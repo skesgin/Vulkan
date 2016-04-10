@@ -40,6 +40,8 @@ protected:
 
     IShaderModuleSP fragmentShader;
 
+    SmartPointerVector<ITextureSP> allTextures;
+
 public:
 
     BSDFMaterial();
@@ -58,6 +60,18 @@ public:
 
     virtual void setName(const std::string& name) override;
 
+    virtual IShaderModuleSP getFragmentShader() const override;
+
+	virtual void setFragmentShader(const IShaderModuleSP& fragmentShader) override;
+
+    virtual void addTexture(const ITextureSP& texture) override;
+
+    virtual VkBool32 removeTexture(const ITextureSP& texture) override;
+
+    virtual size_t getNumberTextures() const override;
+
+    virtual const SmartPointerVector<ITextureSP>& getTextures() const override;
+
     // TODO: Add methods
 
     //
@@ -71,7 +85,6 @@ public:
     //
 
     virtual void destroy() override;
-
 };
 
 } /* namespace vkts */

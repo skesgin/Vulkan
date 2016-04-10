@@ -50,6 +50,19 @@ public:
 
     virtual void setName(const std::string& name) = 0;
 
+    virtual IShaderModuleSP getFragmentShader() const = 0;
+
+	virtual void setFragmentShader(const IShaderModuleSP& fragmentShader) = 0;
+
+    virtual void addTexture(const ITextureSP& texture) = 0;
+
+    virtual VkBool32 removeTexture(const ITextureSP& texture) = 0;
+
+    virtual size_t getNumberTextures() const = 0;
+
+    virtual const SmartPointerVector<ITextureSP>& getTextures() const = 0;
+
+
     // TODO: Add Methods.
 
 };

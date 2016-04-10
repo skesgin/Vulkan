@@ -58,6 +58,36 @@ void BSDFMaterial::setName(const std::string& name)
     this->name = name;
 }
 
+IShaderModuleSP BSDFMaterial::getFragmentShader() const
+{
+	return fragmentShader;
+}
+
+void BSDFMaterial::setFragmentShader(const IShaderModuleSP& fragmentShader)
+{
+	this->fragmentShader = fragmentShader;
+}
+
+void BSDFMaterial::addTexture(const ITextureSP& texture)
+{
+    allTextures.append(texture);
+}
+
+VkBool32 BSDFMaterial::removeTexture(const ITextureSP& texture)
+{
+    return allTextures.remove(texture);
+}
+
+size_t BSDFMaterial::getNumberTextures() const
+{
+    return allTextures.size();
+}
+
+const SmartPointerVector<ITextureSP>& BSDFMaterial::getTextures() const
+{
+    return allTextures;
+}
+
 //
 // ICloneable
 //

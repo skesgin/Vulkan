@@ -74,6 +74,8 @@ How to build:
 Changelog:
 ----------
 
+04/10/2016 - Continued on BSDF shader class.
+
 04/09/2016 - Split up textures into device images, having sampler and view.
            - Optimized material management, by avoiding unnecessary clone.
 
