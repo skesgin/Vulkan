@@ -98,9 +98,11 @@ private:
 	vkts::SmartPointerVector<vkts::IGraphicsPipelineSP> allBlendGraphicsPipelines;
 	vkts::SmartPointerVector<vkts::IGraphicsPipelineSP> allBlendCwGraphicsPipelines;
 
+	vkts::IMemoryImageSP shadowTexture;
 	vkts::IMemoryImageSP msaaColorTexture;
 	vkts::IMemoryImageSP msaaDepthTexture;
 	vkts::IMemoryImageSP depthTexture;
+	vkts::IImageViewSP shadowImageView;
 	vkts::IImageViewSP msaaColorImageView;
 	vkts::IImageViewSP msaaDepthStencilImageView;
 	vkts::IImageViewSP depthStencilImageView;
@@ -129,11 +131,15 @@ private:
 
 	VkBool32 buildMSAAColorImageView();
 
+	VkBool32 buildShadowImageView();
+
 	VkBool32 buildDepthTexture(const vkts::ICommandBuffersSP& cmdBuffer);
 
 	VkBool32 buildMSAADepthTexture(const vkts::ICommandBuffersSP& cmdBuffer);
 
 	VkBool32 buildMSAAColorTexture(const vkts::ICommandBuffersSP& cmdBuffer);
+
+	VkBool32 buildShadowTexture(const vkts::ICommandBuffersSP& cmdBuffer);
 
 	VkBool32 buildPipeline();
 

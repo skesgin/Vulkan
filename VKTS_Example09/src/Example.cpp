@@ -27,7 +27,7 @@
 #include "Example.hpp"
 
 Example::Example(const vkts::IInitialResourcesSP& initialResources, const int32_t windowIndex, const vkts::ISurfaceSP& surface) :
-		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), windowDimension(0, 0), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), descriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), fragmentUniformBuffer(nullptr), skinningVertexShaderModule(nullptr), skinningFragmentShaderModule(nullptr), standardVertexShaderModule(nullptr), standardFragmentShaderModule(nullptr), pipelineLayout(nullptr), sceneContext(nullptr), scene(nullptr), swapchain(nullptr), renderPass(nullptr), allOpaqueGraphicsPipelines(), allBlendGraphicsPipelines(), allBlendCwGraphicsPipelines(), msaaColorTexture(nullptr), msaaDepthTexture(nullptr), depthTexture(nullptr), msaaColorImageView(nullptr), msaaDepthStencilImageView(nullptr), depthStencilImageView(nullptr), swapchainImagesCount(0), swapchainImageView(), framebuffer(), cmdBuffer()
+		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), windowDimension(0, 0), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), descriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), fragmentUniformBuffer(nullptr), skinningVertexShaderModule(nullptr), skinningFragmentShaderModule(nullptr), standardVertexShaderModule(nullptr), standardFragmentShaderModule(nullptr), pipelineLayout(nullptr), sceneContext(nullptr), scene(nullptr), swapchain(nullptr), renderPass(nullptr), allOpaqueGraphicsPipelines(), allBlendGraphicsPipelines(), allBlendCwGraphicsPipelines(), shadowTexture(nullptr), msaaColorTexture(nullptr), msaaDepthTexture(nullptr), depthTexture(nullptr), shadowImageView(nullptr), msaaColorImageView(nullptr), msaaDepthStencilImageView(nullptr), depthStencilImageView(nullptr), swapchainImagesCount(0), swapchainImageView(), framebuffer(), cmdBuffer()
 {
 }
 
@@ -103,6 +103,14 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 	renderPassBeginInfo.pClearValues = clearValues;
 
 	cmdBuffer[usedBuffer]->cmdBeginRenderPass(&renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+	// Depth.
+
+	// TODO: Render to depth.
+
+	vkCmdNextSubpass(cmdBuffer[usedBuffer]->getCommandBuffer(), VK_SUBPASS_CONTENTS_INLINE);
+
+	// Color.
 
 	VkViewport viewport;
 	memset(&viewport, 0, sizeof(VkViewport));
@@ -351,6 +359,24 @@ VkBool32 Example::buildMSAAColorImageView()
 	return VK_TRUE;
 }
 
+VkBool32 Example::buildShadowImageView()
+{
+	VkComponentMapping componentMapping = { VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY };
+	VkImageSubresourceRange imageSubresourceRange = { VK_IMAGE_ASPECT_DEPTH_BIT, 0, 1, 0, 1 };
+
+	shadowImageView = vkts::imageViewCreate(initialResources->getDevice()->getDevice(), 0, shadowTexture->getImage()->getImage(), VK_IMAGE_VIEW_TYPE_2D, shadowTexture->getImage()->getFormat(), componentMapping, imageSubresourceRange);
+
+	if (!shadowImageView.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create shadow attachment view.");
+
+		return VK_FALSE;
+	}
+
+	return VK_TRUE;
+}
+
+
 VkBool32 Example::buildDepthTexture(const vkts::ICommandBuffersSP& cmdBuffer)
 {
 	VkImageCreateInfo imageCreateInfo;
@@ -452,6 +478,42 @@ VkBool32 Example::buildMSAAColorTexture(const vkts::ICommandBuffersSP& cmdBuffer
 	if (!msaaColorTexture.get())
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create msaa color texture.");
+
+		return VK_FALSE;
+	}
+
+	return VK_TRUE;
+}
+
+VkBool32 Example::buildShadowTexture(const vkts::ICommandBuffersSP& cmdBuffer)
+{
+	VkImageCreateInfo imageCreateInfo;
+
+	memset(&imageCreateInfo, 0, sizeof(VkImageCreateInfo));
+
+	imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+
+	imageCreateInfo.flags = 0;
+	imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
+	imageCreateInfo.format = VK_FORMAT_D16_UNORM;
+	imageCreateInfo.extent = {swapchain->getImageExtent().width, swapchain->getImageExtent().height, 1};
+	imageCreateInfo.mipLevels = 1;
+	imageCreateInfo.arrayLayers = 1;
+	imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+	imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+	imageCreateInfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+	imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+	imageCreateInfo.queueFamilyIndexCount = 0;
+	imageCreateInfo.pQueueFamilyIndices = nullptr;
+	imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+
+	VkImageSubresourceRange subresourceRange = { VK_IMAGE_ASPECT_DEPTH_BIT, 0, 1, 0, 1 };
+
+	shadowTexture = vkts::memoryImageCreate(initialResources, cmdBuffer, "ShadowTexture", imageCreateInfo, 0, VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, subresourceRange, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+	if (!shadowTexture.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create shadow texture.");
 
 		return VK_FALSE;
 	}
@@ -737,7 +799,7 @@ VkBool32 Example::buildPipeline()
 	graphicsPipelineCreateInfo.pDynamicState = &pipelineDynamicStateCreateInfo;
 	graphicsPipelineCreateInfo.layout = pipelineLayout->getPipelineLayout();
 	graphicsPipelineCreateInfo.renderPass = renderPass->getRenderPass();
-	graphicsPipelineCreateInfo.subpass = 0;
+	graphicsPipelineCreateInfo.subpass = 1;	// After depth pass.
 	graphicsPipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE;
 	graphicsPipelineCreateInfo.basePipelineIndex = 0;
 
@@ -833,7 +895,7 @@ VkBool32 Example::buildPipeline()
 
 VkBool32 Example::buildRenderPass()
 {
-	VkAttachmentDescription attachmentDescription[4];
+	VkAttachmentDescription attachmentDescription[5];
 
 	memset(&attachmentDescription, 0, sizeof(attachmentDescription));
 
@@ -877,6 +939,16 @@ VkBool32 Example::buildRenderPass()
 	attachmentDescription[3].initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 	attachmentDescription[3].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
+	attachmentDescription[4].flags = 0;
+	attachmentDescription[4].format = VK_FORMAT_D16_UNORM;
+	attachmentDescription[4].samples = VK_SAMPLE_COUNT_1_BIT;
+	attachmentDescription[4].loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+	attachmentDescription[4].storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+	attachmentDescription[4].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+	attachmentDescription[4].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+	attachmentDescription[4].initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+	attachmentDescription[4].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
 	VkAttachmentReference resolveAttachmentReference[2];
 
 	resolveAttachmentReference[0].attachment = 0;
@@ -895,22 +967,56 @@ VkBool32 Example::buildRenderPass()
 	deptStencilAttachmentReference.attachment = 3;
 	deptStencilAttachmentReference.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
-	VkSubpassDescription subpassDescription;
+	VkAttachmentReference shadowAttachmentReference;
 
-	memset(&subpassDescription, 0, sizeof(VkSubpassDescription));
+	shadowAttachmentReference.attachment = 4;
+	shadowAttachmentReference.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
-	subpassDescription.flags = 0;
-	subpassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-	subpassDescription.inputAttachmentCount = 0;
-	subpassDescription.pInputAttachments = nullptr;
-	subpassDescription.colorAttachmentCount = 1;
-	subpassDescription.pColorAttachments = &colorAttachmentReference;
-	subpassDescription.pResolveAttachments = resolveAttachmentReference;
-	subpassDescription.pDepthStencilAttachment = &deptStencilAttachmentReference;
-	subpassDescription.preserveAttachmentCount = 0;
-	subpassDescription.pPreserveAttachments = nullptr;
+	//
 
-	renderPass = vkts::renderPassCreate( initialResources->getDevice()->getDevice(), 0, 4, attachmentDescription, 1, &subpassDescription, 0, nullptr);
+	VkSubpassDescription subpassDescription[2];
+
+	memset(&subpassDescription, 0, sizeof(subpassDescription));
+
+	subpassDescription[0].flags = 0;
+	subpassDescription[0].pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+	subpassDescription[0].inputAttachmentCount = 0;
+	subpassDescription[0].pInputAttachments = nullptr;
+	subpassDescription[0].colorAttachmentCount = 0;
+	subpassDescription[0].pColorAttachments = nullptr;
+	subpassDescription[0].pResolveAttachments = nullptr;
+	subpassDescription[0].pDepthStencilAttachment = &shadowAttachmentReference;
+	subpassDescription[0].preserveAttachmentCount = 0;
+	subpassDescription[0].pPreserveAttachments = nullptr;
+
+	subpassDescription[1].flags = 0;
+	subpassDescription[1].pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+	subpassDescription[1].inputAttachmentCount = 0;
+	subpassDescription[1].pInputAttachments = nullptr;
+	subpassDescription[1].colorAttachmentCount = 1;
+	subpassDescription[1].pColorAttachments = &colorAttachmentReference;
+	subpassDescription[1].pResolveAttachments = resolveAttachmentReference;
+	subpassDescription[1].pDepthStencilAttachment = &deptStencilAttachmentReference;
+	subpassDescription[1].preserveAttachmentCount = 0;
+	subpassDescription[1].pPreserveAttachments = nullptr;
+
+	// Set up dependency form depth to color pass.
+
+    VkSubpassDependency dependency;
+
+    memset(&dependency, 0, sizeof(VkSubpassDependency));
+
+    dependency.srcSubpass = 0;
+    dependency.dstSubpass = 1;
+    dependency.dependencyFlags = 0;
+    dependency.srcStageMask = VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT;
+    dependency.dstStageMask = VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT;
+    dependency.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
+    dependency.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
+
+    //
+
+	renderPass = vkts::renderPassCreate( initialResources->getDevice()->getDevice(), 0, 5, attachmentDescription, 2, subpassDescription, 1, &dependency);
 
 	if (!renderPass.get())
 	{
@@ -1073,6 +1179,10 @@ VkBool32 Example::buildShader()
 		return VK_FALSE;
 	}
 
+	//
+
+	// TODO: Build depth pass shader.
+
 	return VK_TRUE;
 }
 
@@ -1201,6 +1311,13 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
     {
         swapchain->cmdPipelineBarrier(updateCmdBuffer->getCommandBuffer(), 0, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, index);
     }
+
+	if (!buildShadowTexture(updateCmdBuffer))
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not build MSAA color texture.");
+
+		return VK_FALSE;
+	}
 
 	if (!buildMSAAColorTexture(updateCmdBuffer))
 	{
@@ -1372,6 +1489,11 @@ void Example::terminateResources(const vkts::IUpdateThreadContext& updateContext
 				msaaColorImageView->destroy();
 			}
 
+			if (shadowImageView.get())
+			{
+				shadowImageView->destroy();
+			}
+
 			if (depthTexture.get())
 			{
 				depthTexture->destroy();
@@ -1385,6 +1507,11 @@ void Example::terminateResources(const vkts::IUpdateThreadContext& updateContext
 			if (msaaColorTexture.get())
 			{
 				msaaColorTexture->destroy();
+			}
+
+			if (shadowTexture.get())
+			{
+				shadowTexture->destroy();
 			}
 
 			for (size_t i = 0; i < allBlendGraphicsPipelines.size(); i++)
