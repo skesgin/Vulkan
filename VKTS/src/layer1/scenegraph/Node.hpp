@@ -163,6 +163,14 @@ public:
 
     virtual const SmartPointerVector<IAnimationSP>& getAnimations() const override;
 
+    virtual int32_t getCurrentAnimation() const override;
+
+    virtual void setCurrentAnimation(const int32_t currentAnimation) override;
+
+    virtual float getCurrentTime() const override;
+
+    virtual void setCurrentTime(const float currentTime) override;
+
     virtual VkBool32 getDirty() const override;
 
     virtual void setDirty() override;
@@ -174,6 +182,8 @@ public:
     override; virtual IBufferObjectSP getJointsUniformBuffer() const override;
 
     virtual void setJointsUniformBuffer(const int32_t joints, const IBufferObjectSP& jointsUniformBuffer) override;
+
+    virtual void setNodeParameterRecursive(const parameter* p) override;
 
     virtual void updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets) override;
 

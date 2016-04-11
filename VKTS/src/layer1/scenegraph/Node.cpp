@@ -451,6 +451,47 @@ const SmartPointerVector<IAnimationSP>& Node::getAnimations() const
     return allAnimations;
 }
 
+int32_t Node::getCurrentAnimation() const
+{
+	return currentAnimation;
+}
+
+void Node::setCurrentAnimation(const int32_t currentAnimation)
+{
+	if (currentAnimation >= -1 && currentAnimation < (int32_t)allAnimations.size())
+	{
+		this->currentAnimation = currentAnimation;
+	}
+	else
+	{
+		this->currentAnimation = -1;
+	}
+}
+
+float Node::getCurrentTime() const
+{
+	return currentTime;
+}
+
+void Node::setCurrentTime(const float currentTime)
+{
+	if (currentAnimation >= 0)
+	{
+        if (currentTime < allAnimations[currentAnimation]->getStart() || currentTime > allAnimations[currentAnimation]->getStop())
+        {
+            this->currentTime = allAnimations[currentAnimation]->getStart();
+        }
+        else
+        {
+        	this->currentTime = currentTime;
+        }
+	}
+	else
+	{
+		this->currentTime = 0.0f;
+	}
+}
+
 VkBool32 Node::getDirty() const
 {
     return transformMatrixDirty;
@@ -488,6 +529,23 @@ void Node::setJointsUniformBuffer(const int32_t joints, const IBufferObjectSP& j
     updateJointDescriptorBufferInfo(this->jointsUniformBuffer->getBuffer()->getBuffer(), 0, this->jointsUniformBuffer->getBuffer()->getSize());
 
     this->bindMatrixDirty = VK_TRUE;
+}
+
+void Node::setNodeParameterRecursive(const parameter* p)
+{
+	if (!p)
+	{
+		return;
+	}
+	else
+	{
+		p->setNodeParameter(*this);
+	}
+
+    for (size_t i = 0; i < allChildNodes.size(); i++)
+    {
+        allChildNodes[i]->setNodeParameterRecursive(p);
+    }
 }
 
 void Node::updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets)

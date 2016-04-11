@@ -34,6 +34,8 @@ namespace vkts
 
 class overwrite;
 
+class parameter;
+
 class INode: public ICloneable<INode>, public IDestroyable, public std::enable_shared_from_this<INode>
 {
 
@@ -110,6 +112,14 @@ public:
 
     virtual const SmartPointerVector<IAnimationSP>& getAnimations() const = 0;
 
+    virtual int32_t getCurrentAnimation() const = 0;
+
+    virtual void setCurrentAnimation(const int32_t currentAnimation) = 0;
+
+    virtual float getCurrentTime() const = 0;
+
+    virtual void setCurrentTime(const float currentTime) = 0;
+
     virtual VkBool32 getDirty() const = 0;
 
     virtual void setDirty() = 0;
@@ -121,6 +131,8 @@ public:
     virtual IBufferObjectSP getJointsUniformBuffer() const = 0;
 
     virtual void setJointsUniformBuffer(const int32_t joints, const IBufferObjectSP& jointsUniformBuffer) = 0;
+
+    virtual void setNodeParameterRecursive(const parameter* p) = 0;
 
     virtual void updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets) = 0;
 

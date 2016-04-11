@@ -524,6 +524,14 @@
 #include <vkts/layer1/overwrite/displace.hpp>
 
 /**
+ * Parameter updater.
+ */
+
+#include <vkts/layer1/update/parameter.hpp>
+
+#include <vkts/layer1/update/time.hpp>
+
+/**
  * Interpolator.
  */
 
