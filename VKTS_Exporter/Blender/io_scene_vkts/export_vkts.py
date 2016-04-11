@@ -304,8 +304,8 @@ def saveTextures(context, filepath, imagesLibraryName, materials):
 
 fragmentGLSL = """#version 450 core
 
-layout (location = 0) in vec4 v_position;
-layout (location = 1) in vec3 v_normal;
+layout (location = 0) in vec4 v_f_position;
+layout (location = 1) in vec3 v_f_normal;
 // Generated code start
 #nextAttribute#
 #nextTexture#
@@ -317,9 +317,9 @@ layout (location = 0) out vec4 ob_diffuseColor;            // Diffuse color and 
 
 void main()
 {
-    ob_position = v_position;
+    ob_position = v_f_position;
     
-    vec3 normal = normalize(v_normal);
+    vec3 normal = normalize(v_f_normal);
     // Generated code start
     #nextTangents#
     #previousMain#
@@ -327,16 +327,16 @@ void main()
     // Generated code end
 }"""
 
-nextTangents = """vec3 bitangent = normalize(v_bitangent);
-    vec3 tangent = normalize(v_tangent);
+nextTangents = """vec3 bitangent = normalize(v_f_bitangent);
+    vec3 tangent = normalize(v_f_tangent);
     
     mat3 objectToWorldMatrix = mat3(tangent, bitangent, normal);"""
 
-normalMapAttribute = """layout (location = 2) in vec3 v_bitangent;
-layout (location = 3) in vec3 v_tangent;
+normalMapAttribute = """layout (location = 2) in vec3 v_f_bitangent;
+layout (location = 3) in vec3 v_f_tangent;
 #nextAttribute#"""
 
-texCoordAttribute = """layout (location = 4) in vec2 v_texCoord;
+texCoordAttribute = """layout (location = 4) in vec2 v_f_texCoord;
 #nextAttribute#"""
 
 texImageFunction = """layout (binding = %d) uniform sampler2D u_texture%d;
@@ -661,7 +661,7 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
  
                     # Special case, if not linked
                      
-                    currentMain = currentMain.replace("vec3 " + vectorInputName + " = vec3(0.000, 0.000, 0.000);", "vec3 " + vectorInputName + " = vec3(v_texCoord, 0.0);")
+                    currentMain = currentMain.replace("vec3 " + vectorInputName + " = vec3(0.000, 0.000, 0.000);", "vec3 " + vectorInputName + " = vec3(v_f_texCoord, 0.0);")
                     
                     #
                     
