@@ -843,7 +843,7 @@ VkBool32 Example::buildShader()
 
 	//
 
-	vertexShaderModule = vkts::shaderModuleCreate(initialResources->getDevice()->getDevice(), 0, vertexShaderBinary->getSize(), (uint32_t*)vertexShaderBinary->getData());
+	vertexShaderModule = vkts::shaderModuleCreate(VKTS_VERTEX_SHADER_NAME, initialResources->getDevice()->getDevice(), 0, vertexShaderBinary->getSize(), (uint32_t*)vertexShaderBinary->getData());
 
 	if (!vertexShaderModule.get())
 	{
@@ -852,7 +852,7 @@ VkBool32 Example::buildShader()
 		return VK_FALSE;
 	}
 
-	tessellationControlShaderModule = vkts::shaderModuleCreate(initialResources->getDevice()->getDevice(), 0, tessellationControlShaderBinary->getSize(), (uint32_t*)tessellationControlShaderBinary->getData());
+	tessellationControlShaderModule = vkts::shaderModuleCreate(VKTS_TESSELLATION_CONTROL_SHADER_NAME, initialResources->getDevice()->getDevice(), 0, tessellationControlShaderBinary->getSize(), (uint32_t*)tessellationControlShaderBinary->getData());
 
 	if (!tessellationControlShaderModule.get())
 	{
@@ -861,7 +861,7 @@ VkBool32 Example::buildShader()
 		return VK_FALSE;
 	}
 
-	tessellationEvaluationShaderModule = vkts::shaderModuleCreate(initialResources->getDevice()->getDevice(), 0, tessellationEvaluationShaderBinary->getSize(), (uint32_t*)tessellationEvaluationShaderBinary->getData());
+	tessellationEvaluationShaderModule = vkts::shaderModuleCreate(VKTS_TESSELLATION_EVALUATION_SHADER_NAME, initialResources->getDevice()->getDevice(), 0, tessellationEvaluationShaderBinary->getSize(), (uint32_t*)tessellationEvaluationShaderBinary->getData());
 
 	if (!tessellationControlShaderModule.get())
 	{
@@ -870,7 +870,7 @@ VkBool32 Example::buildShader()
 		return VK_FALSE;
 	}
 
-	geometryShaderModule = vkts::shaderModuleCreate(initialResources->getDevice()->getDevice(), 0, geometryShaderBinary->getSize(), (uint32_t*)geometryShaderBinary->getData());
+	geometryShaderModule = vkts::shaderModuleCreate(VKTS_GEOMETRY_SHADER_NAME, initialResources->getDevice()->getDevice(), 0, geometryShaderBinary->getSize(), (uint32_t*)geometryShaderBinary->getData());
 
 	if (!geometryShaderModule.get())
 	{
@@ -879,7 +879,7 @@ VkBool32 Example::buildShader()
 		return VK_FALSE;
 	}
 
-	fragmentShaderModule = vkts::shaderModuleCreate(initialResources->getDevice()->getDevice(), 0, fragmentShaderBinary->getSize(), (uint32_t*)fragmentShaderBinary->getData());
+	fragmentShaderModule = vkts::shaderModuleCreate(VKTS_FRAGMENT_SHADER_NAME, initialResources->getDevice()->getDevice(), 0, fragmentShaderBinary->getSize(), (uint32_t*)fragmentShaderBinary->getData());
 
 	if (!fragmentShaderModule.get())
 	{

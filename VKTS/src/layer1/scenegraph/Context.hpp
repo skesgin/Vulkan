@@ -72,6 +72,8 @@ private:
 
     SmartPointerMap<std::string, IImageDataSP> allImageDatas;
 
+    SmartPointerMap<std::string, IShaderModuleSP> allShaderModules;
+
     //
 
     SmartPointerVector<IImageSP> allStageImages;
@@ -222,6 +224,14 @@ public:
     virtual VkBool32 addImageData(const IImageDataSP& imageData) override;
 
     virtual VkBool32 removeImageData(const IImageDataSP& imageData) override;
+
+    //
+
+    virtual IShaderModuleSP useShaderModule(const std::string& name) const override;
+
+    virtual VkBool32 addShaderModule(const IShaderModuleSP& shaderModule) override;
+
+    virtual VkBool32 removeShaderModule(const IShaderModuleSP& shaderModule) override;
 
     //
 

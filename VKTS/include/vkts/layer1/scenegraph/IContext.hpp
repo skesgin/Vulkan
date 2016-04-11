@@ -132,6 +132,14 @@ public:
 
     //
 
+    virtual IShaderModuleSP useShaderModule(const std::string& name) const = 0;
+
+    virtual VkBool32 addShaderModule(const IShaderModuleSP& shaderModule) = 0;
+
+    virtual VkBool32 removeShaderModule(const IShaderModuleSP& shaderModule) = 0;
+
+    //
+
     virtual void addStageImage(const IImageSP& stageImage) = 0;
 
     virtual void addStageBuffer(const IBufferSP& stageBuffer) = 0;

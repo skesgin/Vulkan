@@ -745,7 +745,7 @@ VkBool32 Example::buildShader()
 
 	//
 
-	vertexShaderModule = vkts::shaderModuleCreate(initialResources->getDevice()->getDevice(), 0, vertexShaderBinary->getSize(), (uint32_t*)vertexShaderBinary->getData());
+	vertexShaderModule = vkts::shaderModuleCreate(VKTS_VERTEX_SHADER_NAME, initialResources->getDevice()->getDevice(), 0, vertexShaderBinary->getSize(), (uint32_t*)vertexShaderBinary->getData());
 
 	if (!vertexShaderModule.get())
 	{
@@ -754,7 +754,7 @@ VkBool32 Example::buildShader()
 		return VK_FALSE;
 	}
 
-	fragmentShaderModule = vkts::shaderModuleCreate(initialResources->getDevice()->getDevice(), 0, fragmentShaderBinary->getSize(), (uint32_t*)fragmentShaderBinary->getData());
+	fragmentShaderModule = vkts::shaderModuleCreate(VKTS_FRAGMENT_SHADER_NAME, initialResources->getDevice()->getDevice(), 0, fragmentShaderBinary->getSize(), (uint32_t*)fragmentShaderBinary->getData());
 
 	if (!fragmentShaderModule.get())
 	{

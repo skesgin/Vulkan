@@ -31,7 +31,7 @@
 namespace vkts
 {
 
-IShaderModuleSP VKTS_APIENTRY shaderModuleCreate(const VkDevice device, const VkShaderModuleCreateFlags flags, const size_t codeSize, const uint32_t* code)
+IShaderModuleSP VKTS_APIENTRY shaderModuleCreate(const std::string& name, const VkDevice device, const VkShaderModuleCreateFlags flags, const size_t codeSize, const uint32_t* code)
 {
     if (!device)
     {
@@ -61,7 +61,7 @@ IShaderModuleSP VKTS_APIENTRY shaderModuleCreate(const VkDevice device, const Vk
         return IShaderModuleSP();
     }
 
-    auto newInstance = new ShaderModule(device, flags, codeSize, code, shaderModule);
+    auto newInstance = new ShaderModule(name, device, flags, codeSize, code, shaderModule);
 
     if (!newInstance)
     {

@@ -663,7 +663,7 @@ VkBool32 Example::buildShader()
 
 	//
 
-	computeShaderModule = vkts::shaderModuleCreate(device->getDevice(), 0, computeShaderBinary->getSize(), (const uint32_t*)computeShaderBinary->getData());
+	computeShaderModule = vkts::shaderModuleCreate(VKTS_COMPUTE_SHADER_NAME, device->getDevice(), 0, computeShaderBinary->getSize(), (const uint32_t*)computeShaderBinary->getData());
 
 	if (!computeShaderModule.get())
 	{

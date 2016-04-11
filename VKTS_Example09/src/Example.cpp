@@ -1013,7 +1013,7 @@ VkBool32 Example::buildShader()
 
 	//
 
-	skinningVertexShaderModule = vkts::shaderModuleCreate(initialResources->getDevice()->getDevice(), 0, vertexShaderBinary->getSize(), (uint32_t*)vertexShaderBinary->getData());
+	skinningVertexShaderModule = vkts::shaderModuleCreate(VKTS_SKINNING_VERTEX_SHADER_NAME, initialResources->getDevice()->getDevice(), 0, vertexShaderBinary->getSize(), (uint32_t*)vertexShaderBinary->getData());
 
 	if (!skinningVertexShaderModule.get())
 	{
@@ -1022,7 +1022,7 @@ VkBool32 Example::buildShader()
 		return VK_FALSE;
 	}
 
-	skinningFragmentShaderModule = vkts::shaderModuleCreate(initialResources->getDevice()->getDevice(), 0, fragmentShaderBinary->getSize(), (uint32_t*)fragmentShaderBinary->getData());
+	skinningFragmentShaderModule = vkts::shaderModuleCreate(VKTS_SKINNING_FRAGMENT_SHADER_NAME, initialResources->getDevice()->getDevice(), 0, fragmentShaderBinary->getSize(), (uint32_t*)fragmentShaderBinary->getData());
 
 	if (!skinningFragmentShaderModule.get())
 	{
@@ -1055,7 +1055,7 @@ VkBool32 Example::buildShader()
 
 	//
 
-	standardVertexShaderModule = vkts::shaderModuleCreate(initialResources->getDevice()->getDevice(), 0, vertexShaderBinary->getSize(), (uint32_t*)vertexShaderBinary->getData());
+	standardVertexShaderModule = vkts::shaderModuleCreate(VKTS_STANDARD_VERTEX_SHADER_NAME, initialResources->getDevice()->getDevice(), 0, vertexShaderBinary->getSize(), (uint32_t*)vertexShaderBinary->getData());
 
 	if (!standardVertexShaderModule.get())
 	{
@@ -1064,7 +1064,7 @@ VkBool32 Example::buildShader()
 		return VK_FALSE;
 	}
 
-	standardFragmentShaderModule = vkts::shaderModuleCreate(initialResources->getDevice()->getDevice(), 0, fragmentShaderBinary->getSize(), (uint32_t*)fragmentShaderBinary->getData());
+	standardFragmentShaderModule = vkts::shaderModuleCreate(VKTS_STANDARD_FRAGMENT_SHADER_NAME, initialResources->getDevice()->getDevice(), 0, fragmentShaderBinary->getSize(), (uint32_t*)fragmentShaderBinary->getData());
 
 	if (!standardFragmentShaderModule.get())
 	{

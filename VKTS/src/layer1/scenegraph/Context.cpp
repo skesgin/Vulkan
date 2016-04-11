@@ -30,7 +30,7 @@ namespace vkts
 {
 
 Context::Context(const VkBool32 replace, const IInitialResourcesSP& initialResources, const ICommandBuffersSP& cmdBuffer, const VkSamplerCreateInfo& samplerCreateInfo, const VkImageViewCreateInfo& imageViewCreateInfo, const IDescriptorSetLayoutSP& descriptorSetLayout) :
-    IContext(), replace(replace), initialResources(initialResources), cmdBuffer(cmdBuffer), samplerCreateInfo(samplerCreateInfo), imageViewCreateInfo(imageViewCreateInfo), descriptorSetLayout(descriptorSetLayout), allObjects(), allUsedObjects(), allMeshes(), allSubMeshes(), allAnimations(), allChannels(), allBSDFMaterials(), allUsedBSDFMaterials(), allPhongMaterials(), allUsedPhongMaterials(), allTextures(), allImageDatas()
+    IContext(), replace(replace), initialResources(initialResources), cmdBuffer(cmdBuffer), samplerCreateInfo(samplerCreateInfo), imageViewCreateInfo(imageViewCreateInfo), descriptorSetLayout(descriptorSetLayout), allObjects(), allUsedObjects(), allMeshes(), allSubMeshes(), allAnimations(), allChannels(), allBSDFMaterials(), allUsedBSDFMaterials(), allPhongMaterials(), allUsedPhongMaterials(), allTextures(), allImageDatas(), allShaderModules()
 {
 }
 
@@ -386,6 +386,34 @@ VkBool32 Context::removeImageData(const IImageDataSP& imageData)
     }
 
     return remove(imageData->getName(), allImageDatas);
+}
+
+
+//
+
+IShaderModuleSP Context::useShaderModule(const std::string& name) const
+{
+    return get(name, allShaderModules);
+}
+
+VkBool32 Context::addShaderModule(const IShaderModuleSP& shaderModule)
+{
+    if (!shaderModule.get())
+    {
+        return VK_FALSE;
+    }
+
+    return add(shaderModule->getName(), shaderModule, allShaderModules);
+}
+
+VkBool32 Context::removeShaderModule(const IShaderModuleSP& shaderModule)
+{
+    if (!shaderModule.get())
+    {
+        return VK_FALSE;
+    }
+
+    return remove(shaderModule->getName(), allShaderModules);
 }
 
 //

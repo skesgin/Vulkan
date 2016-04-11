@@ -1408,11 +1408,36 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
                 return VK_FALSE;
             }
 
-            // TODO: Gather fragment shader module.
+            auto shaderModule = context->useShaderModule(sdata);
+
+            if (!shaderModule.get())
+            {
+				auto shaderBinary = fileLoadBinary(sdata);
+
+				if (!shaderBinary.get())
+				{
+					logPrint(VKTS_LOG_ERROR, "Could not load fragment shader: '%s'", sdata);
+
+					return VK_FALSE;
+				}
+
+				//
+
+				shaderModule = shaderModuleCreate(sdata, context->getInitialResources()->getDevice()->getDevice(), 0, shaderBinary->getSize(), (uint32_t*)shaderBinary->getData());
+
+				if (!shaderModule.get())
+				{
+					logPrint(VKTS_LOG_ERROR, "Could not create fragment shader module.");
+
+					return VK_FALSE;
+				}
+
+				context->addShaderModule(shaderModule);
+            }
 
             if (bsdfMaterial.get())
             {
-            	// TODO: Set fragment shader module.
+            	bsdfMaterial->setFragmentShader(shaderModule);
             }
             else
             {
@@ -1428,11 +1453,16 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
                 return VK_FALSE;
             }
 
-            // TODO: Gather texture.
+            texture = context->useTexture(sdata);
+
+            if (!texture.get())
+            {
+                return VK_FALSE;
+            }
 
             if (bsdfMaterial.get())
             {
-            	// TODO: Add texture.
+            	bsdfMaterial->addTexture(texture);
             }
             else
             {
