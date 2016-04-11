@@ -40,6 +40,8 @@ protected:
 
     IShaderModuleSP fragmentShader;
 
+    VkTsVertexBufferType attributes;
+
     SmartPointerVector<ITextureSP> allTextures;
 
 public:
@@ -63,6 +65,10 @@ public:
     virtual IShaderModuleSP getFragmentShader() const override;
 
 	virtual void setFragmentShader(const IShaderModuleSP& fragmentShader) override;
+
+    virtual VkTsVertexBufferType getAttributes() const override;
+
+	virtual void setAttributes(const VkTsVertexBufferType attributes) override;
 
     virtual void addTexture(const ITextureSP& texture) override;
 

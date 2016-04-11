@@ -76,6 +76,7 @@ Changelog:
 
 04/11/2016 - Added BSDF material loader.
 		   - Added node visitor function to recursivly set parameters.
+		   - Continued on Blender Cycles exporter.
 
 04/10/2016 - Continued on BSDF shader class.
 

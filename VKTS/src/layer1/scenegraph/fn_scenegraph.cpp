@@ -318,6 +318,23 @@ static VkBool32 scenegraphParseInt(const char* buffer, int32_t* scalar)
     return VK_TRUE;
 }
 
+static VkBool32 scenegraphParseUIntHex(const char* buffer, uint32_t* scalar)
+{
+    if (!buffer)
+    {
+        return VK_FALSE;
+    }
+
+    char token[VKTS_MAX_TOKEN_CHARS + 1];
+
+    if (sscanf(buffer, "%s %x", token, scalar) != 2)
+    {
+        return VK_FALSE;
+    }
+
+    return VK_TRUE;
+}
+
 static VkBool32 scenegraphParseIVec3(const char* buffer, int32_t ivec3[3])
 {
     if (!buffer)
@@ -857,6 +874,7 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
     char buffer[VKTS_MAX_BUFFER_CHARS + 1];
     char sdata[VKTS_MAX_TOKEN_CHARS + 1];
     float fdata[3];
+    uint32_t uidata;
     VkBool32 bdata;
 
     auto bsdfMaterial = IBSDFMaterialSP();
@@ -1438,6 +1456,24 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
             if (bsdfMaterial.get())
             {
             	bsdfMaterial->setFragmentShader(shaderModule);
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, "No material");
+
+                return VK_FALSE;
+            }
+        }
+        else if (scenegraphIsToken(buffer, "attributes"))
+        {
+            if (!scenegraphParseUIntHex(buffer, &uidata))
+            {
+                return VK_FALSE;
+            }
+
+            if (bsdfMaterial.get())
+            {
+            	bsdfMaterial->setAttributes((VkTsVertexBufferType)uidata);
             }
             else
             {

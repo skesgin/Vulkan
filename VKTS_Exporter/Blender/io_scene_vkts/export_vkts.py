@@ -306,11 +306,8 @@ fragmentGLSL = """#version 450 core
 
 layout (location = 0) in vec4 v_position;
 layout (location = 1) in vec3 v_normal;
-layout (location = 2) in vec3 v_bitangent;
-layout (location = 3) in vec3 v_tangent;
-layout (location = 4) in vec2 v_texCoord;
-
 // Generated code start
+#nextAttribute#
 #nextTexture#
 // Generated code end
 
@@ -323,17 +320,41 @@ void main()
     ob_position = v_position;
     
     vec3 normal = normalize(v_normal);
-    vec3 bitangent = normalize(v_bitangent);
-    vec3 tangent = normalize(v_tangent);
-    
     // Generated code start
+    #nextTangents#
     #previousMain#
     
     // Generated code end
 }"""
 
+nextTangents = """vec3 bitangent = normalize(v_bitangent);
+    vec3 tangent = normalize(v_tangent);
+    
+    mat3 objectToWorldMatrix = mat3(tangent, bitangent, normal);"""
+
+normalMapAttribute = """layout (location = 2) in vec3 v_bitangent;
+layout (location = 3) in vec3 v_tangent;
+#nextAttribute#"""
+
+texCoordAttribute = """layout (location = 4) in vec2 v_texCoord;
+#nextAttribute#"""
+
 texImageFunction = """layout (binding = %d) uniform sampler2D u_texture%d;
 #nextTexture#"""
+
+normalMapMain = """#previousMain#
+    
+    // Normal map start
+
+    // In
+    float %s = %s;
+    vec3 %s = objectToWorldMatrix * normalize(%s.xyz * 2.0 - 1.0);
+    
+    // Out
+    
+    vec3 %s = mix(normal, %s, %s);
+    
+    // Normal map end"""
 
 texImageMain = """#previousMain#
     
@@ -444,6 +465,8 @@ def replaceParameters(currentNode, openNodes, processedNodes, currentMain):
                 currentValue = getVec4(currentSocket.default_value)
             elif isinstance(currentSocket, bpy.types.NodeSocketFloatFactor):
                 currentValue = getFloat(currentSocket.default_value)
+            elif isinstance(currentSocket, bpy.types.NodeSocketFloat):
+                currentValue = getFloat(currentSocket.default_value)
             elif isinstance(currentSocket, bpy.types.NodeSocketVector):
                 currentValue = getVec3(currentSocket.default_value)
             
@@ -516,6 +539,11 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
         material = materials[materialName]
         
         if material.use_nodes == True:
+            
+            normalMapUsed = False
+            texCoordUsed = False
+            
+            vertexAttributes = 0x00000001 | 0x00000002 
 
             #
             # Cycles material.
@@ -554,6 +582,7 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
             facCounter = 0
             normalCounter = 0
             roughnessCounter = 0
+            strengthCounter = 0
             vectorCounter = 0
             
             openNodes = [currentNode]
@@ -565,7 +594,43 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
             
                 currentNode = openNodes.pop(0)
 
-                if isinstance(currentNode, bpy.types.ShaderNodeTexImage):
+                if isinstance(currentNode, bpy.types.ShaderNodeNormalMap):
+                    # Normal map.
+                    
+                    # Inputs
+                    
+                    strengthInputName = "Strength_%d" % (strengthCounter)
+                    colorInputName = "Color_%d" % (colorCounter)
+
+                    strengthCounter += 1
+                    colorCounter += 1
+
+                    strengthInputParameterName = "Strength_Dummy"
+                    colorInputParameterName = "Color_Dummy"
+                    
+                    # Outputs
+                    
+                    normalOutputName = friendlyNodeName(currentNode.name) + "_" + friendlyNodeName(currentNode.outputs["Normal"].name)
+                    
+                    #
+                    
+                    currentMain = normalMapMain % (strengthInputName, strengthInputParameterName, colorInputName, colorInputParameterName, normalOutputName, colorInputName, strengthInputName) 
+                    
+                    #
+                    
+                    currentMain = replaceParameters(currentNode, openNodes, processedNodes, currentMain)
+                    
+                    #
+                    
+                    currentFragmentGLSL = currentFragmentGLSL.replace("#previousMain#", currentMain)
+                    
+                    #
+                
+                    normalMapUsed = True
+                    
+                    vertexAttributes = vertexAttributes | 0x00000004 | 0x00000008
+
+                elif isinstance(currentNode, bpy.types.ShaderNodeTexImage):
                     # Image texture.
                     
                     if currentNode not in nodes:
@@ -596,11 +661,15 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
  
                     # Special case, if not linked
                      
-                    currentMain = currentMain.replace("vec3 " + vectorInputName + " = vec3(0.000, 0.000);", "vec3 " + vectorInputName + " = v_texCoord;")
+                    currentMain = currentMain.replace("vec3 " + vectorInputName + " = vec3(0.000, 0.000, 0.000);", "vec3 " + vectorInputName + " = vec3(v_texCoord, 0.0);")
                     
                     #
                     
                     currentFragmentGLSL = currentFragmentGLSL.replace("#previousMain#", currentMain)
+                    
+                    texCoordUsed = True
+                    
+                    vertexAttributes = vertexAttributes | 0x00000010 
                 
                 elif isinstance(currentNode, bpy.types.ShaderNodeMixRGB):
                     # Mix color.
@@ -719,7 +788,16 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
                     
                 if currentNode not in processedNodes:
                     processedNodes.append(currentNode)
-            #
+
+            if normalMapUsed:
+                currentFragmentGLSL = currentFragmentGLSL.replace("#nextTangents#", nextTangents)
+                currentFragmentGLSL = currentFragmentGLSL.replace("#nextAttribute#", normalMapAttribute)
+                
+            if texCoordUsed:
+                currentFragmentGLSL = currentFragmentGLSL.replace("#nextAttribute#", texCoordAttribute)
+            
+            fw("attributes %x\n" % (vertexAttributes))
+            fw("\n")
             
             for binding in range (0, len(nodes)):
                 currentTexImage = texImageFunction % (binding, binding)
@@ -727,6 +805,10 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
                 
                 fw("add_texture %s\n" % (friendlyImageName(nodes[binding].name) + "_texture" ))    
                 fw("\n")
+                
+            currentFragmentGLSL = currentFragmentGLSL.replace("#nextTangents#", "")                
+                
+            currentFragmentGLSL = currentFragmentGLSL.replace("#nextAttribute#", "")
 
             currentFragmentGLSL = currentFragmentGLSL.replace("#nextTexture#", "")
             

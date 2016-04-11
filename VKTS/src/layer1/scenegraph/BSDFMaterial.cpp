@@ -30,12 +30,12 @@ namespace vkts
 {
 
 BSDFMaterial::BSDFMaterial() :
-    IBSDFMaterial(), name()
+    IBSDFMaterial(), name(), fragmentShader(nullptr), attributes(VKTS_VERTEX_BUFFER_TYPE_VERTEX | VKTS_VERTEX_BUFFER_TYPE_NORMAL), allTextures()
 {
 }
 
 BSDFMaterial::BSDFMaterial(const BSDFMaterial& other) :
-    IBSDFMaterial(), name(other.name)
+    IBSDFMaterial(), name(other.name), fragmentShader(other.fragmentShader), attributes(other.attributes), allTextures(other.allTextures)
 {
 }
 
@@ -66,6 +66,17 @@ IShaderModuleSP BSDFMaterial::getFragmentShader() const
 void BSDFMaterial::setFragmentShader(const IShaderModuleSP& fragmentShader)
 {
 	this->fragmentShader = fragmentShader;
+}
+
+
+VkTsVertexBufferType BSDFMaterial::getAttributes() const
+{
+	return attributes;
+}
+
+void BSDFMaterial::setAttributes(const VkTsVertexBufferType attributes)
+{
+	this->attributes = attributes;
 }
 
 void BSDFMaterial::addTexture(const ITextureSP& texture)

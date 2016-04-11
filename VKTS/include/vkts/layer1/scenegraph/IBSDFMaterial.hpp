@@ -54,6 +54,10 @@ public:
 
 	virtual void setFragmentShader(const IShaderModuleSP& fragmentShader) = 0;
 
+    virtual VkTsVertexBufferType getAttributes() const = 0;
+
+	virtual void setAttributes(const VkTsVertexBufferType attributes) = 0;
+
     virtual void addTexture(const ITextureSP& texture) = 0;
 
     virtual VkBool32 removeTexture(const ITextureSP& texture) = 0;
