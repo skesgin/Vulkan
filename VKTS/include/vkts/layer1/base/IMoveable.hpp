@@ -53,6 +53,8 @@ protected:
 
     void updateVectors();
 
+    glm::vec3 getAngle(const glm::vec3& forward) const;
+
     virtual void update() = 0;
 
 public:
@@ -78,10 +80,14 @@ public:
     const quat& getRotateX() const;
     const quat& getRotateY() const;
     const quat& getRotateZ() const;
+    glm::vec3 getRotate() const;
 
-    void setDirection(const glm::vec3& direction);
+    void setForward(const glm::vec3& forward);
+    const glm::vec3& getForward() const;
 
     //
+
+    void move(const glm::vec3& forward);
 
     void move(const glm::vec3& translate, const glm::vec3& rotate);
 

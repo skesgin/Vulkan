@@ -38,6 +38,31 @@ void IMoveable::updateVectors()
     up = rotation * glm::vec3(0.0f, 1.0f, 0.0f);
 }
 
+glm::vec3 IMoveable::getAngle(const glm::vec3& forward) const
+{
+	glm::vec3 rotate(0.0f, 0.0f, 0.0f);
+
+	//
+
+	auto newForward = glm::normalize(forward);
+
+	auto newForwardZ = glm::normalize(glm::vec3(newForward.x, 0.0f, newForward.z));
+
+	//
+
+	rotate.x = 90.0f - glm::degrees(acosf(glm::dot(newForward, glm::vec3(0.0f, 1.0f, 0.0f))));
+
+	rotate.y = glm::degrees(acosf(glm::dot(newForwardZ, glm::vec3(0.0f, 0.0f, -1.0f))));
+	if (glm::dot(newForwardZ, glm::vec3(-1.0f, 0.0f, 0.0f)) < 0.0f)
+	{
+		rotate.y = -rotate.y;
+	}
+
+	rotate.z = 0.0f;
+
+	return rotate;
+}
+
 IMoveable::IMoveable() :
     IUpdateable(), translate(0.0f, 0.0f, 0.0f), rotateZ(), rotateY(), rotateX(), targetTranslate(0.0f, 0.0f, 0.0f), targetRotateZ(), targetRotateY(), targetRotateX(), forward(0.0f, 0.0f, -1.0f), left(-1.0f, 0.0f, 0.0f), up(0.0f, 1.0f, 0.0f)
 {
@@ -176,31 +201,28 @@ const quat& IMoveable::getRotateZ() const
 	return rotateZ;
 }
 
-void IMoveable::setDirection(const glm::vec3& direction)
+glm::vec3 IMoveable::getRotate() const
 {
-	glm::vec3 rotation(0.0f, 0.0f, 0.0f);
+	return glm::vec3(glm::degrees(2.0f * acosf(rotateX.w)), glm::degrees(2.0f * acosf(rotateY.w)), glm::degrees(2.0f * acosf(rotateZ.w)));
+}
 
-	//
+void IMoveable::setForward(const glm::vec3& forward)
+{
+	setRotate(getAngle(forward));
+}
 
-	auto forward = glm::normalize(direction);
+const glm::vec3& IMoveable::getForward() const
+{
+	return forward;
+}
 
-	auto forwardXZ = glm::normalize(glm::vec3(forward.x, 0.0f, forward.z));
+void IMoveable::move(const glm::vec3& forward)
+{
+	glm::vec3 rotate = getAngle(forward);
 
-	//
-
-	rotation.x = 90.0f - glm::degrees(acosf(glm::dot(forward, glm::vec3(0.0f, 1.0f, 0.0f))));
-
-	rotation.y = glm::degrees(acosf(glm::dot(forwardXZ, glm::vec3(0.0f, 0.0f, -1.0f))));
-	if (glm::dot(forwardXZ, glm::vec3(-1.0f, 0.0f, 0.0f)) < 0.0f)
-	{
-		rotation.y = -rotation.y;
-	}
-
-	rotation.z = 0.0f;
-
-	//
-
-	setRotate(rotation);
+	this->targetRotateZ = targetRotateZ * rotateRz(rotate.z);
+    this->targetRotateY = targetRotateY * rotateRy(rotate.y);
+    this->targetRotateX = targetRotateX * rotateRx(rotate.x);
 }
 
 void IMoveable::move(const glm::vec3& translate, const glm::vec3& rotate)
