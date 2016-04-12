@@ -74,6 +74,9 @@ How to build:
 Changelog:
 ----------
 
+04/12/2016 - Fixed bug, that transform matrix from scene object was set non dirty too early.
+		   - Scene object is now inherited from IMoveable.
+
 04/11/2016 - Added BSDF material loader.
 		   - Added node visitor function to recursivly set parameters.
 		   - Continued on Blender Cycles exporter.

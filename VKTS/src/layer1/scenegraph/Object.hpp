@@ -39,14 +39,20 @@ private:
 
     std::string name;
 
-    glm::vec3 translate;
-    glm::vec3 rotate;
     glm::vec3 scale;
 
     glm::mat4 transformMatrix;
     VkBool32 dirty;
 
     INodeSP rootNode;
+
+protected:
+
+    //
+    // IMoveable
+    //
+
+    virtual void update();
 
 public:
 
@@ -66,14 +72,6 @@ public:
     virtual const std::string& getName() const override;
 
     virtual void setName(const std::string& name) override;
-
-    virtual const glm::vec3& getTranslate() const override;
-
-    virtual void setTranslate(const glm::vec3& translate) override;
-
-    virtual const glm::vec3& getRotate() const override;
-
-    virtual void setRotate(const glm::vec3& rotate) override;
 
     virtual const glm::vec3& getScale() const override;
 

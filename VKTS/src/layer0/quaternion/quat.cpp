@@ -226,4 +226,16 @@ glm::vec3 quat::rotation() const
 	return rotation;
 }
 
+//
+
+glm::mat4 operator* (const glm::mat4& matrix, const quat& q)
+{
+	return matrix * q.mat4();
+}
+
+glm::mat4 operator* (const quat& q, const glm::mat4& matrix)
+{
+	return q.mat4() * matrix;
+}
+
 } /* namespace vkts */

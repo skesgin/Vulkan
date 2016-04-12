@@ -31,7 +31,7 @@ namespace vkts
 
 void Camera::updateViewMatrix()
 {
-    viewMatrix = lookAtMat4(position, position + glm::vec4(forward, 0.0f), up);
+    viewMatrix = lookAtMat4(glm::vec4(translate, 1.0f), glm::vec4(translate + forward, 1.0f), up);
 }
 
 void Camera::update()
@@ -48,13 +48,13 @@ Camera::Camera() :
 Camera::Camera(const glm::vec4& eye, const glm::vec3& rotation) :
     ICamera()
 {
-    setPositionRotation(eye, rotation);
+    setTranslateRotate(glm::vec3(eye), rotation);
 }
 
 Camera::Camera(const glm::vec4& eye, const quat& rotationZ, const quat& rotationY, const quat& rotationX) :
     ICamera()
 {
-    setPositionRotation(eye, rotationZ, rotationY, rotationX);
+    setTranslateRotate(glm::vec3(eye), rotationZ, rotationY, rotationX);
 }
 
 Camera::Camera(const Camera& other) :
@@ -68,15 +68,15 @@ Camera::~Camera()
 
 Camera& Camera::operator =(const Camera& other)
 {
-    this->position = other.position;
-    this->rotationZ = other.rotationZ;
-    this->rotationY = other.rotationY;
-    this->rotationX = other.rotationX;
+    this->translate = other.translate;
+    this->rotateZ = other.rotateZ;
+    this->rotateY = other.rotateY;
+    this->rotateX = other.rotateX;
 
-    this->targetPosition = other.targetPosition;
-    this->targetRotationZ = other.targetRotationZ;
-    this->targetRotationY = other.targetRotationY;
-    this->targetRotationX = other.targetRotationX;
+    this->targetTranslate = other.targetTranslate;
+    this->targetRotateZ = other.targetRotateZ;
+    this->targetRotateY = other.targetRotateY;
+    this->targetRotateX = other.targetRotateX;
 
     this->forward = other.forward;
     this->left = other.left;

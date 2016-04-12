@@ -764,7 +764,7 @@ static VkBool32 scenegraphLoadTextures(const char* directory, const char* filena
     VkBool32 bdata;
 
     std::string textureName;
-    VkBool32 mipMap;
+    VkBool32 mipMap = VK_TRUE;
     IMemoryImageSP memoryImage;
 
     ITextureSP texture;

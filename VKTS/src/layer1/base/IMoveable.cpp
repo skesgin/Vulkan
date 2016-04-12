@@ -31,7 +31,7 @@ namespace vkts
 
 void IMoveable::updateVectors()
 {
-    quat rotation = rotationZ * rotationY * rotationX;
+    quat rotation = rotateZ * rotateY * rotateX;
 
     forward = rotation * glm::vec3(0.0f, 0.0f, -1.0f);
     left = rotation * glm::vec3(-1.0f, 0.0f, 0.0f);
@@ -39,25 +39,24 @@ void IMoveable::updateVectors()
 }
 
 IMoveable::IMoveable() :
-    IUpdateable(), position(0.0f, 0.0f, 1.0f, 1.0f), rotationZ(), rotationY(), rotationX(), targetPosition(0.0f, 0.0f, 1.0f, 1.0f), targetRotationZ(), targetRotationY(), targetRotationX(), forward(0.0f, 0.0f, -1.0f), left(-1.0f, 0.0f, 0.0f), up(0.0f, 1.0f, 0.0f)
+    IUpdateable(), translate(0.0f, 0.0f, 0.0f), rotateZ(), rotateY(), rotateX(), targetTranslate(0.0f, 0.0f, 0.0f), targetRotateZ(), targetRotateY(), targetRotateX(), forward(0.0f, 0.0f, -1.0f), left(-1.0f, 0.0f, 0.0f), up(0.0f, 1.0f, 0.0f)
 {
 }
 
-IMoveable::IMoveable(const glm::vec4& position, const glm::vec3& rotation) :
-    IUpdateable(), position(), rotationZ(), rotationY(), rotationX(), targetPosition(), targetRotationZ(), targetRotationY(), targetRotationX(), forward(0.0f, 0.0f, -1.0f), left(-1.0f, 0.0f, 0.0f), up(0.0f, 1.0f,0.0f)
+IMoveable::IMoveable(const glm::vec3& translate, const glm::vec3& rotate) :
+    IUpdateable(), translate(), rotateZ(), rotateY(), rotateX(), targetTranslate(), targetRotateZ(), targetRotateY(), targetRotateX(), forward(0.0f, 0.0f, -1.0f), left(-1.0f, 0.0f, 0.0f), up(0.0f, 1.0f,0.0f)
 {
-    setPositionRotation(position, rotation);
+    setTranslateRotate(translate, rotate);
 }
 
-IMoveable::IMoveable(const glm::vec4& position, const quat& rotationZ,
-                     const quat& rotationY, const quat& rotationX) :
-    IUpdateable(), position(), rotationZ(), rotationY(), rotationX(), targetPosition(), targetRotationZ(), targetRotationY(), targetRotationX(), forward(0.0f, 0.0f, -1.0f), left(-1.0f, 0.0f, 0.0f), up(0.0f, 1.0f, 0.0f)
+IMoveable::IMoveable(const glm::vec3& translate, const quat& rotateZ, const quat& rotateY, const quat& rotateX) :
+    IUpdateable(), translate(), rotateZ(), rotateY(), rotateX(), targetTranslate(), targetRotateZ(), targetRotateY(), targetRotateX(), forward(0.0f, 0.0f, -1.0f), left(-1.0f, 0.0f, 0.0f), up(0.0f, 1.0f, 0.0f)
 {
-    setPositionRotation(position, rotationZ, rotationY, rotationX);
+    setTranslateRotate(translate, rotateZ, rotateY, rotateX);
 }
 
 IMoveable::IMoveable(const IMoveable& other) :
-    IUpdateable(), position(other.position), rotationZ(other.rotationZ), rotationY(other.rotationY), rotationX(other.rotationX), targetPosition(other.targetPosition), targetRotationZ(other.targetRotationZ), targetRotationY(other.targetRotationY), targetRotationX(other.targetRotationX), forward(other.forward), left(other.left), up(other.up)
+    IUpdateable(), translate(other.translate), rotateZ(other.rotateZ), rotateY(other.rotateY), rotateX(other.rotateX), targetTranslate(other.targetTranslate), targetRotateZ(other.targetRotateZ), targetRotateY(other.targetRotateY), targetRotateX(other.targetRotateX), forward(other.forward), left(other.left), up(other.up)
 {
 }
 
@@ -67,15 +66,15 @@ IMoveable::~IMoveable()
 
 IMoveable& IMoveable::operator =(const IMoveable& other)
 {
-    this->position = other.position;
-    this->rotationZ = other.rotationZ;
-    this->rotationY = other.rotationY;
-    this->rotationX = other.rotationX;
+    this->translate = other.translate;
+    this->rotateZ = other.rotateZ;
+    this->rotateY = other.rotateY;
+    this->rotateX = other.rotateX;
 
-    this->targetPosition = other.targetPosition;
-    this->targetRotationZ = other.targetRotationZ;
-    this->targetRotationY = other.targetRotationY;
-    this->targetRotationX = other.targetRotationX;
+    this->targetTranslate = other.targetTranslate;
+    this->targetRotateZ = other.targetRotateZ;
+    this->targetRotateY = other.targetRotateY;
+    this->targetRotateX = other.targetRotateX;
 
     this->forward = other.forward;
     this->left = other.left;
@@ -88,107 +87,152 @@ IMoveable& IMoveable::operator =(const IMoveable& other)
 // IMoveable
 //
 
-void IMoveable::setPositionRotation(const glm::vec4& position, const glm::vec3& rotation)
+void IMoveable::setTranslateRotate(const glm::vec3& translate, const glm::vec3& rotate)
 {
-    this->position = position;
-    this->rotationZ = rotateRz(rotation.z);
-    this->rotationY = rotateRy(rotation.y);
-    this->rotationX = rotateRx(rotation.x);
+    this->translate = translate;
+    this->rotateZ = rotateRz(rotate.z);
+    this->rotateY = rotateRy(rotate.y);
+    this->rotateX = rotateRx(rotate.x);
 
-    this->targetPosition = this->position;
-    this->targetRotationZ = this->rotationZ;
-    this->targetRotationY = this->rotationY;
-    this->targetRotationX = this->rotationX;
+    this->targetTranslate = this->translate;
+    this->targetRotateZ = this->rotateZ;
+    this->targetRotateY = this->rotateY;
+    this->targetRotateX = this->rotateX;
 
     updateVectors();
     update();
 }
 
-void IMoveable::setPositionRotation(const glm::vec4& position, const quat& rotationZ, const quat& rotationY, const quat& rotationX)
+void IMoveable::setTranslateRotate(const glm::vec3& translate, const quat& rotateZ, const quat& rotateY, const quat& rotateX)
 {
-    this->position = position;
-    this->rotationZ = rotationZ;
-    this->rotationY = rotationY;
-    this->rotationX = rotationX;
+    this->translate = translate;
+    this->rotateZ = rotateZ;
+    this->rotateY = rotateY;
+    this->rotateX = rotateX;
 
-    this->targetPosition = this->position;
-    this->targetRotationZ = this->rotationZ;
-    this->targetRotationY = this->rotationY;
-    this->targetRotationX = this->rotationX;
+    this->targetTranslate = this->translate;
+    this->targetRotateZ = this->rotateZ;
+    this->targetRotateY = this->rotateY;
+    this->targetRotateX = this->rotateX;
 
     updateVectors();
     update();
 }
 
-void IMoveable::setPosition(const glm::vec4& position)
+void IMoveable::setTranslate(const glm::vec3& translate)
 {
-    this->position = position;
+    this->translate = translate;
 
-    this->targetPosition = this->position;
+    this->targetTranslate = this->translate;
 
     update();
 }
 
-void IMoveable::setRotation(const glm::vec3& rotation)
+const glm::vec3& IMoveable::getTranslate() const
 {
-    this->rotationZ = rotateRz(rotation.z);
-    this->rotationY = rotateRy(rotation.y);
-    this->rotationX = rotateRx(rotation.x);
+	return translate;
+}
 
-    this->targetRotationZ = this->rotationZ;
-    this->targetRotationY = this->rotationY;
-    this->targetRotationX = this->rotationX;
+void IMoveable::setRotate(const glm::vec3& rotate)
+{
+    this->rotateZ = rotateRz(rotate.z);
+    this->rotateY = rotateRy(rotate.y);
+    this->rotateX = rotateRx(rotate.x);
+
+    this->targetRotateZ = this->rotateZ;
+    this->targetRotateY = this->rotateY;
+    this->targetRotateX = this->rotateX;
 
     updateVectors();
     update();
 }
 
-void IMoveable::setRotation(const quat& rotationZ, const quat& rotationY, const quat& rotationX)
+void IMoveable::setRotate(const quat& rotateZ, const quat& rotateY, const quat& rotateX)
 {
-    this->rotationZ = rotationZ;
-    this->rotationY = rotationY;
-    this->rotationX = rotationX;
+    this->rotateZ = rotateZ;
+    this->rotateY = rotateY;
+    this->rotateX = rotateX;
 
-    this->targetRotationZ = this->rotationZ;
-    this->targetRotationY = this->rotationY;
-    this->targetRotationX = this->rotationX;
+    this->targetRotateZ = this->rotateZ;
+    this->targetRotateY = this->rotateY;
+    this->targetRotateX = this->rotateX;
 
     updateVectors();
     update();
 }
 
-void IMoveable::movePositionRotation(const glm::vec4& position, const glm::vec3& rotation)
+const quat& IMoveable::getRotateX() const
 {
-    this->targetPosition = position;
-    this->targetRotationZ = targetRotationZ * rotateRz(rotation.z);
-    this->targetRotationY = targetRotationY * rotateRy(rotation.y);
-    this->targetRotationX = targetRotationX * rotateRx(rotation.x);
+	return rotateX;
 }
 
-void IMoveable::movePositionRotation(const glm::vec4& position, const quat& rotationZ, const quat& rotationY, const quat& rotationX)
+const quat& IMoveable::getRotateY() const
 {
-    this->targetPosition = position;
-    this->targetRotationZ = targetRotationZ * rotationZ;
-    this->targetRotationY = targetRotationY * rotationY;
-    this->targetRotationX = targetRotationX * rotationX;
+	return rotateY;
 }
 
-void IMoveable::move(const float forwardFactor, const float strafeFactor, const float upFactor, const glm::vec3& rotation)
+const quat& IMoveable::getRotateZ() const
 {
-    this->targetPosition += glm::vec4(forward, 0.0f) * forwardFactor + glm::vec4(left, 0.0f) * strafeFactor + glm::vec4(up, 0.0f) * upFactor;
-    this->targetRotationZ = targetRotationZ * rotateRz(rotation.z);
-    this->targetRotationY = targetRotationY * rotateRy(rotation.y);
-    this->targetRotationX = targetRotationX * rotateRx(rotation.x);
+	return rotateZ;
 }
 
-void IMoveable::move(const float forwardFactor, const float strafeFactor,
-                     const float upFactor, const quat& rotationZ, const quat& rotationY,
-                     const quat& rotationX)
+void IMoveable::setDirection(const glm::vec3& direction)
 {
-    this->targetPosition += glm::vec4(forward, 0.0f) * forwardFactor + glm::vec4(left, 0.0f) * strafeFactor + glm::vec4(up, 0.0f) * upFactor;
-    this->targetRotationZ = targetRotationZ * rotationZ;
-    this->targetRotationY = targetRotationY * rotationY;
-    this->targetRotationX = targetRotationX * rotationX;
+	glm::vec3 rotation(0.0f, 0.0f, 0.0f);
+
+	//
+
+	auto forward = glm::normalize(direction);
+
+	auto forwardXZ = glm::normalize(glm::vec3(forward.x, 0.0f, forward.z));
+
+	//
+
+	rotation.x = 90.0f - glm::degrees(acosf(glm::dot(forward, glm::vec3(0.0f, 1.0f, 0.0f))));
+
+	rotation.y = glm::degrees(acosf(glm::dot(forwardXZ, glm::vec3(0.0f, 0.0f, -1.0f))));
+	if (glm::dot(forwardXZ, glm::vec3(-1.0f, 0.0f, 0.0f)) < 0.0f)
+	{
+		rotation.y = -rotation.y;
+	}
+
+	rotation.z = 0.0f;
+
+	//
+
+	setRotate(rotation);
+}
+
+void IMoveable::move(const glm::vec3& translate, const glm::vec3& rotate)
+{
+    this->targetTranslate = translate;
+    this->targetRotateZ = targetRotateZ * rotateRz(rotate.z);
+    this->targetRotateY = targetRotateY * rotateRy(rotate.y);
+    this->targetRotateX = targetRotateX * rotateRx(rotate.x);
+}
+
+void IMoveable::move(const glm::vec3& translate, const quat& rotateZ, const quat& rotateY, const quat& rotateX)
+{
+    this->targetTranslate = translate;
+    this->targetRotateZ = targetRotateZ * rotateZ;
+    this->targetRotateY = targetRotateY * rotateY;
+    this->targetRotateX = targetRotateX * rotateX;
+}
+
+void IMoveable::move(const float forwardFactor, const float strafeFactor, const float upFactor, const glm::vec3& rotate)
+{
+    this->targetTranslate += forward * forwardFactor + left * strafeFactor + up * upFactor;
+    this->targetRotateZ = targetRotateZ * rotateRz(rotate.z);
+    this->targetRotateY = targetRotateY * rotateRy(rotate.y);
+    this->targetRotateX = targetRotateX * rotateRx(rotate.x);
+}
+
+void IMoveable::move(const float forwardFactor, const float strafeFactor, const float upFactor, const quat& rotateZ, const quat& rotateY, const quat& rotateX)
+{
+    this->targetTranslate += forward * forwardFactor + left * strafeFactor + up * upFactor;
+    this->targetRotateZ = targetRotateZ * rotateZ;
+    this->targetRotateY = targetRotateY * rotateY;
+    this->targetRotateX = targetRotateX * rotateX;
 }
 
 //
@@ -197,19 +241,18 @@ void IMoveable::move(const float forwardFactor, const float strafeFactor,
 
 VkBool32 IMoveable::update(const double deltaTime, const uint64_t deltaTicks)
 {
-    if (targetPosition != position || targetRotationZ != rotationZ || targetRotationY != rotationY || targetRotationX != rotationX)
+    if (targetTranslate != translate || targetRotateZ != rotateZ || targetRotateY != rotateY || targetRotateX != rotateX)
     {
-        glm::vec4 currentPosition = targetPosition + position;
-        currentPosition /= currentPosition.w;
+        glm::vec3 currentTranslate = (targetTranslate + translate) * 0.5f;
 
-        quat currentRotationZ = slerp(targetRotationZ, rotationZ, 0.5f);
-        quat currentRotationY = slerp(targetRotationY, rotationY, 0.5f);
-        quat currentRotationX = slerp(targetRotationX, rotationX, 0.5f);
+        quat currentRotateZ = slerp(targetRotateZ, rotateZ, 0.5f);
+        quat currentRotateY = slerp(targetRotateY, rotateY, 0.5f);
+        quat currentRotateX = slerp(targetRotateX, rotateX, 0.5f);
 
-        this->position = currentPosition;
-        this->rotationZ = currentRotationZ;
-        this->rotationY = currentRotationY;
-        this->rotationX = currentRotationX;
+        this->translate = currentTranslate;
+        this->rotateZ = currentRotateZ;
+        this->rotateY = currentRotateY;
+        this->rotateX = currentRotateX;
 
         updateVectors();
         update();

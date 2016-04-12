@@ -34,13 +34,13 @@ namespace vkts
 
 class overwrite;
 
-class IObject: public ICloneable<IObject>, public IDestroyable
+class IObject: public ICloneable<IObject>, public IDestroyable, public IMoveable
 {
 
 public:
 
     IObject() :
-        ICloneable<IObject>(), IDestroyable()
+        ICloneable<IObject>(), IDestroyable(), IMoveable()
     {
     }
 
@@ -51,14 +51,6 @@ public:
     virtual const std::string& getName() const = 0;
 
     virtual void setName(const std::string& name) = 0;
-
-    virtual const glm::vec3& getTranslate() const = 0;
-
-    virtual void setTranslate(const glm::vec3& translate) = 0;
-
-    virtual const glm::vec3& getRotate() const = 0;
-
-    virtual void setRotate(const glm::vec3& rotate) = 0;
 
     virtual const glm::vec3& getScale() const = 0;
 

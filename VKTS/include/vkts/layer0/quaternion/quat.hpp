@@ -93,6 +93,10 @@ public:
 
 };
 
+glm::mat4 operator* (const glm::mat4& matrix, const quat& q);
+
+glm::mat4 operator* (const quat& q, const glm::mat4& matrix);
+
 } /* namespace vkts */
 
 #endif /* VKTS_QUAT_HPP_ */

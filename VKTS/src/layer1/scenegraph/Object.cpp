@@ -31,20 +31,30 @@
 namespace vkts
 {
 
+
+//
+// IMoveable
+//
+
+void Object::update()
+{
+	setDirty();
+}
+
 Object::Object() :
-    IObject(), name(""), translate(0.0f, 0.0f, 0.0f), rotate(0.0f, 0.0f, 0.0f), scale(1.0f, 1.0f, 1.0f), transformMatrix(1.0f), dirty(VK_TRUE), rootNode()
+    IObject(), name(""), scale(1.0f, 1.0f, 1.0f), transformMatrix(1.0f), dirty(VK_TRUE), rootNode()
 {
 }
 
 Object::Object(const Object& other) :
-    IObject(), name(other.name), translate(other.translate), rotate(other.rotate), scale(other.scale), transformMatrix(other.transformMatrix), dirty(VK_TRUE), rootNode()
+    IObject(other), name(other.name), scale(other.scale), transformMatrix(other.transformMatrix), dirty(VK_TRUE), rootNode()
 {
     if (!other.rootNode.get())
     {
         name = "";
 
-        translate = glm::vec3(0.0f, 0.0f, 0.0f);
-        rotate = glm::vec3(0.0f, 0.0f, 0.0f);
+        setTranslate(glm::vec3(0.0f, 0.0f, 0.0f));
+        setRotate(glm::vec3(0.0f, 0.0f, 0.0f));
         scale = glm::vec3(1.0f, 1.0f, 1.0f);
 
         return;
@@ -56,8 +66,8 @@ Object::Object(const Object& other) :
     {
         name = "";
 
-        translate = glm::vec3(0.0f, 0.0f, 0.0f);
-        rotate = glm::vec3(0.0f, 0.0f, 0.0f);
+        setTranslate(glm::vec3(0.0f, 0.0f, 0.0f));
+        setRotate(glm::vec3(0.0f, 0.0f, 0.0f));
         scale = glm::vec3(1.0f, 1.0f, 1.0f);
 
         return;
@@ -81,30 +91,6 @@ const std::string& Object::getName() const
 void Object::setName(const std::string& name)
 {
     this->name = name;
-}
-
-const glm::vec3& Object::getTranslate() const
-{
-    return translate;
-}
-
-void Object::setTranslate(const glm::vec3& translate)
-{
-    this->translate = translate;
-
-    setDirty();
-}
-
-const glm::vec3& Object::getRotate() const
-{
-    return rotate;
-}
-
-void Object::setRotate(const glm::vec3& rotate)
-{
-    this->rotate = rotate;
-
-    setDirty();
 }
 
 const glm::vec3& Object::getScale() const
@@ -167,15 +153,15 @@ void Object::updateRecursive(const IUpdateThreadContext& updateContext)
 {
     if (dirty)
     {
-        transformMatrix = translateMat4(translate.x, translate.y, translate.z) * rotateRzRyRxMat4(rotate.z, rotate.y, rotate.x) * scaleMat4(scale.x, scale.y, scale.z);
-
-        dirty = VK_FALSE;
+        transformMatrix = translateMat4(translate.x, translate.y, translate.z) * (rotateZ * rotateY * rotateX) * scaleMat4(scale.x, scale.y, scale.z);
     }
 
     if (rootNode.get())
     {
         rootNode->updateRecursive(updateContext, transformMatrix, dirty, glm::mat4(1.0f), VK_FALSE, INodeSP());
     }
+
+    dirty = VK_FALSE;
 }
 
 //

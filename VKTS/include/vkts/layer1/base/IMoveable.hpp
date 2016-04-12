@@ -37,15 +37,15 @@ class IMoveable: public IUpdateable
 
 protected:
 
-    glm::vec4 position;
-    quat rotationZ;
-    quat rotationY;
-    quat rotationX;
+    glm::vec3 translate;
+    quat rotateZ;
+    quat rotateY;
+    quat rotateX;
 
-    glm::vec4 targetPosition;
-    quat targetRotationZ;
-    quat targetRotationY;
-    quat targetRotationX;
+    glm::vec3 targetTranslate;
+    quat targetRotateZ;
+    quat targetRotateY;
+    quat targetRotateX;
 
     glm::vec3 forward;
     glm::vec3 left;
@@ -58,8 +58,8 @@ protected:
 public:
 
     IMoveable();
-    IMoveable(const glm::vec4& position, const glm::vec3& rotation);
-    IMoveable(const glm::vec4& position, const quat& rotationZ, const quat& rotationY, const quat& rotationX);
+    IMoveable(const glm::vec3& translate, const glm::vec3& rotate);
+    IMoveable(const glm::vec3& translate, const quat& rotateZ, const quat& rotateY, const quat& rotateX);
     IMoveable(const IMoveable& other);
     IMoveable(IMoveable&& other) = delete;
     virtual ~IMoveable();
@@ -67,24 +67,29 @@ public:
     IMoveable& operator =(const IMoveable& other);
     IMoveable& operator =(IMoveable && other) = delete;
 
-    void setPositionRotation(const glm::vec4& position, const glm::vec3& rotation);
-    void setPositionRotation(const glm::vec4& position, const quat& rotationZ, const quat& rotationY, const quat& rotationX);
+    void setTranslateRotate(const glm::vec3& translate, const glm::vec3& rotate);
+    void setTranslateRotate(const glm::vec3& translate, const quat& rotateZ, const quat& rotateY, const quat& rotateX);
 
-    void setPosition(const glm::vec4& position);
+    void setTranslate(const glm::vec3& translate);
+    const glm::vec3& getTranslate() const;
 
-    void setRotation(const glm::vec3& rotation);
+    void setRotate(const glm::vec3& rotate);
+    void setRotate(const quat& rotateZ, const quat& rotateY, const quat& rotateX);
+    const quat& getRotateX() const;
+    const quat& getRotateY() const;
+    const quat& getRotateZ() const;
 
-    void setRotation(const quat& rotationZ, const quat& rotationY, const quat& rotationX);
+    void setDirection(const glm::vec3& direction);
 
     //
 
-    void movePositionRotation(const glm::vec4& position, const glm::vec3& rotation);
+    void move(const glm::vec3& translate, const glm::vec3& rotate);
 
-    void movePositionRotation(const glm::vec4& position, const quat& rotationZ, const quat& rotationY, const quat& rotationX);
+    void move(const glm::vec3& translate, const quat& rotateZ, const quat& rotateY, const quat& rotateX);
 
-    void move(const float forwardFactor, const float strafeFactor, const float upFactor, const glm::vec3& rotation);
+    void move(const float forwardFactor, const float strafeFactor, const float upFactor, const glm::vec3& rotate);
 
-    void move(const float forwardFactor, const float strafeFactor, const float upFactor, const quat& rotationZ, const quat& rotationY, const quat& rotationX);
+    void move(const float forwardFactor, const float strafeFactor, const float upFactor, const quat& rotateZ, const quat& rotateY, const quat& rotateX);
 
     virtual VkBool32 update(const double deltaTime, const uint64_t deltaTicks) override;
 

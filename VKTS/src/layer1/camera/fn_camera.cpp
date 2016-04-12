@@ -57,34 +57,14 @@ ICameraSP VKTS_APIENTRY cameraCreate(const glm::vec4& position, const quat& rota
 
 ICameraSP VKTS_APIENTRY cameraCreate(const glm::vec4& position, const glm::vec4& center)
 {
-	glm::vec3 rotation(0.0f, 0.0f, 0.0f);
-
-	//
-
-    auto forward = glm::normalize(glm::vec3(center - position));
-
-    auto forwardXZ = glm::normalize(glm::vec3(forward.x, 0.0f, forward.z));
-
-    //
-
-    rotation.x = 90.0f - glm::degrees(acosf(glm::dot(forward, glm::vec3(0.0f, 1.0f, 0.0f))));
-
-    rotation.y = glm::degrees(acosf(glm::dot(forwardXZ, glm::vec3(0.0f, 0.0f, -1.0f))));
-    if (glm::dot(forwardXZ, glm::vec3(-1.0f, 0.0f, 0.0f)) < 0.0f)
-	{
-    	rotation.y = -rotation.y;
-	}
-
-    rotation.z = 0.0f;
-
-    //
-
-    auto newInstance = new Camera(position, rotation);
+    auto newInstance = new Camera(position, glm::vec3(0.0f, 0.0f, 0.0f));
 
     if (!newInstance)
     {
         return ICameraSP();
     }
+
+    newInstance->setDirection(glm::vec3(center - position));
 
     return ICameraSP(newInstance);
 }
