@@ -52,7 +52,7 @@ protected:
     // IMoveable
     //
 
-    virtual void update();
+    virtual void update() override;
 
 public:
 
