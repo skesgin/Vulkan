@@ -75,6 +75,7 @@ Changelog:
 ----------
 
 04/13/2016 - Fixed code for target forward calculation in IMoveable.
+           - Fixed bug in image layout transitions.
 
 04/12/2016 - Fixed bug, that transform matrix from scene object was set non dirty too early.
 		   - Scene object is now inherited from IMoveable.

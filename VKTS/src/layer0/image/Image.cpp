@@ -212,7 +212,10 @@ void Image::copyImage(const VkCommandBuffer cmdBuffer, const VkImage targetImage
 
     imageMemoryBarrier.image = image;
 
-    vkCmdPipelineBarrier(cmdBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
+    if (imageMemoryBarrier.srcAccessMask != imageMemoryBarrier.dstAccessMask || imageMemoryBarrier.oldLayout != imageMemoryBarrier.newLayout)
+    {
+    	vkCmdPipelineBarrier(cmdBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
+    }
 
     // Prepare target image for copy.
 
@@ -223,7 +226,10 @@ void Image::copyImage(const VkCommandBuffer cmdBuffer, const VkImage targetImage
 
     imageMemoryBarrier.image = targetImage;
 
-    vkCmdPipelineBarrier(cmdBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
+    if (imageMemoryBarrier.srcAccessMask != imageMemoryBarrier.dstAccessMask || imageMemoryBarrier.oldLayout != imageMemoryBarrier.newLayout)
+    {
+    	vkCmdPipelineBarrier(cmdBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
+    }
 
     // Copy image by command.
 
@@ -237,7 +243,10 @@ void Image::copyImage(const VkCommandBuffer cmdBuffer, const VkImage targetImage
     imageMemoryBarrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
     imageMemoryBarrier.newLayout = targetImageLayout;
 
-    vkCmdPipelineBarrier(cmdBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
+    if (imageMemoryBarrier.srcAccessMask != imageMemoryBarrier.dstAccessMask || imageMemoryBarrier.oldLayout != imageMemoryBarrier.newLayout)
+    {
+    	vkCmdPipelineBarrier(cmdBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
+	}
 
 	imageMemoryBarrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
 	imageMemoryBarrier.dstAccessMask = accessMask;
@@ -247,7 +256,10 @@ void Image::copyImage(const VkCommandBuffer cmdBuffer, const VkImage targetImage
 
     imageMemoryBarrier.image = image;
 
-    vkCmdPipelineBarrier(cmdBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
+    if (imageMemoryBarrier.srcAccessMask != imageMemoryBarrier.dstAccessMask || imageMemoryBarrier.oldLayout != imageMemoryBarrier.newLayout)
+    {
+    	vkCmdPipelineBarrier(cmdBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
+    }
 }
 
 void Image::copyImageToBuffer(const VkCommandBuffer cmdBuffer, const VkBuffer dstBuffer, const uint32_t regionCount, const VkBufferImageCopy* regions, const VkImageSubresourceRange& subresourceRange) const
@@ -261,8 +273,6 @@ void Image::copyImageToBuffer(const VkCommandBuffer cmdBuffer, const VkBuffer ds
 
 	for (uint32_t i = 0; i < regionCount; i++)
 	{
-		//
-
 		VkImageMemoryBarrier imageMemoryBarrier;
 
 		memset(&imageMemoryBarrier, 0, sizeof(VkImageMemoryBarrier));
@@ -287,15 +297,16 @@ void Image::copyImageToBuffer(const VkCommandBuffer cmdBuffer, const VkBuffer ds
 
 		imageMemoryBarrier.image = image;
 
-		vkCmdPipelineBarrier(cmdBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
+		if (imageMemoryBarrier.srcAccessMask != imageMemoryBarrier.dstAccessMask || imageMemoryBarrier.oldLayout != imageMemoryBarrier.newLayout)
+	    {
+			vkCmdPipelineBarrier(cmdBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
+	    }
 
 		// Copy image by command.
 
 		vkCmdCopyImageToBuffer(cmdBuffer, image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, dstBuffer, 1, &regions[i]);
 
 		// Revert back.
-
-		vkCmdPipelineBarrier(cmdBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
 
 		imageMemoryBarrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
 		imageMemoryBarrier.dstAccessMask = accessMask;
@@ -305,7 +316,10 @@ void Image::copyImageToBuffer(const VkCommandBuffer cmdBuffer, const VkBuffer ds
 
 		imageMemoryBarrier.image = image;
 
-		vkCmdPipelineBarrier(cmdBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
+		if (imageMemoryBarrier.srcAccessMask != imageMemoryBarrier.dstAccessMask || imageMemoryBarrier.oldLayout != imageMemoryBarrier.newLayout)
+	    {
+			vkCmdPipelineBarrier(cmdBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
+	    }
 	}
 }
 
@@ -314,6 +328,13 @@ void Image::cmdPipelineBarrier(const VkCommandBuffer cmdBuffer, const VkAccessFl
 	if (newLayout == VK_IMAGE_LAYOUT_UNDEFINED || newLayout == VK_IMAGE_LAYOUT_PREINITIALIZED)
 	{
 		logPrint(VKTS_LOG_WARNING, "Image: New layout not allowed: %d", newLayout);
+
+		return;
+	}
+
+	if (subresourceRange.baseMipLevel != 0 || subresourceRange.levelCount != getMipLevels())
+	{
+		logPrint(VKTS_LOG_WARNING, "Image: Can only transit layout for all mip levels at once");
 
 		return;
 	}

@@ -506,7 +506,7 @@ static ITextureSP scenegraphCreateTexture(const float red, const float green, co
     imageCreateInfo.pQueueFamilyIndices = nullptr;
     imageCreateInfo.initialLayout = initialLayout;
 
-    VkImageSubresourceRange subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
+    VkImageSubresourceRange subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, imageData->getMipLevels(), 0, 1};
 
     IDeviceMemorySP stageDeviceMemory;
     IBufferSP stageBuffer;
@@ -710,7 +710,7 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
             imageCreateInfo.pQueueFamilyIndices = nullptr;
             imageCreateInfo.initialLayout = initialLayout;
 
-            VkImageSubresourceRange subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
+            VkImageSubresourceRange subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, imageData->getMipLevels(), 0, 1};
 
             IDeviceMemorySP stageDeviceMemory;
             IImageSP stageImage;
