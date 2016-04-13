@@ -271,7 +271,7 @@ int main()
 	deviceQueueCreateInfo.queueCount = 1;
 	deviceQueueCreateInfo.pQueuePriorities = queuePriorities;
 
-	auto device = vkts::deviceCreate(physicalDevice->getPhysicalDevice(), 0, 1, &deviceQueueCreateInfo, 0, nullptr, vkts::extensionGetNeededDeviceExtensionCount(), vkts::extensionGetNeededDeviceExtensionNames(), nullptr);
+	auto device = vkts::deviceCreate(physicalDevice->getPhysicalDevice(), 0, 1, &deviceQueueCreateInfo, 0, nullptr, vkts::extensionGetNeededDeviceExtensionCount(), vkts::extensionGetNeededDeviceExtensionNames(), &physicalDeviceFeatures);
 
 	if (!device.get())
 	{
