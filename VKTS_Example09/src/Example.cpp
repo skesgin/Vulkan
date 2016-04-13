@@ -171,14 +171,15 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 
 VkBool32 Example::buildFramebuffer(const int32_t usedBuffer)
 {
-	VkImageView imageViews[4];
+	VkImageView imageViews[5];
 
 	imageViews[0] = swapchainImageView[usedBuffer]->getImageView();
 	imageViews[1] = depthStencilImageView->getImageView();
 	imageViews[2] = msaaColorImageView->getImageView();
 	imageViews[3] = msaaDepthStencilImageView->getImageView();
+	imageViews[4] = shadowImageView->getImageView();
 
-	framebuffer[usedBuffer] = vkts::framebufferCreate(initialResources->getDevice()->getDevice(), 0, renderPass->getRenderPass(), 4, imageViews, swapchain->getImageExtent().width, swapchain->getImageExtent().height, 1);
+	framebuffer[usedBuffer] = vkts::framebufferCreate(initialResources->getDevice()->getDevice(), 0, renderPass->getRenderPass(), 5, imageViews, swapchain->getImageExtent().width, swapchain->getImageExtent().height, 1);
 
 	if (!framebuffer[usedBuffer].get())
 	{
@@ -1410,6 +1411,11 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 		{
 			scene->updateDescriptorSetsRecursive(VKTS_BINDING_UNIFORM_BINDING_COUNT, writeDescriptorSets);
 		}
+	}
+
+	if (!buildShadowImageView())
+	{
+		return VK_FALSE;
 	}
 
 	if (!buildMSAAColorImageView())
