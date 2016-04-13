@@ -220,9 +220,9 @@ void IMoveable::move(const glm::vec3& forward)
 {
 	glm::vec3 rotate = getAngle(forward);
 
-	this->targetRotateZ = targetRotateZ * rotateRz(rotate.z);
-    this->targetRotateY = targetRotateY * rotateRy(rotate.y);
-    this->targetRotateX = targetRotateX * rotateRx(rotate.x);
+	this->targetRotateZ = rotateRz(rotate.z);
+    this->targetRotateY = rotateRy(rotate.y);
+    this->targetRotateX = rotateRx(rotate.x);
 }
 
 void IMoveable::move(const glm::vec3& translate, const glm::vec3& rotate)
