@@ -191,7 +191,7 @@ VkResult DeviceMemory::upload(const VkDeviceSize offset, const VkMemoryMapFlags 
 
 	if (!(memoryPropertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT))
 	{
-		result = flushMappedMemoryRanges(0, uploadDataSize);
+		result = flushMappedMemoryRanges(offset, uploadDataSize);
 	}
 
     unmapMemory();
