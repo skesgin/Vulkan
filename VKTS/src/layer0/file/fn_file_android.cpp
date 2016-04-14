@@ -37,6 +37,23 @@ namespace vkts
 
 VkBool32 VKTS_APIENTRY _filePrepareLoadBinary(const char* filename)
 {
+	std::string targetDirectory = std::string(_fileGetBaseDirectory());
+
+	std::string targetFile = targetDirectory + std::string(filename);
+
+	//
+
+	FILE* testAsset = fopen(targetFile.c_str(), "rb");
+
+	if (testAsset)
+	{
+		fclose(testAsset);
+
+		return VK_TRUE;
+	}
+
+	//
+
 	auto androidApp = _visualGetAndroidApp();
 
 	if (!androidApp)
@@ -63,12 +80,6 @@ VkBool32 VKTS_APIENTRY _filePrepareLoadBinary(const char* filename)
 
 	//
 
-	std::string targetDirectory = std::string(_fileGetBaseDirectory());
-
-	std::string targetFile = targetDirectory + std::string(filename);
-
-	//
-
 	std::string foldersToCreate = std::string(filename);
 
 	auto lastSlash = foldersToCreate.find('/');
@@ -92,6 +103,8 @@ VkBool32 VKTS_APIENTRY _filePrepareLoadBinary(const char* filename)
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, "File: Could not open target asset: '%s'", targetFile.c_str());
 
+		AAsset_close(sourceAsset);
+
 		return VK_FALSE;
 	}
 
@@ -100,6 +113,10 @@ VkBool32 VKTS_APIENTRY _filePrepareLoadBinary(const char* filename)
 	if (sourceLength != targetLength)
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, "File: Could not write target asset: '%s'", targetFile.c_str());
+
+		fclose(targetAsset);
+
+		AAsset_close(sourceAsset);
 
 		return VK_FALSE;
 	}
