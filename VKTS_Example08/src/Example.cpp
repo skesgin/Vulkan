@@ -144,7 +144,7 @@ vkts::IImageDataSP Example::gatherImageData() const
 
 		//
 
-		result = stageDeviceMemory->mapMemory(0, stageDeviceMemory->getAllocationSize(), 0);
+		result = stageDeviceMemory->mapMemory(subresourceLayout.offset, subresourceLayout.size, 0);
 
 		if (result != VK_SUCCESS)
 		{
@@ -154,6 +154,18 @@ vkts::IImageDataSP Example::gatherImageData() const
 		}
 
 		imageData->upload(stageDeviceMemory->getMemory(), 0, subresourceLayout);
+
+		if (!(stageDeviceMemory->getMemoryPropertyFlags() & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT))
+		{
+			result = stageDeviceMemory->invalidateMappedMemoryRanges(subresourceLayout.offset, subresourceLayout.size);
+
+			if (result != VK_SUCCESS)
+			{
+				vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not invalidate memory.");
+
+				return VK_FALSE;
+			}
+		}
 
 		stageDeviceMemory->unmapMemory();
 
@@ -270,7 +282,7 @@ vkts::IImageDataSP Example::gatherImageData() const
 		subresourceLayout.arrayPitch = VKTS_IMAGE_LENGTH * VKTS_IMAGE_LENGTH * 4 * sizeof(uint8_t);
 		subresourceLayout.depthPitch = VKTS_IMAGE_LENGTH * VKTS_IMAGE_LENGTH * 4 * sizeof(uint8_t);
 
-		result = stageDeviceMemory->mapMemory(0, stageDeviceMemory->getAllocationSize(), 0);
+		result = stageDeviceMemory->mapMemory(subresourceLayout.offset, subresourceLayout.size, 0);
 
 		if (result != VK_SUCCESS)
 		{
@@ -280,6 +292,18 @@ vkts::IImageDataSP Example::gatherImageData() const
 		}
 
 		imageData->upload(stageDeviceMemory->getMemory(), 0, subresourceLayout);
+
+		if (!(stageDeviceMemory->getMemoryPropertyFlags() & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT))
+		{
+			result = stageDeviceMemory->invalidateMappedMemoryRanges(0, stageDeviceMemory->getAllocationSize());
+
+			if (result != VK_SUCCESS)
+			{
+				vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not invalidate memory.");
+
+				return VK_FALSE;
+			}
+		}
 
 		stageDeviceMemory->unmapMemory();
 

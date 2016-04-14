@@ -131,6 +131,36 @@ void* DeviceMemory::getMemory()
     return data;
 }
 
+VkResult DeviceMemory::flushMappedMemoryRanges(const VkDeviceSize offset, const VkDeviceSize size) const
+{
+	VkMappedMemoryRange mappedMemoryRange;
+
+	memset(&mappedMemoryRange, 0, sizeof(mappedMemoryRange));
+
+	mappedMemoryRange.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
+
+	mappedMemoryRange.memory = deviceMemory;
+	mappedMemoryRange.offset = offset;
+	mappedMemoryRange.size = size;
+
+	return vkFlushMappedMemoryRanges(device, 1, &mappedMemoryRange);
+}
+
+VkResult DeviceMemory::invalidateMappedMemoryRanges(const VkDeviceSize offset, const VkDeviceSize size) const
+{
+	VkMappedMemoryRange mappedMemoryRange;
+
+	memset(&mappedMemoryRange, 0, sizeof(mappedMemoryRange));
+
+	mappedMemoryRange.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
+
+	mappedMemoryRange.memory = deviceMemory;
+	mappedMemoryRange.offset = offset;
+	mappedMemoryRange.size = size;
+
+	return vkInvalidateMappedMemoryRanges(device, 1, & mappedMemoryRange);
+}
+
 void DeviceMemory::unmapMemory()
 {
     if (!(memoryPropertyFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT))
@@ -148,9 +178,9 @@ void DeviceMemory::unmapMemory()
     }
 }
 
-VkResult DeviceMemory::upload(const VkDeviceSize offset, const VkDeviceSize size, const VkMemoryMapFlags flags, const void* uploadData, const size_t uploadDataSize)
+VkResult DeviceMemory::upload(const VkDeviceSize offset, const VkMemoryMapFlags flags, const void* uploadData, const size_t uploadDataSize)
 {
-    auto result = mapMemory(offset, size, flags);
+    auto result = mapMemory(offset, uploadDataSize, flags);
 
     if (result != VK_SUCCESS)
     {
@@ -160,6 +190,11 @@ VkResult DeviceMemory::upload(const VkDeviceSize offset, const VkDeviceSize size
     memcpy(data, uploadData, uploadDataSize);
 
     unmapMemory();
+
+	if (!(memoryPropertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT))
+	{
+		result = flushMappedMemoryRanges(0, uploadDataSize);
+	}
 
     return result;
 }

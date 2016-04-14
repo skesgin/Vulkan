@@ -82,7 +82,8 @@ Changelog:
 04/14/2016
 - Updated documentaion structure and clarified topics.  
 - Optimized Android file loading.
-- Added automatic gathering of base directory. 
+- Added automatic gathering of base directory.
+- Added invalidate and flush for mapped memory. 
 
 04/13/2016
 - Fixed code for target forward calculation in IMoveable.  

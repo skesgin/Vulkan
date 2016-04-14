@@ -42,7 +42,7 @@ static VkBool32 memoryImageUpload(const IDeviceMemorySP& deviceMemory, const IIm
 
     if (deviceMemory->getMemoryPropertyFlags() & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)
     {
-        result = deviceMemory->mapMemory(0, deviceMemory->getAllocationSize(), 0);
+        result = deviceMemory->mapMemory(subresourceLayout.offset, subresourceLayout.size, 0);
 
         if (result != VK_SUCCESS)
         {
@@ -53,7 +53,19 @@ static VkBool32 memoryImageUpload(const IDeviceMemorySP& deviceMemory, const IIm
 
         imageData->copy(deviceMemory->getMemory(), mipLevel, subresourceLayout);
 
-        deviceMemory->unmapMemory();
+		if (!(deviceMemory->getMemoryPropertyFlags() & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT))
+		{
+			result = deviceMemory->flushMappedMemoryRanges(subresourceLayout.offset, subresourceLayout.size);
+
+			if (result != VK_SUCCESS)
+			{
+				vkts::logPrint(VKTS_LOG_ERROR, "MemoryImage: Could not flush memory.");
+
+				return VK_FALSE;
+			}
+		}
+
+		deviceMemory->unmapMemory();
     }
     else
     {
@@ -288,7 +300,7 @@ IMemoryImageSP VKTS_APIENTRY memoryImageCreate(IImageSP& stageImage, IBufferSP& 
 
             // Copy image data into buffer.
 
-            result = stageDeviceMemory->upload(0, stageDeviceMemory->getAllocationSize(), 0, imageData->getData(), imageData->getSize());
+            result = stageDeviceMemory->upload(0, 0, imageData->getData(), imageData->getSize());
 
             if (result != VK_SUCCESS)
             {

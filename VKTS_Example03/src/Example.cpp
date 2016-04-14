@@ -95,7 +95,7 @@ VkBool32 Example::createTexture(vkts::IImageSP& currentImage, vkts::IDeviceMemor
 
 		currentImage->getImageSubresourceLayout(subresourceLayout, imageSubresource);
 
-		result = currentDeviceMemoryImage->mapMemory(0, memoryRequirements.size, 0);
+		result = currentDeviceMemoryImage->mapMemory(subresourceLayout.offset, subresourceLayout.size, 0);
 
 		if (result != VK_SUCCESS)
 		{
@@ -105,6 +105,18 @@ VkBool32 Example::createTexture(vkts::IImageSP& currentImage, vkts::IDeviceMemor
 		}
 
 		imageData->copy(currentDeviceMemoryImage->getMemory(), 0, subresourceLayout);
+
+		if (!(currentDeviceMemoryImage->getMemoryPropertyFlags() & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT))
+		{
+			result = currentDeviceMemoryImage->flushMappedMemoryRanges(subresourceLayout.offset, subresourceLayout.size);
+
+			if (result != VK_SUCCESS)
+			{
+				vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not flush memory.");
+
+				return VK_FALSE;
+			}
+		}
 
 		currentDeviceMemoryImage->unmapMemory();
 	}
@@ -907,7 +919,7 @@ VkBool32 Example::buildVertexBuffer()
 		return VK_FALSE;
 	}
 
-	result = deviceMemoryVertexBuffer->upload(0, memoryRequirements.size, 0, vertices, sizeof(vertices));
+	result = deviceMemoryVertexBuffer->upload(0, 0, vertices, sizeof(vertices));
 
 	if (result != VK_SUCCESS)
 	{

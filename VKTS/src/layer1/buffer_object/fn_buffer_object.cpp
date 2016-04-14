@@ -100,7 +100,7 @@ IBufferObjectSP VKTS_APIENTRY bufferObjectCreate(IBufferSP& stageBuffer, IDevice
 
     if (memoryPropertyFlag & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)
     {
-        result = deviceMemory->upload(0, deviceMemory->getAllocationSize(), 0, binaryBuffer->getData(), binaryBuffer->getSize());
+        result = deviceMemory->upload(0, 0, binaryBuffer->getData(), binaryBuffer->getSize());
 
         if (result != VK_SUCCESS)
         {
@@ -118,7 +118,7 @@ IBufferObjectSP VKTS_APIENTRY bufferObjectCreate(IBufferSP& stageBuffer, IDevice
             return IBufferObjectSP();
         }
 
-        result = stageDeviceMemory->upload(0, stageDeviceMemory->getAllocationSize(), 0, binaryBuffer->getData(), binaryBuffer->getSize());
+        result = stageDeviceMemory->upload(0, 0, binaryBuffer->getData(), binaryBuffer->getSize());
 
         if (result != VK_SUCCESS)
         {

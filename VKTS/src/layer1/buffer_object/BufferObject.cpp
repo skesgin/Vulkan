@@ -72,7 +72,7 @@ VkBool32 BufferObject::upload(const size_t offset, const VkMemoryMapFlags flags,
 
     VkResult result;
 
-    result = deviceMemory->upload(offset, deviceMemory->getAllocationSize() - offset, flags, data, size);
+    result = deviceMemory->upload(offset, flags, data, size);
 
     if (result != VK_SUCCESS)
     {

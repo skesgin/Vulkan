@@ -601,7 +601,7 @@ VkBool32 Example::buildVertexBuffer()
 		return VK_FALSE;
 	}
 
-	result = vkMapMemory(device->getDevice(), deviceMemoryVertexBuffer, 0, memoryRequirements.size, 0, &mappedData);
+	result = vkMapMemory(device->getDevice(), deviceMemoryVertexBuffer, 0, sizeof(vertices), 0, &mappedData);
 
 	if (result != VK_SUCCESS)
 	{
@@ -611,6 +611,28 @@ VkBool32 Example::buildVertexBuffer()
 	}
 
 	memcpy(mappedData, vertices, sizeof(vertices));
+
+	if (!(physicalDeviceMemoryProperties.memoryTypes[memoryAllocInfo.memoryTypeIndex].propertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT))
+	{
+		VkMappedMemoryRange mappedMemoryRange;
+
+		memset(&mappedMemoryRange, 0, sizeof(mappedMemoryRange));
+
+		mappedMemoryRange.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
+
+		mappedMemoryRange.memory = deviceMemoryVertexBuffer;
+		mappedMemoryRange.offset = 0;
+		mappedMemoryRange.size = sizeof(vertices);
+
+		result = vkFlushMappedMemoryRanges(device->getDevice(), 1, &mappedMemoryRange);
+
+		if (result != VK_SUCCESS)
+		{
+			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not flush memory.");
+
+			return VK_FALSE;
+		}
+	}
 
 	vkUnmapMemory(device->getDevice(), deviceMemoryVertexBuffer);
 

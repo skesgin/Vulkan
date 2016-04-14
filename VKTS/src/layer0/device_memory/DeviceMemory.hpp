@@ -88,9 +88,13 @@ public:
 
     virtual void* getMemory() override;
 
+    virtual VkResult flushMappedMemoryRanges(const VkDeviceSize offset, const VkDeviceSize size) const override;
+
+    virtual VkResult invalidateMappedMemoryRanges(const VkDeviceSize offset, const VkDeviceSize size) const override;
+
     virtual void unmapMemory() override;
 
-    virtual VkResult upload(const VkDeviceSize offset, const VkDeviceSize size, const VkMemoryMapFlags flags, const void* uploadData, const size_t uploadDataSize) override;
+    virtual VkResult upload(const VkDeviceSize offset, const VkMemoryMapFlags flags, const void* uploadData, const size_t uploadDataSize) override;
 
     //
     // IDestroyable

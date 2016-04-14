@@ -68,9 +68,13 @@ public:
 
     virtual void* getMemory() = 0;
 
+    virtual VkResult flushMappedMemoryRanges(const VkDeviceSize offset, const VkDeviceSize size) const = 0;
+
+    virtual VkResult invalidateMappedMemoryRanges(const VkDeviceSize offset, const VkDeviceSize size) const = 0;
+
     virtual void unmapMemory() = 0;
 
-    virtual VkResult upload(const VkDeviceSize offset, const VkDeviceSize size, const VkMemoryMapFlags flags, const void* uploadData, const size_t uploadDataSize) = 0;
+    virtual VkResult upload(const VkDeviceSize offset, const VkMemoryMapFlags flags, const void* uploadData, const size_t uploadDataSize) = 0;
 
 };
 
