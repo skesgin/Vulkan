@@ -26,8 +26,46 @@
 
 #include <vkts/vkts.hpp>
 
+#include "fn_file_internal.hpp"
+
 namespace vkts
 {
+
+VkBool32 VKTS_APIENTRY _fileInit()
+{
+	std::string testFilename = "vk_layer_settings.txt";
+
+	auto testFile = fopen(testFilename.c_str(), "rb");
+
+	if (testFile)
+	{
+		fclose(testFile);
+
+		return VK_TRUE;
+	}
+
+	std::string directory = "../VKTS_Binaries/";
+
+	for (uint32_t i = 0; i < 3; i++)
+	{
+		testFile = fopen((directory + testFilename).c_str(), "rb");
+
+		if (testFile)
+		{
+			_fileSetBaseDirectory(directory.c_str());
+
+			fclose(testFile);
+
+			return VK_TRUE;
+		}
+
+		directory = "../" + directory;
+	}
+
+	logPrint(VKTS_LOG_WARNING, "File: Could not find base directory");
+
+	return VK_TRUE;
+}
 
 VkBool32 VKTS_APIENTRY _filePrepareLoadBinary(const char* filename)
 {

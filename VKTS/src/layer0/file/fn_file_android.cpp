@@ -35,6 +35,22 @@
 namespace vkts
 {
 
+VkBool32 VKTS_APIENTRY _fileInit()
+{
+	auto androidApp = _visualGetAndroidApp();
+
+	if (!androidApp)
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "File: No android application.");
+
+		return VK_FALSE;
+	}
+
+    _fileSetBaseDirectory(androidApp->activity->externalDataPath);
+
+	return VK_TRUE;
+}
+
 VkBool32 VKTS_APIENTRY _filePrepareLoadBinary(const char* filename)
 {
 	std::string targetDirectory = std::string(_fileGetBaseDirectory());

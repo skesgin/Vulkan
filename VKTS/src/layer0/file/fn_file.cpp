@@ -73,6 +73,13 @@ static VkBool32 fileSave(const char* filename, const void* data, const size_t si
 
 //
 
+VkBool32 VKTS_APIENTRY fileInit()
+{
+    return _fileInit();
+}
+
+//
+
 void VKTS_APIENTRY _fileSetBaseDirectory(const char* directory)
 {
 	g_baseDirectory = std::string(directory) + "/";
@@ -222,6 +229,11 @@ VkBool32 VKTS_APIENTRY fileSaveText(const char* filename, const ITextBufferSP& t
     }
 
     return fileSave(filename, text->getString(), text->getLength());
+}
+
+void VKTS_APIENTRY fileTerminate()
+{
+    // Nothing for now.
 }
 
 }

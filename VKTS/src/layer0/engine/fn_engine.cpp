@@ -84,6 +84,13 @@ VkBool32 VKTS_APIENTRY engineInit()
         return VK_FALSE;
     }
 
+    if (!fileInit())
+    {
+        logPrint(VKTS_LOG_ERROR, "Engine: Initialization failed! Could not initialize the file system!");
+
+        return VK_FALSE;
+    }
+
     return VK_TRUE;
 }
 
@@ -481,6 +488,8 @@ uint32_t VKTS_APIENTRY engineGetTaskExecutorCount()
 
 void VKTS_APIENTRY engineTerminate()
 {
+	fileTerminate();
+
     barrierTerminate();
 
     timeTerminate();

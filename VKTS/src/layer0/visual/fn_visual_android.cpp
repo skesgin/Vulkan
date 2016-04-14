@@ -295,11 +295,6 @@ void android_main(struct android_app* app)
 
     //
 
-    // Set data path.
-    vkts::_fileSetBaseDirectory(g_app->activity->externalDataPath);
-
-    //
-
     // Force fullscreen.
     ANativeActivity_setWindowFlags(g_app->activity, AWINDOW_FLAG_FULLSCREEN, 0);
 
