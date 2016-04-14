@@ -189,12 +189,12 @@ VkResult DeviceMemory::upload(const VkDeviceSize offset, const VkMemoryMapFlags 
 
     memcpy(data, uploadData, uploadDataSize);
 
-    unmapMemory();
-
 	if (!(memoryPropertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT))
 	{
 		result = flushMappedMemoryRanges(0, uploadDataSize);
 	}
+
+    unmapMemory();
 
     return result;
 }
