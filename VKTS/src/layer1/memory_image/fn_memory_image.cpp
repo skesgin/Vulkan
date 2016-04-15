@@ -42,7 +42,7 @@ static VkBool32 memoryImageUpload(const IDeviceMemorySP& deviceMemory, const IIm
 
     if (deviceMemory->getMemoryPropertyFlags() & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)
     {
-        result = deviceMemory->mapMemory(subresourceLayout.offset, subresourceLayout.size, 0);
+        result = deviceMemory->mapMemory(0, deviceMemory->getAllocationSize(), 0);
 
         if (result != VK_SUCCESS)
         {
@@ -55,7 +55,7 @@ static VkBool32 memoryImageUpload(const IDeviceMemorySP& deviceMemory, const IIm
 
 		if (!(deviceMemory->getMemoryPropertyFlags() & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT))
 		{
-			result = deviceMemory->flushMappedMemoryRanges(subresourceLayout.offset, subresourceLayout.size);
+			result = deviceMemory->flushMappedMemoryRanges(0, deviceMemory->getAllocationSize());
 
 			if (result != VK_SUCCESS)
 			{

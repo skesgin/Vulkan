@@ -104,14 +104,6 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 
 	cmdBuffer[usedBuffer]->cmdBeginRenderPass(&renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-	// Depth.
-
-	// TODO: Render to depth.
-
-	vkCmdNextSubpass(cmdBuffer[usedBuffer]->getCommandBuffer(), VK_SUBPASS_CONTENTS_INLINE);
-
-	// Color.
-
 	VkViewport viewport;
 	memset(&viewport, 0, sizeof(VkViewport));
 
@@ -171,15 +163,14 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 
 VkBool32 Example::buildFramebuffer(const int32_t usedBuffer)
 {
-	VkImageView imageViews[5];
+	VkImageView imageViews[4];
 
 	imageViews[0] = swapchainImageView[usedBuffer]->getImageView();
 	imageViews[1] = depthStencilImageView->getImageView();
 	imageViews[2] = msaaColorImageView->getImageView();
 	imageViews[3] = msaaDepthStencilImageView->getImageView();
-	imageViews[4] = shadowImageView->getImageView();
 
-	framebuffer[usedBuffer] = vkts::framebufferCreate(initialResources->getDevice()->getDevice(), 0, renderPass->getRenderPass(), 5, imageViews, swapchain->getImageExtent().width, swapchain->getImageExtent().height, 1);
+	framebuffer[usedBuffer] = vkts::framebufferCreate(initialResources->getDevice()->getDevice(), 0, renderPass->getRenderPass(), 4, imageViews, swapchain->getImageExtent().width, swapchain->getImageExtent().height, 1);
 
 	if (!framebuffer[usedBuffer].get())
 	{
@@ -800,7 +791,7 @@ VkBool32 Example::buildPipeline()
 	graphicsPipelineCreateInfo.pDynamicState = &pipelineDynamicStateCreateInfo;
 	graphicsPipelineCreateInfo.layout = pipelineLayout->getPipelineLayout();
 	graphicsPipelineCreateInfo.renderPass = renderPass->getRenderPass();
-	graphicsPipelineCreateInfo.subpass = 1;	// After depth pass.
+	graphicsPipelineCreateInfo.subpass = 0;
 	graphicsPipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE;
 	graphicsPipelineCreateInfo.basePipelineIndex = 0;
 
@@ -896,7 +887,7 @@ VkBool32 Example::buildPipeline()
 
 VkBool32 Example::buildRenderPass()
 {
-	VkAttachmentDescription attachmentDescription[5];
+	VkAttachmentDescription attachmentDescription[4];
 
 	memset(&attachmentDescription, 0, sizeof(attachmentDescription));
 
@@ -940,16 +931,6 @@ VkBool32 Example::buildRenderPass()
 	attachmentDescription[3].initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 	attachmentDescription[3].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
-	attachmentDescription[4].flags = 0;
-	attachmentDescription[4].format = VK_FORMAT_D16_UNORM;
-	attachmentDescription[4].samples = VK_SAMPLE_COUNT_1_BIT;
-	attachmentDescription[4].loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-	attachmentDescription[4].storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-	attachmentDescription[4].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-	attachmentDescription[4].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-	attachmentDescription[4].initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-	attachmentDescription[4].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
 	VkAttachmentReference resolveAttachmentReference[2];
 
 	resolveAttachmentReference[0].attachment = 0;
@@ -968,14 +949,9 @@ VkBool32 Example::buildRenderPass()
 	deptStencilAttachmentReference.attachment = 3;
 	deptStencilAttachmentReference.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
-	VkAttachmentReference shadowAttachmentReference;
-
-	shadowAttachmentReference.attachment = 4;
-	shadowAttachmentReference.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
 	//
 
-	VkSubpassDescription subpassDescription[2];
+	VkSubpassDescription subpassDescription[1];
 
 	memset(&subpassDescription, 0, sizeof(subpassDescription));
 
@@ -983,41 +959,16 @@ VkBool32 Example::buildRenderPass()
 	subpassDescription[0].pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
 	subpassDescription[0].inputAttachmentCount = 0;
 	subpassDescription[0].pInputAttachments = nullptr;
-	subpassDescription[0].colorAttachmentCount = 0;
-	subpassDescription[0].pColorAttachments = nullptr;
-	subpassDescription[0].pResolveAttachments = nullptr;
-	subpassDescription[0].pDepthStencilAttachment = &shadowAttachmentReference;
+	subpassDescription[0].colorAttachmentCount = 1;
+	subpassDescription[0].pColorAttachments = &colorAttachmentReference;
+	subpassDescription[0].pResolveAttachments = resolveAttachmentReference;
+	subpassDescription[0].pDepthStencilAttachment = &deptStencilAttachmentReference;
 	subpassDescription[0].preserveAttachmentCount = 0;
 	subpassDescription[0].pPreserveAttachments = nullptr;
 
-	subpassDescription[1].flags = 0;
-	subpassDescription[1].pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-	subpassDescription[1].inputAttachmentCount = 0;
-	subpassDescription[1].pInputAttachments = nullptr;
-	subpassDescription[1].colorAttachmentCount = 1;
-	subpassDescription[1].pColorAttachments = &colorAttachmentReference;
-	subpassDescription[1].pResolveAttachments = resolveAttachmentReference;
-	subpassDescription[1].pDepthStencilAttachment = &deptStencilAttachmentReference;
-	subpassDescription[1].preserveAttachmentCount = 0;
-	subpassDescription[1].pPreserveAttachments = nullptr;
-
-	// Set up dependency form depth to color pass.
-
-    VkSubpassDependency dependency;
-
-    memset(&dependency, 0, sizeof(VkSubpassDependency));
-
-    dependency.srcSubpass = 0;
-    dependency.dstSubpass = 1;
-    dependency.dependencyFlags = 0;
-    dependency.srcStageMask = VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT;
-    dependency.dstStageMask = VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT;
-    dependency.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
-    dependency.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
-
     //
 
-	renderPass = vkts::renderPassCreate( initialResources->getDevice()->getDevice(), 0, 5, attachmentDescription, 2, subpassDescription, 1, &dependency);
+	renderPass = vkts::renderPassCreate( initialResources->getDevice()->getDevice(), 0, 4, attachmentDescription, 1, subpassDescription, 0, nullptr);
 
 	if (!renderPass.get())
 	{

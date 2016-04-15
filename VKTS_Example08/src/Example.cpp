@@ -144,7 +144,7 @@ vkts::IImageDataSP Example::gatherImageData() const
 
 		//
 
-		result = stageDeviceMemory->mapMemory(subresourceLayout.offset, subresourceLayout.size, 0);
+		result = stageDeviceMemory->mapMemory(0, stageDeviceMemory->getAllocationSize(), 0);
 
 		if (result != VK_SUCCESS)
 		{
@@ -157,7 +157,7 @@ vkts::IImageDataSP Example::gatherImageData() const
 
 		if (!(stageDeviceMemory->getMemoryPropertyFlags() & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT))
 		{
-			result = stageDeviceMemory->invalidateMappedMemoryRanges(subresourceLayout.offset, subresourceLayout.size);
+			result = stageDeviceMemory->invalidateMappedMemoryRanges(0, stageDeviceMemory->getAllocationSize());
 
 			if (result != VK_SUCCESS)
 			{

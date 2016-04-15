@@ -95,7 +95,7 @@ VkBool32 Example::createTexture(vkts::IImageSP& currentImage, vkts::IDeviceMemor
 
 		currentImage->getImageSubresourceLayout(subresourceLayout, imageSubresource);
 
-		result = currentDeviceMemoryImage->mapMemory(subresourceLayout.offset, subresourceLayout.size, 0);
+		result = currentDeviceMemoryImage->mapMemory(0, currentDeviceMemoryImage->getAllocationSize(), 0);
 
 		if (result != VK_SUCCESS)
 		{
@@ -108,7 +108,7 @@ VkBool32 Example::createTexture(vkts::IImageSP& currentImage, vkts::IDeviceMemor
 
 		if (!(currentDeviceMemoryImage->getMemoryPropertyFlags() & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT))
 		{
-			result = currentDeviceMemoryImage->flushMappedMemoryRanges(subresourceLayout.offset, subresourceLayout.size);
+			result = currentDeviceMemoryImage->flushMappedMemoryRanges(0, currentDeviceMemoryImage->getAllocationSize());
 
 			if (result != VK_SUCCESS)
 			{
