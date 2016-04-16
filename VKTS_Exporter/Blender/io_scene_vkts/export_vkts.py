@@ -28,6 +28,186 @@ import math
 import mathutils
 import bmesh
 
+#
+# Cycles materials.
+#
+
+fragmentGLSL = """#version 450 core
+
+layout (location = 0) in vec4 v_f_position;
+layout (location = 1) in vec3 v_f_normal;
+// Generated code start
+#nextAttribute#
+#nextTexture#
+// Generated code end
+
+layout (location = 4) out vec4 ob_position;                // Position as NDC. Last element used but could be freed.
+layout (location = 3) out vec4 ob_glossyNormalRoughness;   // Glossy normal and roughness.
+layout (location = 2) out vec4 ob_glossyColor;             // Glossy color and alpha.
+layout (location = 1) out vec4 ob_diffuseNormalRoughness;  // Diffuse normal and roughness.
+layout (location = 0) out vec4 ob_diffuseColor;            // Diffuse color and alpha.
+
+void main()
+{
+    ob_position = v_f_position;
+    
+    vec3 normal = normalize(v_f_normal);
+    // Generated code start
+    #nextTangents#
+    #previousMain#
+    
+    // Generated code end
+}"""
+
+nextTangents = """vec3 bitangent = normalize(v_f_bitangent);
+    vec3 tangent = normalize(v_f_tangent);
+    
+    mat3 objectToWorldMatrix = mat3(tangent, bitangent, normal);"""
+
+normalMapAttribute = """layout (location = 2) in vec3 v_f_bitangent;
+layout (location = 3) in vec3 v_f_tangent;
+#nextAttribute#"""
+
+texCoordAttribute = """layout (location = 4) in vec2 v_f_texCoord;
+#nextAttribute#"""
+
+texImageFunction = """layout (binding = %d) uniform sampler2D u_texture%d;
+#nextTexture#"""
+
+normalMapMain = """#previousMain#
+    
+    // Normal map start
+
+    // In
+    float %s = %s;
+    vec3 %s = objectToWorldMatrix * normalize(%s.xyz * 2.0 - 1.0);
+    
+    // Out
+    
+    vec3 %s = mix(normal, %s, %s);
+    
+    // Normal map end"""
+
+texImageMain = """#previousMain#
+    
+    // Image texture start
+
+    // In
+    vec3 %s = %s;
+    
+    // Out
+    vec4 %s = texture(u_texture%d, %s.st).rgba;
+    float %s = texture(u_texture%d, %s.st).a;
+    
+    // Image texture end"""
+
+multiplyMain = """#previousMain#
+    
+    // Multiply start
+
+    // In
+    float %s = %s;
+    vec4 %s = %s;
+    vec4 %s = %s;
+    
+    // Out
+    vec4 %s = %s%s * (1.0 - %s) + %s * %s * %s%s;
+    
+    // Multiply end"""
+
+addMain = """#previousMain#
+    
+    // Add start
+
+    // In
+    float %s = %s;
+    vec4 %s = %s;
+    vec4 %s = %s;
+    
+    // Out
+    vec4 %s = %s%s + %s * %s%s;
+    
+    // Add end"""
+
+mixMain = """#previousMain#
+    
+    // Mix start
+
+    // In
+    float %s = %s;
+    vec4 %s = %s;
+    vec4 %s = %s;
+    
+    // Out
+    vec4 %s = %smix(%s, %s, %s)%s;
+    
+    // Mix end"""
+
+invertMain = """#previousMain#
+    
+    // Invert start
+
+    // In
+    float %s = %s;
+    vec4 %s = %s;
+    
+    // Out
+    vec4 %s = mix(%s, vec4(1.0 - %s.r, 1.0 - %s.g, 1.0 - %s.b, 1.0 - %s.a), %s);
+    
+    // Invert end"""
+
+diffuseMain = """#previousMain#
+    
+    // Diffuse BSDF start
+
+    // In
+    vec4 %s = %s;
+    float %s = %s;
+    vec3 %s = %s;
+    
+    // Out
+    ob_diffuseNormalRoughness = vec4(%s, %s);
+    ob_diffuseColor = %s;
+    
+    // Diffuse BSDF end"""
+
+glossyMain = """#previousMain#
+    
+    // Glossy BSDF start
+
+    // In
+    vec4 %s = %s;
+    float %s = %s;
+    vec3 %s = %s;
+    
+    // Out
+    ob_glossyNormalRoughness = vec4(%s, %s);
+    ob_glossyColor = %s;
+    
+    // Glossy BSDF end"""
+
+defaultDiffuse = """#previousMain#
+    
+    // Diffuse BSDF start
+
+    ob_diffuseNormalRoughness = vec4(0.0, 0.0, 0.0, 0.0);
+    ob_diffuseColor = vec4(0.0, 0.0, 0.0, 0.0);
+    
+    // Diffuse BSDF end"""
+
+defaultGlossy = """#previousMain#
+    
+    // Glossy BSDF start
+
+    ob_glossyNormalRoughness = vec4(0.0, 0.0, 0.0, 0.0);
+    ob_glossyColor = vec4(0.0, 0.0, 0.0, 0.0);
+    
+    // Glossy BSDF end"""
+        
+#
+#
+#
+
 def friendlyName(name):
 
     return name.replace(" ", "_")
@@ -298,148 +478,6 @@ def saveTextures(context, filepath, imagesLibraryName, materials):
 
     return
 
-#
-# Cycles material.
-#
-
-fragmentGLSL = """#version 450 core
-
-layout (location = 0) in vec4 v_f_position;
-layout (location = 1) in vec3 v_f_normal;
-// Generated code start
-#nextAttribute#
-#nextTexture#
-// Generated code end
-
-layout (location = 2) out vec4 ob_position;                // Position as NDC. Last element used but could be freed.
-layout (location = 1) out vec4 ob_diffuseNormalRoughness;  // Diffuse normal and roughness.
-layout (location = 0) out vec4 ob_diffuseColor;            // Diffuse color and alpha.
-
-void main()
-{
-    ob_position = v_f_position;
-    
-    vec3 normal = normalize(v_f_normal);
-    // Generated code start
-    #nextTangents#
-    #previousMain#
-    
-    // Generated code end
-}"""
-
-nextTangents = """vec3 bitangent = normalize(v_f_bitangent);
-    vec3 tangent = normalize(v_f_tangent);
-    
-    mat3 objectToWorldMatrix = mat3(tangent, bitangent, normal);"""
-
-normalMapAttribute = """layout (location = 2) in vec3 v_f_bitangent;
-layout (location = 3) in vec3 v_f_tangent;
-#nextAttribute#"""
-
-texCoordAttribute = """layout (location = 4) in vec2 v_f_texCoord;
-#nextAttribute#"""
-
-texImageFunction = """layout (binding = %d) uniform sampler2D u_texture%d;
-#nextTexture#"""
-
-normalMapMain = """#previousMain#
-    
-    // Normal map start
-
-    // In
-    float %s = %s;
-    vec3 %s = objectToWorldMatrix * normalize(%s.xyz * 2.0 - 1.0);
-    
-    // Out
-    
-    vec3 %s = mix(normal, %s, %s);
-    
-    // Normal map end"""
-
-texImageMain = """#previousMain#
-    
-    // Image texture start
-
-    // In
-    vec3 %s = %s;
-    
-    // Out
-    vec4 %s = texture(u_texture%d, %s.st).rgba;
-    float %s = texture(u_texture%d, %s.st).a;
-    
-    // Image texture end"""
-
-multiplyMain = """#previousMain#
-    
-    // Multiply start
-
-    // In
-    float %s = %s;
-    vec4 %s = %s;
-    vec4 %s = %s;
-    
-    // Out
-    vec4 %s = %s%s * (1.0 - %s) + %s * %s * %s%s;
-    
-    // Multiply end"""
-
-addMain = """#previousMain#
-    
-    // Add start
-
-    // In
-    float %s = %s;
-    vec4 %s = %s;
-    vec4 %s = %s;
-    
-    // Out
-    vec4 %s = %s%s + %s * %s%s;
-    
-    // Add end"""
-
-mixMain = """#previousMain#
-    
-    // Mix start
-
-    // In
-    float %s = %s;
-    vec4 %s = %s;
-    vec4 %s = %s;
-    
-    // Out
-    vec4 %s = %smix(%s, %s, %s)%s;
-    
-    // Mix end"""
-
-invertMain = """#previousMain#
-    
-    // Invert start
-
-    // In
-    float %s = %s;
-    vec4 %s = %s;
-    
-    // Out
-    vec4 %s = mix(%s, vec4(1.0 - %s.r, 1.0 - %s.g, 1.0 - %s.b, 1.0 - %s.a), %s);
-    
-    // Invert end"""
-
-diffuseMain = """#previousMain#
-    
-    // Diffuse BSDF start
-
-    // In
-    vec4 %s = %s;
-    float %s = %s;
-    vec3 %s = %s;
-    
-    // Out
-    ob_diffuseNormalRoughness = vec4(%s, %s);
-    ob_diffuseColor = %s;
-    
-    // Diffuse BSDF end"""
-
-
 def getFloat(value):
     return "%.3f"%(value)
 
@@ -576,10 +614,12 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
 
             #
             
+            addCounter = 0
             alphaCounter = 0
             colorCounter = 0
             diffuseCounter = 0
             facCounter = 0
+            glossyCounter = 0
             normalCounter = 0
             roughnessCounter = 0
             strengthCounter = 0
@@ -786,6 +826,50 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
                     
                     diffuseCounter += 1
                     
+                elif isinstance(currentNode, bpy.types.ShaderNodeBsdfGlossy) and glossyCounter == 0:
+                    # Glossy BSDF shader.
+
+                    # Inputs.
+
+                    colorInputName = "Color_%d" % colorCounter
+                    roughnessInputName = "Roughness_%d" % roughnessCounter
+                    normalInputName = "Normal_%d" % normalCounter
+
+                    colorCounter += 1
+                    roughnessCounter += 1
+                    normalCounter += 1
+                    
+                    colorInputParameterName = "Color_Dummy"
+                    roughnessInputParameterName = "Roughness_Dummy"
+                    normalInputParameterName =  "Normal_Dummy"
+                    
+                    # Outputs.
+                    
+                    #
+                    
+                    currentMain = glossyMain % (colorInputName, colorInputParameterName, roughnessInputName, roughnessInputParameterName, normalInputName, normalInputParameterName, normalInputName, roughnessInputName, colorInputName)
+                    
+                    #
+                    
+                    currentMain = replaceParameters(currentNode, openNodes, processedNodes, currentMain)
+                    
+                    # Special case, if not linked
+                    
+                    currentMain = currentMain.replace("vec3 " + normalInputName + " = vec3(0.000, 0.000, 0.000);", "vec3 " + normalInputName + " = normal;")
+                    
+                    #
+                        
+                    currentFragmentGLSL = currentFragmentGLSL.replace("#previousMain#", currentMain)
+                    
+                    glossyCounter += 1
+                    
+                elif isinstance(currentNode, bpy.types.ShaderNodeAddShader) and addCounter == 0:
+                    # Add shader.
+                    
+                    replaceParameters(currentNode, openNodes, processedNodes, "")
+                    
+                    addCounter += 1
+                    
                 if currentNode not in processedNodes:
                     processedNodes.append(currentNode)
 
@@ -812,8 +896,12 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
 
             currentFragmentGLSL = currentFragmentGLSL.replace("#nextTexture#", "")
             
+            if diffuseCounter == 0:
+                currentFragmentGLSL = currentFragmentGLSL.replace("#previousMain#", defaultDiffuse)
+            if glossyCounter == 0:
+                currentFragmentGLSL = currentFragmentGLSL.replace("#previousMain#", defaultGlossy)
             currentFragmentGLSL = currentFragmentGLSL.replace("#previousMain#", "")
-                    
+                                
             #
 
             fragmentShaderFilepath = os.path.dirname(filepath) + "/" + friendlyName(materialName) + ".frag"
