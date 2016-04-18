@@ -37,14 +37,17 @@
 #define VKTS_SHADER_STAGE_COUNT 2
 #define VKTS_PIPELINE_CACHE_SIZE 0
 #define VKTS_SAMPLE_COUNT_BIT VK_SAMPLE_COUNT_4_BIT
+#define VKTS_SHADOW_MAP_SIZE 1024
 
 #define VKTS_BINDING_VERTEX_BUFFER 0
 
-#define VKTS_SKINNING_VERTEX_SHADER_NAME "shader/SPIR/V/phong_skinning.vert.spv"
-#define VKTS_SKINNING_FRAGMENT_SHADER_NAME "shader/SPIR/V/phong_skinning.frag.spv"
+#define VKTS_SKINNING_VERTEX_SHADER_NAME 			"shader/SPIR/V/phong_skinning.vert.spv"
+#define VKTS_SKINNING_FRAGMENT_SHADER_NAME 			"shader/SPIR/V/phong_skinning.frag.spv"
+#define VKTS_SKINNING_SHADOW_FRAGMENT_SHADER_NAME 	"shader/SPIR/V/phong_skinning_shadow.frag.spv"
 
-#define VKTS_STANDARD_VERTEX_SHADER_NAME "shader/SPIR/V/phong.vert.spv"
-#define VKTS_STANDARD_FRAGMENT_SHADER_NAME "shader/SPIR/V/phong.frag.spv"
+#define VKTS_STANDARD_VERTEX_SHADER_NAME 			"shader/SPIR/V/phong.vert.spv"
+#define VKTS_STANDARD_FRAGMENT_SHADER_NAME 			"shader/SPIR/V/phong.frag.spv"
+#define VKTS_STANDARD_SHADOW_FRAGMENT_SHADER_NAME	"shader/SPIR/V/phong_shadow.frag.spv"
 
 #define VKTS_SCENE_NAME "transport_shuttle/transport_shuttle.vkts"
 
@@ -81,9 +84,11 @@ private:
 
 	vkts::IShaderModuleSP skinningVertexShaderModule;
 	vkts::IShaderModuleSP skinningFragmentShaderModule;
+	vkts::IShaderModuleSP skinningShadowFragmentShaderModule;
 
 	vkts::IShaderModuleSP standardVertexShaderModule;
 	vkts::IShaderModuleSP standardFragmentShaderModule;
+	vkts::IShaderModuleSP standardShadowFragmentShaderModule;
 
 	vkts::IPipelineLayoutSP pipelineLayout;
 
@@ -93,10 +98,12 @@ private:
     vkts::ISwapchainSP swapchain;
 
 	vkts::IRenderPassSP renderPass;
+	vkts::IRenderPassSP shadowRenderPass;
 
 	vkts::SmartPointerVector<vkts::IGraphicsPipelineSP> allOpaqueGraphicsPipelines;
 	vkts::SmartPointerVector<vkts::IGraphicsPipelineSP> allBlendGraphicsPipelines;
 	vkts::SmartPointerVector<vkts::IGraphicsPipelineSP> allBlendCwGraphicsPipelines;
+	vkts::SmartPointerVector<vkts::IGraphicsPipelineSP> allShadowGraphicsPipelines;
 
 	vkts::IMemoryImageSP shadowTexture;
 	vkts::IMemoryImageSP msaaColorTexture;

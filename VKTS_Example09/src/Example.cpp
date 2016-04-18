@@ -27,7 +27,7 @@
 #include "Example.hpp"
 
 Example::Example(const vkts::IInitialResourcesSP& initialResources, const int32_t windowIndex, const vkts::ISurfaceSP& surface) :
-		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), windowDimension(0, 0), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), descriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), fragmentUniformBuffer(nullptr), skinningVertexShaderModule(nullptr), skinningFragmentShaderModule(nullptr), standardVertexShaderModule(nullptr), standardFragmentShaderModule(nullptr), pipelineLayout(nullptr), sceneContext(nullptr), scene(nullptr), swapchain(nullptr), renderPass(nullptr), allOpaqueGraphicsPipelines(), allBlendGraphicsPipelines(), allBlendCwGraphicsPipelines(), shadowTexture(nullptr), msaaColorTexture(nullptr), msaaDepthTexture(nullptr), depthTexture(nullptr), shadowImageView(nullptr), msaaColorImageView(nullptr), msaaDepthStencilImageView(nullptr), depthStencilImageView(nullptr), swapchainImagesCount(0), swapchainImageView(), framebuffer(), cmdBuffer()
+		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), windowDimension(0, 0), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), descriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), fragmentUniformBuffer(nullptr), skinningVertexShaderModule(nullptr), skinningFragmentShaderModule(nullptr), skinningShadowFragmentShaderModule(nullptr), standardVertexShaderModule(nullptr), standardFragmentShaderModule(nullptr), standardShadowFragmentShaderModule(nullptr), pipelineLayout(nullptr), sceneContext(nullptr), scene(nullptr), swapchain(nullptr), renderPass(nullptr), shadowRenderPass(nullptr), allOpaqueGraphicsPipelines(), allBlendGraphicsPipelines(), allBlendCwGraphicsPipelines(), allShadowGraphicsPipelines(), shadowTexture(nullptr), msaaColorTexture(nullptr), msaaDepthTexture(nullptr), depthTexture(nullptr), shadowImageView(nullptr), msaaColorImageView(nullptr), msaaDepthStencilImageView(nullptr), depthStencilImageView(nullptr), swapchainImagesCount(0), swapchainImageView(), framebuffer(), cmdBuffer()
 {
 }
 
@@ -38,6 +38,12 @@ Example::~Example()
 VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 {
 	VkResult result;
+
+	//
+
+	// TODO: Build shadow command buffer and add code, that depth texture can be used in next command buffer.
+
+	//
 
 	cmdBuffer[usedBuffer] = vkts::commandBuffersCreate(initialResources->getDevice()->getDevice(), commandPool->getCmdPool(), VK_COMMAND_BUFFER_LEVEL_PRIMARY, 1);
 
@@ -178,6 +184,8 @@ VkBool32 Example::buildFramebuffer(const int32_t usedBuffer)
 
 		return VK_FALSE;
 	}
+
+	// TODO: Build shadow frame buffer.
 
 	return VK_TRUE;
 }
@@ -809,6 +817,61 @@ VkBool32 Example::buildPipeline()
 	allOpaqueGraphicsPipelines.append(pipeline);
 
 	//
+	// Same as above without writing color.
+	//
+
+	pipelineShaderStageCreateInfo[1].module = skinningShadowFragmentShaderModule->getShaderModule();
+
+
+	VkViewport shadowViewport;
+	memset(&shadowViewport, 0, sizeof(VkViewport));
+
+	shadowViewport.x = 0.0f;
+	shadowViewport.y = 0.0f;
+	shadowViewport.width = (float)VKTS_SHADOW_MAP_SIZE;
+	shadowViewport.height = (float)VKTS_SHADOW_MAP_SIZE;
+	shadowViewport.minDepth = 0.0f;
+	shadowViewport.maxDepth = 1.0f;
+
+	VkRect2D shadowScissor;
+	memset(&shadowScissor, 0, sizeof(VkRect2D));
+
+	shadowScissor.offset.x = 0;
+	shadowScissor.offset.y = 0;
+	shadowScissor.extent = {VKTS_SHADOW_MAP_SIZE, VKTS_SHADOW_MAP_SIZE};
+
+	pipelineViewportStateCreateInfo.pViewports = &shadowViewport;
+	pipelineViewportStateCreateInfo.pScissors = &shadowScissor;
+
+
+	pipelineMultisampleStateCreateInfo.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+
+	pipelineColorBlendAttachmentState.colorWriteMask = 0;
+
+	pipeline = vkts::pipelineCreateGraphics(initialResources->getDevice()->getDevice(), VK_NULL_HANDLE, graphicsPipelineCreateInfo, vertexBufferType);
+
+	if (!pipeline.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create graphics pipeline.");
+
+		return VK_FALSE;
+	}
+
+	allShadowGraphicsPipelines.append(pipeline);
+
+	// Revert
+	pipelineShaderStageCreateInfo[1].module = skinningFragmentShaderModule->getShaderModule();
+
+	pipelineViewportStateCreateInfo.pViewports = &viewport;
+	pipelineViewportStateCreateInfo.pScissors = &scissor;
+
+	pipelineMultisampleStateCreateInfo.rasterizationSamples = VKTS_SAMPLE_COUNT_BIT;
+
+	pipelineColorBlendAttachmentState.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+
+	//
+	//
+	//
 
 	// Same as above with blending.
 	pipelineColorBlendAttachmentState.blendEnable = VK_TRUE;
@@ -881,6 +944,30 @@ VkBool32 Example::buildPipeline()
 	allOpaqueGraphicsPipelines.append(pipeline);
 	allBlendGraphicsPipelines.append(pipeline);
 	allBlendCwGraphicsPipelines.append(pipeline);
+
+	//
+	// Same as above without writing color.
+	//
+
+	pipelineShaderStageCreateInfo[1].module = standardShadowFragmentShaderModule->getShaderModule();
+
+	pipelineViewportStateCreateInfo.pViewports = &shadowViewport;
+	pipelineViewportStateCreateInfo.pScissors = &shadowScissor;
+
+	pipelineMultisampleStateCreateInfo.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+
+	pipelineColorBlendAttachmentState.colorWriteMask = 0;
+
+	pipeline = vkts::pipelineCreateGraphics(initialResources->getDevice()->getDevice(), VK_NULL_HANDLE, graphicsPipelineCreateInfo, vertexBufferType);
+
+	if (!pipeline.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create graphics pipeline.");
+
+		return VK_FALSE;
+	}
+
+	allShadowGraphicsPipelines.append(pipeline);
 
 	return VK_TRUE;
 }
@@ -973,6 +1060,32 @@ VkBool32 Example::buildRenderPass()
 	if (!renderPass.get())
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create render pass.");
+
+		return VK_FALSE;
+	}
+
+	//
+	// Create shadow render pass.
+	//
+
+	attachmentDescription[0].format = VK_FORMAT_D16_UNORM;
+	attachmentDescription[0].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+	attachmentDescription[0].initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+	attachmentDescription[0].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+	deptStencilAttachmentReference.attachment = 0;
+
+	subpassDescription[0].colorAttachmentCount = 0;
+	subpassDescription[0].pColorAttachments = nullptr;
+	subpassDescription[0].pResolveAttachments = nullptr;
+
+    //
+
+	shadowRenderPass = vkts::renderPassCreate( initialResources->getDevice()->getDevice(), 0, 1, attachmentDescription, 1, subpassDescription, 0, nullptr);
+
+	if (!shadowRenderPass.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create shadow render pass.");
 
 		return VK_FALSE;
 	}
@@ -1089,6 +1202,24 @@ VkBool32 Example::buildShader()
 		return VK_FALSE;
 	}
 
+	fragmentShaderBinary = vkts::fileLoadBinary(VKTS_SKINNING_SHADOW_FRAGMENT_SHADER_NAME);
+
+	if (!fragmentShaderBinary.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not load fragment shader: '%s'", VKTS_SKINNING_SHADOW_FRAGMENT_SHADER_NAME);
+
+		return VK_FALSE;
+	}
+
+	skinningShadowFragmentShaderModule = vkts::shaderModuleCreate(VKTS_SKINNING_SHADOW_FRAGMENT_SHADER_NAME, initialResources->getDevice()->getDevice(), 0, fragmentShaderBinary->getSize(), (uint32_t*)fragmentShaderBinary->getData());
+
+	if (!skinningShadowFragmentShaderModule.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create fragment shader module.");
+
+		return VK_FALSE;
+	}
+
 	//
 	// Load another shader.
 	//
@@ -1131,9 +1262,23 @@ VkBool32 Example::buildShader()
 		return VK_FALSE;
 	}
 
-	//
+	fragmentShaderBinary = vkts::fileLoadBinary(VKTS_STANDARD_SHADOW_FRAGMENT_SHADER_NAME);
 
-	// TODO: Build depth pass shader.
+	if (!fragmentShaderBinary.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not load fragment shader: '%s'", VKTS_STANDARD_SHADOW_FRAGMENT_SHADER_NAME);
+
+		return VK_FALSE;
+	}
+
+	standardShadowFragmentShaderModule = vkts::shaderModuleCreate(VKTS_STANDARD_SHADOW_FRAGMENT_SHADER_NAME, initialResources->getDevice()->getDevice(), 0, fragmentShaderBinary->getSize(), (uint32_t*)fragmentShaderBinary->getData());
+
+	if (!standardShadowFragmentShaderModule.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create fragment shader module.");
+
+		return VK_FALSE;
+	}
 
 	return VK_TRUE;
 }
@@ -1471,6 +1616,12 @@ void Example::terminateResources(const vkts::IUpdateThreadContext& updateContext
 				shadowTexture->destroy();
 			}
 
+			for (size_t i = 0; i < allShadowGraphicsPipelines.size(); i++)
+			{
+				allShadowGraphicsPipelines[i]->destroy();
+			}
+			allShadowGraphicsPipelines.clear();
+
 			for (size_t i = 0; i < allBlendGraphicsPipelines.size(); i++)
 			{
 				allBlendGraphicsPipelines[i]->destroy();
@@ -1488,6 +1639,11 @@ void Example::terminateResources(const vkts::IUpdateThreadContext& updateContext
 				allOpaqueGraphicsPipelines[i]->destroy();
 			}
 			allOpaqueGraphicsPipelines.clear();
+
+			if (shadowRenderPass.get())
+			{
+				shadowRenderPass->destroy();
+			}
 
 			if (renderPass.get())
 			{
@@ -1639,6 +1795,12 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 	{
 		glm::mat4 projectionMatrix(1.0f);
 		glm::mat4 viewMatrix(1.0f);
+
+		//
+
+		// TODO: Do same as below with "shadow" parameters.
+
+		//
 
 		const auto& dimension = updateContext.getWindowDimension(windowIndex);
 
@@ -1832,6 +1994,11 @@ void Example::terminate(const vkts::IUpdateThreadContext& updateContext)
 				standardFragmentShaderModule->destroy();
 			}
 
+			if (standardShadowFragmentShaderModule.get())
+			{
+				standardShadowFragmentShaderModule->destroy();
+			}
+
 			if (skinningVertexShaderModule.get())
 			{
 				skinningVertexShaderModule->destroy();
@@ -1840,6 +2007,11 @@ void Example::terminate(const vkts::IUpdateThreadContext& updateContext)
 			if (skinningFragmentShaderModule.get())
 			{
 				skinningFragmentShaderModule->destroy();
+			}
+
+			if (skinningShadowFragmentShaderModule.get())
+			{
+				skinningShadowFragmentShaderModule->destroy();
 			}
 
 			if (vertexViewProjectionUniformBuffer.get())

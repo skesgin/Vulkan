@@ -36,11 +36,8 @@ fragmentGLSL = """#version 450 core
 
 layout (location = 0) in vec4 v_f_position;
 layout (location = 1) in vec3 v_f_normal;
-// Generated code start
 #nextAttribute#
 #nextTexture#
-// Generated code end
-
 layout (location = 4) out vec4 ob_position;                // Position as NDC. Last element used but could be freed.
 layout (location = 3) out vec4 ob_glossyNormalRoughness;   // Glossy normal and roughness.
 layout (location = 2) out vec4 ob_glossyColor;             // Glossy color and alpha.
@@ -49,14 +46,13 @@ layout (location = 0) out vec4 ob_diffuseColor;            // Diffuse color and 
 
 void main()
 {
-    ob_position = v_f_position;
+    vec4 position = v_f_position / v_f_position.w; 
+    
+    ob_position = position * 0.5 + 0.5;
     
     vec3 normal = normalize(v_f_normal);
-    // Generated code start
     #nextTangents#
     #previousMain#
-    
-    // Generated code end
 }"""
 
 nextTangents = """vec3 bitangent = normalize(v_f_bitangent);
@@ -186,45 +182,44 @@ glossyMain = """#previousMain#
     
     // Glossy BSDF end"""
 
-materialAddMain = """#previousMain#
+addShaderMain = """#previousMain#
     
-    // Material add start
-
-    // In
-    vec4 %s = %s;
-    vec4 %s = %s;
-    vec4 %s = %s;
-    vec4 %s = %s;
-
-    vec4 %s = %s;
-    vec4 %s = %s;
-    vec4 %s = %s;
-    vec4 %s = %s;
+    // Add shader start
 
     // Out
-    vec4 %s = %s + %s;
-    vec4 %s = %s + %s;
+    vec4 %s = %s;
+    vec4 %s = %s;
 
-    vec4 %s = %s + %s;
-    vec4 %s = %s + %s;
+    vec4 %s = %s;
+    vec4 %s = %s;
     
-    // Material add end"""
+    // Add shader end"""
+
+mixShaderMain = """#previousMain#
+    
+    // Mix shader start
+    
+    // In
+    float %s = %s;
+
+    // Out
+    vec4 %s = %s * (1.0 - %s);
+    vec4 %s = %s * (1.0 - %s);
+
+    vec4 %s = %s * %s;
+    vec4 %s = %s * %s;
+    
+    // Mix shader end"""
 
 materialMain = """#previousMain#
     
     // Material start
 
-    // In
-    vec4 %s = %s;
-    vec4 %s = %s;
-    vec4 %s = %s;
-    vec4 %s = %s;
-
     // Out
-    ob_glossyNormalRoughness = %s;
+    ob_glossyNormalRoughness = vec4(%s.xyz * 0.5 + 0.5, %s.w);
     ob_glossyColor = %s;
 
-    ob_diffuseNormalRoughness = %s;
+    ob_diffuseNormalRoughness = vec4(%s.xyz * 0.5 + 0.5, %s.w);
     ob_diffuseColor = %s;
     
     // Material end"""
@@ -531,7 +526,10 @@ def replaceParameters(currentNode, openNodes, processedNodes, currentMain):
             elif isinstance(currentSocket, bpy.types.NodeSocketFloat):
                 currentValue = getFloat(currentSocket.default_value)
             elif isinstance(currentSocket, bpy.types.NodeSocketVector):
-                currentValue = getVec3(currentSocket.default_value)
+                if currentSocket.name == "Normal":
+                    currentValue = "normal"
+                else:
+                    currentValue = getVec3(currentSocket.default_value)
             
             # Replace parameter with value.
             currentMain = currentMain.replace(currentParameter, currentValue)
@@ -549,33 +547,36 @@ def replaceShaderParameters(currentNode, openNodes, processedNodes, currentMain)
     for currentSocket in currentNode.inputs:
 
         if len(currentSocket.links) == 0:
-            parameterNames = ["Glossy%dNormalRoughness", "Glossy%dColor", "Diffuse%dNormalRoughness", "Diffuse%dColor"]
-        
-            for currentParameter in parameterNames:
-                currentMain = currentMain.replace(currentParameter + "_Dummy" % (index), "vec4(0.0, 0.0, 0.0, 0.0)")
+            # Convert value into GLSL expression.
+            if isinstance(currentSocket, bpy.types.NodeSocketFloatFactor):
+                currentParameter = currentSocket.name + "_Dummy"
+                currentValue = getFloat(currentSocket.default_value)
+                currentMain = currentMain.replace(currentParameter, currentValue)
+                
         else:
             # Append node for later processing.
             if currentSocket.links[0].from_node not in openNodes and currentSocket.links[0].from_node not in processedNodes:
                 openNodes.append(currentSocket.links[0].from_node)
             # Replace parameter with variable.
             linkedNode = currentSocket.links[0].from_node
-            if isinstance(linkedNode, bpy.types.ShaderNodeAddShader) or isinstance(linkedNode, bpy.types.ShaderNodeMixShader): 
-                currentMain = currentMain.replace("Glossy%dNormalRoughness_Dummy" % (index), friendlyNodeName(currentSocket.links[0].from_node.name) + "_GlossyNormalRoughness")
-                currentMain = currentMain.replace("Glossy%dColor_Dummy" % (index), friendlyNodeName(currentSocket.links[0].from_node.name) + "_GlossyColor")
-                currentMain = currentMain.replace("Diffuse%dNormalRoughness_Dummy" % (index), friendlyNodeName(currentSocket.links[0].from_node.name) + "_DiffuseNormalRoughness")
-                currentMain = currentMain.replace("Diffuse%dColor_Dummy" % (index), friendlyNodeName(currentSocket.links[0].from_node.name) + "_DiffuseColor")
+            if isinstance(linkedNode, bpy.types.ShaderNodeAddShader): 
+                currentMain = currentMain.replace("GlossyNormalRoughness_Dummy", friendlyNodeName(currentSocket.links[0].from_node.name) + "_GlossyNormalRoughness")
+                currentMain = currentMain.replace("GlossyColor_Dummy", friendlyNodeName(currentSocket.links[0].from_node.name) + "_GlossyColor")
+                currentMain = currentMain.replace("DiffuseNormalRoughness_Dummy", friendlyNodeName(currentSocket.links[0].from_node.name) + "_DiffuseNormalRoughness")
+                currentMain = currentMain.replace("DiffuseColor_Dummy", friendlyNodeName(currentSocket.links[0].from_node.name) + "_DiffuseColor")
             if isinstance(linkedNode, bpy.types.ShaderNodeBsdfGlossy): 
-                currentMain = currentMain.replace("Glossy%dNormalRoughness_Dummy" % (index), friendlyNodeName(currentSocket.links[0].from_node.name) + "_GlossyNormalRoughness")
-                currentMain = currentMain.replace("Glossy%dColor_Dummy" % (index), friendlyNodeName(currentSocket.links[0].from_node.name) + "_GlossyColor")
-                currentMain = currentMain.replace("Diffuse%dNormalRoughness_Dummy" % (index), "vec4(0.0, 0.0, 0.0, 0.0)")
-                currentMain = currentMain.replace("Diffuse%dColor_Dummy" % (index), "vec4(0.0, 0.0, 0.0, 0.0)")
+                currentMain = currentMain.replace("GlossyNormalRoughness_Dummy", friendlyNodeName(currentSocket.links[0].from_node.name) + "_GlossyNormalRoughness")
+                currentMain = currentMain.replace("GlossyColor_Dummy", friendlyNodeName(currentSocket.links[0].from_node.name) + "_GlossyColor")
             if isinstance(linkedNode, bpy.types.ShaderNodeBsdfDiffuse):
-                currentMain = currentMain.replace("Glossy%dNormalRoughness_Dummy" % (index), "vec4(0.0, 0.0, 0.0, 0.0)")
-                currentMain = currentMain.replace("Glossy%dColor_Dummy" % (index), "vec4(0.0, 0.0, 0.0, 0.0)")
-                currentMain = currentMain.replace("Diffuse%dNormalRoughness_Dummy" % (index), friendlyNodeName(currentSocket.links[0].from_node.name) + "_DiffuseNormalRoughness")
-                currentMain = currentMain.replace("Diffuse%dColor_Dummy" % (index), friendlyNodeName(currentSocket.links[0].from_node.name) + "_DiffuseColor")
+                currentMain = currentMain.replace("DiffuseNormalRoughness_Dummy", friendlyNodeName(currentSocket.links[0].from_node.name) + "_DiffuseNormalRoughness")
+                currentMain = currentMain.replace("DiffuseColor_Dummy", friendlyNodeName(currentSocket.links[0].from_node.name) + "_DiffuseColor")
                 
         index += 1
+
+    parameterNames = ["GlossyNormalRoughness", "GlossyColor", "DiffuseNormalRoughness", "DiffuseColor"]
+        
+    for currentParameter in parameterNames:
+        currentMain = currentMain.replace(currentParameter + "_Dummy", "vec4(0.0, 0.0, 0.0, 0.0)")
         
     return currentMain
 
@@ -703,7 +704,7 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
 
             #
             
-            addCounter = 0
+            addMixCounter = 0
             alphaCounter = 0
             colorCounter = 0
             diffuseCounter = 0
@@ -878,7 +879,7 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
                         
                     currentFragmentGLSL = currentFragmentGLSL.replace("#previousMain#", currentMain)
 
-                elif isinstance(currentNode, bpy.types.ShaderNodeBsdfDiffuse):
+                elif isinstance(currentNode, bpy.types.ShaderNodeBsdfDiffuse) and diffuseCounter == 0:
                     # Diffuse BSDF shader.
                     
                     # Inputs.
@@ -912,7 +913,7 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
                         
                     currentFragmentGLSL = currentFragmentGLSL.replace("#previousMain#", currentMain)
                     
-                elif isinstance(currentNode, bpy.types.ShaderNodeBsdfGlossy):
+                elif isinstance(currentNode, bpy.types.ShaderNodeBsdfGlossy) and glossyCounter == 0:
                     # Glossy BSDF shader.
 
                     # Inputs.
@@ -946,40 +947,26 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
                         
                     currentFragmentGLSL = currentFragmentGLSL.replace("#previousMain#", currentMain)
                     
-                elif isinstance(currentNode, bpy.types.ShaderNodeAddShader):
+                elif isinstance(currentNode, bpy.types.ShaderNodeAddShader) and addMixCounter == 0:
                     # Material Add shader.
 
                     # Inputs.
+                    
+                    # No more inputs, as only diffuse and glossy can be added.
 
-                    glossy0NormalRoughnessInputName = "Glossy0NormalRoughness_%d" % glossyCounter
-                    glossy0ColorInputName = "Glossy0Color_%d" % glossyCounter
+                    glossyNormalRoughnessInputName = "GlossyNormalRoughness_%d" % addMixCounter
+                    glossyColorInputName = "GlossyColor_%d" % addMixCounter
 
-                    diffuse0NormalRoughnessInputName = "Diffuse0NormalRoughness_%d" % diffuseCounter
-                    diffuse0ColorInputName = "Diffuse0Color_%d" % diffuseCounter
+                    diffuseNormalRoughnessInputName = "DiffuseNormalRoughness_%d" % addMixCounter
+                    diffuseColorInputName = "DiffuseColor_%d" % addMixCounter
 
-                    glossyCounter += 1
-                    diffuseCounter += 1
+                    addMixCounter += 1
 
-                    glossy1NormalRoughnessInputName = "Glossy1NormalRoughness_%d" % glossyCounter
-                    glossy1ColorInputName = "Gloss1yColor_%d" % glossyCounter
+                    glossyNormalRoughnessInputParameterName = "GlossyNormalRoughness_Dummy"
+                    glossyColorInputParameterName = "GlossyColor_Dummy"
 
-                    diffuse1NormalRoughnessInputName = "Diffuse1NormalRoughness_%d" % diffuseCounter
-                    diffuse1ColorInputName = "Diffuse1Color_%d" % diffuseCounter
-
-                    glossyCounter += 1
-                    diffuseCounter += 1
-
-                    glossy0NormalRoughnessInputParameterName = "Glossy0NormalRoughness_Dummy"
-                    glossy0ColorInputParameterName = "Glossy0Color_Dummy"
-
-                    diffuse0NormalRoughnessInputParameterName = "Diffuse0NormalRoughness_Dummy"
-                    diffuse0ColorInputParameterName = "Diffuse0Color_Dummy"
-
-                    glossy1NormalRoughnessInputParameterName = "Glossy1NormalRoughness_Dummy"
-                    glossy1ColorInputParameterName = "Glossy1Color_Dummy"
-
-                    diffuse1NormalRoughnessInputParameterName = "Diffuse1NormalRoughness_Dummy"
-                    diffuse1ColorInputParameterName = "Diffuse1Color_Dummy"
+                    diffuseNormalRoughnessInputParameterName = "DiffuseNormalRoughness_Dummy"
+                    diffuseColorInputParameterName = "DiffuseColor_Dummy"
                     
                     # Outputs.
                     
@@ -991,7 +978,51 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
                     
                     #
                     
-                    currentMain = materialAddMain % (glossy0NormalRoughnessInputName, glossy0NormalRoughnessInputParameterName, glossy0ColorInputName, glossy0ColorInputParameterName, diffuse0NormalRoughnessInputName, diffuse0NormalRoughnessInputParameterName, diffuse0ColorInputName, diffuse0ColorInputParameterName, glossy1NormalRoughnessInputName, glossy1NormalRoughnessInputParameterName, glossy1ColorInputName, glossy1ColorInputParameterName, diffuse1NormalRoughnessInputName, diffuse1NormalRoughnessInputParameterName, diffuse1ColorInputName, diffuse1ColorInputParameterName, glossyNormalRoughnessOutputName, glossy0NormalRoughnessInputName, glossy1NormalRoughnessInputName, glossyColorOutputName, glossy0ColorInputName, glossy1ColorInputName, diffuseNormalRoughnessOutputName, diffuse0NormalRoughnessInputName, diffuse1NormalRoughnessInputName, diffuseColorOutputName, diffuse0ColorInputName, diffuse1ColorInputName)
+                    currentMain = addShaderMain % (glossyNormalRoughnessOutputName, glossyNormalRoughnessInputParameterName, glossyColorOutputName, glossyColorInputParameterName, diffuseNormalRoughnessOutputName, diffuseNormalRoughnessInputParameterName, diffuseColorOutputName, diffuseColorInputParameterName)
+                    
+                    #
+                    
+                    currentMain = replaceShaderParameters(currentNode, openNodes, processedNodes, currentMain)
+                    
+                    #
+                        
+                    currentFragmentGLSL = currentFragmentGLSL.replace("#previousMain#", currentMain)
+
+                elif isinstance(currentNode, bpy.types.ShaderNodeMixShader) and addMixCounter == 0:
+                    # Material Mix shader.
+
+                    # Inputs.
+                    
+                    facInputName = "Fac_%d" % (facCounter)
+                    
+                    glossyNormalRoughnessInputName = "GlossyNormalRoughness_%d" % addMixCounter
+                    glossyColorInputName = "GlossyColor_%d" % addMixCounter
+
+                    diffuseNormalRoughnessInputName = "DiffuseNormalRoughness_%d" % addMixCounter
+                    diffuseColorInputName = "DiffuseColor_%d" % addMixCounter
+
+                    facCounter += 1
+                    addMixCounter += 1
+
+                    facInputParameterName = "Fac_Dummy"
+
+                    glossyNormalRoughnessInputParameterName = "GlossyNormalRoughness_Dummy"
+                    glossyColorInputParameterName = "GlossyColor_Dummy"
+
+                    diffuseNormalRoughnessInputParameterName = "DiffuseNormalRoughness_Dummy"
+                    diffuseColorInputParameterName = "DiffuseColor_Dummy"
+                    
+                    # Outputs.
+                    
+                    glossyNormalRoughnessOutputName = friendlyNodeName(currentNode.name) + "_GlossyNormalRoughness" 
+                    glossyColorOutputName = friendlyNodeName(currentNode.name) + "_GlossyColor"
+                    
+                    diffuseNormalRoughnessOutputName = friendlyNodeName(currentNode.name) + "_DiffuseNormalRoughness" 
+                    diffuseColorOutputName = friendlyNodeName(currentNode.name) + "_DiffuseColor"
+                    
+                    #
+                    
+                    currentMain = mixShaderMain % (facInputName, facInputParameterName, glossyNormalRoughnessOutputName, glossyNormalRoughnessInputParameterName, facInputName, glossyColorOutputName, glossyColorInputParameterName, facInputName, diffuseNormalRoughnessOutputName, diffuseNormalRoughnessInputParameterName, facInputName, diffuseColorOutputName, diffuseColorInputParameterName, facInputName)
                     
                     #
                     
@@ -1005,15 +1036,8 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
                     # Material output.
 
                     # Inputs.
-
-                    glossyNormalRoughnessInputName = "GlossyNormalRoughness_%d" % glossyCounter
-                    glossyColorInputName = "GlossyColor_%d" % glossyCounter
-
-                    diffuseNormalRoughnessInputName = "DiffuseNormalRoughness_%d" % diffuseCounter
-                    diffuseColorInputName = "DiffuseColor_%d" % diffuseCounter
-
-                    glossyCounter += 1
-                    diffuseCounter += 1
+                    
+                    # No inputs, as only one diffuse and glossy are possible.
 
                     glossyNormalRoughnessInputParameterName = "GlossyNormalRoughness_Dummy"
                     glossyColorInputParameterName = "GlossyColor_Dummy"
@@ -1027,7 +1051,7 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
                     
                     #
                     
-                    currentMain = materialMain % (glossyNormalRoughnessInputName, glossyNormalRoughnessInputParameterName, glossyColorInputName, glossyColorInputParameterName, diffuseNormalRoughnessInputName, diffuseNormalRoughnessInputParameterName, diffuseColorInputName, diffuseColorInputParameterName, glossyNormalRoughnessInputName, glossyColorInputName, diffuseNormalRoughnessInputName, diffuseColorInputName)
+                    currentMain = materialMain % (glossyNormalRoughnessInputParameterName, glossyNormalRoughnessInputParameterName, glossyColorInputParameterName, diffuseNormalRoughnessInputParameterName, diffuseNormalRoughnessInputParameterName, diffuseColorInputParameterName)
                     
                     #
                     
@@ -1057,11 +1081,12 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
                 fw("add_texture %s\n" % (friendlyImageName(nodes[binding].name) + "_texture" ))    
                 fw("\n")
                 
-            currentFragmentGLSL = currentFragmentGLSL.replace("#nextTangents#", "")                
                 
             currentFragmentGLSL = currentFragmentGLSL.replace("#nextAttribute#", "")
 
             currentFragmentGLSL = currentFragmentGLSL.replace("#nextTexture#", "")
+
+            currentFragmentGLSL = currentFragmentGLSL.replace("#nextTangents#", "")                
 
             currentFragmentGLSL = currentFragmentGLSL.replace("#previousMain#", "")
                                 
