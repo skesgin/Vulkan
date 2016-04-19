@@ -27,7 +27,7 @@
 #include "Example.hpp"
 
 Example::Example(const vkts::IInitialResourcesSP& initialResources, const int32_t windowIndex, const vkts::ISurfaceSP& surface) :
-		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), windowDimension(0, 0), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), descriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), fragmentUniformBuffer(nullptr), skinningVertexShaderModule(nullptr), skinningFragmentShaderModule(nullptr), skinningShadowFragmentShaderModule(nullptr), standardVertexShaderModule(nullptr), standardFragmentShaderModule(nullptr), standardShadowFragmentShaderModule(nullptr), pipelineLayout(nullptr), sceneContext(nullptr), scene(nullptr), swapchain(nullptr), renderPass(nullptr), shadowRenderPass(nullptr), allOpaqueGraphicsPipelines(), allBlendGraphicsPipelines(), allBlendCwGraphicsPipelines(), allShadowGraphicsPipelines(), shadowTexture(nullptr), msaaColorTexture(nullptr), msaaDepthTexture(nullptr), depthTexture(nullptr), shadowImageView(nullptr), msaaColorImageView(nullptr), msaaDepthStencilImageView(nullptr), depthStencilImageView(nullptr), swapchainImagesCount(0), swapchainImageView(), framebuffer(), shadowFramebuffer(), cmdBuffer()
+		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), windowDimension(0, 0), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), descriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), fragmentUniformBuffer(nullptr), skinningVertexShaderModule(nullptr), skinningFragmentShaderModule(nullptr), skinningShadowFragmentShaderModule(nullptr), standardVertexShaderModule(nullptr), standardFragmentShaderModule(nullptr), standardShadowFragmentShaderModule(nullptr), pipelineLayout(nullptr), sceneContext(nullptr), scene(nullptr), swapchain(nullptr), renderPass(nullptr), shadowRenderPass(nullptr), allOpaqueGraphicsPipelines(), allBlendGraphicsPipelines(), allBlendCwGraphicsPipelines(), allShadowGraphicsPipelines(), shadowTexture(nullptr), msaaColorTexture(nullptr), msaaDepthTexture(nullptr), depthTexture(nullptr), shadowImageView(nullptr), msaaColorImageView(nullptr), msaaDepthStencilImageView(nullptr), depthStencilImageView(nullptr), swapchainImagesCount(0), swapchainImageView(), framebuffer(), shadowFramebuffer(), cmdBuffer(), shadowCmdBuffer()
 {
 }
 
@@ -39,18 +39,20 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 {
 	VkResult result;
 
-	//
+    //
+    // Depth pass.
+    //
 
-	cmdBuffer[usedBuffer] = vkts::commandBuffersCreate(initialResources->getDevice()->getDevice(), commandPool->getCmdPool(), VK_COMMAND_BUFFER_LEVEL_PRIMARY, 1);
+	shadowCmdBuffer[usedBuffer] = vkts::commandBuffersCreate(initialResources->getDevice()->getDevice(), commandPool->getCmdPool(), VK_COMMAND_BUFFER_LEVEL_PRIMARY, 1);
 
-	if (!cmdBuffer[usedBuffer].get())
+	if (!shadowCmdBuffer[usedBuffer].get())
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create command buffer.");
 
 		return VK_FALSE;
 	}
 
-	result = cmdBuffer[usedBuffer]->beginCommandBuffer(0, VK_NULL_HANDLE, 0, VK_NULL_HANDLE, VK_FALSE, 0, 0);
+	result = shadowCmdBuffer[usedBuffer]->beginCommandBuffer(0, VK_NULL_HANDLE, 0, VK_NULL_HANDLE, VK_FALSE, 0, 0);
 
 	if (result != VK_SUCCESS)
 	{
@@ -59,13 +61,7 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 		return VK_FALSE;
 	}
 
-    //
-
-    swapchain->cmdPipelineBarrier(cmdBuffer[usedBuffer]->getCommandBuffer(), VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, usedBuffer);
-
-    //
-    // Depth pass.
-    //
+	//
 
 	VkClearDepthStencilValue shadowClearDepthStencilValue;
 
@@ -94,17 +90,86 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 	shadowRenderPassBeginInfo.clearValueCount = 1;
 	shadowRenderPassBeginInfo.pClearValues = shadowClearValues;
 
-	cmdBuffer[usedBuffer]->cmdBeginRenderPass(&shadowRenderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+	shadowCmdBuffer[usedBuffer]->cmdBeginRenderPass(&shadowRenderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-	// TODO: Render into depth/shadow map.
+	VkViewport shadowViewport;
+	memset(&shadowViewport, 0, sizeof(VkViewport));
 
-	cmdBuffer[usedBuffer]->cmdEndRenderPass();
+	shadowViewport.x = 0.0f;
+	shadowViewport.y = 0.0f;
+	shadowViewport.width = (float)VKTS_SHADOW_MAP_SIZE;
+	shadowViewport.height = (float)VKTS_SHADOW_MAP_SIZE;
+	shadowViewport.minDepth = 0.0f;
+	shadowViewport.maxDepth = 1.0f;
 
-	// TODO: Add barrier for shadow texture.
+	vkCmdSetViewport(shadowCmdBuffer[usedBuffer]->getCommandBuffer(), 0, 1, &shadowViewport);
+
+	VkRect2D shadowScissor;
+	memset(&shadowScissor, 0, sizeof(VkRect2D));
+
+	shadowScissor.offset.x = 0;
+	shadowScissor.offset.y = 0;
+	shadowScissor.extent = {VKTS_SHADOW_MAP_SIZE, VKTS_SHADOW_MAP_SIZE};
+
+	vkCmdSetScissor(shadowCmdBuffer[usedBuffer]->getCommandBuffer(), 0, 1, &shadowScissor);
+
+	if (scene.get())
+	{
+		vkts::blend blend;
+
+		// In this use case, transparent elements do not cast a shadow.
+		blend.setPassTransparent(VK_FALSE);
+		scene->bindDrawIndexedRecursive(shadowCmdBuffer[usedBuffer], allShadowGraphicsPipelines, &blend);
+	}
+
+	shadowCmdBuffer[usedBuffer]->cmdEndRenderPass();
+
+    //
+
+	result = shadowCmdBuffer[usedBuffer]->endCommandBuffer();
+
+	if (result != VK_SUCCESS)
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not end command buffer.");
+
+		return VK_FALSE;
+	}
 
     //
     // Color pass.
     //
+
+	cmdBuffer[usedBuffer] = vkts::commandBuffersCreate(initialResources->getDevice()->getDevice(), commandPool->getCmdPool(), VK_COMMAND_BUFFER_LEVEL_PRIMARY, 1);
+
+	if (!cmdBuffer[usedBuffer].get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create command buffer.");
+
+		return VK_FALSE;
+	}
+
+	result = cmdBuffer[usedBuffer]->beginCommandBuffer(0, VK_NULL_HANDLE, 0, VK_NULL_HANDLE, VK_FALSE, 0, 0);
+
+	if (result != VK_SUCCESS)
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not begin command buffer.");
+
+		return VK_FALSE;
+	}
+
+    //
+
+    swapchain->cmdPipelineBarrier(cmdBuffer[usedBuffer]->getCommandBuffer(), VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, usedBuffer);
+
+	//
+	// Barrier, that we can read from the shadow map.
+	//
+
+    VkImageSubresourceRange depthSubresourceRange = {VK_IMAGE_ASPECT_DEPTH_BIT, 0, 1, 0, 1};
+
+	shadowTexture->getImage()->cmdPipelineBarrier(cmdBuffer[usedBuffer]->getCommandBuffer(), VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT | VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, depthSubresourceRange);
+
+	//
 
 	VkClearColorValue clearColorValue;
 
@@ -168,6 +233,8 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 
 	vkCmdSetScissor(cmdBuffer[usedBuffer]->getCommandBuffer(), 0, 1, &scissor);
 
+	//
+
 	if (scene.get())
 	{
 		vkts::blend blend;
@@ -187,6 +254,14 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 	cmdBuffer[usedBuffer]->cmdEndRenderPass();
 
     //
+
+	//
+	// Barrier, that we can write to the shadow map.
+	//
+
+	shadowTexture->getImage()->cmdPipelineBarrier(cmdBuffer[usedBuffer]->getCommandBuffer(), VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT | VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, depthSubresourceRange);
+
+	//
 
     swapchain->cmdPipelineBarrier(cmdBuffer[usedBuffer]->getCommandBuffer(), VK_ACCESS_MEMORY_READ_BIT, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, usedBuffer);
 
@@ -544,7 +619,7 @@ VkBool32 Example::buildShadowTexture(const vkts::ICommandBuffersSP& cmdBuffer)
 	imageCreateInfo.flags = 0;
 	imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
 	imageCreateInfo.format = VK_FORMAT_D16_UNORM;
-	imageCreateInfo.extent = {swapchain->getImageExtent().width, swapchain->getImageExtent().height, 1};
+	imageCreateInfo.extent = {VKTS_SHADOW_MAP_SIZE, VKTS_SHADOW_MAP_SIZE, 1};
 	imageCreateInfo.mipLevels = 1;
 	imageCreateInfo.arrayLayers = 1;
 	imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -557,7 +632,7 @@ VkBool32 Example::buildShadowTexture(const vkts::ICommandBuffersSP& cmdBuffer)
 
 	VkImageSubresourceRange subresourceRange = { VK_IMAGE_ASPECT_DEPTH_BIT, 0, 1, 0, 1 };
 
-	shadowTexture = vkts::memoryImageCreate(initialResources, cmdBuffer, "ShadowTexture", imageCreateInfo, 0, VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, subresourceRange, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+	shadowTexture = vkts::memoryImageCreate(initialResources, cmdBuffer, "ShadowTexture", imageCreateInfo, 0, VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT | VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, subresourceRange, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
 	if (!shadowTexture.get())
 	{
@@ -894,7 +969,7 @@ VkBool32 Example::buildPipeline()
 
 	pipelineMultisampleStateCreateInfo.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
 
-	pipelineColorBlendAttachmentState.colorWriteMask = 0;
+	graphicsPipelineCreateInfo.pColorBlendState = nullptr;
 
 	pipeline = vkts::pipelineCreateGraphics(initialResources->getDevice()->getDevice(), VK_NULL_HANDLE, graphicsPipelineCreateInfo, vertexBufferType);
 
@@ -915,8 +990,7 @@ VkBool32 Example::buildPipeline()
 
 	pipelineMultisampleStateCreateInfo.rasterizationSamples = VKTS_SAMPLE_COUNT_BIT;
 
-	pipelineColorBlendAttachmentState.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-
+	graphicsPipelineCreateInfo.pColorBlendState = &pipelineColorBlendStateCreateInfo;
 	//
 	//
 	//
@@ -1197,6 +1271,8 @@ VkBool32 Example::buildDescriptorSetLayout()
 	descriptorSetLayoutBinding[VKTS_BINDING_UNIFORM_BUFFER_VERTEX_BONE_TRANSFORM].descriptorCount = 1;
 	descriptorSetLayoutBinding[VKTS_BINDING_UNIFORM_BUFFER_VERTEX_BONE_TRANSFORM].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 	descriptorSetLayoutBinding[VKTS_BINDING_UNIFORM_BUFFER_VERTEX_BONE_TRANSFORM].pImmutableSamplers = nullptr;
+
+	// TODO: Add shadow map / add shadow descriptor set.
 
 	descriptorSetLayout = vkts::descriptorSetLayoutCreate(initialResources->getDevice()->getDevice(), 0, VKTS_BINDING_UNIFORM_BINDING_COUNT, descriptorSetLayoutBinding);
 
@@ -1614,6 +1690,11 @@ void Example::terminateResources(const vkts::IUpdateThreadContext& updateContext
 					cmdBuffer[i]->destroy();
 				}
 
+				if (shadowCmdBuffer[i].get())
+				{
+					shadowCmdBuffer[i]->destroy();
+				}
+
 				if (shadowFramebuffer[i].get())
 				{
 					shadowFramebuffer[i]->destroy();
@@ -1851,9 +1932,61 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 		glm::mat4 viewMatrix(1.0f);
 
 		//
+		// Depth
+		//
 
-		// TODO: Do same as below with "shadow" parameters.
+		projectionMatrix = vkts::orthoMat4(-VKTS_SHADOW_MAP_SIZE * 0.5f, VKTS_SHADOW_MAP_SIZE * 0.5f, -VKTS_SHADOW_MAP_SIZE * 0.5f, VKTS_SHADOW_MAP_SIZE * 0.5f, 1.0f, 1000.0f);
 
+		// TODO: Get view matrix from light.
+		viewMatrix = camera->getViewMatrix();
+
+		if (!vertexViewProjectionUniformBuffer->upload(0 * sizeof(float) * 16, 0, projectionMatrix))
+		{
+			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not upload matrices.");
+
+			return VK_FALSE;
+		}
+		if (!vertexViewProjectionUniformBuffer->upload(1 * sizeof(float) * 16, 0, viewMatrix))
+		{
+			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not upload matrices.");
+
+			return VK_FALSE;
+		}
+
+		if (scene.get())
+		{
+			scene->updateRecursive(updateContext);
+		}
+
+		//
+
+        VkPipelineStageFlags waitDstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+
+        VkSubmitInfo submitInfo;
+
+        memset(&submitInfo, 0, sizeof(VkSubmitInfo));
+
+        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+        submitInfo.waitSemaphoreCount = 0;
+        submitInfo.pWaitSemaphores = nullptr;
+        submitInfo.pWaitDstStageMask = &waitDstStageMask;
+        submitInfo.commandBufferCount = 1;
+        submitInfo.pCommandBuffers = shadowCmdBuffer[currentBuffer]->getCommandBuffers();
+        submitInfo.signalSemaphoreCount = 0;
+        submitInfo.pSignalSemaphores = nullptr;
+
+		result = initialResources->getQueue()->submit(1, &submitInfo, VK_NULL_HANDLE);
+
+		if (result != VK_SUCCESS)
+		{
+			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not submit queue.");
+
+			return VK_FALSE;
+		}
+
+		//
+		// Color
 		//
 
 		const auto& dimension = updateContext.getWindowDimension(windowIndex);
@@ -1885,10 +2018,7 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 			return VK_FALSE;
 		}
 
-		if (scene.get())
-		{
-			scene->updateRecursive(updateContext);
-		}
+		// Scene already updated.
 
 		//
 
@@ -1896,9 +2026,7 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
         VkSemaphore signalSemaphores = renderingCompleteSemaphore->getSemaphore();
 
 
-        VkPipelineStageFlags waitDstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
-
-        VkSubmitInfo submitInfo;
+        waitDstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
 
         memset(&submitInfo, 0, sizeof(VkSubmitInfo));
 

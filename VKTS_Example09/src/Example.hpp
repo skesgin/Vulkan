@@ -122,6 +122,7 @@ private:
     vkts::SmartPointerVector<vkts::IFramebufferSP> shadowFramebuffer;
 
     vkts::SmartPointerVector<vkts::ICommandBuffersSP> cmdBuffer;
+    vkts::SmartPointerVector<vkts::ICommandBuffersSP> shadowCmdBuffer;
 
 	VkBool32 buildCmdBuffer(const int32_t usedBuffer);
 
