@@ -97,6 +97,31 @@ texImageMain = """#previousMain#
     
     // Image texture end"""
 
+texCheckerMain = """#previousMain#
+    
+    // Checker texture start
+
+    // In
+    vec3 %s = %s;
+    vec4 %s = %s;
+    vec4 %s = %s;
+    float %s = %s;
+
+    bool %s = mod(mod(%s.s * %s, 1.0), 2.0) == 0.0;
+    bool %s = mod(mod(%s.t * %s, 1.0), 2.0) == 0.0;
+    
+    // Out
+    vec4 %s = %s;
+    float %s = 0.0;
+        
+    if ((%s && %s) || (!%s && !%s))
+    {
+        %s = %s;
+        %s = 1.0;
+    }
+    
+    // Checker texture end"""
+
 multiplyMain = """#previousMain#
     
     // Multiply start
@@ -152,6 +177,15 @@ invertMain = """#previousMain#
     
     // Invert end"""
 
+uvMapMain = """#previousMain#
+    
+    // UV map start
+
+    // Out
+    vec3 %s = vec3(v_f_texCoord, 0.0);
+    
+    // UV map end"""
+
 diffuseMain = """#previousMain#
     
     // Diffuse BSDF start
@@ -195,20 +229,27 @@ addShaderMain = """#previousMain#
     
     // Add shader end"""
 
+discard = """if (%s %s)
+    {
+        discard;
+    }
+"""
+
 mixShaderMain = """#previousMain#
     
     // Mix shader start
     
     // In
     float %s = %s;
-
-    // Out
-    vec4 %s = %s * (1.0 - %s);
-    vec4 %s = %s * (1.0 - %s);
-
-    vec4 %s = %s * %s;
-    vec4 %s = %s * %s;
     
+    #discard#
+    // Out
+    vec4 %s = %s * %s;
+    vec4 %s = %s * %s;
+
+    vec4 %s = %s * %s;
+    vec4 %s = %s * %s;
+
     // Mix shader end"""
 
 materialMain = """#previousMain#
@@ -554,6 +595,10 @@ def replaceShaderParameters(currentNode, openNodes, processedNodes, currentMain)
                 currentMain = currentMain.replace(currentParameter, currentValue)
                 
         else:
+            if isinstance(currentSocket, bpy.types.NodeSocketFloatFactor):
+                currentParameter = currentSocket.name + "_Dummy"
+                currentMain = currentMain.replace(currentParameter, friendlyNodeName(currentSocket.links[0].from_node.name) + "_" + friendlyNodeName(currentSocket.links[0].from_socket.name))
+
             # Append node for later processing.
             if currentSocket.links[0].from_node not in openNodes and currentSocket.links[0].from_node not in processedNodes:
                 openNodes.append(currentSocket.links[0].from_node)
@@ -712,7 +757,9 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
             glossyCounter = 0
             normalCounter = 0
             roughnessCounter = 0
+            scaleCounter = 0
             strengthCounter = 0
+            tempCounter = 0
             vectorCounter = 0
             
             openNodes = [materialOutput]
@@ -788,18 +835,59 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
                     #
                     
                     currentMain = replaceParameters(currentNode, openNodes, processedNodes, currentMain)
- 
-                    # Special case, if not linked
-                     
-                    currentMain = currentMain.replace("vec3 " + vectorInputName + " = vec3(0.000, 0.000, 0.000);", "vec3 " + vectorInputName + " = vec3(v_f_texCoord, 0.0);")
                     
                     #
                     
                     currentFragmentGLSL = currentFragmentGLSL.replace("#previousMain#", currentMain)
+
+                elif isinstance(currentNode, bpy.types.ShaderNodeTexChecker):
+                    # Checker texture.
                     
-                    texCoordUsed = True
+                    # Inputs.
                     
-                    vertexAttributes = vertexAttributes | 0x00000010 
+                    vectorInputName = "Vector_%d" % (vectorCounter)
+                    
+                    color1InputName = "Color1_%d" % (colorCounter)
+                    colorCounter += 1
+                    color2InputName = "Color2_%d" % (colorCounter)
+                    
+                    scaleInputName = "Scale_%d" % (scaleCounter)
+                    
+                    vectorCounter += 1
+                    colorCounter += 1
+                    scaleCounter += 1
+
+                    vectorInputParameterName = "Vector_Dummy"
+                    color1InputParameterName = "Color1_Dummy"
+                    color2InputParameterName = "Color2_Dummy"
+                    scaleInputParameterName = "Scale_Dummy"
+                    
+                    # Temporary
+
+                    bool1TempName = "TempBool_%d" % (tempCounter)
+                    
+                    tempCounter += 1;
+
+                    bool2TempName = "TempBool_%d" % (tempCounter)
+
+                    tempCounter += 1;
+                    
+                    # Outputs
+                    
+                    colorOutputName = friendlyNodeName(currentNode.name) + "_" + friendlyNodeName(currentNode.outputs["Color"].name) 
+                    facOutputName = friendlyNodeName(currentNode.name) + "_" + friendlyNodeName(currentNode.outputs["Fac"].name) 
+
+                    #
+                    
+                    currentMain = texCheckerMain % (vectorInputName, vectorInputParameterName, color1InputName, color1InputParameterName, color2InputName, color2InputParameterName, scaleInputName, scaleInputParameterName, bool1TempName, vectorInputName, scaleInputName, bool2TempName, vectorInputName, scaleInputName, colorOutputName, color2InputName, facOutputName, bool1TempName, bool2TempName, bool1TempName, bool2TempName, colorOutputName, color1InputName, facOutputName)
+                    
+                    # 
+                    
+                    currentMain = replaceParameters(currentNode, openNodes, processedNodes, currentMain)
+                     
+                    #
+                        
+                    currentFragmentGLSL = currentFragmentGLSL.replace("#previousMain#", currentMain)
                 
                 elif isinstance(currentNode, bpy.types.ShaderNodeMixRGB):
                     # Mix color.
@@ -849,6 +937,25 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
                         
                     currentFragmentGLSL = currentFragmentGLSL.replace("#previousMain#", currentMain)
                     
+                elif isinstance(currentNode, bpy.types.ShaderNodeUVMap):
+                    # UV map.
+
+                    # Outputs
+                    
+                    uvOutputName = friendlyNodeName(currentNode.name) + "_" + friendlyNodeName(currentNode.outputs["UV"].name) 
+                    
+                    #
+                    
+                    currentMain = uvMapMain % (uvOutputName) 
+                    
+                    #
+                        
+                    currentFragmentGLSL = currentFragmentGLSL.replace("#previousMain#", currentMain)
+                    
+                    texCoordUsed = True
+                    
+                    vertexAttributes = vertexAttributes | 0x00000010 
+
                 elif isinstance(currentNode, bpy.types.ShaderNodeInvert):
                     # Invert color.
 
@@ -1022,11 +1129,57 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
                     
                     #
                     
-                    currentMain = mixShaderMain % (facInputName, facInputParameterName, glossyNormalRoughnessOutputName, glossyNormalRoughnessInputParameterName, facInputName, glossyColorOutputName, glossyColorInputParameterName, facInputName, diffuseNormalRoughnessOutputName, diffuseNormalRoughnessInputParameterName, facInputName, diffuseColorOutputName, diffuseColorInputParameterName, facInputName)
+                    factorOneMinusFac = "(1.0 - %s)" % (facInputName)
+                    factorFac = facInputName
                     
+                    factorOne = factorOneMinusFac
+                    factorTwo = factorFac
+                    
+                    counter = 0
+                    for currentSocket in currentNode.inputs:
+                        if len(currentSocket.links) != 0:
+                            linkedNode = currentSocket.links[0].from_node
+                            if isinstance(linkedNode, bpy.types.ShaderNodeBsdfDiffuse):
+                                if (counter == 1):
+                                    factorOne = factorFac
+                                    factorTwo = factorOneMinusFac
+                                else:
+                                    factorOne = factorOneMinusFac
+                                    factorTwo = factorFac
+                                break
+                            if isinstance(linkedNode, bpy.types.ShaderNodeBsdfGlossy):
+                                if (counter == 1):
+                                    factorOne = factorOneMinusFac
+                                    factorTwo = factorFac
+                                else:
+                                    factorOne = factorFac
+                                    factorTwo = factorOneMinusFac
+                                break
+                        counter += 1
+                    
+                    currentMain = mixShaderMain % (facInputName, facInputParameterName, glossyNormalRoughnessOutputName, glossyNormalRoughnessInputParameterName, factorOne, glossyColorOutputName, glossyColorInputParameterName, factorOne, diffuseNormalRoughnessOutputName, diffuseNormalRoughnessInputParameterName, factorTwo, diffuseColorOutputName, diffuseColorInputParameterName, factorTwo)
+
                     #
                     
                     currentMain = replaceShaderParameters(currentNode, openNodes, processedNodes, currentMain)
+                    
+                    # Special case, if a mask is available.
+                    counter = 0
+                    for currentSocket in currentNode.inputs:
+                        if len(currentSocket.links) != 0:
+                            linkedNode = currentSocket.links[0].from_node
+                            if isinstance(linkedNode, bpy.types.ShaderNodeBsdfTransparent):
+                                if (counter == 1):
+                                    currentDiscard = discard % (facInputName, "< 1.0")                
+                                else:
+                                    currentDiscard = discard % (facInputName, "> 0.0")
+                                
+                                currentMain = currentMain.replace("#discard#", currentDiscard)
+                                    
+                                break
+                        counter += 1
+                    
+                    currentMain = currentMain.replace("#discard#", "")
                     
                     #
                         

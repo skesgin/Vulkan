@@ -27,7 +27,7 @@
 #include "Example.hpp"
 
 Example::Example(const vkts::IInitialResourcesSP& initialResources, const int32_t windowIndex, const vkts::ISurfaceSP& surface) :
-		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), windowDimension(0, 0), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), descriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), fragmentUniformBuffer(nullptr), skinningVertexShaderModule(nullptr), skinningFragmentShaderModule(nullptr), skinningShadowFragmentShaderModule(nullptr), standardVertexShaderModule(nullptr), standardFragmentShaderModule(nullptr), standardShadowFragmentShaderModule(nullptr), pipelineLayout(nullptr), sceneContext(nullptr), scene(nullptr), swapchain(nullptr), renderPass(nullptr), shadowRenderPass(nullptr), allOpaqueGraphicsPipelines(), allBlendGraphicsPipelines(), allBlendCwGraphicsPipelines(), allShadowGraphicsPipelines(), shadowTexture(nullptr), msaaColorTexture(nullptr), msaaDepthTexture(nullptr), depthTexture(nullptr), shadowImageView(nullptr), msaaColorImageView(nullptr), msaaDepthStencilImageView(nullptr), depthStencilImageView(nullptr), swapchainImagesCount(0), swapchainImageView(), framebuffer(), cmdBuffer()
+		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), windowDimension(0, 0), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), descriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), fragmentUniformBuffer(nullptr), skinningVertexShaderModule(nullptr), skinningFragmentShaderModule(nullptr), skinningShadowFragmentShaderModule(nullptr), standardVertexShaderModule(nullptr), standardFragmentShaderModule(nullptr), standardShadowFragmentShaderModule(nullptr), pipelineLayout(nullptr), sceneContext(nullptr), scene(nullptr), swapchain(nullptr), renderPass(nullptr), shadowRenderPass(nullptr), allOpaqueGraphicsPipelines(), allBlendGraphicsPipelines(), allBlendCwGraphicsPipelines(), allShadowGraphicsPipelines(), shadowTexture(nullptr), msaaColorTexture(nullptr), msaaDepthTexture(nullptr), depthTexture(nullptr), shadowImageView(nullptr), msaaColorImageView(nullptr), msaaDepthStencilImageView(nullptr), depthStencilImageView(nullptr), swapchainImagesCount(0), swapchainImageView(), framebuffer(), shadowFramebuffer(), cmdBuffer()
 {
 }
 
@@ -38,10 +38,6 @@ Example::~Example()
 VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 {
 	VkResult result;
-
-	//
-
-	// TODO: Build shadow command buffer and add code, that depth texture can be used in next command buffer.
 
 	//
 
@@ -67,6 +63,47 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 
     swapchain->cmdPipelineBarrier(cmdBuffer[usedBuffer]->getCommandBuffer(), VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, usedBuffer);
 
+    //
+    // Depth pass.
+    //
+
+	VkClearDepthStencilValue shadowClearDepthStencilValue;
+
+	memset(&shadowClearDepthStencilValue, 0, sizeof(VkClearDepthStencilValue));
+
+	shadowClearDepthStencilValue.depth = 1.0f;
+	shadowClearDepthStencilValue.stencil = 0;
+
+	VkClearValue shadowClearValues[1];
+
+	memset(shadowClearValues, 0, sizeof(shadowClearValues));
+
+	shadowClearValues[0].depthStencil = shadowClearDepthStencilValue;
+
+	VkRenderPassBeginInfo shadowRenderPassBeginInfo;
+
+	memset(&shadowRenderPassBeginInfo, 0, sizeof(VkRenderPassBeginInfo));
+
+	shadowRenderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+
+	shadowRenderPassBeginInfo.renderPass = shadowRenderPass->getRenderPass();
+	shadowRenderPassBeginInfo.framebuffer = shadowFramebuffer[usedBuffer]->getFramebuffer();
+	shadowRenderPassBeginInfo.renderArea.offset.x = 0;
+	shadowRenderPassBeginInfo.renderArea.offset.y = 0;
+	shadowRenderPassBeginInfo.renderArea.extent = {VKTS_SHADOW_MAP_SIZE, VKTS_SHADOW_MAP_SIZE};
+	shadowRenderPassBeginInfo.clearValueCount = 1;
+	shadowRenderPassBeginInfo.pClearValues = shadowClearValues;
+
+	cmdBuffer[usedBuffer]->cmdBeginRenderPass(&shadowRenderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+	// TODO: Render into depth/shadow map.
+
+	cmdBuffer[usedBuffer]->cmdEndRenderPass();
+
+	// TODO: Add barrier for shadow texture.
+
+    //
+    // Color pass.
     //
 
 	VkClearColorValue clearColorValue;
@@ -185,7 +222,18 @@ VkBool32 Example::buildFramebuffer(const int32_t usedBuffer)
 		return VK_FALSE;
 	}
 
-	// TODO: Build shadow frame buffer.
+	// Build shadow frame buffer.
+
+	imageViews[0] = shadowImageView->getImageView();
+
+	shadowFramebuffer[usedBuffer] = vkts::framebufferCreate(initialResources->getDevice()->getDevice(), 0, shadowRenderPass->getRenderPass(), 1, imageViews, VKTS_SHADOW_MAP_SIZE, VKTS_SHADOW_MAP_SIZE, 1);
+
+	if (!shadowFramebuffer[usedBuffer].get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create frame buffer.");
+
+		return VK_FALSE;
+	}
 
 	return VK_TRUE;
 }
@@ -1362,6 +1410,7 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 
     swapchainImageView = vkts::SmartPointerVector<vkts::IImageViewSP>(swapchainImagesCount);
     framebuffer = vkts::SmartPointerVector<vkts::IFramebufferSP>(swapchainImagesCount);
+    shadowFramebuffer = vkts::SmartPointerVector<vkts::IFramebufferSP>(swapchainImagesCount);
     cmdBuffer = vkts::SmartPointerVector<vkts::ICommandBuffersSP>(swapchainImagesCount);
 
     //
@@ -1563,6 +1612,11 @@ void Example::terminateResources(const vkts::IUpdateThreadContext& updateContext
 				if (cmdBuffer[i].get())
 				{
 					cmdBuffer[i]->destroy();
+				}
+
+				if (shadowFramebuffer[i].get())
+				{
+					shadowFramebuffer[i]->destroy();
 				}
 
 				if (framebuffer[i].get())

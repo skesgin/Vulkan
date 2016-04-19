@@ -119,6 +119,7 @@ private:
     vkts::SmartPointerVector<vkts::IImageViewSP> swapchainImageView;
 
     vkts::SmartPointerVector<vkts::IFramebufferSP> framebuffer;
+    vkts::SmartPointerVector<vkts::IFramebufferSP> shadowFramebuffer;
 
     vkts::SmartPointerVector<vkts::ICommandBuffersSP> cmdBuffer;
 
