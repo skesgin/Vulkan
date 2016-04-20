@@ -198,27 +198,36 @@ VkBool32 Example::updateDescriptorSets()
 
 	memset(writeDescriptorSets, 0, sizeof(writeDescriptorSets));
 
-	writeDescriptorSets[VKTS_BINDING_UNIFORM_BUFFER_VERTEX_VIEWPROJECTION].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+	writeDescriptorSets[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 
-	writeDescriptorSets[VKTS_BINDING_UNIFORM_BUFFER_VERTEX_VIEWPROJECTION].dstSet = VK_NULL_HANDLE;	// Defined later.
-	writeDescriptorSets[VKTS_BINDING_UNIFORM_BUFFER_VERTEX_VIEWPROJECTION].dstBinding = VKTS_BINDING_UNIFORM_BUFFER_VERTEX_VIEWPROJECTION;
-	writeDescriptorSets[VKTS_BINDING_UNIFORM_BUFFER_VERTEX_VIEWPROJECTION].dstArrayElement = 0;
-	writeDescriptorSets[VKTS_BINDING_UNIFORM_BUFFER_VERTEX_VIEWPROJECTION].descriptorCount = 1;
-	writeDescriptorSets[VKTS_BINDING_UNIFORM_BUFFER_VERTEX_VIEWPROJECTION].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-	writeDescriptorSets[VKTS_BINDING_UNIFORM_BUFFER_VERTEX_VIEWPROJECTION].pImageInfo = nullptr;
-	writeDescriptorSets[VKTS_BINDING_UNIFORM_BUFFER_VERTEX_VIEWPROJECTION].pBufferInfo = &descriptorBufferInfos[0];
-	writeDescriptorSets[VKTS_BINDING_UNIFORM_BUFFER_VERTEX_VIEWPROJECTION].pTexelBufferView = nullptr;
+	writeDescriptorSets[0].dstSet = VK_NULL_HANDLE;	// Defined later.
+	writeDescriptorSets[0].dstBinding = VKTS_BINDING_UNIFORM_BUFFER_VIEWPROJECTION;
+	writeDescriptorSets[0].dstArrayElement = 0;
+	writeDescriptorSets[0].descriptorCount = 1;
+	writeDescriptorSets[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	writeDescriptorSets[0].pImageInfo = nullptr;
+	writeDescriptorSets[0].pBufferInfo = &descriptorBufferInfos[0];
+	writeDescriptorSets[0].pTexelBufferView = nullptr;
 
-	writeDescriptorSets[VKTS_BINDING_UNIFORM_BUFFER_FRAGMENT_LIGHT].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+	writeDescriptorSets[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 
-	writeDescriptorSets[VKTS_BINDING_UNIFORM_BUFFER_FRAGMENT_LIGHT].dstSet = VK_NULL_HANDLE;	// Defined later.
-	writeDescriptorSets[VKTS_BINDING_UNIFORM_BUFFER_FRAGMENT_LIGHT].dstBinding = VKTS_BINDING_UNIFORM_BUFFER_FRAGMENT_LIGHT;
-	writeDescriptorSets[VKTS_BINDING_UNIFORM_BUFFER_FRAGMENT_LIGHT].dstArrayElement = 0;
-	writeDescriptorSets[VKTS_BINDING_UNIFORM_BUFFER_FRAGMENT_LIGHT].descriptorCount = 1;
-	writeDescriptorSets[VKTS_BINDING_UNIFORM_BUFFER_FRAGMENT_LIGHT].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-	writeDescriptorSets[VKTS_BINDING_UNIFORM_BUFFER_FRAGMENT_LIGHT].pImageInfo = nullptr;
-	writeDescriptorSets[VKTS_BINDING_UNIFORM_BUFFER_FRAGMENT_LIGHT].pBufferInfo = &descriptorBufferInfos[1];
-	writeDescriptorSets[VKTS_BINDING_UNIFORM_BUFFER_FRAGMENT_LIGHT].pTexelBufferView = nullptr;
+	writeDescriptorSets[1].dstSet = VK_NULL_HANDLE;	// Defined later.
+	writeDescriptorSets[1].dstBinding = VKTS_BINDING_UNIFORM_BUFFER_LIGHT;
+	writeDescriptorSets[1].dstArrayElement = 0;
+	writeDescriptorSets[1].descriptorCount = 1;
+	writeDescriptorSets[1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	writeDescriptorSets[1].pImageInfo = nullptr;
+	writeDescriptorSets[1].pBufferInfo = &descriptorBufferInfos[1];
+	writeDescriptorSets[1].pTexelBufferView = nullptr;
+
+	//
+
+	writeDescriptorSets[2].dstBinding = VKTS_BINDING_UNIFORM_BUFFER_TRANSFORM;
+
+	for (uint32_t i = VKTS_BINDING_UNIFORM_SAMPLER_EMISSIVE; i <= VKTS_BINDING_UNIFORM_SAMPLER_PHONG_SPECULAR_SHININESS; i++)
+	{
+		writeDescriptorSets[3 + i - VKTS_BINDING_UNIFORM_SAMPLER_EMISSIVE].dstBinding = i;
+	}
 
 	return VK_TRUE;
 }
@@ -680,38 +689,38 @@ VkBool32 Example::buildPipelineLayout()
 
 VkBool32 Example::buildDescriptorSetLayout()
 {
-	VkDescriptorSetLayoutBinding descriptorSetLayoutBinding[VKTS_BINDING_UNIFORM_BUFFER_VERTEX_BONE_TRANSFORM];
+	VkDescriptorSetLayoutBinding descriptorSetLayoutBinding[VKTS_DESCRIPTOR_SET_COUNT];
 
 	memset(&descriptorSetLayoutBinding, 0, sizeof(descriptorSetLayoutBinding));
 
-	descriptorSetLayoutBinding[VKTS_BINDING_UNIFORM_BUFFER_VERTEX_VIEWPROJECTION].binding = VKTS_BINDING_UNIFORM_BUFFER_VERTEX_VIEWPROJECTION;
-	descriptorSetLayoutBinding[VKTS_BINDING_UNIFORM_BUFFER_VERTEX_VIEWPROJECTION].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-	descriptorSetLayoutBinding[VKTS_BINDING_UNIFORM_BUFFER_VERTEX_VIEWPROJECTION].descriptorCount = 1;
-	descriptorSetLayoutBinding[VKTS_BINDING_UNIFORM_BUFFER_VERTEX_VIEWPROJECTION].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-	descriptorSetLayoutBinding[VKTS_BINDING_UNIFORM_BUFFER_VERTEX_VIEWPROJECTION].pImmutableSamplers = nullptr;
+	descriptorSetLayoutBinding[0].binding = VKTS_BINDING_UNIFORM_BUFFER_VIEWPROJECTION;
+	descriptorSetLayoutBinding[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	descriptorSetLayoutBinding[0].descriptorCount = 1;
+	descriptorSetLayoutBinding[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+	descriptorSetLayoutBinding[0].pImmutableSamplers = nullptr;
 
-	descriptorSetLayoutBinding[VKTS_BINDING_UNIFORM_BUFFER_VERTEX_TRANSFORM].binding = VKTS_BINDING_UNIFORM_BUFFER_VERTEX_TRANSFORM;
-	descriptorSetLayoutBinding[VKTS_BINDING_UNIFORM_BUFFER_VERTEX_TRANSFORM].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-	descriptorSetLayoutBinding[VKTS_BINDING_UNIFORM_BUFFER_VERTEX_TRANSFORM].descriptorCount = 1;
-	descriptorSetLayoutBinding[VKTS_BINDING_UNIFORM_BUFFER_VERTEX_TRANSFORM].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-	descriptorSetLayoutBinding[VKTS_BINDING_UNIFORM_BUFFER_VERTEX_TRANSFORM].pImmutableSamplers = nullptr;
+	descriptorSetLayoutBinding[1].binding = VKTS_BINDING_UNIFORM_BUFFER_LIGHT;
+	descriptorSetLayoutBinding[1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	descriptorSetLayoutBinding[1].descriptorCount = 1;
+	descriptorSetLayoutBinding[1].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+	descriptorSetLayoutBinding[1].pImmutableSamplers = nullptr;
 
-	descriptorSetLayoutBinding[VKTS_BINDING_UNIFORM_BUFFER_FRAGMENT_LIGHT].binding = VKTS_BINDING_UNIFORM_BUFFER_FRAGMENT_LIGHT;
-	descriptorSetLayoutBinding[VKTS_BINDING_UNIFORM_BUFFER_FRAGMENT_LIGHT].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-	descriptorSetLayoutBinding[VKTS_BINDING_UNIFORM_BUFFER_FRAGMENT_LIGHT].descriptorCount = 1;
-	descriptorSetLayoutBinding[VKTS_BINDING_UNIFORM_BUFFER_FRAGMENT_LIGHT].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-	descriptorSetLayoutBinding[VKTS_BINDING_UNIFORM_BUFFER_FRAGMENT_LIGHT].pImmutableSamplers = nullptr;
+	descriptorSetLayoutBinding[2].binding = VKTS_BINDING_UNIFORM_BUFFER_TRANSFORM;
+	descriptorSetLayoutBinding[2].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	descriptorSetLayoutBinding[2].descriptorCount = 1;
+	descriptorSetLayoutBinding[2].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+	descriptorSetLayoutBinding[2].pImmutableSamplers = nullptr;
 
-    for (int32_t i = VKTS_BINDING_UNIFORM_SAMPLER_FRAGMENT_EMISSIVE; i < VKTS_BINDING_UNIFORM_BUFFER_VERTEX_BONE_TRANSFORM; i++)
+    for (int32_t i = VKTS_BINDING_UNIFORM_SAMPLER_EMISSIVE; i <= VKTS_BINDING_UNIFORM_SAMPLER_PHONG_SPECULAR_SHININESS; i++)
     {
-		descriptorSetLayoutBinding[i].binding = i;
-		descriptorSetLayoutBinding[i].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		descriptorSetLayoutBinding[i].descriptorCount = 1;
-		descriptorSetLayoutBinding[i].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-		descriptorSetLayoutBinding[i].pImmutableSamplers = nullptr;
+		descriptorSetLayoutBinding[3 + i - VKTS_BINDING_UNIFORM_SAMPLER_EMISSIVE].binding = i;
+		descriptorSetLayoutBinding[3 + i - VKTS_BINDING_UNIFORM_SAMPLER_EMISSIVE].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		descriptorSetLayoutBinding[3 + i - VKTS_BINDING_UNIFORM_SAMPLER_EMISSIVE].descriptorCount = 1;
+		descriptorSetLayoutBinding[3 + i - VKTS_BINDING_UNIFORM_SAMPLER_EMISSIVE].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+		descriptorSetLayoutBinding[3 + i - VKTS_BINDING_UNIFORM_SAMPLER_EMISSIVE].pImmutableSamplers = nullptr;
     }
 
-	descriptorSetLayout = vkts::descriptorSetLayoutCreate(initialResources->getDevice()->getDevice(), 0, VKTS_BINDING_UNIFORM_BUFFER_VERTEX_BONE_TRANSFORM, descriptorSetLayoutBinding);
+	descriptorSetLayout = vkts::descriptorSetLayoutCreate(initialResources->getDevice()->getDevice(), 0, VKTS_DESCRIPTOR_SET_COUNT, descriptorSetLayoutBinding);
 
 	if (!descriptorSetLayout.get())
 	{
@@ -967,7 +976,7 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 
 		if (scene.get())
 		{
-			scene->updateDescriptorSetsRecursive(VKTS_BINDING_UNIFORM_BUFFER_VERTEX_BONE_TRANSFORM, writeDescriptorSets);
+			scene->updateDescriptorSetsRecursive(VKTS_DESCRIPTOR_SET_COUNT, writeDescriptorSets);
 		}
 	}
 

@@ -42,14 +42,16 @@
 #define VKTS_BINDING_VERTEX_BUFFER 0
 
 #define VKTS_SKINNING_VERTEX_SHADER_NAME 			"shader/SPIR/V/phong_skinning.vert.spv"
-#define VKTS_SKINNING_FRAGMENT_SHADER_NAME 			"shader/SPIR/V/phong_skinning.frag.spv"
-#define VKTS_SKINNING_SHADOW_FRAGMENT_SHADER_NAME 	"shader/SPIR/V/phong_skinning_shadow.frag.spv"
+#define VKTS_SKINNING_FRAGMENT_SHADER_NAME 			"shader/SPIR/V/phong_skinning_shadow.frag.spv"
+#define VKTS_SKINNING_SHADOW_FRAGMENT_SHADER_NAME 	"shader/SPIR/V/phong_skinning_write_shadow.frag.spv"
 
 #define VKTS_STANDARD_VERTEX_SHADER_NAME 			"shader/SPIR/V/phong.vert.spv"
-#define VKTS_STANDARD_FRAGMENT_SHADER_NAME 			"shader/SPIR/V/phong.frag.spv"
-#define VKTS_STANDARD_SHADOW_FRAGMENT_SHADER_NAME	"shader/SPIR/V/phong_shadow.frag.spv"
+#define VKTS_STANDARD_FRAGMENT_SHADER_NAME 			"shader/SPIR/V/phong_shadow.frag.spv"
+#define VKTS_STANDARD_SHADOW_FRAGMENT_SHADER_NAME	"shader/SPIR/V/phong_write_shadow.frag.spv"
 
 #define VKTS_SCENE_NAME "transport_shuttle/transport_shuttle.vkts"
+
+#define VKTS_DESCRIPTOR_SET_COUNT (VKTS_BINDING_UNIFORM_PHONG_NO_DISPLACEMENT_BINDING_COUNT + VKTS_BINDING_UNIFORM_TRANSFORM_BINDING_COUNT + VKTS_BINDING_UNIFORM_BONES_BINDING_COUNT + VKTS_BINDING_UNIFORM_SHADOW_BINDING_COUNT)
 
 class Example: public vkts::IUpdateThread
 {
@@ -75,9 +77,10 @@ private:
     vkts::ISemaphoreSP renderingCompleteSemaphore;
 
 	vkts::IDescriptorSetLayoutSP descriptorSetLayout;
+	VkDescriptorImageInfo descriptorImageInfos[1];
     VkDescriptorBufferInfo descriptorBufferInfos[1 + 1];
 
-    VkWriteDescriptorSet writeDescriptorSets[VKTS_BINDING_UNIFORM_BINDING_COUNT];
+    VkWriteDescriptorSet writeDescriptorSets[VKTS_DESCRIPTOR_SET_COUNT];
 
 	vkts::IBufferObjectSP vertexViewProjectionUniformBuffer;
 	vkts::IBufferObjectSP fragmentUniformBuffer;
@@ -109,10 +112,13 @@ private:
 	vkts::IMemoryImageSP msaaColorTexture;
 	vkts::IMemoryImageSP msaaDepthTexture;
 	vkts::IMemoryImageSP depthTexture;
+
 	vkts::IImageViewSP shadowImageView;
 	vkts::IImageViewSP msaaColorImageView;
 	vkts::IImageViewSP msaaDepthStencilImageView;
 	vkts::IImageViewSP depthStencilImageView;
+
+	vkts::ISamplerSP shadowSampler;
 
     uint32_t swapchainImagesCount;
 
@@ -133,6 +139,8 @@ private:
 	VkBool32 updateDescriptorSets();
 
 	VkBool32 buildScene(const vkts::ICommandBuffersSP& cmdBuffer);
+
+	VkBool32 buildShadowSampler();
 
 	VkBool32 buildDepthStencilImageView();
 

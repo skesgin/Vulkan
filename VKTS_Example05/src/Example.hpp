@@ -44,6 +44,8 @@
 
 #define VKTS_SCENE_NAME "cartoon_tree_with_plane/cartoon_tree_with_plane.vkts"
 
+#define VKTS_DESCRIPTOR_SET_COUNT (VKTS_BINDING_UNIFORM_PHONG_NO_DISPLACEMENT_BINDING_COUNT + VKTS_BINDING_UNIFORM_TRANSFORM_BINDING_COUNT)
+
 class Example: public vkts::IUpdateThread
 {
 
@@ -64,7 +66,7 @@ private:
 
 	vkts::IDescriptorSetLayoutSP descriptorSetLayout;
     VkDescriptorBufferInfo descriptorBufferInfos[1 + 1];
-    VkWriteDescriptorSet writeDescriptorSets[VKTS_BINDING_UNIFORM_BUFFER_VERTEX_BONE_TRANSFORM];
+    VkWriteDescriptorSet writeDescriptorSets[VKTS_DESCRIPTOR_SET_COUNT];
 
 	vkts::IBufferObjectSP vertexViewProjectionUniformBuffer;
 	vkts::IBufferObjectSP fragmentUniformBuffer;

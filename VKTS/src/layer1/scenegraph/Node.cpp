@@ -216,7 +216,7 @@ void Node::updateTransformDescriptorBufferInfo(const VkBuffer buffer, const VkDe
 
     transformWriteDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
     transformWriteDescriptorSet.dstSet = VK_NULL_HANDLE; // Defined later.
-    transformWriteDescriptorSet.dstBinding = VKTS_BINDING_UNIFORM_BUFFER_VERTEX_TRANSFORM;
+    transformWriteDescriptorSet.dstBinding = VKTS_BINDING_UNIFORM_BUFFER_TRANSFORM;
     transformWriteDescriptorSet.dstArrayElement = 0;
     transformWriteDescriptorSet.descriptorCount = 1;
     transformWriteDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -237,7 +237,7 @@ void Node::updateJointDescriptorBufferInfo(const VkBuffer buffer, const VkDevice
 
     jointWriteDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
     jointWriteDescriptorSet.dstSet = VK_NULL_HANDLE; // Defined later.
-    jointWriteDescriptorSet.dstBinding = VKTS_BINDING_UNIFORM_BUFFER_VERTEX_BONE_TRANSFORM;
+    jointWriteDescriptorSet.dstBinding = VKTS_BINDING_UNIFORM_BUFFER_BONE_TRANSFORM;
     jointWriteDescriptorSet.dstArrayElement = 0;
     jointWriteDescriptorSet.descriptorCount = 1;
     jointWriteDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -550,14 +550,24 @@ void Node::setNodeParameterRecursive(const parameter* p)
 
 void Node::updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets)
 {
-	if (transformWriteDescriptorSet.dstBinding == VKTS_BINDING_UNIFORM_BUFFER_VERTEX_TRANSFORM)
+	for (uint32_t i = 0; i < allWriteDescriptorSetsCount; i++)
 	{
-		allWriteDescriptorSets[transformWriteDescriptorSet.dstBinding] = transformWriteDescriptorSet;
-	}
+		if (transformWriteDescriptorSet.dstBinding == VKTS_BINDING_UNIFORM_BUFFER_TRANSFORM && transformWriteDescriptorSet.sType == VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET)
+		{
+			if (allWriteDescriptorSets[i].dstBinding == VKTS_BINDING_UNIFORM_BUFFER_TRANSFORM)
+			{
+				allWriteDescriptorSets[i] = transformWriteDescriptorSet;
+			}
+		}
 
-	if (jointWriteDescriptorSet.dstBinding == VKTS_BINDING_UNIFORM_BUFFER_VERTEX_BONE_TRANSFORM)
-	{
-		allWriteDescriptorSets[jointWriteDescriptorSet.dstBinding] = jointWriteDescriptorSet;
+		if (jointWriteDescriptorSet.dstBinding == VKTS_BINDING_UNIFORM_BUFFER_BONE_TRANSFORM && jointWriteDescriptorSet.sType == VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET)
+		{
+			if (allWriteDescriptorSets[i].dstBinding == VKTS_BINDING_UNIFORM_BUFFER_BONE_TRANSFORM)
+			{
+				allWriteDescriptorSets[i] = jointWriteDescriptorSet;
+			}
+
+		}
 	}
 
     if (allMeshes.size() > 0)

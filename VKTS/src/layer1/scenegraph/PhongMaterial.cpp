@@ -86,7 +86,7 @@ IDescriptorSetsSP PhongMaterial::getDescriptorSetsByName(const std::string& node
 
 void PhongMaterial::updateDescriptorImageInfo(const uint32_t colorIndex, const VkSampler sampler, const VkImageView imageView, const VkImageLayout imageLayout)
 {
-    if (colorIndex >= VKTS_BINDING_UNIFORM_SAMPLER_FRAGMENT_COLOR_COUNT)
+    if (colorIndex >= VKTS_BINDING_UNIFORM_PHONG_BINDING_COUNT)
     {
         return;
     }
@@ -101,7 +101,7 @@ void PhongMaterial::updateDescriptorImageInfo(const uint32_t colorIndex, const V
 
     writeDescriptorSets[colorIndex].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
     writeDescriptorSets[colorIndex].dstSet = VK_NULL_HANDLE; // Defined later.
-    writeDescriptorSets[colorIndex].dstBinding = VKTS_BINDING_UNIFORM_SAMPLER_FRAGMENT_EMISSIVE + colorIndex;
+    writeDescriptorSets[colorIndex].dstBinding = VKTS_BINDING_UNIFORM_SAMPLER_DISPLACEMENT + colorIndex;
     writeDescriptorSets[colorIndex].dstArrayElement = 0;
     writeDescriptorSets[colorIndex].descriptorCount = 1;
     writeDescriptorSets[colorIndex].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
@@ -113,11 +113,16 @@ void PhongMaterial::updateDescriptorImageInfo(const uint32_t colorIndex, const V
 PhongMaterial::PhongMaterial() :
     IPhongMaterial(), name(), alpha(), displacement(), normal(), ambient(), emissive(), diffuse(), specular(), specularShininess(), transparent(VK_FALSE), descriptorPool(), descriptorSets(), nodeName(), allDescriptorPools(), allDescriptorSets()
 {
+	memset(descriptorImageInfos, 0, sizeof(descriptorImageInfos));
+	memset(writeDescriptorSets, 0, sizeof(writeDescriptorSets));
 }
 
 PhongMaterial::PhongMaterial(const PhongMaterial& other) :
     IPhongMaterial(), name(other.name), alpha(other.alpha), displacement(other.displacement), normal(other.normal), ambient(other.ambient), emissive(other.emissive), diffuse(other.diffuse), specular(other.specular), specularShininess(other.specularShininess), transparent(other.transparent), descriptorPool(), descriptorSets(), nodeName(), allDescriptorPools(), allDescriptorSets()
 {
+	memset(descriptorImageInfos, 0, sizeof(descriptorImageInfos));
+	memset(writeDescriptorSets, 0, sizeof(writeDescriptorSets));
+
     // Textures cannot be cloned, just replaced.
 
     descriptorPool = descriptorPoolCreate(other.descriptorPool->getDevice(), other.descriptorPool->getFlags(), other.descriptorPool->getMaxSets(), other.descriptorPool->getPoolSizeCount(), other.descriptorPool->getPoolSizes());
@@ -177,23 +182,23 @@ PhongMaterial::PhongMaterial(const PhongMaterial& other) :
 
     //
 
-    updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_FRAGMENT_EMISSIVE - VKTS_BINDING_UNIFORM_SAMPLER_FRAGMENT_EMISSIVE, this->emissive->getSampler()->getSampler(), this->emissive->getImageView()->getImageView(), this->emissive->getMemoryImage()->getImage()->getImageLayout());
+    updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_EMISSIVE - VKTS_BINDING_UNIFORM_SAMPLER_DISPLACEMENT, this->emissive->getSampler()->getSampler(), this->emissive->getImageView()->getImageView(), this->emissive->getMemoryImage()->getImage()->getImageLayout());
 
-    updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_FRAGMENT_ALPHA - VKTS_BINDING_UNIFORM_SAMPLER_FRAGMENT_EMISSIVE, this->alpha->getSampler()->getSampler(), this->alpha->getImageView()->getImageView(), this->alpha->getMemoryImage()->getImage()->getImageLayout());
+    updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_ALPHA - VKTS_BINDING_UNIFORM_SAMPLER_DISPLACEMENT, this->alpha->getSampler()->getSampler(), this->alpha->getImageView()->getImageView(), this->alpha->getMemoryImage()->getImage()->getImageLayout());
 
-    updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_FRAGMENT_DISPLACEMENT - VKTS_BINDING_UNIFORM_SAMPLER_FRAGMENT_EMISSIVE, this->displacement->getSampler()->getSampler(), this->displacement->getImageView()->getImageView(), this->displacement->getMemoryImage()->getImage()->getImageLayout());
+    updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_DISPLACEMENT - VKTS_BINDING_UNIFORM_SAMPLER_DISPLACEMENT, this->displacement->getSampler()->getSampler(), this->displacement->getImageView()->getImageView(), this->displacement->getMemoryImage()->getImage()->getImageLayout());
 
-    updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_FRAGMENT_NORMAL - VKTS_BINDING_UNIFORM_SAMPLER_FRAGMENT_EMISSIVE, this->normal->getSampler()->getSampler(), this->normal->getImageView()->getImageView(), this->normal->getMemoryImage()->getImage()->getImageLayout());
+    updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_NORMAL - VKTS_BINDING_UNIFORM_SAMPLER_DISPLACEMENT, this->normal->getSampler()->getSampler(), this->normal->getImageView()->getImageView(), this->normal->getMemoryImage()->getImage()->getImageLayout());
 
     //
 
-    updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_FRAGMENT_PHONG_AMBIENT - VKTS_BINDING_UNIFORM_SAMPLER_FRAGMENT_EMISSIVE, this->ambient->getSampler()->getSampler(), this->ambient->getImageView()->getImageView(), this->ambient->getMemoryImage()->getImage()->getImageLayout());
+    updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_PHONG_AMBIENT - VKTS_BINDING_UNIFORM_SAMPLER_DISPLACEMENT, this->ambient->getSampler()->getSampler(), this->ambient->getImageView()->getImageView(), this->ambient->getMemoryImage()->getImage()->getImageLayout());
 
-    updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_FRAGMENT_PHONG_DIFFUSE - VKTS_BINDING_UNIFORM_SAMPLER_FRAGMENT_EMISSIVE, this->diffuse->getSampler()->getSampler(), this->diffuse->getImageView()->getImageView(), this->diffuse->getMemoryImage()->getImage()->getImageLayout());
+    updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DIFFUSE - VKTS_BINDING_UNIFORM_SAMPLER_DISPLACEMENT, this->diffuse->getSampler()->getSampler(), this->diffuse->getImageView()->getImageView(), this->diffuse->getMemoryImage()->getImage()->getImageLayout());
 
-    updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_FRAGMENT_PHONG_SPECULAR - VKTS_BINDING_UNIFORM_SAMPLER_FRAGMENT_EMISSIVE, this->specular->getSampler()->getSampler(), this->specular->getImageView()->getImageView(), this->specular->getMemoryImage()->getImage()->getImageLayout());
+    updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_PHONG_SPECULAR - VKTS_BINDING_UNIFORM_SAMPLER_DISPLACEMENT, this->specular->getSampler()->getSampler(), this->specular->getImageView()->getImageView(), this->specular->getMemoryImage()->getImage()->getImageLayout());
 
-    updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_FRAGMENT_PHONG_SPECULAR_SHININESS - VKTS_BINDING_UNIFORM_SAMPLER_FRAGMENT_EMISSIVE, this->specularShininess->getSampler()->getSampler(), this->specularShininess->getImageView()->getImageView(), this->specularShininess->getMemoryImage()->getImage()->getImageLayout());
+    updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_PHONG_SPECULAR_SHININESS - VKTS_BINDING_UNIFORM_SAMPLER_DISPLACEMENT, this->specularShininess->getSampler()->getSampler(), this->specularShininess->getImageView()->getImageView(), this->specularShininess->getMemoryImage()->getImage()->getImageLayout());
 }
 
 PhongMaterial::~PhongMaterial()
@@ -228,7 +233,7 @@ void PhongMaterial::setAlpha(const ITextureSP& alpha)
 
     if (this->alpha.get())
     {
-        updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_FRAGMENT_ALPHA - VKTS_BINDING_UNIFORM_SAMPLER_FRAGMENT_EMISSIVE, this->alpha->getSampler()->getSampler(), this->alpha->getImageView()->getImageView(), this->alpha->getMemoryImage()->getImage()->getImageLayout());
+        updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_ALPHA - VKTS_BINDING_UNIFORM_SAMPLER_DISPLACEMENT, this->alpha->getSampler()->getSampler(), this->alpha->getImageView()->getImageView(), this->alpha->getMemoryImage()->getImage()->getImageLayout());
     }
 }
 
@@ -243,7 +248,7 @@ void PhongMaterial::setDisplacement(const ITextureSP& displacement)
 
     if (this->displacement.get())
     {
-        updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_FRAGMENT_DISPLACEMENT - VKTS_BINDING_UNIFORM_SAMPLER_FRAGMENT_EMISSIVE, this->displacement->getSampler()->getSampler(), this->displacement->getImageView()->getImageView(), this->displacement->getMemoryImage()->getImage()->getImageLayout());
+        updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_DISPLACEMENT - VKTS_BINDING_UNIFORM_SAMPLER_DISPLACEMENT, this->displacement->getSampler()->getSampler(), this->displacement->getImageView()->getImageView(), this->displacement->getMemoryImage()->getImage()->getImageLayout());
     }
 }
 
@@ -258,7 +263,7 @@ void PhongMaterial::setNormal(const ITextureSP& normal)
 
     if (this->normal.get())
     {
-        updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_FRAGMENT_NORMAL - VKTS_BINDING_UNIFORM_SAMPLER_FRAGMENT_EMISSIVE, this->normal->getSampler()->getSampler(), this->normal->getImageView()->getImageView(), this->normal->getMemoryImage()->getImage()->getImageLayout());
+        updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_NORMAL - VKTS_BINDING_UNIFORM_SAMPLER_DISPLACEMENT, this->normal->getSampler()->getSampler(), this->normal->getImageView()->getImageView(), this->normal->getMemoryImage()->getImage()->getImageLayout());
     }
 }
 
@@ -275,7 +280,7 @@ void PhongMaterial::setEmissive(const ITextureSP& emissive)
 
     if (this->emissive.get())
     {
-        updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_FRAGMENT_EMISSIVE - VKTS_BINDING_UNIFORM_SAMPLER_FRAGMENT_EMISSIVE, this->emissive->getSampler()->getSampler(), this->emissive->getImageView()->getImageView(), this->emissive->getMemoryImage()->getImage()->getImageLayout());
+        updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_EMISSIVE - VKTS_BINDING_UNIFORM_SAMPLER_DISPLACEMENT, this->emissive->getSampler()->getSampler(), this->emissive->getImageView()->getImageView(), this->emissive->getMemoryImage()->getImage()->getImageLayout());
     }
 }
 
@@ -290,7 +295,7 @@ void PhongMaterial::setAmbient(const ITextureSP& ambient)
 
     if (this->ambient.get())
     {
-        updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_FRAGMENT_PHONG_AMBIENT - VKTS_BINDING_UNIFORM_SAMPLER_FRAGMENT_EMISSIVE, this->ambient->getSampler()->getSampler(), this->ambient->getImageView()->getImageView(), this->ambient->getMemoryImage()->getImage()->getImageLayout());
+        updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_PHONG_AMBIENT - VKTS_BINDING_UNIFORM_SAMPLER_DISPLACEMENT, this->ambient->getSampler()->getSampler(), this->ambient->getImageView()->getImageView(), this->ambient->getMemoryImage()->getImage()->getImageLayout());
     }
 }
 
@@ -305,7 +310,7 @@ void PhongMaterial::setDiffuse(const ITextureSP& diffuse)
 
     if (this->diffuse.get())
     {
-        updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_FRAGMENT_PHONG_DIFFUSE - VKTS_BINDING_UNIFORM_SAMPLER_FRAGMENT_EMISSIVE, this->diffuse->getSampler()->getSampler(), this->diffuse->getImageView()->getImageView(), this->diffuse->getMemoryImage()->getImage()->getImageLayout());
+        updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DIFFUSE - VKTS_BINDING_UNIFORM_SAMPLER_DISPLACEMENT, this->diffuse->getSampler()->getSampler(), this->diffuse->getImageView()->getImageView(), this->diffuse->getMemoryImage()->getImage()->getImageLayout());
     }
 }
 
@@ -320,7 +325,7 @@ void PhongMaterial::setSpecular(const ITextureSP& specular)
 
     if (this->specular.get())
     {
-        updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_FRAGMENT_PHONG_SPECULAR - VKTS_BINDING_UNIFORM_SAMPLER_FRAGMENT_EMISSIVE, this->specular->getSampler()->getSampler(), this->specular->getImageView()->getImageView(), this->specular->getMemoryImage()->getImage()->getImageLayout());
+        updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_PHONG_SPECULAR - VKTS_BINDING_UNIFORM_SAMPLER_DISPLACEMENT, this->specular->getSampler()->getSampler(), this->specular->getImageView()->getImageView(), this->specular->getMemoryImage()->getImage()->getImageLayout());
     }
 }
 
@@ -335,7 +340,7 @@ void PhongMaterial::setSpecularShininess(const ITextureSP& specularShininess)
 
     if (this->specularShininess.get())
     {
-        updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_FRAGMENT_PHONG_SPECULAR_SHININESS - VKTS_BINDING_UNIFORM_SAMPLER_FRAGMENT_EMISSIVE, this->specularShininess->getSampler()->getSampler(), this->specularShininess->getImageView()->getImageView(), this->specularShininess->getMemoryImage()->getImage()->getImageLayout());
+        updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_PHONG_SPECULAR_SHININESS - VKTS_BINDING_UNIFORM_SAMPLER_DISPLACEMENT, this->specularShininess->getSampler()->getSampler(), this->specularShininess->getImageView()->getImageView(), this->specularShininess->getMemoryImage()->getImage()->getImageLayout());
     }
 }
 
@@ -375,13 +380,6 @@ void PhongMaterial::setDescriptorSets(const IDescriptorSetsSP& descriptorSets)
 
 void PhongMaterial::updateDescriptorSetsRecursive(const std::string& nodeName, const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets)
 {
-    for (uint32_t i = 0; i < VKTS_BINDING_UNIFORM_SAMPLER_FRAGMENT_COLOR_COUNT; i++)
-    {
-    	allWriteDescriptorSets[writeDescriptorSets[i].dstBinding] = writeDescriptorSets[i];
-    }
-
-    //
-
     auto currentDescriptorSets = createDescriptorSetsByName(nodeName);
 
     if (!currentDescriptorSets.get())
@@ -391,17 +389,32 @@ void PhongMaterial::updateDescriptorSetsRecursive(const std::string& nodeName, c
 
     //
 
-    for (uint32_t i = 0; i < VKTS_BINDING_UNIFORM_BINDING_COUNT; i++)
-    {
-    	if (i >= allWriteDescriptorSetsCount)
-    	{
-    		break;
-    	}
+    VkWriteDescriptorSet finalWriteDescriptorSets[VKTS_BINDING_UNIFORM_BINDING_COUNT];
+    uint32_t finalWriteDescriptorSetsCount = 0;
 
-    	allWriteDescriptorSets[i].dstSet = currentDescriptorSets->getDescriptorSets()[0];
+    for (uint32_t i = 0; i < allWriteDescriptorSetsCount; i++)
+    {
+        for (uint32_t k = 0; k < VKTS_BINDING_UNIFORM_PHONG_BINDING_COUNT; k++)
+        {
+        	// Assign used descriptor set.
+			if (allWriteDescriptorSets[i].dstBinding == writeDescriptorSets[k].dstBinding && writeDescriptorSets[k].sType == VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET)
+			{
+				allWriteDescriptorSets[i] = writeDescriptorSets[k];
+			}
+        }
+
+        // Gather valid descriptor sets.
+    	if (allWriteDescriptorSets[i].sType == VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET)
+    	{
+    		finalWriteDescriptorSets[finalWriteDescriptorSetsCount] = allWriteDescriptorSets[i];
+
+    		finalWriteDescriptorSets[finalWriteDescriptorSetsCount].dstSet = currentDescriptorSets->getDescriptorSets()[0];
+
+			finalWriteDescriptorSetsCount++;
+    	}
     }
 
-    currentDescriptorSets->updateDescriptorSets(allWriteDescriptorSetsCount, allWriteDescriptorSets, 0, nullptr);
+    currentDescriptorSets->updateDescriptorSets(finalWriteDescriptorSetsCount, finalWriteDescriptorSets, 0, nullptr);
 }
 
 void PhongMaterial::bindDescriptorSets(const std::string& nodeName, const ICommandBuffersSP& cmdBuffer, const VkPipelineLayout layout, const uint32_t bufferIndex) const

@@ -79,6 +79,9 @@ How to build:
 Changelog:
 ----------
 
+04/20/2016
+- Refactored shader bindings.
+
 04/14/2016
 - Updated documentaion structure and clarified topics.  
 - Optimized Android file loading.

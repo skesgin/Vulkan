@@ -59,8 +59,8 @@ protected:
 
     IDescriptorPoolSP descriptorPool;
     IDescriptorSetsSP descriptorSets;
-    VkDescriptorImageInfo descriptorImageInfos[VKTS_BINDING_UNIFORM_SAMPLER_FRAGMENT_COLOR_COUNT];
-    VkWriteDescriptorSet writeDescriptorSets[VKTS_BINDING_UNIFORM_SAMPLER_FRAGMENT_COLOR_COUNT];
+    VkDescriptorImageInfo descriptorImageInfos[VKTS_BINDING_UNIFORM_PHONG_BINDING_COUNT];
+    VkWriteDescriptorSet writeDescriptorSets[VKTS_BINDING_UNIFORM_PHONG_BINDING_COUNT];
     std::string nodeName;
 
     SmartPointerMap<std::string, IDescriptorPoolSP> allDescriptorPools;

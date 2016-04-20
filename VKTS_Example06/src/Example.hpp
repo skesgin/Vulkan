@@ -44,6 +44,8 @@
 
 #define VKTS_SCENE_NAME "astro_boy/astro_boy.vkts"
 
+#define VKTS_DESCRIPTOR_SET_COUNT (VKTS_BINDING_UNIFORM_PHONG_NO_DISPLACEMENT_BINDING_COUNT + VKTS_BINDING_UNIFORM_TRANSFORM_BINDING_COUNT + VKTS_BINDING_UNIFORM_BONES_BINDING_COUNT)
+
 class Example: public vkts::IUpdateThread
 {
 
@@ -70,7 +72,7 @@ private:
 	vkts::IDescriptorSetLayoutSP descriptorSetLayout;
     VkDescriptorBufferInfo descriptorBufferInfos[1 + 1];
 
-    VkWriteDescriptorSet writeDescriptorSets[VKTS_BINDING_UNIFORM_BINDING_COUNT];
+    VkWriteDescriptorSet writeDescriptorSets[VKTS_DESCRIPTOR_SET_COUNT];
 
 	vkts::IBufferObjectSP vertexViewProjectionUniformBuffer;
 	vkts::IBufferObjectSP fragmentUniformBuffer;
