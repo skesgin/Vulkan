@@ -946,9 +946,15 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
     				descriptorPoolSize[i].descriptorCount = 1;
                 }
 
-                for (int32_t i = VKTS_BINDING_UNIFORM_SAMPLER_SHADOW; i < VKTS_BINDING_UNIFORM_BINDING_COUNT; i++)
+                for (int32_t i = VKTS_BINDING_UNIFORM_SAMPLER_SHADOW; i < VKTS_BINDING_UNIFORM_BUFFER_SHADOW; i++)
                 {
     				descriptorPoolSize[i].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    				descriptorPoolSize[i].descriptorCount = 1;
+                }
+
+                for (int32_t i = VKTS_BINDING_UNIFORM_BUFFER_SHADOW; i < VKTS_BINDING_UNIFORM_BINDING_COUNT; i++)
+                {
+    				descriptorPoolSize[i].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     				descriptorPoolSize[i].descriptorCount = 1;
                 }
 

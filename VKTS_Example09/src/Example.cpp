@@ -27,7 +27,7 @@
 #include "Example.hpp"
 
 Example::Example(const vkts::IInitialResourcesSP& initialResources, const int32_t windowIndex, const vkts::ISurfaceSP& surface) :
-		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), windowDimension(0, 0), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), descriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), fragmentUniformBuffer(nullptr), skinningVertexShaderModule(nullptr), skinningFragmentShaderModule(nullptr), skinningShadowFragmentShaderModule(nullptr), standardVertexShaderModule(nullptr), standardFragmentShaderModule(nullptr), standardShadowFragmentShaderModule(nullptr), pipelineLayout(nullptr), sceneContext(nullptr), scene(nullptr), swapchain(nullptr), renderPass(nullptr), shadowRenderPass(nullptr), allOpaqueGraphicsPipelines(), allBlendGraphicsPipelines(), allBlendCwGraphicsPipelines(), allShadowGraphicsPipelines(), shadowTexture(nullptr), msaaColorTexture(nullptr), msaaDepthTexture(nullptr), depthTexture(nullptr), shadowImageView(nullptr), msaaColorImageView(nullptr), msaaDepthStencilImageView(nullptr), depthStencilImageView(nullptr), shadowSampler(nullptr), swapchainImagesCount(0), swapchainImageView(), framebuffer(), shadowFramebuffer(), cmdBuffer(), shadowCmdBuffer()
+		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), windowDimension(0, 0), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), descriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), fragmentUniformBuffer(nullptr), shadowUniformBuffer(nullptr), skinningVertexShaderModule(nullptr), skinningFragmentShaderModule(nullptr), skinningShadowFragmentShaderModule(nullptr), standardVertexShaderModule(nullptr), standardFragmentShaderModule(nullptr), standardShadowFragmentShaderModule(nullptr), pipelineLayout(nullptr), sceneContext(nullptr), scene(nullptr), swapchain(nullptr), renderPass(nullptr), shadowRenderPass(nullptr), allOpaqueGraphicsPipelines(), allBlendGraphicsPipelines(), allBlendCwGraphicsPipelines(), allShadowGraphicsPipelines(), shadowTexture(nullptr), msaaColorTexture(nullptr), msaaDepthTexture(nullptr), depthTexture(nullptr), shadowImageView(nullptr), msaaColorImageView(nullptr), msaaDepthStencilImageView(nullptr), depthStencilImageView(nullptr), shadowSampler(nullptr), swapchainImagesCount(0), swapchainImageView(), framebuffer(), shadowFramebuffer(), cmdBuffer(), shadowCmdBuffer()
 {
 }
 
@@ -342,6 +342,10 @@ VkBool32 Example::updateDescriptorSets()
 	descriptorBufferInfos[1].offset = 0;
 	descriptorBufferInfos[1].range = fragmentUniformBuffer->getBuffer()->getSize();
 
+	descriptorBufferInfos[2].buffer = shadowUniformBuffer->getBuffer()->getBuffer();
+	descriptorBufferInfos[2].offset = 0;
+	descriptorBufferInfos[2].range = shadowUniformBuffer->getBuffer()->getSize();
+
     memset(&descriptorImageInfos, 0, sizeof(descriptorImageInfos));
 
     descriptorImageInfos[0].sampler = shadowSampler->getSampler();
@@ -384,15 +388,26 @@ VkBool32 Example::updateDescriptorSets()
 	writeDescriptorSets[2].pBufferInfo = nullptr;
 	writeDescriptorSets[2].pTexelBufferView = nullptr;
 
+	writeDescriptorSets[3].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+
+	writeDescriptorSets[3].dstSet = VK_NULL_HANDLE;	// Defined later.
+	writeDescriptorSets[3].dstBinding = VKTS_BINDING_UNIFORM_BUFFER_SHADOW;
+	writeDescriptorSets[3].dstArrayElement = 0;
+	writeDescriptorSets[3].descriptorCount = 1;
+	writeDescriptorSets[3].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	writeDescriptorSets[3].pImageInfo = nullptr;
+	writeDescriptorSets[3].pBufferInfo = &descriptorBufferInfos[2];
+	writeDescriptorSets[3].pTexelBufferView = nullptr;
+
 	//
 
-	writeDescriptorSets[3].dstBinding = VKTS_BINDING_UNIFORM_BUFFER_TRANSFORM;
+	writeDescriptorSets[4].dstBinding = VKTS_BINDING_UNIFORM_BUFFER_TRANSFORM;
 
-	writeDescriptorSets[4].dstBinding = VKTS_BINDING_UNIFORM_BUFFER_BONE_TRANSFORM;
+	writeDescriptorSets[5].dstBinding = VKTS_BINDING_UNIFORM_BUFFER_BONE_TRANSFORM;
 
 	for (uint32_t i = VKTS_BINDING_UNIFORM_SAMPLER_EMISSIVE; i <= VKTS_BINDING_UNIFORM_SAMPLER_PHONG_SPECULAR_SHININESS; i++)
 	{
-		writeDescriptorSets[5 + i - VKTS_BINDING_UNIFORM_SAMPLER_EMISSIVE].dstBinding = i;
+		writeDescriptorSets[6 + i - VKTS_BINDING_UNIFORM_SAMPLER_EMISSIVE].dstBinding = i;
 	}
 
 	return VK_TRUE;
@@ -1304,25 +1319,31 @@ VkBool32 Example::buildDescriptorSetLayout()
 	descriptorSetLayoutBinding[2].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 	descriptorSetLayoutBinding[2].pImmutableSamplers = nullptr;
 
-	descriptorSetLayoutBinding[3].binding = VKTS_BINDING_UNIFORM_BUFFER_TRANSFORM;
+	descriptorSetLayoutBinding[3].binding = VKTS_BINDING_UNIFORM_BUFFER_SHADOW;
 	descriptorSetLayoutBinding[3].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 	descriptorSetLayoutBinding[3].descriptorCount = 1;
 	descriptorSetLayoutBinding[3].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 	descriptorSetLayoutBinding[3].pImmutableSamplers = nullptr;
 
-	descriptorSetLayoutBinding[4].binding = VKTS_BINDING_UNIFORM_BUFFER_BONE_TRANSFORM;
+	descriptorSetLayoutBinding[4].binding = VKTS_BINDING_UNIFORM_BUFFER_TRANSFORM;
 	descriptorSetLayoutBinding[4].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 	descriptorSetLayoutBinding[4].descriptorCount = 1;
 	descriptorSetLayoutBinding[4].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 	descriptorSetLayoutBinding[4].pImmutableSamplers = nullptr;
 
+	descriptorSetLayoutBinding[5].binding = VKTS_BINDING_UNIFORM_BUFFER_BONE_TRANSFORM;
+	descriptorSetLayoutBinding[5].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	descriptorSetLayoutBinding[5].descriptorCount = 1;
+	descriptorSetLayoutBinding[5].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+	descriptorSetLayoutBinding[5].pImmutableSamplers = nullptr;
+
     for (int32_t i = VKTS_BINDING_UNIFORM_SAMPLER_EMISSIVE; i <= VKTS_BINDING_UNIFORM_SAMPLER_PHONG_SPECULAR_SHININESS; i++)
     {
-		descriptorSetLayoutBinding[5 + i - VKTS_BINDING_UNIFORM_SAMPLER_EMISSIVE].binding = i;
-		descriptorSetLayoutBinding[5 + i - VKTS_BINDING_UNIFORM_SAMPLER_EMISSIVE].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		descriptorSetLayoutBinding[5 + i - VKTS_BINDING_UNIFORM_SAMPLER_EMISSIVE].descriptorCount = 1;
-		descriptorSetLayoutBinding[5 + i - VKTS_BINDING_UNIFORM_SAMPLER_EMISSIVE].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-		descriptorSetLayoutBinding[5 + i - VKTS_BINDING_UNIFORM_SAMPLER_EMISSIVE].pImmutableSamplers = nullptr;
+		descriptorSetLayoutBinding[6 + i - VKTS_BINDING_UNIFORM_SAMPLER_EMISSIVE].binding = i;
+		descriptorSetLayoutBinding[6 + i - VKTS_BINDING_UNIFORM_SAMPLER_EMISSIVE].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		descriptorSetLayoutBinding[6 + i - VKTS_BINDING_UNIFORM_SAMPLER_EMISSIVE].descriptorCount = 1;
+		descriptorSetLayoutBinding[6 + i - VKTS_BINDING_UNIFORM_SAMPLER_EMISSIVE].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+		descriptorSetLayoutBinding[6 + i - VKTS_BINDING_UNIFORM_SAMPLER_EMISSIVE].pImmutableSamplers = nullptr;
     }
 
 	descriptorSetLayout = vkts::descriptorSetLayoutCreate(initialResources->getDevice()->getDevice(), 0, VKTS_DESCRIPTOR_SET_COUNT, descriptorSetLayoutBinding);
@@ -1498,6 +1519,26 @@ VkBool32 Example::buildUniformBuffers()
 	if (!fragmentUniformBuffer.get())
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create fragment uniform buffer.");
+
+		return VK_FALSE;
+	}
+
+	memset(&bufferCreateInfo, 0, sizeof(VkBufferCreateInfo));
+
+	bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+
+	bufferCreateInfo.flags = 0;
+	bufferCreateInfo.size = vkts::commonGetDeviceSize(1 * sizeof(float), 16);
+	bufferCreateInfo.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+	bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+	bufferCreateInfo.queueFamilyIndexCount = 0;
+	bufferCreateInfo.pQueueFamilyIndices = nullptr;
+
+	shadowUniformBuffer = vkts::bufferObjectCreate(initialResources, bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+
+	if (!shadowUniformBuffer.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create shadow uniform buffer.");
 
 		return VK_FALSE;
 	}
@@ -1994,6 +2035,7 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 	{
 		glm::mat4 projectionMatrix(1.0f);
 		glm::mat4 viewMatrix(1.0f);
+		glm::mat4 shadowMatrix(1.0f);
 
 		glm::vec3 worldLightDirection = glm::vec3(-2.0f, 1.0f, 0.0f);
 
@@ -2005,6 +2047,9 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 
 		// Get view matrix from light.
 		viewMatrix = vkts::lookAtMat4(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f) + glm::vec4(worldLightDirection * 10.0f, 0.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+		// TODO: Add bias matrix.
+		shadowMatrix = projectionMatrix * viewMatrix;
 
 		if (!vertexViewProjectionUniformBuffer->upload(0 * sizeof(float) * 16, 0, projectionMatrix))
 		{
@@ -2080,6 +2125,12 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 		if (!vertexViewProjectionUniformBuffer->upload(1 * sizeof(float) * 16, 0, viewMatrix))
 		{
 			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not upload matrices.");
+
+			return VK_FALSE;
+		}
+		if (!shadowUniformBuffer->upload(0, 0, shadowMatrix))
+		{
+			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not upload shadow matrix.");
 
 			return VK_FALSE;
 		}
@@ -2270,6 +2321,11 @@ void Example::terminate(const vkts::IUpdateThreadContext& updateContext)
 			if (fragmentUniformBuffer.get())
 			{
 				fragmentUniformBuffer->destroy();
+			}
+
+			if (shadowUniformBuffer.get())
+			{
+				shadowUniformBuffer->destroy();
 			}
 
 			if (descriptorSetLayout.get())

@@ -41,11 +41,11 @@
 
 #define VKTS_BINDING_VERTEX_BUFFER 0
 
-#define VKTS_SKINNING_VERTEX_SHADER_NAME 			"shader/SPIR/V/phong_skinning.vert.spv"
+#define VKTS_SKINNING_VERTEX_SHADER_NAME 			"shader/SPIR/V/phong_skinning_shadow.vert.spv"
 #define VKTS_SKINNING_FRAGMENT_SHADER_NAME 			"shader/SPIR/V/phong_skinning_shadow.frag.spv"
 #define VKTS_SKINNING_SHADOW_FRAGMENT_SHADER_NAME 	"shader/SPIR/V/phong_skinning_write_shadow.frag.spv"
 
-#define VKTS_STANDARD_VERTEX_SHADER_NAME 			"shader/SPIR/V/phong.vert.spv"
+#define VKTS_STANDARD_VERTEX_SHADER_NAME 			"shader/SPIR/V/phong_shadow.vert.spv"
 #define VKTS_STANDARD_FRAGMENT_SHADER_NAME 			"shader/SPIR/V/phong_shadow.frag.spv"
 #define VKTS_STANDARD_SHADOW_FRAGMENT_SHADER_NAME	"shader/SPIR/V/phong_write_shadow.frag.spv"
 
@@ -78,12 +78,13 @@ private:
 
 	vkts::IDescriptorSetLayoutSP descriptorSetLayout;
 	VkDescriptorImageInfo descriptorImageInfos[1];
-    VkDescriptorBufferInfo descriptorBufferInfos[1 + 1];
+    VkDescriptorBufferInfo descriptorBufferInfos[1 + 1 + 1];
 
     VkWriteDescriptorSet writeDescriptorSets[VKTS_DESCRIPTOR_SET_COUNT];
 
 	vkts::IBufferObjectSP vertexViewProjectionUniformBuffer;
 	vkts::IBufferObjectSP fragmentUniformBuffer;
+	vkts::IBufferObjectSP shadowUniformBuffer;
 
 	vkts::IShaderModuleSP skinningVertexShaderModule;
 	vkts::IShaderModuleSP skinningFragmentShaderModule;

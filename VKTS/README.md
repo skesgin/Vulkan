@@ -79,6 +79,9 @@ How to build:
 Changelog:
 ----------
 
+04/21/2016
+- Added binding for shadow mapping.
+
 04/20/2016
 - Refactored shader bindings.
 
