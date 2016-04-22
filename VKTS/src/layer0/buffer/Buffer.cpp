@@ -117,6 +117,25 @@ void Buffer::copyBufferToImage(const VkCommandBuffer cmdBuffer, const VkImage ta
     vkCmdCopyBufferToImage(cmdBuffer, buffer, targetImage, targetImageLayout, regionCount, regions);
 }
 
+void Buffer::cmdPipelineBarrier(const VkCommandBuffer cmdBuffer, const VkAccessFlags srcAccessMask, const VkAccessFlags dstAccessMask)
+{
+    VkBufferMemoryBarrier bufferMemoryBarrier;
+
+    memset(&bufferMemoryBarrier, 0, sizeof(VkBufferMemoryBarrier));
+
+    bufferMemoryBarrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+
+    bufferMemoryBarrier.srcAccessMask = srcAccessMask;
+    bufferMemoryBarrier.dstAccessMask = dstAccessMask;
+    bufferMemoryBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    bufferMemoryBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    bufferMemoryBarrier.buffer = buffer;
+    bufferMemoryBarrier.offset = 0;
+    bufferMemoryBarrier.size = getSize();
+
+    vkCmdPipelineBarrier(cmdBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, 0, 0, nullptr, 1, &bufferMemoryBarrier, 0, nullptr);
+}
+
 //
 // IDestroyable
 //

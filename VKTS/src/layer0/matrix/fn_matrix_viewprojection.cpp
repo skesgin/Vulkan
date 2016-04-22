@@ -46,16 +46,19 @@ glm::mat4 VKTS_APIENTRY orthoMat4(const float left, const float right, const flo
     result[0][1] = 0.0f;
     result[0][2] = 0.0f;
     result[0][3] = 0.0f;
+
     result[1][0] = 0.0f;
     // Window clip origin is upper left.
     result[1][1] = -2.0f / (top - bottom);
     result[1][2] = 0.0f;
     result[1][3] = 0.0f;
+
     result[2][0] = 0.0f;
     result[2][1] = 0.0f;
     // z range is [0 1]
     result[2][2] = -1.0f / (farVal - nearVal);
     result[2][3] = 0.0f;
+
     result[3][0] = -(right + left) / (right - left);
     result[3][1] = -(top + bottom) / (top - bottom);
     // z range is [0 1]
@@ -78,16 +81,19 @@ glm::mat4 VKTS_APIENTRY frustumMat4(const float left, const float right, const f
     result[0][1] = 0.0f;
     result[0][2] = 0.0f;
     result[0][3] = 0.0f;
+
     result[1][0] = 0.0f;
     // Window clip origin is upper left.
     result[1][1] = -2.0f * nearVal / (top - bottom);
     result[1][2] = 0.0f;
     result[1][3] = 0.0f;
+
     result[2][0] = (right + left) / (right - left);
     result[2][1] = (top + bottom) / (top - bottom);
     // z range is [0 1]
     result[2][2] = -farVal / (farVal - nearVal);
     result[2][3] = -1.0f;
+
     result[3][0] = 0.0f;
     result[3][1] = 0.0f;
     // z range is [0 1]

@@ -87,6 +87,8 @@ public:
 
     virtual void copyBufferToImage(const VkCommandBuffer cmdBuffer, const VkImage targetImage, const VkImageLayout targetImageLayout, const uint32_t regionCount, const VkBufferImageCopy* regions) const override;
 
+    virtual void cmdPipelineBarrier(const VkCommandBuffer cmdBuffer, const VkAccessFlags srcAccessMask, const VkAccessFlags dstAccessMask) override;
+
     //
     // IDestroyable
     //

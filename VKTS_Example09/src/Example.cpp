@@ -27,7 +27,7 @@
 #include "Example.hpp"
 
 Example::Example(const vkts::IInitialResourcesSP& initialResources, const int32_t windowIndex, const vkts::ISurfaceSP& surface) :
-		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), windowDimension(0, 0), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), descriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), fragmentUniformBuffer(nullptr), shadowUniformBuffer(nullptr), skinningVertexShaderModule(nullptr), skinningFragmentShaderModule(nullptr), skinningShadowFragmentShaderModule(nullptr), standardVertexShaderModule(nullptr), standardFragmentShaderModule(nullptr), standardShadowFragmentShaderModule(nullptr), pipelineLayout(nullptr), sceneContext(nullptr), scene(nullptr), swapchain(nullptr), renderPass(nullptr), shadowRenderPass(nullptr), allOpaqueGraphicsPipelines(), allBlendGraphicsPipelines(), allBlendCwGraphicsPipelines(), allShadowGraphicsPipelines(), shadowTexture(nullptr), msaaColorTexture(nullptr), msaaDepthTexture(nullptr), depthTexture(nullptr), shadowImageView(nullptr), msaaColorImageView(nullptr), msaaDepthStencilImageView(nullptr), depthStencilImageView(nullptr), shadowSampler(nullptr), swapchainImagesCount(0), swapchainImageView(), framebuffer(), shadowFramebuffer(), cmdBuffer(), shadowCmdBuffer()
+		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), windowDimension(0, 0), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), descriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), fragmentUniformBuffer(nullptr), shadowUniformBuffer(nullptr), skinningVertexShaderModule(nullptr), skinningFragmentShaderModule(nullptr), skinningShadowFragmentShaderModule(nullptr), standardVertexShaderModule(nullptr), standardFragmentShaderModule(nullptr), standardShadowFragmentShaderModule(nullptr), pipelineLayout(nullptr), sceneContext(nullptr), scene(nullptr), swapchain(nullptr), renderPass(nullptr), shadowRenderPass(nullptr), allOpaqueGraphicsPipelines(), allBlendGraphicsPipelines(), allBlendCwGraphicsPipelines(), allShadowGraphicsPipelines(), shadowTexture(nullptr), msaaColorTexture(nullptr), msaaDepthTexture(nullptr), depthTexture(nullptr), shadowImageView(nullptr), msaaColorImageView(nullptr), msaaDepthStencilImageView(nullptr), depthStencilImageView(nullptr), shadowSampler(nullptr), swapchainImagesCount(0), swapchainImageView(), framebuffer(), shadowFramebuffer(), fences(), cmdBuffer(), shadowCmdBuffer()
 {
 }
 
@@ -115,14 +115,8 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 
 	if (scene.get())
 	{
-		vkts::blend blend;
-
-		// In this use case, transparent elements do not cast a shadow.
-		blend.setPassTransparent(VK_FALSE);
-		scene->bindDrawIndexedRecursive(shadowCmdBuffer[usedBuffer], allShadowGraphicsPipelines, &blend);
+		scene->bindDrawIndexedRecursive(shadowCmdBuffer[usedBuffer], allShadowGraphicsPipelines);
 	}
-
-	shadowCmdBuffer[usedBuffer]->cmdEndRenderPass();
 
     //
 
@@ -272,6 +266,20 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 	if (result != VK_SUCCESS)
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not end command buffer.");
+
+		return VK_FALSE;
+	}
+
+	return VK_TRUE;
+}
+
+VkBool32 Example::buildFences(const int32_t usedBuffer)
+{
+	fences[usedBuffer] = vkts::fenceCreate(initialResources->getDevice()->getDevice(), 0);
+
+	if (!fences[usedBuffer].get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create fences.");
 
 		return VK_FALSE;
 	}
@@ -477,7 +485,8 @@ VkBool32 Example::buildScene(const vkts::ICommandBuffersSP& cmdBuffer)
 
 VkBool32 Example::buildShadowSampler()
 {
-	shadowSampler = vkts::samplerCreate(initialResources->getDevice()->getDevice(), 0, VK_FILTER_LINEAR, VK_FILTER_LINEAR, VK_SAMPLER_MIPMAP_MODE_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, 0.0f, VK_FALSE, 1.0f, VK_FALSE, VK_COMPARE_OP_NEVER, 0.0f, 0.0f, VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK, VK_FALSE);
+	// Enabled texture compare.
+	shadowSampler = vkts::samplerCreate(initialResources->getDevice()->getDevice(), 0, VK_FILTER_NEAREST, VK_FILTER_NEAREST, VK_SAMPLER_MIPMAP_MODE_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, 0.0f, VK_FALSE, 1.0f, VK_TRUE, VK_COMPARE_OP_LESS_OR_EQUAL, 0.0f, 0.0f, VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK, VK_FALSE);
 
 	if (!shadowSampler.get())
 	{
@@ -676,7 +685,7 @@ VkBool32 Example::buildShadowTexture(const vkts::ICommandBuffersSP& cmdBuffer)
 
 	imageCreateInfo.flags = 0;
 	imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
-	imageCreateInfo.format = VK_FORMAT_D16_UNORM;
+	imageCreateInfo.format = VK_FORMAT_D32_SFLOAT;
 	imageCreateInfo.extent = {VKTS_SHADOW_MAP_SIZE, VKTS_SHADOW_MAP_SIZE, 1};
 	imageCreateInfo.mipLevels = 1;
 	imageCreateInfo.arrayLayers = 1;
@@ -1024,6 +1033,10 @@ VkBool32 Example::buildPipeline()
 	pipelineViewportStateCreateInfo.pViewports = &shadowViewport;
 	pipelineViewportStateCreateInfo.pScissors = &shadowScissor;
 
+	pipelineRasterizationStateCreateInfo.cullMode = VK_CULL_MODE_FRONT_BIT;
+	pipelineRasterizationStateCreateInfo.depthBiasEnable = VK_TRUE;
+	pipelineRasterizationStateCreateInfo.depthBiasConstantFactor = VKTS_DEPTH_BIAS_CONSTANT_FACTOR;
+	pipelineRasterizationStateCreateInfo.depthBiasSlopeFactor = VKTS_DEPTH_BIAS_SLOPE_FACTOR;
 
 	pipelineMultisampleStateCreateInfo.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
 
@@ -1046,6 +1059,11 @@ VkBool32 Example::buildPipeline()
 
 	pipelineViewportStateCreateInfo.pViewports = &viewport;
 	pipelineViewportStateCreateInfo.pScissors = &scissor;
+
+	pipelineRasterizationStateCreateInfo.cullMode = VK_CULL_MODE_BACK_BIT;
+	pipelineRasterizationStateCreateInfo.depthBiasEnable = VK_FALSE;
+	pipelineRasterizationStateCreateInfo.depthBiasConstantFactor = 0.0f;
+	pipelineRasterizationStateCreateInfo.depthBiasSlopeFactor = 0.0f;
 
 	pipelineMultisampleStateCreateInfo.rasterizationSamples = VKTS_SAMPLE_COUNT_BIT;
 
@@ -1136,6 +1154,11 @@ VkBool32 Example::buildPipeline()
 
 	pipelineViewportStateCreateInfo.pViewports = &shadowViewport;
 	pipelineViewportStateCreateInfo.pScissors = &shadowScissor;
+
+	pipelineRasterizationStateCreateInfo.cullMode = VK_CULL_MODE_FRONT_BIT;
+	pipelineRasterizationStateCreateInfo.depthBiasEnable = VK_TRUE;
+	pipelineRasterizationStateCreateInfo.depthBiasConstantFactor = VKTS_DEPTH_BIAS_CONSTANT_FACTOR;
+	pipelineRasterizationStateCreateInfo.depthBiasSlopeFactor = VKTS_DEPTH_BIAS_SLOPE_FACTOR;
 
 	pipelineMultisampleStateCreateInfo.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
 
@@ -1252,7 +1275,7 @@ VkBool32 Example::buildRenderPass()
 	// Create shadow render pass.
 	//
 
-	attachmentDescription[0].format = VK_FORMAT_D16_UNORM;
+	attachmentDescription[0].format = VK_FORMAT_D32_SFLOAT;
 	attachmentDescription[0].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 	attachmentDescription[0].initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 	attachmentDescription[0].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
@@ -1528,7 +1551,7 @@ VkBool32 Example::buildUniformBuffers()
 	bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 
 	bufferCreateInfo.flags = 0;
-	bufferCreateInfo.size = vkts::commonGetDeviceSize(1 * sizeof(float), 16);
+	bufferCreateInfo.size = vkts::commonGetDeviceSize(16 * sizeof(float), 16);
 	bufferCreateInfo.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
 	bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 	bufferCreateInfo.queueFamilyIndexCount = 0;
@@ -1578,6 +1601,7 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 
     swapchainImageView = vkts::SmartPointerVector<vkts::IImageViewSP>(swapchainImagesCount);
     framebuffer = vkts::SmartPointerVector<vkts::IFramebufferSP>(swapchainImagesCount);
+    fences = vkts::SmartPointerVector<vkts::IFenceSP>(swapchainImagesCount);
     shadowFramebuffer = vkts::SmartPointerVector<vkts::IFramebufferSP>(swapchainImagesCount);
     cmdBuffer = vkts::SmartPointerVector<vkts::ICommandBuffersSP>(swapchainImagesCount);
 
@@ -1768,6 +1792,11 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 			return VK_FALSE;
 		}
 
+		if (!buildFences(i))
+		{
+			return VK_FALSE;
+		}
+
 		if (!buildCmdBuffer(i))
 		{
 			return VK_FALSE;
@@ -1793,6 +1822,11 @@ void Example::terminateResources(const vkts::IUpdateThreadContext& updateContext
 				if (shadowCmdBuffer[i].get())
 				{
 					shadowCmdBuffer[i]->destroy();
+				}
+
+				if (fences[i].get())
+				{
+					fences[i]->destroy();
 				}
 
 				if (shadowFramebuffer[i].get())
@@ -2037,19 +2071,21 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 		glm::mat4 viewMatrix(1.0f);
 		glm::mat4 shadowMatrix(1.0f);
 
-		glm::vec3 worldLightDirection = glm::vec3(-2.0f, 1.0f, 0.0f);
+		glm::vec3 worldLightDirection = glm::vec3(0.5f, 1.0f, 0.0f);
 
 		//
-		// Depth
+		// Shadow
 		//
 
-		projectionMatrix = vkts::orthoMat4(-VKTS_SHADOW_MAP_SIZE * 0.5f, VKTS_SHADOW_MAP_SIZE * 0.5f, -VKTS_SHADOW_MAP_SIZE * 0.5f, VKTS_SHADOW_MAP_SIZE * 0.5f, 1.0f, 1000.0f);
+		projectionMatrix = vkts::orthoMat4(-VKTS_SHADOW_MAP_SIZE * 0.5f * VKTS_SHADOW_CAMERA_SCALE, VKTS_SHADOW_MAP_SIZE * 0.5f * VKTS_SHADOW_CAMERA_SCALE, -VKTS_SHADOW_MAP_SIZE * 0.5f * VKTS_SHADOW_CAMERA_SCALE, VKTS_SHADOW_MAP_SIZE * 0.5f * VKTS_SHADOW_CAMERA_SCALE, 0.0f, VKTS_SHADOW_CAMERA_ORTHO_FAR);
 
 		// Get view matrix from light.
-		viewMatrix = vkts::lookAtMat4(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f) + glm::vec4(worldLightDirection * 10.0f, 0.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		viewMatrix = vkts::lookAtMat4(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f) + glm::vec4(glm::normalize(worldLightDirection) * VKTS_SHADOW_CAMERA_DISTANCE, 0.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
-		// TODO: Add bias matrix.
-		shadowMatrix = projectionMatrix * viewMatrix;
+		// Bias matrix to convert to window space.
+		glm::mat4 biasMatrix = vkts::translateMat4(0.5f, 0.5f, 0.0f) * vkts::scaleMat4(0.5f, 0.5f, 1.0f);
+
+		shadowMatrix = biasMatrix * projectionMatrix * viewMatrix;
 
 		if (!vertexViewProjectionUniformBuffer->upload(0 * sizeof(float) * 16, 0, projectionMatrix))
 		{
@@ -2087,11 +2123,34 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
         submitInfo.signalSemaphoreCount = 0;
         submitInfo.pSignalSemaphores = nullptr;
 
-		result = initialResources->getQueue()->submit(1, &submitInfo, VK_NULL_HANDLE);
+        // Added fence for later waiting.
+		result = initialResources->getQueue()->submit(1, &submitInfo, fences[currentBuffer]->getFence());
 
 		if (result != VK_SUCCESS)
 		{
 			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not submit queue.");
+
+			return VK_FALSE;
+		}
+
+		//
+		// Wait for fence, as view projection buffer is used by both commands.
+		//
+
+		result = fences[currentBuffer]->waitForFence(UINT64_MAX);
+
+		if (result != VK_SUCCESS)
+		{
+			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not wait for fence.");
+
+			return VK_FALSE;
+		}
+
+		result = fences[currentBuffer]->reset();
+
+		if (result != VK_SUCCESS)
+		{
+			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not reset fence.");
 
 			return VK_FALSE;
 		}

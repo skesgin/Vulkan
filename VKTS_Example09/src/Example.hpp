@@ -37,7 +37,14 @@
 #define VKTS_SHADER_STAGE_COUNT 2
 #define VKTS_PIPELINE_CACHE_SIZE 0
 #define VKTS_SAMPLE_COUNT_BIT VK_SAMPLE_COUNT_4_BIT
-#define VKTS_SHADOW_MAP_SIZE 1024
+#define VKTS_SHADOW_MAP_SIZE 2048
+#define VKTS_SHADOW_CAMERA_SCALE 0.11f
+#define VKTS_SHADOW_CAMERA_DISTANCE 100.0f
+#define VKTS_SHADOW_CAMERA_ORTHO_FAR 200.0f
+
+// TODO: Tweak values.
+#define VKTS_DEPTH_BIAS_CONSTANT_FACTOR 1000.0f
+#define VKTS_DEPTH_BIAS_SLOPE_FACTOR 2000.0f
 
 #define VKTS_BINDING_VERTEX_BUFFER 0
 
@@ -128,10 +135,14 @@ private:
     vkts::SmartPointerVector<vkts::IFramebufferSP> framebuffer;
     vkts::SmartPointerVector<vkts::IFramebufferSP> shadowFramebuffer;
 
+    vkts::SmartPointerVector<vkts::IFenceSP> fences;
+
     vkts::SmartPointerVector<vkts::ICommandBuffersSP> cmdBuffer;
     vkts::SmartPointerVector<vkts::ICommandBuffersSP> shadowCmdBuffer;
 
 	VkBool32 buildCmdBuffer(const int32_t usedBuffer);
+
+	VkBool32 buildFences(const int32_t usedBuffer);
 
 	VkBool32 buildFramebuffer(const int32_t usedBuffer);
 

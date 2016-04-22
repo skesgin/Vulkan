@@ -309,6 +309,14 @@
 #include <vkts/layer0/fence/fn_fence.hpp>
 
 /**
+ * Event.
+ */
+
+#include <vkts/layer0/event/IEvent.hpp>
+
+#include <vkts/layer0/event/fn_event.hpp>
+
+/**
  * Semaphore.
  */
 
