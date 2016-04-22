@@ -511,7 +511,7 @@ VkBool32 Example::buildPipeline()
 	pipelineRasterizationStateCreateInfo.depthBiasConstantFactor = 0.0f;
 	pipelineRasterizationStateCreateInfo.depthBiasClamp = 0.0f;
 	pipelineRasterizationStateCreateInfo.depthBiasSlopeFactor = 0.0f;
-	pipelineRasterizationStateCreateInfo.lineWidth = 0.0f;
+	pipelineRasterizationStateCreateInfo.lineWidth = 1.0f;
 
 	//
 
