@@ -79,6 +79,9 @@ How to build:
 Changelog:
 ----------
 
+04/23/2016
+- Disabled VK_KHR_xlib_surface temporarily, as currently not present in the VulkanSDK.
+
 04/21/2016
 - Added binding for shadow mapping.
 
