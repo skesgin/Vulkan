@@ -7,7 +7,7 @@ Authors:
 
 VKTS version: **0.9.0**
 
-Depending Vulkan API header version: **1.0.8**
+Depending Vulkan API header version: **1.0.11**
 
 Depending Vulkan extensions, when using a window system:
 
@@ -78,6 +78,9 @@ How to build:
 
 Changelog:
 ----------
+
+04/28/2016
+- Updated to LunarG SDK 1.0.11.
 
 04/23/2016
 - Disabled VK_KHR_xlib_surface temporarily, as currently not present in the VulkanSDK.
