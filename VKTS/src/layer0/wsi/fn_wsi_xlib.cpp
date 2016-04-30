@@ -55,8 +55,7 @@ VkBool32 VKTS_APIENTRY _wsiGatherNeededInstanceExtensions(const std::vector<VkEx
         }
     }
 
-    // FIXME: Enable again.
-    /*if (!g_hasXcb)
+    if (!g_hasXcb)
     {
     	g_hasXlib = VK_FALSE;
 
@@ -79,7 +78,7 @@ VkBool32 VKTS_APIENTRY _wsiGatherNeededInstanceExtensions(const std::vector<VkEx
         {
             return VK_FALSE;
         }
-    }*/
+    }
 
     //
 
@@ -131,8 +130,7 @@ VkSurfaceKHR VKTS_APIENTRY _wsiSurfaceCreate(const VkInstance instance, VKTS_NAT
         return surface;
     }
 
-    // FIXME: Enable again.
-    /*if (g_hasXlib)
+    if (g_hasXlib)
     {
     	VkXlibSurfaceCreateInfoKHR xlibSurfaceCreateInfoKHR;
 
@@ -152,7 +150,7 @@ VkSurfaceKHR VKTS_APIENTRY _wsiSurfaceCreate(const VkInstance instance, VKTS_NAT
         }
 
         return surface;
-    }*/
+    }
 
     return VK_NULL_HANDLE;
 }

@@ -79,8 +79,11 @@ How to build:
 Changelog:
 ----------
 
+04/30/2016
+- Enabled VK_KHR_xlib_surface, as now present in the VulkanSDK 1.0.11.0 again.
+
 04/28/2016
-- Updated to LunarG SDK 1.0.11.
+- Updated to LunarG SDK 1.0.11.0.
 
 04/23/2016
 - Disabled VK_KHR_xlib_surface temporarily, as currently not present in the VulkanSDK.
