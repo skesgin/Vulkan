@@ -522,6 +522,14 @@
 #include <vkts/layer1/scenegraph/fn_scenegraph.hpp>
 
 /**
+ * Font.
+ */
+
+#include <vkts/layer1/font/IFont.hpp>
+
+#include <vkts/layer1/font/fn_font.hpp>
+
+/**
  * Render overwrites.
  */
 

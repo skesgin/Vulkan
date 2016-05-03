@@ -79,6 +79,9 @@ How to build:
 Changelog:
 ----------
 
+05/03/2016
+- Added font class.
+
 04/30/2016
 - Enabled VK_KHR_xlib_surface, as now present in the VulkanSDK 1.0.11.0 again.
 
