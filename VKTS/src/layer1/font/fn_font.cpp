@@ -102,7 +102,7 @@ static VkBool32 fontExtractValue(const char* buffer, const char* parameter, char
         return VK_FALSE;
     }
 
-    char* start = strstr(buffer, parameter);
+    const char* start = strstr(buffer, parameter);
 
     if (!start)
     {
@@ -112,7 +112,7 @@ static VkBool32 fontExtractValue(const char* buffer, const char* parameter, char
     // Skip '='
     start++;
 
-    char* end = strstr(start, " ");
+    const char* end = strstr(start, " ");
 
     if (!end)
     {
