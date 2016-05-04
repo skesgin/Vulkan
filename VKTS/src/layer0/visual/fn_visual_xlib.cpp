@@ -108,6 +108,8 @@ static void _visualEnumerateDisplays()
     RROutput primary = XRRGetOutputPrimary(g_nativeDisplay, DefaultRootWindow(g_nativeDisplay));
 
     int32_t displayIndex = 0;
+    
+    VkBool32 hasDefaultDisplay = VK_FALSE;
 
     //
 
@@ -143,6 +145,11 @@ static void _visualEnumerateDisplays()
                     currentDisplayContainer->height = crtcInfo->height;
 
                     currentDisplayContainer->defaultDisplay = (primary == crtcInfo->outputs[k]);
+                    
+                    if (currentDisplayContainer->defaultDisplay)
+                    {
+                        hasDefaultDisplay = VK_TRUE;                        
+                    }
 
                     currentDisplayContainer->oldMode = crtcInfo->mode;
 
@@ -162,8 +169,8 @@ static void _visualEnumerateDisplays()
 
     XRRFreeScreenResources(screenResources);
     
-    // If only one display is connected, make sure this is the default one.
-    if (g_allDisplays.size() == 1)
+    // If no default display has been found, make sure the first one is the default one.
+    if (!hasDefaultDisplay && g_allDisplays.size() >= 1)
     {
         g_allDisplays[0]->defaultDisplay = VK_TRUE;
     }

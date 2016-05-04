@@ -81,6 +81,7 @@ Changelog:
 
 05/04/2016
 - Added missing cstlib header file.
+- Default display detection is more relaxed under Linux now.
 
 05/03/2016
 - Added font class.
