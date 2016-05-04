@@ -98,6 +98,14 @@ public:
 
     virtual void setMoveable(const IMoveableSP& moveable) = 0;
 
+    virtual VkBool32 getEnabled() const = 0;
+
+    virtual void setEnabled(const VkBool32 enabled) = 0;
+
+    virtual VkBool32 getForwardOnly() const = 0;
+
+    virtual void setForwardOnly(const VkBool32 forwardOnly) = 0;
+
 };
 
 typedef std::shared_ptr<IInputController> IInputControllerSP;

@@ -77,6 +77,10 @@ private:
 
     IMoveableSP moveable;
 
+    VkBool32 enabled;
+
+    VkBool32 forwardOnly;
+
 public:
 
     InputController() = delete;
@@ -144,6 +148,14 @@ public:
     virtual const IMoveableSP& getMoveable() const override;
 
     virtual void setMoveable(const IMoveableSP& moveable) override;
+
+    virtual VkBool32 getEnabled() const override;
+
+    virtual void setEnabled(const VkBool32 enabled) override;
+
+    virtual VkBool32 getForwardOnly() const override;
+
+    virtual void setForwardOnly(const VkBool32 forwardOnly) override;
 
     //
     // IUpdateable

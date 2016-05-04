@@ -83,6 +83,7 @@ Changelog:
 - Added missing cstlib header file.
 - Default display detection is more relaxed under Linux now.
 - Continued on font class. Add font shaders.
+- Improved input controller and updating its moveable.
 
 05/03/2016
 - Added font class.

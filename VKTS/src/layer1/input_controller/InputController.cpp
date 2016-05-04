@@ -30,17 +30,17 @@ namespace vkts
 {
 
 InputController::InputController(const IUpdateThreadContext& updateThreadContext, const int32_t windowIndex, const int32_t gamepadIndex) :
-    IInputController(), updateThreadContext(updateThreadContext), windowIndex(windowIndex), gamepadIndex(gamepadIndex), lastMouseLocation(0, 0), mouseLocationInitialized(VK_FALSE), forwardSpeed(VKTS_FORWARD_SPEED), strafeSpeed(VKTS_STRAFE_SPEED), upSpeed(VKTS_UP_SPEED), moveMulitply(VKTS_MOVE_MULTIPLY), rotateMulitply(VKTS_ROTATE_MULTIPLY), yawSpeed(VKTS_YAW_SPEED), pitchSpeed(VKTS_PITCH_SPEED), rollSpeed(VKTS_ROLL_SPEED), pitchMulitply(VKTS_PITCH_MULTIPLY), mouseMultiply(VKTS_MOUSE_MULTIPLY), moveable()
+    IInputController(), updateThreadContext(updateThreadContext), windowIndex(windowIndex), gamepadIndex(gamepadIndex), lastMouseLocation(0, 0), mouseLocationInitialized(VK_FALSE), forwardSpeed(VKTS_FORWARD_SPEED), strafeSpeed(VKTS_STRAFE_SPEED), upSpeed(VKTS_UP_SPEED), moveMulitply(VKTS_MOVE_MULTIPLY), rotateMulitply(VKTS_ROTATE_MULTIPLY), yawSpeed(VKTS_YAW_SPEED), pitchSpeed(VKTS_PITCH_SPEED), rollSpeed(VKTS_ROLL_SPEED), pitchMulitply(VKTS_PITCH_MULTIPLY), mouseMultiply(VKTS_MOUSE_MULTIPLY), moveable(), enabled(VK_TRUE), forwardOnly(VK_FALSE)
 {
 }
 
 InputController::InputController(const IUpdateThreadContext& updateThreadContext, const int32_t windowIndex, const int32_t gamepadIndex, const IMoveableSP& moveable) :
-    IInputController(), updateThreadContext(updateThreadContext), windowIndex(windowIndex), gamepadIndex(gamepadIndex), lastMouseLocation(0,0), mouseLocationInitialized(VK_FALSE), forwardSpeed(VKTS_FORWARD_SPEED), strafeSpeed(VKTS_STRAFE_SPEED), upSpeed(VKTS_UP_SPEED), moveMulitply(VKTS_MOVE_MULTIPLY), rotateMulitply(VKTS_ROTATE_MULTIPLY), yawSpeed(VKTS_YAW_SPEED), pitchSpeed(VKTS_PITCH_SPEED), rollSpeed(VKTS_ROLL_SPEED), pitchMulitply(VKTS_PITCH_MULTIPLY), mouseMultiply(VKTS_MOUSE_MULTIPLY), moveable(moveable)
+    IInputController(), updateThreadContext(updateThreadContext), windowIndex(windowIndex), gamepadIndex(gamepadIndex), lastMouseLocation(0,0), mouseLocationInitialized(VK_FALSE), forwardSpeed(VKTS_FORWARD_SPEED), strafeSpeed(VKTS_STRAFE_SPEED), upSpeed(VKTS_UP_SPEED), moveMulitply(VKTS_MOVE_MULTIPLY), rotateMulitply(VKTS_ROTATE_MULTIPLY), yawSpeed(VKTS_YAW_SPEED), pitchSpeed(VKTS_PITCH_SPEED), rollSpeed(VKTS_ROLL_SPEED), pitchMulitply(VKTS_PITCH_MULTIPLY), mouseMultiply(VKTS_MOUSE_MULTIPLY), moveable(moveable), enabled(VK_TRUE), forwardOnly(VK_FALSE)
 {
 }
 
 InputController::InputController(const InputController& other) :
-    IInputController(), updateThreadContext(other.updateThreadContext), windowIndex(other.windowIndex), gamepadIndex(other.gamepadIndex), lastMouseLocation(other.lastMouseLocation), mouseLocationInitialized(other.mouseLocationInitialized), forwardSpeed(other.forwardSpeed), strafeSpeed(other.strafeSpeed), upSpeed(other.upSpeed), moveMulitply(other.moveMulitply), rotateMulitply(other.rotateMulitply), yawSpeed(other.yawSpeed), pitchSpeed(other.pitchSpeed), rollSpeed(other.rollSpeed), pitchMulitply(other.pitchMulitply), mouseMultiply(other.mouseMultiply), moveable(other.moveable)
+    IInputController(), updateThreadContext(other.updateThreadContext), windowIndex(other.windowIndex), gamepadIndex(other.gamepadIndex), lastMouseLocation(other.lastMouseLocation), mouseLocationInitialized(other.mouseLocationInitialized), forwardSpeed(other.forwardSpeed), strafeSpeed(other.strafeSpeed), upSpeed(other.upSpeed), moveMulitply(other.moveMulitply), rotateMulitply(other.rotateMulitply), yawSpeed(other.yawSpeed), pitchSpeed(other.pitchSpeed), rollSpeed(other.rollSpeed), pitchMulitply(other.pitchMulitply), mouseMultiply(other.mouseMultiply), moveable(other.moveable), enabled(other.enabled), forwardOnly(other.forwardOnly)
 {
 }
 
@@ -182,12 +182,37 @@ void InputController::setMoveable(const IMoveableSP& moveable)
     this->moveable = moveable;
 }
 
+VkBool32 InputController::getEnabled() const
+{
+	return enabled;
+}
+
+void InputController::setEnabled(const VkBool32 enabled)
+{
+	this->enabled = enabled;
+}
+
+VkBool32 InputController::getForwardOnly() const
+{
+	return forwardOnly;
+}
+
+void InputController::setForwardOnly(const VkBool32 forwardOnly)
+{
+	this->forwardOnly = forwardOnly;
+}
+
 //
 // IUpdateable
 //
 
 VkBool32 InputController::update(const double deltaTime, const uint64_t deltaTicks)
 {
+	if (!enabled)
+	{
+		return VK_TRUE;
+	}
+
     if (moveable.get())
     {
         if (windowIndex >= 0)
@@ -207,6 +232,11 @@ VkBool32 InputController::update(const double deltaTime, const uint64_t deltaTic
                 float forwardFactor = updateThreadContext.getGamepadAxis(windowIndex, gamepadIndex, VKTS_GAMEPAD_LEFT_STICK_Y) * forwardSpeed * moveSpeedFactor * (float) deltaTime;
                 float strafeFactor = -updateThreadContext.getGamepadAxis(windowIndex, gamepadIndex, VKTS_GAMEPAD_LEFT_STICK_X) * strafeSpeed * moveSpeedFactor * (float) deltaTime;
                 float upFactor = 0.0f;
+
+                if (forwardOnly && forwardFactor > 0.0f)
+                {
+                	forwardFactor = 0.0f;
+                }
 
                 glm::vec3 deltaRotation(0.0f, 0.0f, 0.0f);
 
@@ -263,6 +293,11 @@ VkBool32 InputController::update(const double deltaTime, const uint64_t deltaTic
                 if (updateThreadContext.getKey(windowIndex, VKTS_KEY_PAGE_DOWN))
                 {
                     upFactor -= 1.0f * upSpeed * moveSpeedFactor * (float) deltaTime;
+                }
+
+                if (forwardOnly && forwardFactor > 0.0f)
+                {
+                	forwardFactor = 0.0f;
                 }
 
                 glm::vec3 deltaRotation(0.0f, 0.0f, 0.0f);

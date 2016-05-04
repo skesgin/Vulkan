@@ -151,6 +151,11 @@ void Object::bindDrawIndexedRecursive(const ICommandBuffersSP& cmdBuffer, const 
 
 void Object::updateRecursive(const IUpdateThreadContext& updateContext)
 {
+	if (!IMoveable::update(updateContext.getDeltaTime(), updateContext.getDeltaTicks()))
+	{
+		return;
+	}
+
     if (dirty)
     {
         transformMatrix = translateMat4(translate.x, translate.y, translate.z) * (rotateZ * rotateY * rotateX) * scaleMat4(scale.x, scale.y, scale.z);
