@@ -161,6 +161,12 @@ static void _visualEnumerateDisplays()
     }
 
     XRRFreeScreenResources(screenResources);
+    
+    // If only one display is connected, make sure this is the default one.
+    if (g_allDisplays.size() == 1)
+    {
+        g_allDisplays[0]->defaultDisplay = VK_TRUE;
+    }
 }
 
 static void _visualRevertFullscreen(const INativeDisplayWP& display)
