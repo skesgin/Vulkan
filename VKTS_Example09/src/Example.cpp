@@ -2107,6 +2107,8 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 
 		//
 
+		VkSemaphore waitSemaphores = imageAcquiredSemaphore->getSemaphore();
+
         VkPipelineStageFlags waitDstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
 
         VkSubmitInfo submitInfo;
@@ -2115,8 +2117,8 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-        submitInfo.waitSemaphoreCount = 0;
-        submitInfo.pWaitSemaphores = nullptr;
+        submitInfo.waitSemaphoreCount = 1;
+        submitInfo.pWaitSemaphores = &waitSemaphores;
         submitInfo.pWaitDstStageMask = &waitDstStageMask;
         submitInfo.commandBufferCount = 1;
         submitInfo.pCommandBuffers = shadowCmdBuffer[currentBuffer]->getCommandBuffers();
@@ -2198,7 +2200,6 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 
 		//
 
-        VkSemaphore waitSemaphores = imageAcquiredSemaphore->getSemaphore();
         VkSemaphore signalSemaphores = renderingCompleteSemaphore->getSemaphore();
 
 
@@ -2208,9 +2209,9 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-        submitInfo.waitSemaphoreCount = 1;
-        submitInfo.pWaitSemaphores = &waitSemaphores;
-        submitInfo.pWaitDstStageMask = &waitDstStageMask;
+        submitInfo.waitSemaphoreCount = 0;
+        submitInfo.pWaitSemaphores = nullptr;
+        submitInfo.pWaitDstStageMask = nullptr;
         submitInfo.commandBufferCount = 1;
         submitInfo.pCommandBuffers = cmdBuffer[currentBuffer]->getCommandBuffers();
         submitInfo.signalSemaphoreCount = 1;

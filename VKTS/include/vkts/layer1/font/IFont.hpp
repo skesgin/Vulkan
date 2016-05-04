@@ -63,7 +63,7 @@ public:
 	virtual const ITextureSP& getTexture() const = 0;
 
 
-	virtual void drawText(const ICommandBuffersSP& cmdBuffer, const IGraphicsPipelineSP& graphicsPipeline, const glm::vec2& translate, const std::string& text) const = 0;
+	virtual void drawText(const ICommandBuffersSP& cmdBuffer, const IGraphicsPipelineSP& graphicsPipeline, const glm::mat4& viewProjection, const glm::vec2& translate, const std::string& text, const glm::vec4& color) const = 0;
 
 };
 

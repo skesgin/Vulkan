@@ -96,7 +96,7 @@ void Font::setVertexBuffer(const IBufferObjectSP& vertexBuffer)
 	this->vertexBuffer = vertexBuffer;
 }
 
-void Font::drawText(const ICommandBuffersSP& cmdBuffer, const IGraphicsPipelineSP& graphicsPipeline, const glm::vec2& translate, const std::string& text) const
+void Font::drawText(const ICommandBuffersSP& cmdBuffer, const IGraphicsPipelineSP& graphicsPipeline, const glm::mat4& viewProjection, const glm::vec2& translate, const std::string& text, const glm::vec4& color) const
 {
 	if (!cmdBuffer.get() || !graphicsPipeline.get())
 	{
@@ -162,7 +162,7 @@ void Font::drawText(const ICommandBuffersSP& cmdBuffer, const IGraphicsPipelineS
 
 		// Draw Character.
 
-		glm::mat4 transformVertex = translateMat4(origin.x, origin.y, 0.0f);
+		glm::mat4 transformVertex = viewProjection * translateMat4(origin.x, origin.y, 0.0f);
 
 		vkCmdPushConstants(cmdBuffer->getCommandBuffer(), graphicsPipeline->getLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(float) * 16, glm::value_ptr(transformVertex));
 
@@ -172,6 +172,8 @@ void Font::drawText(const ICommandBuffersSP& cmdBuffer, const IGraphicsPipelineS
 		glm::mat3 transformTexCoord = translateTexCoord * scaleTexCoord;
 
 		vkCmdPushConstants(cmdBuffer->getCommandBuffer(), graphicsPipeline->getLayout(), VK_SHADER_STAGE_VERTEX_BIT, sizeof(float) * 16, sizeof(float) * 9, glm::value_ptr(transformTexCoord));
+
+		vkCmdPushConstants(cmdBuffer->getCommandBuffer(), graphicsPipeline->getLayout(), VK_SHADER_STAGE_VERTEX_BIT, sizeof(float) * 16 + sizeof(float) * 12, sizeof(float) * 4, glm::value_ptr(color));
 
 		// Expecting triangle strip as primitive topology.
 		vkCmdDraw(cmdBuffer->getCommandBuffer(), 4, 1, 0, 0);
