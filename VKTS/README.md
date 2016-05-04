@@ -79,6 +79,9 @@ How to build:
 Changelog:
 ----------
 
+05/04/2016
+- Added missing cstlib header file.
+
 05/03/2016
 - Added font class.
 
