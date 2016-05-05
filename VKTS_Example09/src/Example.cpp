@@ -118,6 +118,8 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 		scene->bindDrawIndexedRecursive(shadowCmdBuffer[usedBuffer], allShadowGraphicsPipelines);
 	}
 
+	shadowCmdBuffer[usedBuffer]->cmdEndRenderPass();
+
     //
 
 	result = shadowCmdBuffer[usedBuffer]->endCommandBuffer();
