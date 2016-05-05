@@ -2203,8 +2203,6 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
         VkSemaphore signalSemaphores = renderingCompleteSemaphore->getSemaphore();
 
 
-        waitDstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
-
         memset(&submitInfo, 0, sizeof(VkSubmitInfo));
 
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
