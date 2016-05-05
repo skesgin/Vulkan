@@ -79,6 +79,9 @@ How to build:
 Changelog:
 ----------
 
+05/05/2016
+- Updated to LunarG SDK 1.0.11.1.
+
 05/04/2016
 - Added missing cstlib header file.
 - Default display detection is more relaxed under Linux now.
