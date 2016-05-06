@@ -413,6 +413,18 @@ public:
 
     V& operator[](const size_t index)
     {
+    	if (index > listSize)
+    	{
+    		throw std::out_of_range(std::to_string(index) + " > " + std::to_string(listSize));
+    	}
+    	else if (index == listSize)
+    	{
+    		// Allow to append at the end.
+    		V v;
+
+    		emplaceBack(v);
+    	}
+
         auto walker = front;
         auto counter = 0;
 
@@ -423,12 +435,16 @@ public:
             counter++;
         }
 
-        // If index out of bounds, this crashes.
         return walker->element;
     }
 
     const V& operator[](const size_t index) const
     {
+    	if (index >= listSize)
+    	{
+    		throw std::out_of_range(std::to_string(index) + " >= " + std::to_string(listSize));
+    	}
+
         auto walker = front;
         auto counter = 0;
 
@@ -439,7 +455,6 @@ public:
             counter++;
         }
 
-        // If index out of bounds, this crashes.
         return walker->element;
     }
 

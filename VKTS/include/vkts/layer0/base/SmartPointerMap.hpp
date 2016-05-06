@@ -41,8 +41,6 @@ protected:
     Vector<K> allKeys;
     SmartPointerVector<V> allValues;
 
-    const V empty;
-
 public:
 
     SmartPointerMap() :
@@ -51,7 +49,7 @@ public:
     }
 
     SmartPointerMap(const size_t& allDataCount) :
-        allKeys(allDataCount), allValues(allDataCount), empty(nullptr)
+        allKeys(allDataCount), allValues(allDataCount)
     {
     }
 
@@ -193,6 +191,7 @@ public:
             return allValues[index];
         }
 
+        // Create, if not present.
         V v;
         set(key, v);
 
@@ -201,14 +200,7 @@ public:
 
     const V& operator[](const K& key) const
     {
-        size_t index = find(key);
-
-        if (index == allKeys.size())
-        {
-            return empty;
-        }
-
-        return allValues[index];
+        return allValues[find(key)];
     }
 
     K& keyAt(const size_t index)

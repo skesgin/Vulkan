@@ -41,8 +41,6 @@ protected:
     Vector<K> allKeys;
     Vector<V> allValues;
 
-    const V empty;
-
 public:
 
     Map() :
@@ -51,7 +49,7 @@ public:
     }
 
     Map(const size_t& allDataCount) :
-        allKeys(allDataCount), allValues(allDataCount), empty(nullptr)
+        allKeys(allDataCount), allValues(allDataCount)
     {
     }
 
@@ -180,14 +178,7 @@ public:
 
     const V& operator[](const K& key) const
     {
-        size_t index = find(key);
-
-        if (index == allKeys.size())
-        {
-            return empty;
-        }
-
-        return allValues[index];
+        return allValues[find(key)];
     }
 
     K& keyAt(const size_t index)

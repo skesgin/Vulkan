@@ -337,12 +337,11 @@ public:
     {
     	if (index > topElement)
     	{
-    		throw std::out_of_range("");
+    		throw std::out_of_range(std::to_string(index) + " > " + std::to_string(topElement));
     	}
     	else if (index == topElement)
     	{
     		// Allow to append at the end.
-
     		V v;
 
     		append(v);
@@ -353,7 +352,12 @@ public:
 
     const V& operator[](const size_t index) const
     {
-        return allData[index];
+    	if (index >= topElement)
+    	{
+    		throw std::out_of_range(std::to_string(index) + " >= " + std::to_string(topElement));
+    	}
+
+    	return allData[index];
     }
 
     const V* data() const
