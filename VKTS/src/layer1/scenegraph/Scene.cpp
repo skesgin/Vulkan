@@ -127,7 +127,7 @@ void Scene::updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsC
     }
 }
 
-void Scene::bindDrawIndexedRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const overwrite* renderOverwrite, const uint32_t bufferIndex, const uint32_t objectOffset, const uint32_t objectStep) const
+void Scene::bindDrawIndexedRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const overwrite* renderOverwrite, const uint32_t bufferIndex, const uint32_t objectOffset, const uint32_t objectStep, const size_t objectLimit) const
 {
     if (objectStep == 0)
     {
@@ -137,7 +137,7 @@ void Scene::bindDrawIndexedRecursive(const ICommandBuffersSP& cmdBuffer, const S
     const overwrite* currentOverwrite = renderOverwrite;
     while (currentOverwrite)
     {
-    	if (!currentOverwrite->sceneBindDrawIndexedRecursive(*this, cmdBuffer, allGraphicsPipelines, bufferIndex, objectOffset, objectStep))
+    	if (!currentOverwrite->sceneBindDrawIndexedRecursive(*this, cmdBuffer, allGraphicsPipelines, bufferIndex, objectOffset, objectStep, objectLimit))
     	{
     		return;
     	}
@@ -145,20 +145,20 @@ void Scene::bindDrawIndexedRecursive(const ICommandBuffersSP& cmdBuffer, const S
     	currentOverwrite = currentOverwrite->getNextOverwrite();
     }
 
-    for (size_t i = (size_t) objectOffset; i < allObjects.size(); i += (size_t) objectStep)
+    for (size_t i = (size_t) objectOffset; i < glm::min(allObjects.size(), objectLimit); i += (size_t) objectStep)
     {
         allObjects[i]->bindDrawIndexedRecursive(cmdBuffer, allGraphicsPipelines, renderOverwrite, bufferIndex);
     }
 }
 
-void Scene::updateRecursive(const IUpdateThreadContext& updateContext, const uint32_t objectOffset, const uint32_t objectStep)
+void Scene::updateRecursive(const IUpdateThreadContext& updateContext, const uint32_t objectOffset, const uint32_t objectStep, const size_t objectLimit)
 {
     if (objectStep == 0)
     {
         return;
     }
 
-    for (size_t i = (size_t) objectOffset; i < allObjects.size(); i += (size_t) objectStep)
+    for (size_t i = (size_t) objectOffset; i < glm::min(allObjects.size(), objectLimit); i += (size_t) objectStep)
     {
         allObjects[i]->updateRecursive(updateContext);
     }

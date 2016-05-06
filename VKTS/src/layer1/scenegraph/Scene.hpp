@@ -72,9 +72,9 @@ public:
 
     virtual void updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets) override;
 
-    virtual void bindDrawIndexedRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const overwrite* renderOverwrite = nullptr, const uint32_t bufferIndex = 0, const uint32_t objectOffset = 0, const uint32_t objectStep = 1) const override;
+    virtual void bindDrawIndexedRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const overwrite* renderOverwrite = nullptr, const uint32_t bufferIndex = 0, const uint32_t objectOffset = 0, const uint32_t objectStep = 1, const size_t objectLimit = SIZE_MAX) const override;
 
-    virtual void updateRecursive(const IUpdateThreadContext& updateContext, const uint32_t objectOffset = 0, const uint32_t objectStep = 1) override;
+    virtual void updateRecursive(const IUpdateThreadContext& updateContext, const uint32_t objectOffset = 0, const uint32_t objectStep = 1, const size_t objectLimit = SIZE_MAX) override;
 
     //
     // ICloneable

@@ -69,7 +69,7 @@ public:
 
     //
 
-    virtual VkBool32 sceneBindDrawIndexedRecursive(const IScene& scene, const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const uint32_t bufferIndex, const uint32_t objectOffset, const uint32_t objectStep) const
+    virtual VkBool32 sceneBindDrawIndexedRecursive(const IScene& scene, const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const uint32_t bufferIndex, const uint32_t objectOffset, const uint32_t objectStep, const size_t objectLimit) const
     {
     	return VK_TRUE;
     }

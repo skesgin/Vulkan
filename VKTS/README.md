@@ -79,6 +79,9 @@ How to build:
 Changelog:
 ----------
 
+05/06/2016
+- Added object limit for scene graph.
+
 05/05/2016
 - Updated to LunarG SDK 1.0.11.1.
 
