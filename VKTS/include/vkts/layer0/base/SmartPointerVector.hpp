@@ -335,6 +335,19 @@ public:
 
     V& operator[](const size_t index)
     {
+    	if (index > topElement)
+    	{
+    		throw std::out_of_range("");
+    	}
+    	else if (index == topElement)
+    	{
+    		// Allow to append at the end.
+
+    		V v;
+
+    		append(v);
+    	}
+
         return allData[index];
     }
 
