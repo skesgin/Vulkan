@@ -39,18 +39,11 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 {
 	VkResult result;
 
-	if (!cmdBuffer[usedBuffer].get())
-	{
-	    cmdBuffer[usedBuffer] = vkts::commandBuffersCreate(initialResources->getDevice()->getDevice(), commandPool->getCmdPool(), VK_COMMAND_BUFFER_LEVEL_PRIMARY, 1);
-	}
-	else
-	{
-	    cmdBuffer[usedBuffer]->reset();
-	}
+	result = cmdBuffer[usedBuffer]->reset();
 
-	if (!cmdBuffer[usedBuffer].get())
+	if (result != VK_SUCCESS)
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create command buffer.");
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not reset command buffer.");
 
 		return VK_FALSE;
 	}
@@ -1144,6 +1137,15 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 
 		if (!buildFramebuffer(i))
 		{
+			return VK_FALSE;
+		}
+
+		cmdBuffer[i] = vkts::commandBuffersCreate(initialResources->getDevice()->getDevice(), commandPool->getCmdPool(), VK_COMMAND_BUFFER_LEVEL_PRIMARY, 1);
+
+		if (!cmdBuffer[i].get())
+		{
+			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create command buffer.");
+
 			return VK_FALSE;
 		}
 	}
