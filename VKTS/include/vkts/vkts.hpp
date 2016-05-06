@@ -140,6 +140,7 @@
 #include <vkts/layer0/base/IDestroyable.hpp>
 #include <vkts/layer0/base/IResetable.hpp>
 #include <vkts/layer0/base/IUpdateable.hpp>
+#include <vkts/layer0/base/List.hpp>
 #include <vkts/layer0/base/SmartPointerList.hpp>
 #include <vkts/layer0/base/SmartPointerVector.hpp>
 #include <vkts/layer0/base/ThreadsafeQueue.hpp>

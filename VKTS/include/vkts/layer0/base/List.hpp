@@ -24,8 +24,8 @@
  * THE SOFTWARE.
  */
 
-#ifndef VKTS_SMARTPOINTERLIST_HPP_
-#define VKTS_SMARTPOINTERLIST_HPP_
+#ifndef VKTS_LIST_HPP_
+#define VKTS_LIST_HPP_
 
 #include <vkts/vkts.hpp>
 
@@ -35,25 +35,23 @@ namespace vkts
 {
 
 template<class V>
-class SmartPointerListElement
+class ListElement
 {
 
 public:
 
     V value;
 
-    SmartPointerListElement* prev;
-    SmartPointerListElement* next;
+    ListElement* prev;
+    ListElement* next;
 
-    SmartPointerListElement(const V& value) :
+    ListElement(const V& value) :
         value(value), prev(nullptr), next(nullptr)
     {
     }
 
-    ~SmartPointerListElement()
+    ~ListElement()
     {
-        value.reset();
-
         prev = nullptr;
         next = nullptr;
     }
@@ -61,24 +59,24 @@ public:
 };
 
 template<class V>
-class SmartPointerList
+class List
 {
 
 private:
 
-    SmartPointerListElement<V>* front;
-    SmartPointerListElement<V>* back;
+    ListElement<V>* front;
+    ListElement<V>* back;
 
     size_t listSize;
 
 public:
 
-    SmartPointerList() :
+    List() :
         front(nullptr), back(nullptr), listSize(0)
     {
     }
 
-    SmartPointerList(const SmartPointerList& other) :
+    List(const List& other) :
         front(nullptr), back(nullptr), listSize(0)
     {
         auto walker = other.front;
@@ -96,7 +94,7 @@ public:
         }
     }
 
-    SmartPointerList(SmartPointerList&& other) :
+    List(List&& other) :
         front(other.front), back(other.back), listSize(other.listSize)
     {
         other.front = nullptr;
@@ -104,7 +102,7 @@ public:
         other.listSize = 0;
     }
 
-    SmartPointerList& operator= (const SmartPointerList& other)
+    List& operator= (const List& other)
     {
     	clear();
 
@@ -129,7 +127,7 @@ public:
     	return *this;
     }
 
-    SmartPointerList& operator= (SmartPointerList&& other)
+    List& operator= (List&& other)
     {
     	clear();
 
@@ -148,7 +146,7 @@ public:
     	return *this;
     }
 
-    ~SmartPointerList()
+    ~List()
     {
         clear();
     }
@@ -175,7 +173,7 @@ public:
 
     VkBool32 emplaceBack(const V& value)
     {
-        auto newElement = new SmartPointerListElement<V>(value);
+        auto newElement = new ListElement<V>(value);
 
         if (!newElement)
         {
@@ -202,7 +200,7 @@ public:
 
     VkBool32 emplaceFront(const V& value)
     {
-        auto newElement = new SmartPointerListElement<V>(value);
+        auto newElement = new ListElement<V>(value);
 
         if (!newElement)
         {
@@ -254,7 +252,7 @@ public:
             return emplaceFront(value);
         }
 
-        auto newElement = new SmartPointerListElement<V>(value);
+        auto newElement = new ListElement<V>(value);
 
         if (!newElement)
         {
@@ -364,7 +362,7 @@ public:
     		throw std::out_of_range("No such element");
     	}
 
-    	auto toDelete = back;
+		auto toDelete = back;
 
 		back = back->prev;
 
@@ -474,4 +472,4 @@ public:
 
 }
 
-#endif /* VKTS_SMARTPOINTERLIST_HPP_ */
+#endif /* VKTS_LIST_HPP_ */
