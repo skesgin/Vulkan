@@ -14,8 +14,8 @@ PROJECT_FILES := $(wildcard $(LOCAL_PATH)/../../src/**/**/*.cpp)
 
 # Create list of operating system specific files and remove them.
 
-IGNORE_FILES += $(LOCAL_PATH)/../../src/layer0/file/fn_file_general.cpp
-IGNORE_FILES := $(LOCAL_PATH)/../../src/layer0/processor/fn_processor_linux.cpp
+IGNORE_FILES := $(LOCAL_PATH)/../../src/layer0/file/fn_file_general.cpp
+IGNORE_FILES += $(LOCAL_PATH)/../../src/layer0/processor/fn_processor_linux.cpp
 IGNORE_FILES += $(LOCAL_PATH)/../../src/layer0/processor/fn_processor_windows.cpp
 IGNORE_FILES += $(LOCAL_PATH)/../../src/layer0/visual/fn_visual_none.cpp
 IGNORE_FILES += $(LOCAL_PATH)/../../src/layer0/visual/fn_visual_linux.cpp
