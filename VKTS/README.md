@@ -81,6 +81,7 @@ Changelog:
 
 05/07/2016
 - Added queue for executed tasks and removed old interface.
+- Added default graphics pipeline class.
 
 05/06/2016
 - Added object limit for scene graph.
