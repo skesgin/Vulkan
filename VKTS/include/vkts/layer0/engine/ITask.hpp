@@ -39,25 +39,11 @@ class ITask
 
 private:
 
-    mutable std::mutex taskMutex;
-
-    std::condition_variable taskConditionVariable;
-
-    VkBool32 done;
+    const uint64_t id;
 
     VkBool32 run()
     {
-        std::lock_guard<std::mutex> taskLock(taskMutex);
-
-        done = VK_FALSE;
-
-        auto result = execute();
-
-        done = VK_TRUE;
-
-        taskConditionVariable.notify_all();
-
-        return result;
+        return execute();
     }
 
 protected:
@@ -66,8 +52,8 @@ protected:
 
 public:
 
-    ITask() :
-        taskMutex(), taskConditionVariable(), done(VK_FALSE)
+    ITask(const uint64_t id) :
+    	id(id)
     {
     }
 
@@ -75,37 +61,10 @@ public:
     {
     }
 
-    VkBool32 isDone()
+    uint64_t getID()
     {
-        std::lock_guard<std::mutex> taskLock(taskMutex);
-
-        return done;
+        return id;
     }
-
-    void waitDone()
-    {
-        std::unique_lock<std::mutex> taskLock(taskMutex);
-
-        while (!done)
-        {
-            taskConditionVariable.wait(taskLock);
-        }
-    }
-
-    VkBool32 resetDone()
-    {
-    	std::unique_lock<std::mutex> taskLock(taskMutex);
-
-    	if (done)
-    	{
-    		done = VK_FALSE;
-
-    		return VK_TRUE;
-    	}
-
-    	return VK_FALSE;
-    }
-
 };
 
 typedef std::shared_ptr<ITask> ITaskSP;

@@ -250,13 +250,23 @@ VkBool32 VKTS_APIENTRY engineRun()
 
     // Task queue creation.
 
-    TaskQueueSP taskQueue;
+    TaskQueueSP sendTaskQueue;
+    TaskQueueSP executedTaskQueue;
 
     if (g_taskExecutorCount > 0)
     {
-        taskQueue = TaskQueueSP(new TaskQueue);
+        sendTaskQueue = TaskQueueSP(new TaskQueue);
 
-        if (!taskQueue.get())
+        if (!sendTaskQueue.get())
+        {
+            logPrint(VKTS_LOG_ERROR, "Engine: Run failed! Could not create task queue.");
+
+            return VK_FALSE;
+        }
+
+        executedTaskQueue = TaskQueueSP(new TaskQueue);
+
+        if (!executedTaskQueue.get())
         {
             logPrint(VKTS_LOG_ERROR, "Engine: Run failed! Could not create task queue.");
 
@@ -288,7 +298,7 @@ VkBool32 VKTS_APIENTRY engineRun()
 
     for (uint32_t i = 0; i < g_taskExecutorCount; i++)
     {
-        auto currentTaskExecutor = TaskExecutorSP(new TaskExecutor(i, executorSync, taskQueue));
+        auto currentTaskExecutor = TaskExecutorSP(new TaskExecutor(i, executorSync, sendTaskQueue, executedTaskQueue));
 
         if (!currentTaskExecutor.get())
         {
@@ -335,7 +345,7 @@ VkBool32 VKTS_APIENTRY engineRun()
 
         //
 
-        auto currentUpdateThreadContext = UpdateThreadContextSP(new UpdateThreadContext((int32_t) updateThreadIndex, (int32_t) g_allUpdateThreads.size(), g_tickTime, taskQueue));
+        auto currentUpdateThreadContext = UpdateThreadContextSP(new UpdateThreadContext((int32_t) updateThreadIndex, (int32_t) g_allUpdateThreads.size(), g_tickTime, sendTaskQueue, executedTaskQueue));
 
         if (!currentUpdateThreadContext.get())
         {
@@ -427,12 +437,12 @@ VkBool32 VKTS_APIENTRY engineRun()
 
     //
 
-    if (taskQueue.get())
+    if (sendTaskQueue.get())
     {
     	// Empty the queue.
     	// As no update thread can feed the queue anymore, it is save to call reset.
 
-    	taskQueue->reset();
+    	sendTaskQueue->reset();
 
     	//
 
@@ -443,7 +453,7 @@ VkBool32 VKTS_APIENTRY engineRun()
     	for (uint32_t i = 0; i < g_taskExecutorCount; i++)
     	{
     		// Send an empty task to the queue, to exit the thread.
-    		taskQueue->addTask(stopTask);
+    		sendTaskQueue->addTask(stopTask);
     	}
     }
 

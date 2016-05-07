@@ -29,8 +29,8 @@
 namespace vkts
 {
 
-TaskExecutor::TaskExecutor(const int32_t index, ExecutorSync& sync, const TaskQueueSP& taskQueue) :
-    index(index), sync(sync), taskQueue(taskQueue)
+TaskExecutor::TaskExecutor(const int32_t index, ExecutorSync& sync, const TaskQueueSP& sendTaskQueue, const TaskQueueSP& executedTaskQueue) :
+    index(index), sync(sync), sendTaskQueue(sendTaskQueue), executedTaskQueue(executedTaskQueue)
 {
 }
 
@@ -53,7 +53,7 @@ void TaskExecutor::run() const
 
     while (doRun && sync.doAllRun())
     {
-        doRun = taskQueue->receiveTask(task);
+        doRun = sendTaskQueue->receiveTask(task);
 
         if (!task.get())
         {
@@ -63,6 +63,8 @@ void TaskExecutor::run() const
         if (doRun && task.get())
         {
             doRun = task->run();
+
+            doRun = executedTaskQueue->addTask(task);
         }
 
         if (doRun)

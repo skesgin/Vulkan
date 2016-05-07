@@ -1048,9 +1048,9 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 	{
 		allBuildCommandTasks.clear();
 
-		for (size_t i = 0; i < VKTS_NUMBER_TASKS; i++)
+		for (uint64_t i = 0; i < VKTS_NUMBER_TASKS; i++)
 		{
-			auto currentBuildCommandTask = IBuildCommandTaskSP(new BuildCommandTask(updateContext, initialResources, allGraphicsPipelines, scene, (uint32_t)i, VKTS_NUMBER_TASKS));
+			auto currentBuildCommandTask = IBuildCommandTaskSP(new BuildCommandTask(i, updateContext, initialResources, allGraphicsPipelines, scene, (uint32_t)i, VKTS_NUMBER_TASKS));
 
 			if (!currentBuildCommandTask.get())
 			{
@@ -1418,9 +1418,6 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 
 		for (size_t i = 0; i < allBuildCommandTasks.size(); i++)
 		{
-			// Reset tasks, that they can be used again.
-			allBuildCommandTasks[i]->resetDone();
-
 			// Set the current info.
 			allBuildCommandTasks[i]->setCommandBufferInheritanceInfo(&commandBufferInheritanceInfo);
 			allBuildCommandTasks[i]->setExtent(swapchain->getImageExtent());
@@ -1432,13 +1429,19 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 
 		for (size_t i = 0; i < allBuildCommandTasks.size(); i++)
 		{
-			// ... and wait for finished execution.
-			allBuildCommandTasks[i]->waitDone();
+			vkts::ITaskSP executedTask;
+
+			updateContext.receiveExecutedTask(executedTask);
+
+			if (!executedTask.get())
+			{
+	            return VK_FALSE;
+			}
 
 			// If available, add secondary command buffer to list to be executed later.
-			if (allBuildCommandTasks[i]->getCommandBuffer() != VK_NULL_HANDLE)
+			if (allBuildCommandTasks[executedTask->getID()]->getCommandBuffer() != VK_NULL_HANDLE)
 			{
-				secondaryCmdBuffers[commandBufferCount] = allBuildCommandTasks[i]->getCommandBuffer();
+				secondaryCmdBuffers[commandBufferCount] = allBuildCommandTasks[executedTask->getID()]->getCommandBuffer();
 
 				commandBufferCount++;
 			}

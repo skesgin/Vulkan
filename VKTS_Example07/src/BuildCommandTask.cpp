@@ -102,8 +102,8 @@ VkBool32 BuildCommandTask::execute()
 	return VK_TRUE;
 }
 
-BuildCommandTask::BuildCommandTask(const vkts::IUpdateThreadContext& updateContext, const vkts::IInitialResourcesSP& initialResources, const vkts::SmartPointerVector<vkts::IGraphicsPipelineSP>& allGraphicsPipelines, const vkts::ISceneSP& scene, const uint32_t& objectOffset, const uint32_t& objectStep) :
-	ITask(), updateContext(updateContext), initialResources(initialResources), allGraphicsPipelines(allGraphicsPipelines), scene(scene), objectOffset(objectOffset), objectStep(objectStep), commandBufferInheritanceInfo(nullptr), extent{0, 0}, commandPool(nullptr), cmdBuffer(nullptr)
+BuildCommandTask::BuildCommandTask(const uint64_t id, const vkts::IUpdateThreadContext& updateContext, const vkts::IInitialResourcesSP& initialResources, const vkts::SmartPointerVector<vkts::IGraphicsPipelineSP>& allGraphicsPipelines, const vkts::ISceneSP& scene, const uint32_t& objectOffset, const uint32_t& objectStep) :
+	ITask(id), updateContext(updateContext), initialResources(initialResources), allGraphicsPipelines(allGraphicsPipelines), scene(scene), objectOffset(objectOffset), objectStep(objectStep), commandBufferInheritanceInfo(nullptr), extent{0, 0}, commandPool(nullptr), cmdBuffer(nullptr)
 {
 	// This pool will contain secondary command buffers, which will be reset.
 	commandPool = vkts::commandPoolCreate(initialResources->getDevice()->getDevice(), VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT, initialResources->getQueue()->getQueueFamilyIndex());

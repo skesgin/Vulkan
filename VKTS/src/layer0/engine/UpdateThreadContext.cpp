@@ -53,8 +53,8 @@ NativeWindowSP UpdateThreadContext::getWindow(int32_t windowIndex) const
     return allAttachedWindows.valueAt(index);
 }
 
-UpdateThreadContext::UpdateThreadContext(const int32_t threadIndex, const int32_t threadCount, const double tickTime, const TaskQueueSP& taskQueue) :
-    IUpdateThreadContext(), threadIndex(threadIndex), threadCount(threadCount), taskQueue(taskQueue), allAttachedDisplays(), allAttachedDisplayKeys(), allAttachedWindows(), allAttachedWindowKeys()
+UpdateThreadContext::UpdateThreadContext(const int32_t threadIndex, const int32_t threadCount, const double tickTime, const TaskQueueSP& sendTaskQueue, const TaskQueueSP& executedTaskQueue) :
+    IUpdateThreadContext(), threadIndex(threadIndex), threadCount(threadCount), sendTaskQueue(sendTaskQueue), executedTaskQueue(executedTaskQueue), allAttachedDisplays(), allAttachedDisplayKeys(), allAttachedWindows(), allAttachedWindowKeys()
 {
     this->startTime = timeGetRaw();
     this->lastTime = startTime;
@@ -336,12 +336,38 @@ float UpdateThreadContext::getGamepadAxis(const int32_t windowIndex, const int32
 
 VkBool32 UpdateThreadContext::sendTask(const ITaskSP& task) const
 {
-    if (!taskQueue.get())
+    if (!sendTaskQueue.get())
     {
         return VK_FALSE;
     }
 
-    return taskQueue->addTask(task);
+    return sendTaskQueue->addTask(task);
+}
+
+VkBool32 UpdateThreadContext::receiveExecutedTask(ITaskSP& task) const
+{
+    if (!executedTaskQueue.get())
+    {
+        return VK_FALSE;
+    }
+
+    return executedTaskQueue->receiveTask(task);
+}
+
+void UpdateThreadContext::resetSendTasks() const
+{
+    if (sendTaskQueue.get())
+    {
+    	sendTaskQueue->reset();
+    }
+}
+
+void UpdateThreadContext::resetExecutedTasks() const
+{
+    if (executedTaskQueue.get())
+    {
+    	executedTaskQueue->reset();
+    }
 }
 
 } /* namespace vkts */

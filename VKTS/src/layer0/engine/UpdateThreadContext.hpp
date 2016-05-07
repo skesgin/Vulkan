@@ -51,7 +51,8 @@ private:
 
     double tickTime;
 
-    TaskQueueSP taskQueue;
+    TaskQueueSP sendTaskQueue;
+    TaskQueueSP executedTaskQueue;
 
     uint64_t lastTicks;
     uint64_t currentTicks;
@@ -75,7 +76,7 @@ public:
     UpdateThreadContext() = delete;
     UpdateThreadContext(const UpdateThreadContext& other) = delete;
     UpdateThreadContext(UpdateThreadContext&& other) = delete;
-    UpdateThreadContext(const int32_t threadIndex, const int32_t threadCount, const double tickTime, const TaskQueueSP& taskQueue);
+    UpdateThreadContext(const int32_t threadIndex, const int32_t threadCount, const double tickTime, const TaskQueueSP& sendTaskQueue, const TaskQueueSP& executedTaskQueue);
     virtual ~UpdateThreadContext();
 
     UpdateThreadContext& operator =(const UpdateThreadContext& other) = delete;
@@ -148,6 +149,12 @@ public:
     // Task functions
 
     virtual VkBool32 sendTask(const ITaskSP& task) const override;
+
+    virtual VkBool32 receiveExecutedTask(ITaskSP& task) const override;
+
+    virtual void resetSendTasks() const override;
+
+    virtual void resetExecutedTasks() const override;
 
 };
 

@@ -44,14 +44,15 @@ private:
 
     ExecutorSync& sync;
 
-    TaskQueueSP taskQueue;
+    TaskQueueSP sendTaskQueue;
+    TaskQueueSP executedTaskQueue;
 
 public:
 
     TaskExecutor() = delete;
     TaskExecutor(const TaskExecutor& other) = delete;
     TaskExecutor(TaskExecutor&& other) = delete;
-    TaskExecutor(const int32_t index, ExecutorSync& sync, const TaskQueueSP& taskQueue);
+    TaskExecutor(const int32_t index, ExecutorSync& sync, const TaskQueueSP& sendTaskQueue, const TaskQueueSP& executedTaskQueue);
     virtual ~TaskExecutor();
 
     TaskExecutor& operator =(const TaskExecutor& other) = delete;
