@@ -418,6 +418,7 @@
 #include <vkts/layer0/pipeline/IPipelineCache.hpp>
 #include <vkts/layer0/pipeline/IPipelineLayout.hpp>
 
+#include <vkts/layer0/pipeline/defaultComputePipeline.hpp>
 #include <vkts/layer0/pipeline/defaultGraphicsPipeline.hpp>
 
 #include <vkts/layer0/pipeline/fn_pipeline.hpp>

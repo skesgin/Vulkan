@@ -30,6 +30,15 @@ namespace vkts {
 
 defaultGraphicsPipeline::defaultGraphicsPipeline()
 {
+	reset();
+}
+
+defaultGraphicsPipeline::~defaultGraphicsPipeline()
+{
+}
+
+void defaultGraphicsPipeline::reset()
+{
     memset(pipelineShaderStageCreateInfo, 0, sizeof(pipelineShaderStageCreateInfo));
 
     for (uint32_t i = 0; i < 5; i++)
@@ -130,10 +139,7 @@ defaultGraphicsPipeline::defaultGraphicsPipeline()
 	graphicsPipelineCreateInfo.pDepthStencilState = nullptr;
 	graphicsPipelineCreateInfo.pColorBlendState = nullptr;
 	graphicsPipelineCreateInfo.pDynamicState = nullptr;
-}
 
-defaultGraphicsPipeline::~defaultGraphicsPipeline()
-{
 }
 
 //

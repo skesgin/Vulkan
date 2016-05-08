@@ -80,7 +80,7 @@ Changelog:
 ----------
 
 05/08/2016
-- Finalized default graphics pipeline class.
+- Finalized default graphics pipeline class and added default compute pipeline class.
 
 05/07/2016
 - Added queue for executed tasks and removed old interface.

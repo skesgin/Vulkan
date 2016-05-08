@@ -71,6 +71,8 @@ public:
 
 	~defaultGraphicsPipeline();
 
+	void reset();
+
 	VkVertexInputBindingDescription& 		getVertexInputBindingDescription(const uint32_t index);
 	VkVertexInputAttributeDescription& 		getVertexInputAttributeDescription(const uint32_t index);
 
