@@ -23,15 +23,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 #ifndef DEFAULTGRAPHICSPIPELINE_HPP_
 #define DEFAULTGRAPHICSPIPELINE_HPP_
 
 #include <vkts/vkts.hpp>
 
-#define VKTS_MAX_VERTEX_DESCRIPTION_COUNT 16
-#define VKTS_MAX_VIEWPORTS				  16
-#define VKTS_MAX_SCISSORS				  16
-#define VKTS_MAX_BLEND_ATTACHMENTS		  16
+#define VKTS_MAX_VERTEX_BINDING_DESCRIPTION_COUNT	16
+#define VKTS_MAX_VERTEX_ATTRIBUTE_DESCRIPTION_COUNT	16
+#define VKTS_MAX_VIEWPORTS				  			16
+#define VKTS_MAX_SCISSORS				  			16
+#define VKTS_MAX_BLEND_ATTACHMENTS		  			16
 
 namespace vkts {
 
@@ -40,8 +42,8 @@ class defaultGraphicsPipeline
 
 private:
 
-	VkVertexInputBindingDescription 		vertexInputBindingDescription[VKTS_MAX_VERTEX_DESCRIPTION_COUNT];
-	VkVertexInputAttributeDescription 		vertexInputAttributeDescription[VKTS_MAX_VERTEX_DESCRIPTION_COUNT];
+	VkVertexInputBindingDescription 		vertexInputBindingDescription[VKTS_MAX_VERTEX_BINDING_DESCRIPTION_COUNT];
+	VkVertexInputAttributeDescription 		vertexInputAttributeDescription[VKTS_MAX_VERTEX_ATTRIBUTE_DESCRIPTION_COUNT];
 
     VkViewport                     			viewports[VKTS_MAX_VIEWPORTS];
     VkRect2D                       			scissors[VKTS_MAX_SCISSORS];
@@ -69,9 +71,32 @@ public:
 
 	~defaultGraphicsPipeline();
 
-	// TODO: Add methods to configure graphics pipeline.
+	VkVertexInputBindingDescription& 		getVertexInputBindingDescription(const uint32_t index);
+	VkVertexInputAttributeDescription& 		getVertexInputAttributeDescription(const uint32_t index);
 
-	const VkGraphicsPipelineCreateInfo& getGraphicsPipelineCreateInfo() const;
+    VkViewport&                     		getViewports(const uint32_t index);
+    VkRect2D&                       		getScissors(const uint32_t index);
+
+    VkPipelineColorBlendAttachmentState&	getPipelineColorBlendAttachmentState(const uint32_t index);
+
+    VkDynamicState&							getDynamicState(const uint32_t index);
+
+	//
+
+    VkPipelineShaderStageCreateInfo&		getPipelineShaderStageCreateInfo(const uint32_t index);
+    VkPipelineVertexInputStateCreateInfo&	getPipelineVertexInputStateCreateInfo();
+    VkPipelineInputAssemblyStateCreateInfo&	getPipelineInputAssemblyStateCreateInfo();
+    VkPipelineTessellationStateCreateInfo&	getPipelineTessellationStateCreateInfo();
+    VkPipelineViewportStateCreateInfo&		getPipelineViewportStateCreateInfo();
+    VkPipelineRasterizationStateCreateInfo&	getPipelineRasterizationStateCreateInfo();
+    VkPipelineMultisampleStateCreateInfo&	getPipelineMultisampleStateCreateInfo();
+    VkPipelineDepthStencilStateCreateInfo&	getPipelineDepthStencilStateCreateInfo();
+    VkPipelineColorBlendStateCreateInfo&	getPipelineColorBlendStateCreateInfo();
+    VkPipelineDynamicStateCreateInfo&		getPipelineDynamicStateCreateInfo();
+
+    //
+
+	VkGraphicsPipelineCreateInfo& 			getGraphicsPipelineCreateInfo();
 
 };
 

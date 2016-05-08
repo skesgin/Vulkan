@@ -79,6 +79,9 @@ How to build:
 Changelog:
 ----------
 
+05/08/2016
+- Finalized default graphics pipeline class.
+
 05/07/2016
 - Added queue for executed tasks and removed old interface.
 - Added default graphics pipeline class.

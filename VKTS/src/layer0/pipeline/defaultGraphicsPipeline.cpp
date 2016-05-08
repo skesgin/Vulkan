@@ -32,6 +32,11 @@ defaultGraphicsPipeline::defaultGraphicsPipeline()
 {
     memset(pipelineShaderStageCreateInfo, 0, sizeof(pipelineShaderStageCreateInfo));
 
+    for (uint32_t i = 0; i < 5; i++)
+    {
+    	pipelineShaderStageCreateInfo[i].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    }
+
     //
 
 	memset(vertexInputBindingDescription, 0, sizeof(vertexInputBindingDescription));
@@ -131,7 +136,234 @@ defaultGraphicsPipeline::~defaultGraphicsPipeline()
 {
 }
 
-const VkGraphicsPipelineCreateInfo& defaultGraphicsPipeline::getGraphicsPipelineCreateInfo() const
+//
+
+VkVertexInputBindingDescription& defaultGraphicsPipeline::getVertexInputBindingDescription(const uint32_t index)
+{
+	if (index >= VKTS_MAX_VERTEX_BINDING_DESCRIPTION_COUNT)
+	{
+		throw std::out_of_range(std::to_string(index) + " >= " + std::to_string(VKTS_MAX_VERTEX_BINDING_DESCRIPTION_COUNT));
+	}
+
+	auto& current = getPipelineVertexInputStateCreateInfo();
+
+	if (!current.pVertexBindingDescriptions)
+	{
+		current.pVertexBindingDescriptions = vertexInputBindingDescription;
+	}
+
+	current.vertexBindingDescriptionCount = glm::max(current.vertexBindingDescriptionCount, index + 1);
+
+	return vertexInputBindingDescription[index];
+}
+
+VkVertexInputAttributeDescription& defaultGraphicsPipeline::getVertexInputAttributeDescription(const uint32_t index)
+{
+	if (index >= VKTS_MAX_VERTEX_ATTRIBUTE_DESCRIPTION_COUNT)
+	{
+		throw std::out_of_range(std::to_string(index) + " >= " + std::to_string(VKTS_MAX_VERTEX_ATTRIBUTE_DESCRIPTION_COUNT));
+	}
+
+	auto& current = getPipelineVertexInputStateCreateInfo();
+
+	if (!current.pVertexAttributeDescriptions)
+	{
+		current.pVertexAttributeDescriptions = vertexInputAttributeDescription;
+	}
+
+	current.vertexAttributeDescriptionCount = glm::max(current.vertexAttributeDescriptionCount, index + 1);
+
+	return vertexInputAttributeDescription[index];
+}
+
+VkViewport& defaultGraphicsPipeline::getViewports(const uint32_t index)
+{
+	if (index >= VKTS_MAX_VIEWPORTS)
+	{
+		throw std::out_of_range(std::to_string(index) + " >= " + std::to_string(VKTS_MAX_VIEWPORTS));
+	}
+
+	auto& current = getPipelineViewportStateCreateInfo();
+
+	if (!current.pViewports)
+	{
+		current.pViewports = viewports;
+	}
+
+	current.viewportCount = glm::max(current.viewportCount, index + 1);
+
+	return viewports[index];
+}
+
+VkRect2D& defaultGraphicsPipeline::getScissors(const uint32_t index)
+{
+	if (index >= VKTS_MAX_SCISSORS)
+	{
+		throw std::out_of_range(std::to_string(index) + " >= " + std::to_string(VKTS_MAX_SCISSORS));
+	}
+
+	auto& current = getPipelineViewportStateCreateInfo();
+
+	if (!current.pScissors)
+	{
+		current.pScissors = scissors;
+	}
+
+	current.scissorCount = glm::max(current.scissorCount, index + 1);
+
+	return scissors[index];
+}
+
+VkPipelineColorBlendAttachmentState& defaultGraphicsPipeline::getPipelineColorBlendAttachmentState(const uint32_t index)
+{
+	if (index >= VKTS_MAX_BLEND_ATTACHMENTS)
+	{
+		throw std::out_of_range(std::to_string(index) + " >= " + std::to_string(VKTS_MAX_BLEND_ATTACHMENTS));
+	}
+
+	auto& current = getPipelineColorBlendStateCreateInfo();
+
+	if (!current.pAttachments)
+	{
+		current.pAttachments = pipelineColorBlendAttachmentState;
+	}
+
+	current.attachmentCount = glm::max(current.attachmentCount, index + 1);
+
+	return pipelineColorBlendAttachmentState[index];
+}
+
+VkDynamicState&	defaultGraphicsPipeline::getDynamicState(const uint32_t index)
+{
+	if (index >= VK_DYNAMIC_STATE_RANGE_SIZE)
+	{
+		throw std::out_of_range(std::to_string(index) + " >= " + std::to_string(VK_DYNAMIC_STATE_RANGE_SIZE));
+	}
+
+	auto& current = getPipelineDynamicStateCreateInfo();
+
+	if (!current.pDynamicStates)
+	{
+		current.pDynamicStates = dynamicState;
+	}
+
+	current.dynamicStateCount = glm::max(current.dynamicStateCount, index + 1);
+
+	return dynamicState[index];
+}
+
+//
+
+VkPipelineShaderStageCreateInfo& defaultGraphicsPipeline::getPipelineShaderStageCreateInfo(const uint32_t index)
+{
+	if (index >= 5)
+	{
+		throw std::out_of_range(std::to_string(index) + " >= 5");
+	}
+
+	if (!graphicsPipelineCreateInfo.pStages)
+	{
+		graphicsPipelineCreateInfo.pStages = pipelineShaderStageCreateInfo;
+	}
+
+	graphicsPipelineCreateInfo.stageCount = glm::max(graphicsPipelineCreateInfo.stageCount, index + 1);
+
+	return pipelineShaderStageCreateInfo[index];
+}
+
+VkPipelineVertexInputStateCreateInfo& defaultGraphicsPipeline::getPipelineVertexInputStateCreateInfo()
+{
+	if (!graphicsPipelineCreateInfo.pVertexInputState)
+	{
+		graphicsPipelineCreateInfo.pVertexInputState = &pipelineVertexInputStateCreateInfo;
+	}
+
+	return pipelineVertexInputStateCreateInfo;
+}
+
+VkPipelineInputAssemblyStateCreateInfo&	defaultGraphicsPipeline::getPipelineInputAssemblyStateCreateInfo()
+{
+	if (!graphicsPipelineCreateInfo.pInputAssemblyState)
+	{
+		graphicsPipelineCreateInfo.pInputAssemblyState = &pipelineInputAssemblyStateCreateInfo;
+	}
+
+	return pipelineInputAssemblyStateCreateInfo;
+}
+
+VkPipelineTessellationStateCreateInfo& defaultGraphicsPipeline::getPipelineTessellationStateCreateInfo()
+{
+	if (!graphicsPipelineCreateInfo.pTessellationState)
+	{
+		graphicsPipelineCreateInfo.pTessellationState = &pipelineTessellationStateCreateInfo;
+	}
+
+	return pipelineTessellationStateCreateInfo;
+}
+
+VkPipelineViewportStateCreateInfo& defaultGraphicsPipeline::getPipelineViewportStateCreateInfo()
+{
+	if (!graphicsPipelineCreateInfo.pViewportState)
+	{
+		graphicsPipelineCreateInfo.pViewportState = &pipelineViewportStateCreateInfo;
+	}
+
+	return pipelineViewportStateCreateInfo;
+}
+
+VkPipelineRasterizationStateCreateInfo&	defaultGraphicsPipeline::getPipelineRasterizationStateCreateInfo()
+{
+	if (!graphicsPipelineCreateInfo.pRasterizationState)
+	{
+		graphicsPipelineCreateInfo.pRasterizationState = &pipelineRasterizationStateCreateInfo;
+	}
+
+	return pipelineRasterizationStateCreateInfo;
+}
+
+VkPipelineMultisampleStateCreateInfo& defaultGraphicsPipeline::getPipelineMultisampleStateCreateInfo()
+{
+	if (!graphicsPipelineCreateInfo.pMultisampleState)
+	{
+		graphicsPipelineCreateInfo.pMultisampleState = &pipelineMultisampleStateCreateInfo;
+	}
+
+	return pipelineMultisampleStateCreateInfo;
+}
+
+VkPipelineDepthStencilStateCreateInfo& defaultGraphicsPipeline::getPipelineDepthStencilStateCreateInfo()
+{
+	if (!graphicsPipelineCreateInfo.pDepthStencilState)
+	{
+		graphicsPipelineCreateInfo.pDepthStencilState = &pipelineDepthStencilStateCreateInfo;
+	}
+
+	return pipelineDepthStencilStateCreateInfo;
+}
+
+VkPipelineColorBlendStateCreateInfo& defaultGraphicsPipeline::getPipelineColorBlendStateCreateInfo()
+{
+	if (!graphicsPipelineCreateInfo.pColorBlendState)
+	{
+		graphicsPipelineCreateInfo.pColorBlendState = &pipelineColorBlendStateCreateInfo;
+	}
+
+	return pipelineColorBlendStateCreateInfo;
+}
+
+VkPipelineDynamicStateCreateInfo& defaultGraphicsPipeline::getPipelineDynamicStateCreateInfo()
+{
+	if (!graphicsPipelineCreateInfo.pDynamicState)
+	{
+		graphicsPipelineCreateInfo.pDynamicState = &pipelineDynamicStateCreateInfo;
+	}
+
+	return pipelineDynamicStateCreateInfo;
+}
+
+//
+
+VkGraphicsPipelineCreateInfo& defaultGraphicsPipeline::getGraphicsPipelineCreateInfo()
 {
 	return graphicsPipelineCreateInfo;
 }
