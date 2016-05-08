@@ -190,7 +190,7 @@ static VkBool32 fontExtractStringValue(const char* buffer, const char* parameter
     return VK_TRUE;
 }
 
-IFontSP VKTS_APIENTRY fontLoadFont(const char* filename, const IInitialResourcesSP& initialResources, const ICommandBuffersSP& commandBuffer)
+IFontSP VKTS_APIENTRY fontCreate(const char* filename, const IInitialResourcesSP& initialResources, const ICommandBuffersSP& commandBuffer, const IRenderPassSP& renderPass)
 {
     if (!filename || !initialResources.get() || !commandBuffer.get())
     {
@@ -540,6 +540,19 @@ IFontSP VKTS_APIENTRY fontLoadFont(const char* filename, const IInitialResources
     font->setVertexBuffer(vertexBuffer);
 
     //
+
+    defaultGraphicsPipeline gp;
+
+    // TODO: Add settings.
+
+    auto graphicsPipeline = pipelineCreateGraphics(initialResources->getDevice()->getDevice(), VK_NULL_HANDLE, gp.getGraphicsPipelineCreateInfo(), VKTS_VERTEX_BUFFER_TYPE_VERTEX);
+
+    if (!graphicsPipeline.get())
+    {
+    	return IFontSP();
+    }
+
+    font->setGraphicsPipeline(graphicsPipeline);
 
     return interfaceFont;
 }

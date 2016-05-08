@@ -57,6 +57,8 @@ private:
 
 	IBufferObjectSP vertexBuffer;
 
+	IGraphicsPipelineSP graphicsPipeline;
+
 public:
 
     Font();
@@ -87,6 +89,8 @@ public:
 
 	void setVertexBuffer(const IBufferObjectSP& vertexBuffer);
 
+	void setGraphicsPipeline(const IGraphicsPipelineSP& graphicsPipeline);
+
     //
     // IFont
     //
@@ -106,7 +110,7 @@ public:
 	virtual const ITextureSP& getTexture() const override;
 
 
-	virtual void drawText(const ICommandBuffersSP& cmdBuffer, const IGraphicsPipelineSP& graphicsPipeline, const glm::mat4& viewProjection, const glm::vec2& translate, const std::string& text, const glm::vec4& color) const override;
+	virtual void drawText(const ICommandBuffersSP& cmdBuffer, const glm::mat4& viewProjection, const glm::vec2& translate, const std::string& text, const glm::vec4& color) const override;
 
     //
     // IDestroyable

@@ -96,9 +96,14 @@ void Font::setVertexBuffer(const IBufferObjectSP& vertexBuffer)
 	this->vertexBuffer = vertexBuffer;
 }
 
-void Font::drawText(const ICommandBuffersSP& cmdBuffer, const IGraphicsPipelineSP& graphicsPipeline, const glm::mat4& viewProjection, const glm::vec2& translate, const std::string& text, const glm::vec4& color) const
+void Font::setGraphicsPipeline(const IGraphicsPipelineSP& graphicsPipeline)
 {
-	if (!cmdBuffer.get() || !graphicsPipeline.get())
+	this->graphicsPipeline = graphicsPipeline;
+}
+
+void Font::drawText(const ICommandBuffersSP& cmdBuffer, const glm::mat4& viewProjection, const glm::vec2& translate, const std::string& text, const glm::vec4& color) const
+{
+	if (!cmdBuffer.get())
 	{
 		return;
 	}
