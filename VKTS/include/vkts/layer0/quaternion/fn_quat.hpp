@@ -60,6 +60,12 @@ VKTS_APICALL quat VKTS_APIENTRY inverse(const quat& q);
  *
  * @ThreadSafe
  */
+VKTS_APICALL float VKTS_APIENTRY dot(const quat& q0, const quat& q1);
+
+/**
+ *
+ * @ThreadSafe
+ */
 VKTS_APICALL quat VKTS_APIENTRY slerp(const quat& q0, const quat& q1, const float t);
 
 /**

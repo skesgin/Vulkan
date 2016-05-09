@@ -53,7 +53,7 @@ protected:
 
     void updateVectors();
 
-    glm::vec3 getAngle(const glm::vec3& forward) const;
+    glm::vec3 getAngle(const glm::vec3& forward, const glm::vec3& up) const;
 
     virtual void update() = 0;
 
@@ -82,20 +82,25 @@ public:
     const quat& getRotateZ() const;
     glm::vec3 getRotate() const;
 
-    void setForward(const glm::vec3& forward);
+    void setForwardUp(const glm::vec3& forward, const glm::vec3& up);
+
     const glm::vec3& getForward() const;
+    const glm::vec3& getLeft() const;
+    const glm::vec3& getUp() const;
 
     //
 
-    void move(const glm::vec3& forward);
+    void moveDirection(const glm::vec3& forward, const glm::vec3& up);
 
-    void move(const glm::vec3& translate, const glm::vec3& rotate);
+    void moveTranslateDirection(const glm::vec3& translate, const glm::vec3& forward, const glm::vec3& up);
 
-    void move(const glm::vec3& translate, const quat& rotateZ, const quat& rotateY, const quat& rotateX);
+    void moveTranslateRotate(const glm::vec3& translate, const glm::vec3& rotate);
 
-    void move(const float forwardFactor, const float strafeFactor, const float upFactor, const glm::vec3& rotate);
+    void moveTranslateRotate(const glm::vec3& translate, const quat& rotateZ, const quat& rotateY, const quat& rotateX);
 
-    void move(const float forwardFactor, const float strafeFactor, const float upFactor, const quat& rotateZ, const quat& rotateY, const quat& rotateX);
+    void moveTranslateRotate(const float forwardFactor, const float strafeFactor, const float upFactor, const glm::vec3& rotate);
+
+    void moveTranslateRotate(const float forwardFactor, const float strafeFactor, const float upFactor, const quat& rotateZ, const quat& rotateY, const quat& rotateX);
 
     virtual VkBool32 update(const double deltaTime, const uint64_t deltaTicks) override;
 

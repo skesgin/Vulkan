@@ -80,6 +80,16 @@ bool quat::operator !=(const quat& other) const
     return !(*this == other);
 }
 
+quat quat::operator +() const
+{
+	return *this;
+}
+
+quat quat::operator -() const
+{
+	return quat(-x, -y, -z, -w);
+}
+
 quat quat::operator +(const quat& other) const
 {
     return quat(x + other.x, y + other.y, z + other.z, w + other.w);

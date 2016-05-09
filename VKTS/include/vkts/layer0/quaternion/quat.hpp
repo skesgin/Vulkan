@@ -58,6 +58,10 @@ public:
     bool operator !=(const quat& other) const;
 
 
+    quat operator +() const;
+    quat operator -() const;
+
+
     quat operator +(const quat& other) const;
 
     quat& operator +=(const quat& other);

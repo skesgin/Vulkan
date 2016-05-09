@@ -64,7 +64,7 @@ ICameraSP VKTS_APIENTRY cameraCreate(const glm::vec4& position, const glm::vec4&
         return ICameraSP();
     }
 
-    newInstance->setForward(glm::vec3(center - position));
+    newInstance->setForwardUp(glm::vec3(center - position), glm::vec3(0.0f, 1.0f, 0.0f));
 
     return ICameraSP(newInstance);
 }

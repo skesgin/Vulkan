@@ -251,7 +251,7 @@ VkBool32 InputController::update(const double deltaTime, const uint64_t deltaTic
 
                 deltaRotation.y = -updateThreadContext.getGamepadAxis(windowIndex, gamepadIndex, VKTS_GAMEPAD_RIGHT_STICK_X) * yawSpeed * rotateSpeedFactor * (float) deltaTime;
 
-                moveable->move(forwardFactor, strafeFactor, upFactor, deltaRotation);
+                moveable->moveTranslateRotate(forwardFactor, strafeFactor, upFactor, deltaRotation);
             }
             else if (gamepadIndex < 0)
             {
@@ -334,7 +334,7 @@ VkBool32 InputController::update(const double deltaTime, const uint64_t deltaTic
                     lastMouseLocation = glm::ivec2(currentMouseLocation.x, currentMouseLocation.y);
                 }
 
-                moveable->move(forwardFactor, strafeFactor, upFactor, deltaRotation);
+                moveable->moveTranslateRotate(forwardFactor, strafeFactor, upFactor, deltaRotation);
             }
         }
     }

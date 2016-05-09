@@ -63,6 +63,11 @@ quat VKTS_APIENTRY inverse(const quat& q)
     return conjugate(q) / (n * n);
 }
 
+float VKTS_APIENTRY dot(const quat& q0, const quat& q1)
+{
+	return q0.x * q1.x + q0.y * q1.y + q0.z * q1.z + q0.w * q1.w;
+}
+
 quat VKTS_APIENTRY slerp(const quat& q0, const quat& q1, const float t)
 {
     float cosAlpha = q0.x * q1.x + q0.y * q1.y + q0.z * q1.z + q0.w * q1.w;

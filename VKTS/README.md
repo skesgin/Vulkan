@@ -79,6 +79,10 @@ How to build:
 Changelog:
 ----------
 
+05/09/2016
+- Refactored/fixed/improved moveable class.
+- Added dot product and unary operators for quaternions.
+
 05/08/2016
 - Finalized default graphics pipeline class and added default compute pipeline class.
 
