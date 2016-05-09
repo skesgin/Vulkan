@@ -241,7 +241,7 @@ IMemoryImageSP VKTS_APIENTRY memoryImageCreate(IImageSP& stageImage, IBufferSP& 
             stageImageCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
             stageImageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_PREINITIALIZED;
 
-            if (!memoryImagePrepare(stageImage, stageDeviceMemory, initialResources, cmdBuffer, stageImageCreateInfo, VK_ACCESS_HOST_WRITE_BIT, VK_ACCESS_TRANSFER_READ_BIT | VK_ACCESS_HOST_WRITE_BIT, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, subresourceRange, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT))
+            if (!memoryImagePrepare(stageImage, stageDeviceMemory, initialResources, cmdBuffer, stageImageCreateInfo, VK_ACCESS_HOST_WRITE_BIT, VK_ACCESS_TRANSFER_READ_BIT, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, subresourceRange, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT))
             {
                 logPrint(VKTS_LOG_ERROR, "MemoryImage: Could not prepare staging image.");
 
