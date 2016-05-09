@@ -72,7 +72,7 @@ vkts::IImageDataSP Example::gatherImageData() const
 		VkImageSubresourceRange imageSubresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
 
 		// Prepare stage image for final layout etc.
-		stageImage->cmdPipelineBarrier(cmdBuffer->getCommandBuffer(), VK_ACCESS_HOST_READ_BIT, VK_IMAGE_LAYOUT_GENERAL, imageSubresourceRange);
+		stageImage->cmdPipelineBarrier(cmdBuffer->getCommandBuffer(), 0, VK_IMAGE_LAYOUT_GENERAL, imageSubresourceRange);
 
 
 		VkImageCopy imageCopy;
@@ -347,7 +347,7 @@ VkBool32 Example::buildCmdBuffer()
 
 	VkImageSubresourceRange imageSubresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
 
-	image->cmdPipelineBarrier(cmdBuffer->getCommandBuffer(), VK_ACCESS_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL, imageSubresourceRange);
+	image->cmdPipelineBarrier(cmdBuffer->getCommandBuffer(), 0, VK_IMAGE_LAYOUT_GENERAL, imageSubresourceRange);
 
 	vkCmdDispatch(cmdBuffer->getCommandBuffer(), VKTS_IMAGE_LENGTH / VKTS_LOCAL_SIZE, VKTS_IMAGE_LENGTH / VKTS_LOCAL_SIZE, 1);
 
