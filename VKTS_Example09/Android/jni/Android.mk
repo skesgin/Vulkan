@@ -18,7 +18,7 @@ include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 
-LOCAL_MODULE := VKTS_Example06
+LOCAL_MODULE := VKTS_Example09
 
 # All files.
 
