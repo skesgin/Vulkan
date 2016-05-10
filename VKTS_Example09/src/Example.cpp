@@ -488,7 +488,7 @@ VkBool32 Example::buildScene(const vkts::ICommandBuffersSP& cmdBuffer)
 VkBool32 Example::buildShadowSampler()
 {
 	// Enabled texture compare.
-	shadowSampler = vkts::samplerCreate(initialResources->getDevice()->getDevice(), 0, VK_FILTER_NEAREST, VK_FILTER_NEAREST, VK_SAMPLER_MIPMAP_MODE_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, 0.0f, VK_FALSE, 1.0f, VK_TRUE, VK_COMPARE_OP_LESS_OR_EQUAL, 0.0f, 0.0f, VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK, VK_FALSE);
+	shadowSampler = vkts::samplerCreate(initialResources->getDevice()->getDevice(), 0, VK_FILTER_NEAREST, VK_FILTER_NEAREST, VK_SAMPLER_MIPMAP_MODE_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, 0.0f, VK_FALSE, 1.0f, VK_FALSE, VK_COMPARE_OP_NEVER, 0.0f, 0.0f, VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK, VK_FALSE);
 
 	if (!shadowSampler.get())
 	{
@@ -1035,10 +1035,10 @@ VkBool32 Example::buildPipeline()
 	pipelineViewportStateCreateInfo.pViewports = &shadowViewport;
 	pipelineViewportStateCreateInfo.pScissors = &shadowScissor;
 
-	pipelineRasterizationStateCreateInfo.cullMode = VK_CULL_MODE_FRONT_BIT;
-	pipelineRasterizationStateCreateInfo.depthBiasEnable = VK_TRUE;
-	pipelineRasterizationStateCreateInfo.depthBiasConstantFactor = VKTS_DEPTH_BIAS_CONSTANT_FACTOR;
-	pipelineRasterizationStateCreateInfo.depthBiasSlopeFactor = VKTS_DEPTH_BIAS_SLOPE_FACTOR;
+	pipelineRasterizationStateCreateInfo.cullMode = VK_CULL_MODE_NONE;
+	pipelineRasterizationStateCreateInfo.depthBiasEnable = VK_FALSE;
+	pipelineRasterizationStateCreateInfo.depthBiasConstantFactor = 0.0f;
+	pipelineRasterizationStateCreateInfo.depthBiasSlopeFactor = 0.0f;
 
 	pipelineMultisampleStateCreateInfo.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
 
@@ -1157,10 +1157,10 @@ VkBool32 Example::buildPipeline()
 	pipelineViewportStateCreateInfo.pViewports = &shadowViewport;
 	pipelineViewportStateCreateInfo.pScissors = &shadowScissor;
 
-	pipelineRasterizationStateCreateInfo.cullMode = VK_CULL_MODE_FRONT_BIT;
-	pipelineRasterizationStateCreateInfo.depthBiasEnable = VK_TRUE;
-	pipelineRasterizationStateCreateInfo.depthBiasConstantFactor = VKTS_DEPTH_BIAS_CONSTANT_FACTOR;
-	pipelineRasterizationStateCreateInfo.depthBiasSlopeFactor = VKTS_DEPTH_BIAS_SLOPE_FACTOR;
+	pipelineRasterizationStateCreateInfo.cullMode = VK_CULL_MODE_NONE;
+	pipelineRasterizationStateCreateInfo.depthBiasEnable = VK_FALSE;
+	pipelineRasterizationStateCreateInfo.depthBiasConstantFactor = 0.0f;
+	pipelineRasterizationStateCreateInfo.depthBiasSlopeFactor = 0.0f;
 
 	pipelineMultisampleStateCreateInfo.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
 
