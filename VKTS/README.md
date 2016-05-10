@@ -79,6 +79,9 @@ How to build:
 Changelog:
 ----------
 
+05/10/2016
+- Fixed event creation.
+
 05/09/2016
 - Refactored/fixed/improved moveable class.
 - Added dot product and unary operators for quaternions.

@@ -44,7 +44,7 @@ IEventSP VKTS_APIENTRY eventCreate(const VkDevice device, const VkEventCreateFla
 
     memset(&eventCreateInfo, 0, sizeof(VkEventCreateInfo));
 
-    eventCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+    eventCreateInfo.sType = VK_STRUCTURE_TYPE_EVENT_CREATE_INFO;
 
     eventCreateInfo.flags = flags;
 
