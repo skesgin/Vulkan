@@ -44,6 +44,11 @@
 
 #include "Font.hpp"
 
+#define VKTS_BINDING_VERTEX_BUFFER 0
+
+#define VKTS_FONT_VERTEX_SHADER_NAME 	"shader/SPIR/V/font.vert.spv"
+#define VKTS_FONT_FRAGMENT_SHADER_NAME 	"shader/SPIR/V/font.frag.spv"
+
 namespace vkts
 {
 
@@ -109,8 +114,8 @@ static VkBool32 fontExtractValue(const char* buffer, const char* parameter, char
     	return VK_FALSE;
     }
 
-    // Skip '='
-    start++;
+    // Skip parameter and '='
+    start += 1 + strlen(parameter);
 
     const char* end = strstr(start, " ");
 
@@ -147,6 +152,7 @@ static VkBool32 fontExtractIntValue(const char* buffer, const char* parameter, i
     }
 
     char temp[VKTS_MAX_TOKEN_CHARS + 1];
+    memset(temp, 0, sizeof(temp));
 
     if (!fontExtractValue(buffer, parameter, temp))
     {
@@ -166,6 +172,7 @@ static VkBool32 fontExtractStringValue(const char* buffer, const char* parameter
     }
 
     char temp[VKTS_MAX_TOKEN_CHARS + 1];
+    memset(temp, 0, sizeof(temp));
 
     if (!fontExtractValue(buffer, parameter, temp))
     {
@@ -190,7 +197,7 @@ static VkBool32 fontExtractStringValue(const char* buffer, const char* parameter
     return VK_TRUE;
 }
 
-IFontSP VKTS_APIENTRY fontCreate(const char* filename, const IInitialResourcesSP& initialResources, const ICommandBuffersSP& commandBuffer, const IRenderPassSP& renderPass)
+IFontSP VKTS_APIENTRY fontCreate(const char* filename, const IInitialResourcesSP& initialResources, const ICommandBuffersSP& commandBuffer, const IRenderPassSP& renderPass, SmartPointerVector<vkts::IImageSP>& allStageImages, vkts::SmartPointerVector<vkts::IBufferSP>& allStageBuffers, vkts::SmartPointerVector<vkts::IDeviceMemorySP>& allStageDeviceMemories)
 {
     if (!filename || !initialResources.get() || !commandBuffer.get())
     {
@@ -204,7 +211,8 @@ IFontSP VKTS_APIENTRY fontCreate(const char* filename, const IInitialResourcesSP
         return IFontSP();
     }
 
-    char directory[VKTS_MAX_BUFFER_CHARS] = "";
+    char directory[VKTS_MAX_BUFFER_CHARS];
+    memset(directory, 0, sizeof(directory));
 
     fontGetDirectory(directory, filename);
 
@@ -334,7 +342,20 @@ IFontSP VKTS_APIENTRY fontCreate(const char* filename, const IInitialResourcesSP
             IBufferSP stageBuffer;
             IImageSP stageImage;
 
-            auto memoryImage = memoryImageCreate(stageImage, stageBuffer, stageDeviceMemory, initialResources, commandBuffer, font->getFace(), imageData, imageCreateInfo, srcAccessMask, VK_ACCESS_INPUT_ATTACHMENT_READ_BIT | VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_TRANSFER_READ_BIT | VK_ACCESS_TRANSFER_WRITE_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, subresourceRange, memoryPropertyFlags);
+            auto memoryImage = memoryImageCreate(stageImage, stageBuffer, stageDeviceMemory, initialResources, commandBuffer, font->getFace(), imageData, imageCreateInfo, srcAccessMask, VK_ACCESS_TRANSFER_WRITE_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, subresourceRange, memoryPropertyFlags);
+
+            if (stageDeviceMemory.get())
+            {
+            	allStageDeviceMemories.append(stageDeviceMemory);
+            }
+            if (stageBuffer.get())
+            {
+            	allStageBuffers.append(stageBuffer);
+            }
+            if (stageImage.get())
+            {
+            	allStageImages.append(stageImage);
+            }
 
             if (!memoryImage.get())
             {
@@ -488,10 +509,6 @@ IFontSP VKTS_APIENTRY fontCreate(const char* filename, const IInitialResourcesSP
 
         	font->setKerning(characterId, nextCharacterId, amount);
         }
-        else
-        {
-        	return IFontSP();
-        }
     }
 
     //
@@ -532,6 +549,15 @@ IFontSP VKTS_APIENTRY fontCreate(const char* filename, const IInitialResourcesSP
 
     auto vertexBuffer = bufferObjectCreate(stageBuffer, stageDeviceMemory, initialResources, commandBuffer, binaryBuffer, bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
 
+    if (stageDeviceMemory.get())
+    {
+    	allStageDeviceMemories.append(stageDeviceMemory);
+    }
+    if (stageBuffer.get())
+    {
+    	allStageBuffers.append(stageBuffer);
+    }
+
     if (!vertexBuffer.get())
     {
     	return IFontSP();
@@ -540,10 +566,163 @@ IFontSP VKTS_APIENTRY fontCreate(const char* filename, const IInitialResourcesSP
     font->setVertexBuffer(vertexBuffer);
 
     //
+    // Shader modules.
+    //
+
+	auto vertexShaderBinary = fileLoadBinary(VKTS_FONT_VERTEX_SHADER_NAME);
+
+	if (!vertexShaderBinary.get())
+	{
+		logPrint(VKTS_LOG_ERROR, "Font: Could not load vertex shader: '%s'", VKTS_FONT_VERTEX_SHADER_NAME);
+
+		return IFontSP();
+	}
+
+	auto fragmentShaderBinary = fileLoadBinary(VKTS_FONT_FRAGMENT_SHADER_NAME);
+
+	if (!fragmentShaderBinary.get())
+	{
+		logPrint(VKTS_LOG_ERROR, "Font: Could not load fragment shader: '%s'", VKTS_FONT_FRAGMENT_SHADER_NAME);
+
+		return IFontSP();
+	}
+
+	//
+
+	auto vertexShaderModule = shaderModuleCreate(VKTS_FONT_VERTEX_SHADER_NAME, initialResources->getDevice()->getDevice(), 0, vertexShaderBinary->getSize(), (uint32_t*)vertexShaderBinary->getData());
+
+	if (!vertexShaderModule.get())
+	{
+		logPrint(VKTS_LOG_ERROR, "Font: Could not create vertex shader module.");
+
+		return IFontSP();
+	}
+
+	// No need to store.
+
+	auto fragmentShaderModule = shaderModuleCreate(VKTS_FONT_FRAGMENT_SHADER_NAME, initialResources->getDevice()->getDevice(), 0, fragmentShaderBinary->getSize(), (uint32_t*)fragmentShaderBinary->getData());
+
+	if (!fragmentShaderModule.get())
+	{
+		logPrint(VKTS_LOG_ERROR, "Font: Could not create fragment shader module.");
+
+		return VK_FALSE;
+	}
+
+	// No need to store.
+
+	//
+	// Descriptor set layout.
+	//
+
+	VkDescriptorSetLayoutBinding descriptorSetLayoutBinding[1];
+
+	memset(&descriptorSetLayoutBinding, 0, sizeof(descriptorSetLayoutBinding));
+
+	descriptorSetLayoutBinding[0].binding = 0;
+	descriptorSetLayoutBinding[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+	descriptorSetLayoutBinding[0].descriptorCount = 1;
+	descriptorSetLayoutBinding[0].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+	descriptorSetLayoutBinding[0].pImmutableSamplers = nullptr;
+
+    //
+
+    auto descriptorSetLayout = descriptorSetLayoutCreate(initialResources->getDevice()->getDevice(), 0, 1, descriptorSetLayoutBinding);
+
+	if (!descriptorSetLayout.get())
+	{
+		logPrint(VKTS_LOG_ERROR, "Font: Could not create descriptor set layout.");
+
+		return IFontSP();
+	}
+
+	font->setDescriptorSetLayout(descriptorSetLayout);
+
+	//
+	// Pipeline layout.
+	//
+
+    // Using push constants for displacement.
+
+    VkPushConstantRange pushConstantRange[1];
+
+    pushConstantRange[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    pushConstantRange[0].offset = 0;
+    pushConstantRange[0].size = 16 * sizeof(float) + 12 * sizeof(float) + 4 * sizeof(float);
+
+	VkDescriptorSetLayout setLayouts[1];
+
+	setLayouts[0] = descriptorSetLayout->getDescriptorSetLayout();
+
+	auto pipelineLayout = vkts::pipelineCreateLayout(initialResources->getDevice()->getDevice(), 0, 1, setLayouts, 1, pushConstantRange);
+
+	if (!pipelineLayout.get())
+	{
+		logPrint(VKTS_LOG_ERROR, "Font: Could not create pipeline layout.");
+
+		return IFontSP();
+	}
+
+	font->setPipelineLayout(pipelineLayout);
+
+    //
+	// Graphics pipeline.
+	//
 
     defaultGraphicsPipeline gp;
 
-    // TODO: Add settings.
+    gp.getPipelineShaderStageCreateInfo(0).stage = VK_SHADER_STAGE_VERTEX_BIT;
+    gp.getPipelineShaderStageCreateInfo(0).module = vertexShaderModule->getShaderModule();
+
+    gp.getPipelineShaderStageCreateInfo(1).stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+    gp.getPipelineShaderStageCreateInfo(1).module = fragmentShaderModule->getShaderModule();
+
+
+	VkTsVertexBufferType vertexBufferType = VKTS_VERTEX_BUFFER_TYPE_VERTEX;
+
+    gp.getVertexInputBindingDescription(0).binding = VKTS_BINDING_VERTEX_BUFFER;
+    gp.getVertexInputBindingDescription(0).stride = commonGetStrideInBytes(vertexBufferType);
+    gp.getVertexInputBindingDescription(0).inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+    gp.getVertexInputAttributeDescription(0).location = 0;
+    gp.getVertexInputAttributeDescription(0).binding = VKTS_BINDING_VERTEX_BUFFER;
+    gp.getVertexInputAttributeDescription(0).format = VK_FORMAT_R32G32B32A32_SFLOAT;
+    gp.getVertexInputAttributeDescription(0).offset = commonGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_VERTEX, vertexBufferType);
+
+
+    gp.getPipelineInputAssemblyStateCreateInfo().topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+
+
+    gp.getViewports(0).x = 0.0f;
+    gp.getViewports(0).y = 0.0f;
+    gp.getViewports(0).width = 1.0f;
+    gp.getViewports(0).height = 1.0f;
+    gp.getViewports(0).minDepth = 0.0f;
+    gp.getViewports(0).maxDepth = 1.0f;
+
+
+    gp.getScissors(0).offset.x = 0;
+    gp.getScissors(0).offset.y = 0;
+    gp.getScissors(0).extent = {1, 1};
+
+
+    gp.getPipelineColorBlendAttachmentState(0).blendEnable = VK_TRUE;
+    gp.getPipelineColorBlendAttachmentState(0).srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+    gp.getPipelineColorBlendAttachmentState(0).dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+    gp.getPipelineColorBlendAttachmentState(0).colorBlendOp = VK_BLEND_OP_ADD;
+    gp.getPipelineColorBlendAttachmentState(0).srcAlphaBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+    gp.getPipelineColorBlendAttachmentState(0).dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+    gp.getPipelineColorBlendAttachmentState(0).alphaBlendOp = VK_BLEND_OP_ADD;
+    gp.getPipelineColorBlendAttachmentState(0).colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+
+
+    gp.getDynamicState(0) = VK_DYNAMIC_STATE_VIEWPORT;
+    gp.getDynamicState(1) = VK_DYNAMIC_STATE_SCISSOR;
+
+
+    gp.getGraphicsPipelineCreateInfo().layout = pipelineLayout->getPipelineLayout();
+    gp.getGraphicsPipelineCreateInfo().renderPass = renderPass->getRenderPass();
+
 
     auto graphicsPipeline = pipelineCreateGraphics(initialResources->getDevice()->getDevice(), VK_NULL_HANDLE, gp.getGraphicsPipelineCreateInfo(), VKTS_VERTEX_BUFFER_TYPE_VERTEX);
 

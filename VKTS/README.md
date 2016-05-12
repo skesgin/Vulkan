@@ -79,6 +79,9 @@ How to build:
 Changelog:
 ----------
 
+05/12/2016
+- Finalized font creation class, not tested.
+
 05/10/2016
 - Fixed event creation.
 

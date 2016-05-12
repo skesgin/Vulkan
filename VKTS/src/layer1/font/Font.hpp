@@ -57,6 +57,10 @@ private:
 
 	IBufferObjectSP vertexBuffer;
 
+	IDescriptorSetLayoutSP descriptorSetLayout;
+
+	IPipelineLayoutSP pipelineLayout;
+
 	IGraphicsPipelineSP graphicsPipeline;
 
 public:
@@ -88,6 +92,10 @@ public:
 	void setKerning(const int32_t characterId, const int32_t nextCharacterId, const float amount);
 
 	void setVertexBuffer(const IBufferObjectSP& vertexBuffer);
+
+	void setDescriptorSetLayout(const IDescriptorSetLayoutSP& descriptorSetLayout);
+
+	void setPipelineLayout(const IPipelineLayoutSP& pipelineLayout);
 
 	void setGraphicsPipeline(const IGraphicsPipelineSP& graphicsPipeline);
 

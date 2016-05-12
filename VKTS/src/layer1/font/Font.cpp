@@ -30,7 +30,7 @@ namespace vkts
 {
 
 Font::Font() :
-    IFont(), face(""), size(0.0f), lineHeight(0.0f), base(0.0f), scaleWidth(0.0f), scaleHeight(0.0f), texture(nullptr), allCharacters(), vertexBuffer(nullptr)
+    IFont(), face(""), size(0.0f), lineHeight(0.0f), base(0.0f), scaleWidth(0.0f), scaleHeight(0.0f), texture(nullptr), allCharacters(), vertexBuffer(nullptr), descriptorSetLayout(nullptr), pipelineLayout(nullptr), graphicsPipeline(nullptr)
 {
 }
 
@@ -94,6 +94,16 @@ void Font::setKerning(const int32_t characterId, const int32_t nextCharacterId, 
 void Font::setVertexBuffer(const IBufferObjectSP& vertexBuffer)
 {
 	this->vertexBuffer = vertexBuffer;
+}
+
+void Font::setDescriptorSetLayout(const IDescriptorSetLayoutSP& descriptorSetLayout)
+{
+	this->descriptorSetLayout = descriptorSetLayout;
+}
+
+void Font::setPipelineLayout(const IPipelineLayoutSP& pipelineLayout)
+{
+	this->pipelineLayout = pipelineLayout;
 }
 
 void Font::setGraphicsPipeline(const IGraphicsPipelineSP& graphicsPipeline)
@@ -239,20 +249,41 @@ const ITextureSP& Font::getTexture() const
 
 void Font::destroy()
 {
-	if (texture.get())
-	{
-		texture->destroy();
+	allCharacters.clear();
 
-		texture = ITextureSP(nullptr);
+	if (graphicsPipeline.get())
+	{
+		graphicsPipeline->destroy();
+
+		graphicsPipeline = IGraphicsPipelineSP(nullptr);
 	}
 
-	allCharacters.clear();
+	if (pipelineLayout.get())
+	{
+		pipelineLayout->destroy();
+
+		pipelineLayout = IPipelineLayoutSP(nullptr);
+	}
+
+	if (descriptorSetLayout.get())
+	{
+		descriptorSetLayout->destroy();
+
+		descriptorSetLayout = IDescriptorSetLayoutSP(nullptr);
+	}
 
 	if (vertexBuffer.get())
 	{
 		vertexBuffer->destroy();
 
 		vertexBuffer = IBufferObjectSP(nullptr);
+	}
+
+	if (texture.get())
+	{
+		texture->destroy();
+
+		texture = ITextureSP(nullptr);
 	}
 }
 

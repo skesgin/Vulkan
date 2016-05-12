@@ -41,7 +41,7 @@ const std::string VKTS_BASE_DIRECTORY("");
 
 #elif defined(VKTS_DISPLAY_VISUAL)
 
-// TODO: Implement depending which framework is used.
+// Include nothing for now.
 
 #else
 
@@ -97,7 +97,7 @@ const std::string VKTS_BASE_DIRECTORY("");
 
 #elif defined(VKTS_DISPLAY_VISUAL)
 
-// TODO: Implement depending which framework is used.
+// Include nothing for now.
 
 #else
 

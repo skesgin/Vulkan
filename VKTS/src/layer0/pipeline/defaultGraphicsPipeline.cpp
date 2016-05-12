@@ -44,6 +44,8 @@ void defaultGraphicsPipeline::reset()
     for (uint32_t i = 0; i < 5; i++)
     {
     	pipelineShaderStageCreateInfo[i].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+
+    	pipelineShaderStageCreateInfo[i].pName = "main";
     }
 
     //

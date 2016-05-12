@@ -44,6 +44,8 @@ void defaultComputePipeline::reset()
 	computePipelineCreateInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
 
 	computePipelineCreateInfo.stage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+
+	computePipelineCreateInfo.stage.pName = "main";
 }
 
 //
