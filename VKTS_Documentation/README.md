@@ -62,9 +62,9 @@ This example uses only the core Vulkan API, so no extensions are activated. A co
 ![VKTS_Example08](screenshots/VKTS_Example08.png)
   
   
-[VKTS_Example09](../VKTS_Example09) - Shadow mapping and MSAA.
+[VKTS_Example09](../VKTS_Example09) - Shadow mapping, blending and MSAA.
       
-This example renders into an offscreen framebuffer, writing only the depth value as the shadow map. In the following command, this depth texture is used to generate shadows. This content is also rendered into an offscreen multisample framebuffer, which is finally resolved to the visible window.   
+This example renders into an offscreen framebuffer, writing only the depth value as the shadow map. In the following command, this depth texture is used to generate shadows. The spaceship does have transparent elements, so first the opaque and then the transparent elements are drawed. This content is also rendered into an offscreen multisample framebuffer, which is finally resolved to the visible window.   
     
 ![VKTS_Example09](screenshots/VKTS_Example09.png)
   
