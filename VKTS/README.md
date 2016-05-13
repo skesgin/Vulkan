@@ -65,6 +65,7 @@ Features:
     * Materials (Phong and BSDF)  
     * Textures (TGA and HDR)  
     * Animations (incl. node and armature)  
+- Bitmap font rendering.
 - Blender Python exporter for the VKTS scene file format.
 - GLSL to SPIR-V build script.
 - Interpolator and converter for constant, linear and bezier key frame data.
@@ -78,6 +79,9 @@ How to build:
 
 Changelog:
 ----------
+
+05/13/2016
+- Working and tested font class.
 
 05/12/2016
 - Finalized font creation class, not tested.

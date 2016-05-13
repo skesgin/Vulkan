@@ -59,6 +59,10 @@ private:
 
 	IDescriptorSetLayoutSP descriptorSetLayout;
 
+	IDescriptorPoolSP descriptorPool;
+
+	IDescriptorSetsSP descriptorSets;
+
 	IPipelineLayoutSP pipelineLayout;
 
 	IGraphicsPipelineSP graphicsPipeline;
@@ -95,6 +99,10 @@ public:
 
 	void setDescriptorSetLayout(const IDescriptorSetLayoutSP& descriptorSetLayout);
 
+	void setDescriptorPool(const IDescriptorPoolSP& descriptorPool);
+
+	void setDescriptorSets(const IDescriptorSetsSP& descriptorSets);
+
 	void setPipelineLayout(const IPipelineLayoutSP& pipelineLayout);
 
 	void setGraphicsPipeline(const IGraphicsPipelineSP& graphicsPipeline);
@@ -118,7 +126,7 @@ public:
 	virtual const ITextureSP& getTexture() const override;
 
 
-	virtual void drawText(const ICommandBuffersSP& cmdBuffer, const glm::mat4& viewProjection, const glm::vec2& translate, const std::string& text, const glm::vec4& color) const override;
+	virtual void drawText(const ICommandBuffersSP& cmdBuffer, const glm::mat4& viewProjection, const glm::vec2& translate, const std::string& text, const float fontSize, const glm::vec4& color) const override;
 
     //
     // IDestroyable

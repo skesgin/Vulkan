@@ -33,7 +33,7 @@
 
 #define VKTS_NUMBER_BUFFERS 2
 
-#define VKTS_FONT_NAME "font/Arial_32.fnt"
+#define VKTS_FONT_NAME "font/Arial_128.fnt"
 
 class Example: public vkts::IUpdateThread
 {

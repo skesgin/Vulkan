@@ -63,7 +63,8 @@ static VkBool32 fontGetDirectory(char* directory, const char* filename)
 
     if (position)
     {
-        strncpy(directory, filename, (position - filename) + 1);
+        strncpy(directory, filename, position - filename + 1);
+        directory[position - filename + 1] = '\0';
 
         return VK_TRUE;
     }
@@ -72,7 +73,8 @@ static VkBool32 fontGetDirectory(char* directory, const char* filename)
 
     if (position)
     {
-        strncpy(directory, filename, (position - filename) + 1);
+        strncpy(directory, filename, position - filename + 1);
+        directory[position - filename + 1] = '\0';
 
         return VK_TRUE;
     }
@@ -140,6 +142,7 @@ static VkBool32 fontExtractValue(const char* buffer, const char* parameter, char
     }
 
     strncpy(value, start, end - start);
+    value[end - start] = '\0';
 
     return VK_TRUE;
 }
@@ -152,7 +155,6 @@ static VkBool32 fontExtractIntValue(const char* buffer, const char* parameter, i
     }
 
     char temp[VKTS_MAX_TOKEN_CHARS + 1];
-    memset(temp, 0, sizeof(temp));
 
     if (!fontExtractValue(buffer, parameter, temp))
     {
@@ -172,7 +174,6 @@ static VkBool32 fontExtractStringValue(const char* buffer, const char* parameter
     }
 
     char temp[VKTS_MAX_TOKEN_CHARS + 1];
-    memset(temp, 0, sizeof(temp));
 
     if (!fontExtractValue(buffer, parameter, temp))
     {
@@ -193,6 +194,7 @@ static VkBool32 fontExtractStringValue(const char* buffer, const char* parameter
     }
 
     strncpy(value, start, end - start);
+    value[end - start] = '\0';
 
     return VK_TRUE;
 }
@@ -212,7 +214,6 @@ IFontSP VKTS_APIENTRY fontCreate(const char* filename, const IInitialResourcesSP
     }
 
     char directory[VKTS_MAX_BUFFER_CHARS];
-    memset(directory, 0, sizeof(directory));
 
     fontGetDirectory(directory, filename);
 
@@ -639,6 +640,64 @@ IFontSP VKTS_APIENTRY fontCreate(const char* filename, const IInitialResourcesSP
 	font->setDescriptorSetLayout(descriptorSetLayout);
 
 	//
+
+    VkDescriptorPoolSize descriptorPoolSize[1];
+
+    memset(&descriptorPoolSize, 0, sizeof(descriptorPoolSize));
+
+    descriptorPoolSize[0].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    descriptorPoolSize[0].descriptorCount = 1;
+
+    auto descriptorPool = descriptorPoolCreate(initialResources->getDevice()->getDevice(), VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT, 1, 1, descriptorPoolSize);
+
+    if (!descriptorPool.get())
+    {
+    	return IFontSP();
+    }
+
+    font->setDescriptorPool(descriptorPool);
+
+	//
+
+    auto allDescriptorSetLayouts = descriptorSetLayout->getDescriptorSetLayout();
+
+	auto descriptorSets = descriptorSetsCreate(initialResources->getDevice()->getDevice(), descriptorPool->getDescriptorPool(), 1, &allDescriptorSetLayouts);
+
+    if (!descriptorSets.get())
+    {
+    	return IFontSP();
+    }
+
+    font->setDescriptorSets(descriptorSets);
+
+	//
+
+	VkDescriptorImageInfo descriptorImageInfo;
+
+	memset(&descriptorImageInfo, 0, sizeof(VkDescriptorImageInfo));
+
+	descriptorImageInfo.sampler = font->getTexture()->getSampler()->getSampler();
+	descriptorImageInfo.imageView = font->getTexture()->getImageView()->getImageView();
+	descriptorImageInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+
+	VkWriteDescriptorSet writeDescriptorSet;
+
+	memset(&writeDescriptorSet, 0, sizeof(writeDescriptorSet));
+
+	writeDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+
+	writeDescriptorSet.dstSet = descriptorSets->getDescriptorSets()[0];
+	writeDescriptorSet.dstBinding = 0;
+	writeDescriptorSet.dstArrayElement = 0;
+	writeDescriptorSet.descriptorCount = 1;
+	writeDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+	writeDescriptorSet.pImageInfo = &descriptorImageInfo;
+	writeDescriptorSet.pBufferInfo = nullptr;
+	writeDescriptorSet.pTexelBufferView = nullptr;
+
+	vkUpdateDescriptorSets(initialResources->getDevice()->getDevice(), 1, &writeDescriptorSet, 0, nullptr);
+
+	//
 	// Pipeline layout.
 	//
 
@@ -690,7 +749,7 @@ IFontSP VKTS_APIENTRY fontCreate(const char* filename, const IInitialResourcesSP
     gp.getVertexInputAttributeDescription(0).offset = commonGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_VERTEX, vertexBufferType);
 
 
-    gp.getPipelineInputAssemblyStateCreateInfo().topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+    gp.getPipelineInputAssemblyStateCreateInfo().topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
 
 
     gp.getViewports(0).x = 0.0f;
@@ -704,6 +763,10 @@ IFontSP VKTS_APIENTRY fontCreate(const char* filename, const IInitialResourcesSP
     gp.getScissors(0).offset.x = 0;
     gp.getScissors(0).offset.y = 0;
     gp.getScissors(0).extent = {1, 1};
+
+
+    gp.getPipelineMultisampleStateCreateInfo();
+    gp.getPipelineDepthStencilStateCreateInfo();
 
 
     gp.getPipelineColorBlendAttachmentState(0).blendEnable = VK_TRUE;

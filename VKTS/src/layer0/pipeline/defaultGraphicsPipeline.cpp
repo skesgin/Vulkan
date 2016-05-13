@@ -51,7 +51,7 @@ void defaultGraphicsPipeline::reset()
     //
 
 	memset(vertexInputBindingDescription, 0, sizeof(vertexInputBindingDescription));
-	memset(vertexInputAttributeDescription, 0, sizeof(vertexInputBindingDescription));
+	memset(vertexInputAttributeDescription, 0, sizeof(vertexInputAttributeDescription));
 
     memset(&pipelineVertexInputStateCreateInfo, 0, sizeof(VkPipelineVertexInputStateCreateInfo));
 
@@ -97,6 +97,8 @@ void defaultGraphicsPipeline::reset()
     memset(&pipelineMultisampleStateCreateInfo, 0, sizeof(VkPipelineMultisampleStateCreateInfo));
 
     pipelineMultisampleStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+
+    pipelineMultisampleStateCreateInfo.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
 
     //
 

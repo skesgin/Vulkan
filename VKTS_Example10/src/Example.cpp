@@ -123,6 +123,16 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 
 	vkCmdSetScissor(cmdBuffer[usedBuffer]->getCommandBuffer(), 0, 1, &scissor);
 
+	// Render font.
+
+	if (font.get())
+	{
+		glm::mat4 projectionMatrix = vkts::orthoMat4((float)swapchain->getImageExtent().width * -0.5f, (float)swapchain->getImageExtent().width * 0.5f, (float)swapchain->getImageExtent().height * -0.5f, (float)swapchain->getImageExtent().height  * 0.5f, 0.0f, 100.0f);
+
+		font->drawText(cmdBuffer[usedBuffer], projectionMatrix, glm::vec2((float)swapchain->getImageExtent().width * -0.5f + 100.0f, 0.0f), "Hello VulKan ToolS!", 64.0f, glm::vec4(0.64f, 0.12f, 0.13f, 1.0f));
+	}
+
+
 	cmdBuffer[usedBuffer]->cmdEndRenderPass();
 
     //
