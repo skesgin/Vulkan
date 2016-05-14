@@ -1191,7 +1191,7 @@ VkBool32 Example::buildRenderPass()
 	attachmentDescription[0].format = swapchain->getImageFormat();
 	attachmentDescription[0].samples = VK_SAMPLE_COUNT_1_BIT;
 	attachmentDescription[0].loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-	attachmentDescription[0].storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+	attachmentDescription[0].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 	attachmentDescription[0].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 	attachmentDescription[0].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 	attachmentDescription[0].initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
@@ -1221,7 +1221,7 @@ VkBool32 Example::buildRenderPass()
 	attachmentDescription[3].format = VK_FORMAT_D16_UNORM;
 	attachmentDescription[3].samples = VKTS_SAMPLE_COUNT_BIT;
 	attachmentDescription[3].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-	attachmentDescription[3].storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+	attachmentDescription[3].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 	attachmentDescription[3].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 	attachmentDescription[3].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 	attachmentDescription[3].initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
@@ -1279,6 +1279,7 @@ VkBool32 Example::buildRenderPass()
 
 	attachmentDescription[0].format = VK_FORMAT_D32_SFLOAT;
 	attachmentDescription[0].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+	attachmentDescription[0].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 	attachmentDescription[0].initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 	attachmentDescription[0].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
