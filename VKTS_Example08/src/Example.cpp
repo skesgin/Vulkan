@@ -196,7 +196,7 @@ vkts::IImageDataSP Example::gatherImageData() const
 
         bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
         bufferCreateInfo.size = imageData->getSize();
-        bufferCreateInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_TEXEL_BUFFER_BIT;
+        bufferCreateInfo.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT;
         bufferCreateInfo.flags = 0;
         bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
         bufferCreateInfo.queueFamilyIndexCount = 0;

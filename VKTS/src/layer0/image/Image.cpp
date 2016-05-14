@@ -382,7 +382,7 @@ void Image::copyImageToBuffer(const VkCommandBuffer cmdBuffer, const VkBuffer ds
 		// Prepare source image for copy.
 
 		imageMemoryBarrier.srcAccessMask = accessMask;
-		imageMemoryBarrier.dstAccessMask = accessMask | VK_ACCESS_TRANSFER_READ_BIT;
+		imageMemoryBarrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
 		imageMemoryBarrier.oldLayout = imageLayout;
 		imageMemoryBarrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
 

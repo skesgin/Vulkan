@@ -324,6 +324,7 @@ IMemoryImageSP VKTS_APIENTRY memoryImageCreate(IImageSP& stageImage, IBufferSP& 
                 bufferImageCopy.imageOffset = {0, 0, 0};
                 bufferImageCopy.imageExtent = {glm::max(imageData->getWidth() >> i, 1u), glm::max(imageData->getHeight() >> i, 1u), glm::max(imageData->getDepth() >> i, 1u)};
 
+                // FIXME: Copy to shared object.
                 stageBuffer->copyBufferToImage(cmdBuffer->getCommandBuffer(), image->getImage(), image->getImageLayout(), 1, &bufferImageCopy);
 
                 //

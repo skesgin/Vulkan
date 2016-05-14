@@ -114,8 +114,12 @@ void Buffer::copyBuffer(const VkCommandBuffer cmdBuffer, const VkBuffer targetBu
 
 void Buffer::copyBufferToImage(const VkCommandBuffer cmdBuffer, const VkImage targetImage, const VkImageLayout targetImageLayout, const uint32_t regionCount, const VkBufferImageCopy* regions) const
 {
+	// FIXME: Add barrier for image.
+
     vkCmdCopyBufferToImage(cmdBuffer, buffer, targetImage, targetImageLayout, regionCount, regions);
 }
+
+// TODO: Add Copy to shared object.
 
 void Buffer::cmdPipelineBarrier(const VkCommandBuffer cmdBuffer, const VkAccessFlags srcAccessMask, const VkAccessFlags dstAccessMask)
 {
