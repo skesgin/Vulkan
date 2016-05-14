@@ -111,7 +111,9 @@ public:
 
     virtual void getImageSubresourceLayout(VkSubresourceLayout& subresourceLayout, const VkImageSubresource& imageSubresource) const override;
 
-    virtual void copyImage(const VkCommandBuffer cmdBuffer, const VkImage targetImage, const VkAccessFlags targetAccessMask, const VkImageLayout targetImageLayout, const VkImageCopy& iamgeCopy) const override;
+    virtual void copyImage(const VkCommandBuffer cmdBuffer, const VkImage targetImage, const VkAccessFlags targetAccessMask, const VkImageLayout targetImageLayout, const VkImageCopy& imageCopy) const override;
+
+    virtual void copyImage(const VkCommandBuffer cmdBuffer, IImageSP& targetImage, const VkImageCopy& imageCopy) const override;
 
     virtual void copyImageToBuffer(const VkCommandBuffer cmdBuffer, const VkBuffer dstBuffer, const uint32_t regionCount, const VkBufferImageCopy* regions, const VkImageSubresourceRange& subresourceRange) const override;
 

@@ -39,6 +39,17 @@ vkts::IImageDataSP Example::gatherImageData() const
 {
 	VkResult result;
 
+	auto fence = vkts::fenceCreate(device->getDevice(), 0);
+
+	if (!fence.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create fence.");
+
+		return vkts::IImageDataSP();
+	}
+
+	//
+
 	auto imageData = vkts::imageDataCreate(VKTS_IMAGE_NAME, VKTS_IMAGE_LENGTH, VKTS_IMAGE_LENGTH, 1, 1.0f, 0.0f, 0.0f, 1.0f, VK_IMAGE_TYPE_2D, VK_FORMAT_R8G8B8A8_UNORM);
 
 	// Check, if we can use a linear tiled image for staging.
@@ -68,12 +79,10 @@ vkts::IImageDataSP Example::gatherImageData() const
 			return vkts::IImageDataSP();
 		}
 
-
 		VkImageSubresourceRange imageSubresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
 
 		// Prepare stage image for final layout etc.
-		stageImage->cmdPipelineBarrier(cmdBuffer->getCommandBuffer(), 0, VK_IMAGE_LAYOUT_GENERAL, imageSubresourceRange);
-
+		stageImage->cmdPipelineBarrier(cmdBuffer->getCommandBuffer(), VK_ACCESS_TRANSFER_WRITE_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, imageSubresourceRange);
 
 		VkImageCopy imageCopy;
 
@@ -83,9 +92,10 @@ vkts::IImageDataSP Example::gatherImageData() const
 		imageCopy.dstOffset = {0, 0, 0};
 		imageCopy.extent = { VKTS_IMAGE_LENGTH, VKTS_IMAGE_LENGTH, 1u };
 
-		// Copy form device to host visible image / memory.
-		image->copyImage(cmdBuffer->getCommandBuffer(), stageImage->getImage(), stageImage->getAccessMask(), stageImage->getImageLayout(), imageCopy);
+		// Copy form device to host visible image / memory. This command also sets the needed barriers.
+		image->copyImage(cmdBuffer->getCommandBuffer(), stageImage, imageCopy);
 
+		stageImage->cmdPipelineBarrier(cmdBuffer->getCommandBuffer(), VK_ACCESS_HOST_READ_BIT, VK_IMAGE_LAYOUT_GENERAL, imageSubresourceRange);
 
 		result = cmdBuffer->endCommandBuffer();
 
@@ -110,7 +120,7 @@ vkts::IImageDataSP Example::gatherImageData() const
 		submitInfo.signalSemaphoreCount = 0;
 		submitInfo.pSignalSemaphores = nullptr;
 
-		result = queue->submit(1, &submitInfo, VK_NULL_HANDLE);
+		result = queue->submit(1, &submitInfo, fence->getFence());
 
 		if (result != VK_SUCCESS)
 		{
@@ -119,11 +129,13 @@ vkts::IImageDataSP Example::gatherImageData() const
 			return vkts::IImageDataSP();
 		}
 
-		result = queue->waitIdle();
+		//
+
+		result = fence->waitForFence(UINT64_MAX);
 
 		if (result != VK_SUCCESS)
 		{
-			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not wait for idle queue.");
+			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not wait for fence.");
 
 			return vkts::IImageDataSP();
 		}
@@ -252,7 +264,7 @@ vkts::IImageDataSP Example::gatherImageData() const
 		submitInfo.signalSemaphoreCount = 0;
 		submitInfo.pSignalSemaphores = nullptr;
 
-		result = queue->submit(1, &submitInfo, VK_NULL_HANDLE);
+		result = queue->submit(1, &submitInfo, fence->getFence());
 
 		if (result != VK_SUCCESS)
 		{
@@ -261,11 +273,13 @@ vkts::IImageDataSP Example::gatherImageData() const
 			return vkts::IImageDataSP();
 		}
 
-		result = queue->waitIdle();
+		//
+
+		result = fence->waitForFence(UINT64_MAX);
 
 		if (result != VK_SUCCESS)
 		{
-			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not wait for idle queue.");
+			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not wait for fence.");
 
 			return vkts::IImageDataSP();
 		}
@@ -310,7 +324,7 @@ vkts::IImageDataSP Example::gatherImageData() const
 		// Stage image and device memory are automatically destroyed.
 	}
 
-	//
+	// Fence is automatically destroyed.
 
 	return imageData;
 }
@@ -347,7 +361,7 @@ VkBool32 Example::buildCmdBuffer()
 
 	VkImageSubresourceRange imageSubresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
 
-	image->cmdPipelineBarrier(cmdBuffer->getCommandBuffer(), 0, VK_IMAGE_LAYOUT_GENERAL, imageSubresourceRange);
+	image->cmdPipelineBarrier(cmdBuffer->getCommandBuffer(), VK_ACCESS_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL, imageSubresourceRange);
 
 	vkCmdDispatch(cmdBuffer->getCommandBuffer(), VKTS_IMAGE_LENGTH / VKTS_LOCAL_SIZE, VKTS_IMAGE_LENGTH / VKTS_LOCAL_SIZE, 1);
 

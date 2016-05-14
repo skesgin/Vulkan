@@ -274,7 +274,7 @@ IMemoryImageSP VKTS_APIENTRY memoryImageCreate(IImageSP& stageImage, IBufferSP& 
                 imageCopy.dstOffset = {0, 0, 0};
                 imageCopy.extent = {glm::max(imageData->getWidth() >> i, 1u), glm::max(imageData->getHeight() >> i, 1u), glm::max(imageData->getDepth() >> i, 1u)};
 
-                stageImage->copyImage(cmdBuffer->getCommandBuffer(), image->getImage(), image->getAccessMask(), image->getImageLayout(), imageCopy);
+                stageImage->copyImage(cmdBuffer->getCommandBuffer(), image, imageCopy);
             }
         }
         else

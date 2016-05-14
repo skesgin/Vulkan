@@ -80,6 +80,9 @@ How to build:
 Changelog:
 ----------
 
+05/14/2016
+- Fixed copy image and the used barriers.
+
 05/13/2016
 - Working and tested font class.
 

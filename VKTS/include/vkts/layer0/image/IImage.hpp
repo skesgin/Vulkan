@@ -94,6 +94,8 @@ public:
 
     virtual void copyImage(const VkCommandBuffer cmdBuffer, const VkImage targetImage, const VkAccessFlags targetAccessMask, const VkImageLayout targetImageLayout, const VkImageCopy& imageCopy) const = 0;
 
+    virtual void copyImage(const VkCommandBuffer cmdBuffer, std::shared_ptr<IImage>& targetImage, const VkImageCopy& iamgeCopy) const = 0;
+
     virtual void copyImageToBuffer(const VkCommandBuffer cmdBuffer, const VkBuffer dstBuffer, const uint32_t regionCount, const VkBufferImageCopy* regions, const VkImageSubresourceRange& subresourceRange) const = 0;
 
     virtual void cmdPipelineBarrier(const VkCommandBuffer cmdBuffer, const VkAccessFlags dstAccessMask, const VkImageLayout newLayout, const VkImageSubresourceRange& subresourceRange) = 0;
