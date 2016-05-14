@@ -30,7 +30,7 @@ namespace vkts
 {
 
 Buffer::Buffer(const VkDevice device, const VkBufferCreateFlags flags, const VkDeviceSize size, const VkBufferUsageFlags usage, const VkSharingMode sharingMode, const uint32_t queueFamilyIndexCount, const uint32_t* queueFamilyIndices, const VkBuffer buffer) :
-    IBuffer(), device(device), bufferCreateInfo{ VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO, nullptr, flags, size, usage, sharingMode, queueFamilyIndexCount, nullptr}, buffer(buffer)
+    IBuffer(), device(device), bufferCreateInfo{ VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO, nullptr, flags, size, usage, sharingMode, queueFamilyIndexCount, nullptr}, buffer(buffer), accessMask(0)
 {
     for (uint32_t i = 0; i < queueFamilyIndexCount; i++)
     {
@@ -97,6 +97,11 @@ const VkBuffer Buffer::getBuffer() const
     return buffer;
 }
 
+VkAccessFlags Buffer::getAccessMask() const
+{
+    return accessMask;
+}
+
 void Buffer::getBufferMemoryRequirements(VkMemoryRequirements& memoryRequirements) const
 {
     vkGetBufferMemoryRequirements(device, buffer, &memoryRequirements);
@@ -107,29 +112,66 @@ VkResult Buffer::bindBufferMemory(const VkDeviceMemory mem, const VkDeviceSize m
     return vkBindBufferMemory(device, buffer, mem, memOffset);
 }
 
-void Buffer::copyBuffer(const VkCommandBuffer cmdBuffer, const VkBuffer targetBuffer, const VkDeviceSize targetBufferSize, const uint32_t regionCount, const VkBufferCopy* bufferCopy) const
+void Buffer::copyBuffer(const VkCommandBuffer cmdBuffer, IBufferSP& targetBuffer, const VkBufferCopy& bufferCopy)
 {
-    vkCmdCopyBuffer(cmdBuffer, buffer, targetBuffer, regionCount, bufferCopy);
+	if (!targetBuffer.get())
+	{
+		return;
+	}
+
+	VkAccessFlags srcAccessMask = accessMask;
+	VkAccessFlags dstAccessMask = targetBuffer->getAccessMask();
+
+	cmdPipelineBarrier(cmdBuffer, VK_ACCESS_TRANSFER_READ_BIT);
+
+	targetBuffer->cmdPipelineBarrier(cmdBuffer, VK_ACCESS_TRANSFER_WRITE_BIT);
+
+    vkCmdCopyBuffer(cmdBuffer, buffer, targetBuffer->getBuffer(), 1, &bufferCopy);
+
+	targetBuffer->cmdPipelineBarrier(cmdBuffer, dstAccessMask);
+
+	cmdPipelineBarrier(cmdBuffer, srcAccessMask);
 }
 
-void Buffer::copyBufferToImage(const VkCommandBuffer cmdBuffer, const VkImage targetImage, const VkImageLayout targetImageLayout, const uint32_t regionCount, const VkBufferImageCopy* regions) const
+void Buffer::copyBufferToImage(const VkCommandBuffer cmdBuffer, IImageSP& targetImage, const VkBufferImageCopy& bufferImageCopy)
 {
-	// FIXME: Add barrier for image.
+	if (!targetImage.get())
+	{
+		return;
+	}
 
-    vkCmdCopyBufferToImage(cmdBuffer, buffer, targetImage, targetImageLayout, regionCount, regions);
+	VkAccessFlags srcAccessMask = accessMask;
+
+    VkImageLayout targetImageLayout = targetImage->getImageLayout(bufferImageCopy.imageSubresource.mipLevel);
+    VkAccessFlags targetAccessMask = targetImage->getAccessMask(bufferImageCopy.imageSubresource.mipLevel);
+
+	cmdPipelineBarrier(cmdBuffer, VK_ACCESS_TRANSFER_READ_BIT);
+
+    VkImageSubresourceRange dstImageSubresourceRange = {bufferImageCopy.imageSubresource.aspectMask, bufferImageCopy.imageSubresource.mipLevel, 1, bufferImageCopy.imageSubresource.baseArrayLayer, bufferImageCopy.imageSubresource.layerCount};
+
+    targetImage->cmdPipelineBarrier(cmdBuffer, VK_ACCESS_TRANSFER_WRITE_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, dstImageSubresourceRange);
+
+    vkCmdCopyBufferToImage(cmdBuffer, buffer, targetImage->getImage(), targetImage->getImageLayout(bufferImageCopy.imageSubresource.mipLevel), 1, &bufferImageCopy);
+
+    targetImage->cmdPipelineBarrier(cmdBuffer, targetAccessMask, targetImageLayout, dstImageSubresourceRange);
+
+	cmdPipelineBarrier(cmdBuffer, srcAccessMask);
 }
 
-// TODO: Add Copy to shared object.
-
-void Buffer::cmdPipelineBarrier(const VkCommandBuffer cmdBuffer, const VkAccessFlags srcAccessMask, const VkAccessFlags dstAccessMask)
+void Buffer::cmdPipelineBarrier(const VkCommandBuffer cmdBuffer, const VkAccessFlags dstAccessMask)
 {
+	if (accessMask == dstAccessMask)
+	{
+		return;
+	}
+
     VkBufferMemoryBarrier bufferMemoryBarrier;
 
     memset(&bufferMemoryBarrier, 0, sizeof(VkBufferMemoryBarrier));
 
     bufferMemoryBarrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
 
-    bufferMemoryBarrier.srcAccessMask = srcAccessMask;
+    bufferMemoryBarrier.srcAccessMask = accessMask;
     bufferMemoryBarrier.dstAccessMask = dstAccessMask;
     bufferMemoryBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
     bufferMemoryBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
@@ -138,6 +180,8 @@ void Buffer::cmdPipelineBarrier(const VkCommandBuffer cmdBuffer, const VkAccessF
     bufferMemoryBarrier.size = getSize();
 
     vkCmdPipelineBarrier(cmdBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, 0, 0, nullptr, 1, &bufferMemoryBarrier, 0, nullptr);
+
+    accessMask = dstAccessMask;
 }
 
 //

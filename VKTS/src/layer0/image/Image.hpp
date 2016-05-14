@@ -43,9 +43,9 @@ private:
 
     std::vector<uint32_t> allQueueFamilyIndices;
 
-    VkImageLayout imageLayout;
+    std::vector<VkImageLayout> imageLayout;
 
-    VkAccessFlags accessMask;
+    std::vector<VkAccessFlags> accessMask;
 
     VkImage image;
 
@@ -103,19 +103,17 @@ public:
 
     virtual const VkImage getImage() const override;
 
-    virtual VkAccessFlags getAccessMask() const override;
+    virtual VkAccessFlags getAccessMask(const uint32_t mipLevel) const override;
 
-    virtual VkImageLayout getImageLayout() const override;
+    virtual VkImageLayout getImageLayout(const uint32_t mipLevel) const override;
 
     virtual void getImageMemoryRequirements(VkMemoryRequirements& memoryRequirements) const override;
 
     virtual void getImageSubresourceLayout(VkSubresourceLayout& subresourceLayout, const VkImageSubresource& imageSubresource) const override;
 
-    virtual void copyImage(const VkCommandBuffer cmdBuffer, const VkImage targetImage, const VkAccessFlags targetAccessMask, const VkImageLayout targetImageLayout, const VkImageCopy& imageCopy) const override;
+    virtual void copyImage(const VkCommandBuffer cmdBuffer, IImageSP& targetImage, const VkImageCopy& imageCopy) override;
 
-    virtual void copyImage(const VkCommandBuffer cmdBuffer, IImageSP& targetImage, const VkImageCopy& imageCopy) const override;
-
-    virtual void copyImageToBuffer(const VkCommandBuffer cmdBuffer, const VkBuffer dstBuffer, const uint32_t regionCount, const VkBufferImageCopy* regions, const VkImageSubresourceRange& subresourceRange) const override;
+    virtual void copyImageToBuffer(const VkCommandBuffer cmdBuffer, IBufferSP& targetBuffer, const VkBufferImageCopy& bufferImageCopy) override;
 
     virtual void cmdPipelineBarrier(const VkCommandBuffer cmdBuffer, const VkAccessFlags dstAccessMask, const VkImageLayout newLayout, const VkImageSubresourceRange& subresourceRange) override;
 

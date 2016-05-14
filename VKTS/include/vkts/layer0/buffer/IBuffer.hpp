@@ -32,6 +32,8 @@
 namespace vkts
 {
 
+class IImage;
+
 class IBuffer: public IDestroyable
 {
 
@@ -64,15 +66,17 @@ public:
 
     virtual const VkBuffer getBuffer() const = 0;
 
+    virtual VkAccessFlags getAccessMask() const = 0;
+
     virtual void getBufferMemoryRequirements(VkMemoryRequirements& memoryRequirements) const = 0;
 
     virtual VkResult bindBufferMemory(const VkDeviceMemory mem, const VkDeviceSize memOffset) const = 0;
 
-    virtual void copyBuffer(const VkCommandBuffer cmdBuffer, const VkBuffer targetBuffer, const VkDeviceSize targetBufferSize, const uint32_t regionCount, const VkBufferCopy* bufferCopy) const = 0;
+    virtual void copyBuffer(const VkCommandBuffer cmdBuffer, std::shared_ptr<IBuffer>& targetBuffer, const VkBufferCopy& bufferCopy) = 0;
 
-    virtual void copyBufferToImage(const VkCommandBuffer cmdBuffer, const VkImage targetImage, const VkImageLayout targetImageLayout, const uint32_t regionCount, const VkBufferImageCopy* regions) const = 0;
+    virtual void copyBufferToImage(const VkCommandBuffer cmdBuffer, std::shared_ptr<IImage>& targetImage, const VkBufferImageCopy& bufferImageCopy) = 0;
 
-    virtual void cmdPipelineBarrier(const VkCommandBuffer cmdBuffer, const VkAccessFlags srcAccessMask, const VkAccessFlags dstAccessMask) = 0;
+    virtual void cmdPipelineBarrier(const VkCommandBuffer cmdBuffer, const VkAccessFlags dstAccessMask) = 0;
 
 };
 

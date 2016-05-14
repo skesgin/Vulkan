@@ -224,11 +224,6 @@ vkts::IImageDataSP Example::gatherImageData() const
 			return vkts::IImageDataSP();
 		}
 
-
-
-		VkImageSubresourceRange imageSubresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
-
-
 		VkBufferImageCopy bufferImageCopy;
 
 		bufferImageCopy.bufferOffset = 0;
@@ -238,7 +233,7 @@ vkts::IImageDataSP Example::gatherImageData() const
 		bufferImageCopy.imageOffset = {0, 0, 0};
 		bufferImageCopy.imageExtent = {VKTS_IMAGE_LENGTH, VKTS_IMAGE_LENGTH, 1};
 
-		image->copyImageToBuffer(cmdBuffer->getCommandBuffer(), stageBuffer->getBuffer(), 1, &bufferImageCopy, imageSubresourceRange);
+		image->copyImageToBuffer(cmdBuffer->getCommandBuffer(), stageBuffer, bufferImageCopy);
 
 
 		result = cmdBuffer->endCommandBuffer();

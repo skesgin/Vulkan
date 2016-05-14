@@ -30,7 +30,7 @@ namespace vkts
 {
 
 Image::Image(const VkDevice device, const VkImageCreateFlags flags, const VkImageType imageType, const VkFormat format, const VkExtent3D& extent, const uint32_t mipLevels, const uint32_t arrayLayers, const VkSampleCountFlagBits samples, const VkImageTiling tiling, const VkImageUsageFlags usage, const VkSharingMode sharingMode, const uint32_t queueFamilyIndexCount, const uint32_t* queueFamilyIndices, const VkImageLayout initialLayout, const VkAccessFlags accessMask, const VkImage image) :
-    IImage(), device(device), imageCreateInfo{VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO, nullptr, flags, imageType, format, extent, mipLevels, arrayLayers, samples, tiling, usage, sharingMode, queueFamilyIndexCount, nullptr, initialLayout}, allQueueFamilyIndices(), imageLayout(initialLayout), accessMask(accessMask), image(image)
+    IImage(), device(device), imageCreateInfo{VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO, nullptr, flags, imageType, format, extent, mipLevels, arrayLayers, samples, tiling, usage, sharingMode, queueFamilyIndexCount, nullptr, initialLayout}, allQueueFamilyIndices(), imageLayout(mipLevels), accessMask(mipLevels), image(image)
 {
     if (queueFamilyIndices)
     {
@@ -43,6 +43,12 @@ Image::Image(const VkDevice device, const VkImageCreateFlags flags, const VkImag
         {
             imageCreateInfo.pQueueFamilyIndices = &allQueueFamilyIndices[0];
         }
+    }
+
+    for (uint32_t i = 0; i < mipLevels; i++)
+    {
+        this->imageLayout[i] = initialLayout;
+        this->accessMask[i] = accessMask;
     }
 }
 
@@ -150,14 +156,14 @@ const VkImage Image::getImage() const
     return image;
 }
 
-VkAccessFlags Image::getAccessMask() const
+VkAccessFlags Image::getAccessMask(const uint32_t mipLevel) const
 {
-	return accessMask;
+	return accessMask[mipLevel];
 }
 
-VkImageLayout Image::getImageLayout() const
+VkImageLayout Image::getImageLayout(const uint32_t mipLevel) const
 {
-    return imageLayout;
+    return imageLayout[mipLevel];
 }
 
 void Image::getImageMemoryRequirements(VkMemoryRequirements& memoryRequirements) const
@@ -170,157 +176,29 @@ void Image::getImageSubresourceLayout(VkSubresourceLayout& subresourceLayout, co
     vkGetImageSubresourceLayout(device, image, &imageSubresource, &subresourceLayout);
 }
 
-void Image::copyImage(const VkCommandBuffer cmdBuffer, const VkImage targetImage, const VkAccessFlags targetAccessMask, const VkImageLayout targetImageLayout, const VkImageCopy& imageCopy) const
+void Image::copyImage(const VkCommandBuffer cmdBuffer, IImageSP& targetImage, const VkImageCopy& imageCopy)
 {
-	if (imageLayout == VK_IMAGE_LAYOUT_UNDEFINED || imageLayout == VK_IMAGE_LAYOUT_PREINITIALIZED)
-	{
-		logPrint(VKTS_LOG_WARNING, "Image: Source layout not allowed: %d", imageLayout);
-
-		return;
-	}
-
-	if (targetImageLayout == VK_IMAGE_LAYOUT_UNDEFINED || targetImageLayout == VK_IMAGE_LAYOUT_PREINITIALIZED)
-	{
-		logPrint(VKTS_LOG_WARNING, "Image: Target layout not allowed: %d", targetImageLayout);
-
-		return;
-	}
-
-	//
-
-	VkImageMemoryBarrier imageMemoryBarrier;
-
-    memset(&imageMemoryBarrier, 0, sizeof(VkImageMemoryBarrier));
-
-    imageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-
-    imageMemoryBarrier.srcAccessMask = 0;       				// Defined later.
-    imageMemoryBarrier.dstAccessMask = 0;       				// Defined later.
-    imageMemoryBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;	// Defined later.
-    imageMemoryBarrier.newLayout = VK_IMAGE_LAYOUT_UNDEFINED;	// Defined later.
-    imageMemoryBarrier.srcQueueFamilyIndex = 0;
-    imageMemoryBarrier.dstQueueFamilyIndex = 0;
-    imageMemoryBarrier.image = VK_NULL_HANDLE;      			// Defined later.
-    imageMemoryBarrier.subresourceRange = {imageCopy.srcSubresource.aspectMask, imageCopy.srcSubresource.mipLevel, 1, imageCopy.srcSubresource.baseArrayLayer, 1};
-
-    // Prepare source image for copy.
-
-	imageMemoryBarrier.srcAccessMask = accessMask;
-	imageMemoryBarrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
-    imageMemoryBarrier.oldLayout = imageLayout;
-    imageMemoryBarrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-
-    imageMemoryBarrier.image = image;
-
-    if (imageMemoryBarrier.srcAccessMask != imageMemoryBarrier.dstAccessMask || imageMemoryBarrier.oldLayout != imageMemoryBarrier.newLayout)
-    {
-    	vkCmdPipelineBarrier(cmdBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
-    }
-
-    // Prepare target image for copy.
-
-    imageMemoryBarrier.srcAccessMask = targetAccessMask;
-    imageMemoryBarrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-    imageMemoryBarrier.oldLayout = targetImageLayout;
-    imageMemoryBarrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-
-    imageMemoryBarrier.image = targetImage;
-
-    if (imageMemoryBarrier.srcAccessMask != imageMemoryBarrier.dstAccessMask || imageMemoryBarrier.oldLayout != imageMemoryBarrier.newLayout)
-    {
-    	vkCmdPipelineBarrier(cmdBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
-    }
-
-    // Copy image by command.
-
-    vkCmdCopyImage(cmdBuffer, image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, targetImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &imageCopy);
-
-    // Revert back.
-
-    imageMemoryBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-    imageMemoryBarrier.dstAccessMask = targetAccessMask;
-
-    imageMemoryBarrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-    imageMemoryBarrier.newLayout = targetImageLayout;
-
-    if (imageMemoryBarrier.srcAccessMask != imageMemoryBarrier.dstAccessMask || imageMemoryBarrier.oldLayout != imageMemoryBarrier.newLayout)
-    {
-    	vkCmdPipelineBarrier(cmdBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
-	}
-
-	imageMemoryBarrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
-	imageMemoryBarrier.dstAccessMask = accessMask;
-
-	imageMemoryBarrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-    imageMemoryBarrier.newLayout = imageLayout;
-
-    imageMemoryBarrier.image = image;
-
-    if (imageMemoryBarrier.srcAccessMask != imageMemoryBarrier.dstAccessMask || imageMemoryBarrier.oldLayout != imageMemoryBarrier.newLayout)
-    {
-    	vkCmdPipelineBarrier(cmdBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
-    }
-}
-
-void Image::copyImage(const VkCommandBuffer cmdBuffer, IImageSP& targetImage, const VkImageCopy& imageCopy) const
-{
-	if (imageLayout == VK_IMAGE_LAYOUT_UNDEFINED || imageLayout == VK_IMAGE_LAYOUT_PREINITIALIZED)
-	{
-		logPrint(VKTS_LOG_WARNING, "Image: Source layout not allowed: %d", imageLayout);
-
-		return;
-	}
-
 	if (!targetImage.get())
 	{
 		return;
 	}
 
-	//
-
-	VkImageMemoryBarrier imageMemoryBarrier;
-
-    memset(&imageMemoryBarrier, 0, sizeof(VkImageMemoryBarrier));
-
-    imageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-
-    imageMemoryBarrier.srcAccessMask = 0;       				// Defined later.
-    imageMemoryBarrier.dstAccessMask = 0;       				// Defined later.
-    imageMemoryBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;	// Defined later.
-    imageMemoryBarrier.newLayout = VK_IMAGE_LAYOUT_UNDEFINED;	// Defined later.
-    imageMemoryBarrier.srcQueueFamilyIndex = 0;
-    imageMemoryBarrier.dstQueueFamilyIndex = 0;
-    imageMemoryBarrier.image = VK_NULL_HANDLE;      			// Defined later.
-    imageMemoryBarrier.subresourceRange = {imageCopy.srcSubresource.aspectMask, imageCopy.srcSubresource.mipLevel, 1, imageCopy.srcSubresource.baseArrayLayer, 1};
+    VkImageLayout sourceImageLayout = imageLayout[imageCopy.srcSubresource.mipLevel];
+    VkAccessFlags sourceAccessMask = accessMask[imageCopy.srcSubresource.mipLevel];
+    VkImageLayout targetImageLayout = targetImage->getImageLayout(imageCopy.dstSubresource.mipLevel);
+    VkAccessFlags targetAccessMask = targetImage->getAccessMask(imageCopy.dstSubresource.mipLevel);
 
     // Prepare source image for copy.
 
-	imageMemoryBarrier.srcAccessMask = accessMask;
-	imageMemoryBarrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
-    imageMemoryBarrier.oldLayout = imageLayout;
-    imageMemoryBarrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+    VkImageSubresourceRange srcImageSubresourceRange = {imageCopy.srcSubresource.aspectMask, imageCopy.srcSubresource.mipLevel, 1, imageCopy.srcSubresource.baseArrayLayer, imageCopy.srcSubresource.layerCount};
 
-    imageMemoryBarrier.image = image;
-
-    if (imageMemoryBarrier.srcAccessMask != imageMemoryBarrier.dstAccessMask || imageMemoryBarrier.oldLayout != imageMemoryBarrier.newLayout)
-    {
-    	vkCmdPipelineBarrier(cmdBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
-    }
+    cmdPipelineBarrier(cmdBuffer, VK_ACCESS_TRANSFER_READ_BIT, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, srcImageSubresourceRange);
 
     // Prepare target image for copy.
 
-    VkAccessFlags targetAccessMask = targetImage->getAccessMask();
-	VkImageLayout targetImageLayout = targetImage->getImageLayout();
+    VkImageSubresourceRange dstImageSubresourceRange = {imageCopy.dstSubresource.aspectMask, imageCopy.dstSubresource.mipLevel, 1, imageCopy.dstSubresource.baseArrayLayer, imageCopy.dstSubresource.layerCount};
 
-	imageMemoryBarrier.srcAccessMask = targetAccessMask;
-	imageMemoryBarrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-    imageMemoryBarrier.oldLayout = targetImageLayout;
-    imageMemoryBarrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-
-    if (imageMemoryBarrier.srcAccessMask != imageMemoryBarrier.dstAccessMask || imageMemoryBarrier.oldLayout != imageMemoryBarrier.newLayout)
-    {
-    	targetImage->cmdPipelineBarrier(cmdBuffer, imageMemoryBarrier.dstAccessMask, imageMemoryBarrier.newLayout, imageMemoryBarrier.subresourceRange);
-	}
+    targetImage->cmdPipelineBarrier(cmdBuffer, VK_ACCESS_TRANSFER_WRITE_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, dstImageSubresourceRange);
 
     // Copy image by command.
 
@@ -328,90 +206,45 @@ void Image::copyImage(const VkCommandBuffer cmdBuffer, IImageSP& targetImage, co
 
     // Revert back.
 
-    imageMemoryBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-    imageMemoryBarrier.dstAccessMask = targetAccessMask;
+    targetImage->cmdPipelineBarrier(cmdBuffer, targetAccessMask, targetImageLayout, dstImageSubresourceRange);
 
-    imageMemoryBarrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-    imageMemoryBarrier.newLayout = targetImageLayout;
+    // Revert back.
 
-    if (imageMemoryBarrier.srcAccessMask != imageMemoryBarrier.dstAccessMask || imageMemoryBarrier.oldLayout != imageMemoryBarrier.newLayout)
-    {
-    	targetImage->cmdPipelineBarrier(cmdBuffer, imageMemoryBarrier.dstAccessMask, imageMemoryBarrier.newLayout, imageMemoryBarrier.subresourceRange);
-	}
-
-	imageMemoryBarrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
-	imageMemoryBarrier.dstAccessMask = accessMask;
-
-	imageMemoryBarrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-    imageMemoryBarrier.newLayout = imageLayout;
-
-    imageMemoryBarrier.image = image;
-
-    if (imageMemoryBarrier.srcAccessMask != imageMemoryBarrier.dstAccessMask || imageMemoryBarrier.oldLayout != imageMemoryBarrier.newLayout)
-    {
-    	vkCmdPipelineBarrier(cmdBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
-    }
+    cmdPipelineBarrier(cmdBuffer, sourceAccessMask, sourceImageLayout, srcImageSubresourceRange);
 }
 
-void Image::copyImageToBuffer(const VkCommandBuffer cmdBuffer, const VkBuffer dstBuffer, const uint32_t regionCount, const VkBufferImageCopy* regions, const VkImageSubresourceRange& subresourceRange) const
+void Image::copyImageToBuffer(const VkCommandBuffer cmdBuffer, IBufferSP& targetBuffer, const VkBufferImageCopy& bufferImageCopy)
 {
-	if (imageLayout == VK_IMAGE_LAYOUT_UNDEFINED || imageLayout == VK_IMAGE_LAYOUT_PREINITIALIZED)
+	if (!targetBuffer.get())
 	{
-		logPrint(VKTS_LOG_WARNING, "Image: Source layout not allowed: %d", imageLayout);
-
 		return;
 	}
 
-	for (uint32_t i = 0; i < regionCount; i++)
-	{
-		VkImageMemoryBarrier imageMemoryBarrier;
+    VkImageLayout sourceImageLayout = imageLayout[bufferImageCopy.imageSubresource.mipLevel];
+    VkAccessFlags sourceAccessMask = accessMask[bufferImageCopy.imageSubresource.mipLevel];
+    VkAccessFlags targetAccessMask = targetBuffer->getAccessMask();
 
-		memset(&imageMemoryBarrier, 0, sizeof(VkImageMemoryBarrier));
+    // Prepare source image for copy.
 
-		imageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    VkImageSubresourceRange imageSubresourceRange = {bufferImageCopy.imageSubresource.aspectMask, bufferImageCopy.imageSubresource.mipLevel, 1, bufferImageCopy.imageSubresource.baseArrayLayer, bufferImageCopy.imageSubresource.layerCount};
 
-		imageMemoryBarrier.srcAccessMask = 0;       				// Defined later.
-		imageMemoryBarrier.dstAccessMask = 0;       				// Defined later.
-		imageMemoryBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;	// Defined later.
-		imageMemoryBarrier.newLayout = VK_IMAGE_LAYOUT_UNDEFINED;	// Defined later.
-		imageMemoryBarrier.srcQueueFamilyIndex = 0;
-		imageMemoryBarrier.dstQueueFamilyIndex = 0;
-		imageMemoryBarrier.image = VK_NULL_HANDLE;      			// Defined later.
-		imageMemoryBarrier.subresourceRange = subresourceRange;
+    cmdPipelineBarrier(cmdBuffer, VK_ACCESS_TRANSFER_READ_BIT, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, imageSubresourceRange);
 
-		// Prepare source image for copy.
+    // Prepare target buffer for copy.
 
-		imageMemoryBarrier.srcAccessMask = accessMask;
-		imageMemoryBarrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
-		imageMemoryBarrier.oldLayout = imageLayout;
-		imageMemoryBarrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+    targetBuffer->cmdPipelineBarrier(cmdBuffer, VK_ACCESS_TRANSFER_WRITE_BIT);
 
-		imageMemoryBarrier.image = image;
+	// Copy image by command.
 
-		if (imageMemoryBarrier.srcAccessMask != imageMemoryBarrier.dstAccessMask || imageMemoryBarrier.oldLayout != imageMemoryBarrier.newLayout)
-	    {
-			vkCmdPipelineBarrier(cmdBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
-	    }
+	vkCmdCopyImageToBuffer(cmdBuffer, image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, targetBuffer->getBuffer(), 1, &bufferImageCopy);
 
-		// Copy image by command.
+    // Revert back.
 
-		vkCmdCopyImageToBuffer(cmdBuffer, image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, dstBuffer, 1, &regions[i]);
+	targetBuffer->cmdPipelineBarrier(cmdBuffer, targetAccessMask);
 
-		// Revert back.
+    // Revert back.
 
-		imageMemoryBarrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
-		imageMemoryBarrier.dstAccessMask = accessMask;
-
-		imageMemoryBarrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-		imageMemoryBarrier.newLayout = imageLayout;
-
-		imageMemoryBarrier.image = image;
-
-		if (imageMemoryBarrier.srcAccessMask != imageMemoryBarrier.dstAccessMask || imageMemoryBarrier.oldLayout != imageMemoryBarrier.newLayout)
-	    {
-			vkCmdPipelineBarrier(cmdBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
-	    }
-	}
+    cmdPipelineBarrier(cmdBuffer, sourceAccessMask, sourceImageLayout, imageSubresourceRange);
 }
 
 void Image::cmdPipelineBarrier(const VkCommandBuffer cmdBuffer, const VkAccessFlags dstAccessMask, const VkImageLayout newLayout, const VkImageSubresourceRange& subresourceRange)
@@ -423,32 +256,33 @@ void Image::cmdPipelineBarrier(const VkCommandBuffer cmdBuffer, const VkAccessFl
 		return;
 	}
 
-	if (subresourceRange.baseMipLevel != 0 || subresourceRange.levelCount != getMipLevels())
+	for (uint32_t i = subresourceRange.baseMipLevel; i < subresourceRange.baseMipLevel + subresourceRange.levelCount; i++)
 	{
-		logPrint(VKTS_LOG_WARNING, "Image: Can only transit layout for all mip levels at once");
+		if (accessMask[i] == dstAccessMask && imageLayout[i] == newLayout)
+		{
+			continue;
+		}
 
-		return;
+		VkImageMemoryBarrier imageMemoryBarrier;
+
+		memset(&imageMemoryBarrier, 0, sizeof(VkImageMemoryBarrier));
+
+		imageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+
+		imageMemoryBarrier.srcAccessMask = accessMask[i];
+		imageMemoryBarrier.dstAccessMask = dstAccessMask;
+		imageMemoryBarrier.oldLayout = imageLayout[i];
+		imageMemoryBarrier.newLayout = newLayout;
+		imageMemoryBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		imageMemoryBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		imageMemoryBarrier.image = image;
+		imageMemoryBarrier.subresourceRange = subresourceRange;
+
+		vkCmdPipelineBarrier(cmdBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
+
+		accessMask[i] = dstAccessMask;
+		imageLayout[i] = newLayout;
 	}
-
-    VkImageMemoryBarrier imageMemoryBarrier;
-
-    memset(&imageMemoryBarrier, 0, sizeof(VkImageMemoryBarrier));
-
-    imageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-
-    imageMemoryBarrier.srcAccessMask = accessMask;
-    imageMemoryBarrier.dstAccessMask = dstAccessMask;
-    imageMemoryBarrier.oldLayout = imageLayout;
-    imageMemoryBarrier.newLayout = newLayout;
-    imageMemoryBarrier.srcQueueFamilyIndex = 0;
-    imageMemoryBarrier.dstQueueFamilyIndex = 0;
-    imageMemoryBarrier.image = image;
-    imageMemoryBarrier.subresourceRange = subresourceRange;
-
-    vkCmdPipelineBarrier(cmdBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
-
-    accessMask = dstAccessMask;
-    imageLayout = newLayout;
 }
 
 //

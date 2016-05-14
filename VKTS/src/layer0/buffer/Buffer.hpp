@@ -45,6 +45,8 @@ private:
 
     VkBuffer buffer;
 
+    VkAccessFlags accessMask;
+
 public:
 
     Buffer() = delete;
@@ -79,15 +81,17 @@ public:
 
     virtual const VkBuffer getBuffer() const override;
 
+    virtual VkAccessFlags getAccessMask() const override;
+
     virtual void getBufferMemoryRequirements(VkMemoryRequirements& memoryRequirements) const override;
 
     virtual VkResult bindBufferMemory(const VkDeviceMemory mem, const VkDeviceSize memOffset) const override;
 
-    virtual void copyBuffer(const VkCommandBuffer cmdBuffer, const VkBuffer targetBuffer, const VkDeviceSize targetBufferSize, const uint32_t regionCount, const VkBufferCopy* bufferCopy) const override;
+    virtual void copyBuffer(const VkCommandBuffer cmdBuffer, IBufferSP& targetBuffer, const VkBufferCopy& bufferCopy) override;
 
-    virtual void copyBufferToImage(const VkCommandBuffer cmdBuffer, const VkImage targetImage, const VkImageLayout targetImageLayout, const uint32_t regionCount, const VkBufferImageCopy* regions) const override;
+    virtual void copyBufferToImage(const VkCommandBuffer cmdBuffer, IImageSP& targetImage, const VkBufferImageCopy& bufferImageCopy) override;
 
-    virtual void cmdPipelineBarrier(const VkCommandBuffer cmdBuffer, const VkAccessFlags srcAccessMask, const VkAccessFlags dstAccessMask) override;
+    virtual void cmdPipelineBarrier(const VkCommandBuffer cmdBuffer, const VkAccessFlags dstAccessMask) override;
 
     //
     // IDestroyable

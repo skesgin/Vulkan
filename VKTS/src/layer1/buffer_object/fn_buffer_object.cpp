@@ -133,7 +133,7 @@ IBufferObjectSP VKTS_APIENTRY bufferObjectCreate(IBufferSP& stageBuffer, IDevice
         bufferCopy.dstOffset = 0;
         bufferCopy.size = binaryBuffer->getSize();
 
-        stageBuffer->copyBuffer(cmdBuffer->getCommandBuffer(), buffer->getBuffer(), buffer->getSize(), 1, &bufferCopy);
+        stageBuffer->copyBuffer(cmdBuffer->getCommandBuffer(), buffer, bufferCopy);
     }
 
     //

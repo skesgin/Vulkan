@@ -84,19 +84,17 @@ public:
 
     virtual const VkImage getImage() const = 0;
 
-    virtual VkAccessFlags getAccessMask() const = 0;
+    virtual VkAccessFlags getAccessMask(const uint32_t mipLevel = 0) const = 0;
 
-    virtual VkImageLayout getImageLayout() const = 0;
+    virtual VkImageLayout getImageLayout(const uint32_t mipLevel = 0) const = 0;
 
     virtual void getImageMemoryRequirements(VkMemoryRequirements& memoryRequirements) const = 0;
 
     virtual void getImageSubresourceLayout(VkSubresourceLayout& subresourceLayout, const VkImageSubresource& imageSubresource) const = 0;
 
-    virtual void copyImage(const VkCommandBuffer cmdBuffer, const VkImage targetImage, const VkAccessFlags targetAccessMask, const VkImageLayout targetImageLayout, const VkImageCopy& imageCopy) const = 0;
+    virtual void copyImage(const VkCommandBuffer cmdBuffer, std::shared_ptr<IImage>& targetImage, const VkImageCopy& iamgeCopy) = 0;
 
-    virtual void copyImage(const VkCommandBuffer cmdBuffer, std::shared_ptr<IImage>& targetImage, const VkImageCopy& iamgeCopy) const = 0;
-
-    virtual void copyImageToBuffer(const VkCommandBuffer cmdBuffer, const VkBuffer dstBuffer, const uint32_t regionCount, const VkBufferImageCopy* regions, const VkImageSubresourceRange& subresourceRange) const = 0;
+    virtual void copyImageToBuffer(const VkCommandBuffer cmdBuffer, IBufferSP& targetBuffer, const VkBufferImageCopy& bufferImageCopy) = 0;
 
     virtual void cmdPipelineBarrier(const VkCommandBuffer cmdBuffer, const VkAccessFlags dstAccessMask, const VkImageLayout newLayout, const VkImageSubresourceRange& subresourceRange) = 0;
 
