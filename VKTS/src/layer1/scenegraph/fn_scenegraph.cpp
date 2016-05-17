@@ -512,7 +512,7 @@ static ITextureSP scenegraphCreateTexture(const float red, const float green, co
     IBufferSP stageBuffer;
     IImageSP stageImage;
 
-    auto memoryImage = memoryImageCreate(stageImage, stageBuffer, stageDeviceMemory, context->getInitialResources(), context->getCommandBuffer(), textureName, imageData, imageCreateInfo, srcAccessMask, VK_ACCESS_TRANSFER_WRITE_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, subresourceRange, memoryPropertyFlags);
+    auto memoryImage = memoryImageCreate(stageImage, stageBuffer, stageDeviceMemory, context->getInitialResources(), context->getCommandBuffer(), textureName, imageData, imageCreateInfo, srcAccessMask, VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, subresourceRange, memoryPropertyFlags);
 
     context->addStageImage(stageImage);
     context->addStageBuffer(stageBuffer);
@@ -716,7 +716,7 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
             IImageSP stageImage;
             IBufferSP stageBuffer;
 
-            auto memoryImage = memoryImageCreate(stageImage, stageBuffer, stageDeviceMemory, context->getInitialResources(), context->getCommandBuffer(), memoryImageName, imageData, imageCreateInfo, srcAccessMask, VK_ACCESS_TRANSFER_WRITE_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, subresourceRange, memoryPropertyFlags);
+            auto memoryImage = memoryImageCreate(stageImage, stageBuffer, stageDeviceMemory, context->getInitialResources(), context->getCommandBuffer(), memoryImageName, imageData, imageCreateInfo, srcAccessMask, VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, subresourceRange, memoryPropertyFlags);
 
             context->addStageImage(stageImage);
             context->addStageBuffer(stageBuffer);

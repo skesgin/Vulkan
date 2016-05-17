@@ -80,6 +80,9 @@ How to build:
 Changelog:
 ----------
 
+05/17/2016
+- Optimized final layout for images.
+
 05/14/2016
 - Fixed/improved copy image, buffer and the used barriers.
 

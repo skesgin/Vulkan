@@ -373,7 +373,7 @@ VkBool32 Example::buildTexture(const vkts::ICommandBuffersSP& cmdBuffer, vkts::I
 
 	//
 
-	imageMemoryBarrier.dstAccessMask = VK_ACCESS_INPUT_ATTACHMENT_READ_BIT | VK_ACCESS_SHADER_READ_BIT;
+	imageMemoryBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 	imageMemoryBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 	imageMemoryBarrier.image = image->getImage();
 
