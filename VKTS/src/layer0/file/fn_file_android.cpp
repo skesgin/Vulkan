@@ -85,8 +85,6 @@ VkBool32 VKTS_APIENTRY _filePrepareLoadBinary(const char* filename)
 
     if (!sourceAsset)
     {
-		vkts::logPrint(VKTS_LOG_ERROR, "File: Source asset not found: '%s'", filename);
-
 		return VK_FALSE;
     }
 
@@ -117,8 +115,6 @@ VkBool32 VKTS_APIENTRY _filePrepareLoadBinary(const char* filename)
 
 	if (!targetAsset)
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "File: Could not open target asset: '%s'", targetFile.c_str());
-
 		AAsset_close(sourceAsset);
 
 		return VK_FALSE;
@@ -128,8 +124,6 @@ VkBool32 VKTS_APIENTRY _filePrepareLoadBinary(const char* filename)
 
 	if (sourceLength != targetLength)
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "File: Could not write target asset: '%s'", targetFile.c_str());
-
 		fclose(targetAsset);
 
 		AAsset_close(sourceAsset);
