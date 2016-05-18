@@ -34,6 +34,7 @@ namespace vkts
 
 class BSDFMaterial : public IBSDFMaterial
 {
+
 protected:
 
     std::string name;
@@ -43,6 +44,9 @@ protected:
     VkTsVertexBufferType attributes;
 
     SmartPointerVector<ITextureSP> allTextures;
+
+    IDescriptorPoolSP descriptorPool;
+    IDescriptorSetsSP descriptorSets;
 
 public:
 
@@ -79,6 +83,14 @@ public:
     virtual const SmartPointerVector<ITextureSP>& getTextures() const override;
 
     // TODO: Add methods
+
+    virtual const IDescriptorPoolSP& getDescriptorPool() const override;
+
+    virtual void setDescriptorPool(const IDescriptorPoolSP& descriptorPool) override;
+
+    virtual IDescriptorSetsSP getDescriptorSets() const override;
+
+    virtual void setDescriptorSets(const IDescriptorSetsSP& descriptorSets) override;
 
     //
     // ICloneable

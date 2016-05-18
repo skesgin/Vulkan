@@ -24,36 +24,26 @@
  * THE SOFTWARE.
  */
 
-#ifndef VKTS_FN_FILE_INTERNAL_HPP_
-#define VKTS_FN_FILE_INTERNAL_HPP_
+#ifndef VKTS_FN_CACHE_HPP_
+#define VKTS_FN_CACHE_HPP_
 
 #include <vkts/vkts.hpp>
 
 namespace vkts
 {
 
-VKTS_APICALL VkBool32 VKTS_APIENTRY _fileInit();
-
-VKTS_APICALL void VKTS_APIENTRY _fileSetBaseDirectory(const char* directory);
-
-VKTS_APICALL const char* VKTS_APIENTRY _fileGetBaseDirectory();
-
-VKTS_APICALL VkBool32 VKTS_APIENTRY _filePrepareLoadBinary(const char* filename);
-
-VKTS_APICALL VkBool32 VKTS_APIENTRY _filePrepareSaveBinary(const char* filename);
-
-VKTS_APICALL VkBool32 VKTS_APIENTRY _fileCreateDirectory(const char* directory);
+/**
+ *
+ * @ThreadSafe
+ */
+VKTS_APICALL VkBool32 VKTS_APIENTRY cacheSaveImageData(const IImageDataSP& imageData);
 
 /**
- * Not thread Safe.
+ *
+ * @ThreadSafe
  */
-VKTS_APICALL VkBool32 VKTS_APIENTRY fileInit();
-
-/**
- * Not thread Safe.
- */
-VKTS_APICALL void VKTS_APIENTRY fileTerminate();
+VKTS_APICALL IImageDataSP VKTS_APIENTRY cacheLoadImageData(const char* filename);
 
 }
 
-#endif /* VKTS_FN_FILE_INTERNAL_HPP_ */
+#endif /* VKTS_FN_CACHE_HPP_ */

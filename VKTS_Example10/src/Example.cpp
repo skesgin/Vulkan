@@ -27,7 +27,7 @@
 #include "Example.hpp"
 
 Example::Example(const vkts::IInitialResourcesSP& initialResources, const int32_t windowIndex, const vkts::ISurfaceSP& surface) :
-		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), windowDimension(0, 0), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), swapchain(nullptr), renderPass(nullptr), depthTexture(nullptr), depthStencilImageView(nullptr), swapchainImagesCount(0), swapchainImageView(), framebuffer(), cmdBuffer()
+		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), windowDimension(0, 0), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), font(nullptr), sceneContext(nullptr), scene(nullptr), swapchain(nullptr), renderPass(nullptr), depthTexture(nullptr), depthStencilImageView(nullptr), swapchainImagesCount(0), swapchainImageView(), framebuffer(), cmdBuffer()
 {
 }
 
@@ -168,6 +168,67 @@ VkBool32 Example::buildFramebuffer(const int32_t usedBuffer)
 
 		return VK_FALSE;
 	}
+
+	return VK_TRUE;
+}
+VkBool32 Example::buildScene(const vkts::ICommandBuffersSP& cmdBuffer)
+{
+	VkSamplerCreateInfo samplerCreateInfo;
+
+	memset(&samplerCreateInfo, 0, sizeof(VkSamplerCreateInfo));
+
+	samplerCreateInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+
+	samplerCreateInfo.flags = 0;
+	samplerCreateInfo.magFilter = VK_FILTER_LINEAR;
+	samplerCreateInfo.minFilter = VK_FILTER_LINEAR;
+	samplerCreateInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+	samplerCreateInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+	samplerCreateInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+	samplerCreateInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+	samplerCreateInfo.mipLodBias = 0.0f;
+	samplerCreateInfo.maxAnisotropy = 1.0f;
+	samplerCreateInfo.compareEnable = VK_FALSE;
+	samplerCreateInfo.compareOp = VK_COMPARE_OP_NEVER;
+	samplerCreateInfo.minLod = 0.0f;
+	samplerCreateInfo.maxLod = 0.0f;
+	samplerCreateInfo.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
+	samplerCreateInfo.unnormalizedCoordinates = VK_FALSE;
+
+	VkImageViewCreateInfo imageViewCreateInfo;
+
+	memset(&imageViewCreateInfo, 0, sizeof(VkImageViewCreateInfo));
+
+	imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+
+	imageViewCreateInfo.flags = 0;
+	imageViewCreateInfo.image = VK_NULL_HANDLE;		// Defined later.
+	imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+	imageViewCreateInfo.format = VK_FORMAT_UNDEFINED;		// Defined later.
+	imageViewCreateInfo.components = {VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_G, VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_A};
+	imageViewCreateInfo.subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
+
+	sceneContext = vkts::scenegraphCreateContext(VK_FALSE, initialResources, cmdBuffer, samplerCreateInfo, imageViewCreateInfo, vkts::IDescriptorSetLayoutSP());
+
+	if (!sceneContext.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create cache.");
+
+		return VK_FALSE;
+	}
+
+	//
+
+	scene = vkts::scenegraphLoadScene(VKTS_SCENE_NAME, sceneContext);
+
+	if (!scene.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not load scene.");
+
+		return VK_FALSE;
+	}
+
+	vkts::logPrint(VKTS_LOG_INFO, "Example: Number objects: %d", scene->getNumberObjects());
 
 	return VK_TRUE;
 }
@@ -397,6 +458,16 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 		if (!font.get())
 		{
 			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not build font.");
+
+			return VK_FALSE;
+		}
+	}
+
+	if (!scene.get())
+	{
+		if (!buildScene(updateCmdBuffer))
+		{
+			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not build scene.");
 
 			return VK_FALSE;
 		}
@@ -738,6 +809,18 @@ void Example::terminate(const vkts::IUpdateThreadContext& updateContext)
 			terminateResources(updateContext);
 
 			//
+
+			if (sceneContext.get())
+			{
+				sceneContext->destroy();
+
+				sceneContext.reset();
+			}
+
+			if (scene.get())
+			{
+				scene->destroy();
+			}
 
 			if (font.get())
 			{

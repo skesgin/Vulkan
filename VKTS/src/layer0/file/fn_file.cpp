@@ -231,6 +231,16 @@ VkBool32 VKTS_APIENTRY fileSaveText(const char* filename, const ITextBufferSP& t
     return fileSave(filename, text->getString(), text->getLength());
 }
 
+VkBool32 VKTS_APIENTRY fileCreateDirectory(const char* directory)
+{
+	if (!directory || directory[0] == '/' || directory[0] == '\\')
+	{
+		return VK_FALSE;
+	}
+
+	return _fileCreateDirectory(directory);
+}
+
 void VKTS_APIENTRY fileTerminate()
 {
     // Nothing for now.

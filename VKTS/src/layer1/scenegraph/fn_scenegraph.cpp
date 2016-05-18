@@ -363,11 +363,11 @@ static void scenegraphUnknownBuffer(const char* buffer)
 
     if (unknown.length() > 0 && (unknown[unknown.length() - 1] == '\r' || unknown[unknown.length() - 1] == '\n'))
     {
-        logPrint(VKTS_LOG_WARNING, "Could not parse line '%s'", unknown.substr(0, unknown.length() - 1).c_str());
+        logPrint(VKTS_LOG_WARNING, "Scenegraph: Could not parse line '%s'", unknown.substr(0, unknown.length() - 1).c_str());
     }
     else
     {
-        logPrint(VKTS_LOG_WARNING, "Could not parse line '%s'", unknown.c_str());
+        logPrint(VKTS_LOG_WARNING, "Scenegraph: Could not parse line '%s'", unknown.c_str());
     }
 }
 
@@ -415,7 +415,7 @@ static ITextureSP scenegraphCreateTexture(const float red, const float green, co
     {
         imageData = imageDataCreate(imageDataName, 1, 1, 1, red, green, blue, 0.0f, VK_IMAGE_TYPE_2D, format);
 
-        logPrint(VKTS_LOG_DEBUG, "Create image '%s'", imageDataName);
+        logPrint(VKTS_LOG_DEBUG, "Scenegraph: Create image '%s'", imageDataName);
 
         if (!imageData.get())
         {
@@ -638,11 +638,73 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
 
                     if (imageData->getExtent3D().width > 1 || imageData->getExtent3D().height > 1 || imageData->getExtent3D().depth > 1)
                     {
-                        auto allMipMaps = imageDataMipmap(imageData, VK_FALSE, finalImageDataFilename);
+                        auto dotIndex = finalImageDataFilename.rfind(".");
+
+                        if (dotIndex == finalImageDataFilename.npos)
+                        {
+                            return VK_FALSE;
+                        }
+
+                        auto sourceImageName = finalImageDataFilename.substr(0, dotIndex);
+                        auto sourceImageExtension = finalImageDataFilename.substr(dotIndex);
+
+                        int32_t width = imageData->getWidth();
+                        int32_t height = imageData->getHeight();
+                        int32_t depth = imageData->getDepth();
+
+                        SmartPointerVector<IImageDataSP> allMipMaps;
+                        allMipMaps.append(imageData);
+
+                        int32_t level = 1;
+
+                        while (width > 1 || height > 1 || depth > 1)
+                        {
+                            width = glm::max(width / 2, 1);
+                            height = glm::max(height / 2, 1);
+                            depth = glm::max(depth / 2, 1);
+
+                            auto targetImageFilename = sourceImageName + "_L" + std::to_string(level++) + sourceImageExtension;
+
+                            auto targetImage = cacheLoadImageData(targetImageFilename.c_str());
+
+                            if (!targetImage.get())
+                            {
+                            	allMipMaps.clear();
+
+                            	break;
+                            }
+
+                            allMipMaps.append(targetImage);
+
+                            //
+
+                            width = targetImage->getWidth();
+                            height = targetImage->getHeight();
+                            depth = targetImage->getDepth();
+                        }
+
+                        //
 
                         if (allMipMaps.size() == 0)
                         {
-                            return VK_FALSE;
+                        	allMipMaps = imageDataMipmap(imageData, VK_FALSE, finalImageDataFilename);
+
+                            if (allMipMaps.size() == 0)
+                            {
+                                return VK_FALSE;
+                            }
+
+                        	logPrint(VKTS_LOG_INFO, "Scenegraph: Storing cached data for '%s'", finalImageDataFilename.c_str());
+
+                        	// Only cache mip maps sub levels.
+                        	for (size_t i = 1; i < allMipMaps.size(); i++)
+                        	{
+                        		cacheSaveImageData(allMipMaps[i]);
+                        	}
+                        }
+                        else
+                        {
+                        	logPrint(VKTS_LOG_INFO, "Scenegraph: Using cached data for '%s'", finalImageDataFilename.c_str());
                         }
 
                         imageData = imageDataMerge(allMipMaps, finalImageDataFilename);
@@ -785,7 +847,7 @@ static VkBool32 scenegraphLoadTextures(const char* directory, const char* filena
 
             if (!scenegraphLoadImages(directory, sdata, context))
             {
-                logPrint(VKTS_LOG_ERROR, "Could not load images: '%s'", sdata);
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: Could not load images: '%s'", sdata);
 
                 return VK_FALSE;
             }
@@ -820,7 +882,7 @@ static VkBool32 scenegraphLoadTextures(const char* directory, const char* filena
 
 			if (!memoryImage.get())
 			{
-				logPrint(VKTS_LOG_ERROR, "Memory image not found: '%s'", sdata);
+				logPrint(VKTS_LOG_ERROR, "Scenegraph: Memory image not found: '%s'", sdata);
 
 				return VK_FALSE;
 			}
@@ -898,7 +960,7 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
 
             if (!scenegraphLoadTextures(directory, sdata, context))
             {
-                logPrint(VKTS_LOG_ERROR, "Could not load textures: '%s'", sdata);
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: Could not load textures: '%s'", sdata);
 
                 return VK_FALSE;
             }
@@ -915,7 +977,26 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
                 bsdfMaterial = IBSDFMaterialSP(new BSDFMaterial());
                 phongMaterial = IPhongMaterialSP();
 
-                // TODO: Revisit, if more is needed.
+                // Create all possibilities, even when not used.
+
+                VkDescriptorPoolSize descriptorPoolSize[2];
+
+                memset(&descriptorPoolSize, 0, sizeof(descriptorPoolSize));
+
+				descriptorPoolSize[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+				descriptorPoolSize[0].descriptorCount = 5;
+
+				descriptorPoolSize[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+				descriptorPoolSize[1].descriptorCount = 17;
+
+                auto descriptorPool = descriptorPoolCreate(context->getInitialResources()->getDevice()->getDevice(), VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT, 1, 2, descriptorPoolSize);
+
+                if (!descriptorPool.get())
+                {
+                    return VK_FALSE;
+                }
+
+                bsdfMaterial->setDescriptorPool(descriptorPool);
             }
             else if (strncmp(sdata, "Phong", 5) == 0)
             {
@@ -924,41 +1005,17 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
 
                 // Create all possibilities, even when not used.
 
-                VkDescriptorPoolSize descriptorPoolSize[VKTS_BINDING_UNIFORM_BINDING_COUNT];
+                VkDescriptorPoolSize descriptorPoolSize[2];
 
                 memset(&descriptorPoolSize, 0, sizeof(descriptorPoolSize));
 
-                for (int32_t i = VKTS_BINDING_UNIFORM_BUFFER_VIEWPROJECTION; i < VKTS_BINDING_UNIFORM_SAMPLER_DISPLACEMENT; i++)
-                {
-    				descriptorPoolSize[i].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    				descriptorPoolSize[i].descriptorCount = 1;
-                }
+				descriptorPoolSize[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+				descriptorPoolSize[0].descriptorCount = 5;
 
-                for (int32_t i = VKTS_BINDING_UNIFORM_SAMPLER_DISPLACEMENT; i < VKTS_BINDING_UNIFORM_BUFFER_BONE_TRANSFORM; i++)
-                {
-    				descriptorPoolSize[i].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    				descriptorPoolSize[i].descriptorCount = 1;
-                }
+				descriptorPoolSize[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+				descriptorPoolSize[1].descriptorCount = 9;
 
-                for (int32_t i = VKTS_BINDING_UNIFORM_BUFFER_BONE_TRANSFORM; i < VKTS_BINDING_UNIFORM_SAMPLER_SHADOW; i++)
-                {
-    				descriptorPoolSize[i].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    				descriptorPoolSize[i].descriptorCount = 1;
-                }
-
-                for (int32_t i = VKTS_BINDING_UNIFORM_SAMPLER_SHADOW; i < VKTS_BINDING_UNIFORM_BUFFER_SHADOW; i++)
-                {
-    				descriptorPoolSize[i].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    				descriptorPoolSize[i].descriptorCount = 1;
-                }
-
-                for (int32_t i = VKTS_BINDING_UNIFORM_BUFFER_SHADOW; i < VKTS_BINDING_UNIFORM_BINDING_COUNT; i++)
-                {
-    				descriptorPoolSize[i].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    				descriptorPoolSize[i].descriptorCount = 1;
-                }
-
-                auto descriptorPool = descriptorPoolCreate(context->getInitialResources()->getDevice()->getDevice(), VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT, 1, VKTS_BINDING_UNIFORM_BINDING_COUNT, descriptorPoolSize);
+                auto descriptorPool = descriptorPoolCreate(context->getInitialResources()->getDevice()->getDevice(), VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT, 1, 2, descriptorPoolSize);
 
                 if (!descriptorPool.get())
                 {
@@ -982,7 +1039,7 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "Unknown shading: '%s'", sdata);
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: Unknown shading: '%s'", sdata);
 
                 return VK_FALSE;
             }
@@ -1008,7 +1065,7 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "No material");
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No material");
 
                 return VK_FALSE;
             }
@@ -1026,7 +1083,7 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "No material");
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No material");
 
                 return VK_FALSE;
             }
@@ -1051,7 +1108,7 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "No material");
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No material");
 
                 return VK_FALSE;
             }
@@ -1076,7 +1133,7 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "No material");
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No material");
 
                 return VK_FALSE;
             }
@@ -1101,7 +1158,7 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "No material");
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No material");
 
                 return VK_FALSE;
             }
@@ -1126,7 +1183,7 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "No material");
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No material");
 
                 return VK_FALSE;
             }
@@ -1151,7 +1208,7 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "No material");
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No material");
 
                 return VK_FALSE;
             }
@@ -1176,7 +1233,7 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "No material");
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No material");
 
                 return VK_FALSE;
             }
@@ -1201,7 +1258,7 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "No material");
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No material");
 
                 return VK_FALSE;
             }
@@ -1226,7 +1283,7 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "No material");
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No material");
 
                 return VK_FALSE;
             }
@@ -1251,7 +1308,7 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "No material");
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No material");
 
                 return VK_FALSE;
             }
@@ -1276,7 +1333,7 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "No material");
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No material");
 
                 return VK_FALSE;
             }
@@ -1301,7 +1358,7 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "No material");
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No material");
 
                 return VK_FALSE;
             }
@@ -1326,7 +1383,7 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "No material");
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No material");
 
                 return VK_FALSE;
             }
@@ -1351,7 +1408,7 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "No material");
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No material");
 
                 return VK_FALSE;
             }
@@ -1376,7 +1433,7 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "No material");
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No material");
 
                 return VK_FALSE;
             }
@@ -1401,7 +1458,7 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "No material");
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No material");
 
                 return VK_FALSE;
             }
@@ -1426,7 +1483,7 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "No material");
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No material");
 
                 return VK_FALSE;
             }
@@ -1442,13 +1499,20 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
 
             if (!shaderModule.get())
             {
-				auto shaderBinary = fileLoadBinary(sdata);
+                std::string finalFilename = std::string(directory) + std::string(sdata);
+
+                auto shaderBinary = fileLoadBinary(finalFilename.c_str());
 
 				if (!shaderBinary.get())
 				{
-					logPrint(VKTS_LOG_ERROR, "Could not load fragment shader: '%s'", sdata);
+					shaderBinary = fileLoadBinary(filename);
 
-					return VK_FALSE;
+					if (!shaderBinary.get())
+					{
+						logPrint(VKTS_LOG_ERROR, "Could not load fragment shader: '%s'", sdata);
+
+						return VK_FALSE;
+					}
 				}
 
 				//
@@ -1471,7 +1535,7 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "No material");
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No material");
 
                 return VK_FALSE;
             }
@@ -1486,10 +1550,12 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
             if (bsdfMaterial.get())
             {
             	bsdfMaterial->setAttributes((VkTsVertexBufferType)uidata);
+
+            	// TODO: Finalize and set descriptor layouts.
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "No material");
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No material");
 
                 return VK_FALSE;
             }
@@ -1514,7 +1580,7 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "No material");
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No material");
 
                 return VK_FALSE;
             }
@@ -1625,7 +1691,7 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "No sub mesh");
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No sub mesh");
 
                 return VK_FALSE;
             }
@@ -1646,7 +1712,7 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "No sub mesh");
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No sub mesh");
 
                 return VK_FALSE;
             }
@@ -1667,7 +1733,7 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "No sub mesh");
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No sub mesh");
 
                 return VK_FALSE;
             }
@@ -1688,7 +1754,7 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "No sub mesh");
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No sub mesh");
 
                 return VK_FALSE;
             }
@@ -1709,7 +1775,7 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "No sub mesh");
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No sub mesh");
 
                 return VK_FALSE;
             }
@@ -1737,7 +1803,7 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "No sub mesh");
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No sub mesh");
 
                 return VK_FALSE;
             }
@@ -1765,7 +1831,7 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "No sub mesh");
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No sub mesh");
 
                 return VK_FALSE;
             }
@@ -1783,7 +1849,7 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "No sub mesh");
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No sub mesh");
 
                 return VK_FALSE;
             }
@@ -1804,7 +1870,7 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "No sub mesh");
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No sub mesh");
 
                 return VK_FALSE;
             }
@@ -1818,7 +1884,7 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
 
             if (subMesh.get())
             {
-                const auto& phongMaterial = context->usePhongMaterial(sdata);
+                const auto phongMaterial = context->usePhongMaterial(sdata);
 
                 if (phongMaterial.get())
                 {
@@ -1826,7 +1892,7 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
                 }
                 else
                 {
-                    const auto& bsdfMaterial = context->useBSDFMaterial(sdata);
+                    const auto bsdfMaterial = context->useBSDFMaterial(sdata);
 
                     if (bsdfMaterial.get())
                     {
@@ -1842,7 +1908,7 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "No sub mesh");
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No sub mesh");
 
                 return VK_FALSE;
             }
@@ -2153,7 +2219,7 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "No sub mesh");
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No sub mesh");
 
                 return VK_FALSE;
             }
@@ -2271,7 +2337,7 @@ static VkBool32 scenegraphLoadMeshes(const char* directory, const char* filename
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "No mesh");
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No mesh");
 
                 return VK_FALSE;
             }
@@ -2289,7 +2355,7 @@ static VkBool32 scenegraphLoadMeshes(const char* directory, const char* filename
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "No mesh");
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No mesh");
 
                 return VK_FALSE;
             }
@@ -2307,7 +2373,7 @@ static VkBool32 scenegraphLoadMeshes(const char* directory, const char* filename
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "No mesh");
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No mesh");
 
                 return VK_FALSE;
             }
@@ -2409,7 +2475,7 @@ static VkBool32 scenegraphLoadChannels(const char* directory, const char* filena
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "No channel");
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No channel");
 
                 return VK_FALSE;
             }
@@ -2448,7 +2514,7 @@ static VkBool32 scenegraphLoadChannels(const char* directory, const char* filena
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "No channel");
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No channel");
 
                 return VK_FALSE;
             }
@@ -2499,7 +2565,7 @@ static VkBool32 scenegraphLoadChannels(const char* directory, const char* filena
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "No channel");
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No channel");
 
                 return VK_FALSE;
             }
@@ -2594,7 +2660,7 @@ static VkBool32 scenegraphLoadAnimations(const char* directory, const char* file
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "No animation");
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No animation");
 
                 return VK_FALSE;
             }
@@ -2612,7 +2678,7 @@ static VkBool32 scenegraphLoadAnimations(const char* directory, const char* file
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "No animation");
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No animation");
 
                 return VK_FALSE;
             }
@@ -2639,7 +2705,7 @@ static VkBool32 scenegraphLoadAnimations(const char* directory, const char* file
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "No animation");
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No animation");
 
                 return VK_FALSE;
             }
@@ -2790,7 +2856,7 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "No object");
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No object");
 
                 return VK_FALSE;
             }
@@ -2808,7 +2874,7 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "No node");
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No node");
 
                 return VK_FALSE;
             }
@@ -2826,7 +2892,7 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "No node");
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No node");
 
                 return VK_FALSE;
             }
@@ -2844,7 +2910,7 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "No node");
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No node");
 
                 return VK_FALSE;
             }
@@ -2862,7 +2928,7 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "No node");
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No node");
 
                 return VK_FALSE;
             }
@@ -2899,7 +2965,7 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "No node");
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No node");
 
                 return VK_FALSE;
             }
@@ -2917,7 +2983,7 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "No node");
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No node");
 
                 return VK_FALSE;
             }
@@ -2935,7 +3001,7 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "No node");
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No node");
 
                 return VK_FALSE;
             }
@@ -2953,7 +3019,7 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "No node");
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No node");
 
                 return VK_FALSE;
             }
@@ -3005,7 +3071,7 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "No node");
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No node");
 
                 return VK_FALSE;
             }
@@ -3032,7 +3098,7 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "No node");
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No node");
 
                 return VK_FALSE;
             }
@@ -3138,7 +3204,7 @@ ISceneSP VKTS_APIENTRY scenegraphLoadScene(const char* filename, const IContextS
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "No object");
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No object");
 
                 return ISceneSP();
             }
@@ -3156,7 +3222,7 @@ ISceneSP VKTS_APIENTRY scenegraphLoadScene(const char* filename, const IContextS
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "No object");
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No object");
 
                 return ISceneSP();
             }
@@ -3174,7 +3240,7 @@ ISceneSP VKTS_APIENTRY scenegraphLoadScene(const char* filename, const IContextS
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "No object");
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No object");
 
                 return ISceneSP();
             }
@@ -3192,7 +3258,7 @@ ISceneSP VKTS_APIENTRY scenegraphLoadScene(const char* filename, const IContextS
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, "No object");
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No object");
 
                 return ISceneSP();
             }
@@ -3208,7 +3274,7 @@ ISceneSP VKTS_APIENTRY scenegraphLoadScene(const char* filename, const IContextS
 
 IContextSP VKTS_APIENTRY scenegraphCreateContext(const VkBool32 replace, const IInitialResourcesSP& initialResources, const ICommandBuffersSP& cmdBuffer, const VkSamplerCreateInfo& samplerCreateInfo, const VkImageViewCreateInfo& imageViewCreateInfo, const IDescriptorSetLayoutSP& descriptorSetLayout)
 {
-    if (!initialResources.get() || !descriptorSetLayout.get())
+    if (!initialResources.get())
     {
         return IContextSP();
     }

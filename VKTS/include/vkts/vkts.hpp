@@ -461,6 +461,12 @@
 #include <vkts/layer1/initial_resources/fn_initial_resources.hpp>
 
 /**
+ * Cache.
+ */
+
+#include <vkts/layer1/cache/fn_cache.hpp>
+
+/**
  * Buffer object.
  */
 

@@ -29,6 +29,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     endif ()        
 
     list(APPEND IGNORE_CPP_FILES    ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/file/fn_file_android.cpp
+                                    ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/file/fn_file_linux.cpp
                                     ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/processor/fn_processor_android.cpp
                                     ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/processor/fn_processor_linux.cpp
                                     ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_android.cpp
@@ -66,6 +67,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
     list(APPEND IGNORE_CPP_FILES        ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/file/fn_file_android.cpp
+                                        ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/file/fn_file_windows.cpp
                                         ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/processor/fn_processor_android.cpp
                                         ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/processor/fn_processor_windows.cpp
                                         ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_android.cpp

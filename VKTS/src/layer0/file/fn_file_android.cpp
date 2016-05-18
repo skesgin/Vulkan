@@ -96,19 +96,19 @@ VkBool32 VKTS_APIENTRY _filePrepareLoadBinary(const char* filename)
 
 	//
 
+
 	std::string foldersToCreate = std::string(filename);
 
-	auto lastSlash = foldersToCreate.find('/');
+	auto lastSlash = foldersToCreate.rfind('/');
 
-	while (lastSlash != foldersToCreate.npos)
+	if (lastSlash != foldersToCreate.npos)
 	{
-		targetDirectory += foldersToCreate.substr(0, lastSlash) + "/";
+		foldersToCreate = foldersToCreate.substr(0, lastSlash);
+	}
 
-		mkdir(targetDirectory.c_str(), S_IXUSR | S_IXGRP);
-
-		foldersToCreate = foldersToCreate.substr(lastSlash + 1);
-
-		lastSlash = foldersToCreate.find('/');
+	if (!_fileCreateDirectory(foldersToCreate.c_str()))
+	{
+		return VK_FALSE;
 	}
 
 	//
@@ -158,25 +158,54 @@ VkBool32 VKTS_APIENTRY _filePrepareSaveBinary(const char* filename)
 		return VK_FALSE;
 	}
 
-	//
+	if (!filename)
+	{
+		return VK_FALSE;
+	}
+
+	std::string foldersToCreate = std::string(filename);
+
+	auto lastSlash = foldersToCreate.rfind('/');
+
+	if (lastSlash != foldersToCreate.npos)
+	{
+		foldersToCreate = foldersToCreate.substr(0, lastSlash);
+	}
+
+	return _fileCreateDirectory(foldersToCreate.c_str());
+}
+
+VkBool32 VKTS_APIENTRY _fileCreateDirectory(const char* directory)
+{
+	if (!directory)
+	{
+		return VK_FALSE;
+	}
 
 	std::string targetDirectory = std::string(_fileGetBaseDirectory());
 
 	//
 
-	std::string foldersToCreate = std::string(filename);
+	std::string foldersToCreate = std::string(directory);
 
-	auto lastSlash = foldersToCreate.find('/');
-
-	while (lastSlash != foldersToCreate.npos)
+	while (foldersToCreate.length())
 	{
-		targetDirectory += foldersToCreate.substr(0, lastSlash) + "/";
+		auto lastSlash = foldersToCreate.find('/');
+
+		if (lastSlash != foldersToCreate.npos)
+		{
+			targetDirectory += foldersToCreate.substr(0, lastSlash) + "/";
+
+			foldersToCreate = foldersToCreate.substr(lastSlash + 1);
+		}
+		else
+		{
+			targetDirectory += foldersToCreate + "/";
+
+			foldersToCreate = "";
+		}
 
 		mkdir(targetDirectory.c_str(), S_IXUSR | S_IXGRP);
-
-		foldersToCreate = foldersToCreate.substr(lastSlash + 1);
-
-		lastSlash = foldersToCreate.find('/');
 	}
 
 	return VK_TRUE;

@@ -222,6 +222,11 @@ IBSDFMaterialSP Context::useBSDFMaterial(const std::string& name) const
 {
 	IBSDFMaterialSP result = get(name, allBSDFMaterials);
 
+	if (!result.get())
+	{
+		return IBSDFMaterialSP();
+	}
+
 	if (std::find(allUsedBSDFMaterials.begin(), allUsedBSDFMaterials.end(), name) != allUsedBSDFMaterials.end())
 	{
 		result = result->clone();
@@ -268,6 +273,11 @@ VkBool32 Context::removeBSDFMaterial(const IBSDFMaterialSP& material)
 IPhongMaterialSP Context::usePhongMaterial(const std::string& name) const
 {
 	IPhongMaterialSP result = get(name, allPhongMaterials);
+
+	if (!result.get())
+	{
+		return IPhongMaterialSP();
+	}
 
 	if (std::find(allUsedPhongMaterials.begin(), allUsedPhongMaterials.end(), name) != allUsedPhongMaterials.end())
 	{

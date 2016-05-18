@@ -24,36 +24,51 @@
  * THE SOFTWARE.
  */
 
-#ifndef VKTS_FN_FILE_INTERNAL_HPP_
-#define VKTS_FN_FILE_INTERNAL_HPP_
-
 #include <vkts/vkts.hpp>
+
+#include "fn_file_internal.hpp"
+
+#include <windows.h>
 
 namespace vkts
 {
 
-VKTS_APICALL VkBool32 VKTS_APIENTRY _fileInit();
+VkBool32 VKTS_APIENTRY _fileCreateDirectory(const char* directory)
+{
+	if (!directory)
+	{
+		return VK_FALSE;
+	}
 
-VKTS_APICALL void VKTS_APIENTRY _fileSetBaseDirectory(const char* directory);
+	std::string targetDirectory = std::string(_fileGetBaseDirectory());
 
-VKTS_APICALL const char* VKTS_APIENTRY _fileGetBaseDirectory();
+	//
 
-VKTS_APICALL VkBool32 VKTS_APIENTRY _filePrepareLoadBinary(const char* filename);
+	std::string foldersToCreate = std::string(directory);
 
-VKTS_APICALL VkBool32 VKTS_APIENTRY _filePrepareSaveBinary(const char* filename);
+	while (foldersToCreate.length())
+	{
+		auto lastSlash = foldersToCreate.find('/');
 
-VKTS_APICALL VkBool32 VKTS_APIENTRY _fileCreateDirectory(const char* directory);
+		if (lastSlash != foldersToCreate.npos)
+		{
+			targetDirectory += foldersToCreate.substr(0, lastSlash);
 
-/**
- * Not thread Safe.
- */
-VKTS_APICALL VkBool32 VKTS_APIENTRY fileInit();
+			foldersToCreate = foldersToCreate.substr(lastSlash + 1);
+		}
+		else
+		{
+			targetDirectory += foldersToCreate;
 
-/**
- * Not thread Safe.
- */
-VKTS_APICALL void VKTS_APIENTRY fileTerminate();
+			foldersToCreate = "";
+		}
 
+		CreateDirectory(targetDirectory.c_str(), NULL);
+
+		targetDirectory += "/";
+	}
+
+	return VK_TRUE;
 }
 
-#endif /* VKTS_FN_FILE_INTERNAL_HPP_ */
+}

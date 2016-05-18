@@ -56,6 +56,12 @@ VKTS_APICALL VkBool32 VKTS_APIENTRY fileSaveBinary(const char* filename, const I
  */
 VKTS_APICALL VkBool32 VKTS_APIENTRY fileSaveText(const char* filename, const ITextBufferSP& text);
 
+/**
+ *
+ * @ThreadSafe
+ */
+VKTS_APICALL VkBool32 VKTS_APIENTRY fileCreateDirectory(const char* directory);
+
 }
 
 #endif /* VKTS_FN_FILE_HPP_ */

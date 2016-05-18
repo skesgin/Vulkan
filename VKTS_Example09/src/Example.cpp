@@ -415,9 +415,9 @@ VkBool32 Example::updateDescriptorSets()
 
 	writeDescriptorSets[5].dstBinding = VKTS_BINDING_UNIFORM_BUFFER_BONE_TRANSFORM;
 
-	for (uint32_t i = VKTS_BINDING_UNIFORM_SAMPLER_EMISSIVE; i <= VKTS_BINDING_UNIFORM_SAMPLER_PHONG_SPECULAR_SHININESS; i++)
+	for (uint32_t i = VKTS_BINDING_UNIFORM_SAMPLER_PHONG_EMISSIVE; i <= VKTS_BINDING_UNIFORM_SAMPLER_PHONG_SPECULAR_SHININESS; i++)
 	{
-		writeDescriptorSets[6 + i - VKTS_BINDING_UNIFORM_SAMPLER_EMISSIVE].dstBinding = i;
+		writeDescriptorSets[6 + i - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_EMISSIVE].dstBinding = i;
 	}
 
 	return VK_TRUE;
@@ -1363,13 +1363,13 @@ VkBool32 Example::buildDescriptorSetLayout()
 	descriptorSetLayoutBinding[5].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 	descriptorSetLayoutBinding[5].pImmutableSamplers = nullptr;
 
-    for (int32_t i = VKTS_BINDING_UNIFORM_SAMPLER_EMISSIVE; i <= VKTS_BINDING_UNIFORM_SAMPLER_PHONG_SPECULAR_SHININESS; i++)
+    for (int32_t i = VKTS_BINDING_UNIFORM_SAMPLER_PHONG_EMISSIVE; i <= VKTS_BINDING_UNIFORM_SAMPLER_PHONG_SPECULAR_SHININESS; i++)
     {
-		descriptorSetLayoutBinding[6 + i - VKTS_BINDING_UNIFORM_SAMPLER_EMISSIVE].binding = i;
-		descriptorSetLayoutBinding[6 + i - VKTS_BINDING_UNIFORM_SAMPLER_EMISSIVE].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		descriptorSetLayoutBinding[6 + i - VKTS_BINDING_UNIFORM_SAMPLER_EMISSIVE].descriptorCount = 1;
-		descriptorSetLayoutBinding[6 + i - VKTS_BINDING_UNIFORM_SAMPLER_EMISSIVE].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-		descriptorSetLayoutBinding[6 + i - VKTS_BINDING_UNIFORM_SAMPLER_EMISSIVE].pImmutableSamplers = nullptr;
+		descriptorSetLayoutBinding[6 + i - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_EMISSIVE].binding = i;
+		descriptorSetLayoutBinding[6 + i - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_EMISSIVE].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		descriptorSetLayoutBinding[6 + i - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_EMISSIVE].descriptorCount = 1;
+		descriptorSetLayoutBinding[6 + i - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_EMISSIVE].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+		descriptorSetLayoutBinding[6 + i - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_EMISSIVE].pImmutableSamplers = nullptr;
     }
 
 	descriptorSetLayout = vkts::descriptorSetLayoutCreate(initialResources->getDevice()->getDevice(), 0, VKTS_DESCRIPTOR_SET_COUNT, descriptorSetLayoutBinding);

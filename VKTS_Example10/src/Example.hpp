@@ -35,6 +35,8 @@
 
 #define VKTS_FONT_NAME "font/Arial_128.fnt"
 
+#define VKTS_SCENE_NAME "test/cycles/cycles.vkts"
+
 class Example: public vkts::IUpdateThread
 {
 
@@ -55,6 +57,9 @@ private:
 
     vkts::IFontSP font;
 
+	vkts::IContextSP sceneContext;
+	vkts::ISceneSP scene;
+
 	vkts::ISwapchainSP swapchain;
 
 	vkts::IRenderPassSP renderPass;
@@ -73,6 +78,8 @@ private:
 	VkBool32 buildCmdBuffer(const int32_t usedBuffer);
 
 	VkBool32 buildFramebuffer(const int32_t usedBuffer);
+
+	VkBool32 buildScene(const vkts::ICommandBuffersSP& cmdBuffer);
 
 	VkBool32 buildSwapchainImageView(const int32_t usedBuffer);
 

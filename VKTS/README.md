@@ -80,6 +80,12 @@ How to build:
 Changelog:
 ----------
 
+05/18/2016
+- Added OS independent directory creation.
+- Added cache for generated assets.
+- Refactored bindings.
+- Continued on BSDF material.
+
 05/17/2016
 - Optimized final layout for images.
 

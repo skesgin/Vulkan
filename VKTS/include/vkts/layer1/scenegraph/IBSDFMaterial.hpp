@@ -66,8 +66,16 @@ public:
 
     virtual const SmartPointerVector<ITextureSP>& getTextures() const = 0;
 
-
     // TODO: Add Methods.
+
+
+    virtual const IDescriptorPoolSP& getDescriptorPool() const = 0;
+
+    virtual void setDescriptorPool(const IDescriptorPoolSP& descriptorPool) = 0;
+
+    virtual IDescriptorSetsSP getDescriptorSets() const = 0;
+
+    virtual void setDescriptorSets(const IDescriptorSetsSP& descriptorSets) = 0;
 
 };
 

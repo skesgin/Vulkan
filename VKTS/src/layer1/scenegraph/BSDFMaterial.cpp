@@ -30,13 +30,14 @@ namespace vkts
 {
 
 BSDFMaterial::BSDFMaterial() :
-    IBSDFMaterial(), name(), fragmentShader(nullptr), attributes(VKTS_VERTEX_BUFFER_TYPE_VERTEX | VKTS_VERTEX_BUFFER_TYPE_NORMAL), allTextures()
+    IBSDFMaterial(), name(), fragmentShader(nullptr), attributes(VKTS_VERTEX_BUFFER_TYPE_VERTEX | VKTS_VERTEX_BUFFER_TYPE_NORMAL), allTextures(), descriptorPool(), descriptorSets()
 {
 }
 
 BSDFMaterial::BSDFMaterial(const BSDFMaterial& other) :
-    IBSDFMaterial(), name(other.name), fragmentShader(other.fragmentShader), attributes(other.attributes), allTextures(other.allTextures)
+    IBSDFMaterial(), name(other.name), fragmentShader(other.fragmentShader), attributes(other.attributes), allTextures(other.allTextures), descriptorPool(), descriptorSets()
 {
+	// TODO: Clone, as done in phong.
 }
 
 BSDFMaterial::~BSDFMaterial()
@@ -97,6 +98,26 @@ size_t BSDFMaterial::getNumberTextures() const
 const SmartPointerVector<ITextureSP>& BSDFMaterial::getTextures() const
 {
     return allTextures;
+}
+
+const IDescriptorPoolSP& BSDFMaterial::getDescriptorPool() const
+{
+    return descriptorPool;
+}
+
+void BSDFMaterial::setDescriptorPool(const IDescriptorPoolSP& descriptorPool)
+{
+    this->descriptorPool = descriptorPool;
+}
+
+IDescriptorSetsSP BSDFMaterial::getDescriptorSets() const
+{
+    return descriptorSets;
+}
+
+void BSDFMaterial::setDescriptorSets(const IDescriptorSetsSP& descriptorSets)
+{
+    this->descriptorSets = descriptorSets;
 }
 
 //

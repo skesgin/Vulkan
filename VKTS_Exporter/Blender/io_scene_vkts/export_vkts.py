@@ -1224,9 +1224,6 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
             if texCoordUsed:
                 currentFragmentGLSL = currentFragmentGLSL.replace("#nextAttribute#", texCoordAttribute)
             
-            fw("attributes %x\n" % (vertexAttributes))
-            fw("\n")
-            
             for binding in range (0, len(nodes)):
                 currentTexImage = texImageFunction % (binding, binding)
                 currentFragmentGLSL = currentFragmentGLSL.replace("#nextTexture#", currentTexImage)
@@ -1234,6 +1231,8 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
                 fw("add_texture %s\n" % (friendlyImageName(nodes[binding].name) + "_texture" ))    
                 fw("\n")
                 
+            fw("attributes %x\n" % (vertexAttributes))
+            fw("\n")
                 
             currentFragmentGLSL = currentFragmentGLSL.replace("#nextAttribute#", "")
 
