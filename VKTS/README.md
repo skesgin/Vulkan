@@ -85,6 +85,7 @@ Changelog:
 - Added cache for generated assets.
 - Refactored bindings.
 - Continued on BSDF material.
+- Update to latest Android NDK.
 
 05/17/2016
 - Optimized final layout for images.
