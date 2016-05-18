@@ -199,7 +199,7 @@ VkBool32 VKTS_APIENTRY _fileCreateDirectory(const char* directory)
 			foldersToCreate = "";
 		}
 
-		mkdir(targetDirectory.c_str(), S_IXUSR | S_IXGRP);
+		mkdir(targetDirectory.c_str(), S_IRWXU | S_IRWXG | (S_IROTH | S_IXOTH));
 	}
 
 	return VK_TRUE;
