@@ -650,10 +650,6 @@ VkBool32 Example::buildVertexBuffer()
 
 VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext)
 {
-	VkResult result;
-
-	//
-
 	auto lastSwapchain = swapchain;
 
 	VkSwapchainKHR oldSwapchain = lastSwapchain.get() ? lastSwapchain->getSwapchain() : VK_NULL_HANDLE;
@@ -700,73 +696,6 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 	{
 		return VK_FALSE;
 	}
-
-	//
-
-	vkts::ICommandBuffersSP updateCmdBuffer = vkts::commandBuffersCreate(device->getDevice(), commandPool->getCmdPool(), VK_COMMAND_BUFFER_LEVEL_PRIMARY, 1);
-
-	if (!updateCmdBuffer.get())
-	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create command buffer.");
-
-		return VK_FALSE;
-	}
-
-	result = updateCmdBuffer->beginCommandBuffer(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT, VK_NULL_HANDLE, 0, VK_NULL_HANDLE, VK_FALSE, 0, 0);
-
-	if (result != VK_SUCCESS)
-	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not begin command buffer.");
-
-		return VK_FALSE;
-	}
-
-	for (uint32_t index = 0; index < swapchain->getMinImageCount(); index++)
-	{
-	    swapchain->cmdPipelineBarrier(updateCmdBuffer->getCommandBuffer(), 0, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, index);
-	}
-
-	result = updateCmdBuffer->endCommandBuffer();
-
-	if (result != VK_SUCCESS)
-	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not end command buffer.");
-
-		return VK_FALSE;
-	}
-
-	VkSubmitInfo submitInfo;
-
-	memset(&submitInfo, 0, sizeof(VkSubmitInfo));
-
-	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-
-	submitInfo.waitSemaphoreCount = 0;
-	submitInfo.pWaitSemaphores = nullptr;
-	submitInfo.commandBufferCount = updateCmdBuffer->getCommandBufferCount();
-	submitInfo.pCommandBuffers = updateCmdBuffer->getCommandBuffers();
-	submitInfo.signalSemaphoreCount = 0;
-	submitInfo.pSignalSemaphores = nullptr;
-
-	result = queue->submit(1, &submitInfo, VK_NULL_HANDLE);
-
-	if (result != VK_SUCCESS)
-	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not submit queue.");
-
-		return VK_FALSE;
-	}
-
-	result = queue->waitIdle();
-
-	if (result != VK_SUCCESS)
-	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not wait for idle queue.");
-
-		return VK_FALSE;
-	}
-
-	updateCmdBuffer->destroy();
 
 	//
 

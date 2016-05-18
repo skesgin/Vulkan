@@ -81,8 +81,6 @@ private:
 
 	VkBool32 buildSwapchainImageView(const int32_t usedBuffer);
 
-	VkBool32 buildSwapchainImageLayout(const int32_t usedBuffer, const VkCommandBuffer cmdBuffer);
-
 	VkBool32 buildRenderPass();
 
 	VkBool32 buildSwapchain();

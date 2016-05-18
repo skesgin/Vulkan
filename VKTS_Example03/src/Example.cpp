@@ -1016,11 +1016,6 @@ VkBool32 Example::buildResources( const vkts::IUpdateThreadContext& updateContex
 		return VK_FALSE;
 	}
 
-    for (uint32_t index = 0; index < swapchain->getMinImageCount(); index++)
-    {
-        swapchain->cmdPipelineBarrier(updateCmdBuffer->getCommandBuffer(), 0, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, index);
-    }
-
 	VkBool32 doUpdateDescriptorSets = VK_FALSE;
 
 	if (!image.get())

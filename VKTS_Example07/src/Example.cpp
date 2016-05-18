@@ -100,7 +100,7 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 	renderPassBeginInfo.clearValueCount = 2;
 	renderPassBeginInfo.pClearValues = clearValues;
 
-	cmdBuffer[usedBuffer]->cmdBeginRenderPass(&renderPassBeginInfo, VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS);
+	cmdBuffer[usedBuffer]->cmdBeginRenderPass(&renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
 	VkViewport viewport;
 	memset(&viewport, 0, sizeof(VkViewport));
@@ -123,10 +123,13 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 
 	vkCmdSetScissor(cmdBuffer[usedBuffer]->getCommandBuffer(), 0, 1, &scissor);
 
+	// Next sub pass is for secondary command buffers.
+
+	vkCmdNextSubpass(cmdBuffer[usedBuffer]->getCommandBuffer(), VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS);
+
     // Execute secondary command buffers.
 
     vkCmdExecuteCommands(cmdBuffer[usedBuffer]->getCommandBuffer(), commandBufferCount, secondaryCmdBuffers);
-
 
 	cmdBuffer[usedBuffer]->cmdEndRenderPass();
 
@@ -640,7 +643,7 @@ VkBool32 Example::buildPipeline()
 	graphicsPipelineCreateInfo.pDynamicState = &pipelineDynamicStateCreateInfo;
 	graphicsPipelineCreateInfo.layout = pipelineLayout->getPipelineLayout();
 	graphicsPipelineCreateInfo.renderPass = renderPass->getRenderPass();
-	graphicsPipelineCreateInfo.subpass = 0;
+	graphicsPipelineCreateInfo.subpass = 1;	// Graphics pipeline will be used in sub pass 0.
 	graphicsPipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE;
 	graphicsPipelineCreateInfo.basePipelineIndex = 0;
 
@@ -694,22 +697,43 @@ VkBool32 Example::buildRenderPass()
 	deptStencilAttachmentReference.attachment = 1;
 	deptStencilAttachmentReference.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
-	VkSubpassDescription subpassDescription;
+	VkSubpassDescription subpassDescription[2];
 
-	memset(&subpassDescription, 0, sizeof(VkSubpassDescription));
+	memset(&subpassDescription, 0, sizeof(subpassDescription));
 
-	subpassDescription.flags = 0;
-	subpassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-	subpassDescription.inputAttachmentCount = 0;
-	subpassDescription.pInputAttachments = nullptr;
-	subpassDescription.colorAttachmentCount = 1;
-	subpassDescription.pColorAttachments = &colorAttachmentReference;
-	subpassDescription.pResolveAttachments = nullptr;
-	subpassDescription.pDepthStencilAttachment = &deptStencilAttachmentReference;
-	subpassDescription.preserveAttachmentCount = 0;
-	subpassDescription.pPreserveAttachments = nullptr;
+	subpassDescription[0].flags = 0;
+	subpassDescription[0].pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+	subpassDescription[0].inputAttachmentCount = 0;
+	subpassDescription[0].pInputAttachments = nullptr;
+	subpassDescription[0].colorAttachmentCount = 1;
+	subpassDescription[0].pColorAttachments = &colorAttachmentReference;
+	subpassDescription[0].pResolveAttachments = nullptr;
+	subpassDescription[0].pDepthStencilAttachment = &deptStencilAttachmentReference;
+	subpassDescription[0].preserveAttachmentCount = 0;
+	subpassDescription[0].pPreserveAttachments = nullptr;
 
-	renderPass = vkts::renderPassCreate( initialResources->getDevice()->getDevice(), 0, 2, attachmentDescription, 1, &subpassDescription, 0, nullptr);
+	subpassDescription[1].flags = 0;
+	subpassDescription[1].pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+	subpassDescription[1].inputAttachmentCount = 0;
+	subpassDescription[1].pInputAttachments = nullptr;
+	subpassDescription[1].colorAttachmentCount = 1;
+	subpassDescription[1].pColorAttachments = &colorAttachmentReference;
+	subpassDescription[1].pResolveAttachments = nullptr;
+	subpassDescription[1].pDepthStencilAttachment = &deptStencilAttachmentReference;
+	subpassDescription[1].preserveAttachmentCount = 0;
+	subpassDescription[1].pPreserveAttachments = nullptr;
+
+	VkSubpassDependency subpassDependency;
+
+	subpassDependency.srcSubpass = 0;
+	subpassDependency.dstSubpass = 1;
+	subpassDependency.srcStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+	subpassDependency.dstStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+	subpassDependency.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+	subpassDependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+    subpassDependency.dependencyFlags = 0;
+
+	renderPass = vkts::renderPassCreate( initialResources->getDevice()->getDevice(), 0, 2, attachmentDescription, 2, subpassDescription, 1, &subpassDependency);
 
 	if (!renderPass.get())
 	{
@@ -1017,11 +1041,6 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 
 		return VK_FALSE;
 	}
-
-    for (uint32_t index = 0; index < swapchain->getMinImageCount(); index++)
-    {
-        swapchain->cmdPipelineBarrier(updateCmdBuffer->getCommandBuffer(), 0, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, index);
-    }
 
 	if (!buildDepthTexture(updateCmdBuffer))
 	{

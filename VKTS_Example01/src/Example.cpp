@@ -101,9 +101,9 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 
     imageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
 
-    imageMemoryBarrier.srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+    imageMemoryBarrier.srcAccessMask = 0;
     imageMemoryBarrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-    imageMemoryBarrier.oldLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+    imageMemoryBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     imageMemoryBarrier.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
     imageMemoryBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
     imageMemoryBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
@@ -235,28 +235,6 @@ VkBool32 Example::buildSwapchainImageView(const int32_t usedBuffer)
 
 		return VK_FALSE;
 	}
-
-	return VK_TRUE;
-}
-
-VkBool32 Example::buildSwapchainImageLayout(const int32_t usedBuffer, const VkCommandBuffer cmdBuffer)
-{
-	VkImageMemoryBarrier imageMemoryBarrier;
-
-	memset(&imageMemoryBarrier, 0, sizeof(VkImageMemoryBarrier));
-
-	imageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-
-	imageMemoryBarrier.srcAccessMask = 0;
-	imageMemoryBarrier.dstAccessMask = 0;
-	imageMemoryBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	imageMemoryBarrier.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-	imageMemoryBarrier.srcQueueFamilyIndex = 0;
-	imageMemoryBarrier.dstQueueFamilyIndex = 0;
-	imageMemoryBarrier.image = swapchainImage[usedBuffer];
-	imageMemoryBarrier.subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
-
-	vkCmdPipelineBarrier(cmdBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
 
 	return VK_TRUE;
 }
@@ -522,113 +500,6 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 
 		return VK_FALSE;
 	}
-
-	//
-
-	VkCommandBufferAllocateInfo cmdBufferAllocateInfo;
-
-	memset(&cmdBufferAllocateInfo, 0, sizeof(VkCommandBufferAllocateInfo));
-
-	cmdBufferAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-
-	cmdBufferAllocateInfo.commandPool = commandPool;
-	cmdBufferAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-	cmdBufferAllocateInfo.commandBufferCount = 1;
-
-	VkCommandBuffer updateCmdBuffer;
-
-	result = vkAllocateCommandBuffers(device, &cmdBufferAllocateInfo, &updateCmdBuffer);
-
-	if (result != VK_SUCCESS)
-	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create command buffer.");
-
-		return VK_FALSE;
-	}
-
-	VkCommandBufferInheritanceInfo commandBufferInheritanceInfo;
-
-	memset(&commandBufferInheritanceInfo, 0, sizeof(VkCommandBufferInheritanceInfo));
-
-	commandBufferInheritanceInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO;
-
-	commandBufferInheritanceInfo.renderPass = VK_NULL_HANDLE;
-	commandBufferInheritanceInfo.subpass = 0;
-	commandBufferInheritanceInfo.framebuffer = VK_NULL_HANDLE;
-	commandBufferInheritanceInfo.occlusionQueryEnable = VK_FALSE;
-	commandBufferInheritanceInfo.queryFlags = 0;
-	commandBufferInheritanceInfo.pipelineStatistics = 0;
-
-	VkCommandBufferBeginInfo cmdBufferBeginInfo;
-
-	memset(&cmdBufferBeginInfo, 0, sizeof(VkCommandBufferBeginInfo));
-
-	cmdBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-
-	cmdBufferBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-	cmdBufferBeginInfo.pInheritanceInfo = &commandBufferInheritanceInfo;
-
-	result = vkBeginCommandBuffer(updateCmdBuffer, &cmdBufferBeginInfo);
-
-	if (result != VK_SUCCESS)
-	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not begin command buffer.");
-
-		return VK_FALSE;
-	}
-
-	for (int32_t i = 0; i < (int32_t)swapchainImagesCount; i++)
-	{
-		if (!buildSwapchainImageLayout(i, updateCmdBuffer))
-		{
-			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not build swap chain image layout.");
-
-			return VK_FALSE;
-		}
-	}
-
-	result = vkEndCommandBuffer(updateCmdBuffer);
-
-	if (result != VK_SUCCESS)
-	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not end command buffer.");
-
-		return VK_FALSE;
-	}
-
-	VkSubmitInfo submitInfo;
-
-	memset(&submitInfo, 0, sizeof(VkSubmitInfo));
-
-	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-
-	submitInfo.waitSemaphoreCount = 0;
-	submitInfo.pWaitSemaphores = nullptr;
-	submitInfo.commandBufferCount = 1;
-	submitInfo.pCommandBuffers = &updateCmdBuffer;
-	submitInfo.signalSemaphoreCount = 0;
-	submitInfo.pSignalSemaphores = nullptr;
-
-	result = vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE);
-
-	if (result != VK_SUCCESS)
-	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not submit queue.");
-
-		return VK_FALSE;
-	}
-
-	result = vkQueueWaitIdle(queue);
-
-	if (result != VK_SUCCESS)
-	{
-		vkts::logPrint(VKTS_LOG_ERROR,
-				"Example: Could not wait for idle queue.");
-
-		return VK_FALSE;
-	}
-
-	vkFreeCommandBuffers(device, commandPool, 1, &updateCmdBuffer);
 
 	//
 
