@@ -89,7 +89,6 @@ static void _onAppCmd(struct android_app* app, int32_t cmd)
         break;
 
         case APP_CMD_TERM_WINDOW:
-        case APP_CMD_DESTROY:
 
             g_app->destroyRequested = 1;
 
@@ -129,6 +128,13 @@ static int32_t _onInputEvent(struct android_app* app, AInputEvent* event)
     }
     else if (source == AINPUT_SOURCE_KEYBOARD)
     {
+        if (AKeyEvent_getKeyCode(event) == AKEYCODE_BACK)
+        {
+            g_app->destroyRequested = 1;
+            
+            return 1;
+        }
+        
         VkBool32 pressed = (AKeyEvent_getAction(event) == AKEY_EVENT_ACTION_DOWN);
 
         int32_t scanCode = AKeyEvent_getScanCode(event);
@@ -339,9 +345,9 @@ void android_main(struct android_app* app)
     g_nativeAndroidWindow = nullptr;
 
     g_app = nullptr;
-
+    
     //
-
+    
     ::exit(0);
 }
 
@@ -390,6 +396,11 @@ VkBool32 VKTS_APIENTRY _visualDispatchMessages()
         }
     }
 
+    if (g_app->destroyRequested != 0)
+    {
+        return VK_FALSE;
+    }
+
     int32_t width = ANativeWindow_getWidth(g_app->window);
     int32_t height = ANativeWindow_getHeight(g_app->window);
 
@@ -402,11 +413,6 @@ VkBool32 VKTS_APIENTRY _visualDispatchMessages()
         {
             ::g_defaultWindow->setDimension(glm::ivec2(g_width, g_height));
         }
-    }
-
-    if (g_app->destroyRequested != 0)
-    {
-        return VK_FALSE;
     }
 
     return VK_TRUE;

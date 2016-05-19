@@ -33,8 +33,6 @@
 
 // Windows OS.
 
-const std::string VKTS_BASE_DIRECTORY("");
-
 #if defined(VKTS_NO_VISUAL)
 
 // Include nothing for now.
@@ -61,8 +59,6 @@ const std::string VKTS_BASE_DIRECTORY("");
 
 // Android OS.
 
-const std::string VKTS_BASE_DIRECTORY("/sdcard/Download/VKTS_Binaries/");
-
 #if defined(VKTS_NO_VISUAL)
 
 // Include in both cases the same.
@@ -88,8 +84,6 @@ const std::string VKTS_BASE_DIRECTORY("/sdcard/Download/VKTS_Binaries/");
 #elif defined(__gnu_linux__)
 
 // GNU/Linux OS.
-
-const std::string VKTS_BASE_DIRECTORY("");
 
 #if defined(VKTS_NO_VISUAL)
 
