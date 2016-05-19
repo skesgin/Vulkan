@@ -80,6 +80,9 @@ How to build:
 Changelog:
 ----------
 
+05/19/2016
+- All scripts are now pyhton scripts.
+
 05/18/2016
 - Added OS independent directory creation.
 - Added cache for generated assets.

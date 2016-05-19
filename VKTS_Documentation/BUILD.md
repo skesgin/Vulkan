@@ -5,7 +5,8 @@ General requirements:
 ---------------------
   
 - [LunarG Vulkan SDK](http://vulkan.lunarg.com) version has to be 1.0.11.x.
-- Vulkan headers and libraries have to be visible by the used compiler and/or IDE. 
+- Vulkan headers and libraries have to be visible by the used compiler and/or IDE.
+- [Python](https://www.python.org/) version has to be 3.5 or higher.  
 
 
 Following requirements do depend on the platform:
@@ -14,7 +15,7 @@ Following requirements do depend on the platform:
 ---
 
 - Building: ndk-build  
-    - Windows batch files included.  
+    - Python build scrips included.  
     - [Android NDK](http://developer.android.com/ndk/index.html) with Vulkan support required.  
     - [Apache Ant](https://ant.apache.org/) required.  
       
@@ -93,7 +94,7 @@ Using Android NDK:
 ------------------
 
 The needed shaders, textures and scene files are automatically copied into the assets folder by
-executing `Build_Install.bat`. After the build, the assets are packed in the apk file. 
+executing `python build_project.py`. After the build, the assets are packed in the apk file. 
 
 Note:
 With the current beta NDK, copy the `include/vulkan` and `lib/libvulkan.so` from `android-24` to `android-23`,
@@ -108,22 +109,22 @@ The following command builds the VKTS library:
 The following command creates the Android project:
 
 1. Open console in `Android` project folder and execute following command:  
-    - `Init.bat`
+    - `python create_project.py`
 
-The following command copies assets, builds and installs the Android project:
+The following command copies the needed assets and builds the Android project:
 
 2. Open console in `Android` project folder and execute following command:  
-    - `Build_Install.bat`
+    - `python build_project.py`
+
+The following command installs the Android project:
+
+3. Open console in `Android` project folder and execute following command:  
+    - `python install_project.py`
 
 The following commands allows to display the log output:
 
-3. Open another console execute following command in the `VKTS_Binaries` folder:  
-    - `android_log.bat`
-
-The following command executes the Android application:
-
-4. Open console in `Android` project folder and execute following command:  
-    - `Execute.bat`
+4. Open another console execute following command in the `VKTS_Binaries` folder:  
+    - `python android_log.py` 
 
 
 Setting up the Android device:
