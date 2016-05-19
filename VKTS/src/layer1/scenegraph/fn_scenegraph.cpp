@@ -1551,7 +1551,90 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
             {
             	bsdfMaterial->setAttributes((VkTsVertexBufferType)uidata);
 
-            	// TODO: Finalize and set descriptor layouts.
+            	//
+
+            	VkDescriptorSetLayoutBinding descriptorSetLayoutBinding[VKTS_BINDING_UNIFORM_BSDF_TOTAL_BINDING_COUNT];
+
+            	memset(&descriptorSetLayoutBinding, 0, sizeof(descriptorSetLayoutBinding));
+
+            	uint32_t bindingCount = 0;
+
+            	descriptorSetLayoutBinding[bindingCount].binding = VKTS_BINDING_UNIFORM_BUFFER_VIEWPROJECTION;
+            	descriptorSetLayoutBinding[bindingCount].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+            	descriptorSetLayoutBinding[bindingCount].descriptorCount = 1;
+            	descriptorSetLayoutBinding[bindingCount].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+            	descriptorSetLayoutBinding[bindingCount].pImmutableSamplers = nullptr;
+
+            	bindingCount++;
+
+            	descriptorSetLayoutBinding[bindingCount].binding = VKTS_BINDING_UNIFORM_BUFFER_TRANSFORM;
+            	descriptorSetLayoutBinding[bindingCount].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+            	descriptorSetLayoutBinding[bindingCount].descriptorCount = 1;
+            	descriptorSetLayoutBinding[bindingCount].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+            	descriptorSetLayoutBinding[bindingCount].pImmutableSamplers = nullptr;
+
+            	bindingCount++;
+
+            	if (bsdfMaterial->getAttributes() & VKTS_VERTEX_BUFFER_TYPE_BONES)
+            	{
+                	descriptorSetLayoutBinding[bindingCount].binding = VKTS_BINDING_UNIFORM_BUFFER_BONE_TRANSFORM;
+                	descriptorSetLayoutBinding[bindingCount].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+                	descriptorSetLayoutBinding[bindingCount].descriptorCount = 1;
+                	descriptorSetLayoutBinding[bindingCount].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+                	descriptorSetLayoutBinding[bindingCount].pImmutableSamplers = nullptr;
+
+                	bindingCount++;
+            	}
+
+            	if (bsdfMaterial->getNumberTextures() > VKTS_BINDING_UNIFORM_BSDF_BINDING_COUNT)
+            	{
+            		vkts::logPrint(VKTS_LOG_ERROR, "Scenegraph: Too many textures.");
+
+            		return VK_FALSE;
+            	}
+
+                for (size_t i = 0; i < bsdfMaterial->getNumberTextures(); i++)
+                {
+            		descriptorSetLayoutBinding[bindingCount].binding = VKTS_BINDING_UNIFORM_SAMPLER_BSDF_FIRST + (uint32_t)i;
+            		descriptorSetLayoutBinding[bindingCount].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+            		descriptorSetLayoutBinding[bindingCount].descriptorCount = 1;
+            		descriptorSetLayoutBinding[bindingCount].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+            		descriptorSetLayoutBinding[bindingCount].pImmutableSamplers = nullptr;
+
+            		bindingCount++;
+                }
+
+                //
+
+                auto descriptorSetLayout = descriptorSetLayoutCreate(context->getInitialResources()->getDevice()->getDevice(), 0, bindingCount, descriptorSetLayoutBinding);
+
+            	if (!descriptorSetLayout.get())
+            	{
+            		vkts::logPrint(VKTS_LOG_ERROR, "Scenegraph: Could not create descriptor set layout.");
+
+            		return VK_FALSE;
+            	}
+
+            	bsdfMaterial->setDescriptorSetLayout(descriptorSetLayout);
+
+            	//
+
+            	const auto allDescriptorSetLayouts = descriptorSetLayout->getDescriptorSetLayout();
+
+                auto descriptorSets = descriptorSetsCreate(context->getInitialResources()->getDevice()->getDevice(), bsdfMaterial->getDescriptorPool()->getDescriptorPool(), 1, &allDescriptorSetLayouts);
+
+                if (!descriptorSets.get())
+                {
+                	vkts::logPrint(VKTS_LOG_ERROR, "Scenegraph: Could not create descriptor sets.");
+
+                    return VK_FALSE;
+                }
+
+                bsdfMaterial->setDescriptorSets(descriptorSets);
+
+                //
+
+            	// TODO: Create graphics pipeline.
             }
             else
             {

@@ -30,12 +30,12 @@ namespace vkts
 {
 
 BSDFMaterial::BSDFMaterial() :
-    IBSDFMaterial(), name(), fragmentShader(nullptr), attributes(VKTS_VERTEX_BUFFER_TYPE_VERTEX | VKTS_VERTEX_BUFFER_TYPE_NORMAL), allTextures(), descriptorPool(), descriptorSets()
+    IBSDFMaterial(), name(), fragmentShader(nullptr), attributes(VKTS_VERTEX_BUFFER_TYPE_VERTEX | VKTS_VERTEX_BUFFER_TYPE_NORMAL), allTextures(), descriptorPool(), descriptorSetLayout(), descriptorSets()
 {
 }
 
 BSDFMaterial::BSDFMaterial(const BSDFMaterial& other) :
-    IBSDFMaterial(), name(other.name), fragmentShader(other.fragmentShader), attributes(other.attributes), allTextures(other.allTextures), descriptorPool(), descriptorSets()
+    IBSDFMaterial(), name(other.name), fragmentShader(other.fragmentShader), attributes(other.attributes), allTextures(other.allTextures), descriptorPool(), descriptorSetLayout(), descriptorSets()
 {
 	// TODO: Clone, as done in phong.
 }
@@ -110,6 +110,16 @@ void BSDFMaterial::setDescriptorPool(const IDescriptorPoolSP& descriptorPool)
     this->descriptorPool = descriptorPool;
 }
 
+IDescriptorSetLayoutSP BSDFMaterial::getDescriptorSetLayout() const
+{
+	return descriptorSetLayout;
+}
+
+void BSDFMaterial::setDescriptorSetLayout(const IDescriptorSetLayoutSP& descriptorSetLayout)
+{
+    this->descriptorSetLayout = descriptorSetLayout;
+}
+
 IDescriptorSetsSP BSDFMaterial::getDescriptorSets() const
 {
     return descriptorSets;
@@ -135,6 +145,7 @@ IBSDFMaterialSP BSDFMaterial::clone() const
 
 void BSDFMaterial::destroy()
 {
+	// TODO: Destroy members.
 }
 
 } /* namespace vkts */

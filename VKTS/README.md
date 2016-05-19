@@ -83,6 +83,7 @@ Changelog:
 05/19/2016
 - All scripts are now pyhton scripts.
 - Fixed/improved Android exit and shutdown code.
+- Continued on BSDF material loader.
 
 05/18/2016
 - Added OS independent directory creation.

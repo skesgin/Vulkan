@@ -46,6 +46,7 @@ protected:
     SmartPointerVector<ITextureSP> allTextures;
 
     IDescriptorPoolSP descriptorPool;
+    IDescriptorSetLayoutSP descriptorSetLayout;
     IDescriptorSetsSP descriptorSets;
 
 public:
@@ -82,15 +83,19 @@ public:
 
     virtual const SmartPointerVector<ITextureSP>& getTextures() const override;
 
-    // TODO: Add methods
-
     virtual const IDescriptorPoolSP& getDescriptorPool() const override;
 
     virtual void setDescriptorPool(const IDescriptorPoolSP& descriptorPool) override;
 
+    virtual IDescriptorSetLayoutSP getDescriptorSetLayout() const override;
+
+    virtual void setDescriptorSetLayout(const IDescriptorSetLayoutSP& descriptorSetLayout) override;
+
     virtual IDescriptorSetsSP getDescriptorSets() const override;
 
     virtual void setDescriptorSets(const IDescriptorSetsSP& descriptorSets) override;
+
+    // TODO: Add methods.
 
     //
     // ICloneable
