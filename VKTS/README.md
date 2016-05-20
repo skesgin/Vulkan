@@ -5,9 +5,9 @@ Authors:
 
 **Norbert Nopper** (norbert@nopper.tv)
 
-VKTS version: **0.9.0**
+VKTS version: **0.9.1**
 
-Depending Vulkan API header version: **1.0.11**
+Depending Vulkan API header version: **1.0.13**
 
 Depending Vulkan extensions, when using a window system:
 
@@ -84,6 +84,7 @@ Changelog:
 - Fixed/improved image barrier.
 - Removed warning in vector template.
 - Added CPU and FPS profiling.
+- Updated to LunarG SDK 1.0.13.0.
 
 05/19/2016
 - All scripts are now pyhton scripts.

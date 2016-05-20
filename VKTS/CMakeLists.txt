@@ -20,7 +20,7 @@ list(APPEND IGNORE_CPP_FILES )
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
-	include_directories(AFTER C:/VulkanSDK/1.0.11.1/Include)
+	include_directories(AFTER C:/VulkanSDK/1.0.13.0/Include)
 
     if (${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
 

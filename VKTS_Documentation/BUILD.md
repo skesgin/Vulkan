@@ -4,7 +4,7 @@ How to build the VulKan ToolS (VKTS) examples:
 General requirements:
 ---------------------
   
-- [LunarG Vulkan SDK](http://vulkan.lunarg.com) version has to be 1.0.11.x.
+- [LunarG Vulkan SDK](http://vulkan.lunarg.com) version has to be 1.0.13.0.
 - Vulkan headers and libraries have to be visible by the used compiler and/or IDE.
 - [Python](https://www.python.org/) version has to be 3.5 or higher.  
 

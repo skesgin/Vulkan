@@ -54,15 +54,15 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
 	set(VKTS_ADDITIONAL_LIBS vulkan-1 WinMM Xinput9_1_0 Pdh)
 
-	include_directories(AFTER C:/VulkanSDK/1.0.11.1/Include)
+	include_directories(AFTER C:/VulkanSDK/1.0.13.0/Include)
     
     if (${VKTS_BITS} MATCHES "64")
     
-       link_directories(C:/VulkanSDK/1.0.11.1/Bin)
+       link_directories(C:/VulkanSDK/1.0.13.0/Bin)
        
     else ()
     
-       link_directories(C:/VulkanSDK/1.0.11.1/Bin32)
+       link_directories(C:/VulkanSDK/1.0.13.0/Bin32)
     
     endif ()
         	
