@@ -27,16 +27,12 @@ def copy(src, dst):
 
 print("Copying project assets")
 
-copy("../../VKTS_Binaries/shader/SPIR/V/phong_skinning.vert.spv", "./assets/shader/SPIR/V/")
-copy("../../VKTS_Binaries/shader/SPIR/V/phong_skinning.frag.spv", "./assets/shader/SPIR/V/")
 copy("../../VKTS_Binaries/shader/SPIR/V/phong_skinning_shadow.vert.spv", "./assets/shader/SPIR/V/")
 copy("../../VKTS_Binaries/shader/SPIR/V/phong_skinning_shadow.frag.spv", "./assets/shader/SPIR/V/")
 copy("../../VKTS_Binaries/shader/SPIR/V/phong_skinning_write_shadow.frag.spv", "./assets/shader/SPIR/V/")
 copy("../../VKTS_Binaries/shader/SPIR/V/phong_shadow.vert.spv", "./assets/shader/SPIR/V/")
 copy("../../VKTS_Binaries/shader/SPIR/V/phong_shadow.frag.spv", "./assets/shader/SPIR/V/")
 copy("../../VKTS_Binaries/shader/SPIR/V/phong_write_shadow.frag.spv", "./assets/shader/SPIR/V/")
-copy("../../VKTS_Binaries/shader/SPIR/V/phong.vert.spv", "./assets/shader/SPIR/V/")
-copy("../../VKTS_Binaries/shader/SPIR/V/phong.frag.spv", "./assets/shader/SPIR/V/")
 copy("../../VKTS_Binaries/transport_shuttle/*.vkts", "./assets/transport_shuttle/")
 copy("../../VKTS_Binaries/transport_shuttle/*.tga", "./assets/transport_shuttle/")
 
