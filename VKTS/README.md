@@ -80,6 +80,11 @@ How to build:
 Changelog:
 ----------
 
+05/20/2016
+- Fixed/improved image barrier.
+- Removed warning in vector template.
+- Added CPU and FPS profiling.
+
 05/19/2016
 - All scripts are now pyhton scripts.
 - Fixed/improved Android exit and shutdown code.

@@ -255,6 +255,8 @@ public:
     		// Allow to append at the end.
     		V v;
 
+    		memset(&v, 0, sizeof(V));
+
     		append(v);
     	}
 

@@ -256,6 +256,20 @@ void Image::cmdPipelineBarrier(const VkCommandBuffer cmdBuffer, const VkAccessFl
 		return;
 	}
 
+	VkImageMemoryBarrier imageMemoryBarrier;
+
+	memset(&imageMemoryBarrier, 0, sizeof(VkImageMemoryBarrier));
+
+	imageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+
+	imageMemoryBarrier.dstAccessMask = dstAccessMask;
+	imageMemoryBarrier.newLayout = newLayout;
+	imageMemoryBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	imageMemoryBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	imageMemoryBarrier.image = image;
+	imageMemoryBarrier.subresourceRange = subresourceRange;
+
+	// It is allowed, that each mip level can have different layouts.
 	for (uint32_t i = subresourceRange.baseMipLevel; i < subresourceRange.baseMipLevel + subresourceRange.levelCount; i++)
 	{
 		if (accessMask[i] == dstAccessMask && imageLayout[i] == newLayout)
@@ -263,20 +277,10 @@ void Image::cmdPipelineBarrier(const VkCommandBuffer cmdBuffer, const VkAccessFl
 			continue;
 		}
 
-		VkImageMemoryBarrier imageMemoryBarrier;
-
-		memset(&imageMemoryBarrier, 0, sizeof(VkImageMemoryBarrier));
-
-		imageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-
 		imageMemoryBarrier.srcAccessMask = accessMask[i];
-		imageMemoryBarrier.dstAccessMask = dstAccessMask;
 		imageMemoryBarrier.oldLayout = imageLayout[i];
-		imageMemoryBarrier.newLayout = newLayout;
-		imageMemoryBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		imageMemoryBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		imageMemoryBarrier.image = image;
-		imageMemoryBarrier.subresourceRange = subresourceRange;
+		imageMemoryBarrier.subresourceRange.baseMipLevel = i;
+		imageMemoryBarrier.subresourceRange.levelCount = 1;
 
 		vkCmdPipelineBarrier(cmdBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
 

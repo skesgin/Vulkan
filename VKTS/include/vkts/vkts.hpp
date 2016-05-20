@@ -180,6 +180,12 @@
 #include <vkts/layer0/processor/fn_processor.hpp>
 
 /**
+ * Profile.
+ */
+
+#include <vkts/layer0/profile/fn_profile.hpp>
+
+/**
  * Visual.
  */
 

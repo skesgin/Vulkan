@@ -19,6 +19,7 @@ IGNORE_FILES += $(LOCAL_PATH)/../../src/layer0/file/fn_file_linux.cpp
 IGNORE_FILES += $(LOCAL_PATH)/../../src/layer0/file/fn_file_windows.cpp
 IGNORE_FILES += $(LOCAL_PATH)/../../src/layer0/processor/fn_processor_linux.cpp
 IGNORE_FILES += $(LOCAL_PATH)/../../src/layer0/processor/fn_processor_windows.cpp
+IGNORE_FILES += $(LOCAL_PATH)/../../src/layer0/profile/fn_profile_windows.cpp
 IGNORE_FILES += $(LOCAL_PATH)/../../src/layer0/visual/fn_visual_none.cpp
 IGNORE_FILES += $(LOCAL_PATH)/../../src/layer0/visual/fn_visual_linux.cpp
 IGNORE_FILES += $(LOCAL_PATH)/../../src/layer0/visual/fn_visual_xlib.cpp

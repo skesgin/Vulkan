@@ -52,7 +52,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 		
     endif ()        
 
-	set(VKTS_ADDITIONAL_LIBS vulkan-1 WinMM Xinput9_1_0)
+	set(VKTS_ADDITIONAL_LIBS vulkan-1 WinMM Xinput9_1_0 Pdh)
 	
 	include_directories(AFTER C:/VulkanSDK/1.0.11.1/Include)
 	
