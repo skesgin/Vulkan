@@ -32,6 +32,10 @@
 namespace vkts
 {
 
+VKTS_APICALL VkBool32 VKTS_APIENTRY cacheGetEnabled();
+
+VKTS_APICALL void VKTS_APIENTRY cacheSetEnabled(const VkBool32 enabled);
+
 /**
  *
  * @ThreadSafe

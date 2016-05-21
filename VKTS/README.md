@@ -80,6 +80,9 @@ How to build:
 Changelog:
 ----------
 
+05/21/2016
+- Added disable/enable of cache.
+
 05/20/2016
 - Fixed/improved image barrier.
 - Removed warning in vector template.

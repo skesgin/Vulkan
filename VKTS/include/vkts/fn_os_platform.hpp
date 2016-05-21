@@ -33,6 +33,8 @@
 
 // Windows OS.
 
+#define VKTS_CACHE_ENABLED VK_TRUE
+
 #if defined(VKTS_NO_VISUAL)
 
 // Include nothing for now.
@@ -59,6 +61,8 @@
 
 // Android OS.
 
+#define VKTS_CACHE_ENABLED VK_TRUE
+
 #if defined(VKTS_NO_VISUAL)
 
 // Include in both cases the same.
@@ -84,6 +88,8 @@
 #elif defined(__gnu_linux__)
 
 // GNU/Linux OS.
+
+#define VKTS_CACHE_ENABLED VK_TRUE
 
 #if defined(VKTS_NO_VISUAL)
 

@@ -124,6 +124,8 @@ VkBool32 VKTS_APIENTRY _filePrepareLoadBinary(const char* filename)
 
 	if (sourceLength != targetLength)
 	{
+		vkts::logPrint(VKTS_LOG_ERROR, "File: Could not copy '%s'.", filename);
+
 		fclose(targetAsset);
 
 		AAsset_close(sourceAsset);

@@ -31,6 +31,9 @@
 namespace vkts
 {
 
+static VkBool32 g_cacheEnabled = VKTS_CACHE_ENABLED;
+
+
 static std::string VKTS_APIENTRY cacheGetDirectory(const char* filename)
 {
 	if (!filename)
@@ -58,6 +61,16 @@ static std::string cacheGetFilename(const char* filename)
 	}
 
 	return std::string(VKTS_CACHE_DIRECTORY)  + "/" + std::string(filename);
+}
+
+VkBool32 VKTS_APIENTRY cacheGetEnabled()
+{
+	return g_cacheEnabled;
+}
+
+void VKTS_APIENTRY cacheSetEnabled(const VkBool32 enabled)
+{
+	g_cacheEnabled = enabled;
 }
 
 VkBool32 VKTS_APIENTRY cacheSaveImageData(const IImageDataSP& imageData)

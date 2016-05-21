@@ -576,6 +576,8 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
         {
             if (!scenegraphParseString(buffer, sdata))
             {
+            	logPrint(VKTS_LOG_ERROR, "Scenegraph: Invalid name");
+
                 return VK_FALSE;
             }
 
@@ -606,6 +608,8 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
 
                         if (!imageData.get())
                         {
+                        	logPrint(VKTS_LOG_ERROR, "Scenegraph: Could not load image data '%s'", finalImageDataFilename.c_str());
+
                             return VK_FALSE;
                         }
                     }
@@ -630,6 +634,8 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
                         }
                         else
                         {
+                            logPrint(VKTS_LOG_ERROR, "Scenegraph: Format not supported.");
+
                             return VK_FALSE;
                         }
                     }
@@ -642,6 +648,8 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
 
                         if (dotIndex == finalImageDataFilename.npos)
                         {
+                        	logPrint(VKTS_LOG_ERROR, "Scenegraph: No valid image filename '%s'", finalImageDataFilename.c_str());
+
                             return VK_FALSE;
                         }
 
@@ -653,34 +661,38 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
                         int32_t depth = imageData->getDepth();
 
                         SmartPointerVector<IImageDataSP> allMipMaps;
-                        allMipMaps.append(imageData);
 
-                        int32_t level = 1;
-
-                        while (width > 1 || height > 1 || depth > 1)
+                        if (cacheGetEnabled())
                         {
-                            width = glm::max(width / 2, 1);
-                            height = glm::max(height / 2, 1);
-                            depth = glm::max(depth / 2, 1);
+                            allMipMaps.append(imageData);
 
-                            auto targetImageFilename = sourceImageName + "_L" + std::to_string(level++) + sourceImageExtension;
+                            int32_t level = 1;
 
-                            auto targetImage = cacheLoadImageData(targetImageFilename.c_str());
+                            while (width > 1 || height > 1 || depth > 1)
+							{
+								width = glm::max(width / 2, 1);
+								height = glm::max(height / 2, 1);
+								depth = glm::max(depth / 2, 1);
 
-                            if (!targetImage.get())
-                            {
-                            	allMipMaps.clear();
+								auto targetImageFilename = sourceImageName + "_L" + std::to_string(level++) + sourceImageExtension;
 
-                            	break;
-                            }
+								auto targetImage = cacheLoadImageData(targetImageFilename.c_str());
 
-                            allMipMaps.append(targetImage);
+								if (!targetImage.get())
+								{
+									allMipMaps.clear();
 
-                            //
+									break;
+								}
 
-                            width = targetImage->getWidth();
-                            height = targetImage->getHeight();
-                            depth = targetImage->getDepth();
+								allMipMaps.append(targetImage);
+
+								//
+
+								width = targetImage->getWidth();
+								height = targetImage->getHeight();
+								depth = targetImage->getDepth();
+							}
                         }
 
                         //
@@ -691,16 +703,21 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
 
                             if (allMipMaps.size() == 0)
                             {
+                            	logPrint(VKTS_LOG_ERROR, "Scenegraph: Could not create mip maps for '%s'", finalImageDataFilename.c_str());
+
                                 return VK_FALSE;
                             }
 
-                        	logPrint(VKTS_LOG_INFO, "Scenegraph: Storing cached data for '%s'", finalImageDataFilename.c_str());
+                            if (cacheGetEnabled())
+                            {
+								logPrint(VKTS_LOG_INFO, "Scenegraph: Storing cached data for '%s'", finalImageDataFilename.c_str());
 
-                        	// Only cache mip maps sub levels.
-                        	for (size_t i = 1; i < allMipMaps.size(); i++)
-                        	{
-                        		cacheSaveImageData(allMipMaps[i]);
-                        	}
+								// Only cache mip maps sub levels.
+								for (size_t i = 1; i < allMipMaps.size(); i++)
+								{
+									cacheSaveImageData(allMipMaps[i]);
+								}
+                            }
                         }
                         else
                         {
@@ -711,6 +728,8 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
 
                         if (!imageData.get())
                         {
+                        	logPrint(VKTS_LOG_ERROR, "Scenegraph: No merged image for '%s'", finalImageDataFilename.c_str());
+
                             return VK_FALSE;
                         }
                     }
@@ -727,6 +746,8 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
 
             if (memoryImageName == "" || !imageData.get())
             {
+            	logPrint(VKTS_LOG_ERROR, "Scenegraph: No memory image name or image data for '%s'", finalImageDataFilename.c_str());
+
                 return VK_FALSE;
             }
 
@@ -737,6 +758,8 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
 
             if (!context->getInitialResources()->getPhysicalDevice()->getGetImageTilingAndMemoryProperty(imageTiling, memoryPropertyFlags, imageData->getFormat(), imageData->getImageType(), 0, imageData->getExtent3D(), imageData->getMipLevels(), 1, VK_SAMPLE_COUNT_1_BIT, imageData->getSize()))
             {
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: Format not supported.");
+
                 return VK_FALSE;
             }
 
@@ -786,6 +809,8 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
 
             if (!memoryImage.get())
             {
+            	logPrint(VKTS_LOG_ERROR, "Scenegraph: No memory image for '%s'", finalImageDataFilename.c_str());
+
                 return VK_FALSE;
             }
 
