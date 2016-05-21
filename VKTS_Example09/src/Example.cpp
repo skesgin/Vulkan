@@ -27,7 +27,7 @@
 #include "Example.hpp"
 
 Example::Example(const vkts::IInitialResourcesSP& initialResources, const int32_t windowIndex, const vkts::ISurfaceSP& surface) :
-		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), windowDimension(0, 0), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), descriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), fragmentUniformBuffer(nullptr), shadowUniformBuffer(nullptr), skinningVertexShaderModule(nullptr), skinningFragmentShaderModule(nullptr), skinningShadowFragmentShaderModule(nullptr), standardVertexShaderModule(nullptr), standardFragmentShaderModule(nullptr), standardShadowFragmentShaderModule(nullptr), pipelineLayout(nullptr), sceneContext(nullptr), scene(nullptr), swapchain(nullptr), renderPass(nullptr), shadowRenderPass(nullptr), allOpaqueGraphicsPipelines(), allBlendGraphicsPipelines(), allBlendCwGraphicsPipelines(), allShadowGraphicsPipelines(), shadowTexture(nullptr), msaaColorTexture(nullptr), msaaDepthTexture(nullptr), depthTexture(nullptr), shadowImageView(nullptr), msaaColorImageView(nullptr), msaaDepthStencilImageView(nullptr), depthStencilImageView(nullptr), shadowSampler(nullptr), swapchainImagesCount(0), swapchainImageView(), framebuffer(), shadowFramebuffer(), fences(), cmdBuffer(), shadowCmdBuffer()
+		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), windowDimension(0, 0), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), descriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), fragmentUniformBuffer(nullptr), shadowUniformBuffer(nullptr), skinningVertexShaderModule(nullptr), skinningFragmentShaderModule(nullptr), skinningShadowFragmentShaderModule(nullptr), standardVertexShaderModule(nullptr), standardFragmentShaderModule(nullptr), standardShadowFragmentShaderModule(nullptr), pipelineLayout(nullptr), loadTask(), sceneLoaded(VK_FALSE), sceneContext(nullptr), scene(nullptr), swapchain(nullptr), renderPass(nullptr), shadowRenderPass(nullptr), allOpaqueGraphicsPipelines(), allBlendGraphicsPipelines(), allBlendCwGraphicsPipelines(), allShadowGraphicsPipelines(), shadowTexture(nullptr), msaaColorTexture(nullptr), msaaDepthTexture(nullptr), depthTexture(nullptr), shadowImageView(nullptr), msaaColorImageView(nullptr), msaaDepthStencilImageView(nullptr), depthStencilImageView(nullptr), shadowSampler(nullptr), swapchainImagesCount(0), swapchainImageView(), framebuffer(), shadowFramebuffer(), fences(), cmdBuffer(), shadowCmdBuffer()
 {
 }
 
@@ -419,68 +419,6 @@ VkBool32 Example::updateDescriptorSets()
 	{
 		writeDescriptorSets[6 + i - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_EMISSIVE].dstBinding = i;
 	}
-
-	return VK_TRUE;
-}
-
-VkBool32 Example::buildScene(const vkts::ICommandBuffersSP& cmdBuffer)
-{
-	VkSamplerCreateInfo samplerCreateInfo;
-
-	memset(&samplerCreateInfo, 0, sizeof(VkSamplerCreateInfo));
-
-	samplerCreateInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-
-	samplerCreateInfo.flags = 0;
-	samplerCreateInfo.magFilter = VK_FILTER_LINEAR;
-	samplerCreateInfo.minFilter = VK_FILTER_LINEAR;
-	samplerCreateInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-	samplerCreateInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-	samplerCreateInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-	samplerCreateInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-	samplerCreateInfo.mipLodBias = 0.0f;
-	samplerCreateInfo.maxAnisotropy = 1.0f;
-	samplerCreateInfo.compareEnable = VK_FALSE;
-	samplerCreateInfo.compareOp = VK_COMPARE_OP_NEVER;
-	samplerCreateInfo.minLod = 0.0f;
-	samplerCreateInfo.maxLod = 0.0f;
-	samplerCreateInfo.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
-	samplerCreateInfo.unnormalizedCoordinates = VK_FALSE;
-
-	VkImageViewCreateInfo imageViewCreateInfo;
-
-	memset(&imageViewCreateInfo, 0, sizeof(VkImageViewCreateInfo));
-
-	imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-
-	imageViewCreateInfo.flags = 0;
-	imageViewCreateInfo.image = VK_NULL_HANDLE;		// Defined later.
-	imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-	imageViewCreateInfo.format = VK_FORMAT_UNDEFINED;		// Defined later.
-	imageViewCreateInfo.components = {VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_G, VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_A};
-	imageViewCreateInfo.subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
-
-	sceneContext = vkts::scenegraphCreateContext(VK_FALSE, initialResources, cmdBuffer, samplerCreateInfo, imageViewCreateInfo, descriptorSetLayout);
-
-	if (!sceneContext.get())
-	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create cache.");
-
-		return VK_FALSE;
-	}
-
-	//
-
-	scene = vkts::scenegraphLoadScene(VKTS_SCENE_NAME, sceneContext);
-
-	if (!scene.get())
-	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not load scene.");
-
-		return VK_FALSE;
-	}
-
-	vkts::logPrint(VKTS_LOG_INFO, "Example: Number objects: %d", scene->getNumberObjects());
 
 	return VK_TRUE;
 }
@@ -1676,20 +1614,6 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 		return VK_FALSE;
 	}
 
-	VkBool32 doUpdateDescriptorSets = VK_FALSE;
-
-	if (!scene.get())
-	{
-		if (!buildScene(updateCmdBuffer))
-		{
-			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not build scene.");
-
-			return VK_FALSE;
-		}
-
-		doUpdateDescriptorSets = VK_TRUE;
-	}
-
 	result = updateCmdBuffer->endCommandBuffer();
 
 	if (result != VK_SUCCESS)
@@ -1763,21 +1687,6 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 
 	//
 
-	if (doUpdateDescriptorSets)
-	{
-		if (!updateDescriptorSets())
-		{
-			return VK_FALSE;
-		}
-
-		if (scene.get())
-		{
-			scene->updateDescriptorSetsRecursive(VKTS_DESCRIPTOR_SET_COUNT, writeDescriptorSets);
-		}
-	}
-
-	//
-
 	for (int32_t i = 0; i < (int32_t)swapchainImagesCount; i++)
 	{
 		if (!buildSwapchainImageView(i))
@@ -1795,9 +1704,12 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 			return VK_FALSE;
 		}
 
-		if (!buildCmdBuffer(i))
+		if (sceneLoaded)
 		{
-			return VK_FALSE;
+			if (!buildCmdBuffer(i))
+			{
+				return VK_FALSE;
+			}
 		}
 	}
 
@@ -2021,6 +1933,24 @@ VkBool32 Example::init(const vkts::IUpdateThreadContext& updateContext)
 
 	//
 
+	loadTask = ILoadTaskSP(new LoadTask(initialResources, descriptorSetLayout, sceneContext, scene));
+
+	if (!loadTask.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create load task.");
+
+		return VK_FALSE;
+	}
+
+	if (!updateContext.sendTask(loadTask))
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not send load task.");
+
+		return VK_FALSE;
+	}
+
+	//
+
 	if (!buildResources(updateContext))
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not build resources.");
@@ -2036,207 +1966,230 @@ VkBool32 Example::init(const vkts::IUpdateThreadContext& updateContext)
 //
 VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 {
-	for (size_t i = 0; i < allUpdateables.size(); i++)
+	if (sceneLoaded)
 	{
-		allUpdateables[i]->update(updateContext.getDeltaTime(), updateContext.getDeltaTicks());
-	}
-
-	//
-
-	VkResult result = VK_SUCCESS;
-
-	//
-
-	if (windowDimension != updateContext.getWindowDimension(windowIndex))
-	{
-		windowDimension = updateContext.getWindowDimension(windowIndex);
-
-		result = VK_ERROR_OUT_OF_DATE_KHR;
-	}
-
-	//
-
-	uint32_t currentBuffer;
-
-	if (result == VK_SUCCESS)
-	{
-		result = swapchain->acquireNextImage(UINT64_MAX, imageAcquiredSemaphore->getSemaphore(), VK_NULL_HANDLE, currentBuffer);
-	}
-
-	if (result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR)
-	{
-		glm::mat4 projectionMatrix(1.0f);
-		glm::mat4 viewMatrix(1.0f);
-		glm::mat4 shadowMatrix(1.0f);
-
-		glm::vec3 worldLightDirection = glm::vec3(0.5f, 1.0f, 0.0f);
-
-		//
-		// Shadow
-		//
-
-		projectionMatrix = vkts::orthoMat4(-VKTS_SHADOW_MAP_SIZE * 0.5f * VKTS_SHADOW_CAMERA_SCALE, VKTS_SHADOW_MAP_SIZE * 0.5f * VKTS_SHADOW_CAMERA_SCALE, -VKTS_SHADOW_MAP_SIZE * 0.5f * VKTS_SHADOW_CAMERA_SCALE, VKTS_SHADOW_MAP_SIZE * 0.5f * VKTS_SHADOW_CAMERA_SCALE, 0.0f, VKTS_SHADOW_CAMERA_ORTHO_FAR);
-
-		// Get view matrix from light.
-		viewMatrix = vkts::lookAtMat4(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f) + glm::vec4(glm::normalize(worldLightDirection) * VKTS_SHADOW_CAMERA_DISTANCE, 0.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-
-		// Bias matrix to convert to window space.
-		glm::mat4 biasMatrix = vkts::translateMat4(0.5f, 0.5f, 0.0f) * vkts::scaleMat4(0.5f, 0.5f, 1.0f);
-
-		shadowMatrix = biasMatrix * projectionMatrix * viewMatrix;
-
-		if (!vertexViewProjectionUniformBuffer->upload(0 * sizeof(float) * 16, 0, projectionMatrix))
+		for (size_t i = 0; i < allUpdateables.size(); i++)
 		{
-			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not upload matrices.");
-
-			return VK_FALSE;
-		}
-		if (!vertexViewProjectionUniformBuffer->upload(1 * sizeof(float) * 16, 0, viewMatrix))
-		{
-			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not upload matrices.");
-
-			return VK_FALSE;
-		}
-
-		if (scene.get())
-		{
-			scene->updateRecursive(updateContext);
+			allUpdateables[i]->update(updateContext.getDeltaTime(), updateContext.getDeltaTicks());
 		}
 
 		//
 
-		VkSemaphore waitSemaphores = imageAcquiredSemaphore->getSemaphore();
-
-        VkPipelineStageFlags waitDstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
-
-        VkSubmitInfo submitInfo;
-
-        memset(&submitInfo, 0, sizeof(VkSubmitInfo));
-
-        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-
-        submitInfo.waitSemaphoreCount = 1;
-        submitInfo.pWaitSemaphores = &waitSemaphores;
-        submitInfo.pWaitDstStageMask = &waitDstStageMask;
-        submitInfo.commandBufferCount = 1;
-        submitInfo.pCommandBuffers = shadowCmdBuffer[currentBuffer]->getCommandBuffers();
-        submitInfo.signalSemaphoreCount = 0;
-        submitInfo.pSignalSemaphores = nullptr;
-
-        // Added fence for later waiting.
-		result = initialResources->getQueue()->submit(1, &submitInfo, fences[currentBuffer]->getFence());
-
-		if (result != VK_SUCCESS)
-		{
-			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not submit queue.");
-
-			return VK_FALSE;
-		}
-
-		//
-		// Wait for fence, as view projection buffer is used by both commands.
-		//
-
-		result = fences[currentBuffer]->waitForFence(UINT64_MAX);
-
-		if (result != VK_SUCCESS)
-		{
-			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not wait for fence.");
-
-			return VK_FALSE;
-		}
-
-		result = fences[currentBuffer]->reset();
-
-		if (result != VK_SUCCESS)
-		{
-			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not reset fence.");
-
-			return VK_FALSE;
-		}
-
-		//
-		// Color
-		//
-
-		const auto& dimension = updateContext.getWindowDimension(windowIndex);
-
-		projectionMatrix = vkts::perspectiveMat4(45.0f, (float) dimension.x / (float) dimension.y, 1.0f, 1000.0f);
-
-		viewMatrix = camera->getViewMatrix();
-
-		glm::vec3 lightDirection = glm::mat3(viewMatrix) * worldLightDirection;
-
-		lightDirection = glm::normalize(lightDirection);
-
-		if (!fragmentUniformBuffer->upload(0, 0, lightDirection))
-		{
-			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not upload light direction.");
-
-			return VK_FALSE;
-		}
-		if (!vertexViewProjectionUniformBuffer->upload(0 * sizeof(float) * 16, 0, projectionMatrix))
-		{
-			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not upload matrices.");
-
-			return VK_FALSE;
-		}
-		if (!vertexViewProjectionUniformBuffer->upload(1 * sizeof(float) * 16, 0, viewMatrix))
-		{
-			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not upload matrices.");
-
-			return VK_FALSE;
-		}
-		if (!shadowUniformBuffer->upload(0, 0, shadowMatrix))
-		{
-			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not upload shadow matrix.");
-
-			return VK_FALSE;
-		}
-
-		// Scene already updated.
+		VkResult result = VK_SUCCESS;
 
 		//
 
-        VkSemaphore signalSemaphores = renderingCompleteSemaphore->getSemaphore();
-
-
-        memset(&submitInfo, 0, sizeof(VkSubmitInfo));
-
-        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-
-        submitInfo.waitSemaphoreCount = 0;
-        submitInfo.pWaitSemaphores = nullptr;
-        submitInfo.pWaitDstStageMask = nullptr;
-        submitInfo.commandBufferCount = 1;
-        submitInfo.pCommandBuffers = cmdBuffer[currentBuffer]->getCommandBuffers();
-        submitInfo.signalSemaphoreCount = 1;
-        submitInfo.pSignalSemaphores = &signalSemaphores;
-
-		result = initialResources->getQueue()->submit(1, &submitInfo, VK_NULL_HANDLE);
-
-		if (result != VK_SUCCESS)
+		if (windowDimension != updateContext.getWindowDimension(windowIndex))
 		{
-			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not submit queue.");
+			windowDimension = updateContext.getWindowDimension(windowIndex);
 
-			return VK_FALSE;
+			result = VK_ERROR_OUT_OF_DATE_KHR;
 		}
 
-        waitSemaphores = renderingCompleteSemaphore->getSemaphore();
+		//
 
-        VkSwapchainKHR swapchains = swapchain->getSwapchain();
+		uint32_t currentBuffer;
 
-        result = swapchain->queuePresent(initialResources->getQueue()->getQueue(), 1, &waitSemaphores, 1, &swapchains, &currentBuffer, nullptr);
+		if (result == VK_SUCCESS)
+		{
+			result = swapchain->acquireNextImage(UINT64_MAX, imageAcquiredSemaphore->getSemaphore(), VK_NULL_HANDLE, currentBuffer);
+		}
 
 		if (result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR)
 		{
-			result = initialResources->getQueue()->waitIdle();
+			glm::mat4 projectionMatrix(1.0f);
+			glm::mat4 viewMatrix(1.0f);
+			glm::mat4 shadowMatrix(1.0f);
+
+			glm::vec3 worldLightDirection = glm::vec3(0.5f, 1.0f, 0.0f);
+
+			//
+			// Shadow
+			//
+
+			projectionMatrix = vkts::orthoMat4(-VKTS_SHADOW_MAP_SIZE * 0.5f * VKTS_SHADOW_CAMERA_SCALE, VKTS_SHADOW_MAP_SIZE * 0.5f * VKTS_SHADOW_CAMERA_SCALE, -VKTS_SHADOW_MAP_SIZE * 0.5f * VKTS_SHADOW_CAMERA_SCALE, VKTS_SHADOW_MAP_SIZE * 0.5f * VKTS_SHADOW_CAMERA_SCALE, 0.0f, VKTS_SHADOW_CAMERA_ORTHO_FAR);
+
+			// Get view matrix from light.
+			viewMatrix = vkts::lookAtMat4(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f) + glm::vec4(glm::normalize(worldLightDirection) * VKTS_SHADOW_CAMERA_DISTANCE, 0.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+			// Bias matrix to convert to window space.
+			glm::mat4 biasMatrix = vkts::translateMat4(0.5f, 0.5f, 0.0f) * vkts::scaleMat4(0.5f, 0.5f, 1.0f);
+
+			shadowMatrix = biasMatrix * projectionMatrix * viewMatrix;
+
+			if (!vertexViewProjectionUniformBuffer->upload(0 * sizeof(float) * 16, 0, projectionMatrix))
+			{
+				vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not upload matrices.");
+
+				return VK_FALSE;
+			}
+			if (!vertexViewProjectionUniformBuffer->upload(1 * sizeof(float) * 16, 0, viewMatrix))
+			{
+				vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not upload matrices.");
+
+				return VK_FALSE;
+			}
+
+			if (scene.get())
+			{
+				scene->updateRecursive(updateContext);
+			}
+
+			//
+
+			VkSemaphore waitSemaphores = imageAcquiredSemaphore->getSemaphore();
+
+			VkPipelineStageFlags waitDstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+
+			VkSubmitInfo submitInfo;
+
+			memset(&submitInfo, 0, sizeof(VkSubmitInfo));
+
+			submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+			submitInfo.waitSemaphoreCount = 1;
+			submitInfo.pWaitSemaphores = &waitSemaphores;
+			submitInfo.pWaitDstStageMask = &waitDstStageMask;
+			submitInfo.commandBufferCount = 1;
+			submitInfo.pCommandBuffers = shadowCmdBuffer[currentBuffer]->getCommandBuffers();
+			submitInfo.signalSemaphoreCount = 0;
+			submitInfo.pSignalSemaphores = nullptr;
+
+			// Added fence for later waiting.
+			result = initialResources->getQueue()->submit(1, &submitInfo, fences[currentBuffer]->getFence());
 
 			if (result != VK_SUCCESS)
 			{
-				vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not wait for idle queue.");
+				vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not submit queue.");
 
 				return VK_FALSE;
+			}
+
+			//
+			// Wait for fence, as view projection buffer is used by both commands.
+			//
+
+			result = fences[currentBuffer]->waitForFence(UINT64_MAX);
+
+			if (result != VK_SUCCESS)
+			{
+				vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not wait for fence.");
+
+				return VK_FALSE;
+			}
+
+			result = fences[currentBuffer]->reset();
+
+			if (result != VK_SUCCESS)
+			{
+				vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not reset fence.");
+
+				return VK_FALSE;
+			}
+
+			//
+			// Color
+			//
+
+			const auto& dimension = updateContext.getWindowDimension(windowIndex);
+
+			projectionMatrix = vkts::perspectiveMat4(45.0f, (float) dimension.x / (float) dimension.y, 1.0f, 1000.0f);
+
+			viewMatrix = camera->getViewMatrix();
+
+			glm::vec3 lightDirection = glm::mat3(viewMatrix) * worldLightDirection;
+
+			lightDirection = glm::normalize(lightDirection);
+
+			if (!fragmentUniformBuffer->upload(0, 0, lightDirection))
+			{
+				vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not upload light direction.");
+
+				return VK_FALSE;
+			}
+			if (!vertexViewProjectionUniformBuffer->upload(0 * sizeof(float) * 16, 0, projectionMatrix))
+			{
+				vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not upload matrices.");
+
+				return VK_FALSE;
+			}
+			if (!vertexViewProjectionUniformBuffer->upload(1 * sizeof(float) * 16, 0, viewMatrix))
+			{
+				vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not upload matrices.");
+
+				return VK_FALSE;
+			}
+			if (!shadowUniformBuffer->upload(0, 0, shadowMatrix))
+			{
+				vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not upload shadow matrix.");
+
+				return VK_FALSE;
+			}
+
+			// Scene already updated.
+
+			//
+
+			VkSemaphore signalSemaphores = renderingCompleteSemaphore->getSemaphore();
+
+
+			memset(&submitInfo, 0, sizeof(VkSubmitInfo));
+
+			submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+			submitInfo.waitSemaphoreCount = 0;
+			submitInfo.pWaitSemaphores = nullptr;
+			submitInfo.pWaitDstStageMask = nullptr;
+			submitInfo.commandBufferCount = 1;
+			submitInfo.pCommandBuffers = cmdBuffer[currentBuffer]->getCommandBuffers();
+			submitInfo.signalSemaphoreCount = 1;
+			submitInfo.pSignalSemaphores = &signalSemaphores;
+
+			result = initialResources->getQueue()->submit(1, &submitInfo, VK_NULL_HANDLE);
+
+			if (result != VK_SUCCESS)
+			{
+				vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not submit queue.");
+
+				return VK_FALSE;
+			}
+
+			waitSemaphores = renderingCompleteSemaphore->getSemaphore();
+
+			VkSwapchainKHR swapchains = swapchain->getSwapchain();
+
+			result = swapchain->queuePresent(initialResources->getQueue()->getQueue(), 1, &waitSemaphores, 1, &swapchains, &currentBuffer, nullptr);
+
+			if (result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR)
+			{
+				result = initialResources->getQueue()->waitIdle();
+
+				if (result != VK_SUCCESS)
+				{
+					vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not wait for idle queue.");
+
+					return VK_FALSE;
+				}
+			}
+			else
+			{
+				if (result == VK_ERROR_OUT_OF_DATE_KHR)
+				{
+					terminateResources(updateContext);
+
+					if (!buildResources(updateContext))
+					{
+						vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not build resources.");
+
+						return VK_FALSE;
+					}
+				}
+				else
+				{
+					vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not present queue.");
+
+					return VK_FALSE;
+				}
 			}
 		}
 		else
@@ -2254,52 +2207,111 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 			}
 			else
 			{
-				vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not present queue.");
+				vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not acquire next image.");
 
 				return VK_FALSE;
 			}
 		}
-	}
-	else
-	{
-		if (result == VK_ERROR_OUT_OF_DATE_KHR)
+
+		//
+
+		result = imageAcquiredSemaphore->reset();
+
+		if (result != VK_SUCCESS)
 		{
-			terminateResources(updateContext);
+			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not reset semaphore.");
 
-			if (!buildResources(updateContext))
-			{
-				vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not build resources.");
-
-				return VK_FALSE;
-			}
+			return VK_FALSE;
 		}
-		else
+
+		result = renderingCompleteSemaphore->reset();
+
+		if (result != VK_SUCCESS)
 		{
-			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not acquire next image.");
+			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not reset semaphore.");
 
 			return VK_FALSE;
 		}
 	}
+	else
+	{
+		vkts::ITaskSP executedTask;
 
-	//
+		// Do not wait.
+		if (!updateContext.receiveExecutedTask(executedTask, VK_FALSE))
+		{
+			return VK_TRUE;
+		}
 
-    result = imageAcquiredSemaphore->reset();
+		//
 
-    if (result != VK_SUCCESS)
-    {
-        vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not reset semaphore.");
+		vkts::logPrint(VKTS_LOG_INFO, "Example: Scene loaded");
 
-        return VK_FALSE;
-    }
+		sceneLoaded = VK_TRUE;
 
-    result = renderingCompleteSemaphore->reset();
+		//
 
-    if (result != VK_SUCCESS)
-    {
-        vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not reset semaphore.");
+		VkCommandBuffer updateCommandBuffer = loadTask->getCommandBuffer();
 
-        return VK_FALSE;
-    }
+		//
+
+		VkSubmitInfo submitInfo;
+
+		memset(&submitInfo, 0, sizeof(VkSubmitInfo));
+
+		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+		submitInfo.waitSemaphoreCount = 0;
+		submitInfo.pWaitSemaphores = nullptr;
+		submitInfo.commandBufferCount = 1;
+		submitInfo.pCommandBuffers = &updateCommandBuffer;
+		submitInfo.signalSemaphoreCount = 0;
+		submitInfo.pSignalSemaphores = nullptr;
+
+		auto result = initialResources->getQueue()->submit(1, &submitInfo, VK_NULL_HANDLE);
+
+		if (result != VK_SUCCESS)
+		{
+			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not submit queue.");
+
+			return VK_FALSE;
+		}
+
+		result = initialResources->getQueue()->waitIdle();
+
+		if (result != VK_SUCCESS)
+		{
+			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not wait for idle queue.");
+
+			return VK_FALSE;
+		}
+
+		//
+
+
+		// Destroys the load task.
+		loadTask = ILoadTaskSP();
+
+		//
+
+		if (!updateDescriptorSets())
+		{
+			return VK_FALSE;
+		}
+
+		if (scene.get())
+		{
+			scene->updateDescriptorSetsRecursive(VKTS_DESCRIPTOR_SET_COUNT, writeDescriptorSets);
+		}
+
+		for (int32_t i = 0; i < (int32_t)swapchainImagesCount; i++)
+		{
+			if (!buildCmdBuffer(i))
+			{
+				return VK_FALSE;
+			}
+		}
+	}
 
 	return VK_TRUE;
 }
@@ -2309,6 +2321,16 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 //
 void Example::terminate(const vkts::IUpdateThreadContext& updateContext)
 {
+	if (loadTask.get() && !sceneLoaded)
+	{
+		vkts::ITaskSP executedTask;
+
+		// Wait, until finished.
+		updateContext.receiveExecutedTask(executedTask);
+
+		loadTask = ILoadTaskSP();
+	}
+
 	if (initialResources.get())
 	{
 		if (initialResources->getDevice().get())

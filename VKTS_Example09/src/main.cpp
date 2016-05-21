@@ -92,6 +92,20 @@ int main()
 	vkts::logSetLevel(VKTS_LOG_INFO);
 
 	//
+	// Set task executors.
+	//
+
+	// Set one task executor for parallel loading of the scene.
+	if (!vkts::engineSetTaskExecutorCount(1))
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Main: Could not set task executors.");
+
+		terminateApp();
+
+		return -1;
+	}
+
+	//
 
 	VkResult result;
 

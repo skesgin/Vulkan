@@ -29,6 +29,8 @@
 
 #include <vkts/vkts.hpp>
 
+#include "LoadTask.hpp"
+
 #define VKTS_EXAMPLE_NAME "Example09"
 
 #define VKTS_NUMBER_DYNAMIC_STATES 2
@@ -52,8 +54,6 @@
 #define VKTS_STANDARD_VERTEX_SHADER_NAME 			"shader/SPIR/V/phong_shadow.vert.spv"
 #define VKTS_STANDARD_FRAGMENT_SHADER_NAME 			"shader/SPIR/V/phong_shadow.frag.spv"
 #define VKTS_STANDARD_SHADOW_FRAGMENT_SHADER_NAME	"shader/SPIR/V/phong_write_shadow.frag.spv"
-
-#define VKTS_SCENE_NAME "transport_shuttle/transport_shuttle.vkts"
 
 #define VKTS_DESCRIPTOR_SET_COUNT (VKTS_BINDING_UNIFORM_PHONG_NO_DISPLACEMENT_BINDING_COUNT + VKTS_BINDING_UNIFORM_TRANSFORM_BINDING_COUNT + VKTS_BINDING_UNIFORM_LIGHTING_BINDING_COUNT + VKTS_BINDING_UNIFORM_BONES_BINDING_COUNT + VKTS_BINDING_UNIFORM_SHADOW_BINDING_COUNT)
 
@@ -100,6 +100,9 @@ private:
 
 	vkts::IPipelineLayoutSP pipelineLayout;
 
+	ILoadTaskSP loadTask;
+
+	VkBool32 sceneLoaded;
 	vkts::IContextSP sceneContext;
 	vkts::ISceneSP scene;
 
@@ -146,8 +149,6 @@ private:
 	VkBool32 buildSwapchainImageView(const int32_t usedBuffer);
 
 	VkBool32 updateDescriptorSets();
-
-	VkBool32 buildScene(const vkts::ICommandBuffersSP& cmdBuffer);
 
 	VkBool32 buildShadowSampler();
 

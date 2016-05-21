@@ -115,7 +115,7 @@ public:
 
     virtual VkBool32 sendTask(const ITaskSP& task) const = 0;
 
-    virtual VkBool32 receiveExecutedTask(ITaskSP& task) const = 0;
+    virtual VkBool32 receiveExecutedTask(ITaskSP& task, const VkBool32 wait = VK_TRUE) const = 0;
 
     virtual void resetSendTasks() const = 0;
 

@@ -150,7 +150,7 @@ public:
 
     virtual VkBool32 sendTask(const ITaskSP& task) const override;
 
-    virtual VkBool32 receiveExecutedTask(ITaskSP& task) const override;
+    virtual VkBool32 receiveExecutedTask(ITaskSP& task, const VkBool32 wait = VK_TRUE) const override;
 
     virtual void resetSendTasks() const override;
 

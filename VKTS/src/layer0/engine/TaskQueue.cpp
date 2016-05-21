@@ -123,11 +123,21 @@ VkBool32 TaskQueue::addTask(const ITaskSP& task)
     return VK_TRUE;
 }
 
-VkBool32 TaskQueue::receiveTask(ITaskSP& task)
+VkBool32 TaskQueue::receiveTask(ITaskSP& task, const VkBool32 wait)
 {
     TaskQueueElement* taskQueueElement = nullptr;
 
-    queue.waitAndTake(taskQueueElement);
+    if (wait)
+    {
+    	queue.waitAndTake(taskQueueElement);
+    }
+    else
+    {
+    	if (!queue.take(taskQueueElement))
+    	{
+    		return VK_FALSE;
+    	}
+    }
 
     if (!taskQueueElement)
     {

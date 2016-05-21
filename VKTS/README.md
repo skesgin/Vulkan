@@ -82,6 +82,7 @@ Changelog:
 
 05/21/2016
 - Added disable/enable of cache.
+- Added feature to poll for finished tasks.
 
 05/20/2016
 - Fixed/improved image barrier.

@@ -96,7 +96,7 @@ public:
 
     VkBool32 addTask(const ITaskSP& task);
 
-    VkBool32 receiveTask(ITaskSP& task);
+    VkBool32 receiveTask(ITaskSP& task, const VkBool32 wait = VK_TRUE);
 
     void reset();
 

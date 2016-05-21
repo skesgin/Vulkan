@@ -344,14 +344,14 @@ VkBool32 UpdateThreadContext::sendTask(const ITaskSP& task) const
     return sendTaskQueue->addTask(task);
 }
 
-VkBool32 UpdateThreadContext::receiveExecutedTask(ITaskSP& task) const
+VkBool32 UpdateThreadContext::receiveExecutedTask(ITaskSP& task, const VkBool32 wait) const
 {
     if (!executedTaskQueue.get())
     {
         return VK_FALSE;
     }
 
-    return executedTaskQueue->receiveTask(task);
+    return executedTaskQueue->receiveTask(task, wait);
 }
 
 void UpdateThreadContext::resetSendTasks() const
