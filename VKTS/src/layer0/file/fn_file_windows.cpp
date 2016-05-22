@@ -46,6 +46,8 @@ VkBool32 VKTS_APIENTRY _fileCreateDirectory(const char* directory)
 
 	std::string foldersToCreate = std::string(directory);
 
+	DWORD fileAttributes;
+
 	while (foldersToCreate.length())
 	{
 		auto lastSlash = foldersToCreate.find('/');
@@ -61,6 +63,13 @@ VkBool32 VKTS_APIENTRY _fileCreateDirectory(const char* directory)
 			targetDirectory += foldersToCreate;
 
 			foldersToCreate = "";
+		}
+
+		fileAttributes = GetFileAttributes(targetDirectory.c_str());
+
+		if (fileAttributes != INVALID_FILE_ATTRIBUTES && (fileAttributes & FILE_ATTRIBUTE_DIRECTORY))
+		{
+			continue;
 		}
 
 		CreateDirectory(targetDirectory.c_str(), NULL);

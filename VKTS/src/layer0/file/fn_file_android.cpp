@@ -81,10 +81,19 @@ VkBool32 VKTS_APIENTRY _filePrepareLoadBinary(const char* filename)
 
 	AAssetManager* assetManager = androidApp->activity->assetManager;
 
+    if (!assetManager)
+    {
+		vkts::logPrint(VKTS_LOG_ERROR, "File: No asset manager.");
+
+		return VK_FALSE;
+    }
+
     AAsset* sourceAsset = AAssetManager_open(assetManager, filename, AASSET_MODE_BUFFER);
 
     if (!sourceAsset)
     {
+		// No output by purpose.
+		
 		return VK_FALSE;
     }
 
@@ -115,6 +124,8 @@ VkBool32 VKTS_APIENTRY _filePrepareLoadBinary(const char* filename)
 
 	if (!targetAsset)
 	{
+		vkts::logPrint(VKTS_LOG_ERROR, "File: No target asset.");
+
 		AAsset_close(sourceAsset);
 
 		return VK_FALSE;
@@ -183,6 +194,8 @@ VkBool32 VKTS_APIENTRY _fileCreateDirectory(const char* directory)
 	//
 
 	std::string foldersToCreate = std::string(directory);
+	
+	struct stat sb;
 
 	while (foldersToCreate.length())
 	{
@@ -199,6 +212,11 @@ VkBool32 VKTS_APIENTRY _fileCreateDirectory(const char* directory)
 			targetDirectory += foldersToCreate + "/";
 
 			foldersToCreate = "";
+		}
+		
+		if (stat(targetDirectory.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode))
+		{
+			continue;
 		}
 
 		mkdir(targetDirectory.c_str(), S_IRWXU | S_IRWXG | (S_IROTH | S_IXOTH));
