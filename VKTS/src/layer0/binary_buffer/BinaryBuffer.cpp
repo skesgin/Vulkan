@@ -75,6 +75,15 @@ BinaryBuffer::BinaryBuffer(const uint8_t* data, const size_t size) :
     }
 }
 
+BinaryBuffer::BinaryBuffer(uint8_t* data, const size_t size) :
+    IBinaryBuffer(), data(data), size(size), pos(0)
+{
+    if (!this->data || size == 0)
+    {
+        reset();
+    }
+}
+
 BinaryBuffer::~BinaryBuffer()
 {
     reset();
@@ -174,6 +183,7 @@ size_t BinaryBuffer::read(void* ptr, const size_t sizeElement, const size_t coun
     }
 
     size_t bytesRead = sizeElement * countElement;
+
     bytesRead = glm::min(bytesRead, size - pos);
 
     size_t countElementRead = bytesRead / sizeElement;
@@ -201,9 +211,9 @@ size_t BinaryBuffer::write(const void* ptr, const size_t sizeElement, const size
 
     size_t bytesWrite = sizeElement * countElement;
 
-    if (pos >= size)
+    if (pos + bytesWrite > size)
     {
-        uint8_t* tempData = new uint8_t[size + bytesWrite];
+        uint8_t* tempData = new uint8_t[pos + bytesWrite];
 
         if (!tempData)
         {
@@ -212,14 +222,12 @@ size_t BinaryBuffer::write(const void* ptr, const size_t sizeElement, const size
 
         memcpy(tempData, data, size);
 
-        size += bytesWrite;
+        size = pos + bytesWrite;
 
         delete[] data;
 
         data = tempData;
     }
-
-    bytesWrite = glm::min(bytesWrite, size - pos);
 
     size_t countElementWrite = bytesWrite / sizeElement;
 

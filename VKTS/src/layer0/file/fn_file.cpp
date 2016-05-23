@@ -161,29 +161,29 @@ IBinaryBufferSP VKTS_APIENTRY fileLoadBinary(const char* filename)
 
     auto elementsRead = fread(data, 1, size, file);
 
+    fclose(file);
+
+    //
+
     if (elementsRead != size)
     {
         delete[] data;
 
-        fclose(file);
-
         return IBinaryBufferSP();
     }
-
-    fclose(file);
 
     auto buffer = IBinaryBufferSP(new BinaryBuffer(data, size));
 
     //
 
-	if (buffer.get() && buffer->getSize() != size)
+	if (!buffer.get() || (buffer.get() && buffer->getSize() != size))
 	{
-		buffer = IBinaryBufferSP();
+	    delete[] data;
+
+	    return IBinaryBufferSP();
 	}
 
 	//
-
-    delete[] data;
 
     return buffer;
 }

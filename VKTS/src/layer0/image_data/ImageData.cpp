@@ -58,7 +58,7 @@ ImageData::ImageData(const std::string& name, const VkImageType imageType, const
 {
     buffer = IBinaryBufferSP(new BinaryBuffer(data, size));
 
-    if (!buffer.get() || !buffer->getData() || buffer->getSize() != size)
+    if (!buffer.get() || buffer->getSize() != size)
     {
         reset();
     }
@@ -311,7 +311,7 @@ void ImageData::setTexel(const glm::vec4& rgba, const uint32_t x, const uint32_t
             texelStart[currentTargetChannelIndex] = (uint8_t)(rgba[currentChannelIndex] * 255.0f);
         }
 
-        buffer->write(texelStart, sizeof(uint8_t), numberChannels);
+        buffer->write(texelStart, 1, numberChannels);
     }
     else if (SFLOAT)
     {
@@ -341,7 +341,7 @@ glm::vec4 ImageData::getTexel(const uint32_t x, const uint32_t y, const uint32_t
     {
         uint8_t texelStart[4];
 
-        buffer->read(texelStart, sizeof(uint8_t), numberChannels);
+        buffer->read(texelStart, 1, numberChannels);
 
         int32_t currentTargetChannelIndex;
 

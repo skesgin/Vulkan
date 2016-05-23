@@ -50,6 +50,7 @@ public:
     BinaryBuffer();
     BinaryBuffer(const size_t size);
     BinaryBuffer(const uint8_t* data, const size_t size);
+    BinaryBuffer(uint8_t* data, const size_t size);
     BinaryBuffer(const BinaryBuffer& other) = delete;
     BinaryBuffer(BinaryBuffer&& other) = delete;
     virtual ~BinaryBuffer();

@@ -1602,7 +1602,7 @@ IImageDataSP VKTS_APIENTRY imageDataMerge(const SmartPointerVector<IImageDataSP>
 
     for (size_t i = 0; i < sourceImages.size(); i++)
     {
-        mergedImageData->write(sourceImages[i]->getData(), sizeof(uint8_t), sourceImages[i]->getSize());
+        mergedImageData->write(sourceImages[i]->getData(), 1, sourceImages[i]->getSize());
 
         offset += sourceImages[i]->getSize();
     }
