@@ -270,7 +270,7 @@ void SubMesh::updateDescriptorSetsRecursive(const std::string& nodeName, const u
 {
     if (bsdfMaterial.get())
     {
-        // TODO: Add again.
+    	bsdfMaterial->updateDescriptorSetsRecursive(nodeName, allWriteDescriptorSetsCount, allWriteDescriptorSets);
     }
     else if (phongMaterial.get())
     {
@@ -347,7 +347,8 @@ void SubMesh::bindDrawIndexedRecursive(const std::string& nodeName, const IComma
 
     if (bsdfMaterial.get())
     {
-    	// TODO: Add again.
+    	// Pipeline is bound inside the material.
+    	bsdfMaterial->bindDrawIndexedRecursive(nodeName,cmdBuffer, IGraphicsPipelineSP(), renderOverwrite, bufferIndex);
     }
     else if (phongMaterial.get())
     {

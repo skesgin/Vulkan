@@ -37,7 +37,7 @@ BSDFMaterial::BSDFMaterial() :
 BSDFMaterial::BSDFMaterial(const BSDFMaterial& other) :
     IBSDFMaterial(), name(other.name), fragmentShader(other.fragmentShader), attributes(other.attributes), allTextures(other.allTextures), descriptorPool(), descriptorSetLayout(), descriptorSets()
 {
-	// TODO: Clone, as done in phong.
+	// TODO: Clone, as done in phong material.
 }
 
 BSDFMaterial::~BSDFMaterial()
@@ -128,6 +128,18 @@ IDescriptorSetsSP BSDFMaterial::getDescriptorSets() const
 void BSDFMaterial::setDescriptorSets(const IDescriptorSetsSP& descriptorSets)
 {
     this->descriptorSets = descriptorSets;
+}
+
+void BSDFMaterial::updateDescriptorSetsRecursive(const std::string& nodeName, const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets)
+{
+    // TODO: Implement.
+}
+
+void BSDFMaterial::bindDrawIndexedRecursive(const std::string& nodeName, const ICommandBuffersSP& cmdBuffer, const IGraphicsPipelineSP& graphicsPipeline, const overwrite* renderOverwrite, const uint32_t bufferIndex) const
+{
+	// TODO: Bind graphics pipeline.
+
+    // TODO: Implement, as done in phong.
 }
 
 //
