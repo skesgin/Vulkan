@@ -34,9 +34,15 @@ namespace vkts
 
 VKTS_APICALL VkBool32 VKTS_APIENTRY profileInit();
 
-VKTS_APICALL VkBool32 VKTS_APIENTRY profileGetUsage(float& usage, const uint32_t cpu);
+VKTS_APICALL VkBool32 VKTS_APIENTRY profileGetCpuUsage(float& usage, const uint32_t cpu);
 
-VKTS_APICALL VkBool32 VKTS_APIENTRY profileGetFps(uint32_t& fps, const double deltaTime);
+VKTS_APICALL VkBool32 VKTS_APIENTRY profileGetCpuUsage(float& usage);
+
+VKTS_APICALL VkBool32 VKTS_APIENTRY profileApplicationGetCpuUsage(float& usage);
+
+VKTS_APICALL VkBool32 VKTS_APIENTRY profileApplicationGetRam(uint64_t& ram);
+
+VKTS_APICALL VkBool32 VKTS_APIENTRY profileApplicationGetFps(uint32_t& fps, const double deltaTime);
 
 VKTS_APICALL void VKTS_APIENTRY profileTerminate();
 

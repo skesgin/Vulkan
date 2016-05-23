@@ -31,6 +31,7 @@
 #include <windows.h>
 
 #include <pdh.h>
+#include <Psapi.h>
 
 namespace vkts
 {
@@ -38,6 +39,13 @@ namespace vkts
 static PDH_HQUERY g_query;
 
 static PDH_HCOUNTER g_counter[VKTS_MAX_QUERY_CPU];
+
+static HANDLE g_process = INVALID_HANDLE_VALUE;
+
+static ULARGE_INTEGER g_lastTime;
+
+static ULARGE_INTEGER g_lastKernelTime;
+static ULARGE_INTEGER g_lastUserTime;
 
 VkBool32 VKTS_APIENTRY _profileInit()
 {
@@ -50,7 +58,7 @@ VkBool32 VKTS_APIENTRY _profileInit()
 
 	char counterString[VKTS_MAX_CPU_STRING];
 
-	for (uint32_t cpu = 0; cpu < glm::max(processorGetNumber(), VKTS_MAX_QUERY_CPU); cpu++)
+	for (uint32_t cpu = 0; cpu < glm::min(processorGetNumber(), VKTS_MAX_QUERY_CPU); cpu++)
 	{
 		sprintf(counterString, "\\Processor(%u)\\%% Processor Time", cpu);
 
@@ -69,10 +77,37 @@ VkBool32 VKTS_APIENTRY _profileInit()
 		return VK_FALSE;
 	}
 
+	//
+
+	g_process = GetCurrentProcess();
+
+	if (g_process == INVALID_HANDLE_VALUE)
+	{
+		return VK_FALSE;
+	}
+
+	FILETIME time;
+
+	FILETIME creationTime;
+	FILETIME exitTime;
+	FILETIME kernelTime;
+	FILETIME userTime;
+
+	GetSystemTimeAsFileTime(&time);
+	memcpy(&g_lastTime, &time, sizeof(FILETIME));
+
+	if (!GetProcessTimes(g_process, &creationTime, &exitTime, &kernelTime, &userTime))
+	{
+		return VK_FALSE;
+	}
+
+	memcpy(&g_lastKernelTime, &kernelTime, sizeof(FILETIME));
+	memcpy(&g_lastUserTime, &userTime, sizeof(FILETIME));
+
     return VK_TRUE;
 }
 
-VkBool32 VKTS_APIENTRY _profileGetUsage(float& usage, const uint32_t cpu)
+VkBool32 VKTS_APIENTRY _profileGetCpuUsage(float& usage, const uint32_t cpu)
 {
 	if (cpu >= processorGetNumber())
 	{
@@ -100,8 +135,72 @@ VkBool32 VKTS_APIENTRY _profileGetUsage(float& usage, const uint32_t cpu)
 	return VK_TRUE;
 }
 
+VkBool32 VKTS_APIENTRY _profileApplicationGetCpuUsage(float& usage)
+{
+	FILETIME time;
+
+	FILETIME creationTime;
+	FILETIME exitTime;
+	FILETIME kernelTime;
+	FILETIME userTime;
+
+	ULARGE_INTEGER currentTime;
+
+	GetSystemTimeAsFileTime(&time);
+	memcpy(&currentTime, &time, sizeof(FILETIME));
+
+	auto deltaTime = currentTime.QuadPart - g_lastTime.QuadPart;
+
+	if (deltaTime == 0)
+	{
+		return VK_FALSE;
+	}
+
+	if (!GetProcessTimes(g_process, &creationTime, &exitTime, &kernelTime, &userTime))
+	{
+		return VK_FALSE;
+	}
+
+	ULARGE_INTEGER currentKernelTime;
+	ULARGE_INTEGER currentUserTime;
+
+	memcpy(&currentKernelTime, &kernelTime, sizeof(FILETIME));
+	memcpy(&currentUserTime, &userTime, sizeof(FILETIME));
+
+	//
+
+	usage = (float)(((currentKernelTime.QuadPart - g_lastKernelTime.QuadPart) + (currentUserTime.QuadPart - g_lastUserTime.QuadPart)) / deltaTime) / (float)processorGetNumber() * 100.0f;
+
+	//
+
+	g_lastTime = currentTime;
+
+	g_lastKernelTime = currentKernelTime;
+	g_lastUserTime = currentUserTime;
+
+	return VK_TRUE;
+}
+
+VkBool32 VKTS_APIENTRY _profileApplicationGetRam(uint64_t& ram)
+{
+	PROCESS_MEMORY_COUNTERS pmc;
+
+	if (!GetProcessMemoryInfo(g_process, &pmc, sizeof(pmc)))
+	{
+		return VK_FALSE;
+	}
+
+	ram = pmc.WorkingSetSize / 1024;
+
+	return VK_TRUE;
+}
+
 void VKTS_APIENTRY _profileTerminate()
 {
+	g_process = INVALID_HANDLE_VALUE;
+
+	//
+
 	for (uint32_t cpu = 0; cpu < processorGetNumber(); cpu++)
 	{
 		PdhRemoveCounter(&g_counter[cpu]);

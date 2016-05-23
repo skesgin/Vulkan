@@ -35,7 +35,7 @@ BSDFMaterial::BSDFMaterial() :
 }
 
 BSDFMaterial::BSDFMaterial(const BSDFMaterial& other) :
-    IBSDFMaterial(), name(other.name), fragmentShader(other.fragmentShader), attributes(other.attributes), allTextures(other.allTextures), descriptorPool(), descriptorSetLayout(), descriptorSets()
+    IBSDFMaterial(), name(other.name), fragmentShader(other.fragmentShader), attributes(other.attributes), allTextures(other.allTextures), descriptorPool(), descriptorSetLayout(), descriptorSets(), graphicsPipeline()
 {
 	// TODO: Clone, as done in phong material.
 }
@@ -130,6 +130,16 @@ void BSDFMaterial::setDescriptorSets(const IDescriptorSetsSP& descriptorSets)
     this->descriptorSets = descriptorSets;
 }
 
+IGraphicsPipelineSP BSDFMaterial::getGraphicsPipeline() const
+{
+    return graphicsPipeline;
+}
+
+void BSDFMaterial::setGraphicsPipeline(const IGraphicsPipelineSP& graphicsPipeline)
+{
+    this->graphicsPipeline = graphicsPipeline;
+}
+
 void BSDFMaterial::updateDescriptorSetsRecursive(const std::string& nodeName, const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets)
 {
     // TODO: Implement.
@@ -137,7 +147,23 @@ void BSDFMaterial::updateDescriptorSetsRecursive(const std::string& nodeName, co
 
 void BSDFMaterial::bindDrawIndexedRecursive(const std::string& nodeName, const ICommandBuffersSP& cmdBuffer, const IGraphicsPipelineSP& graphicsPipeline, const overwrite* renderOverwrite, const uint32_t bufferIndex) const
 {
-	// TODO: Bind graphics pipeline.
+    const overwrite* currentOverwrite = renderOverwrite;
+    while (currentOverwrite)
+    {
+    	if (!currentOverwrite->materialBindDrawIndexedRecursive(*this, cmdBuffer, graphicsPipeline, bufferIndex))
+    	{
+    		return;
+    	}
+
+    	currentOverwrite = currentOverwrite->getNextOverwrite();
+    }
+
+	if (!graphicsPipeline.get())
+	{
+		return;
+	}
+
+	vkCmdBindPipeline(cmdBuffer->getCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline->getPipeline());
 
     // TODO: Implement, as done in phong.
 }

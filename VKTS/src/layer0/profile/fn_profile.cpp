@@ -42,12 +42,43 @@ VkBool32 VKTS_APIENTRY profileInit()
     return _profileInit();
 }
 
-VkBool32 VKTS_APIENTRY profileGetUsage(float& usage, const uint32_t cpu)
+VkBool32 VKTS_APIENTRY profileGetCpuUsage(float& usage, const uint32_t cpu)
 {
-	return _profileGetUsage(usage, cpu);
+	return _profileGetCpuUsage(usage, cpu);
 }
 
-VkBool32 VKTS_APIENTRY profileGetFps(uint32_t& fps, const double deltaTime)
+VkBool32 VKTS_APIENTRY profileGetCpuUsage(float& usage)
+{
+	usage = 0.0f;
+
+	float currentUsage = 0.0f;
+
+	for (uint32_t cpu = 0; cpu < processorGetNumber(); cpu++)
+	{
+		if (!_profileGetCpuUsage(currentUsage, cpu))
+		{
+			return VK_FALSE;
+		}
+
+		usage += currentUsage;
+	}
+
+	usage /= (float)processorGetNumber();
+
+	return VK_TRUE;
+}
+
+VkBool32 VKTS_APIENTRY profileApplicationGetCpuUsage(float& usage)
+{
+	return _profileApplicationGetCpuUsage(usage);
+}
+
+VkBool32 VKTS_APIENTRY profileApplicationGetRam(uint64_t& ram)
+{
+	return _profileApplicationGetRam(ram);
+}
+
+VkBool32 VKTS_APIENTRY profileApplicationGetFps(uint32_t& fps, const double deltaTime)
 {
 	g_totalTime += deltaTime;
 

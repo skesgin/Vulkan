@@ -83,6 +83,7 @@ Changelog:
 05/23/2016
 - Improved performance in binary buffer and added better creation checks.
 - Fixed context class.
+- Added cpu load and ram usage query per application.
 
 05/21/2016
 - Added disable/enable of cache.

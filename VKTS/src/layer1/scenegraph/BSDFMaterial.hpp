@@ -49,6 +49,8 @@ protected:
     IDescriptorSetLayoutSP descriptorSetLayout;
     IDescriptorSetsSP descriptorSets;
 
+    IGraphicsPipelineSP graphicsPipeline;
+
 public:
 
     BSDFMaterial();
@@ -94,6 +96,10 @@ public:
     virtual IDescriptorSetsSP getDescriptorSets() const override;
 
     virtual void setDescriptorSets(const IDescriptorSetsSP& descriptorSets) override;
+
+    virtual IGraphicsPipelineSP getGraphicsPipeline() const override;
+
+    virtual void setGraphicsPipeline(const IGraphicsPipelineSP& graphicsPipeline) override;
 
     // TODO: Add methods.
 

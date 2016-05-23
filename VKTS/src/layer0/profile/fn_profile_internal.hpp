@@ -31,14 +31,20 @@
 
 #define VKTS_MAX_QUERY_CPU	128u
 
-#define VKTS_MAX_CPU_STRING	64
+#define VKTS_MAX_CPU_STRING 128
+
+#define VKTS_MAX_RAM_STRING	128
 
 namespace vkts
 {
 
 VKTS_APICALL VkBool32 VKTS_APIENTRY _profileInit();
 
-VKTS_APICALL VkBool32 VKTS_APIENTRY _profileGetUsage(float& usage, const uint32_t cpu);
+VKTS_APICALL VkBool32 VKTS_APIENTRY _profileGetCpuUsage(float& usage, const uint32_t cpu);
+
+VKTS_APICALL VkBool32 VKTS_APIENTRY _profileApplicationGetCpuUsage(float& usage);
+
+VKTS_APICALL VkBool32 VKTS_APIENTRY _profileApplicationGetRam(uint64_t& ram);
 
 VKTS_APICALL void VKTS_APIENTRY _profileTerminate();
 
