@@ -51,22 +51,24 @@ Features:
 
 - Platform abstraction.
 - Logging functions.
+- Profiling functions.
 - Matrix, plane, sphere and quaternion classes and functions.
 - Vulkan wrapper objects and factory functions.
 - Basic multi threaded engine including synchronization, time and CPU querying.   
 - Basic native display handling including multi display support.
 - Basic native window handling including fullscreen support.
 - Basic input handling: Gamepad, keyboard and mouse.
-- None visual configuration for console/compute applications.
+- None visual configuration for console/compute only applications.
 - Loading and saving of text, binary and image files (TGA and HDR).
 - VKTS scene file format:  
     * 3D objects (incl. node hierarchy)  
     * Meshes (incl. sub meshes)  
     * Materials (Phong and BSDF)  
     * Textures (TGA and HDR)  
-    * Animations (incl. node and armature)  
-- Bitmap font rendering.
+    * Animations (incl. node and armature) 
 - Blender Python exporter for the VKTS scene file format.
+- Input controller for cameras and 3D objects. 
+- Bitmap font rendering.
 - GLSL to SPIR-V build script.
 - Interpolator and converter for constant, linear and bezier key frame data.
 
