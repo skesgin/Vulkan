@@ -164,7 +164,7 @@ VkBool32 VKTS_APIENTRY wsiInitDeviceExtensions(const VkDevice device)
 
 VkResult VKTS_APIENTRY wsiGetPhysicalDeviceSurfaceSupport(const VkPhysicalDevice physicalDevice, const VkSurfaceKHR surface, const uint32_t queueFamilyIndexCount, std::vector<VkBool32>& supported)
 {
-    VkResult result;
+    VkResult result = VK_SUCCESS;
 
     //
 

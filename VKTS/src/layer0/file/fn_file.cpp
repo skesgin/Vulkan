@@ -174,6 +174,15 @@ IBinaryBufferSP VKTS_APIENTRY fileLoadBinary(const char* filename)
 
     auto buffer = IBinaryBufferSP(new BinaryBuffer(data, size));
 
+    //
+
+	if (buffer.get() && buffer->getSize() != size)
+	{
+		buffer = IBinaryBufferSP();
+	}
+
+	//
+
     delete[] data;
 
     return buffer;

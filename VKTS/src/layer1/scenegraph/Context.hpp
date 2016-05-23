@@ -81,20 +81,15 @@ private:
     SmartPointerVector<IDeviceMemorySP> allStageDeviceMemories;
 
     template<class S, class T>
+    VkBool32 contains(const S& key, const SmartPointerMap<S, T>& map) const
+    {
+    	return map.contains(key);
+    }
+
+    template<class S, class T>
     const T& get(const S& key, const SmartPointerMap<S, T>& map) const
     {
-        static T empty;
-
-        try
-        {
-            return map[key];
-        }
-        catch (const std::out_of_range& outOfRange)
-        {
-            logPrint(VKTS_LOG_SEVERE, "Context: Out of Range error '%s'", outOfRange.what());
-        }
-
-        return empty;
+    	return map[key];
     }
 
     template<class S, class T>

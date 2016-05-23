@@ -2181,9 +2181,9 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
 
                 if (totalSize > 0)
                 {
-                    auto vertexBinaryBuffer = IBinaryBufferSP(new BinaryBuffer((size_t) totalSize));
+                    auto vertexBinaryBuffer = IBinaryBufferSP(new BinaryBuffer((size_t)totalSize));
 
-                    if (!vertexBinaryBuffer.get())
+                    if (!vertexBinaryBuffer.get() || vertexBinaryBuffer->getSize() != (size_t)totalSize)
                     {
                         logPrint(VKTS_LOG_ERROR, "Could not create vertex binary buffer");
 
@@ -2277,9 +2277,11 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
 
                 if (indices.size() > 0)
                 {
-                    auto indicesBinaryBuffer = IBinaryBufferSP(new BinaryBuffer(reinterpret_cast<const uint8_t*>(&indices[0]), sizeof(int32_t) * subMesh->getNumberIndices()));
+                	size_t size = sizeof(int32_t) * subMesh->getNumberIndices();
 
-                    if (!indicesBinaryBuffer.get())
+                    auto indicesBinaryBuffer = IBinaryBufferSP(new BinaryBuffer(reinterpret_cast<const uint8_t*>(&indices[0]), size));
+
+                    if (!indicesBinaryBuffer.get() || indicesBinaryBuffer->getSize() != size)
                     {
                         logPrint(VKTS_LOG_ERROR, "Could not create indices binary buffer");
 

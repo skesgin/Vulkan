@@ -80,6 +80,10 @@ How to build:
 Changelog:
 ----------
 
+05/23/2016
+- Improved performance in binary buffer and added better creation checks.
+- Fixed context class.
+
 05/21/2016
 - Added disable/enable of cache.
 - Added feature to poll for finished tasks.

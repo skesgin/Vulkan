@@ -58,7 +58,7 @@ ImageData::ImageData(const std::string& name, const VkImageType imageType, const
 {
     buffer = IBinaryBufferSP(new BinaryBuffer(data, size));
 
-    if (!buffer.get() || !buffer->getData())
+    if (!buffer.get() || !buffer->getData() || buffer->getSize() != size)
     {
         reset();
     }

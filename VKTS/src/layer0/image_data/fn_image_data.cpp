@@ -453,7 +453,7 @@ static IImageDataSP imageDataLoadHdr(const std::string& name, const IBinaryBuffe
 
     char tempBuffer[256];
 
-    if (buffer->read(tempBuffer, 10, 1) != 1)
+    if (buffer->read(tempBuffer, 1, 10) != 10)
     {
         return IImageDataSP();
     }
@@ -723,10 +723,12 @@ static IBinaryBufferSP imageDataSaveTga(const IImageDataSP& imageData)
 
     size_t numberChannels = bitsPerPixel / 8;
 
-    // 18 bytes is the size of the header.
-    IBinaryBufferSP buffer = IBinaryBufferSP(new BinaryBuffer(imageData->getWidth() * imageData->getHeight() * imageData->getDepth() * numberChannels + 18));
+    size_t size = imageData->getWidth() * imageData->getHeight() * imageData->getDepth() * numberChannels + 18;
 
-    if (!buffer.get())
+    // 18 bytes is the size of the header.
+    IBinaryBufferSP buffer = IBinaryBufferSP(new BinaryBuffer(size));
+
+    if (!buffer.get() || buffer->getSize() != size)
     {
         return IBinaryBufferSP();
     }
@@ -824,10 +826,12 @@ static IBinaryBufferSP imageDataSaveHdr(const IImageDataSP& imageData)
 
     size_t numberChannels = 3;
 
-    // 52 bytes is the size of the header. RGB, where each channel is 4 bytes, is encoded in total of 4 bytes.
-    IBinaryBufferSP buffer = IBinaryBufferSP(new BinaryBuffer((imageData->getWidth() * imageData->getHeight() * imageData->getDepth()) * 4 * sizeof(uint8_t) + VKTS_HDR_HEADER_SIZE + strlen(tempBuffer)));
+    size_t size = (imageData->getWidth() * imageData->getHeight() * imageData->getDepth()) * 4 * sizeof(uint8_t) + VKTS_HDR_HEADER_SIZE + strlen(tempBuffer);
 
-    if (!buffer.get())
+    // 52 bytes is the size of the header. RGB, where each channel is 4 bytes, is encoded in total of 4 bytes.
+    IBinaryBufferSP buffer = IBinaryBufferSP(new BinaryBuffer(size));
+
+    if (!buffer.get() || buffer->getSize() != size)
     {
         return IBinaryBufferSP();
     }
@@ -1589,7 +1593,7 @@ IImageDataSP VKTS_APIENTRY imageDataMerge(const SmartPointerVector<IImageDataSP>
 
     auto mergedImageData = IBinaryBufferSP(new BinaryBuffer(totalSize));
 
-    if (!mergedImageData.get())
+    if (!mergedImageData.get() || mergedImageData->getSize() != totalSize)
     {
         return IImageDataSP();
     }

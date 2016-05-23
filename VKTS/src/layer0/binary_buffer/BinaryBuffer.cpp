@@ -56,11 +56,11 @@ BinaryBuffer::BinaryBuffer() :
 BinaryBuffer::BinaryBuffer(const size_t size) :
     IBinaryBuffer(), data(nullptr), size(size), pos(0)
 {
-    data = new uint8_t[size];
+    data = new uint8_t[this->size];
 
     if (!data)
     {
-        this->size = 0;
+        reset();
     }
 }
 
@@ -156,8 +156,7 @@ VkBool32 BinaryBuffer::seek(const int64_t offset, const VkTsSearch search)
     return VK_FALSE;
 }
 
-size_t BinaryBuffer::read(void* ptr, const size_t sizeElement,
-                          const size_t countElement)
+size_t BinaryBuffer::read(void* ptr, const size_t sizeElement, const size_t countElement)
 {
     if (!data)
     {
@@ -181,20 +180,14 @@ size_t BinaryBuffer::read(void* ptr, const size_t sizeElement,
 
     bytesRead = sizeElement * countElementRead;
 
-    uint8_t* dataPtr = static_cast<uint8_t*>(ptr);
+    memcpy(ptr, &data[pos], bytesRead);
 
-    for (size_t i = 0; i < bytesRead; i++)
-    {
-        dataPtr[i] = data[pos];
-
-        pos++;
-    }
+    pos += bytesRead;
 
     return countElementRead;
 }
 
-size_t BinaryBuffer::write(const void* ptr, const size_t sizeElement,
-                           const size_t countElement)
+size_t BinaryBuffer::write(const void* ptr, const size_t sizeElement, const size_t countElement)
 {
     if (!data)
     {
@@ -232,14 +225,9 @@ size_t BinaryBuffer::write(const void* ptr, const size_t sizeElement,
 
     bytesWrite = sizeElement * countElementWrite;
 
-    const uint8_t* dataPtr = static_cast<const uint8_t*>(ptr);
+    memcpy(&data[pos], ptr, bytesWrite);
 
-    for (size_t i = 0; i < bytesWrite; i++)
-    {
-        data[pos] = dataPtr[i];
-
-        pos++;
-    }
+    pos += bytesWrite;
 
     return countElementWrite;
 }
@@ -262,7 +250,14 @@ VkBool32 BinaryBuffer::copy(void* data) const
 
 IBinaryBufferSP BinaryBuffer::clone() const
 {
-    return IBinaryBufferSP(new BinaryBuffer(data, size));
+	auto result = IBinaryBufferSP(new BinaryBuffer(data, size));
+
+	if (result.get() && result->getSize() != size)
+	{
+		return IBinaryBufferSP();
+	}
+
+    return result;
 }
 
 } /* namespace vkts */

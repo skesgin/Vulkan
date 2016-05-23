@@ -72,6 +72,13 @@ const IDescriptorSetLayoutSP& Context::getDescriptorSetLayout() const
 
 IObjectSP Context::useObject(const std::string& name) const
 {
+	if (!contains(name, allObjects))
+	{
+		return IObjectSP();
+	}
+
+	//
+
 	IObjectSP result = get(name, allObjects);
 
 	if (std::find(allUsedObjects.begin(), allUsedObjects.end(), name) != allUsedObjects.end())
@@ -116,6 +123,13 @@ VkBool32 Context::removeObject(const IObjectSP& object)
 
 IMeshSP Context::useMesh(const std::string& name) const
 {
+	if (!contains(name, allMeshes))
+	{
+		return IMeshSP();
+	}
+
+	//
+
     return get(name, allMeshes);
 }
 
@@ -141,6 +155,13 @@ VkBool32 Context::removeMesh(const IMeshSP& mesh)
 
 ISubMeshSP Context::useSubMesh(const std::string& name) const
 {
+	if (!contains(name, allSubMeshes))
+	{
+		return ISubMeshSP();
+	}
+
+	//
+
     return get(name, allSubMeshes);
 }
 
@@ -168,6 +189,13 @@ VkBool32 Context::removeSubMesh(const ISubMeshSP& subMesh)
 
 IAnimationSP Context::useAnimation(const std::string& name) const
 {
+	if (!contains(name, allAnimations))
+	{
+		return IAnimationSP();
+	}
+
+	//
+
     return get(name, allAnimations);
 }
 
@@ -193,6 +221,13 @@ VkBool32 Context::removeAnimation(const IAnimationSP& animation)
 
 IChannelSP Context::useChannel(const std::string& name) const
 {
+	if (!contains(name, allChannels))
+	{
+		return IChannelSP();
+	}
+
+	//
+
     return get(name, allChannels);
 }
 
@@ -220,12 +255,14 @@ VkBool32 Context::removeChannel(const IChannelSP& channel)
 
 IBSDFMaterialSP Context::useBSDFMaterial(const std::string& name) const
 {
-	IBSDFMaterialSP result = get(name, allBSDFMaterials);
-
-	if (!result.get())
+	if (!contains(name, allBSDFMaterials))
 	{
 		return IBSDFMaterialSP();
 	}
+
+	//
+
+	IBSDFMaterialSP result = get(name, allBSDFMaterials);
 
 	if (std::find(allUsedBSDFMaterials.begin(), allUsedBSDFMaterials.end(), name) != allUsedBSDFMaterials.end())
 	{
@@ -272,12 +309,14 @@ VkBool32 Context::removeBSDFMaterial(const IBSDFMaterialSP& material)
 
 IPhongMaterialSP Context::usePhongMaterial(const std::string& name) const
 {
-	IPhongMaterialSP result = get(name, allPhongMaterials);
-
-	if (!result.get())
+	if (!contains(name, allPhongMaterials))
 	{
 		return IPhongMaterialSP();
 	}
+
+	//
+
+	IPhongMaterialSP result = get(name, allPhongMaterials);
 
 	if (std::find(allUsedPhongMaterials.begin(), allUsedPhongMaterials.end(), name) != allUsedPhongMaterials.end())
 	{
@@ -321,6 +360,13 @@ VkBool32 Context::removePhongMaterial(const IPhongMaterialSP& material)
 
 ITextureSP Context::useTexture(const std::string& name) const
 {
+	if (!contains(name, allTextures))
+	{
+		return ITextureSP();
+	}
+
+	//
+
     return get(name, allTextures);
 }
 
@@ -348,6 +394,13 @@ VkBool32 Context::removeTexture(const ITextureSP& texture)
 
 IMemoryImageSP Context::useMemoryImage(const std::string& name) const
 {
+	if (!contains(name, allMemoryImages))
+	{
+		return IMemoryImageSP();
+	}
+
+	//
+
     return get(name, allMemoryImages);
 }
 
@@ -375,6 +428,13 @@ VkBool32 Context::removeMemoryImage(const IMemoryImageSP& memoryImage)
 
 IImageDataSP Context::useImageData(const std::string& name) const
 {
+	if (!contains(name, allImageDatas))
+	{
+		return IImageDataSP();
+	}
+
+	//
+
     return get(name, allImageDatas);
 }
 
@@ -403,6 +463,13 @@ VkBool32 Context::removeImageData(const IImageDataSP& imageData)
 
 IShaderModuleSP Context::useShaderModule(const std::string& name) const
 {
+	if (!contains(name, allShaderModules))
+	{
+		return IShaderModuleSP();
+	}
+
+	//
+
     return get(name, allShaderModules);
 }
 

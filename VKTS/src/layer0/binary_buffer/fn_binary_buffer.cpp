@@ -38,7 +38,14 @@ IBinaryBufferSP VKTS_APIENTRY binaryBufferCreate(const uint8_t* data, const size
         return IBinaryBufferSP();
     }
 
-    return IBinaryBufferSP(new BinaryBuffer(data, size));
+    auto result = IBinaryBufferSP(new BinaryBuffer(data, size));
+
+	if (result.get() && result->getSize() != size)
+	{
+		return IBinaryBufferSP();
+	}
+
+    return result;
 }
 
 }
