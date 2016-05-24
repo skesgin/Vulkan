@@ -80,6 +80,8 @@ VkBool32 VKTS_APIENTRY _fileCreateDirectory(const char* directory)
 
 		if (fileAttributes != INVALID_FILE_ATTRIBUTES && (fileAttributes & FILE_ATTRIBUTE_DIRECTORY))
 		{
+			targetDirectory += "/";
+
 			continue;
 		}
 

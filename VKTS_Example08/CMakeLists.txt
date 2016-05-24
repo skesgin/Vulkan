@@ -48,6 +48,8 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
 		set(VKTS_LIB ${VKTS_COMPILER}/lib)
 		
+        add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+        
 	else ()
         
 		set(VKTS_COMPILER "GNU")

@@ -43,6 +43,8 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 		set(VKTS_COMPILER "MSVC")
 
 		set(VKTS_LIB ${VKTS_COMPILER}/lib)
+
+        add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 		
 	else ()
         

@@ -65,12 +65,12 @@ static VkBool32 profileGetCpuData()
 
 	for (uint32_t cpu = 0; cpu <= glm::min(processorGetNumber(), VKTS_MAX_QUERY_CPU); cpu++)
 	{
+		result = fscanf(file, "%*s %" SCNu64 " %" SCNu64 " %" SCNu64 " %" SCNu64 " %*u %*u %*u %*u %*u %*u", &currentCpuData.user, &currentCpuData.nice, &currentCpuData.system, &currentCpuData.idle);
+
 		if (cpu == 0)
 		{
 			continue;
 		}
-
-		result = fscanf(file, "%*s %" SCNu64 " %" SCNu64 " %" SCNu64 " %" SCNu64 " %*u %*u %*u %*u %*u %*u", &currentCpuData.user, &currentCpuData.nice, &currentCpuData.system, &currentCpuData.idle);
 
 		if (result == 4)
 		{
