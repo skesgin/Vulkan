@@ -117,6 +117,8 @@ public:
 
 	virtual float getLineHeight() const override;
 
+	virtual float getLineHeight(const float fontSize) const override;
+
 	virtual float getBase() const override;
 
 	virtual float getScaleWidth() const override;

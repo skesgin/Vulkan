@@ -40,13 +40,22 @@ VkBool32 VKTS_APIENTRY _fileCreateDirectory(const char* directory)
 		return VK_FALSE;
 	}
 
+	//
+
+	struct stat sb;
+
+	if (stat(directory, &sb) == 0 && S_ISDIR(sb.st_mode))
+	{
+		return VK_TRUE;
+	}
+
+	//
+
 	std::string targetDirectory = std::string(_fileGetBaseDirectory());
 
 	//
 
 	std::string foldersToCreate = std::string(directory);
-
-	struct stat sb;
 
 	while (foldersToCreate.length())
 	{

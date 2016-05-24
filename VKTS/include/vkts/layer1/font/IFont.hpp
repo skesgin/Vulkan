@@ -54,6 +54,8 @@ public:
 
 	virtual float getLineHeight() const = 0;
 
+	virtual float getLineHeight(const float fontSize) const = 0;
+
 	virtual float getBase() const = 0;
 
 	virtual float getScaleWidth() const = 0;

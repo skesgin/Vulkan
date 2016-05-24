@@ -63,8 +63,6 @@ VkBool32 VKTS_APIENTRY profileGetCpuUsage(float& usage)
 		usage += currentUsage;
 	}
 
-	usage /= (float)processorGetNumber();
-
 	return VK_TRUE;
 }
 
@@ -88,7 +86,7 @@ VkBool32 VKTS_APIENTRY profileApplicationGetFps(uint32_t& fps, const double delt
 	{
 		fps = g_fps;
 
-		g_totalTime = 0.0f;
+		g_totalTime = g_totalTime - 1.0;
 		g_fps = 0;
 
 		return VK_TRUE;

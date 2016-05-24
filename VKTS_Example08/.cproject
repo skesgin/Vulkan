@@ -50,6 +50,7 @@
 									<listOptionValue builtIn="false" value="VKTS"/>
 									<listOptionValue builtIn="false" value="vulkan-1"/>
 									<listOptionValue builtIn="false" value="Pdh"/>
+									<listOptionValue builtIn="false" value="Psapi"/>
 								</option>
 								<option id="gnu.cpp.link.option.other.2019731739" name="Other options (-Xlinker [option])" superClass="gnu.cpp.link.option.other" valueType="stringList">
 									<listOptionValue builtIn="false" value="--enable-stdcall-fixup"/>
@@ -119,6 +120,7 @@
 									<listOptionValue builtIn="false" value="VKTS"/>
 									<listOptionValue builtIn="false" value="vulkan-1"/>
 									<listOptionValue builtIn="false" value="Pdh"/>
+									<listOptionValue builtIn="false" value="Psapi"/>
 								</option>
 								<option id="gnu.cpp.link.option.other.159021550" name="Other options (-Xlinker [option])" superClass="gnu.cpp.link.option.other" valueType="stringList">
 									<listOptionValue builtIn="false" value="--enable-stdcall-fixup"/>

@@ -1244,6 +1244,12 @@ VkBool32 Example::init(const vkts::IUpdateThreadContext& updateContext)
 //
 VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 {
+	if (updateContext.getWindowDimension(windowIndex).x == 0 || updateContext.getWindowDimension(windowIndex).y == 0)
+	{
+		return VK_TRUE;
+	}
+
+	//
 
 	VkResult result;
 

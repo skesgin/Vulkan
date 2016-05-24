@@ -31,6 +31,7 @@
 #include <windows.h>
 
 #include <pdh.h>
+#include <pdhmsg.h>
 #include <Psapi.h>
 
 namespace vkts
@@ -40,12 +41,14 @@ static PDH_HQUERY g_query;
 
 static PDH_HCOUNTER g_counter[VKTS_MAX_QUERY_CPU];
 
-static HANDLE g_process = INVALID_HANDLE_VALUE;
+static float g_counterValue[VKTS_MAX_QUERY_CPU];
 
 static ULARGE_INTEGER g_lastTime;
 
 static ULARGE_INTEGER g_lastKernelTime;
 static ULARGE_INTEGER g_lastUserTime;
+
+static double g_lastCheck;
 
 VkBool32 VKTS_APIENTRY _profileInit()
 {
@@ -62,13 +65,17 @@ VkBool32 VKTS_APIENTRY _profileInit()
 	{
 		sprintf(counterString, "\\Processor(%u)\\%% Processor Time", cpu);
 
-		result = PdhAddCounter(g_query, counterString, 0, &g_counter[cpu]);
+		result = PdhAddEnglishCounter(g_query, counterString, 0, &g_counter[cpu]);
 
 		if (result != ERROR_SUCCESS)
 		{
 			return VK_FALSE;
 		}
+
+		g_counterValue[cpu] = 0.0f;
 	}
+
+	g_lastCheck = timeGetRaw();
 
 	result = PdhCollectQueryData(g_query);
 
@@ -78,13 +85,6 @@ VkBool32 VKTS_APIENTRY _profileInit()
 	}
 
 	//
-
-	g_process = GetCurrentProcess();
-
-	if (g_process == INVALID_HANDLE_VALUE)
-	{
-		return VK_FALSE;
-	}
 
 	FILETIME time;
 
@@ -96,7 +96,7 @@ VkBool32 VKTS_APIENTRY _profileInit()
 	GetSystemTimeAsFileTime(&time);
 	memcpy(&g_lastTime, &time, sizeof(FILETIME));
 
-	if (!GetProcessTimes(g_process, &creationTime, &exitTime, &kernelTime, &userTime))
+	if (!GetProcessTimes(GetCurrentProcess(), &creationTime, &exitTime, &kernelTime, &userTime))
 	{
 		return VK_FALSE;
 	}
@@ -114,6 +114,22 @@ VkBool32 VKTS_APIENTRY _profileGetCpuUsage(float& usage, const uint32_t cpu)
 		return VK_FALSE;
 	}
 
+	//
+
+	// Data is always collected at once, so no need to query again.
+	double currentCheck = timeGetRaw();
+
+	if (currentCheck - g_lastCheck < 0.1)
+	{
+		usage = g_counterValue[cpu];
+
+		return VK_TRUE;
+	}
+
+	g_lastCheck = currentCheck;
+
+	//
+
 	auto result = PdhCollectQueryData(g_query);
 
 	if (result != ERROR_SUCCESS)
@@ -123,14 +139,17 @@ VkBool32 VKTS_APIENTRY _profileGetCpuUsage(float& usage, const uint32_t cpu)
 
 	PDH_FMT_COUNTERVALUE counterValue;
 
-	result = PdhGetFormattedCounterValue(g_counter[cpu], PDH_FMT_DOUBLE, NULL, &counterValue);
-
-	if (result != ERROR_SUCCESS)
+	for (uint32_t currentCpu = 0; currentCpu < glm::min(processorGetNumber(), VKTS_MAX_QUERY_CPU); currentCpu++)
 	{
-		return VK_FALSE;
+		result = PdhGetFormattedCounterValue(g_counter[currentCpu], PDH_FMT_DOUBLE | PDH_FMT_NOCAP100, NULL, &counterValue);
+
+		if (result == ERROR_SUCCESS && (counterValue.CStatus == PDH_CSTATUS_NEW_DATA || counterValue.CStatus == PDH_CSTATUS_VALID_DATA))
+		{
+			g_counterValue[currentCpu] = (float)counterValue.doubleValue;
+		}
 	}
 
-	usage = (float)counterValue.doubleValue;
+	usage = g_counterValue[cpu];
 
 	return VK_TRUE;
 }
@@ -156,7 +175,7 @@ VkBool32 VKTS_APIENTRY _profileApplicationGetCpuUsage(float& usage)
 		return VK_FALSE;
 	}
 
-	if (!GetProcessTimes(g_process, &creationTime, &exitTime, &kernelTime, &userTime))
+	if (!GetProcessTimes(GetCurrentProcess(), &creationTime, &exitTime, &kernelTime, &userTime))
 	{
 		return VK_FALSE;
 	}
@@ -169,7 +188,7 @@ VkBool32 VKTS_APIENTRY _profileApplicationGetCpuUsage(float& usage)
 
 	//
 
-	usage = (float)(((currentKernelTime.QuadPart - g_lastKernelTime.QuadPart) + (currentUserTime.QuadPart - g_lastUserTime.QuadPart)) / deltaTime) / (float)processorGetNumber() * 100.0f;
+	usage = (float)(100.0 * (double)(currentKernelTime.QuadPart - g_lastKernelTime.QuadPart + currentUserTime.QuadPart - g_lastUserTime.QuadPart) / (double)deltaTime);
 
 	//
 
@@ -183,9 +202,9 @@ VkBool32 VKTS_APIENTRY _profileApplicationGetCpuUsage(float& usage)
 
 VkBool32 VKTS_APIENTRY _profileApplicationGetRam(uint64_t& ram)
 {
-	PROCESS_MEMORY_COUNTERS pmc;
+	PROCESS_MEMORY_COUNTERS_EX pmc;
 
-	if (!GetProcessMemoryInfo(g_process, &pmc, sizeof(pmc)))
+	if (!GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc)))
 	{
 		return VK_FALSE;
 	}
@@ -197,10 +216,6 @@ VkBool32 VKTS_APIENTRY _profileApplicationGetRam(uint64_t& ram)
 
 void VKTS_APIENTRY _profileTerminate()
 {
-	g_process = INVALID_HANDLE_VALUE;
-
-	//
-
 	for (uint32_t cpu = 0; cpu < processorGetNumber(); cpu++)
 	{
 		PdhRemoveCounter(&g_counter[cpu]);

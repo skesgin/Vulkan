@@ -27,8 +27,14 @@
 #include "Example.hpp"
 
 Example::Example(const vkts::IInitialResourcesSP& initialResources, const int32_t windowIndex, const vkts::ISurfaceSP& surface) :
-		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), windowDimension(0, 0), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), font(nullptr), sceneContext(nullptr), scene(nullptr), swapchain(nullptr), renderPass(nullptr), depthTexture(nullptr), depthStencilImageView(nullptr), swapchainImagesCount(0), swapchainImageView(), framebuffer(), cmdBuffer()
+		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), windowDimension(0, 0), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), font(nullptr), sceneContext(nullptr), scene(nullptr), swapchain(nullptr), renderPass(nullptr), depthTexture(nullptr), depthStencilImageView(nullptr), swapchainImagesCount(0), swapchainImageView(), framebuffer(), cmdBuffer(), fps(0), ram(0), cpuUsageApp(0.0f), processors(0)
 {
+	processors = glm::min(vkts::processorGetNumber(), VKTS_MAX_CORES);
+
+	for (uint32_t i = 0; i < processors; i++)
+	{
+		cpuUsage[i] = 0.0f;
+	}
 }
 
 Example::~Example()
@@ -39,13 +45,27 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 {
 	VkResult result;
 
-	cmdBuffer[usedBuffer] = vkts::commandBuffersCreate(initialResources->getDevice()->getDevice(), commandPool->getCmdPool(), VK_COMMAND_BUFFER_LEVEL_PRIMARY, 1);
-
-	if (!cmdBuffer[usedBuffer].get())
+	if (cmdBuffer[usedBuffer].get())
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create command buffer.");
+		result = cmdBuffer[usedBuffer]->reset();
 
-		return VK_FALSE;
+		if (result != VK_SUCCESS)
+		{
+			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not reset command buffer.");
+
+			return VK_FALSE;
+		}
+	}
+	else
+	{
+		cmdBuffer[usedBuffer] = vkts::commandBuffersCreate(initialResources->getDevice()->getDevice(), commandPool->getCmdPool(), VK_COMMAND_BUFFER_LEVEL_PRIMARY, 1);
+
+		if (!cmdBuffer[usedBuffer].get())
+		{
+			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create command buffer.");
+
+			return VK_FALSE;
+		}
 	}
 
 	result = cmdBuffer[usedBuffer]->beginCommandBuffer(0, VK_NULL_HANDLE, 0, VK_NULL_HANDLE, VK_FALSE, 0, 0);
@@ -129,9 +149,25 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 	{
 		glm::mat4 projectionMatrix = vkts::orthoMat4((float)swapchain->getImageExtent().width * -0.5f, (float)swapchain->getImageExtent().width * 0.5f, (float)swapchain->getImageExtent().height * -0.5f, (float)swapchain->getImageExtent().height  * 0.5f, 0.0f, 100.0f);
 
-		font->drawText(cmdBuffer[usedBuffer], projectionMatrix, glm::vec2((float)swapchain->getImageExtent().width * -0.5f + 100.0f, 0.0f), "Hello VulKan ToolS!", 64.0f, glm::vec4(0.64f, 0.12f, 0.13f, 1.0f));
-	}
+		char buffer[VKTS_OUTPUT_BUFFER_SIZE];
 
+		sprintf(buffer, "Example FPS: %u\nExample RAM: %" SCNu64 " kb\nExample CPU: %.2f%%", fps, ram, cpuUsageApp);
+
+		float y = (float)swapchain->getImageExtent().height * 0.5f - 10.0f - font->getLineHeight(VKTS_FONT_SCALE);
+
+		font->drawText(cmdBuffer[usedBuffer], projectionMatrix, glm::vec2((float)swapchain->getImageExtent().width * -0.5f + 10.0f, y), buffer, VKTS_FONT_SCALE, glm::vec4(0.64f, 0.12f, 0.13f, 1.0f));
+
+		y -= font->getLineHeight(VKTS_FONT_SCALE) * 4.0f;
+
+		for (uint32_t cpu = 0; cpu < processors; cpu++)
+		{
+			sprintf(buffer, "CPU%u: %.2f%%", cpu, cpuUsage[cpu]);
+
+			font->drawText(cmdBuffer[usedBuffer], projectionMatrix, glm::vec2((float)swapchain->getImageExtent().width * -0.5f + 10.0f, y), buffer, VKTS_FONT_SCALE, glm::vec4(0.64f, 0.12f, 0.13f, 1.0f));
+
+			y -= font->getLineHeight(VKTS_FONT_SCALE);
+		}
+	}
 
 	cmdBuffer[usedBuffer]->cmdEndRenderPass();
 
@@ -612,7 +648,7 @@ VkBool32 Example::init(const vkts::IUpdateThreadContext& updateContext)
 
 	//
 
-	commandPool = vkts::commandPoolCreate(initialResources->getDevice()->getDevice(), 0, initialResources->getQueue()->getQueueFamilyIndex());
+	commandPool = vkts::commandPoolCreate(initialResources->getDevice()->getDevice(), VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT, initialResources->getQueue()->getQueueFamilyIndex());
 
 	if (!commandPool.get())
 	{
@@ -658,6 +694,53 @@ VkBool32 Example::init(const vkts::IUpdateThreadContext& updateContext)
 //
 VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 {
+	uint32_t currentFPS;
+
+	if (vkts::profileApplicationGetFps(currentFPS, updateContext.getDeltaTime()))
+	{
+		fps = currentFPS;
+
+		//
+
+		uint64_t currentRAM;
+
+		if (vkts::profileApplicationGetRam(currentRAM))
+		{
+			ram = currentRAM;
+		}
+
+		//
+
+		float currentCpuUsageApp;
+
+		if (vkts::profileApplicationGetCpuUsage(currentCpuUsageApp))
+		{
+			cpuUsageApp = currentCpuUsageApp;
+		}
+
+		//
+
+		for (uint32_t cpu = 0; cpu < processors; cpu++)
+		{
+			if (vkts::profileGetCpuUsage(currentCpuUsageApp, cpu))
+			{
+				cpuUsage[cpu] = currentCpuUsageApp;
+			}
+		}
+
+		//
+
+
+		for (int32_t i = 0; i < (int32_t)swapchainImagesCount; i++)
+		{
+			if (!buildCmdBuffer(i))
+			{
+				return VK_FALSE;
+			}
+		}
+	}
+
+	//
 
 	VkResult result = VK_SUCCESS;
 
@@ -666,6 +749,11 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 	if (windowDimension != updateContext.getWindowDimension(windowIndex))
 	{
 		windowDimension = updateContext.getWindowDimension(windowIndex);
+
+		if (windowDimension.x == 0 || windowDimension.y == 0)
+		{
+			return VK_TRUE;
+		}
 
 		result = VK_ERROR_OUT_OF_DATE_KHR;
 	}

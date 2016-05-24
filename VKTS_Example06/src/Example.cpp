@@ -1234,6 +1234,11 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 	{
 		windowDimension = updateContext.getWindowDimension(windowIndex);
 
+		if (windowDimension.x == 0 || windowDimension.y == 0)
+		{
+			return VK_TRUE;
+		}
+
 		result = VK_ERROR_OUT_OF_DATE_KHR;
 	}
 

@@ -51,6 +51,7 @@
 									<listOptionValue builtIn="false" value="WinMM"/>
 									<listOptionValue builtIn="false" value="Xinput9_1_0"/>
 									<listOptionValue builtIn="false" value="Pdh"/>
+									<listOptionValue builtIn="false" value="Psapi"/>
 								</option>
 								<option id="gnu.cpp.link.option.other.1683019396" name="Other options (-Xlinker [option])" superClass="gnu.cpp.link.option.other" valueType="stringList">
 									<listOptionValue builtIn="false" value="--enable-stdcall-fixup"/>
@@ -121,6 +122,7 @@
 									<listOptionValue builtIn="false" value="WinMM"/>
 									<listOptionValue builtIn="false" value="Xinput9_1_0"/>
 									<listOptionValue builtIn="false" value="Pdh"/>
+									<listOptionValue builtIn="false" value="Psapi"/>
 								</option>
 								<option id="gnu.cpp.link.option.other.745954613" name="Other options (-Xlinker [option])" superClass="gnu.cpp.link.option.other" valueType="stringList">
 									<listOptionValue builtIn="false" value="--enable-stdcall-fixup"/>

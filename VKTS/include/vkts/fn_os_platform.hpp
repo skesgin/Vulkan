@@ -33,6 +33,17 @@
 
 // Windows OS.
 
+// Only Windows 7 and up is supported.
+#if (WINVER < 0x0601)
+#undef WINVER
+#define WINVER 0x0601
+#endif
+
+#if (_WIN32_WINNT < 0x0601)
+#undef _WIN32_WINNT
+#define _WIN32_WINNT 0x0601
+#endif
+
 #define VKTS_CACHE_ENABLED VK_TRUE
 
 #if defined(VKTS_NO_VISUAL)

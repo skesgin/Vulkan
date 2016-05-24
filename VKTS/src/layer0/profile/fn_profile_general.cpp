@@ -29,7 +29,6 @@
 #include "fn_profile_internal.hpp"
 
 #include <sys/times.h>
-#include <inttypes.h>
 
 namespace vkts
 {
@@ -41,14 +40,17 @@ typedef struct _CpuData {
 	uint64_t idle;
 } CpuData;
 
-static CpuData g_cpuData[VKTS_MAX_QUERY_CPU];
+static CpuData g_lastCpuData[VKTS_MAX_QUERY_CPU];
+static CpuData g_currentCpuData[VKTS_MAX_QUERY_CPU];
 
 static clock_t g_lastTime;
 
 static clock_t g_lastKernelTime;
 static clock_t g_lastUserTime;
 
-static VkBool32 profileGetCpuData(CpuData& cpuData, const uint32_t cpu)
+static double g_lastCheck;
+
+static VkBool32 profileGetCpuData()
 {
 	FILE* file = fopen("/proc/stat", "r");
 
@@ -59,22 +61,24 @@ static VkBool32 profileGetCpuData(CpuData& cpuData, const uint32_t cpu)
 
 	int result;
 
-	for (uint32_t i = 0; i <= cpu + 1; i++)
-	{
-		result = fscanf(file, "%*s %" SCNu64 " %" SCNu64 " %" SCNu64 " %" SCNu64 " %*u %*u %*u %*u %*u %*u", &cpuData.user, &cpuData.nice, &cpuData.system, &cpuData.idle);
+	CpuData currentCpuData;
 
-		if (result == -1)
+	for (uint32_t cpu = 0; cpu <= glm::min(processorGetNumber(), VKTS_MAX_QUERY_CPU); cpu++)
+	{
+		if (cpu == 0)
 		{
-			break;
+			continue;
+		}
+
+		result = fscanf(file, "%*s %" SCNu64 " %" SCNu64 " %" SCNu64 " %" SCNu64 " %*u %*u %*u %*u %*u %*u", &currentCpuData.user, &currentCpuData.nice, &currentCpuData.system, &currentCpuData.idle);
+
+		if (result == 4)
+		{
+			g_currentCpuData[cpu - 1] = currentCpuData;
 		}
 	}
 
 	fclose(file);
-
-	if (result != 4)
-	{
-		return VK_FALSE;
-	}
 
 	return VK_TRUE;
 }
@@ -120,12 +124,16 @@ static VkBool32 profileGetRamData(uint64_t& ram)
 
 VkBool32 VKTS_APIENTRY _profileInit()
 {
+	g_lastCheck = timeGetRaw();
+
+	if (!profileGetCpuData())
+	{
+		return VK_FALSE;
+	}
+
 	for (uint32_t cpu = 0; cpu < glm::min(processorGetNumber(), VKTS_MAX_QUERY_CPU); cpu++)
 	{
-		if (!profileGetCpuData(g_cpuData[cpu], cpu))
-		{
-			return VK_FALSE;
-		}
+		g_lastCpuData[cpu] = g_currentCpuData[cpu];
 	}
 	
 	//
@@ -152,25 +160,38 @@ VkBool32 VKTS_APIENTRY _profileGetCpuUsage(float& usage, const uint32_t cpu)
 		return VK_FALSE;
 	}
 
-	CpuData currentCpuData;
+	//
 
-	if (!profileGetCpuData(currentCpuData, cpu))
+	// Data is always collected at once, so no need to query again.
+	double currentCheck = timeGetRaw();
+
+	if (currentCheck - g_lastCheck >= 0.1)
 	{
+		for (uint32_t cpu = 0; cpu < glm::min(processorGetNumber(), VKTS_MAX_QUERY_CPU); cpu++)
+		{
+			g_lastCpuData[cpu] = g_currentCpuData[cpu];
+		}
+
+		if (!profileGetCpuData())
+		{
+			return VK_FALSE;
+		}
+
+		g_lastCheck = currentCheck;
+	}
+
+	//
+
+	if (g_currentCpuData[cpu].user < g_lastCpuData[cpu].user || g_currentCpuData[cpu].nice < g_lastCpuData[cpu].nice || g_currentCpuData[cpu].system < g_lastCpuData[cpu].system || g_currentCpuData[cpu].idle < g_lastCpuData[cpu].idle)
+	{
+		g_lastCpuData[cpu] = g_currentCpuData[cpu];
+
 		return VK_FALSE;
 	}
 
-	if (currentCpuData.user < g_cpuData[cpu].user || currentCpuData.nice < g_cpuData[cpu].nice || currentCpuData.system < g_cpuData[cpu].system || currentCpuData.idle < g_cpuData[cpu].idle)
-	{
-		g_cpuData[cpu] = currentCpuData;
+	uint64_t totalUsage = (g_currentCpuData[cpu].user - g_lastCpuData[cpu].user) + (g_currentCpuData[cpu].nice - g_lastCpuData[cpu].nice) + (g_currentCpuData[cpu].system - g_lastCpuData[cpu].system);
 
-		return VK_FALSE;
-	}
-
-	uint64_t totalUsage = (currentCpuData.user - g_cpuData[cpu].user) + (currentCpuData.nice - g_cpuData[cpu].nice) + (currentCpuData.system - g_cpuData[cpu].system);
-
-	uint64_t total = totalUsage + (currentCpuData.idle - g_cpuData[cpu].idle);
-
-	g_cpuData[cpu] = currentCpuData;
+	uint64_t total = totalUsage + (g_currentCpuData[cpu].idle - g_lastCpuData[cpu].idle);
 
 	if (total == 0)
 	{
@@ -202,7 +223,7 @@ VkBool32 VKTS_APIENTRY _profileApplicationGetCpuUsage(float& usage)
 	
 	//
 	
-	usage = (float)((buffer.tms_stime - g_lastKernelTime) + (buffer.tms_utime - g_lastUserTime) / deltaTime) / (float)processorGetNumber() * 100.0f; 
+	usage = (float)((buffer.tms_stime - g_lastKernelTime) + (buffer.tms_utime - g_lastUserTime) / deltaTime);
 	
 	//
 	

@@ -243,6 +243,11 @@ float Font::getLineHeight() const
 	return lineHeight;
 }
 
+float Font::getLineHeight(const float fontSize) const
+{
+	return lineHeight * fontSize / getSize();
+}
+
 float Font::getBase() const
 {
 	return base;

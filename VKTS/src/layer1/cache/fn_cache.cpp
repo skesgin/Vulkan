@@ -60,7 +60,7 @@ static std::string cacheGetFilename(const char* filename)
 		return std::string(VKTS_CACHE_DIRECTORY);
 	}
 
-	return std::string(VKTS_CACHE_DIRECTORY)  + "/" + std::string(filename);
+	return std::string(VKTS_CACHE_DIRECTORY) + "/" + std::string(filename);
 }
 
 VkBool32 VKTS_APIENTRY cacheGetEnabled()

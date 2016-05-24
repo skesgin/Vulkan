@@ -75,6 +75,10 @@ static void terminateApp()
 
 	//
 
+	vkts::profileTerminate();
+
+	//
+
 	vkts::engineTerminate();
 }
 
@@ -90,6 +94,13 @@ int main()
 	}
 
 	vkts::logSetLevel(VKTS_LOG_INFO);
+
+	//
+
+	if (!vkts::profileInit())
+	{
+		return -1;
+	}
 
 	//
 

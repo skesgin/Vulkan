@@ -34,8 +34,13 @@
 #define VKTS_NUMBER_BUFFERS 2
 
 #define VKTS_FONT_NAME "font/Arial_128.fnt"
+#define VKTS_FONT_SCALE 32.0f
 
 #define VKTS_SCENE_NAME "test/cycles/cycles.vkts"
+
+#define VKTS_MAX_CORES 32u
+
+#define VKTS_OUTPUT_BUFFER_SIZE 1024
 
 class Example: public vkts::IUpdateThread
 {
@@ -74,6 +79,12 @@ private:
     vkts::SmartPointerVector<vkts::IFramebufferSP> framebuffer;
 
     vkts::SmartPointerVector<vkts::ICommandBuffersSP> cmdBuffer;
+
+    uint32_t fps;
+    uint64_t ram;
+    float cpuUsageApp;
+    uint32_t processors;
+    float cpuUsage[VKTS_MAX_CORES];
 
 	VkBool32 buildCmdBuffer(const int32_t usedBuffer);
 

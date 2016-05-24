@@ -82,6 +82,11 @@ How to build:
 Changelog:
 ----------
 
+05/24/2016
+- Fixed/improved directory creation.
+- Improved font class.
+- Finalized profiling.
+
 05/23/2016
 - Improved performance in binary buffer and added better creation checks.
 - Fixed context class.
