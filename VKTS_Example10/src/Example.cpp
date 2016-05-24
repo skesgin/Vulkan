@@ -600,11 +600,6 @@ void Example::terminateResources(const vkts::IUpdateThreadContext& updateContext
 		{
 			for (int32_t i = 0; i < (int32_t)swapchainImagesCount; i++)
 			{
-				if (cmdBuffer[i].get())
-				{
-					cmdBuffer[i]->destroy();
-				}
-
 				if (framebuffer[i].get())
 				{
 					framebuffer[i]->destroy();
@@ -694,53 +689,6 @@ VkBool32 Example::init(const vkts::IUpdateThreadContext& updateContext)
 //
 VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 {
-	uint32_t currentFPS;
-
-	if (vkts::profileApplicationGetFps(currentFPS, updateContext.getDeltaTime()))
-	{
-		fps = currentFPS;
-
-		//
-
-		uint64_t currentRAM;
-
-		if (vkts::profileApplicationGetRam(currentRAM))
-		{
-			ram = currentRAM;
-		}
-
-		//
-
-		float currentCpuUsageApp;
-
-		if (vkts::profileApplicationGetCpuUsage(currentCpuUsageApp))
-		{
-			cpuUsageApp = currentCpuUsageApp;
-		}
-
-		//
-
-		for (uint32_t cpu = 0; cpu < processors; cpu++)
-		{
-			if (vkts::profileGetCpuUsage(currentCpuUsageApp, cpu))
-			{
-				cpuUsage[cpu] = currentCpuUsageApp;
-			}
-		}
-
-		//
-
-
-		for (int32_t i = 0; i < (int32_t)swapchainImagesCount; i++)
-		{
-			if (!buildCmdBuffer(i))
-			{
-				return VK_FALSE;
-			}
-		}
-	}
-
-	//
 
 	VkResult result = VK_SUCCESS;
 
@@ -767,8 +715,57 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 		result = swapchain->acquireNextImage(UINT64_MAX, imageAcquiredSemaphore->getSemaphore(), VK_NULL_HANDLE, currentBuffer);
 	}
 
+	//
+
 	if (result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR)
 	{
+		uint32_t currentFPS;
+
+		if (vkts::profileApplicationGetFps(currentFPS, updateContext.getDeltaTime()))
+		{
+			fps = currentFPS;
+
+			//
+
+			uint64_t currentRAM;
+
+			if (vkts::profileApplicationGetRam(currentRAM))
+			{
+				ram = currentRAM;
+			}
+
+			//
+
+			float currentCpuUsageApp;
+
+			if (vkts::profileApplicationGetCpuUsage(currentCpuUsageApp))
+			{
+				cpuUsageApp = currentCpuUsageApp;
+			}
+
+			//
+
+			for (uint32_t cpu = 0; cpu < processors; cpu++)
+			{
+				if (vkts::profileGetCpuUsage(currentCpuUsageApp, cpu))
+				{
+					cpuUsage[cpu] = currentCpuUsageApp;
+				}
+			}
+
+			//
+
+			for (int32_t i = 0; i < (int32_t)swapchainImagesCount; i++)
+			{
+				if (!buildCmdBuffer(i))
+				{
+					return VK_FALSE;
+				}
+			}
+		}
+
+		//
+
         VkSemaphore waitSemaphores = imageAcquiredSemaphore->getSemaphore();
         VkSemaphore signalSemaphores = renderingCompleteSemaphore->getSemaphore();
 
@@ -890,6 +887,14 @@ void Example::terminate(const vkts::IUpdateThreadContext& updateContext)
 		if (initialResources->getDevice().get())
 		{
 			terminateResources(updateContext);
+
+			for (int32_t i = 0; i < (int32_t)swapchainImagesCount; i++)
+			{
+				if (cmdBuffer[i].get())
+				{
+					cmdBuffer[i]->destroy();
+				}
+			}
 
 			//
 
