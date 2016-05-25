@@ -27,7 +27,7 @@
 #include "Example.hpp"
 
 Example::Example(const vkts::IInitialResourcesSP& initialResources, const int32_t windowIndex, const vkts::ISurfaceSP& surface) :
-		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), font(nullptr), sceneContext(nullptr), scene(nullptr), swapchain(nullptr), renderPass(nullptr), depthTexture(nullptr), depthStencilImageView(nullptr), swapchainImagesCount(0), swapchainImageView(), framebuffer(), cmdBuffer(), fps(0), ram(0), cpuUsageApp(0.0f), processors(0)
+		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), font(nullptr), sceneContext(nullptr), scene(nullptr), swapchain(nullptr), renderPass(nullptr), depthTexture(nullptr), depthStencilImageView(nullptr), swapchainImagesCount(0), swapchainImageView(), framebuffer(), cmdBuffer(), rebuildCmdBuffer(VK_TRUE), fps(0), ram(0), cpuUsageApp(0.0f), processors(0)
 {
 	processors = glm::min(vkts::processorGetNumber(), VKTS_MAX_CORES);
 
@@ -435,6 +435,7 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
     swapchainImageView = vkts::SmartPointerVector<vkts::IImageViewSP>(swapchainImagesCount);
     framebuffer = vkts::SmartPointerVector<vkts::IFramebufferSP>(swapchainImagesCount);
     cmdBuffer = vkts::SmartPointerVector<vkts::ICommandBuffersSP>(swapchainImagesCount);
+    rebuildCmdBuffer = VK_TRUE;
 
     //
 
@@ -579,11 +580,6 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 		}
 
 		if (!buildFramebuffer(i))
-		{
-			return VK_FALSE;
-		}
-
-		if (!buildCmdBuffer(i))
 		{
 			return VK_FALSE;
 		}
@@ -757,13 +753,20 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 
 			//
 
-			for (int32_t i = 0; i < (int32_t)swapchainImagesCount; i++)
+			rebuildCmdBuffer = VK_TRUE;
+		}
+
+		if (rebuildCmdBuffer)
+		{
+			for (uint32_t i = 0; i < swapchainImagesCount; i++)
 			{
 				if (!buildCmdBuffer(i))
 				{
 					return VK_FALSE;
 				}
 			}
+
+			rebuildCmdBuffer = VK_FALSE;
 		}
 
 		//
