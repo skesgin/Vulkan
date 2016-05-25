@@ -112,6 +112,14 @@ VkBool32 Surface::hasCurrentExtentChanged(const VkPhysicalDevice physicalDevice)
 		changed = VK_TRUE;
 	}
 
+	if (!changed)
+	{
+		if (allExtents[physicalDevice].width == 0 || allExtents[physicalDevice].height == 0)
+		{
+			changed = VK_TRUE;
+		}
+	}
+
 	return changed;
 }
 
