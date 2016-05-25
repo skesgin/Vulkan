@@ -195,7 +195,9 @@ VkBool32 VKTS_APIENTRY _profileGetCpuUsage(float& usage, const uint32_t cpu)
 
 	if (total == 0)
 	{
-		return VK_FALSE;
+		usage = 0.0f;
+
+		return VK_TRUE;
 	}
 
 	usage = (float)((double)totalUsage / (double)total) * 100.0f;

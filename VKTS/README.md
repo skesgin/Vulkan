@@ -84,6 +84,7 @@ Changelog:
 
 05/25/2016
 - Made resize code more robust and reliable.
+- Fixed profile code for POSIX.
 
 05/24/2016
 - Fixed/improved directory creation.
