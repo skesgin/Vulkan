@@ -1154,6 +1154,10 @@ VkBool32 Example::init(const vkts::IUpdateThreadContext& updateContext)
 
 	//
 
+	surface->hasCurrentExtentChanged(physicalDevice->getPhysicalDevice());
+
+	//
+
 	commandPool = vkts::commandPoolCreate(device->getDevice(), 0, queue->getQueueFamilyIndex());
 
 	if (!commandPool.get())
@@ -1244,20 +1248,31 @@ VkBool32 Example::init(const vkts::IUpdateThreadContext& updateContext)
 //
 VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 {
-	if (updateContext.getWindowDimension(windowIndex).x == 0 || updateContext.getWindowDimension(windowIndex).y == 0)
-	{
-		return VK_TRUE;
-	}
+
+	VkResult result = VK_SUCCESS;
 
 	//
 
-	VkResult result;
+	if (surface->hasCurrentExtentChanged(physicalDevice->getPhysicalDevice()))
+	{
+		const auto& currentExtent = surface->getCurrentExtent(physicalDevice->getPhysicalDevice(), VK_FALSE);
+
+		if (currentExtent.width == 0 || currentExtent.height == 0)
+		{
+			return VK_TRUE;
+		}
+
+		result = VK_ERROR_OUT_OF_DATE_KHR;
+	}
 
 	//
 
 	uint32_t currentBuffer;
 
-	result = swapchain->acquireNextImage(UINT64_MAX, imageAcquiredSemaphore->getSemaphore(), VK_NULL_HANDLE, currentBuffer);
+	if (result == VK_SUCCESS)
+	{
+		result = swapchain->acquireNextImage(UINT64_MAX, imageAcquiredSemaphore->getSemaphore(), VK_NULL_HANDLE, currentBuffer);
+	}
 
 	if (result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR)
 	{

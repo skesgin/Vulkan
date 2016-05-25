@@ -27,7 +27,7 @@
 #include "Example.hpp"
 
 Example::Example(const vkts::IInitialResourcesSP& initialResources, const int32_t windowIndex, const vkts::ISurfaceSP& surface) :
-		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), windowDimension(0, 0), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), descriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), fragmentUniformBuffer(nullptr), shadowUniformBuffer(nullptr), skinningVertexShaderModule(nullptr), skinningFragmentShaderModule(nullptr), skinningShadowFragmentShaderModule(nullptr), standardVertexShaderModule(nullptr), standardFragmentShaderModule(nullptr), standardShadowFragmentShaderModule(nullptr), pipelineLayout(nullptr), loadTask(), sceneLoaded(VK_FALSE), sceneContext(nullptr), scene(nullptr), swapchain(nullptr), renderPass(nullptr), shadowRenderPass(nullptr), allOpaqueGraphicsPipelines(), allBlendGraphicsPipelines(), allBlendCwGraphicsPipelines(), allShadowGraphicsPipelines(), shadowTexture(nullptr), msaaColorTexture(nullptr), msaaDepthTexture(nullptr), depthTexture(nullptr), shadowImageView(nullptr), msaaColorImageView(nullptr), msaaDepthStencilImageView(nullptr), depthStencilImageView(nullptr), shadowSampler(nullptr), swapchainImagesCount(0), swapchainImageView(), framebuffer(), shadowFramebuffer(), fences(), cmdBuffer(), shadowCmdBuffer()
+		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), descriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), fragmentUniformBuffer(nullptr), shadowUniformBuffer(nullptr), skinningVertexShaderModule(nullptr), skinningFragmentShaderModule(nullptr), skinningShadowFragmentShaderModule(nullptr), standardVertexShaderModule(nullptr), standardFragmentShaderModule(nullptr), standardShadowFragmentShaderModule(nullptr), pipelineLayout(nullptr), loadTask(), sceneLoaded(VK_FALSE), sceneContext(nullptr), scene(nullptr), swapchain(nullptr), renderPass(nullptr), shadowRenderPass(nullptr), allOpaqueGraphicsPipelines(), allBlendGraphicsPipelines(), allBlendCwGraphicsPipelines(), allShadowGraphicsPipelines(), shadowTexture(nullptr), msaaColorTexture(nullptr), msaaDepthTexture(nullptr), depthTexture(nullptr), shadowImageView(nullptr), msaaColorImageView(nullptr), msaaDepthStencilImageView(nullptr), depthStencilImageView(nullptr), shadowSampler(nullptr), swapchainImagesCount(0), swapchainImageView(), framebuffer(), shadowFramebuffer(), fences(), cmdBuffer(), shadowCmdBuffer()
 {
 }
 
@@ -1847,10 +1847,11 @@ VkBool32 Example::init(const vkts::IUpdateThreadContext& updateContext)
 		return VK_FALSE;
 	}
 
-	windowDimension = updateContext.getWindowDimension(windowIndex);
-
 	//
 
+	surface->hasCurrentExtentChanged(initialResources->getPhysicalDevice()->getPhysicalDevice());
+
+	//
 
 	camera = vkts::cameraCreate(glm::vec4(-16.0f, 16.0f, -8.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 
@@ -1979,11 +1980,11 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 
 		//
 
-		if (windowDimension != updateContext.getWindowDimension(windowIndex))
+		if (surface->hasCurrentExtentChanged(initialResources->getPhysicalDevice()->getPhysicalDevice()))
 		{
-			windowDimension = updateContext.getWindowDimension(windowIndex);
+			const auto& currentExtent = surface->getCurrentExtent(initialResources->getPhysicalDevice()->getPhysicalDevice(), VK_FALSE);
 
-			if (windowDimension.x == 0 || windowDimension.y == 0)
+			if (currentExtent.width == 0 || currentExtent.height == 0)
 			{
 				return VK_TRUE;
 			}
@@ -2096,9 +2097,9 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 			// Color
 			//
 
-			const auto& dimension = updateContext.getWindowDimension(windowIndex);
+			const auto& currentExtent = surface->getCurrentExtent(initialResources->getPhysicalDevice()->getPhysicalDevice(), VK_FALSE);
 
-			projectionMatrix = vkts::perspectiveMat4(45.0f, (float) dimension.x / (float) dimension.y, 1.0f, 1000.0f);
+			projectionMatrix = vkts::perspectiveMat4(45.0f, (float)currentExtent.width / (float)currentExtent.height, 1.0f, 1000.0f);
 
 			viewMatrix = camera->getViewMatrix();
 

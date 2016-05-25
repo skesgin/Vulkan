@@ -68,8 +68,6 @@ private:
 
 	const vkts::ISurfaceSP surface;
 
-	glm::uvec2 windowDimension;
-
 	vkts::ICameraSP camera;
 	vkts::IInputControllerSP inputController;
 

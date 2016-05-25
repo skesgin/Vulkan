@@ -82,6 +82,9 @@ How to build:
 Changelog:
 ----------
 
+05/25/2016
+- Made resize code more robust and reliable.
+
 05/24/2016
 - Fixed/improved directory creation.
 - Improved font class.

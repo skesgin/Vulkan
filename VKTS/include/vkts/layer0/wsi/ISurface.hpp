@@ -54,6 +54,12 @@ public:
 
     virtual const VkSurfaceKHR getSurface() const = 0;
 
+    virtual VkResult getPhysicalDeviceSurfaceCapabilities(const VkPhysicalDevice physicalDevice, VkSurfaceCapabilitiesKHR& surfaceCapabilities) const = 0;
+
+    virtual VkBool32 hasCurrentExtentChanged(const VkPhysicalDevice physicalDevice) const = 0;
+
+    virtual const VkExtent2D& getCurrentExtent(const VkPhysicalDevice physicalDevice, const VkBool32 refresh = VK_TRUE) const = 0;
+
 };
 
 typedef std::shared_ptr<ISurface> ISurfaceSP;

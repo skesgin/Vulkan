@@ -27,7 +27,7 @@
 #include "Example.hpp"
 
 Example::Example(const VkInstance instance, const VkPhysicalDevice physicalDevice, const int32_t windowIndex, const vkts::ISurfaceSP& surface, const VkDevice device, const uint32_t queueFamilyIndex, const VkQueue queue) :
-		IUpdateThread(), instance(instance), physicalDevice(physicalDevice), windowIndex(windowIndex), surface(surface), device(device), queueFamilyIndex(queueFamilyIndex), queue(queue), windowDimension(), commandPool(VK_NULL_HANDLE), imageAcquiredSemaphore(VK_NULL_HANDLE), renderingCompleteSemaphore(VK_NULL_HANDLE), swapchain(VK_NULL_HANDLE), renderPass(VK_NULL_HANDLE), swapchainImagesCount(0), swapchainImage(), swapchainImageView(), framebuffer(), cmdBuffer()
+		IUpdateThread(), instance(instance), physicalDevice(physicalDevice), windowIndex(windowIndex), surface(surface), device(device), queueFamilyIndex(queueFamilyIndex), queue(queue), commandPool(VK_NULL_HANDLE), imageAcquiredSemaphore(VK_NULL_HANDLE), renderingCompleteSemaphore(VK_NULL_HANDLE), swapchain(VK_NULL_HANDLE), renderPass(VK_NULL_HANDLE), swapchainImagesCount(0), swapchainImage(), swapchainImageView(), framebuffer(), cmdBuffer()
 {
 	memset(&swapchainCreateInfo, 0, sizeof(VkSwapchainCreateInfoKHR));
 }
@@ -575,7 +575,9 @@ VkBool32 Example::init(const vkts::IUpdateThreadContext& updateContext)
 		return VK_FALSE;
 	}
 
-	windowDimension = updateContext.getWindowDimension(windowIndex);
+	//
+
+	surface->hasCurrentExtentChanged(physicalDevice);
 
 	//
 
@@ -652,11 +654,11 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 
 	//
 
-	if (windowDimension != updateContext.getWindowDimension(windowIndex))
+	if (surface->hasCurrentExtentChanged(physicalDevice))
 	{
-		windowDimension = updateContext.getWindowDimension(windowIndex);
+		const auto& currentExtent = surface->getCurrentExtent(physicalDevice, VK_FALSE);
 
-		if (windowDimension.x == 0 || windowDimension.y == 0)
+		if (currentExtent.width == 0 || currentExtent.height == 0)
 		{
 			return VK_TRUE;
 		}

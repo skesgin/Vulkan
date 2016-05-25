@@ -29,11 +29,8 @@
 namespace vkts
 {
 
-Surface::Surface(const VkInstance instance,
-		const VKTS_NATIVE_DISPLAY nativeDisplay,
-		const VKTS_NATIVE_WINDOW nativeWindow,
-        const VkSurfaceKHR surface) :
-    ISurface(), instance(instance), nativeDisplay(nativeDisplay), nativeWindow(nativeWindow), surface(surface)
+Surface::Surface(const VkInstance instance, const VKTS_NATIVE_DISPLAY nativeDisplay, const VKTS_NATIVE_WINDOW nativeWindow, const VkSurfaceKHR surface) :
+    ISurface(), instance(instance), nativeDisplay(nativeDisplay), nativeWindow(nativeWindow), surface(surface), allExtents(), zeroExtent{0, 0}
 {
 }
 
@@ -64,6 +61,80 @@ const VKTS_NATIVE_WINDOW Surface::getNativeWindow() const
 const VkSurfaceKHR Surface::getSurface() const
 {
     return surface;
+}
+
+VkResult Surface::getPhysicalDeviceSurfaceCapabilities(const VkPhysicalDevice physicalDevice, VkSurfaceCapabilitiesKHR& surfaceCapabilities) const
+{
+    return vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface, &surfaceCapabilities);
+}
+
+VkBool32 Surface::hasCurrentExtentChanged(const VkPhysicalDevice physicalDevice) const
+{
+	VkBool32 changed = VK_FALSE;
+
+	//
+
+	auto currentExtent = allExtents.find(physicalDevice);
+
+	if (currentExtent == allExtents.end())
+	{
+		changed = VK_TRUE;
+	}
+
+	//
+
+	VkSurfaceCapabilitiesKHR surfaceCapabilities;
+
+	auto result = getPhysicalDeviceSurfaceCapabilities(physicalDevice, surfaceCapabilities);
+
+	if (result == VK_SUCCESS)
+	{
+		if (!changed)
+		{
+			if (currentExtent->second.width != surfaceCapabilities.currentExtent.width || currentExtent->second.height != surfaceCapabilities.currentExtent.height)
+			{
+				changed = VK_TRUE;
+			}
+		}
+
+		if (changed)
+		{
+			allExtents[physicalDevice] = surfaceCapabilities.currentExtent;
+		}
+	}
+	else
+	{
+		if (changed)
+		{
+			allExtents.erase(currentExtent);
+		}
+
+		changed = VK_TRUE;
+	}
+
+	return changed;
+}
+
+const VkExtent2D& Surface::getCurrentExtent(const VkPhysicalDevice physicalDevice, const VkBool32 refresh) const
+{
+	if (refresh)
+	{
+		if (!hasCurrentExtentChanged(physicalDevice))
+		{
+			return zeroExtent;
+		}
+	}
+	else
+	{
+		auto currentExtent = allExtents.find(physicalDevice);
+
+		if (currentExtent == allExtents.end())
+		{
+			return zeroExtent;
+		}
+	}
+
+	return allExtents[physicalDevice];
 }
 
 //

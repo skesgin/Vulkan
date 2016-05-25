@@ -52,8 +52,6 @@ private:
 
 	const VkQueue queue;
 
-	glm::uvec2 windowDimension;
-
 	VkCommandPool commandPool;
 
 	VkSemaphore imageAcquiredSemaphore;

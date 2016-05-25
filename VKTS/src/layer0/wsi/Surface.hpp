@@ -45,13 +45,14 @@ private:
 
     VkSurfaceKHR surface;
 
+    mutable std::map<VkPhysicalDevice, VkExtent2D> allExtents;
+
+    const VkExtent2D zeroExtent;
+
 public:
 
     Surface() = delete;
-    Surface(const VkInstance instance,
-    		const VKTS_NATIVE_DISPLAY nativeDisplay,
-			const VKTS_NATIVE_WINDOW nativeWindow,
-            const VkSurfaceKHR surface);
+    Surface(const VkInstance instance, const VKTS_NATIVE_DISPLAY nativeDisplay, const VKTS_NATIVE_WINDOW nativeWindow, const VkSurfaceKHR surface);
     Surface(const Surface& other) = delete;
     Surface(Surface&& other) = delete;
     virtual ~Surface();
@@ -70,6 +71,12 @@ public:
     virtual const VKTS_NATIVE_WINDOW getNativeWindow() const override;
 
     virtual const VkSurfaceKHR getSurface() const override;
+
+    virtual VkResult getPhysicalDeviceSurfaceCapabilities(const VkPhysicalDevice physicalDevice, VkSurfaceCapabilitiesKHR& surfaceCapabilities) const override;
+
+    virtual VkBool32 hasCurrentExtentChanged(const VkPhysicalDevice physicalDevice) const override;
+
+    virtual const VkExtent2D& getCurrentExtent(const VkPhysicalDevice physicalDevice, const VkBool32 refresh = VK_TRUE) const override;
 
     //
     // IDestroyable

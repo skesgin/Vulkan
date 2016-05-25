@@ -57,8 +57,6 @@ private:
 
 	const vkts::IQueueSP queue;
 
-	glm::uvec2 windowDimension;
-
 	vkts::ICommandPoolSP commandPool;
 
 	vkts::ISemaphoreSP imageAcquiredSemaphore;

@@ -27,7 +27,7 @@
 #include "Example.hpp"
 
 Example::Example(const vkts::IInitialResourcesSP& initialResources, const int32_t windowIndex, const vkts::ISurfaceSP& surface) :
-		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), windowDimension(0, 0), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), descriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), fragmentUniformBuffer(nullptr), vertexShaderModule(nullptr), tessellationControlShaderModule(nullptr), tessellationEvaluationShaderModule(nullptr), geometryShaderModule(nullptr), fragmentShaderModule(nullptr), pipelineLayout(nullptr), sceneContext(nullptr), scene(nullptr), allBuildCommandTasks(), swapchain(nullptr), renderPass(nullptr), allGraphicsPipelines(), depthTexture(nullptr), depthStencilImageView(nullptr), swapchainImagesCount(0), swapchainImageView(), framebuffer(), cmdBuffer(), commandBufferCount(0)
+		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), descriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), fragmentUniformBuffer(nullptr), vertexShaderModule(nullptr), tessellationControlShaderModule(nullptr), tessellationEvaluationShaderModule(nullptr), geometryShaderModule(nullptr), fragmentShaderModule(nullptr), pipelineLayout(nullptr), sceneContext(nullptr), scene(nullptr), allBuildCommandTasks(), swapchain(nullptr), renderPass(nullptr), allGraphicsPipelines(), depthTexture(nullptr), depthStencilImageView(nullptr), swapchainImagesCount(0), swapchainImageView(), framebuffer(), cmdBuffer(), commandBufferCount(0)
 {
 }
 
@@ -1230,7 +1230,9 @@ VkBool32 Example::init(const vkts::IUpdateThreadContext& updateContext)
 		return VK_FALSE;
 	}
 
-	windowDimension = updateContext.getWindowDimension(windowIndex);
+	//
+
+	surface->hasCurrentExtentChanged(initialResources->getPhysicalDevice()->getPhysicalDevice());
 
 	//
 
@@ -1354,11 +1356,11 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 
 	//
 
-	if (windowDimension != updateContext.getWindowDimension(windowIndex))
+	if (surface->hasCurrentExtentChanged(initialResources->getPhysicalDevice()->getPhysicalDevice()))
 	{
-		windowDimension = updateContext.getWindowDimension(windowIndex);
+		const auto& currentExtent = surface->getCurrentExtent(initialResources->getPhysicalDevice()->getPhysicalDevice(), VK_FALSE);
 
-		if (windowDimension.x == 0 || windowDimension.y == 0)
+		if (currentExtent.width == 0 || currentExtent.height == 0)
 		{
 			return VK_TRUE;
 		}
@@ -1387,9 +1389,9 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 		glm::mat4 projectionMatrix(1.0f);
 		glm::mat4 viewMatrix(1.0f);
 
-		const auto& dimension = updateContext.getWindowDimension(windowIndex);
+		const auto& currentExtent = surface->getCurrentExtent(initialResources->getPhysicalDevice()->getPhysicalDevice(), VK_FALSE);
 
-		projectionMatrix = vkts::perspectiveMat4(45.0f, (float) dimension.x / (float) dimension.y, 1.0f, 100.0f);
+		projectionMatrix = vkts::perspectiveMat4(45.0f, (float)currentExtent.width / (float)currentExtent.height, 1.0f, 100.0f);
 
 		viewMatrix = camera->getViewMatrix();
 

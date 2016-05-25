@@ -27,7 +27,7 @@
 #include "Example.hpp"
 
 Example::Example(const vkts::IInstanceSP& instance, const vkts::IPhysicalDeviceSP& physicalDevice, const int32_t windowIndex, const vkts::ISurfaceSP& surface, const vkts::IDeviceSP& device, const vkts::IQueueSP& queue) :
-		IUpdateThread(), instance(instance), physicalDevice(physicalDevice), windowIndex(windowIndex), surface(surface), device(device), queue(queue), windowDimension(0, 0), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), vertexBuffer(VK_NULL_HANDLE), deviceMemoryVertexBuffer(VK_NULL_HANDLE), vertexShaderModule(VK_NULL_HANDLE), fragmentShaderModule(VK_NULL_HANDLE), pipelineLayout(VK_NULL_HANDLE), swapchain(nullptr), renderPass(nullptr), pipeline(VK_NULL_HANDLE), swapchainImagesCount(0), swapchainImageView(), framebuffer(), cmdBuffer()
+		IUpdateThread(), instance(instance), physicalDevice(physicalDevice), windowIndex(windowIndex), surface(surface), device(device), queue(queue), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), vertexBuffer(VK_NULL_HANDLE), deviceMemoryVertexBuffer(VK_NULL_HANDLE), vertexShaderModule(VK_NULL_HANDLE), fragmentShaderModule(VK_NULL_HANDLE), pipelineLayout(VK_NULL_HANDLE), swapchain(nullptr), renderPass(nullptr), pipeline(VK_NULL_HANDLE), swapchainImagesCount(0), swapchainImageView(), framebuffer(), cmdBuffer()
 {
 }
 
@@ -766,7 +766,9 @@ VkBool32 Example::init(const vkts::IUpdateThreadContext& updateContext)
 		return VK_FALSE;
 	}
 
-	windowDimension = updateContext.getWindowDimension(windowIndex);
+	//
+
+	surface->hasCurrentExtentChanged(physicalDevice->getPhysicalDevice());
 
 	//
 
@@ -844,11 +846,11 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 
 	//
 
-	if (windowDimension != updateContext.getWindowDimension(windowIndex))
+	if (surface->hasCurrentExtentChanged(physicalDevice->getPhysicalDevice()))
 	{
-		windowDimension = updateContext.getWindowDimension(windowIndex);
+		const auto& currentExtent = surface->getCurrentExtent(physicalDevice->getPhysicalDevice(), VK_FALSE);
 
-		if (windowDimension.x == 0 || windowDimension.y == 0)
+		if (currentExtent.width == 0 || currentExtent.height == 0)
 		{
 			return VK_TRUE;
 		}

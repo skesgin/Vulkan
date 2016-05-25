@@ -27,7 +27,7 @@
 #include "Example.hpp"
 
 Example::Example(const vkts::IInitialResourcesSP& initialResources, const int32_t windowIndex, const vkts::ISurfaceSP& surface) :
-		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), windowDimension(0, 0), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), font(nullptr), sceneContext(nullptr), scene(nullptr), swapchain(nullptr), renderPass(nullptr), depthTexture(nullptr), depthStencilImageView(nullptr), swapchainImagesCount(0), swapchainImageView(), framebuffer(), cmdBuffer(), fps(0), ram(0), cpuUsageApp(0.0f), processors(0)
+		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), font(nullptr), sceneContext(nullptr), scene(nullptr), swapchain(nullptr), renderPass(nullptr), depthTexture(nullptr), depthStencilImageView(nullptr), swapchainImagesCount(0), swapchainImageView(), framebuffer(), cmdBuffer(), fps(0), ram(0), cpuUsageApp(0.0f), processors(0)
 {
 	processors = glm::min(vkts::processorGetNumber(), VKTS_MAX_CORES);
 
@@ -639,7 +639,9 @@ VkBool32 Example::init(const vkts::IUpdateThreadContext& updateContext)
 		return VK_FALSE;
 	}
 
-	windowDimension = updateContext.getWindowDimension(windowIndex);
+	//
+
+	surface->hasCurrentExtentChanged(initialResources->getPhysicalDevice()->getPhysicalDevice());
 
 	//
 
@@ -694,11 +696,11 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 
 	//
 
-	if (windowDimension != updateContext.getWindowDimension(windowIndex))
+	if (surface->hasCurrentExtentChanged(initialResources->getPhysicalDevice()->getPhysicalDevice()))
 	{
-		windowDimension = updateContext.getWindowDimension(windowIndex);
+		const auto& currentExtent = surface->getCurrentExtent(initialResources->getPhysicalDevice()->getPhysicalDevice(), VK_FALSE);
 
-		if (windowDimension.x == 0 || windowDimension.y == 0)
+		if (currentExtent.width == 0 || currentExtent.height == 0)
 		{
 			return VK_TRUE;
 		}
