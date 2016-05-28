@@ -104,7 +104,7 @@ VkBool32 Example::createTexture(vkts::IImageSP& currentImage, vkts::IDeviceMemor
 			return VK_FALSE;
 		}
 
-		imageData->copy(currentDeviceMemoryImage->getMemory(), 0, subresourceLayout);
+		imageData->copy(currentDeviceMemoryImage->getMemory(), 0, 0, subresourceLayout);
 
 		if (!(currentDeviceMemoryImage->getMemoryPropertyFlags() & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT))
 		{

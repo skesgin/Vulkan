@@ -562,8 +562,12 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
 
     char buffer[VKTS_MAX_BUFFER_CHARS + 1];
     char sdata[VKTS_MAX_TOKEN_CHARS + 1];
+    VkBool32 bdata;
 
     std::string memoryImageName;
+    VkBool32 mipMap = VK_FALSE;
+    VkBool32 environment = VK_FALSE;
+    VkBool32 preFiltered = VK_FALSE;
     IImageDataSP imageData;
 
     while (textBuffer->gets(buffer, VKTS_MAX_BUFFER_CHARS))
@@ -582,6 +586,37 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
             }
 
             memoryImageName = sdata;
+
+            mipMap = VK_FALSE;
+            environment = VK_FALSE;
+            preFiltered = VK_FALSE;
+        }
+        else if (scenegraphIsToken(buffer, "mipmap"))
+        {
+            if (!scenegraphParseBool(buffer, &bdata))
+            {
+                return VK_FALSE;
+            }
+
+            mipMap = bdata;
+        }
+        else if (scenegraphIsToken(buffer, "environment"))
+        {
+            if (!scenegraphParseBool(buffer, &bdata))
+            {
+                return VK_FALSE;
+            }
+
+            environment = bdata;
+        }
+        else if (scenegraphIsToken(buffer, "pre_filtered"))
+        {
+            if (!scenegraphParseBool(buffer, &bdata))
+            {
+                return VK_FALSE;
+            }
+
+            preFiltered = bdata;
         }
         else if (scenegraphIsToken(buffer, "image_data"))
         {
@@ -589,6 +624,20 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
             {
                 return VK_FALSE;
             }
+
+            if (mipMap && environment)
+            {
+            	return VK_FALSE;
+            }
+
+            if (!preFiltered && environment)
+            {
+            	return VK_FALSE;
+            }
+
+            //
+
+            // TODO: Create, if needed, cube map and pre-filter them.
 
             std::string finalImageDataFilename = std::string(directory) + std::string(sdata);
 
@@ -642,7 +691,7 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
 
                     // Mipmaping image creation.
 
-                    if (imageData->getExtent3D().width > 1 || imageData->getExtent3D().height > 1 || imageData->getExtent3D().depth > 1)
+                    if (mipMap && (imageData->getExtent3D().width > 1 || imageData->getExtent3D().height > 1 || imageData->getExtent3D().depth > 1))
                     {
                         auto dotIndex = finalImageDataFilename.rfind(".");
 
@@ -851,7 +900,9 @@ static VkBool32 scenegraphLoadTextures(const char* directory, const char* filena
     VkBool32 bdata;
 
     std::string textureName;
-    VkBool32 mipMap = VK_TRUE;
+    VkBool32 mipMap = VK_FALSE;
+    VkBool32 environment = VK_FALSE;
+    VkBool32 preFiltered = VK_FALSE;
     IMemoryImageSP memoryImage;
 
     ITextureSP texture;
@@ -885,7 +936,10 @@ static VkBool32 scenegraphLoadTextures(const char* directory, const char* filena
             }
 
             textureName = sdata;
-            mipMap = VK_TRUE;
+
+            mipMap = VK_FALSE;
+            environment = VK_FALSE;
+            preFiltered = VK_FALSE;
         }
         else if (scenegraphIsToken(buffer, "mipmap"))
         {
@@ -896,12 +950,44 @@ static VkBool32 scenegraphLoadTextures(const char* directory, const char* filena
 
             mipMap = bdata;
         }
+        else if (scenegraphIsToken(buffer, "environment"))
+        {
+            if (!scenegraphParseBool(buffer, &bdata))
+            {
+                return VK_FALSE;
+            }
+
+            environment = bdata;
+        }
+        else if (scenegraphIsToken(buffer, "pre_filtered"))
+        {
+            if (!scenegraphParseBool(buffer, &bdata))
+            {
+                return VK_FALSE;
+            }
+
+            preFiltered = bdata;
+        }
         else if (scenegraphIsToken(buffer, "image"))
         {
             if (!scenegraphParseString(buffer, sdata))
             {
                 return VK_FALSE;
             }
+
+            if (mipMap && environment)
+            {
+            	return VK_FALSE;
+            }
+
+            if (!preFiltered && environment)
+            {
+            	return VK_FALSE;
+            }
+
+            //
+
+            // TODO: Create, if needed, cube map and pre-filtered textures.
 
             memoryImage = context->useMemoryImage(sdata);
 

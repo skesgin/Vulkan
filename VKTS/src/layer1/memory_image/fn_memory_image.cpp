@@ -51,7 +51,7 @@ static VkBool32 memoryImageUpload(const IDeviceMemorySP& deviceMemory, const IIm
             return VK_FALSE;
         }
 
-        imageData->copy(deviceMemory->getMemory(), mipLevel, subresourceLayout);
+        imageData->copy(deviceMemory->getMemory(), mipLevel, 0, subresourceLayout);
 
 		if (!(deviceMemory->getMemoryPropertyFlags() & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT))
 		{

@@ -425,8 +425,43 @@ def saveTextures(context, filepath, imagesLibraryName, materials):
     fw("\n")
 
     textures = {}
+    envTextures = {}
     cyclesTextures = {}
+    cyclesEnvTextures = {}
     images = {}
+    mipMappedImages = []
+    environmentImages = []
+    preFilteredImages = []
+    
+    #
+
+    if context.scene.world.use_nodes:    
+        for currentNode in context.scene.world.node_tree.nodes:
+            if isinstance(currentNode, bpy.types.ShaderNodeTexEnvironment):
+                storeTexture = False
+                if currentNode.image is not None:
+                    images.setdefault(friendlyImageName(currentNode.image.filepath), currentNode.image)
+                    storeTexture = True
+
+                if storeTexture:
+                    cyclesEnvTextures.setdefault(friendlyImageName(currentNode.name), currentNode)
+    else:
+        if context.scene.world.light_settings.environment_color == 'SKY_TEXTURE':
+            for materialName in materials:
+
+                material = materials[materialName]
+        
+                for currentTextureSlot in material.texture_slots:
+                    if currentTextureSlot and currentTextureSlot.texture and currentTextureSlot.texture.type == 'ENVIRONMENT_MAP':
+                        storeTexture = False
+                        if currentTextureSlot.texture.image is not None:
+                            images.setdefault(friendlyImageName(currentTextureSlot.texture.image.filepath), currentTextureSlot.texture.image)
+                            storeTexture = True
+
+                        if storeTexture:
+                            envTextures.setdefault(friendlyImageName(currentTextureSlot.texture.name), currentTextureSlot.texture)
+
+    #
 
     for materialName in materials:
 
@@ -475,7 +510,7 @@ def saveTextures(context, filepath, imagesLibraryName, materials):
                         storeTexture = True
 
                     if storeTexture:
-                        cyclesTextures.setdefault(friendlyImageName(currentNode.name), currentNode)
+                        cyclesTextures.setdefault(friendlyName(material.name) + "_" + friendlyImageName(currentNode.name), currentNode)
 
     for nameOfTexture in textures:
 
@@ -483,9 +518,9 @@ def saveTextures(context, filepath, imagesLibraryName, materials):
         
         nameOfImage = friendlyImageName(texture.image.filepath)
         
-        useMipMap = "false"
         if texture.use_mipmap:
-            useMipMap = "true" 
+            if not nameOfImage in mipMappedImages:
+                mipMappedImages.append(nameOfImage)
 
         fw("#\n")
         fw("# Texture.\n")
@@ -493,7 +528,8 @@ def saveTextures(context, filepath, imagesLibraryName, materials):
         fw("\n")
         fw("name %s\n" % (nameOfTexture + "_texture"))
         fw("\n")
-        fw("mipmap %s\n" % (useMipMap))
+        if nameOfImage in mipMappedImages:
+            fw("mipmap true\n")
         fw("image %s\n" % (nameOfImage + "_image"))
         fw("\n")
 
@@ -503,7 +539,9 @@ def saveTextures(context, filepath, imagesLibraryName, materials):
         
         nameOfImage = friendlyImageName(node.image.filepath)
         
-        useMipMap = "true"
+        if node.interpolation == 'Cubic':
+            if not nameOfImage in mipMappedImages:
+                mipMappedImages.append(nameOfImage)
 
         fw("#\n")
         fw("# Texture.\n")
@@ -511,7 +549,49 @@ def saveTextures(context, filepath, imagesLibraryName, materials):
         fw("\n")
         fw("name %s\n" % (nameOfTexture + "_texture"))
         fw("\n")
-        fw("mipmap %s\n" % (useMipMap))
+        if nameOfImage in mipMappedImages:
+            fw("mipmap true\n")
+        fw("image %s\n" % (nameOfImage + "_image"))
+        fw("\n")
+
+    for nameOfTexture in envTextures:
+
+        texture = envTextures[nameOfTexture]
+        
+        nameOfImage = friendlyImageName(texture.image.filepath)
+
+        if not nameOfImage in environmentImages:
+            environmentImages.append( nameOfImage)
+
+        fw("#\n")
+        fw("# Environment Texture.\n")
+        fw("#\n")
+        fw("\n")
+        fw("name %s\n" % (nameOfTexture + "_texture"))
+        fw("\n")
+        fw("environment true\n")
+        fw("image %s\n" % (nameOfImage + "_image"))
+        fw("\n")
+
+    for nameOfTexture in cyclesEnvTextures:
+
+        node = cyclesEnvTextures[nameOfTexture]
+        
+        nameOfImage = friendlyImageName(node.image.filepath)
+        
+        if not nameOfImage in environmentImages:
+            environmentImages.append( nameOfImage)
+        if not nameOfImage in preFilteredImages:
+            preFilteredImages.append( nameOfImage)
+
+        fw("#\n")
+        fw("# Environment Texture.\n")
+        fw("#\n")
+        fw("\n")
+        fw("name %s\n" % (nameOfTexture + "_texture"))
+        fw("\n")
+        fw("environment true\n")
+        fw("pre_filtered true\n")
         fw("image %s\n" % (nameOfImage + "_image"))
         fw("\n")
     
@@ -519,10 +599,18 @@ def saveTextures(context, filepath, imagesLibraryName, materials):
 
         image = images[nameOfImage]
 
-        # Always save as TARGA
+        # Always save as TARGA ...
         context.scene.render.image_settings.file_format = 'TARGA'
+        context.scene.render.image_settings.color_depth = '8'        
+        extension = ".tga"
         
-        image.save_render((os.path.dirname(filepath) + "/" + nameOfImage + ".tga"), context.scene)
+        # ... and if image uses floats, as HDR:
+        if image.is_float:
+            context.scene.render.image_settings.file_format = 'HDR'
+            context.scene.render.image_settings.color_depth = '32'
+            extension = ".hdr"
+        
+        image.save_render((os.path.dirname(filepath) + "/" + nameOfImage + extension), context.scene)
 
         fw_image("#\n")
         fw_image("# Image.\n")
@@ -530,7 +618,14 @@ def saveTextures(context, filepath, imagesLibraryName, materials):
         fw_image("\n")
         fw_image("name %s\n" % (nameOfImage + "_image"))
         fw_image("\n")
-        fw_image("image_data %s\n" % (nameOfImage + ".tga"))
+        if nameOfImage in mipMappedImages:
+            fw_image("mipmap true\n")
+        else:
+            if nameOfImage in environmentImages:
+                fw_image("environment true\n")
+            if nameOfImage in preFilteredImages:
+                fw_image("pre_filtered true\n")
+        fw_image("image_data %s\n" % (nameOfImage + extension))
         fw_image("\n")
     
     file.close()
@@ -1228,7 +1323,7 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
                 currentTexImage = texImageFunction % (binding, binding)
                 currentFragmentGLSL = currentFragmentGLSL.replace("#nextTexture#", currentTexImage)
                 
-                fw("add_texture %s\n" % (friendlyImageName(nodes[binding].name) + "_texture" ))    
+                fw("add_texture %s\n" % (friendlyName(material.name) + "_" + friendlyImageName(nodes[binding].name) + "_texture" ))    
                 fw("\n")
                 
             fw("attributes %x\n" % (vertexAttributes))
@@ -2074,6 +2169,8 @@ def save(operator,
         fw("rotate 0.0 0.0 0.0\n")
         fw("scale 1.0 1.0 1.0\n")
         fw("\n")
+        
+        #TODO: Save environment map, if present.
     
     file.close()
 

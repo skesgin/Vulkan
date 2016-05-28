@@ -82,6 +82,13 @@ How to build:
 Changelog:
 ----------
 
+05/28/2016
+- Added layers for image data.
+- Added sampling for image data.
+
+05/26/2016
+- Mip maps of images are now only created for textures using them.
+
 05/25/2016
 - Made resize code more robust and reliable.
 - Fixed profile code for POSIX.

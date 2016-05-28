@@ -165,7 +165,7 @@ vkts::IImageDataSP Example::gatherImageData() const
 			return vkts::IImageDataSP();
 		}
 
-		imageData->upload(stageDeviceMemory->getMemory(), 0, subresourceLayout);
+		imageData->upload(stageDeviceMemory->getMemory(), 0, 0, subresourceLayout);
 
 		if (!(stageDeviceMemory->getMemoryPropertyFlags() & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT))
 		{
@@ -300,7 +300,7 @@ vkts::IImageDataSP Example::gatherImageData() const
 			return vkts::IImageDataSP();
 		}
 
-		imageData->upload(stageDeviceMemory->getMemory(), 0, subresourceLayout);
+		imageData->upload(stageDeviceMemory->getMemory(), 0, 0, subresourceLayout);
 
 		if (!(stageDeviceMemory->getMemoryPropertyFlags() & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT))
 		{

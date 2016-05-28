@@ -61,6 +61,8 @@ public:
 
     virtual uint32_t getMipLevels() const = 0;
 
+    virtual uint32_t getArrayLayers() const = 0;
+
     virtual const void* getData() const = 0;
 
     virtual size_t getSize() const = 0;
@@ -68,12 +70,12 @@ public:
     /**
      * Copy image data pixels into the given data pointer.
      */
-    virtual VkBool32 copy(void* data, const uint32_t mipLevel, const VkSubresourceLayout& subresourceLayout) const = 0;
+    virtual VkBool32 copy(void* data, const uint32_t mipLevel, const uint32_t arrayLayer, const VkSubresourceLayout& subresourceLayout) const = 0;
 
     /**
      * Uploads pixel data into image data.
      */
-    virtual VkBool32 upload(const void* data, const uint32_t mipLevel, const VkSubresourceLayout& subresourceLayout) const = 0;
+    virtual VkBool32 upload(const void* data, const uint32_t mipLevel, const uint32_t arrayLayer, const VkSubresourceLayout& subresourceLayout) const = 0;
 
     virtual VkBool32 isUNORM() const = 0;
 
@@ -83,9 +85,11 @@ public:
 
     virtual int32_t getNumberChannels() const = 0;
 
-    virtual void setTexel(const glm::vec4& rgba, const uint32_t x, const uint32_t y, const uint32_t z) = 0;
+    virtual void setTexel(const glm::vec4& rgba, const uint32_t x, const uint32_t y, const uint32_t z, const uint32_t mipLevel, const uint32_t arrayLayer) = 0;
 
-    virtual glm::vec4 getTexel(const uint32_t x, const uint32_t y, const uint32_t z) const = 0;
+    virtual glm::vec4 getTexel(const uint32_t x, const uint32_t y, const uint32_t z, const uint32_t mipLevel, const uint32_t arrayLayer) const = 0;
+
+    virtual glm::vec4 getSample(const float x, const VkSamplerMipmapMode mipmapModeX, const VkSamplerAddressMode addressModeX, const float y, const VkSamplerMipmapMode mipmapModeY, const VkSamplerAddressMode addressModeY, const float z, const VkSamplerMipmapMode mipmapModeZ, const VkSamplerAddressMode addressModeZ, const uint32_t mipLevel, const uint32_t arrayLayer) const = 0;
 
 };
 

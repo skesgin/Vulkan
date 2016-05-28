@@ -45,6 +45,7 @@ private:
     VkFormat format;
     VkExtent3D extent;
     uint32_t mipLevels;
+    uint32_t arrayLayers;
 
     IBinaryBufferSP buffer;
 
@@ -53,14 +54,19 @@ private:
     int32_t bytesPerChannel;
     int32_t numberChannels;
 
-    void
-    reset();
+    mutable std::vector<size_t> allOffsets;
+
+    void reset();
+
+    size_t getOffset(VkExtent3D& currentExtent, const uint32_t mipLevel, const uint32_t arrayLayer) const;
+
+    int32_t getTexelLocation(float& fraction, const float a, const int32_t size, const VkSamplerAddressMode addressMode) const;
 
 public:
 
     ImageData() = delete;
-    ImageData(const std::string& name, const VkImageType imageType, const VkFormat& format, const VkExtent3D& extent, const uint32_t mipLevels, const uint8_t* data, const size_t size);
-    ImageData(const std::string& name, const VkImageType imageType, const VkFormat& format, const VkExtent3D& extent, const uint32_t mipLevels, const IBinaryBufferSP& buffer);
+    ImageData(const std::string& name, const VkImageType imageType, const VkFormat& format, const VkExtent3D& extent, const uint32_t mipLevels, const uint32_t arrayLayers, const uint8_t* data, const size_t size);
+    ImageData(const std::string& name, const VkImageType imageType, const VkFormat& format, const VkExtent3D& extent, const uint32_t mipLevels, const uint32_t arrayLayers, const IBinaryBufferSP& buffer);
     ImageData(const ImageData& other) = delete;
     ImageData(ImageData&& other) = delete;
     virtual ~ImageData();
@@ -89,13 +95,15 @@ public:
 
     virtual uint32_t getMipLevels() const override;
 
+    virtual uint32_t getArrayLayers() const override;
+
     virtual const void* getData() const override;
 
     virtual size_t getSize() const override;
 
-    virtual VkBool32 copy(void* data, const uint32_t mipLevel, const VkSubresourceLayout& subresourceLayout) const override;
+    virtual VkBool32 copy(void* data, const uint32_t mipLevel, const uint32_t arrayLayer, const VkSubresourceLayout& subresourceLayout) const override;
 
-    virtual VkBool32 upload(const void* data, const uint32_t mipLevel, const VkSubresourceLayout& subresourceLayout) const override;
+    virtual VkBool32 upload(const void* data, const uint32_t mipLevel, const uint32_t arrayLayer, const VkSubresourceLayout& subresourceLayout) const override;
 
     virtual VkBool32 isUNORM() const override;
 
@@ -105,9 +113,11 @@ public:
 
     virtual int32_t getNumberChannels() const override;
 
-    virtual void setTexel(const glm::vec4& rgba, const uint32_t x, const uint32_t y, const uint32_t z) override;
+    virtual void setTexel(const glm::vec4& rgba, const uint32_t x, const uint32_t y, const uint32_t z, const uint32_t mipLevel, const uint32_t arrayLayer) override;
 
-    virtual glm::vec4 getTexel(const uint32_t x, const uint32_t y, const uint32_t z) const override;
+    virtual glm::vec4 getTexel(const uint32_t x, const uint32_t y, const uint32_t z, const uint32_t mipLevel, const uint32_t arrayLayer) const override;
+
+    virtual glm::vec4 getSample(const float x, const VkSamplerMipmapMode mipmapModeX, const VkSamplerAddressMode addressModeX, const float y, const VkSamplerMipmapMode mipmapModeY, const VkSamplerAddressMode addressModeY, const float z, const VkSamplerMipmapMode mipmapModeZ, const VkSamplerAddressMode addressModeZ, const uint32_t mipLevel, const uint32_t arrayLayer) const override;
 
 };
 

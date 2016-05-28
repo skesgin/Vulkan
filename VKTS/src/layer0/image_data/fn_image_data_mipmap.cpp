@@ -110,7 +110,7 @@ SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataMipmap(const IImageDataS
                         {
                             for (int32_t ix = x * 2; ix < x * 2 + 1; ix++)
                             {
-                                rgba += currentSourceImage->getTexel(ix, iy, iz);
+                                rgba += currentSourceImage->getTexel(ix, iy, iz, 0, 0);
 
                                 sampleCount += 1.0f;
                             }
@@ -121,7 +121,7 @@ SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataMipmap(const IImageDataS
                     {
                         rgba /= sampleCount;
 
-                        currentTargetImage->setTexel(rgba, x, y, z);
+                        currentTargetImage->setTexel(rgba, x, y, z, 0, 0);
                     }
                 }
             }

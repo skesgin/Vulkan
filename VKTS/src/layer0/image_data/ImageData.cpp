@@ -41,6 +41,7 @@ void ImageData::reset()
     extent = { 0, 0, 0};
 
     mipLevels = 0;
+    arrayLayers = 0;
 
     if (buffer.get())
     {
@@ -51,10 +52,106 @@ void ImageData::reset()
     SFLOAT = VK_FALSE;
     bytesPerChannel = 0;
     numberChannels = 0;
+
+    allOffsets.clear();
 }
 
-ImageData::ImageData(const std::string& name, const VkImageType imageType, const VkFormat& format, const VkExtent3D& extent, const uint32_t mipLevels, const uint8_t* data, const size_t size) :
-    IImageData(), name(name), imageType(imageType), format(format), extent(extent), mipLevels(mipLevels)
+size_t ImageData::getOffset(VkExtent3D& currentExtent, const uint32_t mipLevel, const uint32_t arrayLayer) const
+{
+	if (allOffsets.size() != 0)
+	{
+		currentExtent.width = glm::max(extent.width >> (mipLevel), 1u);
+		currentExtent.height = glm::max(extent.height >> (mipLevel), 1u);
+		currentExtent.depth = glm::max(extent.depth >> (mipLevel), 1u);
+
+		return allOffsets[arrayLayer * mipLevels + mipLevel];
+	}
+
+    size_t offset = 0;
+
+	for (uint32_t currentArrayLayer = 0; currentArrayLayer < arrayLayers; currentArrayLayer++)
+	{
+		currentExtent = extent;
+
+		for (uint32_t currentMipLevel = 0; currentMipLevel < mipLevels; currentMipLevel++)
+		{
+			allOffsets.push_back(offset);
+
+			currentExtent.width = glm::max(extent.width >> (currentMipLevel), 1u);
+			currentExtent.height = glm::max(extent.height >> (currentMipLevel), 1u);
+			currentExtent.depth = glm::max(extent.depth >> (currentMipLevel), 1u);
+
+			offset += bytesPerChannel * numberChannels * currentExtent.width * currentExtent.height * currentExtent.depth;
+		}
+	}
+
+	return allOffsets[arrayLayer * mipLevels + mipLevel];
+}
+
+int32_t ImageData::getTexelLocation(float& fraction, const float a, const int32_t size, const VkSamplerAddressMode addressMode) const
+{
+	float unnormalizedA = a * (float)size;
+
+	//
+
+	fraction = fabsf(unnormalizedA - floorf(unnormalizedA));
+
+	//
+
+	int32_t coord = (int32_t)unnormalizedA;
+
+	if (addressMode == VK_SAMPLER_ADDRESS_MODE_REPEAT)
+	{
+		coord = coord % size;
+
+		//
+
+		if (coord < 0)
+		{
+			coord += size;
+		}
+	}
+	else if	(addressMode == VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT)
+	{
+		coord = (coord % (2 * size)) - size;
+
+		if (coord < 0)
+		{
+			coord = -(1 + coord);
+		}
+
+		coord = (size - 1) - coord;
+
+		//
+
+		if (coord < 0)
+		{
+			coord = -coord;
+		}
+	}
+	else if	(addressMode == VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE)
+	{
+		coord = glm::clamp(coord, 0, size - 1);
+	}
+	else if	(addressMode == VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER)
+	{
+		coord = glm::clamp(coord, -1, size);
+	}
+	else if	(addressMode == VK_SAMPLER_ADDRESS_MODE_MIRROR_CLAMP_TO_EDGE)
+	{
+		if (coord < 0)
+		{
+			coord = -(1 + coord);
+		}
+
+		coord = glm::clamp(coord, 0, size - 1);
+	}
+
+	return coord;
+}
+
+ImageData::ImageData(const std::string& name, const VkImageType imageType, const VkFormat& format, const VkExtent3D& extent, const uint32_t mipLevels, const uint32_t arrayLayers, const uint8_t* data, const size_t size) :
+    IImageData(), name(name), imageType(imageType), format(format), extent(extent), mipLevels(mipLevels), arrayLayers(arrayLayers), allOffsets()
 {
     buffer = IBinaryBufferSP(new BinaryBuffer(data, size));
 
@@ -69,8 +166,8 @@ ImageData::ImageData(const std::string& name, const VkImageType imageType, const
     numberChannels = commonGetNumberChannels(format);
 }
 
-ImageData::ImageData(const std::string& name, const VkImageType imageType, const VkFormat& format, const VkExtent3D& extent, const uint32_t mipLevels, const IBinaryBufferSP& buffer) :
-    IImageData(), name(name), imageType(imageType), format(format), extent(extent), mipLevels(mipLevels), buffer(buffer)
+ImageData::ImageData(const std::string& name, const VkImageType imageType, const VkFormat& format, const VkExtent3D& extent, const uint32_t mipLevels, const uint32_t arrayLayers, const IBinaryBufferSP& buffer) :
+    IImageData(), name(name), imageType(imageType), format(format), extent(extent), mipLevels(mipLevels), arrayLayers(arrayLayers), buffer(buffer), allOffsets()
 {
     if (!this->buffer.get() || !this->buffer->getData())
     {
@@ -132,6 +229,11 @@ uint32_t ImageData::getMipLevels() const
     return mipLevels;
 }
 
+uint32_t ImageData::getArrayLayers() const
+{
+    return arrayLayers;
+}
+
 const void* ImageData::getData() const
 {
     if (buffer.get())
@@ -152,10 +254,9 @@ size_t ImageData::getSize() const
     return 0;
 }
 
-VkBool32 ImageData::copy(void* data, const uint32_t mipLevel,
-                         const VkSubresourceLayout& subresourceLayout) const
+VkBool32 ImageData::copy(void* data, const uint32_t mipLevel, const uint32_t arrayLayer, const VkSubresourceLayout& subresourceLayout) const
 {
-    if (!data || mipLevel >= mipLevels || !getData())
+    if (!data || mipLevel >= mipLevels || arrayLayer >= arrayLayers || !getData())
     {
         return VK_FALSE;
     }
@@ -165,18 +266,11 @@ VkBool32 ImageData::copy(void* data, const uint32_t mipLevel,
         return VK_FALSE;
     }
 
-    size_t offset = 0;
+	VkExtent3D currentExtent;
 
-    VkExtent3D currentExtent = extent;
+    size_t offset = getOffset(currentExtent, mipLevel, arrayLayer);
 
-    for (uint32_t i = 0; i < mipLevel; i++)
-    {
-        offset += bytesPerChannel * numberChannels * currentExtent.width * currentExtent.height * currentExtent.depth;
-
-        currentExtent.width = glm::max(extent.width >> (i + 1), 1u);
-        currentExtent.height = glm::max(extent.height >> (i + 1), 1u);
-        currentExtent.depth = glm::max(extent.depth >> (i + 1), 1u);
-    }
+    //
 
     const uint8_t* currentSourceBuffer = &(static_cast<const uint8_t*>(buffer->getData())[offset]);
 
@@ -194,7 +288,7 @@ VkBool32 ImageData::copy(void* data, const uint32_t mipLevel,
         {
             currentSourceChannel = &currentSourceBuffer[y * currentExtent.width * numberChannels * bytesPerChannel + z * currentExtent.height * currentExtent.width * numberChannels * bytesPerChannel];
 
-            currentTargetChannel = &currentTargetBuffer[y * subresourceLayout.rowPitch + z * subresourceLayout.depthPitch + subresourceLayout.offset];
+            currentTargetChannel = &currentTargetBuffer[y * subresourceLayout.rowPitch + z * subresourceLayout.depthPitch + arrayLayer * subresourceLayout.arrayPitch + subresourceLayout.offset];
 
             memcpy(currentTargetChannel, currentSourceChannel, numberChannels * bytesPerChannel * currentExtent.width);
         }
@@ -203,9 +297,9 @@ VkBool32 ImageData::copy(void* data, const uint32_t mipLevel,
     return VK_TRUE;
 }
 
-VkBool32 ImageData::upload(const void* data, const uint32_t mipLevel, const VkSubresourceLayout& subresourceLayout) const
+VkBool32 ImageData::upload(const void* data, const uint32_t mipLevel, const uint32_t arrayLayer, const VkSubresourceLayout& subresourceLayout) const
 {
-    if (!data || mipLevel >= mipLevels || !getData())
+    if (!data || mipLevel >= mipLevels || arrayLayer >= arrayLayers || !getData())
     {
         return VK_FALSE;
     }
@@ -215,18 +309,11 @@ VkBool32 ImageData::upload(const void* data, const uint32_t mipLevel, const VkSu
         return VK_FALSE;
     }
 
-    size_t offset = 0;
+	VkExtent3D currentExtent;
 
-    VkExtent3D currentExtent = extent;
+    size_t offset = getOffset(currentExtent, mipLevel, arrayLayer);
 
-    for (uint32_t i = 0; i < mipLevel; i++)
-    {
-        offset += bytesPerChannel * numberChannels * currentExtent.width * currentExtent.height * currentExtent.depth;
-
-        currentExtent.width = glm::max(extent.width >> (i + 1u), 1u);
-        currentExtent.height = glm::max(extent.height >> (i + 1u), 1u);
-        currentExtent.depth = glm::max(extent.depth >> (i + 1u), 1u);
-    }
+    //
 
     if (subresourceLayout.size > (VkDeviceSize)(buffer->getSize() - offset))
     {
@@ -248,7 +335,7 @@ VkBool32 ImageData::upload(const void* data, const uint32_t mipLevel, const VkSu
     {
         for (uint32_t y = 0; y < currentExtent.height; y++)
         {
-            currentSourceChannel = &currentSourceBuffer[y * subresourceLayout.rowPitch + z * subresourceLayout.depthPitch + subresourceLayout.offset];
+            currentSourceChannel = &currentSourceBuffer[y * subresourceLayout.rowPitch + z * subresourceLayout.depthPitch + arrayLayer * subresourceLayout.arrayPitch + subresourceLayout.offset];
 
             buffer->write(currentSourceChannel, 1, numberChannels * bytesPerChannel * currentExtent.width);
         }
@@ -277,14 +364,20 @@ int32_t ImageData::getNumberChannels() const
     return numberChannels;
 }
 
-void ImageData::setTexel(const glm::vec4& rgba, const uint32_t x, const uint32_t y, const uint32_t z)
+void ImageData::setTexel(const glm::vec4& rgba, const uint32_t x, const uint32_t y, const uint32_t z, const uint32_t mipLevel, const uint32_t arrayLayer)
 {
-    if (x >= extent.width || y >= extent.height || z >= extent.depth)
+    if (x >= extent.width || y >= extent.height || z >= extent.depth || mipLevel >= mipLevels || arrayLayer >= arrayLayers)
     {
-        return;;
+        return;
     }
 
-    buffer->seek(numberChannels * bytesPerChannel * x + numberChannels * bytesPerChannel * y * extent.width + numberChannels * bytesPerChannel * z * extent.width * extent.height, VKTS_SEARCH_ABSOLUTE);
+	VkExtent3D currentExtent;
+
+    size_t offset = getOffset(currentExtent, mipLevel, arrayLayer);
+
+    //
+
+    buffer->seek((uint32_t)offset + numberChannels * bytesPerChannel * x + numberChannels * bytesPerChannel * y * extent.width + numberChannels * bytesPerChannel * z * extent.width * extent.height, VKTS_SEARCH_ABSOLUTE);
 
     if (UNORM)
     {
@@ -326,14 +419,20 @@ void ImageData::setTexel(const glm::vec4& rgba, const uint32_t x, const uint32_t
     }
 }
 
-glm::vec4 ImageData::getTexel(const uint32_t x, const uint32_t y, const uint32_t z) const
+glm::vec4 ImageData::getTexel(const uint32_t x, const uint32_t y, const uint32_t z, const uint32_t mipLevel, const uint32_t arrayLayer) const
 {
-    if (x >= extent.width || y >= extent.height || z >= extent.depth)
+    if (x >= extent.width || y >= extent.height || z >= extent.depth || mipLevel >= mipLevels || arrayLayer >= arrayLayers)
     {
         return glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
     }
 
-    buffer->seek(numberChannels * bytesPerChannel * x + numberChannels * bytesPerChannel * y * extent.width + numberChannels * bytesPerChannel * z * extent.width * extent.height, VKTS_SEARCH_ABSOLUTE);
+	VkExtent3D currentExtent;
+
+    size_t offset = getOffset(currentExtent, mipLevel, arrayLayer);
+
+    //
+
+    buffer->seek((uint32_t)offset + numberChannels * bytesPerChannel * x + numberChannels * bytesPerChannel * y * extent.width + numberChannels * bytesPerChannel * z * extent.width * extent.height, VKTS_SEARCH_ABSOLUTE);
 
     glm::vec4 result(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -377,6 +476,127 @@ glm::vec4 ImageData::getTexel(const uint32_t x, const uint32_t y, const uint32_t
     }
 
     return result;
+}
+
+glm::vec4 ImageData::getSample(const float x, const VkSamplerMipmapMode mipmapModeX, const VkSamplerAddressMode addressModeX, const float y, const VkSamplerMipmapMode mipmapModeY, const VkSamplerAddressMode addressModeY, const float z, const VkSamplerMipmapMode mipmapModeZ, const VkSamplerAddressMode addressModeZ, const uint32_t mipLevel, const uint32_t arrayLayer) const
+{
+	glm::vec4 result(0.0f, 0.0f, 0.0f, 0.0f);
+
+	//
+
+	float fractionX;
+	float fractionY;
+	float fractionZ;
+
+	int32_t texelX = getTexelLocation(fractionX, x, (int32_t)extent.width, addressModeX);
+	int32_t texelY = getTexelLocation(fractionY, y, (int32_t)extent.height, addressModeY);
+	int32_t texelZ = getTexelLocation(fractionZ, z, (int32_t)extent.depth, addressModeZ);
+
+	int32_t texelOffsetX = 0;
+	int32_t texelOffsetY = 0;
+	int32_t texelOffsetZ = 0;
+
+	//
+
+	float weightX = 1.0f - (fabsf(0.5 - fractionX) * 2.0f);
+	float weightY = 1.0f - (fabsf(0.5 - fractionY) * 2.0f);
+	float weightZ = 1.0f - (fabsf(0.5 - fractionZ) * 2.0f);
+
+	//
+
+	float weight;
+
+	for (uint32_t currentZ = 0; currentZ < (uint32_t)mipmapModeZ + 1; currentZ++)
+	{
+		weight = 1.0f;
+
+		//
+
+		texelOffsetZ = 0;
+
+		if (mipmapModeZ)
+		{
+			if (currentZ == 0)
+			{
+				weight *= weightZ;
+			}
+			else
+			{
+				weight *= (1.0f - weightZ);
+
+				if (fractionZ >= 0.5f)
+				{
+					texelOffsetZ++;
+				}
+				else
+				{
+					texelOffsetZ--;
+				}
+			}
+		}
+
+		//
+
+		for (uint32_t currentY = 0; currentY < (uint32_t)mipmapModeY + 1; currentY++)
+		{
+			texelOffsetY = 0;
+
+			if (mipmapModeY)
+			{
+				if (currentY == 0)
+				{
+					weight *= weightY;
+				}
+				else
+				{
+					weight *= (1.0f - weightY);
+
+					if (fractionY >= 0.5f)
+					{
+						texelOffsetY++;
+					}
+					else
+					{
+						texelOffsetY--;
+					}
+				}
+			}
+
+			//
+
+			for (uint32_t currentX = 0; currentX < (uint32_t)mipmapModeX + 1; currentX++)
+			{
+				texelOffsetX = 0;
+
+				if (mipmapModeX)
+				{
+					if (currentX == 0)
+					{
+						weight *= weightX;
+					}
+					else
+					{
+						weight *= (1.0f - weightX);
+
+						if (fractionX >= 0.5f)
+						{
+							texelOffsetX++;
+						}
+						else
+						{
+							texelOffsetX--;
+						}
+					}
+				}
+
+				//
+
+				result += getTexel((uint32_t)(texelX + texelOffsetX), (uint32_t)(texelY + texelOffsetY), (uint32_t)(texelZ + texelOffsetZ), mipLevel, arrayLayer) * weight;
+			}
+		}
+	}
+
+	return result;
 }
 
 } /* namespace vkts */
