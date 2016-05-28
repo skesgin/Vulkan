@@ -58,32 +58,30 @@ void ImageData::reset()
 
 size_t ImageData::getOffset(VkExtent3D& currentExtent, const uint32_t mipLevel, const uint32_t arrayLayer) const
 {
-	if (allOffsets.size() != 0)
+	if (allOffsets.size() == 0)
 	{
-		currentExtent.width = glm::max(extent.width >> (mipLevel), 1u);
-		currentExtent.height = glm::max(extent.height >> (mipLevel), 1u);
-		currentExtent.depth = glm::max(extent.depth >> (mipLevel), 1u);
+		size_t offset = 0;
 
-		return allOffsets[arrayLayer * mipLevels + mipLevel];
-	}
-
-    size_t offset = 0;
-
-	for (uint32_t currentArrayLayer = 0; currentArrayLayer < arrayLayers; currentArrayLayer++)
-	{
-		currentExtent = extent;
-
-		for (uint32_t currentMipLevel = 0; currentMipLevel < mipLevels; currentMipLevel++)
+		for (uint32_t currentArrayLayer = 0; currentArrayLayer < arrayLayers; currentArrayLayer++)
 		{
-			allOffsets.push_back(offset);
+			currentExtent = extent;
 
-			currentExtent.width = glm::max(extent.width >> (currentMipLevel), 1u);
-			currentExtent.height = glm::max(extent.height >> (currentMipLevel), 1u);
-			currentExtent.depth = glm::max(extent.depth >> (currentMipLevel), 1u);
+			for (uint32_t currentMipLevel = 0; currentMipLevel < mipLevels; currentMipLevel++)
+			{
+				allOffsets.push_back(offset);
 
-			offset += bytesPerChannel * numberChannels * currentExtent.width * currentExtent.height * currentExtent.depth;
+				currentExtent.width = glm::max(extent.width >> (currentMipLevel), 1u);
+				currentExtent.height = glm::max(extent.height >> (currentMipLevel), 1u);
+				currentExtent.depth = glm::max(extent.depth >> (currentMipLevel), 1u);
+
+				offset += bytesPerChannel * numberChannels * currentExtent.width * currentExtent.height * currentExtent.depth;
+			}
 		}
 	}
+
+	currentExtent.width = glm::max(extent.width >> (mipLevel), 1u);
+	currentExtent.height = glm::max(extent.height >> (mipLevel), 1u);
+	currentExtent.depth = glm::max(extent.depth >> (mipLevel), 1u);
 
 	return allOffsets[arrayLayer * mipLevels + mipLevel];
 }
