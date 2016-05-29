@@ -65,6 +65,8 @@ public:
 
     virtual const void* getData() const = 0;
 
+    virtual const uint8_t* getByteData() const = 0;
+
     virtual size_t getSize() const = 0;
 
     /**
@@ -91,6 +93,7 @@ public:
 
     virtual glm::vec4 getSample(const float x, const VkSamplerMipmapMode mipmapModeX, const VkSamplerAddressMode addressModeX, const float y, const VkSamplerMipmapMode mipmapModeY, const VkSamplerAddressMode addressModeY, const float z, const VkSamplerMipmapMode mipmapModeZ, const VkSamplerAddressMode addressModeZ, const uint32_t mipLevel, const uint32_t arrayLayer) const = 0;
 
+    virtual VkBool32 getExtentAndOffset(VkExtent3D& currentExtent, size_t& currentOffset, const uint32_t mipLevel, const uint32_t arrayLayer) const = 0;
 };
 
 typedef std::shared_ptr<IImageData> IImageDataSP;

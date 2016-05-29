@@ -82,6 +82,9 @@ How to build:
 Changelog:
 ----------
 
+05/29/2016
+- Added feature to save mip level and array layer of an image data.
+
 05/28/2016
 - Added layers for image data.
 - Added sampling for image data.

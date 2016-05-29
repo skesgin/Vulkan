@@ -56,36 +56,6 @@ void ImageData::reset()
     allOffsets.clear();
 }
 
-size_t ImageData::getOffset(VkExtent3D& currentExtent, const uint32_t mipLevel, const uint32_t arrayLayer) const
-{
-	if (allOffsets.size() == 0)
-	{
-		size_t offset = 0;
-
-		for (uint32_t currentArrayLayer = 0; currentArrayLayer < arrayLayers; currentArrayLayer++)
-		{
-			currentExtent = extent;
-
-			for (uint32_t currentMipLevel = 0; currentMipLevel < mipLevels; currentMipLevel++)
-			{
-				allOffsets.push_back(offset);
-
-				currentExtent.width = glm::max(extent.width >> (currentMipLevel), 1u);
-				currentExtent.height = glm::max(extent.height >> (currentMipLevel), 1u);
-				currentExtent.depth = glm::max(extent.depth >> (currentMipLevel), 1u);
-
-				offset += bytesPerChannel * numberChannels * currentExtent.width * currentExtent.height * currentExtent.depth;
-			}
-		}
-	}
-
-	currentExtent.width = glm::max(extent.width >> (mipLevel), 1u);
-	currentExtent.height = glm::max(extent.height >> (mipLevel), 1u);
-	currentExtent.depth = glm::max(extent.depth >> (mipLevel), 1u);
-
-	return allOffsets[arrayLayer * mipLevels + mipLevel];
-}
-
 int32_t ImageData::getTexelLocation(float& fraction, const float a, const int32_t size, const VkSamplerAddressMode addressMode) const
 {
 	float unnormalizedA = a * (float)size;
@@ -242,6 +212,11 @@ const void* ImageData::getData() const
     return nullptr;
 }
 
+const uint8_t* ImageData::getByteData() const
+{
+    return (const uint8_t*)getData();
+}
+
 size_t ImageData::getSize() const
 {
     if (buffer.get())
@@ -265,8 +240,9 @@ VkBool32 ImageData::copy(void* data, const uint32_t mipLevel, const uint32_t arr
     }
 
 	VkExtent3D currentExtent;
+	size_t offset;
 
-    size_t offset = getOffset(currentExtent, mipLevel, arrayLayer);
+    getExtentAndOffset(currentExtent, offset, mipLevel, arrayLayer);
 
     //
 
@@ -308,8 +284,9 @@ VkBool32 ImageData::upload(const void* data, const uint32_t mipLevel, const uint
     }
 
 	VkExtent3D currentExtent;
+	size_t offset;
 
-    size_t offset = getOffset(currentExtent, mipLevel, arrayLayer);
+    getExtentAndOffset(currentExtent, offset, mipLevel, arrayLayer);
 
     //
 
@@ -370,8 +347,9 @@ void ImageData::setTexel(const glm::vec4& rgba, const uint32_t x, const uint32_t
     }
 
 	VkExtent3D currentExtent;
+	size_t offset;
 
-    size_t offset = getOffset(currentExtent, mipLevel, arrayLayer);
+    getExtentAndOffset(currentExtent, offset, mipLevel, arrayLayer);
 
     //
 
@@ -425,8 +403,9 @@ glm::vec4 ImageData::getTexel(const uint32_t x, const uint32_t y, const uint32_t
     }
 
 	VkExtent3D currentExtent;
+	size_t offset;
 
-    size_t offset = getOffset(currentExtent, mipLevel, arrayLayer);
+    getExtentAndOffset(currentExtent, offset, mipLevel, arrayLayer);
 
     //
 
@@ -595,6 +574,43 @@ glm::vec4 ImageData::getSample(const float x, const VkSamplerMipmapMode mipmapMo
 	}
 
 	return result;
+}
+
+VkBool32 ImageData::getExtentAndOffset(VkExtent3D& currentExtent, size_t& currentOffset, const uint32_t mipLevel, const uint32_t arrayLayer) const
+{
+	if (mipLevel >= mipLevels || arrayLayer >= arrayLayers)
+	{
+		return VK_FALSE;
+	}
+
+	if (allOffsets.size() == 0)
+	{
+		size_t offset = 0;
+
+		for (uint32_t currentArrayLayer = 0; currentArrayLayer < arrayLayers; currentArrayLayer++)
+		{
+			currentExtent = extent;
+
+			for (uint32_t currentMipLevel = 0; currentMipLevel < mipLevels; currentMipLevel++)
+			{
+				allOffsets.push_back(offset);
+
+				currentExtent.width = glm::max(extent.width >> (currentMipLevel), 1u);
+				currentExtent.height = glm::max(extent.height >> (currentMipLevel), 1u);
+				currentExtent.depth = glm::max(extent.depth >> (currentMipLevel), 1u);
+
+				offset += bytesPerChannel * numberChannels * currentExtent.width * currentExtent.height * currentExtent.depth;
+			}
+		}
+	}
+
+	currentExtent.width = glm::max(extent.width >> (mipLevel), 1u);
+	currentExtent.height = glm::max(extent.height >> (mipLevel), 1u);
+	currentExtent.depth = glm::max(extent.depth >> (mipLevel), 1u);
+
+	currentOffset = allOffsets[arrayLayer * mipLevels + mipLevel];
+
+	return VK_TRUE;
 }
 
 } /* namespace vkts */

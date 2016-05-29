@@ -690,7 +690,7 @@ IImageDataSP VKTS_APIENTRY imageDataLoad(const char* filename)
     return IImageDataSP();
 }
 
-static IBinaryBufferSP imageDataSaveTga(const IImageDataSP& imageData)
+static IBinaryBufferSP imageDataSaveTga(const IImageDataSP& imageData, const uint32_t mipLevel, const uint32_t arrayLayer)
 {
     if (!imageData.get())
     {
@@ -723,7 +723,14 @@ static IBinaryBufferSP imageDataSaveTga(const IImageDataSP& imageData)
 
     size_t numberChannels = bitsPerPixel / 8;
 
-    size_t size = imageData->getWidth() * imageData->getHeight() * imageData->getDepth() * numberChannels + 18;
+	VkExtent3D currentExtent;
+	size_t offset;
+    if (!imageData->getExtentAndOffset(currentExtent, offset, mipLevel, arrayLayer))
+    {
+    	return IBinaryBufferSP();
+    }
+
+    size_t size = currentExtent.width * currentExtent.height * currentExtent.depth * numberChannels + 18;
 
     // 18 bytes is the size of the header.
     IBinaryBufferSP buffer = IBinaryBufferSP(new BinaryBuffer(size));
@@ -755,8 +762,8 @@ static IBinaryBufferSP imageDataSaveTga(const IImageDataSP& imageData)
         return IBinaryBufferSP();
     }
 
-    uint16_t width = static_cast<uint16_t>(imageData->getWidth());
-    uint16_t height = static_cast<uint16_t>(imageData->getHeight());
+    uint16_t width = static_cast<uint16_t>(currentExtent.width);
+    uint16_t height = static_cast<uint16_t>(currentExtent.height);
     uint16_t depth = 1;
 
     if (buffer->write(&width, 2, 1) != 1)
@@ -790,7 +797,7 @@ static IBinaryBufferSP imageDataSaveTga(const IImageDataSP& imageData)
         return IBinaryBufferSP();
     }
 
-    memcpy(&data[0], imageData->getData(), width * height * depth * numberChannels);
+    memcpy(&data[0], &(imageData->getByteData()[offset]), width * height * depth * numberChannels);
 
     if (imageData->getFormat() == VK_FORMAT_R8G8B8_UNORM || imageData->getFormat() == VK_FORMAT_R8G8B8A8_UNORM)
     {
@@ -805,7 +812,7 @@ static IBinaryBufferSP imageDataSaveTga(const IImageDataSP& imageData)
     return buffer;
 }
 
-static IBinaryBufferSP imageDataSaveHdr(const IImageDataSP& imageData)
+static IBinaryBufferSP imageDataSaveHdr(const IImageDataSP& imageData, const uint32_t mipLevel, const uint32_t arrayLayer)
 {
     if (!imageData.get())
     {
@@ -817,16 +824,24 @@ static IBinaryBufferSP imageDataSaveHdr(const IImageDataSP& imageData)
         return IBinaryBufferSP();
     }
 
+
+	VkExtent3D currentExtent;
+	size_t offset;
+    if (!imageData->getExtentAndOffset(currentExtent, offset, mipLevel, arrayLayer))
+    {
+    	return IBinaryBufferSP();
+    }
+
     char tempBuffer[256];
 
-    if (snprintf(tempBuffer, 256, "-Y %d +X %d\n", imageData->getHeight(), imageData->getWidth()) < 0)
+    if (snprintf(tempBuffer, 256, "-Y %d +X %d\n", currentExtent.height, currentExtent.width) < 0)
     {
         return IBinaryBufferSP();
     }
 
     size_t numberChannels = 3;
 
-    size_t size = (imageData->getWidth() * imageData->getHeight() * imageData->getDepth()) * 4 * sizeof(uint8_t) + VKTS_HDR_HEADER_SIZE + strlen(tempBuffer);
+    size_t size = (currentExtent.width * currentExtent.height * currentExtent.depth) * 4 * sizeof(uint8_t) + VKTS_HDR_HEADER_SIZE + strlen(tempBuffer);
 
     // 52 bytes is the size of the header. RGB, where each channel is 4 bytes, is encoded in total of 4 bytes.
     IBinaryBufferSP buffer = IBinaryBufferSP(new BinaryBuffer(size));
@@ -850,14 +865,14 @@ static IBinaryBufferSP imageDataSaveHdr(const IImageDataSP& imageData)
 
     uint8_t rgbe[4];
 
-    const float* tempData = static_cast<const float*>(imageData->getData());
+    const float* tempData = reinterpret_cast<const float*>(&(imageData->getByteData()[offset]));
 
     // Non compressed data
-    for (int32_t y = (int32_t)imageData->getHeight() - 1; y >= 0; y--)
+    for (int32_t y = (int32_t)currentExtent.height - 1; y >= 0; y--)
     {
-        for (int32_t x = 0; x < (int32_t)imageData->getWidth(); x++)
+        for (int32_t x = 0; x < (int32_t)currentExtent.width; x++)
         {
-            imageDataConvertRGBtoRGBE(rgbe, &tempData[(y * imageData->getWidth() + x) * numberChannels]);
+            imageDataConvertRGBtoRGBE(rgbe, &tempData[(y * currentExtent.width + x) * numberChannels]);
 
             if (buffer->write(rgbe, 1, 4) != 4)
             {
@@ -869,14 +884,14 @@ static IBinaryBufferSP imageDataSaveHdr(const IImageDataSP& imageData)
     return buffer;
 }
 
-VkBool32 VKTS_APIENTRY imageDataSave(const char* filename, const IImageDataSP& imageData)
+VkBool32 VKTS_APIENTRY imageDataSave(const char* filename, const IImageDataSP& imageData, const uint32_t mipLevel, const uint32_t arrayLayer)
 {
     if (!filename || !imageData.get())
     {
         return VK_FALSE;
     }
 
-    if (imageData->getImageType() != VK_IMAGE_TYPE_2D || imageData->getWidth() < 1 || imageData->getHeight() < 1 || imageData->getDepth() != 1)
+    if (imageData->getImageType() != VK_IMAGE_TYPE_2D || imageData->getWidth() < 1 || imageData->getHeight() < 1 || imageData->getDepth() != 1 || mipLevel >= imageData->getMipLevels() || arrayLayer >= imageData->getArrayLayers())
     {
         return VK_FALSE;
     }
@@ -894,7 +909,7 @@ VkBool32 VKTS_APIENTRY imageDataSave(const char* filename, const IImageDataSP& i
 
     if (lowerCaseExtension == ".tga")
     {
-        auto buffer = imageDataSaveTga(imageData);
+        auto buffer = imageDataSaveTga(imageData, mipLevel, arrayLayer);
 
         if (!buffer.get())
         {
@@ -905,7 +920,7 @@ VkBool32 VKTS_APIENTRY imageDataSave(const char* filename, const IImageDataSP& i
     }
     else if (lowerCaseExtension == ".hdr")
     {
-        auto buffer = imageDataSaveHdr(imageData);
+        auto buffer = imageDataSaveHdr(imageData, mipLevel, arrayLayer);
 
         if (!buffer.get())
         {
