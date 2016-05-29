@@ -773,7 +773,7 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
                         	logPrint(VKTS_LOG_INFO, "Scenegraph: Using cached data for '%s'", finalImageDataFilename.c_str());
                         }
 
-                        imageData = imageDataMerge(allMipMaps, finalImageDataFilename);
+                        imageData = imageDataMerge(allMipMaps, finalImageDataFilename, allMipMaps.size(), 1);
 
                         if (!imageData.get())
                         {

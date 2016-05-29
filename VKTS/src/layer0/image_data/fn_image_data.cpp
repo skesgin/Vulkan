@@ -1570,9 +1570,14 @@ IImageDataSP VKTS_APIENTRY imageDataCopy(const IImageDataSP& sourceImage, const 
     return IImageDataSP(new ImageData(name, sourceImage->getImageType(), sourceImage->getFormat(), sourceImage->getExtent3D(), sourceImage->getMipLevels(), sourceImage->getArrayLayers(), (const uint8_t*) sourceImage->getData(), sourceImage->getSize()));
 }
 
-IImageDataSP VKTS_APIENTRY imageDataMerge(const SmartPointerVector<IImageDataSP>& sourceImages, const std::string& name)
+IImageDataSP VKTS_APIENTRY imageDataMerge(const SmartPointerVector<IImageDataSP>& sourceImages, const std::string& name, const uint32_t mipLevels, const uint32_t arrayLayers)
 {
     if (sourceImages.size() == 0)
+    {
+        return IImageDataSP();
+    }
+
+    if (mipLevels * arrayLayers != sourceImages.size())
     {
         return IImageDataSP();
     }
@@ -1622,7 +1627,7 @@ IImageDataSP VKTS_APIENTRY imageDataMerge(const SmartPointerVector<IImageDataSP>
         offset += sourceImages[i]->getSize();
     }
 
-    return IImageDataSP(new ImageData(name, imageType, format, extent, (uint32_t) sourceImages.size(), 1, mergedImageData));
+    return IImageDataSP(new ImageData(name, imageType, format, extent, mipLevels, arrayLayers, mergedImageData));
 }
 
 }

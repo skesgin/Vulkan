@@ -72,7 +72,7 @@ VKTS_APICALL IImageDataSP VKTS_APIENTRY imageDataCopy(const IImageDataSP& source
  *
  * @ThreadSafe
  */
-VKTS_APICALL IImageDataSP VKTS_APIENTRY imageDataMerge(const SmartPointerVector<IImageDataSP>& sourceImages, const std::string& name);
+VKTS_APICALL IImageDataSP VKTS_APIENTRY imageDataMerge(const SmartPointerVector<IImageDataSP>& sourceImages, const std::string& name, const uint32_t mipLevels, const uint32_t arrayLayers);
 
 /**
  *
