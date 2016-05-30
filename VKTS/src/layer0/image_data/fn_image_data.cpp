@@ -536,8 +536,8 @@ static IImageDataSP imageDataLoadHdr(const std::string& name, const IBinaryBuffe
         return IImageDataSP();
     }
 
-    float rgb[3];
-    uint8_t rgbe[4];
+    float rgb[3] = {0.0f, 0.0f, 0.0f};
+    uint8_t rgbe[4] = { 0, 0, 0, 0 };
     uint8_t prevRgbe[4] = { 0, 0, 0, 0 };
 
     int32_t factor = 1;
