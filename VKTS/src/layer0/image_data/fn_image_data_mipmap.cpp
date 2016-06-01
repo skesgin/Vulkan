@@ -29,7 +29,7 @@
 namespace vkts
 {
 
-SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataMipmap(const IImageDataSP& sourceImage, VkBool32 addSourceAsCopy, const std::string& name)
+SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataMipmap(const IImageDataSP& sourceImage, VkBool32 const addSourceAsCopy, const std::string& name)
 {
     if (name.size() == 0 || !sourceImage.get())
     {
@@ -62,7 +62,7 @@ SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataMipmap(const IImageDataS
 
     if (addSourceAsCopy)
     {
-        targetImageFilename = sourceImageName + "_L" + std::to_string(level++) + sourceImageExtension;
+        targetImageFilename = sourceImageName + "_LEVEL" + std::to_string(level++) + sourceImageExtension;
 
         currentTargetImage = imageDataCopy(sourceImage, targetImageFilename);
 
@@ -86,7 +86,7 @@ SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataMipmap(const IImageDataS
         height = glm::max(height / 2, 1);
         depth = glm::max(depth / 2, 1);
 
-        targetImageFilename = sourceImageName + "_L" + std::to_string(level++) + sourceImageExtension;
+        targetImageFilename = sourceImageName + "_LEVEL" + std::to_string(level++) + sourceImageExtension;
 
         currentTargetImage = imageDataCreate(targetImageFilename, width, height, depth, 0.0f, 0.0f, 0.0f, 0.0f, sourceImage->getImageType(), sourceImage->getFormat());
 

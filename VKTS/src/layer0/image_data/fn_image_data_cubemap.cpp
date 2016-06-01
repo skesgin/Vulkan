@@ -29,9 +29,9 @@
 namespace vkts
 {
 
-SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataCubemap(const IImageDataSP& sourceImage, const std::string& name)
+SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataCubemap(const IImageDataSP& sourceImage, const uint32_t length, const std::string& name)
 {
-    if (name.size() == 0 || !sourceImage.get())
+    if (name.size() == 0 || !sourceImage.get() || length == 0)
     {
         return SmartPointerVector<IImageDataSP>();
     }
@@ -48,9 +48,23 @@ SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataCubemap(const IImageData
     auto sourceImageName = sourceImageFilename.substr(0, dotIndex);
     auto sourceImageExtension = sourceImageFilename.substr(dotIndex);
 
+    SmartPointerVector<IImageDataSP> result;
+
+    for (uint32_t side = 0; side < 6; side++)
+    {
+    	auto currentImageData = imageDataCreate(sourceImageName + "_LAYER" + std::to_string(side++) + sourceImageExtension, length, length, 1, sourceImage->getImageType(), sourceImage->getFormat());
+
+    	if (currentImageData.get())
+    	{
+    		return SmartPointerVector<IImageDataSP>();
+    	}
+
+    	result.append(currentImageData);
+    }
+
     // TODO: Implement.
 
-    return SmartPointerVector<IImageDataSP>();
+    return result;
 }
 
 }

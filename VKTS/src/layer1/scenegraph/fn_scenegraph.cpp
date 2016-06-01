@@ -723,7 +723,7 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
 								height = glm::max(height / 2, 1);
 								depth = glm::max(depth / 2, 1);
 
-								auto targetImageFilename = sourceImageName + "_L" + std::to_string(level++) + sourceImageExtension;
+								auto targetImageFilename = sourceImageName + "_LEVEL" + std::to_string(level++) + sourceImageExtension;
 
 								auto targetImage = cacheLoadImageData(targetImageFilename.c_str());
 

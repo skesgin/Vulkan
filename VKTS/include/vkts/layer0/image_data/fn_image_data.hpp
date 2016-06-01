@@ -78,13 +78,13 @@ VKTS_APICALL IImageDataSP VKTS_APIENTRY imageDataMerge(const SmartPointerVector<
  *
  * @ThreadSafe
  */
-VKTS_APICALL SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataMipmap(const IImageDataSP& sourceImage, VkBool32 addSourceAsCopy, const std::string& name);
+VKTS_APICALL SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataMipmap(const IImageDataSP& sourceImage, const VkBool32 addSourceAsCopy, const std::string& name);
 
 /**
  *
  * @ThreadSafe
  */
-VKTS_APICALL SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataCubemap(const IImageDataSP& sourceImage, const std::string& name);
+VKTS_APICALL SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataCubemap(const IImageDataSP& sourceImage, const uint32_t length, const std::string& name);
 
 }
 
