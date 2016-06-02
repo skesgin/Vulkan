@@ -62,7 +62,95 @@ SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataCubemap(const IImageData
     	result.append(currentImageData);
     }
 
-    // TODO: Implement.
+	//
+
+	float step = 2.0f / (float)length;
+	float offset = step * 0.5f;
+
+	//
+
+	glm::vec3 startVector[6];
+
+	// Positive X
+	startVector[0] = glm::vec3(+1.0f, -1.0f, -1.0f);
+	// Negative X
+	startVector[1] = glm::vec3(-1.0f, -1.0f, +1.0f);
+	// Positive Y
+	startVector[2] = glm::vec3(-1.0f, +1.0f, -1.0f);
+	// Negative Y
+	startVector[3] = glm::vec3(-1.0f, -1.0f, +1.0f);
+	// Positive Z
+	startVector[4] = glm::vec3(+1.0f, -1.0f, +1.0f);
+	// Negative Z
+	startVector[5] = glm::vec3(-1.0f, -1.0f, -1.0f);
+
+	//
+
+	glm::vec3 offsetVector;
+
+	glm::vec3 scanVector;
+
+	glm::vec2 sampleLocation;
+
+	glm::vec4 texel;
+
+	for (uint32_t y = 0; y < length; y++)
+	{
+		for (uint32_t x = 0; x < length; x++)
+		{
+			for (uint32_t i = 0; i < 6; i++)
+			{
+				switch (i)
+				{
+					case 0:
+
+						offsetVector = glm::vec3(0.0f, offset + step * (float)y, offset + step * (float)x);
+
+						break;
+					case 1:
+
+						offsetVector = glm::vec3(0.0f, offset + step * (float)y, -offset - step * (float)x);
+
+						break;
+					case 2:
+
+						offsetVector = glm::vec3(offset + step * (float)y, 0.0f, offset + step * (float)x);
+
+						break;
+					case 3:
+
+						offsetVector = glm::vec3(offset + step * (float)y, 0.0f, -offset - step * (float)x);
+
+						break;
+					case 4:
+
+						offsetVector = glm::vec3(-offset - step * (float)y, offset + step * (float)x, 0.0f);
+
+						break;
+					case 5:
+
+						offsetVector = glm::vec3(+offset + step * (float)y, offset + step * (float)x, 0.0f);
+
+						break;
+				}
+
+				scanVector = glm::normalize(startVector[i] + offsetVector);
+
+				//
+
+				sampleLocation.s = 0.5f + 0.5f * atan2f(scanVector.x, -scanVector.z) / VKTS_PI;
+				sampleLocation.t = 1.0f - acosf(scanVector.y) / VKTS_PI;
+
+				//
+
+				texel = sourceImage->getSample(sampleLocation.s, VK_SAMPLER_MIPMAP_MODE_LINEAR, VK_SAMPLER_ADDRESS_MODE_REPEAT, sampleLocation.t, VK_SAMPLER_MIPMAP_MODE_LINEAR, VK_SAMPLER_ADDRESS_MODE_REPEAT, 0.5f, VK_SAMPLER_MIPMAP_MODE_NEAREST, VK_SAMPLER_ADDRESS_MODE_REPEAT, 0, 0);
+
+				result[i]->setTexel(texel, x, y, 0, 0, 0);
+
+				// TODO: Test for proper functionality.
+			}
+		}
+	}
 
     return result;
 }
