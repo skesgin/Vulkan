@@ -258,6 +258,29 @@ int main()
 
 	//
 
+	if (imageHdr.get())
+	{
+		auto cubeMaps = vkts::imageDataCubemap(imageHdr, 256, "test/general/CraterLake.hdr");
+
+		if (cubeMaps.size() != 0)
+		{
+			for (size_t i = 0; i < cubeMaps.size(); i++)
+			{
+				vkts::imageDataSave(cubeMaps[i]->getName().c_str(), cubeMaps[i]);
+			}
+		}
+		else
+		{
+			vkts::logPrint(VKTS_LOG_WARNING, "Test: Could not generate cube maps.");
+		}
+	}
+	else
+	{
+		vkts::logPrint(VKTS_LOG_WARNING, "Test: Could not load HDR image.");
+	}
+
+	//
+
 	auto createdTga = vkts::imageDataCreate("test/general/created.tga", 16, 16, 1, 1.0f, 0.0f, 0.0f, 0.0f, VK_IMAGE_TYPE_2D, VK_FORMAT_R8G8B8_UNORM);
 
 	if (createdTga.get())

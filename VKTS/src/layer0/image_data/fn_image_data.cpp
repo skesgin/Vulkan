@@ -118,88 +118,6 @@ static void imageDataConvertRGBtoRGBE(uint8_t* rgbe, const float* rgb)
     rgbe[3] = static_cast<uint8_t>(maxExponent + 128);
 }
 
-static int32_t imageDataDecodeNewRLE(const IBinaryBufferSP& buffer, uint8_t* scanline, int32_t width)
-{
-    if (!buffer.get() || !scanline || width < 1)
-    {
-        return -1;
-    }
-
-    int32_t maxScanLength = 0;
-
-    // read each component
-    for (int32_t channel = 0; channel < 4; channel++)
-    {
-        int32_t scanLength = 0;
-
-        int32_t x = 0;
-
-        while (x < width)
-        {
-            uint8_t code;
-
-            if (buffer->read(&code, 1, 1) != 1)
-            {
-                return -1;
-            }
-
-            uint8_t channelValue;
-
-            if (code > 128)
-            {
-                // Run
-
-                code &= 127;
-
-                scanLength += code;
-
-                if (scanLength > width)
-                {
-                    return -1;
-                }
-
-                if (buffer->read(&channelValue, 1, 1) != 1)
-                {
-                    return -1;
-                }
-
-                while (code--)
-                {
-                    scanline[x++ * 4 + channel] = channelValue;
-                }
-            }
-            else
-            {
-                // Non-run
-
-                scanLength += code;
-
-                if (scanLength > width)
-                {
-                    return -1;
-                }
-
-                while (code--)
-                {
-                    if (buffer->read(&channelValue, 1, 1) != 1)
-                    {
-                        return -1;
-                    }
-
-                    scanline[x++ * 4 + channel] = channelValue;
-                }
-            }
-        }
-
-        if (scanLength > maxScanLength)
-        {
-            maxScanLength = scanLength;
-        }
-    }
-
-    return maxScanLength;
-}
-
 static IImageDataSP imageDataLoadTga(const std::string& name, const IBinaryBufferSP& buffer)
 {
     if (!buffer.get())
@@ -451,7 +369,7 @@ static IImageDataSP imageDataLoadHdr(const std::string& name, const IBinaryBuffe
         return IImageDataSP();
     }
 
-    char tempBuffer[256];
+    uint8_t tempBuffer[256];
 
     if (buffer->read(tempBuffer, 1, 10) != 10)
     {
@@ -463,7 +381,7 @@ static IImageDataSP imageDataLoadHdr(const std::string& name, const IBinaryBuffe
     //
 
     // Identifier
-    if (strncmp(tempBuffer, "#?RADIANCE", 10))
+    if (strncmp((const char*)tempBuffer, "#?RADIANCE", 10))
     {
         return IImageDataSP();
     }
@@ -513,7 +431,7 @@ static IImageDataSP imageDataLoadHdr(const std::string& name, const IBinaryBuffe
     int32_t width;
     int32_t height;
 
-    if (!sscanf(tempBuffer, "-Y %d +X %d", &height, &width))
+    if (!sscanf((const char*)tempBuffer, "-Y %d +X %d", &height, &width))
     {
         return IImageDataSP();
     }
@@ -529,7 +447,7 @@ static IImageDataSP imageDataLoadHdr(const std::string& name, const IBinaryBuffe
     }
 
     // Scanlines
-    std::unique_ptr<uint8_t[]> scanline = std::unique_ptr<uint8_t[]>(new uint8_t[width * sizeof(float)]);
+    std::unique_ptr<uint8_t[]> scanline = std::unique_ptr<uint8_t[]>(new uint8_t[width * 4]);
 
     if (!scanline.get())
     {
@@ -537,117 +455,125 @@ static IImageDataSP imageDataLoadHdr(const std::string& name, const IBinaryBuffe
     }
 
     float rgb[3] = {0.0f, 0.0f, 0.0f};
-    uint8_t rgbe[4] = { 0, 0, 0, 0 };
-    uint8_t prevRgbe[4] = { 0, 0, 0, 0 };
 
-    int32_t factor = 1;
-    int32_t x = 0;
     int32_t y = height - 1;
     while (y >= 0)
     {
-        if (buffer->read(tempBuffer, 4, 1) != 1)
+        if (buffer->read(tempBuffer, 1, 4) != 4)
         {
             return IImageDataSP();
         }
 
-        int32_t repeat = 0;
-
         // Examine value
         if (width < 32768 && tempBuffer[0] == 2 && tempBuffer[1] == 2 && tempBuffer[2] == ((width >> 8) & 0xFF) && tempBuffer[3] == (width & 0xFF))
         {
-            // New RLE decoding
+			// New RLE decoding
 
-            int32_t scanlinePixels = imageDataDecodeNewRLE(buffer, &scanline[0], width);
+        	int32_t currentX = 0;
 
-            if (scanlinePixels < 0)
+        	for (int32_t channel = 0; channel < 4; channel++)
+			{
+    			currentX = 0;
+
+				while (currentX < width)
+				{
+					if (buffer->read(tempBuffer, 1, 1) != 1)
+					{
+						return IImageDataSP();
+					}
+
+					int32_t loop = (int32_t)tempBuffer[0];
+
+					if (loop > 128)
+					{
+						loop &= 127;
+
+						if (buffer->read(tempBuffer, 1, 1) != 1)
+						{
+							return IImageDataSP();
+						}
+
+						for (int32_t g = 0; g < loop; g++)
+						{
+							scanline[currentX++ * 4 + channel] = tempBuffer[0];
+						}
+					}
+					else
+					{
+						for (int32_t g = 0; g < loop; g++)
+						{
+							if (buffer->read(tempBuffer, 1, 1) != 1)
+							{
+								return IImageDataSP();
+							}
+
+			    			scanline[currentX++ * 4 + channel] = tempBuffer[0];
+						}
+					}
+				}
+			}
+        }
+        else
+        {
+        	// Old RLE decoding
+
+            buffer->seek(-4, VKTS_SEARCH_RELATVE);
+
+            int32_t rshift = 0;
+            int32_t currentX = 0;
+
+            while (currentX < width)
             {
-                return IImageDataSP();
-            }
-
-            for (int32_t i = 0; i < scanlinePixels; i++)
-            {
-                if (y < 0)
+                if (buffer->read(tempBuffer, 1, 4) != 4)
                 {
                     return IImageDataSP();
                 }
 
-                imageDataConvertRGBEtoRGB(rgb, &scanline[i * 4]);
+    			scanline[currentX * 4 + 0] = tempBuffer[0];
+            	scanline[currentX * 4 + 1] = tempBuffer[1];
+            	scanline[currentX * 4 + 2] = tempBuffer[2];
+            	scanline[currentX * 4 + 3] = tempBuffer[3];
 
-                data[(width * y + x) * 3 + 0] = rgb[0];
-                data[(width * y + x) * 3 + 1] = rgb[1];
-                data[(width * y + x) * 3 + 2] = rgb[2];
-
-                x++;
-                if (x >= width)
+                if (tempBuffer[1] != 2 || (tempBuffer[2] & 128))
                 {
-                    y--;
-                    x = 0;
+                	scanline[currentX * 4 + 0] = 2;
                 }
+
+            	if (tempBuffer[0] == 1 && tempBuffer[1] == 1 && tempBuffer[2] == 1)
+            	{
+            		int32_t loop = (int32_t)tempBuffer[3] << rshift;
+
+            		for (int32_t i = 0; i < loop; i++)
+            		{
+                    	scanline[currentX * 4 + 0] = scanline[(currentX - 1) * 4 + 0];
+                    	scanline[currentX * 4 + 1] = scanline[(currentX - 1) * 4 + 1];
+                    	scanline[currentX * 4 + 2] = scanline[(currentX - 1) * 4 + 2];
+                    	scanline[currentX * 4 + 3] = scanline[(currentX - 1) * 4 + 3];
+
+                    	currentX++;
+            		}
+
+    				rshift += 8;
+            	}
+            	else
+            	{
+                	currentX++;
+
+            		rshift = 0;
+            	}
             }
+    	}
 
-            factor = 1;
-
-            prevRgbe[0] = scanline[(scanlinePixels - 1) * 4 + 0];
-            prevRgbe[1] = scanline[(scanlinePixels - 1) * 4 + 1];
-            prevRgbe[2] = scanline[(scanlinePixels - 1) * 4 + 2];
-            prevRgbe[3] = scanline[(scanlinePixels - 1) * 4 + 3];
-
-            continue;
-        }
-        else if (tempBuffer[0] == 1 && tempBuffer[1] == 1 && tempBuffer[2] == 1)
+        for (int32_t x = 0; x < width; x++)
         {
-            // Old RLE decoding
+            imageDataConvertRGBEtoRGB(rgb, &scanline[x * 4]);
 
-            repeat = tempBuffer[3] * factor;
-
-            rgbe[0] = prevRgbe[0];
-            rgbe[1] = prevRgbe[1];
-            rgbe[2] = prevRgbe[2];
-            rgbe[3] = prevRgbe[3];
-
-            factor *= 256;
-        }
-        else
-        {
-            // No RLE decoding
-
-            repeat = 1;
-
-            rgbe[0] = tempBuffer[0];
-            rgbe[1] = tempBuffer[1];
-            rgbe[2] = tempBuffer[2];
-            rgbe[3] = tempBuffer[3];
-
-            factor = 1;
+            data[width * y * numberChannels + x * numberChannels + 0] = rgb[0];
+            data[width * y * numberChannels + x * numberChannels + 1] = rgb[1];
+            data[width * y * numberChannels + x * numberChannels + 2] = rgb[2];
         }
 
-        imageDataConvertRGBEtoRGB(rgb, rgbe);
-
-        while (repeat)
-        {
-            data[(width * y + x) * 3 + 0] = rgb[0];
-            data[(width * y + x) * 3 + 1] = rgb[1];
-            data[(width * y + x) * 3 + 2] = rgb[2];
-
-            repeat--;
-
-            x++;
-            if (x >= width)
-            {
-                x = 0;
-
-                y--;
-                if (y < 0)
-                {
-                    repeat = 0;
-                }
-            }
-        }
-
-        prevRgbe[0] = rgbe[0];
-        prevRgbe[1] = rgbe[1];
-        prevRgbe[2] = rgbe[2];
-        prevRgbe[3] = rgbe[3];
+        y--;
     }
 
     return IImageDataSP(new ImageData(name, VK_IMAGE_TYPE_2D, VK_FORMAT_R32G32B32_SFLOAT, { (uint32_t)width, (uint32_t)height, (uint32_t)depth }, 1, 1, reinterpret_cast<const uint8_t*>(&data[0]), width * height * depth * numberChannels * sizeof(float)));

@@ -52,9 +52,9 @@ SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataCubemap(const IImageData
 
     for (uint32_t side = 0; side < 6; side++)
     {
-    	auto currentImageData = imageDataCreate(sourceImageName + "_LAYER" + std::to_string(side++) + sourceImageExtension, length, length, 1, sourceImage->getImageType(), sourceImage->getFormat());
+    	auto currentImageData = imageDataCreate(sourceImageName + "_LAYER" + std::to_string(side) + sourceImageExtension, length, length, 1, sourceImage->getImageType(), sourceImage->getFormat());
 
-    	if (currentImageData.get())
+    	if (!currentImageData.get())
     	{
     		return SmartPointerVector<IImageDataSP>();
     	}
@@ -124,12 +124,12 @@ SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataCubemap(const IImageData
 						break;
 					case 4:
 
-						offsetVector = glm::vec3(-offset - step * (float)y, offset + step * (float)x, 0.0f);
+						offsetVector = glm::vec3(-offset - step * (float)x, offset + step * (float)y, 0.0f);
 
 						break;
 					case 5:
 
-						offsetVector = glm::vec3(+offset + step * (float)y, offset + step * (float)x, 0.0f);
+						offsetVector = glm::vec3(offset + step * (float)x, offset + step * (float)y, 0.0f);
 
 						break;
 				}
@@ -143,11 +143,11 @@ SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataCubemap(const IImageData
 
 				//
 
-				texel = sourceImage->getSample(sampleLocation.s, VK_SAMPLER_MIPMAP_MODE_LINEAR, VK_SAMPLER_ADDRESS_MODE_REPEAT, sampleLocation.t, VK_SAMPLER_MIPMAP_MODE_LINEAR, VK_SAMPLER_ADDRESS_MODE_REPEAT, 0.5f, VK_SAMPLER_MIPMAP_MODE_NEAREST, VK_SAMPLER_ADDRESS_MODE_REPEAT, 0, 0);
+				texel = sourceImage->getSample(sampleLocation.s, VK_SAMPLER_MIPMAP_MODE_LINEAR, VK_SAMPLER_ADDRESS_MODE_REPEAT, sampleLocation.t, VK_SAMPLER_MIPMAP_MODE_LINEAR, VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT, 0.5f, VK_SAMPLER_MIPMAP_MODE_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, 0, 0);
 
 				result[i]->setTexel(texel, x, y, 0, 0, 0);
 
-				// TODO: Test for proper functionality.
+				// TODO: Check orientation with Vulkan orientation.
 			}
 		}
 	}

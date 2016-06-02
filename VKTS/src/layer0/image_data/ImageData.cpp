@@ -461,6 +461,8 @@ glm::vec4 ImageData::getSample(const float x, const VkSamplerMipmapMode mipmapMo
 
 	//
 
+	float dummy;
+
 	float fractionX;
 	float fractionY;
 	float fractionZ;
@@ -469,45 +471,49 @@ glm::vec4 ImageData::getSample(const float x, const VkSamplerMipmapMode mipmapMo
 	int32_t texelY = getTexelLocation(fractionY, y, (int32_t)extent.height, addressModeY);
 	int32_t texelZ = getTexelLocation(fractionZ, z, (int32_t)extent.depth, addressModeZ);
 
-	int32_t texelOffsetX = 0;
-	int32_t texelOffsetY = 0;
-	int32_t texelOffsetZ = 0;
+	//
+
+	float stepX = 1.0f / (float)extent.width;
+	float stepY = 1.0f / (float)extent.height;
+	float stepZ = 1.0f / (float)extent.depth;
 
 	//
 
-	float weightX = 1.0f - (fabsf(0.5 - fractionX) * 2.0f);
-	float weightY = 1.0f - (fabsf(0.5 - fractionY) * 2.0f);
-	float weightZ = 1.0f - (fabsf(0.5 - fractionZ) * 2.0f);
+	float weightX = 1.0f - (fabsf(0.5f - fractionX) * 2.0f);
+	float weightY = 1.0f - (fabsf(0.5f - fractionY) * 2.0f);
+	float weightZ = 1.0f - (fabsf(0.5f - fractionZ) * 2.0f);
 
 	//
 
-	float weight;
+	float currentWeightX;
+	float currentWeightY;
+	float currentWeightZ;
 
 	for (uint32_t currentZ = 0; currentZ < (uint32_t)mipmapModeZ + 1; currentZ++)
 	{
-		weight = 1.0f;
+		currentWeightZ = 1.0f;
 
 		//
-
-		texelOffsetZ = 0;
 
 		if (mipmapModeZ)
 		{
 			if (currentZ == 0)
 			{
-				weight *= weightZ;
+				currentWeightZ = weightZ;
+
+				texelZ = getTexelLocation(dummy, z, (int32_t)extent.depth, addressModeZ);
 			}
 			else
 			{
-				weight *= (1.0f - weightZ);
+				currentWeightZ = (1.0f - weightZ);
 
 				if (fractionZ >= 0.5f)
 				{
-					texelOffsetZ++;
+					texelZ = getTexelLocation(dummy, z + stepZ, (int32_t)extent.depth, addressModeZ);
 				}
 				else
 				{
-					texelOffsetZ--;
+					texelZ = getTexelLocation(dummy, z - stepZ, (int32_t)extent.depth, addressModeZ);
 				}
 			}
 		}
@@ -516,25 +522,29 @@ glm::vec4 ImageData::getSample(const float x, const VkSamplerMipmapMode mipmapMo
 
 		for (uint32_t currentY = 0; currentY < (uint32_t)mipmapModeY + 1; currentY++)
 		{
-			texelOffsetY = 0;
+			currentWeightY = 1.0f;
+
+			//
 
 			if (mipmapModeY)
 			{
 				if (currentY == 0)
 				{
-					weight *= weightY;
+					currentWeightY = weightY;
+
+					texelY = getTexelLocation(dummy, y, (int32_t)extent.height, addressModeY);
 				}
 				else
 				{
-					weight *= (1.0f - weightY);
+					currentWeightY = (1.0f - weightY);
 
 					if (fractionY >= 0.5f)
 					{
-						texelOffsetY++;
+						texelY = getTexelLocation(dummy, y + stepY, (int32_t)extent.height, addressModeY);
 					}
 					else
 					{
-						texelOffsetY--;
+						texelY = getTexelLocation(dummy, y - stepY, (int32_t)extent.height, addressModeY);
 					}
 				}
 			}
@@ -543,32 +553,36 @@ glm::vec4 ImageData::getSample(const float x, const VkSamplerMipmapMode mipmapMo
 
 			for (uint32_t currentX = 0; currentX < (uint32_t)mipmapModeX + 1; currentX++)
 			{
-				texelOffsetX = 0;
+				currentWeightX = 1.0f;
+
+				//
 
 				if (mipmapModeX)
 				{
 					if (currentX == 0)
 					{
-						weight *= weightX;
+						currentWeightX = weightX;
+
+						texelX = getTexelLocation(dummy, x, (int32_t)extent.width, addressModeX);
 					}
 					else
 					{
-						weight *= (1.0f - weightX);
+						currentWeightX = (1.0f - weightX);
 
 						if (fractionX >= 0.5f)
 						{
-							texelOffsetX++;
+							texelX = getTexelLocation(dummy, x + stepX, (int32_t)extent.width, addressModeX);
 						}
 						else
 						{
-							texelOffsetX--;
+							texelX = getTexelLocation(dummy, x - stepX, (int32_t)extent.width, addressModeX);
 						}
 					}
 				}
 
 				//
 
-				result += getTexel((uint32_t)(texelX + texelOffsetX), (uint32_t)(texelY + texelOffsetY), (uint32_t)(texelZ + texelOffsetZ), mipLevel, arrayLayer) * weight;
+				result += getTexel((uint32_t)texelX, (uint32_t)texelY, (uint32_t)texelZ, mipLevel, arrayLayer) * currentWeightX * currentWeightY * currentWeightZ;
 			}
 		}
 	}
