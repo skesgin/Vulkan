@@ -630,7 +630,7 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
             	return VK_FALSE;
             }
 
-            if (!preFiltered && environment)
+            if (preFiltered && !environment)
             {
             	return VK_FALSE;
             }
