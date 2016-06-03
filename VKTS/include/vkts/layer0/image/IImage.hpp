@@ -84,9 +84,9 @@ public:
 
     virtual const VkImage getImage() const = 0;
 
-    virtual VkAccessFlags getAccessMask(const uint32_t mipLevel = 0) const = 0;
+    virtual VkAccessFlags getAccessMask(const uint32_t mipLevel = 0, const uint32_t arrayLayer = 0) const = 0;
 
-    virtual VkImageLayout getImageLayout(const uint32_t mipLevel = 0) const = 0;
+    virtual VkImageLayout getImageLayout(const uint32_t mipLevel = 0, const uint32_t arrayLayer = 0) const = 0;
 
     virtual void getImageMemoryRequirements(VkMemoryRequirements& memoryRequirements) const = 0;
 

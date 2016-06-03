@@ -30,7 +30,7 @@ namespace vkts
 {
 
 Image::Image(const VkDevice device, const VkImageCreateFlags flags, const VkImageType imageType, const VkFormat format, const VkExtent3D& extent, const uint32_t mipLevels, const uint32_t arrayLayers, const VkSampleCountFlagBits samples, const VkImageTiling tiling, const VkImageUsageFlags usage, const VkSharingMode sharingMode, const uint32_t queueFamilyIndexCount, const uint32_t* queueFamilyIndices, const VkImageLayout initialLayout, const VkAccessFlags accessMask, const VkImage image) :
-    IImage(), device(device), imageCreateInfo{VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO, nullptr, flags, imageType, format, extent, mipLevels, arrayLayers, samples, tiling, usage, sharingMode, queueFamilyIndexCount, nullptr, initialLayout}, allQueueFamilyIndices(), imageLayout(mipLevels), accessMask(mipLevels), image(image)
+    IImage(), device(device), imageCreateInfo{VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO, nullptr, flags, imageType, format, extent, mipLevels, arrayLayers, samples, tiling, usage, sharingMode, queueFamilyIndexCount, nullptr, initialLayout}, allQueueFamilyIndices(), imageLayout(mipLevels * arrayLayers), accessMask(mipLevels * arrayLayers), image(image)
 {
     if (queueFamilyIndices)
     {
@@ -45,10 +45,13 @@ Image::Image(const VkDevice device, const VkImageCreateFlags flags, const VkImag
         }
     }
 
-    for (uint32_t i = 0; i < mipLevels; i++)
+    for (uint32_t k = 0; k < arrayLayers; k++)
     {
-        this->imageLayout[i] = initialLayout;
-        this->accessMask[i] = accessMask;
+		for (uint32_t i = 0; i < mipLevels; i++)
+		{
+			this->imageLayout[k * mipLevels + i] = initialLayout;
+			this->accessMask[k * mipLevels + i] = accessMask;
+		}
     }
 }
 
@@ -156,14 +159,14 @@ const VkImage Image::getImage() const
     return image;
 }
 
-VkAccessFlags Image::getAccessMask(const uint32_t mipLevel) const
+VkAccessFlags Image::getAccessMask(const uint32_t mipLevel, const uint32_t arrayLayer) const
 {
-	return accessMask[mipLevel];
+	return accessMask[arrayLayer * getMipLevels() + mipLevel];
 }
 
-VkImageLayout Image::getImageLayout(const uint32_t mipLevel) const
+VkImageLayout Image::getImageLayout(const uint32_t mipLevel, const uint32_t arrayLayer) const
 {
-    return imageLayout[mipLevel];
+    return imageLayout[arrayLayer * getMipLevels() + mipLevel];
 }
 
 void Image::getImageMemoryRequirements(VkMemoryRequirements& memoryRequirements) const
@@ -183,10 +186,10 @@ void Image::copyImage(const VkCommandBuffer cmdBuffer, IImageSP& targetImage, co
 		return;
 	}
 
-    VkImageLayout sourceImageLayout = imageLayout[imageCopy.srcSubresource.mipLevel];
-    VkAccessFlags sourceAccessMask = accessMask[imageCopy.srcSubresource.mipLevel];
-    VkImageLayout targetImageLayout = targetImage->getImageLayout(imageCopy.dstSubresource.mipLevel);
-    VkAccessFlags targetAccessMask = targetImage->getAccessMask(imageCopy.dstSubresource.mipLevel);
+    VkImageLayout sourceImageLayout = getImageLayout(imageCopy.srcSubresource.mipLevel, imageCopy.srcSubresource.baseArrayLayer);
+    VkAccessFlags sourceAccessMask = getAccessMask(imageCopy.srcSubresource.mipLevel, imageCopy.srcSubresource.baseArrayLayer);
+    VkImageLayout targetImageLayout = targetImage->getImageLayout(imageCopy.dstSubresource.mipLevel, imageCopy.dstSubresource.baseArrayLayer);
+    VkAccessFlags targetAccessMask = targetImage->getAccessMask(imageCopy.dstSubresource.mipLevel, imageCopy.dstSubresource.baseArrayLayer);
 
     // Prepare source image for copy.
 
@@ -220,8 +223,8 @@ void Image::copyImageToBuffer(const VkCommandBuffer cmdBuffer, IBufferSP& target
 		return;
 	}
 
-    VkImageLayout sourceImageLayout = imageLayout[bufferImageCopy.imageSubresource.mipLevel];
-    VkAccessFlags sourceAccessMask = accessMask[bufferImageCopy.imageSubresource.mipLevel];
+    VkImageLayout sourceImageLayout = getImageLayout(bufferImageCopy.imageSubresource.mipLevel, bufferImageCopy.imageSubresource.baseArrayLayer);
+    VkAccessFlags sourceAccessMask = getAccessMask(bufferImageCopy.imageSubresource.mipLevel, bufferImageCopy.imageSubresource.baseArrayLayer);
     VkAccessFlags targetAccessMask = targetBuffer->getAccessMask();
 
     // Prepare source image for copy.
@@ -270,22 +273,27 @@ void Image::cmdPipelineBarrier(const VkCommandBuffer cmdBuffer, const VkAccessFl
 	imageMemoryBarrier.subresourceRange = subresourceRange;
 
 	// It is allowed, that each mip level can have different layouts.
-	for (uint32_t i = subresourceRange.baseMipLevel; i < subresourceRange.baseMipLevel + subresourceRange.levelCount; i++)
+	for (uint32_t arrayLayer = subresourceRange.baseArrayLayer; arrayLayer < subresourceRange.baseArrayLayer + subresourceRange.layerCount; arrayLayer++)
 	{
-		if (accessMask[i] == dstAccessMask && imageLayout[i] == newLayout)
+		for (uint32_t mipLevel = subresourceRange.baseMipLevel; mipLevel < subresourceRange.baseMipLevel + subresourceRange.levelCount; mipLevel++)
 		{
-			continue;
+			if (accessMask[arrayLayer * getMipLevels() + mipLevel] == dstAccessMask && imageLayout[arrayLayer * getMipLevels() + mipLevel] == newLayout)
+			{
+				continue;
+			}
+
+			imageMemoryBarrier.srcAccessMask = accessMask[arrayLayer * getMipLevels() + mipLevel];
+			imageMemoryBarrier.oldLayout = imageLayout[arrayLayer * getMipLevels() + mipLevel];
+			imageMemoryBarrier.subresourceRange.baseMipLevel = mipLevel;
+			imageMemoryBarrier.subresourceRange.levelCount = 1;
+			imageMemoryBarrier.subresourceRange.baseArrayLayer = arrayLayer;
+			imageMemoryBarrier.subresourceRange.layerCount = 1;
+
+			vkCmdPipelineBarrier(cmdBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
+
+			accessMask[arrayLayer * getMipLevels() + mipLevel] = dstAccessMask;
+			imageLayout[arrayLayer * getMipLevels() + mipLevel] = newLayout;
 		}
-
-		imageMemoryBarrier.srcAccessMask = accessMask[i];
-		imageMemoryBarrier.oldLayout = imageLayout[i];
-		imageMemoryBarrier.subresourceRange.baseMipLevel = i;
-		imageMemoryBarrier.subresourceRange.levelCount = 1;
-
-		vkCmdPipelineBarrier(cmdBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
-
-		accessMask[i] = dstAccessMask;
-		imageLayout[i] = newLayout;
 	}
 }
 

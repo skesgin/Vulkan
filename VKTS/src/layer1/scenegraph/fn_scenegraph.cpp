@@ -497,7 +497,7 @@ static ITextureSP scenegraphCreateTexture(const float red, const float green, co
     imageCreateInfo.format = imageData->getFormat();
     imageCreateInfo.extent = imageData->getExtent3D();
     imageCreateInfo.mipLevels = imageData->getMipLevels();
-    imageCreateInfo.arrayLayers = 1;
+    imageCreateInfo.arrayLayers = imageData->getArrayLayers();
     imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
     imageCreateInfo.tiling = imageTiling;
     imageCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
@@ -506,7 +506,7 @@ static ITextureSP scenegraphCreateTexture(const float red, const float green, co
     imageCreateInfo.pQueueFamilyIndices = nullptr;
     imageCreateInfo.initialLayout = initialLayout;
 
-    VkImageSubresourceRange subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, imageData->getMipLevels(), 0, 1};
+    VkImageSubresourceRange subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, imageData->getMipLevels(), 0, imageData->getArrayLayers()};
 
     IDeviceMemorySP stageDeviceMemory;
     IBufferSP stageBuffer;
@@ -527,7 +527,7 @@ static ITextureSP scenegraphCreateTexture(const float red, const float green, co
 
     //
 
-    auto texture = textureCreate(context->getInitialResources(), textureName, VK_FALSE, memoryImage, context->getSamplerCreateInfo(), context->getImageViewCreateInfo());
+    auto texture = textureCreate(context->getInitialResources(), textureName, VK_FALSE, VK_FALSE, memoryImage, context->getSamplerCreateInfo(), context->getImageViewCreateInfo());
 
     if (!texture.get())
     {
@@ -637,8 +637,6 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
 
             //
 
-            // TODO: Create, if needed, cube map and pre-filter them.
-
             std::string finalImageDataFilename = std::string(directory) + std::string(sdata);
 
             imageData = context->useImageData(finalImageDataFilename.c_str());
@@ -689,10 +687,10 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
                         }
                     }
 
-                    // Mipmaping image creation.
-
                     if (mipMap && (imageData->getExtent3D().width > 1 || imageData->getExtent3D().height > 1 || imageData->getExtent3D().depth > 1))
                     {
+                        // Mipmaping image creation.
+
                         auto dotIndex = finalImageDataFilename.rfind(".");
 
                         if (dotIndex == finalImageDataFilename.npos)
@@ -782,6 +780,82 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
                             return VK_FALSE;
                         }
                     }
+                    else if (environment)
+                    {
+                    	// Cube map image creation.
+
+                        auto dotIndex = finalImageDataFilename.rfind(".");
+
+                        if (dotIndex == finalImageDataFilename.npos)
+                        {
+                        	logPrint(VKTS_LOG_ERROR, "Scenegraph: No valid image filename '%s'", finalImageDataFilename.c_str());
+
+                            return VK_FALSE;
+                        }
+
+                        auto sourceImageName = finalImageDataFilename.substr(0, dotIndex);
+                        auto sourceImageExtension = finalImageDataFilename.substr(dotIndex);
+
+                        SmartPointerVector<IImageDataSP> allCubeMaps;
+
+                        if (cacheGetEnabled())
+                        {
+                            for (uint32_t layer = 0; layer < 6; layer++)
+							{
+								auto targetImageFilename = sourceImageName + "_LAYER" + std::to_string(layer) + sourceImageExtension;
+
+								auto targetImage = cacheLoadImageData(targetImageFilename.c_str());
+
+								if (!targetImage.get())
+								{
+									allCubeMaps.clear();
+
+									break;
+								}
+
+								allCubeMaps.append(targetImage);
+							}
+                        }
+
+                        //
+
+                        if (allCubeMaps.size() == 0)
+                        {
+                        	allCubeMaps = imageDataCubemap(imageData, (uint32_t)imageData->getHeight() / 2, finalImageDataFilename);
+
+                            if (allCubeMaps.size() == 0)
+                            {
+                            	logPrint(VKTS_LOG_ERROR, "Scenegraph: Could not create cube maps for '%s'", finalImageDataFilename.c_str());
+
+                                return VK_FALSE;
+                            }
+
+                            if (cacheGetEnabled())
+                            {
+								logPrint(VKTS_LOG_INFO, "Scenegraph: Storing cached data for '%s'", finalImageDataFilename.c_str());
+
+								for (size_t i = 0; i < allCubeMaps.size(); i++)
+								{
+									cacheSaveImageData(allCubeMaps[i]);
+								}
+                            }
+                        }
+                        else
+                        {
+                        	logPrint(VKTS_LOG_INFO, "Scenegraph: Using cached data for '%s'", finalImageDataFilename.c_str());
+                        }
+
+                        imageData = imageDataMerge(allCubeMaps, finalImageDataFilename, 1, allCubeMaps.size());
+
+                        if (!imageData.get())
+                        {
+                        	logPrint(VKTS_LOG_ERROR, "Scenegraph: No merged image for '%s'", finalImageDataFilename.c_str());
+
+                            return VK_FALSE;
+                        }
+
+                        // TODO: Implement pre-filter if needed.
+                    }
 
                     //
 
@@ -830,12 +904,12 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
 
             imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 
-            imageCreateInfo.flags = 0;
+            imageCreateInfo.flags = environment ? VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT : 0;
             imageCreateInfo.imageType = imageData->getImageType();
             imageCreateInfo.format = imageData->getFormat();
             imageCreateInfo.extent = imageData->getExtent3D();
             imageCreateInfo.mipLevels = imageData->getMipLevels();
-            imageCreateInfo.arrayLayers = 1;
+            imageCreateInfo.arrayLayers = imageData->getArrayLayers();
             imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
             imageCreateInfo.tiling = imageTiling;
             imageCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
@@ -844,7 +918,7 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
             imageCreateInfo.pQueueFamilyIndices = nullptr;
             imageCreateInfo.initialLayout = initialLayout;
 
-            VkImageSubresourceRange subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, imageData->getMipLevels(), 0, 1};
+            VkImageSubresourceRange subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, imageData->getMipLevels(), 0, imageData->getArrayLayers()};
 
             IDeviceMemorySP stageDeviceMemory;
             IImageSP stageImage;
@@ -1005,7 +1079,7 @@ static VkBool32 scenegraphLoadTextures(const char* directory, const char* filena
                 return VK_FALSE;
             }
 
-            auto texture = textureCreate(context->getInitialResources(), textureName, mipMap, memoryImage, context->getSamplerCreateInfo(), context->getImageViewCreateInfo());
+            auto texture = textureCreate(context->getInitialResources(), textureName, mipMap, environment, memoryImage, context->getSamplerCreateInfo(), context->getImageViewCreateInfo());
 
             if (!texture.get())
             {

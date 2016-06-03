@@ -77,7 +77,7 @@ private:
     vkts::SmartPointerVector<vkts::IFramebufferSP> framebuffer;
 
     vkts::SmartPointerVector<vkts::ICommandBuffersSP> cmdBuffer;
-    VkBool32 rebuildCmdBuffer;
+    uint32_t rebuildCmdBufferCounter;
 
     uint32_t fps;
     uint64_t ram;

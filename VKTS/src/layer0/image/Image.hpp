@@ -103,9 +103,9 @@ public:
 
     virtual const VkImage getImage() const override;
 
-    virtual VkAccessFlags getAccessMask(const uint32_t mipLevel) const override;
+    virtual VkAccessFlags getAccessMask(const uint32_t mipLevel, const uint32_t arrayLayer) const override;
 
-    virtual VkImageLayout getImageLayout(const uint32_t mipLevel) const override;
+    virtual VkImageLayout getImageLayout(const uint32_t mipLevel, const uint32_t arrayLayer) const override;
 
     virtual void getImageMemoryRequirements(VkMemoryRequirements& memoryRequirements) const override;
 

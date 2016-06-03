@@ -402,7 +402,7 @@ IFontSP VKTS_APIENTRY fontCreate(const char* filename, const IInitialResourcesSP
 
             //
 
-            auto texture = textureCreate(initialResources, font->getFace(), VK_FALSE, memoryImage, samplerCreateInfo, imageViewCreateInfo);
+            auto texture = textureCreate(initialResources, font->getFace(), VK_FALSE, VK_FALSE, memoryImage, samplerCreateInfo, imageViewCreateInfo);
 
             if (!texture.get())
             {

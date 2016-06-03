@@ -142,8 +142,8 @@ void Buffer::copyBufferToImage(const VkCommandBuffer cmdBuffer, IImageSP& target
 
 	VkAccessFlags srcAccessMask = accessMask;
 
-    VkImageLayout targetImageLayout = targetImage->getImageLayout(bufferImageCopy.imageSubresource.mipLevel);
-    VkAccessFlags targetAccessMask = targetImage->getAccessMask(bufferImageCopy.imageSubresource.mipLevel);
+    VkImageLayout targetImageLayout = targetImage->getImageLayout(bufferImageCopy.imageSubresource.mipLevel, bufferImageCopy.imageSubresource.baseArrayLayer);
+    VkAccessFlags targetAccessMask = targetImage->getAccessMask(bufferImageCopy.imageSubresource.mipLevel, bufferImageCopy.imageSubresource.baseArrayLayer);
 
 	cmdPipelineBarrier(cmdBuffer, VK_ACCESS_TRANSFER_READ_BIT);
 
@@ -151,7 +151,7 @@ void Buffer::copyBufferToImage(const VkCommandBuffer cmdBuffer, IImageSP& target
 
     targetImage->cmdPipelineBarrier(cmdBuffer, VK_ACCESS_TRANSFER_WRITE_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, dstImageSubresourceRange);
 
-    vkCmdCopyBufferToImage(cmdBuffer, buffer, targetImage->getImage(), targetImage->getImageLayout(bufferImageCopy.imageSubresource.mipLevel), 1, &bufferImageCopy);
+    vkCmdCopyBufferToImage(cmdBuffer, buffer, targetImage->getImage(), targetImage->getImageLayout(bufferImageCopy.imageSubresource.mipLevel, bufferImageCopy.imageSubresource.baseArrayLayer), 1, &bufferImageCopy);
 
     targetImage->cmdPipelineBarrier(cmdBuffer, targetAccessMask, targetImageLayout, dstImageSubresourceRange);
 

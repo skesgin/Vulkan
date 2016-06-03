@@ -82,6 +82,9 @@ How to build:
 Changelog:
 ----------
 
+06/04/2016
+- Added cube map image generation and creation.
+
 05/29/2016
 - Added feature to save mip level and array layer of an image data.
 - Added feature to merge image data for both mip maps levels and array layers.

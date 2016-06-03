@@ -31,7 +31,7 @@
 namespace vkts
 {
 
-ITextureSP VKTS_APIENTRY textureCreate(const IInitialResourcesSP& initialResources, const std::string& name, const VkBool32 mipmap, const IMemoryImageSP& memoryImage, const VkSamplerCreateInfo& samplerCreateInfo, const VkImageViewCreateInfo& imageViewCreateInfo)
+ITextureSP VKTS_APIENTRY textureCreate(const IInitialResourcesSP& initialResources, const std::string& name, const VkBool32 mipmap, const VkBool32 cubemap, const IMemoryImageSP& memoryImage, const VkSamplerCreateInfo& samplerCreateInfo, const VkImageViewCreateInfo& imageViewCreateInfo)
 {
     if (!memoryImage.get())
     {
@@ -62,8 +62,10 @@ ITextureSP VKTS_APIENTRY textureCreate(const IInitialResourcesSP& initialResourc
     memcpy(&finalImageViewCreateInfo, &imageViewCreateInfo, sizeof(VkImageViewCreateInfo));
 
     finalImageViewCreateInfo.image = memoryImage->getImage()->getImage();
+    finalImageViewCreateInfo.viewType = cubemap ? VK_IMAGE_VIEW_TYPE_CUBE : VK_IMAGE_VIEW_TYPE_2D;
     finalImageViewCreateInfo.format = memoryImage->getImage()->getFormat();
     finalImageViewCreateInfo.subresourceRange.levelCount =  mipmap ? memoryImage->getImageData()->getMipLevels() : 1;
+    finalImageViewCreateInfo.subresourceRange.layerCount =  cubemap ? memoryImage->getImageData()->getArrayLayers() : 1;
 
     auto imageView = imageViewCreate(initialResources->getDevice()->getDevice(), finalImageViewCreateInfo.flags, finalImageViewCreateInfo.image, finalImageViewCreateInfo.viewType, finalImageViewCreateInfo.format, finalImageViewCreateInfo.components, finalImageViewCreateInfo.subresourceRange);
 

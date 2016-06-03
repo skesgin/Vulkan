@@ -31,7 +31,7 @@
 namespace vkts
 {
 
-static VkBool32 memoryImageUpload(const IDeviceMemorySP& deviceMemory, const IImageDataSP& imageData, const uint32_t mipLevel, const VkSubresourceLayout& subresourceLayout)
+static VkBool32 memoryImageUpload(const IDeviceMemorySP& deviceMemory, const IImageDataSP& imageData, const uint32_t mipLevel, const uint32_t arrayLayer, const VkSubresourceLayout& subresourceLayout)
 {
     if (!imageData.get())
     {
@@ -51,7 +51,7 @@ static VkBool32 memoryImageUpload(const IDeviceMemorySP& deviceMemory, const IIm
             return VK_FALSE;
         }
 
-        imageData->copy(deviceMemory->getMemory(), mipLevel, 0, subresourceLayout);
+        imageData->copy(deviceMemory->getMemory(), mipLevel, arrayLayer, subresourceLayout);
 
 		if (!(deviceMemory->getMemoryPropertyFlags() & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT))
 		{
@@ -209,29 +209,32 @@ IMemoryImageSP VKTS_APIENTRY memoryImageCreate(IImageSP& stageImage, IBufferSP& 
 
     if (memoryPropertyFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)
     {
-        for (uint32_t i = 0; i < imageData->getMipLevels(); i++)
+        for (uint32_t arrayLayer = 0; arrayLayer < imageData->getArrayLayers(); arrayLayer++)
         {
-            VkImageSubresource imageSubresource;
+			for (uint32_t mipLevel = 0; mipLevel < imageData->getMipLevels(); mipLevel++)
+			{
+				VkImageSubresource imageSubresource;
 
-            imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-            imageSubresource.mipLevel = i;
-            imageSubresource.arrayLayer = 0;
+				imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+				imageSubresource.mipLevel = mipLevel;
+				imageSubresource.arrayLayer = arrayLayer;
 
-            VkSubresourceLayout subresourceLayout;
+				VkSubresourceLayout subresourceLayout;
 
-            image->getImageSubresourceLayout(subresourceLayout, imageSubresource);
+				image->getImageSubresourceLayout(subresourceLayout, imageSubresource);
 
-            if (!memoryImageUpload(deviceMemory, imageData, i, subresourceLayout))
-            {
-                logPrint(VKTS_LOG_ERROR, "MemoryImage: Could not upload image data.");
+				if (!memoryImageUpload(deviceMemory, imageData, mipLevel, arrayLayer, subresourceLayout))
+				{
+					logPrint(VKTS_LOG_ERROR, "MemoryImage: Could not upload image data.");
 
-                return IMemoryImageSP();
+					return IMemoryImageSP();
+				}
             }
         }
     }
     else
     {
-        if (initialResources->getPhysicalDevice()->isImageTilingAvailable(VK_IMAGE_TILING_LINEAR, imageData->getFormat(), imageData->getImageType(), 0, imageData->getExtent3D(), imageData->getMipLevels(), 1, VK_SAMPLE_COUNT_1_BIT, imageData->getSize()))
+        if (initialResources->getPhysicalDevice()->isImageTilingAvailable(VK_IMAGE_TILING_LINEAR, imageData->getFormat(), imageData->getImageType(), imageCreateInfo.flags, imageData->getExtent3D(), imageData->getMipLevels(), imageData->getArrayLayers(), imageCreateInfo.samples, imageData->getSize()))
         {
             VkImageCreateInfo stageImageCreateInfo;
 
@@ -248,34 +251,37 @@ IMemoryImageSP VKTS_APIENTRY memoryImageCreate(IImageSP& stageImage, IBufferSP& 
                 return IMemoryImageSP();
             }
 
-            for (uint32_t i = 0; i < imageData->getMipLevels(); i++)
+            for (uint32_t arrayLayer = 0; arrayLayer < imageData->getArrayLayers(); arrayLayer++)
             {
-                VkImageSubresource imageSubresource;
-                imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-                imageSubresource.mipLevel = i;
-                imageSubresource.arrayLayer = 0;
+				for (uint32_t mipLevel = 0; mipLevel < imageData->getMipLevels(); mipLevel++)
+				{
+					VkImageSubresource imageSubresource;
+					imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+					imageSubresource.mipLevel = mipLevel;
+					imageSubresource.arrayLayer = arrayLayer;
 
-                VkSubresourceLayout subresourceLayout;
+					VkSubresourceLayout subresourceLayout;
 
-                stageImage->getImageSubresourceLayout(subresourceLayout, imageSubresource);
+					stageImage->getImageSubresourceLayout(subresourceLayout, imageSubresource);
 
-                if (!memoryImageUpload(stageDeviceMemory, imageData, i, subresourceLayout))
-                {
-                    logPrint(VKTS_LOG_ERROR, "MemoryImage: Could not upload image data.");
+					if (!memoryImageUpload(stageDeviceMemory, imageData, mipLevel, arrayLayer, subresourceLayout))
+					{
+						logPrint(VKTS_LOG_ERROR, "MemoryImage: Could not upload image data.");
 
-                    return IMemoryImageSP();
-                }
+						return IMemoryImageSP();
+					}
 
-                VkImageCopy imageCopy;
+					VkImageCopy imageCopy;
 
-                imageCopy.srcSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, i, 0, 1};
-                imageCopy.srcOffset = {0, 0, 0};
-                imageCopy.dstSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, i, 0, 1};
-                imageCopy.dstOffset = {0, 0, 0};
-                imageCopy.extent = {glm::max(imageData->getWidth() >> i, 1u), glm::max(imageData->getHeight() >> i, 1u), glm::max(imageData->getDepth() >> i, 1u)};
+					imageCopy.srcSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, mipLevel, arrayLayer, 1};
+					imageCopy.srcOffset = {0, 0, 0};
+					imageCopy.dstSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, mipLevel, arrayLayer, 1};
+					imageCopy.dstOffset = {0, 0, 0};
+					imageCopy.extent = {glm::max(imageData->getWidth() >> mipLevel, 1u), glm::max(imageData->getHeight() >> mipLevel, 1u), glm::max(imageData->getDepth() >> mipLevel, 1u)};
 
-                stageImage->copyImage(cmdBuffer->getCommandBuffer(), image, imageCopy);
-            }
+					stageImage->copyImage(cmdBuffer->getCommandBuffer(), image, imageCopy);
+				}
+        	}
         }
         else
         {
@@ -313,22 +319,25 @@ IMemoryImageSP VKTS_APIENTRY memoryImageCreate(IImageSP& stageImage, IBufferSP& 
 
             VkDeviceSize bufferOffset = 0;
 
-            for (uint32_t i = 0; i < imageData->getMipLevels(); i++)
+            for (uint32_t arrayLayer = 0; arrayLayer < imageData->getArrayLayers(); arrayLayer++)
             {
-                VkBufferImageCopy bufferImageCopy;
+				for (uint32_t mipLevel = 0; mipLevel < imageData->getMipLevels(); mipLevel++)
+				{
+					VkBufferImageCopy bufferImageCopy;
 
-                bufferImageCopy.bufferOffset = bufferOffset;
-                bufferImageCopy.bufferRowLength = glm::max(imageData->getWidth() >> i, 1u);
-                bufferImageCopy.bufferImageHeight = glm::max(imageData->getHeight() >> i, 1u);
-                bufferImageCopy.imageSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, i, 0, 1};
-                bufferImageCopy.imageOffset = {0, 0, 0};
-                bufferImageCopy.imageExtent = {glm::max(imageData->getWidth() >> i, 1u), glm::max(imageData->getHeight() >> i, 1u), glm::max(imageData->getDepth() >> i, 1u)};
+					bufferImageCopy.bufferOffset = bufferOffset;
+					bufferImageCopy.bufferRowLength = glm::max(imageData->getWidth() >> mipLevel, 1u);
+					bufferImageCopy.bufferImageHeight = glm::max(imageData->getHeight() >> mipLevel, 1u);
+					bufferImageCopy.imageSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, mipLevel, arrayLayer, 1};
+					bufferImageCopy.imageOffset = {0, 0, 0};
+					bufferImageCopy.imageExtent = {glm::max(imageData->getWidth() >> mipLevel, 1u), glm::max(imageData->getHeight() >> mipLevel, 1u), glm::max(imageData->getDepth() >> mipLevel, 1u)};
 
-                stageBuffer->copyBufferToImage(cmdBuffer->getCommandBuffer(), image, bufferImageCopy);
+					stageBuffer->copyBufferToImage(cmdBuffer->getCommandBuffer(), image, bufferImageCopy);
 
-                //
+					//
 
-                bufferOffset += (VkDeviceSize)(bufferImageCopy.imageExtent.width * bufferImageCopy.imageExtent.height * bufferImageCopy.imageExtent.depth) * (VkDeviceSize)(imageData->getBytesPerChannel() * imageData->getNumberChannels());
+					bufferOffset += (VkDeviceSize)(bufferImageCopy.imageExtent.width * bufferImageCopy.imageExtent.height * bufferImageCopy.imageExtent.depth) * (VkDeviceSize)(imageData->getBytesPerChannel() * imageData->getNumberChannels());
+				}
             }
         }
     }
