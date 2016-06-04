@@ -20,8 +20,9 @@ list(APPEND IGNORE_CPP_FILES )
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
-	include_directories(AFTER C:/VulkanSDK/1.0.13.0/Include)
-
+    find_path(Vulkan_INCLUDE_DIR NAMES vulkan/vulkan.h PATHS "$ENV{VULKAN_SDK}/Include")
+    include_directories(AFTER ${Vulkan_INCLUDE_DIR})
+    
     if (${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
 
         add_definitions(-D_CRT_SECURE_NO_WARNINGS)

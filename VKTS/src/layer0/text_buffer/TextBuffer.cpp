@@ -73,7 +73,7 @@ VkBool32 TextBuffer::seek(const int64_t offset, const VkTsSearch search)
                 return VK_FALSE;
             }
 
-            pos = offset;
+            pos = (size_t)offset;
 
             return VK_TRUE;
         }
@@ -95,7 +95,7 @@ VkBool32 TextBuffer::seek(const int64_t offset, const VkTsSearch search)
                 }
             }
 
-            pos += offset;
+            pos += (size_t)offset;
 
             return VK_TRUE;
         }

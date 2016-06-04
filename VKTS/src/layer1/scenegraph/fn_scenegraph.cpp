@@ -771,7 +771,7 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
                         	logPrint(VKTS_LOG_INFO, "Scenegraph: Using cached data for '%s'", finalImageDataFilename.c_str());
                         }
 
-                        imageData = imageDataMerge(allMipMaps, finalImageDataFilename, allMipMaps.size(), 1);
+                        imageData = imageDataMerge(allMipMaps, finalImageDataFilename, (uint32_t)allMipMaps.size(), 1);
 
                         if (!imageData.get())
                         {
@@ -845,7 +845,7 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
                         	logPrint(VKTS_LOG_INFO, "Scenegraph: Using cached data for '%s'", finalImageDataFilename.c_str());
                         }
 
-                        imageData = imageDataMerge(allCubeMaps, finalImageDataFilename, 1, allCubeMaps.size());
+                        imageData = imageDataMerge(allCubeMaps, finalImageDataFilename, 1, (uint32_t)allCubeMaps.size());
 
                         if (!imageData.get())
                         {

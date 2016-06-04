@@ -56,18 +56,21 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
 	set(VKTS_ADDITIONAL_LIBS vulkan-1 WinMM Xinput9_1_0 Pdh Psapi)
 	
-	include_directories(AFTER C:/VulkanSDK/1.0.13.0/Include)
+    find_path(Vulkan_INCLUDE_DIR NAMES vulkan/vulkan.h PATHS "$ENV{VULKAN_SDK}/Include")
+    include_directories(AFTER ${Vulkan_INCLUDE_DIR})
 	
-	if (${VKTS_BITS} MATCHES "64")
-	
-	   link_directories(C:/VulkanSDK/1.0.13.0/Bin)
-	   
-	else ()
-	
-	   link_directories(C:/VulkanSDK/1.0.13.0/Bin32)
-	
-	endif ()
-		
+    if (${VKTS_BITS} MATCHES "64")
+    
+        find_path(Vulkan_LIBRARY_DIR NAMES vulkan-1.lib PATHS "$ENV{VULKAN_SDK}/Bin")
+       
+    else ()
+    
+        find_path(Vulkan_LIBRARY_DIR NAMES vulkan-1.lib PATHS "$ENV{VULKAN_SDK}/Bin32")
+            
+    endif ()
+    
+    link_directories(${Vulkan_LIBRARY_DIR})
+    
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
 	set(VKTS_OS "Linux")
@@ -81,7 +84,6 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 	set(VKTS_ADDITIONAL_LIBS vulkan pthread xcb X11-xcb Xrandr X11)
 
 endif ()
-
 
 link_directories(${CMAKE_CURRENT_SOURCE_DIR}/../VKTS/${VKTS_LIB})
 
