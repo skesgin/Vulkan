@@ -82,6 +82,9 @@ How to build:
 Changelog:
 ----------
 
+06/05/2016
+- Added random functions.
+
 06/04/2016
 - Added cube map image generation and creation.
 

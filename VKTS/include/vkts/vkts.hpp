@@ -301,6 +301,12 @@
 #include <vkts/layer0/queue/fn_queue.hpp>
 
 /**
+ * Random.
+ */
+
+#include <vkts/layer0/random/fn_random.hpp>
+
+/**
  * Command.
  */
 
