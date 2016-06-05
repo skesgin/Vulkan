@@ -118,6 +118,73 @@ int32_t ImageData::getTexelLocation(float& fraction, const float a, const int32_
 	return coord;
 }
 
+int32_t ImageData::getCubeMapFace(float& s, float& t, const float x, const float y, const float z) const
+{
+	int32_t faceLayer = 0;
+
+	float sc = 0.0f;
+	float tc = 0.0f;
+	float rc = 0.0f;
+
+	if (z <= 0.0f && y <= 0.0f && x > 0.0f)
+	{
+		faceLayer = 0;
+
+		sc = -z;
+		tc = -y;
+		rc = x;
+	}
+	else if (z > 0.0f && y <= 0.0f && x > 0.0f)
+	{
+		faceLayer = 1;
+
+		sc = z;
+		tc = -y;
+		rc = x;
+	}
+	else if (x > 0.0f && z > 0.0f && y > 0.0f)
+	{
+		faceLayer = 2;
+
+		sc = x;
+		tc = z;
+		rc = y;
+	}
+	else if (x > 0.0f && z <= 0.0f && y > 0.0f)
+	{
+		faceLayer = 3;
+
+		sc = x;
+		tc = -z;
+		rc = y;
+	}
+	else if (x > 0.0f && y <= 0.0f && z > 0.0f)
+	{
+		faceLayer = 4;
+
+		sc = x;
+		tc = -y;
+		rc = z;
+	}
+	else if (x <= 0.0f && y <= 0.0f && z > 0.0f)
+	{
+		faceLayer = 5;
+
+		sc = -x;
+		tc = -y;
+		rc = z;
+	}
+	else
+	{
+		return -1;
+	}
+
+	s = 0.5f * sc / fabsf(rc) + 0.5f;
+	t = 0.5f * tc / fabsf(rc) + 0.5f;
+
+	return faceLayer;
+}
+
 ImageData::ImageData(const std::string& name, const VkImageType imageType, const VkFormat& format, const VkExtent3D& extent, const uint32_t mipLevels, const uint32_t arrayLayers, const uint8_t* data, const size_t size) :
     IImageData(), name(name), imageType(imageType), format(format), extent(extent), mipLevels(mipLevels), arrayLayers(arrayLayers), allOffsets()
 {
@@ -586,6 +653,36 @@ glm::vec4 ImageData::getSample(const float x, const VkSamplerMipmapMode mipmapMo
 			}
 		}
 	}
+
+	return result;
+}
+
+glm::vec4 ImageData::getSampleCubeMap(const float x, const VkSamplerMipmapMode mipmapModeX, const VkSamplerAddressMode addressModeX, const float y, const VkSamplerMipmapMode mipmapModeY, const VkSamplerAddressMode addressModeY, const float z, const VkSamplerMipmapMode mipmapModeZ, const VkSamplerAddressMode addressModeZ, const uint32_t mipLevel) const
+{
+	glm::vec4 result(0.0f, 0.0f, 0.0f, 0.0f);
+
+	if (arrayLayers != 6)
+	{
+		return result;
+	}
+
+	//
+
+	float s;
+	float t;
+
+	auto faceLayer = getCubeMapFace(s, t, x, y, z);
+
+	if (faceLayer == -1)
+	{
+		return result;
+	}
+
+	//
+
+	// TODO: Implement sampling of cube faces.
+
+	//
 
 	return result;
 }
