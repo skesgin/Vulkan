@@ -522,7 +522,7 @@ glm::vec4 ImageData::getTexel(const uint32_t x, const uint32_t y, const uint32_t
     return result;
 }
 
-glm::vec4 ImageData::getSample(const float x, const VkSamplerMipmapMode mipmapModeX, const VkSamplerAddressMode addressModeX, const float y, const VkSamplerMipmapMode mipmapModeY, const VkSamplerAddressMode addressModeY, const float z, const VkSamplerMipmapMode mipmapModeZ, const VkSamplerAddressMode addressModeZ, const uint32_t mipLevel, const uint32_t arrayLayer) const
+glm::vec4 ImageData::getSample(const float x, const VkFilter filterX, const VkSamplerAddressMode addressModeX, const float y, const VkFilter filterY, const VkSamplerAddressMode addressModeY, const float z, const VkFilter filterZ, const VkSamplerAddressMode addressModeZ, const uint32_t mipLevel, const uint32_t arrayLayer) const
 {
 	glm::vec4 result(0.0f, 0.0f, 0.0f, 0.0f);
 
@@ -556,13 +556,13 @@ glm::vec4 ImageData::getSample(const float x, const VkSamplerMipmapMode mipmapMo
 	float currentWeightY;
 	float currentWeightZ;
 
-	for (uint32_t currentZ = 0; currentZ < (uint32_t)mipmapModeZ + 1; currentZ++)
+	for (uint32_t currentZ = 0; currentZ < (uint32_t)filterZ + 1; currentZ++)
 	{
 		currentWeightZ = 1.0f;
 
 		//
 
-		if (mipmapModeZ)
+		if (filterZ)
 		{
 			if (currentZ == 0)
 			{
@@ -587,13 +587,13 @@ glm::vec4 ImageData::getSample(const float x, const VkSamplerMipmapMode mipmapMo
 
 		//
 
-		for (uint32_t currentY = 0; currentY < (uint32_t)mipmapModeY + 1; currentY++)
+		for (uint32_t currentY = 0; currentY < (uint32_t)filterY + 1; currentY++)
 		{
 			currentWeightY = 1.0f;
 
 			//
 
-			if (mipmapModeY)
+			if (filterY)
 			{
 				if (currentY == 0)
 				{
@@ -618,13 +618,13 @@ glm::vec4 ImageData::getSample(const float x, const VkSamplerMipmapMode mipmapMo
 
 			//
 
-			for (uint32_t currentX = 0; currentX < (uint32_t)mipmapModeX + 1; currentX++)
+			for (uint32_t currentX = 0; currentX < (uint32_t)filterX + 1; currentX++)
 			{
 				currentWeightX = 1.0f;
 
 				//
 
-				if (mipmapModeX)
+				if (filterX)
 				{
 					if (currentX == 0)
 					{
@@ -657,7 +657,7 @@ glm::vec4 ImageData::getSample(const float x, const VkSamplerMipmapMode mipmapMo
 	return result;
 }
 
-glm::vec4 ImageData::getSampleCubeMap(const float x, const VkSamplerMipmapMode mipmapModeX, const VkSamplerAddressMode addressModeX, const float y, const VkSamplerMipmapMode mipmapModeY, const VkSamplerAddressMode addressModeY, const float z, const VkSamplerMipmapMode mipmapModeZ, const VkSamplerAddressMode addressModeZ, const uint32_t mipLevel) const
+glm::vec4 ImageData::getSampleCubeMap(const float x, const float y, const float z, const VkFilter filter, const uint32_t mipLevel) const
 {
 	glm::vec4 result(0.0f, 0.0f, 0.0f, 0.0f);
 

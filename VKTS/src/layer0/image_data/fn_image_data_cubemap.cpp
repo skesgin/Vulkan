@@ -143,7 +143,7 @@ SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataCubemap(const IImageData
 
 				//
 
-				texel = sourceImage->getSample(sampleLocation.s, VK_SAMPLER_MIPMAP_MODE_LINEAR, VK_SAMPLER_ADDRESS_MODE_REPEAT, sampleLocation.t, VK_SAMPLER_MIPMAP_MODE_LINEAR, VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT, 0.5f, VK_SAMPLER_MIPMAP_MODE_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, 0, 0);
+				texel = sourceImage->getSample(sampleLocation.s, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_REPEAT, sampleLocation.t, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT, 0.5f, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, 0, 0);
 
 				result[i]->setTexel(texel, x, y, 0, 0, 0);
 
