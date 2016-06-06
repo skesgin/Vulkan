@@ -659,32 +659,81 @@ glm::vec4 ImageData::getSample(const float x, const VkFilter filterX, const VkSa
 
 glm::vec4 ImageData::getSampleCubeMap(const float x, const float y, const float z, const VkFilter filter, const uint32_t mipLevel) const
 {
-	glm::vec4 result(0.0f, 0.0f, 0.0f, 0.0f);
-
-	if (arrayLayers != 6)
+	if (arrayLayers != 6 || extent.depth != 1)
 	{
-		return result;
+		return glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
 	}
+
+	//
+
+	glm::vec3 noramlized = glm::normalize(glm::vec3(x, y ,z));
 
 	//
 
 	float s;
 	float t;
 
-	auto faceLayer = getCubeMapFace(s, t, x, y, z);
+	auto faceLayer = getCubeMapFace(s, t, noramlized.x, noramlized.y, noramlized.z);
 
 	if (faceLayer == -1)
 	{
-		return result;
+		return glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
 	}
 
 	//
 
-	// TODO: Implement sampling of cube faces.
+	glm::vec4 result = getSample(s, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, t, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, 0.5, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, mipLevel, faceLayer);
+
+	if (filter == VK_FILTER_NEAREST)
+	{
+		return result;
+	}
+
+	// Get three more samples. Not seamless.
+
+	float stepS = 1.0f / (float)extent.width;
+	float stepT = 1.0f / (float)extent.height;
+
+	float fractionS;
+	float fractionT;
+
+	getTexelLocation(fractionS, s, (int32_t)extent.width, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE);
+	getTexelLocation(fractionT, t, (int32_t)extent.height, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE);
+
+	if (fractionS < 0.5f)
+	{
+		result += getSample(s - stepS, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, t, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, 0.5, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, mipLevel, faceLayer);
+
+		if (fractionT < 0.5f)
+		{
+			result += getSample(s, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, t - stepT, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, 0.5, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, mipLevel, faceLayer);
+			result += getSample(s - stepS, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, t - stepT, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, 0.5, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, mipLevel, faceLayer);
+		}
+		else if (fractionT >= 0.5f)
+		{
+			result += getSample(s, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, t + stepT, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, 0.5, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, mipLevel, faceLayer);
+			result += getSample(s - stepS, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, t + stepT, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, 0.5, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, mipLevel, faceLayer);
+		}
+	}
+	else if (fractionS >= 0.5f)
+	{
+		result += getSample(s + stepS, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, t, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, 0.5, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, mipLevel, faceLayer);
+
+		if (fractionT < 0.5f)
+		{
+			result += getSample(s, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, t - stepT, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, 0.5, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, mipLevel, faceLayer);
+			result += getSample(s + stepS, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, t - stepT, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, 0.5, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, mipLevel, faceLayer);
+		}
+		else if (fractionT >= 0.5f)
+		{
+			result += getSample(s, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, t + stepT, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, 0.5, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, mipLevel, faceLayer);
+			result += getSample(s + stepS, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, t + stepT, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, 0.5, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, mipLevel, faceLayer);
+		}
+	}
 
 	//
 
-	return result;
+	return result * 0.25f;
 }
 
 VkBool32 ImageData::getExtentAndOffset(VkExtent3D& currentExtent, size_t& currentOffset, const uint32_t mipLevel, const uint32_t arrayLayer) const
