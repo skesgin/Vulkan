@@ -389,6 +389,12 @@
 #include <vkts/layer0/sampler/fn_sampler.hpp>
 
 /**
+ * Render.
+ */
+
+#include <vkts/layer0/render/fn_render.hpp>
+
+/**
  * Device memory.
  */
 
