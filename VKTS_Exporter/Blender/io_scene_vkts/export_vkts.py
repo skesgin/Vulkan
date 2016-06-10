@@ -44,6 +44,11 @@ layout (location = 2) out vec4 ob_glossyColor;             // Glossy color and a
 layout (location = 1) out vec4 ob_diffuseNormalRoughness;  // Diffuse normal and roughness.
 layout (location = 0) out vec4 ob_diffuseColor;            // Diffuse color and alpha.
 
+mat3 translate(vec3 t)
+{
+    return mat3(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, t.x, t.y, t.z);
+}
+
 mat3 rotateRzRyRx(vec3 rotate)
 {
     if (rotate.x == 0.0 && rotate.y == 0.0 && rotate.z == 0.0)
@@ -62,6 +67,11 @@ mat3 rotateRzRyRx(vec3 rotate)
     float cz = cos(rz);
 
     return mat3(cy * cz, cy * sz, -sy, -cx * sz + cz * sx * sy, cx * cz + sx * sy * sz, cy * sx, sz * sx + cx * cz * sy, -cz * sx + cx * sy * sz, cx * cy);
+}
+
+mat3 scale(vec3 s)
+{
+    return mat3(s.x, 0.0, 0.0, 0.0, s.y, 0.0, 0.0, 0.0, s.z);
 }
 
 void main()
@@ -1110,12 +1120,18 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
 
                     #
 
-                    finalValue = vectorInputName
+                    finalValue = "rotateRzRyRx(" + getVec3(currentNode.rotation) + ") * scale(" + getVec3(currentNode.scale) + ")" 
 
-                    if currentNode.vector_type == 'POINT':
-                        finalValue = "rotateRzRyRx(" + getVec3(currentNode.rotation) + ") * (" + vectorInputName + " * " + getVec3(currentNode.scale) + ") + " + getVec3(currentNode.translation)
+                    if currentNode.vector_type == 'TEXTURE' or currentNode.vector_type == 'POINT':
+                        finalValue = "translate(" + getVec3(currentNode.translation) + ") * "  + finalValue
 
-                    # TODO: Implement 'TEXTURE', 'VECTOR' and 'NORMAL' vector types.
+                        if currentNode.vector_type == 'TEXTURE':
+                            finalValue = "inverse(" + finalValue + ")"
+
+                    finalValue = finalValue + " * " + vectorInputName    
+
+                    if currentNode.vector_type == 'NORMAL':
+                        finalValue = "normalize(" + finalValue + ")"
 
                     #                    
                     
