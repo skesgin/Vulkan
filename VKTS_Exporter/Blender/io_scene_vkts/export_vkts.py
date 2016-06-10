@@ -44,6 +44,26 @@ layout (location = 2) out vec4 ob_glossyColor;             // Glossy color and a
 layout (location = 1) out vec4 ob_diffuseNormalRoughness;  // Diffuse normal and roughness.
 layout (location = 0) out vec4 ob_diffuseColor;            // Diffuse color and alpha.
 
+mat3 rotateRzRyRx(vec3 rotate)
+{
+    if (rotate.x == 0.0 && rotate.y == 0.0 && rotate.z == 0.0)
+    {
+        return mat3(1.0);
+    }
+
+    float rz = radians(rotate.z);
+    float ry = radians(rotate.y);
+    float rx = radians(rotate.x);
+    float sx = sin(rx);
+    float cx = cos(rx);
+    float sy = sin(ry);
+    float cy = cos(ry);
+    float sz = sin(rz);
+    float cz = cos(rz);
+
+    return mat3(cy * cz, cy * sz, -sy, -cx * sz + cz * sx * sy, cx * cz + sx * sy * sz, cy * sx, sz * sx + cx * cz * sy, -cz * sx + cx * sy * sz, cx * cy);
+}
+
 void main()
 {
     vec4 position = v_f_position / v_f_position.w; 
@@ -176,6 +196,20 @@ invertMain = """#previousMain#
     vec4 %s = mix(%s, vec4(1.0 - %s.r, 1.0 - %s.g, 1.0 - %s.b, 1.0 - %s.a), %s);
     
     // Invert end"""
+
+mappingMain = """#previousMain#
+    
+    // Mapping start
+
+    // In
+    vec3 %s = %s;
+
+    %s = %s;
+    
+    // Out
+    vec3 %s = %s%s%s;
+    
+    // Mapping end"""
 
 uvMapMain = """#previousMain#
     
@@ -510,7 +544,7 @@ def saveTextures(context, filepath, imagesLibraryName, materials):
                         storeTexture = True
 
                     if storeTexture:
-                        cyclesTextures.setdefault(friendlyName(material.name) + "_" + friendlyImageName(currentNode.name), currentNode)
+                        cyclesTextures.setdefault(friendlyName(material.name) + "_" + friendlyNodeName(currentNode.name), currentNode)
 
     for nameOfTexture in textures:
 
@@ -561,7 +595,7 @@ def saveTextures(context, filepath, imagesLibraryName, materials):
         nameOfImage = friendlyImageName(texture.image.filepath)
 
         if not nameOfImage in environmentImages:
-            environmentImages.append( nameOfImage)
+            environmentImages.append(nameOfImage)
 
         fw("#\n")
         fw("# Environment Texture.\n")
@@ -580,9 +614,9 @@ def saveTextures(context, filepath, imagesLibraryName, materials):
         nameOfImage = friendlyImageName(node.image.filepath)
         
         if not nameOfImage in environmentImages:
-            environmentImages.append( nameOfImage)
+            environmentImages.append(nameOfImage)
         if not nameOfImage in preFilteredImages:
-            preFilteredImages.append( nameOfImage)
+            preFilteredImages.append(nameOfImage)
 
         fw("#\n")
         fw("# Environment Texture.\n")
@@ -647,6 +681,20 @@ def getVec4(value):
     return "vec4(%.3f, %.3f, %.3f, %.3f)"%(value[0], value[1], value[2], value[3])
 
 
+def enqueueNode(openNodes, currentNode):
+
+    for currentSocket in currentNode.inputs:
+        if len(currentSocket.links) > 0:
+            insertIndex = 0
+            for checkNode in openNodes:
+                if currentSocket.links[0].from_node == checkNode: 
+                    openNodes.insert(insertIndex, currentNode)
+                    return
+                insertIndex += 1
+
+    openNodes.append(currentNode)    
+
+
 def replaceParameters(currentNode, openNodes, processedNodes, currentMain):
     for currentSocket in currentNode.inputs:
         currentParameter = currentSocket.name + "_Dummy"
@@ -672,7 +720,7 @@ def replaceParameters(currentNode, openNodes, processedNodes, currentMain):
         else:
             # Append node for later processing.
             if currentSocket.links[0].from_node not in openNodes and currentSocket.links[0].from_node not in processedNodes:
-                openNodes.append(currentSocket.links[0].from_node)
+                enqueueNode(openNodes, currentSocket.links[0].from_node)
             # Replace parameter with variable.
             currentMain = currentMain.replace(currentParameter, friendlyNodeName(currentSocket.links[0].from_node.name) + "_" + friendlyNodeName(currentSocket.links[0].from_socket.name))
         
@@ -696,7 +744,7 @@ def replaceShaderParameters(currentNode, openNodes, processedNodes, currentMain)
 
             # Append node for later processing.
             if currentSocket.links[0].from_node not in openNodes and currentSocket.links[0].from_node not in processedNodes:
-                openNodes.append(currentSocket.links[0].from_node)
+                enqueueNode(openNodes, currentSocket.links[0].from_node)
             # Replace parameter with variable.
             linkedNode = currentSocket.links[0].from_node
             if isinstance(linkedNode, bpy.types.ShaderNodeAddShader): 
@@ -731,7 +779,7 @@ def replaceMaterialParameters(currentNode, openNodes, processedNodes, currentMai
     else:
         # Append node for later processing.
         if currentSocket.links[0].from_node not in openNodes and currentSocket.links[0].from_node not in processedNodes:
-            openNodes.append(currentSocket.links[0].from_node)
+            enqueueNode(openNodes, currentSocket.links[0].from_node)
         # Replace parameter with variable.
         linkedNode = currentSocket.links[0].from_node
         if isinstance(linkedNode, bpy.types.ShaderNodeAddShader) or isinstance(linkedNode, bpy.types.ShaderNodeMixShader): 
@@ -1032,6 +1080,55 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
                         
                     currentFragmentGLSL = currentFragmentGLSL.replace("#previousMain#", currentMain)
                     
+                elif isinstance(currentNode, bpy.types.ShaderNodeMapping):
+                    # Mapping.
+                        
+                    # Inputs.
+                    
+                    vectorInputName = "Vector_%d" % (vectorCounter)
+
+                    vectorCounter += 1
+                    
+                    vectorInputParameterName = "Vector_Dummy"
+
+                    # Outputs
+                    
+                    vectorOutputName = friendlyNodeName(currentNode.name) + "_" + friendlyNodeName(currentNode.outputs["Vector"].name) 
+                    
+                    #
+
+                    preItem = ""
+                    postItem = ""
+                    
+                    if currentNode.use_min:
+                        preItem = "min("
+                        postItem = ", " + getVec3(currentNode.min) + ")"
+
+                    if currentNode.use_max:
+                        preItem = "max(" + preItem 
+                        postItem = postItem + ", " + getVec3(currentNode.max) + ")"
+
+                    #
+
+                    finalValue = vectorInputName
+
+                    if currentNode.vector_type == 'POINT':
+                        finalValue = "rotateRzRyRx(" + getVec3(currentNode.rotation) + ") * (" + vectorInputName + " * " + getVec3(currentNode.scale) + ") + " + getVec3(currentNode.translation)
+
+                    # TODO: Implement 'TEXTURE', 'VECTOR' and 'NORMAL' vector types.
+
+                    #                    
+                    
+                    currentMain = mappingMain % (vectorInputName, vectorInputParameterName, vectorInputName, finalValue, vectorOutputName, preItem, vectorInputName, postItem)
+                    
+                    # 
+                    
+                    currentMain = replaceParameters(currentNode, openNodes, processedNodes, currentMain)
+                     
+                    #
+                        
+                    currentFragmentGLSL = currentFragmentGLSL.replace("#previousMain#", currentMain)
+                    
                 elif isinstance(currentNode, bpy.types.ShaderNodeUVMap):
                     # UV map.
 
@@ -1323,7 +1420,7 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
                 currentTexImage = texImageFunction % (binding, binding)
                 currentFragmentGLSL = currentFragmentGLSL.replace("#nextTexture#", currentTexImage)
                 
-                fw("add_texture %s\n" % (friendlyName(material.name) + "_" + friendlyImageName(nodes[binding].name) + "_texture" ))    
+                fw("add_texture %s\n" % (friendlyName(material.name) + "_" + friendlyNodeName(nodes[binding].name) + "_texture" ))    
                 fw("\n")
                 
             fw("attributes %x\n" % (vertexAttributes))
