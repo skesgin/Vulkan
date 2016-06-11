@@ -207,6 +207,18 @@ invertMain = """#previousMain#
     
     // Invert end"""
 
+rgbToBwMain = """#previousMain#
+    
+    // RGB to BW start
+
+    // In
+    vec4 %s = %s;
+    
+    // Out
+    float %s = %s.r * 0.2126 + %s.g * 0.7152 + %s.g * 0.0722;
+    
+    // end"""
+
 mappingMain = """#previousMain#
     
     // Mapping start
@@ -692,17 +704,41 @@ def getVec4(value):
 
 
 def enqueueNode(openNodes, currentNode):
+    # Every node apears only once in the list.
+    if currentNode in openNodes:
+        return
 
-    for currentSocket in currentNode.inputs:
-        if len(currentSocket.links) > 0:
+    insertIndexList = []
+
+    # Create a list of insert indices, where the current node links to.
+    for currentSocket in currentNode.outputs:
+        for currentLink in currentSocket.links: 
             insertIndex = 0
             for checkNode in openNodes:
-                if currentSocket.links[0].from_node == checkNode: 
-                    openNodes.insert(insertIndex, currentNode)
-                    return
+                if currentLink.to_node == checkNode:
+                    insertIndexList.append(insertIndex + 1) 
                 insertIndex += 1
 
-    openNodes.append(currentNode)    
+    if len(insertIndexList) == 0 or len(openNodes) == 0:
+        openNodes.append(currentNode)
+    else:
+        # Insert at highest index, that all dependent nodes are before.    
+        openNodes.insert(max(insertIndexList), currentNode)
+
+
+def createOpenNodeList(openNodes, rootNode):
+
+    todoList = [rootNode]
+
+    # Gather all linked nodes and enque them on their dependency.
+    while len(todoList) > 0:
+        currentNode = todoList.pop(0)
+
+        enqueueNode(openNodes, currentNode) 
+
+        for currentSocket in currentNode.inputs:
+            if len(currentSocket.links) > 0:
+                todoList.append(currentSocket.links[0].from_node)
 
 
 def replaceParameters(currentNode, openNodes, processedNodes, currentMain):
@@ -728,9 +764,6 @@ def replaceParameters(currentNode, openNodes, processedNodes, currentMain):
             # Replace parameter with value.
             currentMain = currentMain.replace(currentParameter, currentValue)
         else:
-            # Append node for later processing.
-            if currentSocket.links[0].from_node not in openNodes and currentSocket.links[0].from_node not in processedNodes:
-                enqueueNode(openNodes, currentSocket.links[0].from_node)
             # Replace parameter with variable.
             currentMain = currentMain.replace(currentParameter, friendlyNodeName(currentSocket.links[0].from_node.name) + "_" + friendlyNodeName(currentSocket.links[0].from_socket.name))
         
@@ -752,9 +785,6 @@ def replaceShaderParameters(currentNode, openNodes, processedNodes, currentMain)
                 currentParameter = currentSocket.name + "_Dummy"
                 currentMain = currentMain.replace(currentParameter, friendlyNodeName(currentSocket.links[0].from_node.name) + "_" + friendlyNodeName(currentSocket.links[0].from_socket.name))
 
-            # Append node for later processing.
-            if currentSocket.links[0].from_node not in openNodes and currentSocket.links[0].from_node not in processedNodes:
-                enqueueNode(openNodes, currentSocket.links[0].from_node)
             # Replace parameter with variable.
             linkedNode = currentSocket.links[0].from_node
             if isinstance(linkedNode, bpy.types.ShaderNodeAddShader): 
@@ -787,9 +817,6 @@ def replaceMaterialParameters(currentNode, openNodes, processedNodes, currentMai
         for currentParameter in parameterNames:
             currentMain = currentMain.replace(currentParameter + "_Dummy", "vec4(0.0, 0.0, 0.0, 0.0)")
     else:
-        # Append node for later processing.
-        if currentSocket.links[0].from_node not in openNodes and currentSocket.links[0].from_node not in processedNodes:
-            enqueueNode(openNodes, currentSocket.links[0].from_node)
         # Replace parameter with variable.
         linkedNode = currentSocket.links[0].from_node
         if isinstance(linkedNode, bpy.types.ShaderNodeAddShader) or isinstance(linkedNode, bpy.types.ShaderNodeMixShader): 
@@ -915,10 +942,12 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
             tempCounter = 0
             vectorCounter = 0
             
-            openNodes = [materialOutput]
+            openNodes = []
             processedNodes = []
             
             nodes = []
+
+            createOpenNodeList(openNodes, materialOutput)
             
             while len(openNodes) > 0:
             
@@ -1185,6 +1214,33 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
                     #
                     
                     currentMain = invertMain % (facInputName, facInputParameterName, colorInputName, colorInputParameterName, colorOutputName, colorInputName, colorInputName, colorInputName, colorInputName, colorInputName, facInputName) 
+                    
+                    #
+                    
+                    currentMain = replaceParameters(currentNode, openNodes, processedNodes, currentMain)
+                    
+                    #
+                        
+                    currentFragmentGLSL = currentFragmentGLSL.replace("#previousMain#", currentMain)
+
+                elif isinstance(currentNode, bpy.types.ShaderNodeRGBToBW):
+                    # RGB to BW color.
+
+                    # Inputs
+                    
+                    colorInputName = "Color_%d" % (colorCounter)
+
+                    colorCounter += 1
+
+                    colorInputParameterName = "Color_Dummy"
+                    
+                    # Outputs
+                    
+                    valOutputName = friendlyNodeName(currentNode.name) + "_" + friendlyNodeName(currentNode.outputs["Val"].name) 
+                    
+                    #
+                    
+                    currentMain = rgbToBwMain % (colorInputName, colorInputParameterName, valOutputName, colorInputName, colorInputName, colorInputName) 
                     
                     #
                     
