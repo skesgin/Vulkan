@@ -3533,6 +3533,24 @@ ISceneSP VKTS_APIENTRY scenegraphLoadScene(const char* filename, const IContextS
                 return ISceneSP();
             }
         }
+        else if (scenegraphIsToken(buffer, "environment"))
+        {
+            if (!scenegraphParseString(buffer, sdata))
+            {
+                return ISceneSP();
+            }
+
+            // TODO: Create environment.
+        }
+        else if (scenegraphIsToken(buffer, "texture"))
+        {
+            if (!scenegraphParseString(buffer, sdata))
+            {
+                return ISceneSP();
+            }
+
+            // TODO: Gather texture.
+        }
         else
         {
             scenegraphUnknownBuffer(buffer);

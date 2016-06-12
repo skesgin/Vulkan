@@ -610,6 +610,8 @@ def saveTextures(context, filepath, imagesLibraryName, materials):
         fw("image %s\n" % (nameOfImage + "_image"))
         fw("\n")
 
+    allEnvironmentTextures = []
+
     for nameOfTexture in envTextures:
 
         texture = envTextures[nameOfTexture]
@@ -628,6 +630,8 @@ def saveTextures(context, filepath, imagesLibraryName, materials):
         fw("environment true\n")
         fw("image %s\n" % (nameOfImage + "_image"))
         fw("\n")
+
+        allEnvironmentTextures.append(nameOfTexture + "_texture")
 
     for nameOfTexture in cyclesEnvTextures:
 
@@ -650,7 +654,9 @@ def saveTextures(context, filepath, imagesLibraryName, materials):
         fw("pre_filtered true\n")
         fw("image %s\n" % (nameOfImage + "_image"))
         fw("\n")
-    
+
+        allEnvironmentTextures.append(nameOfTexture + "_texture")
+
     for nameOfImage in images:
 
         image = images[nameOfImage]
@@ -688,7 +694,7 @@ def saveTextures(context, filepath, imagesLibraryName, materials):
     
     file_image.close()
 
-    return
+    return allEnvironmentTextures
 
 def getFloat(value):
     return "%.3f"%(value)
@@ -881,7 +887,7 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
     # Save textures.
 
     texturesLibraryFilepath = os.path.dirname(filepath) + "/" + texturesLibraryName
-    saveTextures(context, texturesLibraryFilepath, imagesLibraryName, materials)
+    allEnvironmentTextures = saveTextures(context, texturesLibraryFilepath, imagesLibraryName, materials)
 
     # Write materials.
     for materialName in materials:
@@ -1597,7 +1603,7 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
     
     file.close()
 
-    return
+    return allEnvironmentTextures
 
 def saveMeshes(context, filepath, materialsLibraryName, subMeshLibraryName):
     
@@ -2262,7 +2268,7 @@ def save(operator,
 
     materialsLibraryFilepath = os.path.dirname(sceneFilepath) + "/" + materialsLibraryName
 
-    saveMaterials(context, materialsLibraryFilepath, texturesLibraryName, imagesLibraryName)
+    allEnvironmentTextures = saveMaterials(context, materialsLibraryFilepath, texturesLibraryName, imagesLibraryName)
 
     #
 
@@ -2339,7 +2345,16 @@ def save(operator,
         fw("scale 1.0 1.0 1.0\n")
         fw("\n")
         
-        #TODO: Save environment map, if present.
+    for currentEnvironmentTexture in allEnvironmentTextures:
+        fw("#\n")
+        fw("# Environment texture.\n")
+        fw("#\n")
+        fw("\n")
+
+        fw("environment %s\n" % (currentEnvironmentTexture))
+        fw("\n")
+        fw("texture %s\n" % (currentEnvironmentTexture))
+        fw("\n")
     
     file.close()
 
