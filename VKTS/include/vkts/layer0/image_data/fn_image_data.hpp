@@ -42,6 +42,12 @@ VKTS_APICALL IImageDataSP VKTS_APIENTRY imageDataLoad(const char* filename);
  *
  * @ThreadSafe
  */
+VKTS_APICALL IImageDataSP VKTS_APIENTRY imageDataLoadRaw(const char* filename, const uint32_t width, const uint32_t height, const VkFormat format);
+
+/**
+ *
+ * @ThreadSafe
+ */
 VKTS_APICALL VkBool32 VKTS_APIENTRY imageDataSave(const char* filename, const IImageDataSP& imageData, const uint32_t mipLevel = 0, const uint32_t arrayLayer = 0);
 
 /**
@@ -85,6 +91,12 @@ VKTS_APICALL SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataMipmap(cons
  * @ThreadSafe
  */
 VKTS_APICALL SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataCubemap(const IImageDataSP& sourceImage, const uint32_t length, const std::string& name);
+
+/**
+ *
+ * @ThreadSafe
+ */
+VKTS_APICALL SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilter(const IImageDataSP& sourceImage, const std::string& name);
 
 }
 

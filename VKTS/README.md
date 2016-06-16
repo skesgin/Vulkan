@@ -82,6 +82,10 @@ How to build:
 Changelog:
 ----------
 
+06/15/2016
+- Added raw data file and load functions.
+- Added more render functions to later pre-filter images.
+
 06/05/2016
 - Added random functions.
 

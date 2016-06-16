@@ -32,6 +32,10 @@
 namespace vkts
 {
 
+VKTS_APICALL float VKTS_APIENTRY renderGetGeometricShadowingSchlickBeckmann(float NdotV, float k);
+
+VKTS_APICALL float VKTS_APIENTRY renderGetGeometricShadowingSmith(float NdotL, float NdotV, float k);
+
 VKTS_APICALL glm::vec3 VKTS_APIENTRY renderGetMicrofacetWeightedVector(const glm::vec2& e, const float roughness);
 
 VKTS_APICALL glm::vec3 VKTS_APIENTRY renderGetCosineWeightedVector(const glm::vec2& e);
@@ -39,6 +43,8 @@ VKTS_APICALL glm::vec3 VKTS_APIENTRY renderGetCosineWeightedVector(const glm::ve
 VKTS_APICALL glm::vec3 VKTS_APIENTRY renderLightCookTorrance(const IImageDataSP& cubeMap, const VkFilter filter, const uint32_t mipLevel, const glm::vec2& randomPoint, const glm::mat3& basis, const glm::vec3& N, const glm::vec3& V, const float roughness);
 
 VKTS_APICALL glm::vec3 VKTS_APIENTRY renderLightLambert(const IImageDataSP& cubeMap, const VkFilter filter, const uint32_t mipLevel, const glm::vec2& randomPoint, const glm::mat3& basis);
+
+VKTS_APICALL glm::vec2 VKTS_APIENTRY renderIntegrateCookTorrance(const glm::vec2& randomPoint, glm::vec3& N, glm::vec3& V, const float k, const float roughness);
 
 }
 

@@ -230,6 +230,16 @@ VkBool32 VKTS_APIENTRY fileSaveBinary(const char* filename, const IBinaryBufferS
     return fileSave(filename, buffer->getData(), buffer->getSize());
 }
 
+VkBool32 VKTS_APIENTRY fileSaveBinaryData(const char* filename, const void* data, const size_t size)
+{
+    if (!data || size == 0)
+    {
+        return VK_FALSE;
+    }
+
+    return fileSave(filename, data, size);
+}
+
 VkBool32 VKTS_APIENTRY fileSaveText(const char* filename, const ITextBufferSP& text)
 {
     if (!text.get())

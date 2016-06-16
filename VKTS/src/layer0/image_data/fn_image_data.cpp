@@ -616,6 +616,35 @@ IImageDataSP VKTS_APIENTRY imageDataLoad(const char* filename)
     return IImageDataSP();
 }
 
+IImageDataSP VKTS_APIENTRY imageDataLoadRaw(const char* filename, const uint32_t width, const uint32_t height, const VkFormat format)
+{
+    if (!filename || width == 0 || height == 0)
+    {
+        return IImageDataSP();
+    }
+
+    if (!(commonIsUNORM(format) || commonIsSFLOAT(format)))
+    {
+    	return IImageDataSP();
+    }
+
+    auto buffer = fileLoadBinary(filename);
+
+    if (!buffer.get())
+    {
+        return IImageDataSP();
+    }
+
+    size_t expectedSize = (size_t)width * (size_t)height * (size_t)commonGetBytesPerChannel(format) * (size_t)commonGetNumberChannels(format);
+
+    if (buffer->getSize() != expectedSize)
+    {
+        return IImageDataSP();
+    }
+
+    return IImageDataSP(new ImageData(filename, VK_IMAGE_TYPE_2D, format, { width, height, 1 }, 1, 1, buffer->getByteData(), expectedSize));
+}
+
 static IBinaryBufferSP imageDataSaveTga(const IImageDataSP& imageData, const uint32_t mipLevel, const uint32_t arrayLayer)
 {
     if (!imageData.get())
@@ -854,6 +883,20 @@ VkBool32 VKTS_APIENTRY imageDataSave(const char* filename, const IImageDataSP& i
         }
 
         return fileSaveBinary(filename, buffer);
+    }
+    else
+    {
+    	VkExtent3D currentExtent;
+    	size_t offset;
+
+    	if (!imageData->getExtentAndOffset(currentExtent, offset, mipLevel, arrayLayer))
+        {
+        	return VK_FALSE;
+        }
+
+    	size_t currentSize = (size_t)currentExtent.width * (size_t)currentExtent.height * (size_t)imageData->getNumberChannels() * (size_t)imageData->getBytesPerChannel();
+
+        return fileSaveBinaryData(filename, &imageData->getByteData()[offset], currentSize);
     }
 
     return VK_FALSE;

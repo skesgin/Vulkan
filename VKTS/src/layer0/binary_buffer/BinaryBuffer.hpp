@@ -66,6 +66,8 @@ public:
 
     virtual const void* getData() const override;
 
+    virtual const uint8_t* getByteData() const override;
+
     virtual size_t getSize() const override;
 
     virtual VkBool32 seek(const int64_t offset, const VkTsSearch search) override;

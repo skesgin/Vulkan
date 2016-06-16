@@ -50,6 +50,8 @@ public:
 
     virtual const void* getData() const = 0;
 
+    virtual const uint8_t* getByteData() const = 0;
+
     virtual size_t getSize() const = 0;
 
     virtual VkBool32 seek(const int64_t offset, const VkTsSearch search) = 0;

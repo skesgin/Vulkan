@@ -36,7 +36,7 @@
 #define VKTS_FONT_NAME "font/Arial_128.fnt"
 #define VKTS_FONT_SCALE 32.0f
 
-#define VKTS_SCENE_NAME "test/cycles/cycles.vkts"
+#define VKTS_SCENE_NAME "material_probes/material_probes.vkts"
 
 #define VKTS_MAX_CORES 32u
 

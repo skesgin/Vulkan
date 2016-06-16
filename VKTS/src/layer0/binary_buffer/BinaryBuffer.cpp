@@ -112,6 +112,11 @@ const void* BinaryBuffer::getData() const
     return static_cast<const void*>(data);
 }
 
+const uint8_t* BinaryBuffer::getByteData() const
+{
+    return data;
+}
+
 size_t BinaryBuffer::getSize() const
 {
     return size;
