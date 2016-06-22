@@ -62,6 +62,10 @@ public:
 
     virtual const SmartPointerVector<IObjectSP>& getObjects() const = 0;
 
+    virtual void setEnvironment(const ITextureSP& environment) = 0;
+
+    virtual ITextureSP getEnvironment() const = 0;
+
     virtual void updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets) = 0;
 
     virtual void bindDrawIndexedRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const overwrite* renderOverwrite = nullptr, const uint32_t bufferIndex = 0, const uint32_t objectOffset = 0, const uint32_t objectStep = 1, const size_t objectLimit = SIZE_MAX) const = 0;

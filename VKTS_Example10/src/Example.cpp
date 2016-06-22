@@ -27,7 +27,7 @@
 #include "Example.hpp"
 
 Example::Example(const vkts::IInitialResourcesSP& initialResources, const int32_t windowIndex, const vkts::ISurfaceSP& surface) :
-		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), font(nullptr), sceneContext(nullptr), scene(nullptr), swapchain(nullptr), renderPass(nullptr), depthTexture(nullptr), depthStencilImageView(nullptr), swapchainImagesCount(0), swapchainImageView(), framebuffer(), cmdBuffer(), rebuildCmdBufferCounter(0), fps(0), ram(0), cpuUsageApp(0.0f), processors(0)
+		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), descriptorSetLayout(nullptr), font(nullptr), sceneContext(nullptr), scene(nullptr), environmentSceneContext(nullptr), environmentScene(nullptr), swapchain(nullptr), renderPass(nullptr), depthTexture(nullptr), depthStencilImageView(nullptr), swapchainImagesCount(0), swapchainImageView(), framebuffer(), cmdBuffer(), rebuildCmdBufferCounter(0), fps(0), ram(0), cpuUsageApp(0.0f), processors(0)
 {
 	processors = glm::min(vkts::processorGetNumber(), VKTS_MAX_CORES);
 
@@ -266,6 +266,30 @@ VkBool32 Example::buildScene(const vkts::ICommandBuffersSP& cmdBuffer)
 
 	vkts::logPrint(VKTS_LOG_INFO, "Example: Number objects: %d", scene->getNumberObjects());
 
+	//
+
+	environmentSceneContext = vkts::scenegraphCreateContext(VK_FALSE, initialResources, cmdBuffer, samplerCreateInfo, imageViewCreateInfo, descriptorSetLayout);
+
+	if (!environmentSceneContext.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create cache.");
+
+		return VK_FALSE;
+	}
+
+	//
+
+	environmentScene = vkts::scenegraphLoadScene(VKTS_ENVIRONMENT_SCENE_NAME, environmentSceneContext);
+
+	if (!environmentScene.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not load scene.");
+
+		return VK_FALSE;
+	}
+
+	vkts::logPrint(VKTS_LOG_INFO, "Example: Number objects: %d", environmentScene->getNumberObjects());
+
 	return VK_TRUE;
 }
 
@@ -402,6 +426,42 @@ VkBool32 Example::buildRenderPass()
 	return VK_TRUE;
 }
 
+VkBool32 Example::buildDescriptorSetLayout()
+{
+	VkDescriptorSetLayoutBinding descriptorSetLayoutBinding[3];
+
+	memset(&descriptorSetLayoutBinding, 0, sizeof(descriptorSetLayoutBinding));
+
+	descriptorSetLayoutBinding[0].binding = VKTS_BINDING_UNIFORM_BUFFER_VIEWPROJECTION;
+	descriptorSetLayoutBinding[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	descriptorSetLayoutBinding[0].descriptorCount = 1;
+	descriptorSetLayoutBinding[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+	descriptorSetLayoutBinding[0].pImmutableSamplers = nullptr;
+
+	descriptorSetLayoutBinding[1].binding = VKTS_BINDING_UNIFORM_BUFFER_TRANSFORM;
+	descriptorSetLayoutBinding[1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	descriptorSetLayoutBinding[1].descriptorCount = 1;
+	descriptorSetLayoutBinding[1].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+	descriptorSetLayoutBinding[1].pImmutableSamplers = nullptr;
+
+	descriptorSetLayoutBinding[2].binding = VKTS_BINDING_UNIFORM_SAMPLER_ENVIRONMENT;
+	descriptorSetLayoutBinding[2].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+	descriptorSetLayoutBinding[2].descriptorCount = 1;
+	descriptorSetLayoutBinding[2].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+	descriptorSetLayoutBinding[2].pImmutableSamplers = nullptr;
+
+	descriptorSetLayout = vkts::descriptorSetLayoutCreate(initialResources->getDevice()->getDevice(), 0, 3, descriptorSetLayoutBinding);
+
+	if (!descriptorSetLayout.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create descriptor set layout.");
+
+		return VK_FALSE;
+	}
+
+	return VK_TRUE;
+}
+
 VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext)
 {
 	VkResult result;
@@ -495,7 +555,7 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 		}
 	}
 
-	if (!scene.get())
+	if (!scene.get() && !environmentScene.get())
 	{
 		if (!buildScene(updateCmdBuffer))
 		{
@@ -671,6 +731,13 @@ VkBool32 Example::init(const vkts::IUpdateThreadContext& updateContext)
     }
 
 	//
+
+	if (!buildDescriptorSetLayout())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not build descriptor set layout.");
+
+		return VK_FALSE;
+	}
 
 	if (!buildResources(updateContext))
 	{
@@ -900,6 +967,18 @@ void Example::terminate(const vkts::IUpdateThreadContext& updateContext)
 
 			//
 
+			if (environmentSceneContext.get())
+			{
+				environmentSceneContext->destroy();
+
+				environmentSceneContext.reset();
+			}
+
+			if (environmentScene.get())
+			{
+				environmentScene->destroy();
+			}
+
 			if (sceneContext.get())
 			{
 				sceneContext->destroy();
@@ -920,6 +999,11 @@ void Example::terminate(const vkts::IUpdateThreadContext& updateContext)
 			if (swapchain.get())
 			{
 				swapchain->destroy();
+			}
+
+			if (descriptorSetLayout.get())
+			{
+				descriptorSetLayout->destroy();
 			}
 
 	        if (renderingCompleteSemaphore.get())

@@ -41,6 +41,8 @@ private:
 
     SmartPointerVector<IObjectSP> allObjects;
 
+    ITextureSP environment;
+
 public:
 
     Scene();
@@ -69,6 +71,10 @@ public:
     virtual size_t getNumberObjects() const override;
 
     virtual const SmartPointerVector<IObjectSP>& getObjects() const override;
+
+    virtual void setEnvironment(const ITextureSP& environment) override;
+
+    virtual ITextureSP getEnvironment() const override;
 
     virtual void updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets) override;
 

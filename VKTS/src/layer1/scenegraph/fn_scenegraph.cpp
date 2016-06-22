@@ -1061,7 +1061,12 @@ static VkBool32 scenegraphLoadTextures(const char* directory, const char* filena
 
             //
 
-            // TODO: Create, if needed, cube map and pre-filtered textures.
+            if (preFiltered && environment)
+            {
+                // The pre-filtered images are stored in the mip map layers.
+
+            	mipMap = VK_TRUE;
+            }
 
             memoryImage = context->useMemoryImage(sdata);
 
@@ -1172,7 +1177,7 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
 				descriptorPoolSize[0].descriptorCount = 5;
 
 				descriptorPoolSize[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-				descriptorPoolSize[1].descriptorCount = 17;
+				descriptorPoolSize[1].descriptorCount = 18;
 
                 auto descriptorPool = descriptorPoolCreate(context->getInitialResources()->getDevice()->getDevice(), VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT, 1, 2, descriptorPoolSize);
 
@@ -3540,7 +3545,7 @@ ISceneSP VKTS_APIENTRY scenegraphLoadScene(const char* filename, const IContextS
                 return ISceneSP();
             }
 
-            // TODO: Create environment.
+            // Nothing for now.
         }
         else if (scenegraphIsToken(buffer, "texture"))
         {
@@ -3549,7 +3554,19 @@ ISceneSP VKTS_APIENTRY scenegraphLoadScene(const char* filename, const IContextS
                 return ISceneSP();
             }
 
-            // TODO: Gather texture.
+            auto texture = context->useTexture(sdata);
+
+            if (!texture.get())
+            {
+                return ISceneSP();
+            }
+
+            if (texture->getImageView()->getViewType() != VK_IMAGE_VIEW_TYPE_CUBE || texture->getImageView()->getLayerCount() != 6)
+            {
+            	return ISceneSP();
+            }
+
+            scene->setEnvironment(texture);
         }
         else
         {

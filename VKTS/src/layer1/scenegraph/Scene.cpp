@@ -32,7 +32,7 @@ namespace vkts
 {
 
 Scene::Scene() :
-    IScene(), name(""), allObjects()
+    IScene(), name(""), allObjects(), environment(nullptr)
 {
 }
 
@@ -65,6 +65,8 @@ Scene::Scene(const Scene& other) :
 
         allObjects.append(cloneObject);
     }
+
+    environment = other.environment;
 }
 
 Scene::~Scene()
@@ -117,6 +119,16 @@ size_t Scene::getNumberObjects() const
 const SmartPointerVector<IObjectSP>& Scene::getObjects() const
 {
     return allObjects;
+}
+
+void Scene::setEnvironment(const ITextureSP& environment)
+{
+    this->environment = environment;
+}
+
+ITextureSP Scene::getEnvironment() const
+{
+    return environment;
 }
 
 void Scene::updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets)
@@ -179,6 +191,13 @@ ISceneSP Scene::clone() const
 
 void Scene::destroy()
 {
+	if (environment.get())
+	{
+		environment->destroy();
+
+		environment.reset();
+	}
+
     for (size_t i = 0; i < allObjects.size(); i++)
     {
         allObjects[i]->destroy();

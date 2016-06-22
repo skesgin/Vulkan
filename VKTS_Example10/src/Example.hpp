@@ -37,6 +37,7 @@
 #define VKTS_FONT_SCALE 32.0f
 
 #define VKTS_SCENE_NAME "material_probes/material_probes.vkts"
+#define VKTS_ENVIRONMENT_SCENE_NAME "primitives/sphere.vkts"
 
 #define VKTS_MAX_CORES 32u
 
@@ -58,10 +59,15 @@ private:
     vkts::ISemaphoreSP imageAcquiredSemaphore;
     vkts::ISemaphoreSP renderingCompleteSemaphore;
 
+	vkts::IDescriptorSetLayoutSP descriptorSetLayout;
+
     vkts::IFontSP font;
 
 	vkts::IContextSP sceneContext;
 	vkts::ISceneSP scene;
+
+	vkts::IContextSP environmentSceneContext;
+	vkts::ISceneSP environmentScene;
 
 	vkts::ISwapchainSP swapchain;
 
@@ -98,6 +104,8 @@ private:
 	VkBool32 buildDepthTexture(const vkts::ICommandBuffersSP& cmdBuffer);
 
 	VkBool32 buildRenderPass();
+
+	VkBool32 buildDescriptorSetLayout();
 
 	VkBool32 buildResources(const vkts::IUpdateThreadContext& updateContext);
 
