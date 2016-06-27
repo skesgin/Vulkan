@@ -27,7 +27,7 @@
 #include "Example.hpp"
 
 Example::Example(const vkts::IInitialResourcesSP& initialResources, const int32_t windowIndex, const vkts::ISurfaceSP& surface) :
-		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), descriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), envVertexShaderModule(nullptr), envFragmentShaderModule(nullptr), font(nullptr), sceneContext(nullptr), scene(nullptr), environmentSceneContext(nullptr), environmentScene(nullptr), swapchain(nullptr), renderPass(nullptr), depthTexture(nullptr), depthStencilImageView(nullptr), swapchainImagesCount(0), swapchainImageView(), framebuffer(), cmdBuffer(), rebuildCmdBufferCounter(0), fps(0), ram(0), cpuUsageApp(0.0f), processors(0)
+		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), descriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), envVertexShaderModule(nullptr), envFragmentShaderModule(nullptr), pipelineLayout(nullptr), font(nullptr), sceneContext(nullptr), scene(nullptr), environmentSceneContext(nullptr), environmentScene(nullptr), swapchain(nullptr), renderPass(nullptr), allGraphicsPipelines(), depthTexture(nullptr), depthStencilImageView(nullptr), swapchainImagesCount(0), swapchainImageView(), framebuffer(), cmdBuffer(), rebuildCmdBufferCounter(0), fps(0), ram(0), cpuUsageApp(0.0f), processors(0)
 {
 	processors = glm::min(vkts::processorGetNumber(), VKTS_MAX_CORES);
 
@@ -363,6 +363,74 @@ VkBool32 Example::buildDepthTexture(const vkts::ICommandBuffersSP& cmdBuffer)
 	return VK_TRUE;
 }
 
+VkBool32 Example::buildPipeline()
+{
+    vkts::defaultGraphicsPipeline gp;
+
+    gp.getPipelineShaderStageCreateInfo(0).stage = VK_SHADER_STAGE_VERTEX_BIT;
+    gp.getPipelineShaderStageCreateInfo(0).module = envVertexShaderModule->getShaderModule();
+
+    gp.getPipelineShaderStageCreateInfo(1).stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+    gp.getPipelineShaderStageCreateInfo(1).module = envFragmentShaderModule->getShaderModule();
+
+
+	VkTsVertexBufferType vertexBufferType = VKTS_VERTEX_BUFFER_TYPE_VERTEX;
+
+    gp.getVertexInputBindingDescription(0).binding = VKTS_BINDING_VERTEX_BUFFER;
+    gp.getVertexInputBindingDescription(0).stride = vkts::commonGetStrideInBytes(vertexBufferType);
+    gp.getVertexInputBindingDescription(0).inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+    gp.getVertexInputAttributeDescription(0).location = 0;
+    gp.getVertexInputAttributeDescription(0).binding = VKTS_BINDING_VERTEX_BUFFER;
+    gp.getVertexInputAttributeDescription(0).format = VK_FORMAT_R32G32B32A32_SFLOAT;
+    gp.getVertexInputAttributeDescription(0).offset = vkts::commonGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_VERTEX, vertexBufferType);
+
+
+    gp.getPipelineInputAssemblyStateCreateInfo().topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+
+    gp.getViewports(0).x = 0.0f;
+    gp.getViewports(0).y = 0.0f;
+    gp.getViewports(0).width = (float) swapchain->getImageExtent().width;
+    gp.getViewports(0).height = (float) swapchain->getImageExtent().height;
+    gp.getViewports(0).minDepth = 0.0f;
+    gp.getViewports(0).maxDepth = 1.0f;
+
+
+    gp.getScissors(0).offset.x = 0;
+    gp.getScissors(0).offset.y = 0;
+    gp.getScissors(0).extent = swapchain->getImageExtent();
+
+
+    gp.getPipelineMultisampleStateCreateInfo();
+    gp.getPipelineDepthStencilStateCreateInfo();
+
+
+    gp.getPipelineColorBlendAttachmentState(0).blendEnable = VK_FALSE;
+    gp.getPipelineColorBlendAttachmentState(0).colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+
+
+    gp.getDynamicState(0) = VK_DYNAMIC_STATE_VIEWPORT;
+    gp.getDynamicState(1) = VK_DYNAMIC_STATE_SCISSOR;
+
+
+    gp.getGraphicsPipelineCreateInfo().layout = pipelineLayout->getPipelineLayout();
+    gp.getGraphicsPipelineCreateInfo().renderPass = renderPass->getRenderPass();
+
+
+    auto pipeline = vkts::pipelineCreateGraphics(initialResources->getDevice()->getDevice(), VK_NULL_HANDLE, gp.getGraphicsPipelineCreateInfo(), VKTS_VERTEX_BUFFER_TYPE_VERTEX);
+
+	if (!pipeline.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create graphics pipeline.");
+
+		return VK_FALSE;
+	}
+
+	allGraphicsPipelines.append(pipeline);
+
+	return VK_TRUE;
+}
+
 VkBool32 Example::buildRenderPass()
 {
 	VkAttachmentDescription attachmentDescription[2];
@@ -419,6 +487,24 @@ VkBool32 Example::buildRenderPass()
 	if (!renderPass.get())
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create render pass.");
+
+		return VK_FALSE;
+	}
+
+	return VK_TRUE;
+}
+
+VkBool32 Example::buildPipelineLayout()
+{
+	VkDescriptorSetLayout setLayouts[1];
+
+	setLayouts[0] = descriptorSetLayout->getDescriptorSetLayout();
+
+	pipelineLayout = vkts::pipelineCreateLayout(initialResources->getDevice()->getDevice(), 0, 1, setLayouts, 0, nullptr);
+
+	if (!pipelineLayout.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create pipeline layout.");
 
 		return VK_FALSE;
 	}
@@ -577,6 +663,11 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 	//
 
 	if (!buildRenderPass())
+	{
+		return VK_FALSE;
+	}
+
+	if (!buildPipeline())
 	{
 		return VK_FALSE;
 	}
@@ -747,6 +838,12 @@ void Example::terminateResources(const vkts::IUpdateThreadContext& updateContext
 				depthTexture->destroy();
 			}
 
+			for (size_t i = 0; i < allGraphicsPipelines.size(); i++)
+			{
+				allGraphicsPipelines[i]->destroy();
+			}
+			allGraphicsPipelines.clear();
+
 			if (renderPass.get())
 			{
 				renderPass->destroy();
@@ -839,6 +936,13 @@ VkBool32 Example::init(const vkts::IUpdateThreadContext& updateContext)
 	if (!buildDescriptorSetLayout())
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not build descriptor set layout.");
+
+		return VK_FALSE;
+	}
+
+	if (!buildPipelineLayout())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not build pipeline cache.");
 
 		return VK_FALSE;
 	}
@@ -1133,6 +1237,11 @@ void Example::terminate(const vkts::IUpdateThreadContext& updateContext)
 			if (swapchain.get())
 			{
 				swapchain->destroy();
+			}
+
+			if (pipelineLayout.get())
+			{
+				pipelineLayout->destroy();
 			}
 
 			if (envVertexShaderModule.get())

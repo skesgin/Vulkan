@@ -33,6 +33,8 @@
 
 #define VKTS_NUMBER_BUFFERS 2
 
+#define VKTS_BINDING_VERTEX_BUFFER 0
+
 #define VKTS_FONT_NAME "font/Arial_128.fnt"
 #define VKTS_FONT_SCALE 32.0f
 
@@ -74,6 +76,8 @@ private:
 	vkts::IShaderModuleSP envVertexShaderModule;
 	vkts::IShaderModuleSP envFragmentShaderModule;
 
+	vkts::IPipelineLayoutSP pipelineLayout;
+
     vkts::IFontSP font;
 
 	vkts::IContextSP sceneContext;
@@ -85,6 +89,8 @@ private:
 	vkts::ISwapchainSP swapchain;
 
 	vkts::IRenderPassSP renderPass;
+
+	vkts::SmartPointerVector<vkts::IGraphicsPipelineSP> allGraphicsPipelines;
 
 	vkts::IMemoryImageSP depthTexture;
 	vkts::IImageViewSP depthStencilImageView;
@@ -115,6 +121,8 @@ private:
 	VkBool32 buildDepthStencilImageView();
 
 	VkBool32 buildDepthTexture(const vkts::ICommandBuffersSP& cmdBuffer);
+
+	VkBool32 buildPipeline();
 
 	VkBool32 buildRenderPass();
 
