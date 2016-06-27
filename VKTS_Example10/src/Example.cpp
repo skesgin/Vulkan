@@ -27,7 +27,7 @@
 #include "Example.hpp"
 
 Example::Example(const vkts::IInitialResourcesSP& initialResources, const int32_t windowIndex, const vkts::ISurfaceSP& surface) :
-		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), descriptorSetLayout(nullptr), font(nullptr), sceneContext(nullptr), scene(nullptr), environmentSceneContext(nullptr), environmentScene(nullptr), swapchain(nullptr), renderPass(nullptr), depthTexture(nullptr), depthStencilImageView(nullptr), swapchainImagesCount(0), swapchainImageView(), framebuffer(), cmdBuffer(), rebuildCmdBufferCounter(0), fps(0), ram(0), cpuUsageApp(0.0f), processors(0)
+		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), descriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), envVertexShaderModule(nullptr), envFragmentShaderModule(nullptr), font(nullptr), sceneContext(nullptr), scene(nullptr), environmentSceneContext(nullptr), environmentScene(nullptr), swapchain(nullptr), renderPass(nullptr), depthTexture(nullptr), depthStencilImageView(nullptr), swapchainImagesCount(0), swapchainImageView(), framebuffer(), cmdBuffer(), rebuildCmdBufferCounter(0), fps(0), ram(0), cpuUsageApp(0.0f), processors(0)
 {
 	processors = glm::min(vkts::processorGetNumber(), VKTS_MAX_CORES);
 
@@ -462,6 +462,76 @@ VkBool32 Example::buildDescriptorSetLayout()
 	return VK_TRUE;
 }
 
+VkBool32 Example::buildShader()
+{
+	auto vertexShaderBinary = vkts::fileLoadBinary(VKTS_ENV_VERTEX_SHADER_NAME);
+
+	if (!vertexShaderBinary.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not load vertex shader: '%s'", VKTS_ENV_VERTEX_SHADER_NAME);
+
+		return VK_FALSE;
+	}
+
+	auto fragmentShaderBinary = vkts::fileLoadBinary(VKTS_ENV_FRAGMENT_SHADER_NAME);
+
+	if (!fragmentShaderBinary.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not load fragment shader: '%s'", VKTS_ENV_FRAGMENT_SHADER_NAME);
+
+		return VK_FALSE;
+	}
+
+	//
+
+	envVertexShaderModule = vkts::shaderModuleCreate(VKTS_ENV_VERTEX_SHADER_NAME, initialResources->getDevice()->getDevice(), 0, vertexShaderBinary->getSize(), (uint32_t*)vertexShaderBinary->getData());
+
+	if (!envVertexShaderModule.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create vertex shader module.");
+
+		return VK_FALSE;
+	}
+
+	envFragmentShaderModule = vkts::shaderModuleCreate(VKTS_ENV_FRAGMENT_SHADER_NAME, initialResources->getDevice()->getDevice(), 0, fragmentShaderBinary->getSize(), (uint32_t*)fragmentShaderBinary->getData());
+
+	if (!envFragmentShaderModule.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create fragment shader module.");
+
+		return VK_FALSE;
+	}
+
+	return VK_TRUE;
+}
+
+VkBool32 Example::buildUniformBuffers()
+{
+	VkBufferCreateInfo bufferCreateInfo;
+
+	memset(&bufferCreateInfo, 0, sizeof(VkBufferCreateInfo));
+
+	bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+
+	bufferCreateInfo.flags = 0;
+	bufferCreateInfo.size = vkts::commonGetDeviceSize(16 * sizeof(float) * 2, 16);
+	bufferCreateInfo.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+	bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+	bufferCreateInfo.queueFamilyIndexCount = 0;
+	bufferCreateInfo.pQueueFamilyIndices = nullptr;
+
+	vertexViewProjectionUniformBuffer = vkts::bufferObjectCreate(initialResources, bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+
+	if (!vertexViewProjectionUniformBuffer.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create vertex uniform buffer.");
+
+		return VK_FALSE;
+	}
+
+	return VK_TRUE;
+}
+
 VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext)
 {
 	VkResult result;
@@ -701,6 +771,26 @@ VkBool32 Example::init(const vkts::IUpdateThreadContext& updateContext)
 
 	//
 
+	camera = vkts::cameraCreate(glm::vec4(0.0f, 4.0f, 10.0f, 1.0f), glm::vec4(0.0f, 2.0f, 0.0f, 1.0f));
+
+	if (!camera.get())
+	{
+		return VK_FALSE;
+	}
+
+	allUpdateables.append(camera);
+
+	inputController = vkts::inputControllerCreate(updateContext, windowIndex, 0, camera);
+
+	if (!inputController.get())
+	{
+		return VK_FALSE;
+	}
+
+	allUpdateables.insert(0, inputController);
+
+	//
+
 	commandPool = vkts::commandPoolCreate(initialResources->getDevice()->getDevice(), VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT, initialResources->getQueue()->getQueueFamilyIndex());
 
 	if (!commandPool.get())
@@ -732,6 +822,20 @@ VkBool32 Example::init(const vkts::IUpdateThreadContext& updateContext)
 
 	//
 
+	if (!buildUniformBuffers())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not build uniform buffers.");
+
+		return VK_FALSE;
+	}
+
+	if (!buildShader())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not build shader.");
+
+		return VK_FALSE;
+	}
+
 	if (!buildDescriptorSetLayout())
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not build descriptor set layout.");
@@ -754,6 +858,12 @@ VkBool32 Example::init(const vkts::IUpdateThreadContext& updateContext)
 //
 VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 {
+	for (size_t i = 0; i < allUpdateables.size(); i++)
+	{
+		allUpdateables[i]->update(updateContext.getDeltaTime(), updateContext.getDeltaTicks());
+	}
+
+	//
 
 	VkResult result = VK_SUCCESS;
 
@@ -784,6 +894,30 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 
 	if (result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR)
 	{
+		glm::mat4 projectionMatrix(1.0f);
+		glm::mat4 viewMatrix(1.0f);
+
+		const auto& currentExtent = surface->getCurrentExtent(initialResources->getPhysicalDevice()->getPhysicalDevice(), VK_FALSE);
+
+		projectionMatrix = vkts::perspectiveMat4(45.0f, (float)currentExtent.width / (float)currentExtent.height, 1.0f, 100.0f);
+
+		viewMatrix = camera->getViewMatrix();
+
+		if (!vertexViewProjectionUniformBuffer->upload(0 * sizeof(float) * 16, 0, projectionMatrix))
+		{
+			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not upload matrices.");
+
+			return VK_FALSE;
+		}
+		if (!vertexViewProjectionUniformBuffer->upload(1 * sizeof(float) * 16, 0, viewMatrix))
+		{
+			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not upload matrices.");
+
+			return VK_FALSE;
+		}
+
+		//
+
 		uint32_t currentFPS;
 
 		if (vkts::profileApplicationGetFps(currentFPS, updateContext.getDeltaTime()))
@@ -999,6 +1133,21 @@ void Example::terminate(const vkts::IUpdateThreadContext& updateContext)
 			if (swapchain.get())
 			{
 				swapchain->destroy();
+			}
+
+			if (envVertexShaderModule.get())
+			{
+				envVertexShaderModule->destroy();
+			}
+
+			if (envFragmentShaderModule.get())
+			{
+				envFragmentShaderModule->destroy();
+			}
+
+			if (vertexViewProjectionUniformBuffer.get())
+			{
+				vertexViewProjectionUniformBuffer->destroy();
 			}
 
 			if (descriptorSetLayout.get())

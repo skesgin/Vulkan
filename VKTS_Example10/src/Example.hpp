@@ -36,6 +36,9 @@
 #define VKTS_FONT_NAME "font/Arial_128.fnt"
 #define VKTS_FONT_SCALE 32.0f
 
+#define VKTS_ENV_VERTEX_SHADER_NAME "shader/SPIR/V/environment.vert.spv"
+#define VKTS_ENV_FRAGMENT_SHADER_NAME "shader/SPIR/V/environment.frag.spv"
+
 #define VKTS_SCENE_NAME "material_probes/material_probes.vkts"
 #define VKTS_ENVIRONMENT_SCENE_NAME "primitives/sphere.vkts"
 
@@ -54,12 +57,22 @@ private:
 
 	const vkts::ISurfaceSP surface;
 
+	vkts::ICameraSP camera;
+	vkts::IInputControllerSP inputController;
+
+	vkts::SmartPointerVector<vkts::IUpdateableSP> allUpdateables;
+
 	vkts::ICommandPoolSP commandPool;
 
     vkts::ISemaphoreSP imageAcquiredSemaphore;
     vkts::ISemaphoreSP renderingCompleteSemaphore;
 
 	vkts::IDescriptorSetLayoutSP descriptorSetLayout;
+
+	vkts::IBufferObjectSP vertexViewProjectionUniformBuffer;
+
+	vkts::IShaderModuleSP envVertexShaderModule;
+	vkts::IShaderModuleSP envFragmentShaderModule;
 
     vkts::IFontSP font;
 
@@ -105,7 +118,13 @@ private:
 
 	VkBool32 buildRenderPass();
 
+	VkBool32 buildPipelineLayout();
+
 	VkBool32 buildDescriptorSetLayout();
+
+	VkBool32 buildShader();
+
+	VkBool32 buildUniformBuffers();
 
 	VkBool32 buildResources(const vkts::IUpdateThreadContext& updateContext);
 
