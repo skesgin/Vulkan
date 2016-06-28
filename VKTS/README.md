@@ -7,7 +7,7 @@ Authors:
 
 VKTS version: **0.9.1**
 
-Depending Vulkan API header version: **1.0.13**
+Depending Vulkan API header version: **1.0.17**
 
 Depending Vulkan extensions, when using a window system:
 
@@ -81,6 +81,9 @@ How to build:
 
 Changelog:
 ----------
+
+06/28/2016
+- Fixed, working and tested cube map generation.
 
 06/15/2016
 - Added raw data file and load functions.

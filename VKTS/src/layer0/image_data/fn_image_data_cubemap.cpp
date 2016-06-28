@@ -64,29 +64,11 @@ SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataCubemap(const IImageData
 
 	//
 
+    // 0.5 as step goes form -1.0 to 1.0 and not just 0.0 to 1.0
 	float step = 2.0f / (float)length;
 	float offset = step * 0.5f;
 
 	//
-
-	glm::vec3 startVector[6];
-
-	// Positive X
-	startVector[0] = glm::vec3(+1.0f, -1.0f, -1.0f);
-	// Negative X
-	startVector[1] = glm::vec3(-1.0f, -1.0f, +1.0f);
-	// Positive Y
-	startVector[2] = glm::vec3(-1.0f, +1.0f, -1.0f);
-	// Negative Y
-	startVector[3] = glm::vec3(-1.0f, -1.0f, +1.0f);
-	// Positive Z
-	startVector[4] = glm::vec3(+1.0f, -1.0f, +1.0f);
-	// Negative Z
-	startVector[5] = glm::vec3(-1.0f, -1.0f, -1.0f);
-
-	//
-
-	glm::vec3 offsetVector;
 
 	glm::vec3 scanVector;
 
@@ -104,37 +86,43 @@ SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataCubemap(const IImageData
 				{
 					case 0:
 
-						offsetVector = glm::vec3(0.0f, offset + step * (float)y, offset + step * (float)x);
+						// Positive X
+						scanVector = glm::vec3(1.0f, 1.0f - offset - step * (float)y, 1.0f - offset - step * (float)x);
 
 						break;
 					case 1:
 
-						offsetVector = glm::vec3(0.0f, offset + step * (float)y, -offset - step * (float)x);
+						// Negative X
+						scanVector = glm::vec3(-1.0f, 1.0f - offset - step * (float)y, -1.0f + offset + step * (float)x);
 
 						break;
 					case 2:
 
-						offsetVector = glm::vec3(offset + step * (float)y, 0.0f, offset + step * (float)x);
+						// Positive Y
+						scanVector = glm::vec3(-1.0f + offset + step * (float)x, 1.0f, -1.0f + offset + step * (float)y);
 
 						break;
 					case 3:
 
-						offsetVector = glm::vec3(offset + step * (float)y, 0.0f, -offset - step * (float)x);
+						// Negative Y
+						scanVector = glm::vec3(-1.0f + offset + step * (float)x, -1.0f, 1.0f - offset - step * (float)y);
 
 						break;
 					case 4:
 
-						offsetVector = glm::vec3(-offset - step * (float)x, offset + step * (float)y, 0.0f);
+						// Positive Z
+						scanVector = glm::vec3(-1.0f + offset + step * (float)x, 1.0f - offset - step * (float)y, 1.0f);
 
 						break;
 					case 5:
 
-						offsetVector = glm::vec3(offset + step * (float)x, offset + step * (float)y, 0.0f);
+						// Negative Z
+						scanVector = glm::vec3(1.0f - offset - step * (float)x, 1.0f - offset - step * (float)y, -1.0f);
 
 						break;
 				}
 
-				scanVector = glm::normalize(startVector[i] + offsetVector);
+				scanVector = glm::normalize(scanVector);
 
 				//
 
@@ -146,8 +134,6 @@ SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataCubemap(const IImageData
 				texel = sourceImage->getSample(sampleLocation.s, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_REPEAT, sampleLocation.t, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT, 0.5f, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, 0, 0);
 
 				result[i]->setTexel(texel, x, y, 0, 0, 0);
-
-				// TODO: Check orientation with Vulkan orientation.
 			}
 		}
 	}

@@ -44,6 +44,8 @@
 #define VKTS_SCENE_NAME "material_probes/material_probes.vkts"
 #define VKTS_ENVIRONMENT_SCENE_NAME "primitives/sphere.vkts"
 
+#define VKTS_ENVIRONMENT_DESCRIPTOR_SET_COUNT (VKTS_BINDING_UNIFORM_TRANSFORM_BINDING_COUNT + VKTS_BINDING_UNIFORM_ENVIRONMENT_COUNT)
+
 #define VKTS_MAX_CORES 32u
 
 #define VKTS_OUTPUT_BUFFER_SIZE 1024
@@ -70,6 +72,10 @@ private:
     vkts::ISemaphoreSP renderingCompleteSemaphore;
 
 	vkts::IDescriptorSetLayoutSP descriptorSetLayout;
+    VkDescriptorBufferInfo descriptorBufferInfos[1];
+    VkDescriptorImageInfo descriptorImageInfos[1];
+
+    VkWriteDescriptorSet writeDescriptorSets[VKTS_ENVIRONMENT_DESCRIPTOR_SET_COUNT];
 
 	vkts::IBufferObjectSP vertexViewProjectionUniformBuffer;
 
@@ -113,6 +119,8 @@ private:
 	VkBool32 buildCmdBuffer(const int32_t usedBuffer);
 
 	VkBool32 buildFramebuffer(const int32_t usedBuffer);
+
+	VkBool32 updateDescriptorSets();
 
 	VkBool32 buildScene(const vkts::ICommandBuffersSP& cmdBuffer);
 

@@ -52,7 +52,7 @@ ITextureSP VKTS_APIENTRY textureCreate(const IInitialResourcesSP& initialResourc
     {
         logPrint(VKTS_LOG_ERROR, "Texture: Could not create sampler.");
 
-        return VK_FALSE;
+        return ITextureSP();
     }
 
     //
@@ -73,7 +73,7 @@ ITextureSP VKTS_APIENTRY textureCreate(const IInitialResourcesSP& initialResourc
     {
         logPrint(VKTS_LOG_ERROR, "Texture: Could not create image view.");
 
-        return VK_FALSE;
+        return ITextureSP();
     }
 
     //

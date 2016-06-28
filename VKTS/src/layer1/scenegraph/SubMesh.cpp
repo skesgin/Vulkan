@@ -377,6 +377,8 @@ void SubMesh::bindDrawIndexedRecursive(const std::string& nodeName, const IComma
     }
     else
     {
+        logPrint(VKTS_LOG_SEVERE, "SubMesh: No material");
+
         return;
     }
 

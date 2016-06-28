@@ -143,6 +143,13 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 
 	vkCmdSetScissor(cmdBuffer[usedBuffer]->getCommandBuffer(), 0, 1, &scissor);
 
+	// Render cube map.
+
+	if (environmentScene.get())
+	{
+		environmentScene->bindDrawIndexedRecursive(cmdBuffer[usedBuffer], allGraphicsPipelines);
+	}
+
 	// Render font.
 
 	if (font.get())
@@ -207,6 +214,54 @@ VkBool32 Example::buildFramebuffer(const int32_t usedBuffer)
 
 	return VK_TRUE;
 }
+
+VkBool32 Example::updateDescriptorSets()
+{
+	memset(descriptorBufferInfos, 0, sizeof(descriptorBufferInfos));
+
+	descriptorBufferInfos[0].buffer = vertexViewProjectionUniformBuffer->getBuffer()->getBuffer();
+	descriptorBufferInfos[0].offset = 0;
+	descriptorBufferInfos[0].range = vertexViewProjectionUniformBuffer->getBuffer()->getSize();
+
+
+	memset(descriptorImageInfos, 0, sizeof(descriptorImageInfos));
+
+	descriptorImageInfos[0].sampler = scene->getEnvironment()->getSampler()->getSampler();
+	descriptorImageInfos[0].imageView = scene->getEnvironment()->getImageView()->getImageView();
+	descriptorImageInfos[0].imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+
+
+	memset(writeDescriptorSets, 0, sizeof(writeDescriptorSets));
+
+	writeDescriptorSets[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+
+	writeDescriptorSets[0].dstSet = VK_NULL_HANDLE;	// Defined later.
+	writeDescriptorSets[0].dstBinding = VKTS_BINDING_UNIFORM_BUFFER_VIEWPROJECTION;
+	writeDescriptorSets[0].dstArrayElement = 0;
+	writeDescriptorSets[0].descriptorCount = 1;
+	writeDescriptorSets[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	writeDescriptorSets[0].pImageInfo = nullptr;
+	writeDescriptorSets[0].pBufferInfo = &descriptorBufferInfos[0];
+	writeDescriptorSets[0].pTexelBufferView = nullptr;
+
+
+	writeDescriptorSets[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+
+	writeDescriptorSets[1].dstSet = VK_NULL_HANDLE;	// Defined later.
+	writeDescriptorSets[1].dstBinding = VKTS_BINDING_UNIFORM_SAMPLER_ENVIRONMENT;
+	writeDescriptorSets[1].dstArrayElement = 0;
+	writeDescriptorSets[1].descriptorCount = 1;
+	writeDescriptorSets[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+	writeDescriptorSets[1].pImageInfo = &descriptorImageInfos[0];
+	writeDescriptorSets[1].pBufferInfo = nullptr;
+	writeDescriptorSets[1].pTexelBufferView = nullptr;
+
+
+	writeDescriptorSets[2].dstBinding = VKTS_BINDING_UNIFORM_BUFFER_TRANSFORM;
+
+	return VK_TRUE;
+}
+
 VkBool32 Example::buildScene(const vkts::ICommandBuffersSP& cmdBuffer)
 {
 	VkSamplerCreateInfo samplerCreateInfo;
@@ -281,12 +336,15 @@ VkBool32 Example::buildScene(const vkts::ICommandBuffersSP& cmdBuffer)
 
 	environmentScene = vkts::scenegraphLoadScene(VKTS_ENVIRONMENT_SCENE_NAME, environmentSceneContext);
 
-	if (!environmentScene.get())
+	if (!environmentScene.get() || environmentScene->getNumberObjects() == 0)
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not load scene.");
 
 		return VK_FALSE;
 	}
+
+	// Enlarge the sphere.
+	environmentScene->getObjects()[0]->setScale(glm::vec3(10.0f, 10.0f, 10.0f));
 
 	vkts::logPrint(VKTS_LOG_INFO, "Example: Number objects: %d", environmentScene->getNumberObjects());
 
@@ -374,7 +432,7 @@ VkBool32 Example::buildPipeline()
     gp.getPipelineShaderStageCreateInfo(1).module = envFragmentShaderModule->getShaderModule();
 
 
-	VkTsVertexBufferType vertexBufferType = VKTS_VERTEX_BUFFER_TYPE_VERTEX;
+	VkTsVertexBufferType vertexBufferType = VKTS_VERTEX_BUFFER_TYPE_VERTEX | VKTS_VERTEX_BUFFER_TYPE_TANGENTS | VKTS_VERTEX_BUFFER_TYPE_TEXCOORD;
 
     gp.getVertexInputBindingDescription(0).binding = VKTS_BINDING_VERTEX_BUFFER;
     gp.getVertexInputBindingDescription(0).stride = vkts::commonGetStrideInBytes(vertexBufferType);
@@ -417,7 +475,7 @@ VkBool32 Example::buildPipeline()
     gp.getGraphicsPipelineCreateInfo().renderPass = renderPass->getRenderPass();
 
 
-    auto pipeline = vkts::pipelineCreateGraphics(initialResources->getDevice()->getDevice(), VK_NULL_HANDLE, gp.getGraphicsPipelineCreateInfo(), VKTS_VERTEX_BUFFER_TYPE_VERTEX);
+    auto pipeline = vkts::pipelineCreateGraphics(initialResources->getDevice()->getDevice(), VK_NULL_HANDLE, gp.getGraphicsPipelineCreateInfo(), vertexBufferType);
 
 	if (!pipeline.get())
 	{
@@ -716,6 +774,8 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 		}
 	}
 
+	VkBool32 doUpdateDescriptorSets = VK_FALSE;
+
 	if (!scene.get() && !environmentScene.get())
 	{
 		if (!buildScene(updateCmdBuffer))
@@ -724,6 +784,8 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 
 			return VK_FALSE;
 		}
+
+		doUpdateDescriptorSets = VK_TRUE;
 	}
 
 	result = updateCmdBuffer->endCommandBuffer();
@@ -782,6 +844,26 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 	for (size_t i = 0; i < allStageDeviceMemories.size(); i++)
 	{
 		allStageDeviceMemories[i]->destroy();
+	}
+
+	//
+
+	if (doUpdateDescriptorSets)
+	{
+		if (!updateDescriptorSets())
+		{
+			return VK_FALSE;
+		}
+
+		if (scene.get())
+		{
+			// TODO: Update.
+		}
+
+		if (environmentScene.get())
+		{
+			environmentScene->updateDescriptorSetsRecursive(VKTS_ENVIRONMENT_DESCRIPTOR_SET_COUNT, writeDescriptorSets);
+		}
 	}
 
 	//
@@ -1000,6 +1082,7 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 	{
 		glm::mat4 projectionMatrix(1.0f);
 		glm::mat4 viewMatrix(1.0f);
+		glm::mat4 lockedViewMatrix;
 
 		const auto& currentExtent = surface->getCurrentExtent(initialResources->getPhysicalDevice()->getPhysicalDevice(), VK_FALSE);
 
@@ -1013,11 +1096,31 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 
 			return VK_FALSE;
 		}
-		if (!vertexViewProjectionUniformBuffer->upload(1 * sizeof(float) * 16, 0, viewMatrix))
+
+		//
+
+		lockedViewMatrix = viewMatrix;
+		lockedViewMatrix[3] = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+
+		if (!vertexViewProjectionUniformBuffer->upload(1 * sizeof(float) * 16, 0, lockedViewMatrix))
 		{
 			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not upload matrices.");
 
 			return VK_FALSE;
+		}
+
+		if (environmentScene.get())
+		{
+			environmentScene->updateRecursive(updateContext);
+		}
+
+		//
+
+		// TODO: Add another view projection buffer.
+
+		if (scene.get())
+		{
+			// TODO: Update etc.
 		}
 
 		//
