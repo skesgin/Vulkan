@@ -30,12 +30,12 @@ namespace vkts
 {
 
 BSDFMaterial::BSDFMaterial() :
-    IBSDFMaterial(), name(), fragmentShader(nullptr), attributes(VKTS_VERTEX_BUFFER_TYPE_VERTEX | VKTS_VERTEX_BUFFER_TYPE_NORMAL), allTextures(), descriptorPool(), descriptorSetLayout(), descriptorSets()
+    IBSDFMaterial(), name(), fragmentShader(nullptr), attributes(VKTS_VERTEX_BUFFER_TYPE_VERTEX | VKTS_VERTEX_BUFFER_TYPE_NORMAL), allTextures(), descriptorPool(), descriptorSetLayout(), descriptorSets(), pipelineLayout()
 {
 }
 
 BSDFMaterial::BSDFMaterial(const BSDFMaterial& other) :
-    IBSDFMaterial(), name(other.name), fragmentShader(other.fragmentShader), attributes(other.attributes), allTextures(other.allTextures), descriptorPool(), descriptorSetLayout(), descriptorSets(), graphicsPipeline()
+    IBSDFMaterial(), name(other.name), fragmentShader(other.fragmentShader), attributes(other.attributes), allTextures(other.allTextures), descriptorPool(), descriptorSetLayout(), descriptorSets(), pipelineLayout()
 {
 	// TODO: Clone, as done in phong material.
 }
@@ -130,14 +130,14 @@ void BSDFMaterial::setDescriptorSets(const IDescriptorSetsSP& descriptorSets)
     this->descriptorSets = descriptorSets;
 }
 
-IGraphicsPipelineSP BSDFMaterial::getGraphicsPipeline() const
+IPipelineLayoutSP BSDFMaterial::getPipelineLayout() const
 {
-    return graphicsPipeline;
+    return pipelineLayout;
 }
 
-void BSDFMaterial::setGraphicsPipeline(const IGraphicsPipelineSP& graphicsPipeline)
+void BSDFMaterial::setPipelineLayout(const IPipelineLayoutSP& pipelineLayout)
 {
-    this->graphicsPipeline = graphicsPipeline;
+    this->pipelineLayout = pipelineLayout;
 }
 
 void BSDFMaterial::updateDescriptorSetsRecursive(const std::string& nodeName, const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets)

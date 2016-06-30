@@ -1824,7 +1824,24 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
 
                 //
 
-            	// TODO: Create graphics pipeline.
+            	VkDescriptorSetLayout setLayouts[1];
+
+            	setLayouts[0] = descriptorSetLayout->getDescriptorSetLayout();
+
+            	auto pipelineLayout = vkts::pipelineCreateLayout(context->getInitialResources()->getDevice()->getDevice(), 0, 1, setLayouts, 0, nullptr);
+
+            	if (!pipelineLayout.get())
+            	{
+            		vkts::logPrint(VKTS_LOG_ERROR, "Scenegraph: Could not create pipeline layout.");
+
+            		return VK_FALSE;
+            	}
+
+            	bsdfMaterial->setPipelineLayout(pipelineLayout);
+
+            	//
+
+            	bsdfMaterial->setAttributes((VkTsVertexBufferType)uidata);
             }
             else
             {
@@ -2170,6 +2187,157 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
                     if (bsdfMaterial.get())
                     {
                         subMesh->setBSDFMaterial(bsdfMaterial);
+
+                        // FIXME: Enable, when finished.
+                        if (false)
+                        {
+							// Create graphics pipeline for this sub mesh.
+
+							VkTsVertexBufferType vertexBufferType = subMesh->getVertexBufferType();
+
+							vkts::defaultGraphicsPipeline gp;
+
+							gp.getPipelineShaderStageCreateInfo(0).stage = VK_SHADER_STAGE_VERTEX_BIT;
+							// FIXME: Get vertex shader from context depending on vertex buffer type.
+							//gp.getPipelineShaderStageCreateInfo(0).module = envVertexShaderModule->getShaderModule();
+
+							gp.getPipelineShaderStageCreateInfo(1).stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+							gp.getPipelineShaderStageCreateInfo(1).module = bsdfMaterial->getFragmentShader()->getShaderModule();
+
+
+							gp.getVertexInputBindingDescription(0).binding = 0;
+							gp.getVertexInputBindingDescription(0).stride = commonGetStrideInBytes(vertexBufferType);
+							gp.getVertexInputBindingDescription(0).inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+
+							uint32_t location = 0;
+
+							gp.getVertexInputAttributeDescription(location).location = location;
+							gp.getVertexInputAttributeDescription(location).binding = 0;
+							gp.getVertexInputAttributeDescription(location).format = VK_FORMAT_R32G32B32A32_SFLOAT;
+							gp.getVertexInputAttributeDescription(location).offset = vkts::commonGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_VERTEX, vertexBufferType);
+
+							if (vertexBufferType & VKTS_VERTEX_BUFFER_TYPE_NORMAL)
+							{
+								location++;
+
+								gp.getVertexInputAttributeDescription(location).location = location;
+								gp.getVertexInputAttributeDescription(location).binding = 0;
+								gp.getVertexInputAttributeDescription(location).format = VK_FORMAT_R32G32B32_SFLOAT;
+								gp.getVertexInputAttributeDescription(location).offset = vkts::commonGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_NORMAL, vertexBufferType);
+
+								if (vertexBufferType & VKTS_VERTEX_BUFFER_TYPE_TANGENTS)
+								{
+									location++;
+
+									gp.getVertexInputAttributeDescription(location).location = location;
+									gp.getVertexInputAttributeDescription(location).binding = 0;
+									gp.getVertexInputAttributeDescription(location).format = VK_FORMAT_R32G32B32_SFLOAT;
+									gp.getVertexInputAttributeDescription(location).offset = vkts::commonGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_BITANGENT, vertexBufferType);
+
+									location++;
+
+									gp.getVertexInputAttributeDescription(location).location = location;
+									gp.getVertexInputAttributeDescription(location).binding = 0;
+									gp.getVertexInputAttributeDescription(location).format = VK_FORMAT_R32G32B32_SFLOAT;
+									gp.getVertexInputAttributeDescription(location).offset = vkts::commonGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_TANGENT, vertexBufferType);
+								}
+							}
+
+							if (vertexBufferType & VKTS_VERTEX_BUFFER_TYPE_TEXCOORD)
+							{
+								location++;
+
+								gp.getVertexInputAttributeDescription(location).location = location;
+								gp.getVertexInputAttributeDescription(location).binding = 0;
+								gp.getVertexInputAttributeDescription(location).format = VK_FORMAT_R32G32_SFLOAT;
+								gp.getVertexInputAttributeDescription(location).offset = vkts::commonGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_TEXCOORD, vertexBufferType);
+							}
+
+
+							if (vertexBufferType & VKTS_VERTEX_BUFFER_TYPE_BONES)
+							{
+								location++;
+
+								gp.getVertexInputAttributeDescription(location).location = location;
+								gp.getVertexInputAttributeDescription(location).binding = 0;
+								gp.getVertexInputAttributeDescription(location).format = VK_FORMAT_R32G32B32A32_SFLOAT;
+								gp.getVertexInputAttributeDescription(location).offset = vkts::commonGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_BONE_INDICES0, vertexBufferType);
+
+								location++;
+
+								gp.getVertexInputAttributeDescription(location).location = location;
+								gp.getVertexInputAttributeDescription(location).binding = 0;
+								gp.getVertexInputAttributeDescription(location).format = VK_FORMAT_R32G32B32A32_SFLOAT;
+								gp.getVertexInputAttributeDescription(location).offset = vkts::commonGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_BONE_INDICES1, vertexBufferType);
+
+								location++;
+
+								gp.getVertexInputAttributeDescription(location).location = location;
+								gp.getVertexInputAttributeDescription(location).binding = 0;
+								gp.getVertexInputAttributeDescription(location).format = VK_FORMAT_R32G32B32A32_SFLOAT;
+								gp.getVertexInputAttributeDescription(location).offset = vkts::commonGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_BONE_WEIGHTS0, vertexBufferType);
+
+								location++;
+
+								gp.getVertexInputAttributeDescription(location).location = location;
+								gp.getVertexInputAttributeDescription(location).binding = 0;
+								gp.getVertexInputAttributeDescription(location).format = VK_FORMAT_R32G32B32A32_SFLOAT;
+								gp.getVertexInputAttributeDescription(location).offset = vkts::commonGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_BONE_WEIGHTS1, vertexBufferType);
+
+								location++;
+
+								gp.getVertexInputAttributeDescription(location).location = location;
+								gp.getVertexInputAttributeDescription(location).binding = 0;
+								gp.getVertexInputAttributeDescription(location).format = VK_FORMAT_R32_SFLOAT;
+								gp.getVertexInputAttributeDescription(location).offset = vkts::commonGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_BONE_NUMBERS, vertexBufferType);
+							}
+
+							//
+
+							gp.getPipelineInputAssemblyStateCreateInfo().topology = subMesh->getPrimitiveTopology();
+
+							gp.getViewports(0).x = 0.0f;
+							gp.getViewports(0).y = 0.0f;
+							gp.getViewports(0).width = 1.0f;
+							gp.getViewports(0).height = 1.0f;
+							gp.getViewports(0).minDepth = 0.0f;
+							gp.getViewports(0).maxDepth = 1.0f;
+
+
+							gp.getScissors(0).offset.x = 0;
+							gp.getScissors(0).offset.y = 0;
+							gp.getScissors(0).extent = {1, 1};
+
+
+							gp.getPipelineMultisampleStateCreateInfo();
+							gp.getPipelineDepthStencilStateCreateInfo();
+
+
+							gp.getPipelineColorBlendAttachmentState(0).blendEnable = VK_FALSE;
+							gp.getPipelineColorBlendAttachmentState(0).colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+
+
+							gp.getDynamicState(0) = VK_DYNAMIC_STATE_VIEWPORT;
+							gp.getDynamicState(1) = VK_DYNAMIC_STATE_SCISSOR;
+
+
+							gp.getGraphicsPipelineCreateInfo().layout = bsdfMaterial->getPipelineLayout()->getPipelineLayout();
+							// FIXME: Get render pass from context.
+							//gp.getGraphicsPipelineCreateInfo().renderPass = renderPass->getRenderPass();
+
+
+							auto pipeline = pipelineCreateGraphics(context->getInitialResources()->getDevice()->getDevice(), VK_NULL_HANDLE, gp.getGraphicsPipelineCreateInfo(), vertexBufferType);
+
+							if (!pipeline.get())
+							{
+								vkts::logPrint(VKTS_LOG_ERROR, "Scenegraph: Could not create graphics pipeline.");
+
+								return VK_FALSE;
+							}
+
+							// TODO: Add pipeline to sub mesh.
+                    	}
                     }
                     else
                     {

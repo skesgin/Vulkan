@@ -80,11 +80,9 @@ public:
 
     virtual void setDescriptorSets(const IDescriptorSetsSP& descriptorSets) = 0;
 
-    virtual IGraphicsPipelineSP getGraphicsPipeline() const = 0;
+    virtual IPipelineLayoutSP getPipelineLayout() const = 0;
 
-    virtual void setGraphicsPipeline(const IGraphicsPipelineSP& graphicsPipeline) = 0;
-
-    // TODO: Add methods.
+    virtual void setPipelineLayout(const IPipelineLayoutSP& pipelineLayout) = 0;
 
     virtual void updateDescriptorSetsRecursive(const std::string& nodeName, const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets) = 0;
 

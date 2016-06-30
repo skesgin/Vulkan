@@ -49,7 +49,7 @@ protected:
     IDescriptorSetLayoutSP descriptorSetLayout;
     IDescriptorSetsSP descriptorSets;
 
-    IGraphicsPipelineSP graphicsPipeline;
+    IPipelineLayoutSP pipelineLayout;
 
 public:
 
@@ -97,11 +97,9 @@ public:
 
     virtual void setDescriptorSets(const IDescriptorSetsSP& descriptorSets) override;
 
-    virtual IGraphicsPipelineSP getGraphicsPipeline() const override;
+    virtual IPipelineLayoutSP getPipelineLayout() const override;
 
-    virtual void setGraphicsPipeline(const IGraphicsPipelineSP& graphicsPipeline) override;
-
-    // TODO: Add methods.
+    virtual void setPipelineLayout(const IPipelineLayoutSP& pipelineLayout) override;
 
     virtual void updateDescriptorSetsRecursive(const std::string& nodeName, const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets) override;
 
