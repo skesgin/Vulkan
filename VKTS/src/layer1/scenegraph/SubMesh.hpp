@@ -52,6 +52,7 @@ private:
     VkPrimitiveTopology primitiveTopology;
 
     IBSDFMaterialSP bsdfMaterial;
+    IGraphicsPipelineSP graphicsPipeline;
 
     IPhongMaterialSP phongMaterial;
 
@@ -120,6 +121,10 @@ public:
     virtual const IBSDFMaterialSP& getBSDFMaterial() const override;
 
     virtual void setBSDFMaterial(const IBSDFMaterialSP& bsdfMaterial) override;
+
+    virtual const IGraphicsPipelineSP& getGraphicsPipeline() const override;
+
+    virtual void setGraphicsPipeline(const IGraphicsPipelineSP& graphicsPipeline) override;
 
     virtual const IPhongMaterialSP& getPhongMaterial() const override;
 

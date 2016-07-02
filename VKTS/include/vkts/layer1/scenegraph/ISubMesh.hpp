@@ -80,6 +80,10 @@ public:
 
     virtual void setBSDFMaterial(const IBSDFMaterialSP& bsdfMaterial) = 0;
 
+    virtual const IGraphicsPipelineSP& getGraphicsPipeline() const = 0;
+
+    virtual void setGraphicsPipeline(const IGraphicsPipelineSP& graphicsPipeline) = 0;
+
     virtual const IPhongMaterialSP& getPhongMaterial() const = 0;
 
     virtual void setPhongMaterial(const IPhongMaterialSP& phongMaterial) = 0;

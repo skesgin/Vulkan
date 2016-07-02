@@ -76,6 +76,8 @@ private:
 
     SmartPointerMap<std::string, IShaderModuleSP> allFragmentShaderModules;
 
+    IRenderPassSP renderPass;
+
     //
 
     SmartPointerVector<IImageSP> allStageImages;
@@ -236,6 +238,12 @@ public:
     virtual VkBool32 addFragmentShaderModule(const IShaderModuleSP& shaderModule) override;
 
     virtual VkBool32 removeFragmentShaderModule(const IShaderModuleSP& shaderModule) override;
+
+    //
+
+    virtual IRenderPassSP getRenderPass() const override;
+
+    virtual void setRenderPass(const IRenderPassSP& renderPass) override;
 
     //
 

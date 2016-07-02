@@ -30,12 +30,12 @@ namespace vkts
 {
 
 SubMesh::SubMesh() :
-    ISubMesh(), name(""), vertexBuffer(), vertexBufferType(0), numberVertices(0), indicesVertexBuffer(), numberIndices(0), primitiveTopology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST), bsdfMaterial(), phongMaterial(), vertexOffset(-1), normalOffset(-1), bitangentOffset(-1), tangentOffset(-1), texcoordOffset(-1), boneIndices0Offset(-1), boneIndices1Offset(-1), boneWeights0Offset(-1), boneWeights1Offset(-1), numberBonesOffset(-1), strideInBytes(0), box(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f))
+    ISubMesh(), name(""), vertexBuffer(), vertexBufferType(0), numberVertices(0), indicesVertexBuffer(), numberIndices(0), primitiveTopology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST), bsdfMaterial(), graphicsPipeline(), phongMaterial(), vertexOffset(-1), normalOffset(-1), bitangentOffset(-1), tangentOffset(-1), texcoordOffset(-1), boneIndices0Offset(-1), boneIndices1Offset(-1), boneWeights0Offset(-1), boneWeights1Offset(-1), numberBonesOffset(-1), strideInBytes(0), box(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f))
 {
 }
 
 SubMesh::SubMesh(const SubMesh& other) :
-    ISubMesh(), name(other.name), vertexBuffer(other.vertexBuffer), vertexBufferType(other.vertexBufferType), numberVertices(other.numberVertices), indicesVertexBuffer(other.indicesVertexBuffer), numberIndices(other.numberIndices), primitiveTopology(other.primitiveTopology), bsdfMaterial(), phongMaterial(), vertexOffset(other.vertexOffset), normalOffset(other.normalOffset), bitangentOffset(other.bitangentOffset), tangentOffset(other.tangentOffset), texcoordOffset(other.texcoordOffset), boneIndices0Offset(other.boneIndices0Offset), boneIndices1Offset(other.boneIndices1Offset), boneWeights0Offset(other.boneWeights0Offset), boneWeights1Offset(other.boneWeights1Offset), numberBonesOffset(other.numberBonesOffset), strideInBytes(other.strideInBytes), box(other.box)
+    ISubMesh(), name(other.name), vertexBuffer(other.vertexBuffer), vertexBufferType(other.vertexBufferType), numberVertices(other.numberVertices), indicesVertexBuffer(other.indicesVertexBuffer), numberIndices(other.numberIndices), primitiveTopology(other.primitiveTopology), bsdfMaterial(), graphicsPipeline(other.graphicsPipeline), phongMaterial(), vertexOffset(other.vertexOffset), normalOffset(other.normalOffset), bitangentOffset(other.bitangentOffset), tangentOffset(other.tangentOffset), texcoordOffset(other.texcoordOffset), boneIndices0Offset(other.boneIndices0Offset), boneIndices1Offset(other.boneIndices1Offset), boneWeights0Offset(other.boneWeights0Offset), boneWeights1Offset(other.boneWeights1Offset), numberBonesOffset(other.numberBonesOffset), strideInBytes(other.strideInBytes), box(other.box)
 {
     if (other.bsdfMaterial.get())
     {
@@ -139,6 +139,16 @@ const IBSDFMaterialSP& SubMesh::getBSDFMaterial() const
 void SubMesh::setBSDFMaterial(const IBSDFMaterialSP& bsdfMaterial)
 {
     this->bsdfMaterial = bsdfMaterial;
+}
+
+const IGraphicsPipelineSP& SubMesh::getGraphicsPipeline() const
+{
+    return graphicsPipeline;
+}
+
+void SubMesh::setGraphicsPipeline(const IGraphicsPipelineSP& graphicsPipeline)
+{
+    this->graphicsPipeline = graphicsPipeline;
 }
 
 const IPhongMaterialSP& SubMesh::getPhongMaterial() const

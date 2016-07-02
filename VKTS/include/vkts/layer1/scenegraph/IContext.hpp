@@ -147,6 +147,12 @@ public:
 
     //
 
+    virtual IRenderPassSP getRenderPass() const = 0;
+
+    virtual void setRenderPass(const IRenderPassSP& renderPass) = 0;
+
+    //
+
     virtual void addStageImage(const IImageSP& stageImage) = 0;
 
     virtual void addStageBuffer(const IBufferSP& stageBuffer) = 0;

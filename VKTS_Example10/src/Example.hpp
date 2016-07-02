@@ -38,6 +38,12 @@
 #define VKTS_FONT_NAME "font/Arial_128.fnt"
 #define VKTS_FONT_SCALE 32.0f
 
+
+#define VKTS_BSDF0_VERTEX_SHADER_NAME "shader/SPIR/V/bsdf.vert.spv"
+#define VKTS_BSDF1_VERTEX_SHADER_NAME "shader/SPIR/V/bsdf_no_texcoord.vert.spv"
+#define VKTS_BSDF2_VERTEX_SHADER_NAME "shader/SPIR/V/bsdf_tangents.vert.spv"
+
+
 #define VKTS_ENV_VERTEX_SHADER_NAME "shader/SPIR/V/environment.vert.spv"
 #define VKTS_ENV_FRAGMENT_SHADER_NAME "shader/SPIR/V/environment.frag.spv"
 
@@ -78,6 +84,8 @@ private:
     VkWriteDescriptorSet writeDescriptorSets[VKTS_ENVIRONMENT_DESCRIPTOR_SET_COUNT];
 
 	vkts::IBufferObjectSP vertexViewProjectionUniformBuffer;
+
+	vkts::SmartPointerVector<vkts::IShaderModuleSP> allBSDFVertexShaderModules;
 
 	vkts::IShaderModuleSP envVertexShaderModule;
 	vkts::IShaderModuleSP envFragmentShaderModule;

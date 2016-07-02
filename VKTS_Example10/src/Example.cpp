@@ -27,7 +27,7 @@
 #include "Example.hpp"
 
 Example::Example(const vkts::IInitialResourcesSP& initialResources, const int32_t windowIndex, const vkts::ISurfaceSP& surface) :
-		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), descriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), envVertexShaderModule(nullptr), envFragmentShaderModule(nullptr), pipelineLayout(nullptr), font(nullptr), sceneContext(nullptr), scene(nullptr), environmentSceneContext(nullptr), environmentScene(nullptr), swapchain(nullptr), renderPass(nullptr), allGraphicsPipelines(), depthTexture(nullptr), depthStencilImageView(nullptr), swapchainImagesCount(0), swapchainImageView(), framebuffer(), cmdBuffer(), rebuildCmdBufferCounter(0), fps(0), ram(0), cpuUsageApp(0.0f), processors(0)
+		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), descriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), allBSDFVertexShaderModules(), envVertexShaderModule(nullptr), envFragmentShaderModule(nullptr), pipelineLayout(nullptr), font(nullptr), sceneContext(nullptr), scene(nullptr), environmentSceneContext(nullptr), environmentScene(nullptr), swapchain(nullptr), renderPass(nullptr), allGraphicsPipelines(), depthTexture(nullptr), depthStencilImageView(nullptr), swapchainImagesCount(0), swapchainImageView(), framebuffer(), cmdBuffer(), rebuildCmdBufferCounter(0), fps(0), ram(0), cpuUsageApp(0.0f), processors(0)
 {
 	processors = glm::min(vkts::processorGetNumber(), VKTS_MAX_CORES);
 
@@ -310,6 +310,15 @@ VkBool32 Example::buildScene(const vkts::ICommandBuffersSP& cmdBuffer)
 
 	//
 
+	if (allBSDFVertexShaderModules.size() == 3)
+	{
+		sceneContext->addVertexShaderModule(VKTS_VERTEX_BUFFER_TYPE_VERTEX | VKTS_VERTEX_BUFFER_TYPE_NORMAL | VKTS_VERTEX_BUFFER_TYPE_TEXCOORD, allBSDFVertexShaderModules[0]);
+		sceneContext->addVertexShaderModule(VKTS_VERTEX_BUFFER_TYPE_VERTEX | VKTS_VERTEX_BUFFER_TYPE_NORMAL, allBSDFVertexShaderModules[1]);
+		sceneContext->addVertexShaderModule(VKTS_VERTEX_BUFFER_TYPE_VERTEX | VKTS_VERTEX_BUFFER_TYPE_TANGENTS | VKTS_VERTEX_BUFFER_TYPE_TEXCOORD, allBSDFVertexShaderModules[2]);
+	}
+
+	//
+
 	scene = vkts::scenegraphLoadScene(VKTS_SCENE_NAME, sceneContext);
 
 	if (!scene.get())
@@ -549,6 +558,10 @@ VkBool32 Example::buildRenderPass()
 		return VK_FALSE;
 	}
 
+	//
+
+	// TODO: Add G-Buffer render pass.
+
 	return VK_TRUE;
 }
 
@@ -645,6 +658,70 @@ VkBool32 Example::buildShader()
 
 		return VK_FALSE;
 	}
+
+	//
+
+	vertexShaderBinary = vkts::fileLoadBinary(VKTS_BSDF0_VERTEX_SHADER_NAME);
+
+	if (!vertexShaderBinary.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not load vertex shader: '%s'", VKTS_BSDF0_VERTEX_SHADER_NAME);
+
+		return VK_FALSE;
+	}
+
+	auto bsdfVertexShaderModule = vkts::shaderModuleCreate(VKTS_BSDF0_VERTEX_SHADER_NAME, initialResources->getDevice()->getDevice(), 0, vertexShaderBinary->getSize(), (uint32_t*)vertexShaderBinary->getData());
+
+	if (!bsdfVertexShaderModule.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create vertex shader module.");
+
+		return VK_FALSE;
+	}
+
+	allBSDFVertexShaderModules.append(bsdfVertexShaderModule);
+
+
+	vertexShaderBinary = vkts::fileLoadBinary(VKTS_BSDF1_VERTEX_SHADER_NAME);
+
+	if (!vertexShaderBinary.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not load vertex shader: '%s'", VKTS_BSDF1_VERTEX_SHADER_NAME);
+
+		return VK_FALSE;
+	}
+
+	bsdfVertexShaderModule = vkts::shaderModuleCreate(VKTS_BSDF1_VERTEX_SHADER_NAME, initialResources->getDevice()->getDevice(), 0, vertexShaderBinary->getSize(), (uint32_t*)vertexShaderBinary->getData());
+
+	if (!bsdfVertexShaderModule.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create vertex shader module.");
+
+		return VK_FALSE;
+	}
+
+	allBSDFVertexShaderModules.append(bsdfVertexShaderModule);
+
+
+	vertexShaderBinary = vkts::fileLoadBinary(VKTS_BSDF2_VERTEX_SHADER_NAME);
+
+	if (!vertexShaderBinary.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not load vertex shader: '%s'", VKTS_BSDF2_VERTEX_SHADER_NAME);
+
+		return VK_FALSE;
+	}
+
+	bsdfVertexShaderModule = vkts::shaderModuleCreate(VKTS_BSDF2_VERTEX_SHADER_NAME, initialResources->getDevice()->getDevice(), 0, vertexShaderBinary->getSize(), (uint32_t*)vertexShaderBinary->getData());
+
+	if (!bsdfVertexShaderModule.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create vertex shader module.");
+
+		return VK_FALSE;
+	}
+
+	allBSDFVertexShaderModules.append(bsdfVertexShaderModule);
 
 	return VK_TRUE;
 }
@@ -1356,6 +1433,12 @@ void Example::terminate(const vkts::IUpdateThreadContext& updateContext)
 			{
 				envFragmentShaderModule->destroy();
 			}
+
+			for (size_t i = 0; i < allBSDFVertexShaderModules.size(); i++)
+			{
+				allBSDFVertexShaderModules[i]->destroy();
+			}
+			allBSDFVertexShaderModules.clear();
 
 			if (vertexViewProjectionUniformBuffer.get())
 			{

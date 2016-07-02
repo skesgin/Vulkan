@@ -30,7 +30,7 @@ namespace vkts
 {
 
 Context::Context(const VkBool32 replace, const IInitialResourcesSP& initialResources, const ICommandBuffersSP& cmdBuffer, const VkSamplerCreateInfo& samplerCreateInfo, const VkImageViewCreateInfo& imageViewCreateInfo, const IDescriptorSetLayoutSP& descriptorSetLayout) :
-    IContext(), replace(replace), initialResources(initialResources), cmdBuffer(cmdBuffer), samplerCreateInfo(samplerCreateInfo), imageViewCreateInfo(imageViewCreateInfo), descriptorSetLayout(descriptorSetLayout), allObjects(), allUsedObjects(), allMeshes(), allSubMeshes(), allAnimations(), allChannels(), allBSDFMaterials(), allUsedBSDFMaterials(), allPhongMaterials(), allUsedPhongMaterials(), allTextures(), allImageDatas(), allVertexShaderModules(), allFragmentShaderModules()
+    IContext(), replace(replace), initialResources(initialResources), cmdBuffer(cmdBuffer), samplerCreateInfo(samplerCreateInfo), imageViewCreateInfo(imageViewCreateInfo), descriptorSetLayout(descriptorSetLayout), allObjects(), allUsedObjects(), allMeshes(), allSubMeshes(), allAnimations(), allChannels(), allBSDFMaterials(), allUsedBSDFMaterials(), allPhongMaterials(), allUsedPhongMaterials(), allTextures(), allImageDatas(), allVertexShaderModules(), allFragmentShaderModules(), renderPass()
 {
 }
 
@@ -523,6 +523,18 @@ VkBool32 Context::removeFragmentShaderModule(const IShaderModuleSP& shaderModule
     }
 
     return remove(shaderModule->getName(), allFragmentShaderModules);
+}
+
+//
+
+IRenderPassSP Context::getRenderPass() const
+{
+	return renderPass;
+}
+
+void Context::setRenderPass(const IRenderPassSP& renderPass)
+{
+	this->renderPass = renderPass;
 }
 
 //
