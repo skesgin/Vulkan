@@ -132,11 +132,18 @@ public:
 
     //
 
-    virtual IShaderModuleSP useShaderModule(const std::string& name) const = 0;
+    virtual IShaderModuleSP useVertexShaderModule(const VkTsVertexBufferType vertexBufferType) const = 0;
 
-    virtual VkBool32 addShaderModule(const IShaderModuleSP& shaderModule) = 0;
+    virtual VkBool32 addVertexShaderModule(const VkTsVertexBufferType vertexBufferType, const IShaderModuleSP& shaderModule) = 0;
 
-    virtual VkBool32 removeShaderModule(const IShaderModuleSP& shaderModule) = 0;
+    virtual VkBool32 removeVertexShaderModule(const VkTsVertexBufferType vertexBufferType, const IShaderModuleSP& shaderModule) = 0;
+
+
+    virtual IShaderModuleSP useFragmentShaderModule(const std::string& name) const = 0;
+
+    virtual VkBool32 addFragmentShaderModule(const IShaderModuleSP& shaderModule) = 0;
+
+    virtual VkBool32 removeFragmentShaderModule(const IShaderModuleSP& shaderModule) = 0;
 
     //
 

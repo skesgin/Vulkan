@@ -72,7 +72,9 @@ private:
 
     SmartPointerMap<std::string, IImageDataSP> allImageDatas;
 
-    SmartPointerMap<std::string, IShaderModuleSP> allShaderModules;
+    SmartPointerMap<VkTsVertexBufferType, IShaderModuleSP> allVertexShaderModules;
+
+    SmartPointerMap<std::string, IShaderModuleSP> allFragmentShaderModules;
 
     //
 
@@ -222,11 +224,18 @@ public:
 
     //
 
-    virtual IShaderModuleSP useShaderModule(const std::string& name) const override;
+    virtual IShaderModuleSP useVertexShaderModule(const VkTsVertexBufferType vertexBufferType) const override;
 
-    virtual VkBool32 addShaderModule(const IShaderModuleSP& shaderModule) override;
+    virtual VkBool32 addVertexShaderModule(const VkTsVertexBufferType vertexBufferType, const IShaderModuleSP& shaderModule) override;
 
-    virtual VkBool32 removeShaderModule(const IShaderModuleSP& shaderModule) override;
+    virtual VkBool32 removeVertexShaderModule(const VkTsVertexBufferType vertexBufferType, const IShaderModuleSP& shaderModule) override;
+
+
+    virtual IShaderModuleSP useFragmentShaderModule(const std::string& name) const override;
+
+    virtual VkBool32 addFragmentShaderModule(const IShaderModuleSP& shaderModule) override;
+
+    virtual VkBool32 removeFragmentShaderModule(const IShaderModuleSP& shaderModule) override;
 
     //
 

@@ -30,7 +30,7 @@ namespace vkts
 {
 
 Context::Context(const VkBool32 replace, const IInitialResourcesSP& initialResources, const ICommandBuffersSP& cmdBuffer, const VkSamplerCreateInfo& samplerCreateInfo, const VkImageViewCreateInfo& imageViewCreateInfo, const IDescriptorSetLayoutSP& descriptorSetLayout) :
-    IContext(), replace(replace), initialResources(initialResources), cmdBuffer(cmdBuffer), samplerCreateInfo(samplerCreateInfo), imageViewCreateInfo(imageViewCreateInfo), descriptorSetLayout(descriptorSetLayout), allObjects(), allUsedObjects(), allMeshes(), allSubMeshes(), allAnimations(), allChannels(), allBSDFMaterials(), allUsedBSDFMaterials(), allPhongMaterials(), allUsedPhongMaterials(), allTextures(), allImageDatas(), allShaderModules()
+    IContext(), replace(replace), initialResources(initialResources), cmdBuffer(cmdBuffer), samplerCreateInfo(samplerCreateInfo), imageViewCreateInfo(imageViewCreateInfo), descriptorSetLayout(descriptorSetLayout), allObjects(), allUsedObjects(), allMeshes(), allSubMeshes(), allAnimations(), allChannels(), allBSDFMaterials(), allUsedBSDFMaterials(), allPhongMaterials(), allUsedPhongMaterials(), allTextures(), allImageDatas(), allVertexShaderModules(), allFragmentShaderModules()
 {
 }
 
@@ -461,36 +461,68 @@ VkBool32 Context::removeImageData(const IImageDataSP& imageData)
 
 //
 
-IShaderModuleSP Context::useShaderModule(const std::string& name) const
+IShaderModuleSP Context::useVertexShaderModule(const VkTsVertexBufferType vertexBufferType) const
 {
-	if (!contains(name, allShaderModules))
+	if (!contains(vertexBufferType, allVertexShaderModules))
 	{
 		return IShaderModuleSP();
 	}
 
 	//
 
-    return get(name, allShaderModules);
+    return get(vertexBufferType, allVertexShaderModules);
 }
 
-VkBool32 Context::addShaderModule(const IShaderModuleSP& shaderModule)
+VkBool32 Context::addVertexShaderModule(const VkTsVertexBufferType vertexBufferType, const IShaderModuleSP& shaderModule)
 {
     if (!shaderModule.get())
     {
         return VK_FALSE;
     }
 
-    return add(shaderModule->getName(), shaderModule, allShaderModules);
+    return add(vertexBufferType, shaderModule, allVertexShaderModules);
 }
 
-VkBool32 Context::removeShaderModule(const IShaderModuleSP& shaderModule)
+VkBool32 Context::removeVertexShaderModule(const VkTsVertexBufferType vertexBufferType, const IShaderModuleSP& shaderModule)
 {
     if (!shaderModule.get())
     {
         return VK_FALSE;
     }
 
-    return remove(shaderModule->getName(), allShaderModules);
+    return remove(vertexBufferType, allVertexShaderModules);
+}
+
+IShaderModuleSP Context::useFragmentShaderModule(const std::string& name) const
+{
+	if (!contains(name, allFragmentShaderModules))
+	{
+		return IShaderModuleSP();
+	}
+
+	//
+
+    return get(name, allFragmentShaderModules);
+}
+
+VkBool32 Context::addFragmentShaderModule(const IShaderModuleSP& shaderModule)
+{
+    if (!shaderModule.get())
+    {
+        return VK_FALSE;
+    }
+
+    return add(shaderModule->getName(), shaderModule, allFragmentShaderModules);
+}
+
+VkBool32 Context::removeFragmentShaderModule(const IShaderModuleSP& shaderModule)
+{
+    if (!shaderModule.get())
+    {
+        return VK_FALSE;
+    }
+
+    return remove(shaderModule->getName(), allFragmentShaderModules);
 }
 
 //
