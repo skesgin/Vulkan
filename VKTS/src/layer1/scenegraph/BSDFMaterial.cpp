@@ -35,7 +35,7 @@ BSDFMaterial::BSDFMaterial() :
 }
 
 BSDFMaterial::BSDFMaterial(const BSDFMaterial& other) :
-    IBSDFMaterial(), name(other.name), fragmentShader(other.fragmentShader), attributes(other.attributes), allTextures(other.allTextures), descriptorPool(), descriptorSetLayout(), descriptorSets(), pipelineLayout()
+    IBSDFMaterial(), name(other.name), fragmentShader(other.fragmentShader), attributes(other.attributes), allTextures(other.allTextures), descriptorPool(), descriptorSetLayout(other.descriptorSetLayout), descriptorSets(), pipelineLayout(other.pipelineLayout)
 {
 	// TODO: Clone, as done in phong material.
 }

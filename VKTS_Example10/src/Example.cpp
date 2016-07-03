@@ -27,7 +27,7 @@
 #include "Example.hpp"
 
 Example::Example(const vkts::IInitialResourcesSP& initialResources, const int32_t windowIndex, const vkts::ISurfaceSP& surface) :
-		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), descriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), allBSDFVertexShaderModules(), envVertexShaderModule(nullptr), envFragmentShaderModule(nullptr), pipelineLayout(nullptr), font(nullptr), sceneContext(nullptr), scene(nullptr), environmentSceneContext(nullptr), environmentScene(nullptr), swapchain(nullptr), renderPass(nullptr), allGraphicsPipelines(), depthTexture(nullptr), depthStencilImageView(nullptr), swapchainImagesCount(0), swapchainImageView(), framebuffer(), cmdBuffer(), rebuildCmdBufferCounter(0), fps(0), ram(0), cpuUsageApp(0.0f), processors(0)
+		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), descriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), allBSDFVertexShaderModules(), envVertexShaderModule(nullptr), envFragmentShaderModule(nullptr), pipelineLayout(nullptr), font(nullptr), sceneContext(nullptr), scene(nullptr), environmentSceneContext(nullptr), environmentScene(nullptr), swapchain(nullptr), renderPass(nullptr), gbufferRenderPass(nullptr), allGraphicsPipelines(), depthTexture(nullptr), depthStencilImageView(nullptr), swapchainImagesCount(0), swapchainImageView(), framebuffer(), cmdBuffer(), rebuildCmdBufferCounter(0), fps(0), ram(0), cpuUsageApp(0.0f), processors(0)
 {
 	processors = glm::min(vkts::processorGetNumber(), VKTS_MAX_CORES);
 
@@ -317,6 +317,8 @@ VkBool32 Example::buildScene(const vkts::ICommandBuffersSP& cmdBuffer)
 		sceneContext->addVertexShaderModule(VKTS_VERTEX_BUFFER_TYPE_VERTEX | VKTS_VERTEX_BUFFER_TYPE_TANGENTS | VKTS_VERTEX_BUFFER_TYPE_TEXCOORD, allBSDFVertexShaderModules[2]);
 	}
 
+	sceneContext->setRenderPass(gbufferRenderPass);
+
 	//
 
 	scene = vkts::scenegraphLoadScene(VKTS_SCENE_NAME, sceneContext);
@@ -560,7 +562,72 @@ VkBool32 Example::buildRenderPass()
 
 	//
 
-	// TODO: Add G-Buffer render pass.
+	//Create G-Buffer render pass.
+
+	VkAttachmentDescription gbufferAttachmentDescription[6];
+
+	memset(&gbufferAttachmentDescription, 0, sizeof(gbufferAttachmentDescription));
+
+	for (uint32_t i = 0; i < 5; i++)
+	{
+		gbufferAttachmentDescription[i].flags = 0;
+		gbufferAttachmentDescription[i].format = VK_FORMAT_R8G8B8A8_UNORM;
+		gbufferAttachmentDescription[i].samples = VK_SAMPLE_COUNT_1_BIT;
+		gbufferAttachmentDescription[i].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+		gbufferAttachmentDescription[i].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+		gbufferAttachmentDescription[i].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+		gbufferAttachmentDescription[i].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		gbufferAttachmentDescription[i].initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+		gbufferAttachmentDescription[i].finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+	}
+
+	gbufferAttachmentDescription[5].flags = 0;
+	gbufferAttachmentDescription[5].format = VK_FORMAT_D16_UNORM;
+	gbufferAttachmentDescription[5].samples = VK_SAMPLE_COUNT_1_BIT;
+	gbufferAttachmentDescription[5].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+	gbufferAttachmentDescription[5].storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+	gbufferAttachmentDescription[5].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+	gbufferAttachmentDescription[5].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+	gbufferAttachmentDescription[5].initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+	gbufferAttachmentDescription[5].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+	VkAttachmentReference gbufferColorAttachmentReference[5];
+
+	for (uint32_t i = 0; i < 5; i++)
+	{
+		gbufferColorAttachmentReference[i].attachment = i;
+		gbufferColorAttachmentReference[i].layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+	}
+
+	VkAttachmentReference gbufferDeptStencilAttachmentReference;
+
+	gbufferDeptStencilAttachmentReference.attachment = 5;
+	gbufferDeptStencilAttachmentReference.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+	VkSubpassDescription gbufferSubpassDescription;
+
+	memset(&gbufferSubpassDescription, 0, sizeof(VkSubpassDescription));
+
+	gbufferSubpassDescription.flags = 0;
+	gbufferSubpassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+	gbufferSubpassDescription.inputAttachmentCount = 0;
+	gbufferSubpassDescription.pInputAttachments = nullptr;
+	gbufferSubpassDescription.colorAttachmentCount = 5;
+	gbufferSubpassDescription.pColorAttachments = gbufferColorAttachmentReference;
+	gbufferSubpassDescription.pResolveAttachments = nullptr;
+	gbufferSubpassDescription.pDepthStencilAttachment = &gbufferDeptStencilAttachmentReference;
+	gbufferSubpassDescription.preserveAttachmentCount = 0;
+	gbufferSubpassDescription.pPreserveAttachments = nullptr;
+
+	gbufferRenderPass = vkts::renderPassCreate(initialResources->getDevice()->getDevice(), 0, 6, gbufferAttachmentDescription, 1, &gbufferSubpassDescription, 0, nullptr);
+
+	if (!gbufferRenderPass.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create render pass.");
+
+		return VK_FALSE;
+	}
+
 
 	return VK_TRUE;
 }
@@ -1006,6 +1073,11 @@ void Example::terminateResources(const vkts::IUpdateThreadContext& updateContext
 			if (renderPass.get())
 			{
 				renderPass->destroy();
+			}
+
+			if (gbufferRenderPass.get())
+			{
+				gbufferRenderPass->destroy();
 			}
 		}
 	}

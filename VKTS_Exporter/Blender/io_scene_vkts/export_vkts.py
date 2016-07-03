@@ -32,6 +32,8 @@ import bmesh
 # Cycles materials.
 #
 
+VKTS_BINDING_UNIFORM_SAMPLER_BSDF_FIRST = 4
+
 fragmentGLSL = """#version 450 core
 
 layout (location = 0) in vec4 v_f_position;
@@ -1495,7 +1497,7 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
                 currentFragmentGLSL = currentFragmentGLSL.replace("#nextAttribute#", texCoordAttribute)
             
             for binding in range (0, len(nodes)):
-                currentTexImage = texImageFunction % (binding, binding)
+                currentTexImage = texImageFunction % ((binding + VKTS_BINDING_UNIFORM_SAMPLER_BSDF_FIRST), binding)
                 currentFragmentGLSL = currentFragmentGLSL.replace("#nextTexture#", currentTexImage)
                 
                 fw("add_texture %s\n" % (friendlyName(material.name) + "_" + friendlyNodeName(nodes[binding].name) + "_texture" ))    

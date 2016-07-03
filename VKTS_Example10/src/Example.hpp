@@ -103,6 +103,7 @@ private:
 	vkts::ISwapchainSP swapchain;
 
 	vkts::IRenderPassSP renderPass;
+	vkts::IRenderPassSP gbufferRenderPass;
 
 	vkts::SmartPointerVector<vkts::IGraphicsPipelineSP> allGraphicsPipelines;
 

@@ -1765,7 +1765,7 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
 
             	bindingCount++;
 
-            	if (bsdfMaterial->getAttributes() & VKTS_VERTEX_BUFFER_TYPE_BONES)
+            	if ((bsdfMaterial->getAttributes() & VKTS_VERTEX_BUFFER_TYPE_BONES) == VKTS_VERTEX_BUFFER_TYPE_BONES)
             	{
                 	descriptorSetLayoutBinding[bindingCount].binding = VKTS_BINDING_UNIFORM_BUFFER_BONE_TRANSFORM;
                 	descriptorSetLayoutBinding[bindingCount].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -1828,7 +1828,7 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
 
             	setLayouts[0] = descriptorSetLayout->getDescriptorSetLayout();
 
-            	auto pipelineLayout = vkts::pipelineCreateLayout(context->getInitialResources()->getDevice()->getDevice(), 0, 1, setLayouts, 0, nullptr);
+            	auto pipelineLayout = pipelineCreateLayout(context->getInitialResources()->getDevice()->getDevice(), 0, 1, setLayouts, 0, nullptr);
 
             	if (!pipelineLayout.get())
             	{
@@ -2522,7 +2522,24 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
 	                    return VK_FALSE;
 					}
 
-					VkTsVertexBufferType vertexBufferType = subMesh->getVertexBufferType();
+					auto currentPipelineLayout = subMesh->getBSDFMaterial()->getPipelineLayout();
+
+					if (!currentPipelineLayout.get())
+					{
+	                    logPrint(VKTS_LOG_ERROR, "Scenegraph: No pipeline layout found");
+
+	                    return VK_FALSE;
+					}
+
+
+					VkTsVertexBufferType vertexBufferType = subMesh->getVertexBufferType() & subMesh->getBSDFMaterial()->getAttributes();
+
+					if (vertexBufferType != subMesh->getBSDFMaterial()->getAttributes())
+					{
+	                    logPrint(VKTS_LOG_ERROR, "Scenegraph: Sub mesh vertex buffer type does not match with material");
+
+	                    return VK_FALSE;
+					}
 
 					auto currentVertexShaderModule = context->useVertexShaderModule(vertexBufferType);
 
@@ -2554,7 +2571,7 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
 					gp.getVertexInputAttributeDescription(location).format = VK_FORMAT_R32G32B32A32_SFLOAT;
 					gp.getVertexInputAttributeDescription(location).offset = commonGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_VERTEX, vertexBufferType);
 
-					if (vertexBufferType & VKTS_VERTEX_BUFFER_TYPE_NORMAL)
+					if ((vertexBufferType & VKTS_VERTEX_BUFFER_TYPE_NORMAL) == VKTS_VERTEX_BUFFER_TYPE_NORMAL)
 					{
 						location++;
 
@@ -2563,7 +2580,7 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
 						gp.getVertexInputAttributeDescription(location).format = VK_FORMAT_R32G32B32_SFLOAT;
 						gp.getVertexInputAttributeDescription(location).offset = commonGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_NORMAL, vertexBufferType);
 
-						if (vertexBufferType & VKTS_VERTEX_BUFFER_TYPE_TANGENTS)
+						if ((vertexBufferType & VKTS_VERTEX_BUFFER_TYPE_TANGENTS) == VKTS_VERTEX_BUFFER_TYPE_TANGENTS)
 						{
 							location++;
 
@@ -2581,7 +2598,7 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
 						}
 					}
 
-					if (vertexBufferType & VKTS_VERTEX_BUFFER_TYPE_TEXCOORD)
+					if ((vertexBufferType & VKTS_VERTEX_BUFFER_TYPE_TEXCOORD) == VKTS_VERTEX_BUFFER_TYPE_TEXCOORD)
 					{
 						location++;
 
@@ -2592,7 +2609,7 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
 					}
 
 
-					if (vertexBufferType & VKTS_VERTEX_BUFFER_TYPE_BONES)
+					if ((vertexBufferType & VKTS_VERTEX_BUFFER_TYPE_BONES) == VKTS_VERTEX_BUFFER_TYPE_BONES)
 					{
 						location++;
 
@@ -2659,7 +2676,7 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
 					gp.getDynamicState(1) = VK_DYNAMIC_STATE_SCISSOR;
 
 
-					gp.getGraphicsPipelineCreateInfo().layout = subMesh->getBSDFMaterial()->getPipelineLayout()->getPipelineLayout();
+					gp.getGraphicsPipelineCreateInfo().layout = currentPipelineLayout->getPipelineLayout();
 					gp.getGraphicsPipelineCreateInfo().renderPass = currentRenderPass->getRenderPass();
 
 
