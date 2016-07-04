@@ -27,7 +27,7 @@
 #include "Example.hpp"
 
 Example::Example(const vkts::IInitialResourcesSP& initialResources, const int32_t windowIndex, const vkts::ISurfaceSP& surface) :
-		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), descriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), allBSDFVertexShaderModules(), envVertexShaderModule(nullptr), envFragmentShaderModule(nullptr), pipelineLayout(nullptr), font(nullptr), sceneContext(nullptr), scene(nullptr), environmentSceneContext(nullptr), environmentScene(nullptr), swapchain(nullptr), renderPass(nullptr), gbufferRenderPass(nullptr), allGraphicsPipelines(), depthTexture(nullptr), depthStencilImageView(nullptr), swapchainImagesCount(0), swapchainImageView(), framebuffer(), cmdBuffer(), rebuildCmdBufferCounter(0), fps(0), ram(0), cpuUsageApp(0.0f), processors(0)
+		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), descriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), allBSDFVertexShaderModules(), envVertexShaderModule(nullptr), envFragmentShaderModule(nullptr), pipelineLayout(nullptr), font(nullptr), sceneContext(nullptr), scene(nullptr), environmentSceneContext(nullptr), environmentScene(nullptr), swapchain(nullptr), renderPass(nullptr), gbufferRenderPass(nullptr), allGraphicsPipelines(), allGBufferTextures(), swapchainImagesCount(0), swapchainImageView(), framebuffer(), cmdBuffer(), rebuildCmdBufferCounter(0), fps(0), ram(0), cpuUsageApp(0.0f), processors(0)
 {
 	processors = glm::min(vkts::processorGetNumber(), VKTS_MAX_CORES);
 
@@ -198,12 +198,11 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 
 VkBool32 Example::buildFramebuffer(const int32_t usedBuffer)
 {
-	VkImageView imageViews[2];
+	VkImageView imageViews[1];
 
 	imageViews[0] = swapchainImageView[usedBuffer]->getImageView();
-	imageViews[1] = depthStencilImageView->getImageView();
 
-	framebuffer[usedBuffer] = vkts::framebufferCreate(initialResources->getDevice()->getDevice(), 0, renderPass->getRenderPass(), 2, imageViews, swapchain->getImageExtent().width, swapchain->getImageExtent().height, 1);
+	framebuffer[usedBuffer] = vkts::framebufferCreate(initialResources->getDevice()->getDevice(), 0, renderPass->getRenderPass(), 1, imageViews, swapchain->getImageExtent().width, swapchain->getImageExtent().height, 1);
 
 	if (!framebuffer[usedBuffer].get())
 	{
@@ -385,24 +384,7 @@ VkBool32 Example::buildSwapchainImageView(const int32_t usedBuffer)
 	return VK_TRUE;
 }
 
-VkBool32 Example::buildDepthStencilImageView()
-{
-	VkComponentMapping componentMapping = { VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY };
-	VkImageSubresourceRange imageSubresourceRange = { VK_IMAGE_ASPECT_DEPTH_BIT, 0, 1, 0, 1 };
-
-	depthStencilImageView = vkts::imageViewCreate(initialResources->getDevice()->getDevice(), 0, depthTexture->getImage()->getImage(), VK_IMAGE_VIEW_TYPE_2D, depthTexture->getImage()->getFormat(), componentMapping, imageSubresourceRange);
-
-	if (!depthStencilImageView.get())
-	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create depth attachment view.");
-
-		return VK_FALSE;
-	}
-
-	return VK_TRUE;
-}
-
-VkBool32 Example::buildDepthTexture(const vkts::ICommandBuffersSP& cmdBuffer)
+VkBool32 Example::buildGBufferTexture(const vkts::ICommandBuffersSP& cmdBuffer)
 {
 	VkImageCreateInfo imageCreateInfo;
 
@@ -412,28 +394,51 @@ VkBool32 Example::buildDepthTexture(const vkts::ICommandBuffersSP& cmdBuffer)
 
 	imageCreateInfo.flags = 0;
 	imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
-	imageCreateInfo.format = VK_FORMAT_D16_UNORM;
+	imageCreateInfo.format = VK_FORMAT_R8G8B8A8_UNORM;
 	imageCreateInfo.extent = {swapchain->getImageExtent().width, swapchain->getImageExtent().height, 1};
 	imageCreateInfo.mipLevels = 1;
 	imageCreateInfo.arrayLayers = 1;
 	imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
 	imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-	imageCreateInfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+	imageCreateInfo.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 	imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 	imageCreateInfo.queueFamilyIndexCount = 0;
 	imageCreateInfo.pQueueFamilyIndices = nullptr;
 	imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
-	VkImageSubresourceRange subresourceRange = { VK_IMAGE_ASPECT_DEPTH_BIT, 0, 1, 0, 1 };
+	VkImageSubresourceRange subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
 
-	depthTexture = vkts::memoryImageCreate(initialResources, cmdBuffer, "DepthTexture", imageCreateInfo, 0, VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, subresourceRange, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-
-	if (!depthTexture.get())
+	for (uint32_t i = 0; i < 5; i++)
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create depth texture.");
+		auto currentTexture = vkts::memoryImageCreate(initialResources, cmdBuffer, "GBuffer" + std::to_string(i), imageCreateInfo, 0, VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, subresourceRange, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+		if (!currentTexture.get())
+		{
+			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create GBuffer texture.");
+
+			return VK_FALSE;
+		}
+
+		allGBufferTextures.append(currentTexture);
+	}
+
+	//
+
+	imageCreateInfo.format = VK_FORMAT_D16_UNORM;
+	imageCreateInfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+
+	subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+
+	auto currentTexture = vkts::memoryImageCreate(initialResources, cmdBuffer, "GBufferDepth", imageCreateInfo, 0, VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, subresourceRange, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+	if (!currentTexture.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create GBuffer depth texture.");
 
 		return VK_FALSE;
 	}
+
+	allGBufferTextures.append(currentTexture);
 
 	return VK_TRUE;
 }
@@ -508,7 +513,7 @@ VkBool32 Example::buildPipeline()
 
 VkBool32 Example::buildRenderPass()
 {
-	VkAttachmentDescription attachmentDescription[2];
+	VkAttachmentDescription attachmentDescription[1];
 
 	memset(&attachmentDescription, 0, sizeof(attachmentDescription));
 
@@ -522,25 +527,10 @@ VkBool32 Example::buildRenderPass()
 	attachmentDescription[0].initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 	attachmentDescription[0].finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
-	attachmentDescription[1].flags = 0;
-	attachmentDescription[1].format = VK_FORMAT_D16_UNORM;
-	attachmentDescription[1].samples = VK_SAMPLE_COUNT_1_BIT;
-	attachmentDescription[1].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-	attachmentDescription[1].storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-	attachmentDescription[1].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-	attachmentDescription[1].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-	attachmentDescription[1].initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-	attachmentDescription[1].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
 	VkAttachmentReference colorAttachmentReference;
 
 	colorAttachmentReference.attachment = 0;
 	colorAttachmentReference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-	VkAttachmentReference deptStencilAttachmentReference;
-
-	deptStencilAttachmentReference.attachment = 1;
-	deptStencilAttachmentReference.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
 	VkSubpassDescription subpassDescription;
 
@@ -553,11 +543,11 @@ VkBool32 Example::buildRenderPass()
 	subpassDescription.colorAttachmentCount = 1;
 	subpassDescription.pColorAttachments = &colorAttachmentReference;
 	subpassDescription.pResolveAttachments = nullptr;
-	subpassDescription.pDepthStencilAttachment = &deptStencilAttachmentReference;
+	subpassDescription.pDepthStencilAttachment = nullptr;
 	subpassDescription.preserveAttachmentCount = 0;
 	subpassDescription.pPreserveAttachments = nullptr;
 
-	renderPass = vkts::renderPassCreate( initialResources->getDevice()->getDevice(), 0, 2, attachmentDescription, 1, &subpassDescription, 0, nullptr);
+	renderPass = vkts::renderPassCreate( initialResources->getDevice()->getDevice(), 0, 1, attachmentDescription, 1, &subpassDescription, 0, nullptr);
 
 	if (!renderPass.get())
 	{
@@ -901,7 +891,7 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 		return VK_FALSE;
 	}
 
-	if (!buildDepthTexture(updateCmdBuffer))
+	if (!buildGBufferTexture(updateCmdBuffer))
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not build texture.");
 
@@ -1018,13 +1008,6 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 
 	//
 
-	if (!buildDepthStencilImageView())
-	{
-		return VK_FALSE;
-	}
-
-	//
-
 	for (int32_t i = 0; i < (int32_t)swapchainImagesCount; i++)
 	{
 		if (!buildSwapchainImageView(i))
@@ -1060,21 +1043,17 @@ void Example::terminateResources(const vkts::IUpdateThreadContext& updateContext
 				}
 			}
 
-			if (depthStencilImageView.get())
-			{
-				depthStencilImageView->destroy();
-			}
-
-			if (depthTexture.get())
-			{
-				depthTexture->destroy();
-			}
-
 			for (size_t i = 0; i < allGraphicsPipelines.size(); i++)
 			{
 				allGraphicsPipelines[i]->destroy();
 			}
 			allGraphicsPipelines.clear();
+
+			for (size_t i = 0; i < allGBufferTextures.size(); i++)
+			{
+				allGBufferTextures[i]->destroy();
+			}
+			allGBufferTextures.clear();
 
 			if (renderPass.get())
 			{

@@ -108,8 +108,7 @@ private:
 
 	vkts::SmartPointerVector<vkts::IGraphicsPipelineSP> allGraphicsPipelines;
 
-	vkts::IMemoryImageSP depthTexture;
-	vkts::IImageViewSP depthStencilImageView;
+	vkts::SmartPointerVector<vkts::IMemoryImageSP> allGBufferTextures;
 
     uint32_t swapchainImagesCount;
 
@@ -136,9 +135,7 @@ private:
 
 	VkBool32 buildSwapchainImageView(const int32_t usedBuffer);
 
-	VkBool32 buildDepthStencilImageView();
-
-	VkBool32 buildDepthTexture(const vkts::ICommandBuffersSP& cmdBuffer);
+	VkBool32 buildGBufferTexture(const vkts::ICommandBuffersSP& cmdBuffer);
 
 	VkBool32 buildPipeline();
 
