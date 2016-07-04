@@ -39,7 +39,7 @@ SubMesh::SubMesh(const SubMesh& other) :
 {
     if (other.bsdfMaterial.get())
     {
-        bsdfMaterial = other.bsdfMaterial->clone();
+        bsdfMaterial = other.bsdfMaterial;
     }
     else if (other.phongMaterial.get())
     {

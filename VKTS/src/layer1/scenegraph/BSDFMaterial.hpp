@@ -29,10 +29,12 @@
 
 #include <vkts/vkts.hpp>
 
+#include "Material.hpp"
+
 namespace vkts
 {
 
-class BSDFMaterial : public IBSDFMaterial
+class BSDFMaterial : public IBSDFMaterial, Material
 {
 
 protected:
@@ -45,16 +47,14 @@ protected:
 
     SmartPointerVector<ITextureSP> allTextures;
 
-    IDescriptorPoolSP descriptorPool;
     IDescriptorSetLayoutSP descriptorSetLayout;
-    IDescriptorSetsSP descriptorSets;
 
     IPipelineLayoutSP pipelineLayout;
 
 public:
 
     BSDFMaterial();
-    BSDFMaterial(const BSDFMaterial& other);
+    BSDFMaterial(const BSDFMaterial& other) = delete;
     BSDFMaterial(BSDFMaterial&& other) = delete;
     virtual ~BSDFMaterial();
 
@@ -103,13 +103,9 @@ public:
 
     virtual void updateDescriptorSetsRecursive(const std::string& nodeName, const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets) override;
 
+    virtual void bindDescriptorSets(const std::string& nodeName, const ICommandBuffersSP& cmdBuffer, const VkPipelineLayout layout, const uint32_t bufferIndex = 0) const override;
+
     virtual void bindDrawIndexedRecursive(const std::string& nodeName, const ICommandBuffersSP& cmdBuffer, const IGraphicsPipelineSP& graphicsPipeline, const overwrite* renderOverwrite = nullptr, const uint32_t bufferIndex = 0) const override;
-
-    //
-    // ICloneable
-    //
-
-    virtual IBSDFMaterialSP clone() const override;
 
     //
     // IDestroyable

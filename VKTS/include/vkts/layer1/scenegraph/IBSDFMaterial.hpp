@@ -34,13 +34,13 @@ namespace vkts
 
 class overwrite;
 
-class IBSDFMaterial: public ICloneable<IBSDFMaterial>, public IDestroyable
+class IBSDFMaterial : public IDestroyable
 {
 
 public:
 
     IBSDFMaterial() :
-        ICloneable<IBSDFMaterial>(), IDestroyable()
+        IDestroyable()
     {
     }
 
@@ -85,6 +85,8 @@ public:
     virtual void setPipelineLayout(const IPipelineLayoutSP& pipelineLayout) = 0;
 
     virtual void updateDescriptorSetsRecursive(const std::string& nodeName, const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets) = 0;
+
+    virtual void bindDescriptorSets(const std::string& nodeName, const ICommandBuffersSP& cmdBuffer, const VkPipelineLayout layout, const uint32_t bufferIndex = 0) const = 0;
 
     virtual void bindDrawIndexedRecursive(const std::string& nodeName, const ICommandBuffersSP& cmdBuffer, const IGraphicsPipelineSP& graphicsPipeline, const overwrite* renderOverwrite = nullptr, const uint32_t bufferIndex = 0) const = 0;
 

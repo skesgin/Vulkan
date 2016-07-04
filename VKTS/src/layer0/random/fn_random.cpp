@@ -52,7 +52,7 @@ float VKTS_APIENTRY randomNormal(const float mean, const float standardDeviation
 	return mean + standardDeviation * (sqrtf(-2.0f * logf(x1)) * cosf(2.0f * VKTS_PI * x2));
 }
 
-glm::vec2 VKTS_APIENTRY randomHammersley(const uint8_t sample, const uint8_t m)
+glm::vec2 VKTS_APIENTRY randomHammersley(const uint32_t sample, const uint8_t m)
 {
 	uint8_t revertSample;
 	float binaryFractionFactor;

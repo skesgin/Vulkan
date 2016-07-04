@@ -231,33 +231,39 @@ VkBool32 Example::updateDescriptorSets()
 	descriptorImageInfos[0].imageLayout = VK_IMAGE_LAYOUT_GENERAL;
 
 
+	memset(environmentWriteDescriptorSets, 0, sizeof(environmentWriteDescriptorSets));
+
+	environmentWriteDescriptorSets[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+
+	environmentWriteDescriptorSets[0].dstSet = VK_NULL_HANDLE;	// Defined later.
+	environmentWriteDescriptorSets[0].dstBinding = VKTS_BINDING_UNIFORM_BUFFER_VIEWPROJECTION;
+	environmentWriteDescriptorSets[0].dstArrayElement = 0;
+	environmentWriteDescriptorSets[0].descriptorCount = 1;
+	environmentWriteDescriptorSets[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	environmentWriteDescriptorSets[0].pImageInfo = nullptr;
+	environmentWriteDescriptorSets[0].pBufferInfo = &descriptorBufferInfos[0];
+	environmentWriteDescriptorSets[0].pTexelBufferView = nullptr;
+
+
+	environmentWriteDescriptorSets[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+
+	environmentWriteDescriptorSets[1].dstSet = VK_NULL_HANDLE;	// Defined later.
+	environmentWriteDescriptorSets[1].dstBinding = VKTS_BINDING_UNIFORM_SAMPLER_ENVIRONMENT;
+	environmentWriteDescriptorSets[1].dstArrayElement = 0;
+	environmentWriteDescriptorSets[1].descriptorCount = 1;
+	environmentWriteDescriptorSets[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+	environmentWriteDescriptorSets[1].pImageInfo = &descriptorImageInfos[0];
+	environmentWriteDescriptorSets[1].pBufferInfo = nullptr;
+	environmentWriteDescriptorSets[1].pTexelBufferView = nullptr;
+
+
+	environmentWriteDescriptorSets[2].dstBinding = VKTS_BINDING_UNIFORM_BUFFER_TRANSFORM;
+
+	//
+
 	memset(writeDescriptorSets, 0, sizeof(writeDescriptorSets));
 
-	writeDescriptorSets[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-
-	writeDescriptorSets[0].dstSet = VK_NULL_HANDLE;	// Defined later.
-	writeDescriptorSets[0].dstBinding = VKTS_BINDING_UNIFORM_BUFFER_VIEWPROJECTION;
-	writeDescriptorSets[0].dstArrayElement = 0;
-	writeDescriptorSets[0].descriptorCount = 1;
-	writeDescriptorSets[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-	writeDescriptorSets[0].pImageInfo = nullptr;
-	writeDescriptorSets[0].pBufferInfo = &descriptorBufferInfos[0];
-	writeDescriptorSets[0].pTexelBufferView = nullptr;
-
-
-	writeDescriptorSets[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-
-	writeDescriptorSets[1].dstSet = VK_NULL_HANDLE;	// Defined later.
-	writeDescriptorSets[1].dstBinding = VKTS_BINDING_UNIFORM_SAMPLER_ENVIRONMENT;
-	writeDescriptorSets[1].dstArrayElement = 0;
-	writeDescriptorSets[1].descriptorCount = 1;
-	writeDescriptorSets[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	writeDescriptorSets[1].pImageInfo = &descriptorImageInfos[0];
-	writeDescriptorSets[1].pBufferInfo = nullptr;
-	writeDescriptorSets[1].pTexelBufferView = nullptr;
-
-
-	writeDescriptorSets[2].dstBinding = VKTS_BINDING_UNIFORM_BUFFER_TRANSFORM;
+	// TODO: Set write descriptor sets.
 
 	return VK_TRUE;
 }
@@ -1001,12 +1007,12 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 
 		if (scene.get())
 		{
-			// TODO: Update.
+			scene->updateDescriptorSetsRecursive(VKTS_BINDING_UNIFORM_BSDF_TOTAL_BINDING_COUNT, writeDescriptorSets);
 		}
 
 		if (environmentScene.get())
 		{
-			environmentScene->updateDescriptorSetsRecursive(VKTS_ENVIRONMENT_DESCRIPTOR_SET_COUNT, writeDescriptorSets);
+			environmentScene->updateDescriptorSetsRecursive(VKTS_ENVIRONMENT_DESCRIPTOR_SET_COUNT, environmentWriteDescriptorSets);
 		}
 	}
 

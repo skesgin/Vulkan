@@ -89,4 +89,8 @@
 
 #define VKTS_BINDING_UNIFORM_BSDF_TOTAL_BINDING_COUNT 				19
 
+// Amount of maximum material bindings.
+
+#define VKTS_BINDING_UNIFORM_MATERIAL_TOTAL_BINDING_COUNT 			16
+
 #endif /* VKTS_BINDINGS_HPP_ */

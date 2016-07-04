@@ -30,14 +30,8 @@ namespace vkts
 {
 
 BSDFMaterial::BSDFMaterial() :
-    IBSDFMaterial(), name(), fragmentShader(nullptr), attributes(VKTS_VERTEX_BUFFER_TYPE_VERTEX | VKTS_VERTEX_BUFFER_TYPE_NORMAL), allTextures(), descriptorPool(), descriptorSetLayout(), descriptorSets(), pipelineLayout()
+    IBSDFMaterial(), Material(), name(), fragmentShader(nullptr), attributes(VKTS_VERTEX_BUFFER_TYPE_VERTEX | VKTS_VERTEX_BUFFER_TYPE_NORMAL), allTextures(), descriptorSetLayout(), pipelineLayout()
 {
-}
-
-BSDFMaterial::BSDFMaterial(const BSDFMaterial& other) :
-    IBSDFMaterial(), name(other.name), fragmentShader(other.fragmentShader), attributes(other.attributes), allTextures(other.allTextures), descriptorPool(), descriptorSetLayout(other.descriptorSetLayout), descriptorSets(), pipelineLayout(other.pipelineLayout)
-{
-	// TODO: Clone, as done in phong material.
 }
 
 BSDFMaterial::~BSDFMaterial()
@@ -82,6 +76,11 @@ void BSDFMaterial::setAttributes(const VkTsVertexBufferType attributes)
 
 void BSDFMaterial::addTexture(const ITextureSP& texture)
 {
+    if (texture.get())
+    {
+        updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_BSDF_FIRST + (uint32_t)allTextures.size(), texture->getSampler()->getSampler(), texture->getImageView()->getImageView(), texture->getMemoryImage()->getImage()->getImageLayout());
+    }
+
     allTextures.append(texture);
 }
 
@@ -142,7 +141,58 @@ void BSDFMaterial::setPipelineLayout(const IPipelineLayoutSP& pipelineLayout)
 
 void BSDFMaterial::updateDescriptorSetsRecursive(const std::string& nodeName, const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets)
 {
-    // TODO: Implement.
+    auto currentDescriptorSets = createDescriptorSetsByName(nodeName);
+
+    if (!currentDescriptorSets.get())
+    {
+        return;
+    }
+
+    //
+
+    VkWriteDescriptorSet finalWriteDescriptorSets[VKTS_BINDING_UNIFORM_BSDF_BINDING_COUNT];
+    uint32_t finalWriteDescriptorSetsCount = 0;
+
+    for (uint32_t i = 0; i < allWriteDescriptorSetsCount; i++)
+    {
+        for (uint32_t k = 0; k < VKTS_BINDING_UNIFORM_BSDF_BINDING_COUNT; k++)
+        {
+        	// Assign used descriptor set.
+			if (allWriteDescriptorSets[i].dstBinding == writeDescriptorSets[k].dstBinding && writeDescriptorSets[k].sType == VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET)
+			{
+				allWriteDescriptorSets[i] = writeDescriptorSets[k];
+			}
+        }
+
+        // Gather valid descriptor sets.
+    	if (allWriteDescriptorSets[i].sType == VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET)
+    	{
+    		finalWriteDescriptorSets[finalWriteDescriptorSetsCount] = allWriteDescriptorSets[i];
+
+    		finalWriteDescriptorSets[finalWriteDescriptorSetsCount].dstSet = currentDescriptorSets->getDescriptorSets()[0];
+
+			finalWriteDescriptorSetsCount++;
+    	}
+    }
+
+    currentDescriptorSets->updateDescriptorSets(finalWriteDescriptorSetsCount, finalWriteDescriptorSets, 0, nullptr);
+}
+
+void BSDFMaterial::bindDescriptorSets(const std::string& nodeName, const ICommandBuffersSP& cmdBuffer, const VkPipelineLayout layout, const uint32_t bufferIndex) const
+{
+    if (!cmdBuffer.get())
+    {
+        return;
+    }
+
+    auto currentDescriptorSets = getDescriptorSetsByName(nodeName);
+
+    if (!currentDescriptorSets.get())
+    {
+        return;
+    }
+
+    vkCmdBindDescriptorSets(cmdBuffer->getCommandBuffer(bufferIndex), VK_PIPELINE_BIND_POINT_GRAPHICS, layout, 0, 1, &currentDescriptorSets->getDescriptorSets()[0], 0, nullptr);
 }
 
 void BSDFMaterial::bindDrawIndexedRecursive(const std::string& nodeName, const ICommandBuffersSP& cmdBuffer, const IGraphicsPipelineSP& graphicsPipeline, const overwrite* renderOverwrite, const uint32_t bufferIndex) const
@@ -165,16 +215,7 @@ void BSDFMaterial::bindDrawIndexedRecursive(const std::string& nodeName, const I
 
 	vkCmdBindPipeline(cmdBuffer->getCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline->getPipeline());
 
-    // TODO: Implement, as done in phong.
-}
-
-//
-// ICloneable
-//
-
-IBSDFMaterialSP BSDFMaterial::clone() const
-{
-    return IBSDFMaterialSP(new BSDFMaterial(*this));
+    bindDescriptorSets(nodeName, cmdBuffer, graphicsPipeline->getLayout(), bufferIndex);
 }
 
 //
@@ -183,7 +224,39 @@ IBSDFMaterialSP BSDFMaterial::clone() const
 
 void BSDFMaterial::destroy()
 {
-	// TODO: Destroy members.
+	if (fragmentShader.get())
+	{
+		fragmentShader->destroy();
+	}
+
+	for (size_t i = 0; i < allTextures.size(); i++)
+	{
+		allTextures[i]->destroy();
+	}
+
+	if (descriptorSets.get())
+	{
+		descriptorSets->destroy();
+	}
+
+	if (descriptorPool.get())
+	{
+		descriptorPool->destroy();
+	}
+
+	if (descriptorSetLayout.get())
+	{
+		descriptorSetLayout->destroy();
+	}
+
+	if (pipelineLayout.get())
+	{
+		pipelineLayout->destroy();
+	}
+
+	//
+
+	Material::destroy();
 }
 
 } /* namespace vkts */

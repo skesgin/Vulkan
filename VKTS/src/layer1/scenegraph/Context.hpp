@@ -61,7 +61,6 @@ private:
     SmartPointerMap<std::string, IChannelSP> allChannels;
 
     SmartPointerMap<std::string, IBSDFMaterialSP> allBSDFMaterials;
-    mutable std::vector<std::string> allUsedBSDFMaterials;
 
     SmartPointerMap<std::string, IPhongMaterialSP> allPhongMaterials;
     mutable std::vector<std::string> allUsedPhongMaterials;

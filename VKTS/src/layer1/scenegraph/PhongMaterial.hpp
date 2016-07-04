@@ -29,10 +29,12 @@
 
 #include <vkts/vkts.hpp>
 
+#include "Material.hpp"
+
 namespace vkts
 {
 
-class PhongMaterial: public IPhongMaterial
+class PhongMaterial: public IPhongMaterial, Material
 {
 
 protected:
@@ -56,20 +58,6 @@ protected:
     ITextureSP specularShininess;
 
     VkBool32 transparent;
-
-    IDescriptorPoolSP descriptorPool;
-    IDescriptorSetsSP descriptorSets;
-    VkDescriptorImageInfo descriptorImageInfos[VKTS_BINDING_UNIFORM_PHONG_BINDING_COUNT];
-    VkWriteDescriptorSet writeDescriptorSets[VKTS_BINDING_UNIFORM_PHONG_BINDING_COUNT];
-    std::string nodeName;
-
-    SmartPointerMap<std::string, IDescriptorPoolSP> allDescriptorPools;
-    SmartPointerMap<std::string, IDescriptorSetsSP> allDescriptorSets;
-
-    IDescriptorSetsSP createDescriptorSetsByName(const std::string& nodeName);
-    IDescriptorSetsSP getDescriptorSetsByName(const std::string& nodeName) const;
-
-    void updateDescriptorImageInfo(const uint32_t colorIndex, const VkSampler sampler, const VkImageView imageView, const VkImageLayout imageLayout);
 
 public:
 

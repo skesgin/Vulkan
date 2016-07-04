@@ -24,22 +24,48 @@
  * THE SOFTWARE.
  */
 
-#ifndef VKTS_FN_RANDOM_HPP_
-#define VKTS_FN_RANDOM_HPP_
+#ifndef VKTS_MATERIAL_HPP_
+#define VKTS_MATERIAL_HPP_
 
 #include <vkts/vkts.hpp>
 
 namespace vkts
 {
 
-VKTS_APICALL void VKTS_APIENTRY randomSetSeed(const uint32_t seed);
+class Material
+{
 
-VKTS_APICALL float VKTS_APIENTRY randomUniform(const float start, const float end);
+protected:
 
-VKTS_APICALL float VKTS_APIENTRY randomNormal(const float mean, const float standardDeviation);
+    IDescriptorPoolSP descriptorPool;
+    IDescriptorSetsSP descriptorSets;
+    VkDescriptorImageInfo descriptorImageInfos[VKTS_BINDING_UNIFORM_MATERIAL_TOTAL_BINDING_COUNT];
+    VkWriteDescriptorSet writeDescriptorSets[VKTS_BINDING_UNIFORM_MATERIAL_TOTAL_BINDING_COUNT];
+    std::string nodeName;
 
-VKTS_APICALL glm::vec2 VKTS_APIENTRY randomHammersley(const uint32_t sample, const uint8_t m);
+    SmartPointerMap<std::string, IDescriptorPoolSP> allDescriptorPools;
+    SmartPointerMap<std::string, IDescriptorSetsSP> allDescriptorSets;
 
-}
+    IDescriptorSetsSP createDescriptorSetsByName(const std::string& nodeName);
+    IDescriptorSetsSP getDescriptorSetsByName(const std::string& nodeName) const;
 
-#endif /* VKTS_FN_RANDOM_HPP_ */
+    void updateDescriptorImageInfo(const uint32_t colorIndex, const VkSampler sampler, const VkImageView imageView, const VkImageLayout imageLayout);
+
+public:
+
+    Material();
+    Material(const Material& other);
+    Material(Material&& other) = delete;
+    virtual ~Material();
+
+    Material& operator =(const Material& other) = delete;
+
+    Material& operator =(Material && other) = delete;
+
+    virtual void destroy();
+
+};
+
+} /* namespace vkts */
+
+#endif /* VKTS_MATERIAL_HPP_ */

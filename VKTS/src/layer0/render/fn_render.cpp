@@ -31,7 +31,7 @@ namespace vkts
 
 float VKTS_APIENTRY renderGetGeometricShadowingSchlickBeckmann(const float NdotV, const float k)
 {
-	return NdotV / (NdotV * (1.0 - k) + k);
+	return NdotV / (NdotV * (1.0f - k) + k);
 }
 
 float VKTS_APIENTRY renderGetGeometricShadowingSmith(const float NdotL, const float NdotV, const float k)
@@ -148,10 +148,10 @@ glm::vec2 VKTS_APIENTRY renderIntegrateCookTorrance(const glm::vec2& randomPoint
 			return glm::vec2(0.0f, 0.0f);
 		}
 
-		float fresnelFactor = pow(1.0 - VdotH, 5.0);
+		float fresnelFactor = powf(1.0f - VdotH, 5.0f);
 
 		// Scale to F0 (first sum)
-		float scaleF0 = (1.0 - fresnelFactor) * colorFactor;
+		float scaleF0 = (1.0f - fresnelFactor) * colorFactor;
 
 		// Bias to F0 (second sum)
 		float biasF0 = fresnelFactor * colorFactor;

@@ -29,159 +29,14 @@
 namespace vkts
 {
 
-IDescriptorSetsSP PhongMaterial::createDescriptorSetsByName(const std::string& nodeName)
-{
-	if (allDescriptorSets.contains(nodeName))
-	{
-		return allDescriptorSets[nodeName];
-	}
-
-	//
-
-	if (this->nodeName == "")
-	{
-		this->nodeName = nodeName;
-
-		allDescriptorPools[nodeName] = descriptorPool;
-
-		allDescriptorSets[nodeName] = descriptorSets;
-
-		return descriptorSets;
-	}
-
-	//
-
-	auto currentDescriptorPool = descriptorPoolCreate(descriptorPool->getDevice(), descriptorPool->getFlags(), descriptorPool->getMaxSets(), descriptorPool->getPoolSizeCount(), descriptorPool->getPoolSizes());
-
-    if (!currentDescriptorPool.get())
-    {
-        return IDescriptorSetsSP();
-    }
-
-	auto currentDescriptorSets = descriptorSetsCreate(currentDescriptorPool->getDevice(), currentDescriptorPool->getDescriptorPool(), descriptorSets->getDescriptorSetCount(), descriptorSets->getSetLayouts());
-
-    if (!currentDescriptorSets.get())
-    {
-        return IDescriptorSetsSP();
-    }
-
-    allDescriptorPools[nodeName] = currentDescriptorPool;
-
-    allDescriptorSets[nodeName] = currentDescriptorSets;
-
-    //
-
-    return allDescriptorSets[nodeName];
-}
-
-IDescriptorSetsSP PhongMaterial::getDescriptorSetsByName(const std::string& nodeName) const
-{
-	if (allDescriptorSets.contains(nodeName))
-	{
-		return allDescriptorSets[nodeName];
-	}
-
-	return IDescriptorSetsSP();
-}
-
-void PhongMaterial::updateDescriptorImageInfo(const uint32_t colorIndex, const VkSampler sampler, const VkImageView imageView, const VkImageLayout imageLayout)
-{
-    if (colorIndex >= VKTS_BINDING_UNIFORM_PHONG_BINDING_COUNT)
-    {
-        return;
-    }
-
-    memset(&descriptorImageInfos[colorIndex], 0, sizeof(VkDescriptorImageInfo));
-
-    descriptorImageInfos[colorIndex].sampler = sampler;
-    descriptorImageInfos[colorIndex].imageView = imageView;
-    descriptorImageInfos[colorIndex].imageLayout = imageLayout;
-
-    memset(&writeDescriptorSets[colorIndex], 0, sizeof(VkWriteDescriptorSet));
-
-    writeDescriptorSets[colorIndex].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    writeDescriptorSets[colorIndex].dstSet = VK_NULL_HANDLE; // Defined later.
-    writeDescriptorSets[colorIndex].dstBinding = VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT + colorIndex;
-    writeDescriptorSets[colorIndex].dstArrayElement = 0;
-    writeDescriptorSets[colorIndex].descriptorCount = 1;
-    writeDescriptorSets[colorIndex].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    writeDescriptorSets[colorIndex].pImageInfo = &descriptorImageInfos[colorIndex];
-    writeDescriptorSets[colorIndex].pBufferInfo = nullptr;
-    writeDescriptorSets[colorIndex].pTexelBufferView = nullptr;
-}
-
 PhongMaterial::PhongMaterial() :
-    IPhongMaterial(), name(), alpha(), displacement(), normal(), ambient(), emissive(), diffuse(), specular(), specularShininess(), transparent(VK_FALSE), descriptorPool(), descriptorSets(), nodeName(), allDescriptorPools(), allDescriptorSets()
+    IPhongMaterial(), Material(), name(), alpha(), displacement(), normal(), ambient(), emissive(), diffuse(), specular(), specularShininess(), transparent(VK_FALSE)
 {
-	memset(descriptorImageInfos, 0, sizeof(descriptorImageInfos));
-	memset(writeDescriptorSets, 0, sizeof(writeDescriptorSets));
 }
 
 PhongMaterial::PhongMaterial(const PhongMaterial& other) :
-    IPhongMaterial(), name(other.name), alpha(other.alpha), displacement(other.displacement), normal(other.normal), ambient(other.ambient), emissive(other.emissive), diffuse(other.diffuse), specular(other.specular), specularShininess(other.specularShininess), transparent(other.transparent), descriptorPool(), descriptorSets(), nodeName(), allDescriptorPools(), allDescriptorSets()
+    IPhongMaterial(), Material(other), name(other.name), alpha(other.alpha), displacement(other.displacement), normal(other.normal), ambient(other.ambient), emissive(other.emissive), diffuse(other.diffuse), specular(other.specular), specularShininess(other.specularShininess), transparent(other.transparent)
 {
-	memset(descriptorImageInfos, 0, sizeof(descriptorImageInfos));
-	memset(writeDescriptorSets, 0, sizeof(writeDescriptorSets));
-
-    // Textures cannot be cloned, just replaced.
-
-    descriptorPool = descriptorPoolCreate(other.descriptorPool->getDevice(), other.descriptorPool->getFlags(), other.descriptorPool->getMaxSets(), other.descriptorPool->getPoolSizeCount(), other.descriptorPool->getPoolSizes());
-
-    if (!descriptorPool.get())
-    {
-        destroy();
-
-        return;
-    }
-
-    descriptorSets = descriptorSetsCreate(descriptorPool->getDevice(), descriptorPool->getDescriptorPool(), other.descriptorSets->getDescriptorSetCount(), other.descriptorSets->getSetLayouts());
-
-    if (!descriptorSets.get())
-    {
-    	destroy();
-
-        return;
-    }
-
-    //
-
-    if (other.allDescriptorPools.size() != other.allDescriptorSets.size())
-    {
-    	destroy();
-
-        return;
-    }
-
-
-    for (size_t i = 0; i < other.allDescriptorPools.size(); i++)
-    {
-    	auto currentDescriptorPool = descriptorPoolCreate(other.allDescriptorPools.valueAt(i)->getDevice(), other.allDescriptorPools.valueAt(i)->getFlags(), other.allDescriptorPools.valueAt(i)->getMaxSets(), other.allDescriptorPools.valueAt(i)->getPoolSizeCount(), other.allDescriptorPools.valueAt(i)->getPoolSizes());
-
-        if (!currentDescriptorPool.get())
-        {
-        	destroy();
-
-            return;
-        }
-
-        allDescriptorPools[other.allDescriptorPools.keyAt(i)] = currentDescriptorPool;
-
-        //
-
-        auto currentDescriptorSets = descriptorSetsCreate(currentDescriptorPool->getDevice(), currentDescriptorPool->getDescriptorPool(), other.allDescriptorSets.valueAt(i)->getDescriptorSetCount(), other.allDescriptorSets.valueAt(i)->getSetLayouts());
-
-        if (!currentDescriptorSets.get())
-        {
-        	destroy();
-
-            return;
-        }
-
-        allDescriptorSets[other.allDescriptorSets.keyAt(i)] = currentDescriptorSets;
-    }
-
-    //
-
     updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_PHONG_EMISSIVE - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT, this->emissive->getSampler()->getSampler(), this->emissive->getImageView()->getImageView(), this->emissive->getMemoryImage()->getImage()->getImageLayout());
 
     updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_PHONG_ALPHA - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT, this->alpha->getSampler()->getSampler(), this->alpha->getImageView()->getImageView(), this->alpha->getMemoryImage()->getImage()->getImageLayout());
@@ -509,24 +364,7 @@ void PhongMaterial::destroy()
 
     //
 
-    descriptorSets = IDescriptorSetsSP();
-
-    descriptorPool = IDescriptorPoolSP();
-
-    memset(&descriptorImageInfos, 0, sizeof(descriptorImageInfos));
-    memset(&writeDescriptorSets, 0, sizeof(writeDescriptorSets));
-
-    for (size_t i = 0; i < allDescriptorSets.size(); i++)
-    {
-        allDescriptorSets.valueAt(i)->destroy();
-    }
-    allDescriptorSets.clear();
-
-    for (size_t i = 0; i < allDescriptorPools.size(); i++)
-    {
-    	allDescriptorPools.valueAt(i)->destroy();
-    }
-    allDescriptorPools.clear();
+    Material::destroy();
 }
 
 } /* namespace vkts */

@@ -81,7 +81,8 @@ private:
     VkDescriptorBufferInfo descriptorBufferInfos[1];
     VkDescriptorImageInfo descriptorImageInfos[1];
 
-    VkWriteDescriptorSet writeDescriptorSets[VKTS_ENVIRONMENT_DESCRIPTOR_SET_COUNT];
+    VkWriteDescriptorSet writeDescriptorSets[VKTS_BINDING_UNIFORM_BSDF_TOTAL_BINDING_COUNT];
+    VkWriteDescriptorSet environmentWriteDescriptorSets[VKTS_ENVIRONMENT_DESCRIPTOR_SET_COUNT];
 
 	vkts::IBufferObjectSP vertexViewProjectionUniformBuffer;
 
