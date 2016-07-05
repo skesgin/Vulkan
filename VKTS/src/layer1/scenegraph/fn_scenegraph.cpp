@@ -2532,7 +2532,7 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
 					}
 
 
-					VkTsVertexBufferType vertexBufferType = subMesh->getVertexBufferType() & subMesh->getBSDFMaterial()->getAttributes();
+					vertexBufferType = subMesh->getVertexBufferType() & subMesh->getBSDFMaterial()->getAttributes();
 
 					if (vertexBufferType != subMesh->getBSDFMaterial()->getAttributes())
 					{
@@ -2560,7 +2560,7 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
 
 
 					gp.getVertexInputBindingDescription(0).binding = 0;
-					gp.getVertexInputBindingDescription(0).stride = commonGetStrideInBytes(vertexBufferType);
+					gp.getVertexInputBindingDescription(0).stride = commonGetStrideInBytes(subMesh->getVertexBufferType());
 					gp.getVertexInputBindingDescription(0).inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
 
@@ -2569,7 +2569,7 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
 					gp.getVertexInputAttributeDescription(location).location = location;
 					gp.getVertexInputAttributeDescription(location).binding = 0;
 					gp.getVertexInputAttributeDescription(location).format = VK_FORMAT_R32G32B32A32_SFLOAT;
-					gp.getVertexInputAttributeDescription(location).offset = commonGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_VERTEX, vertexBufferType);
+					gp.getVertexInputAttributeDescription(location).offset = commonGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_VERTEX, subMesh->getVertexBufferType());
 
 					if ((vertexBufferType & VKTS_VERTEX_BUFFER_TYPE_NORMAL) == VKTS_VERTEX_BUFFER_TYPE_NORMAL)
 					{
@@ -2578,7 +2578,7 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
 						gp.getVertexInputAttributeDescription(location).location = location;
 						gp.getVertexInputAttributeDescription(location).binding = 0;
 						gp.getVertexInputAttributeDescription(location).format = VK_FORMAT_R32G32B32_SFLOAT;
-						gp.getVertexInputAttributeDescription(location).offset = commonGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_NORMAL, vertexBufferType);
+						gp.getVertexInputAttributeDescription(location).offset = commonGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_NORMAL, subMesh->getVertexBufferType());
 
 						if ((vertexBufferType & VKTS_VERTEX_BUFFER_TYPE_TANGENTS) == VKTS_VERTEX_BUFFER_TYPE_TANGENTS)
 						{
@@ -2587,14 +2587,14 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
 							gp.getVertexInputAttributeDescription(location).location = location;
 							gp.getVertexInputAttributeDescription(location).binding = 0;
 							gp.getVertexInputAttributeDescription(location).format = VK_FORMAT_R32G32B32_SFLOAT;
-							gp.getVertexInputAttributeDescription(location).offset = commonGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_BITANGENT, vertexBufferType);
+							gp.getVertexInputAttributeDescription(location).offset = commonGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_BITANGENT, subMesh->getVertexBufferType());
 
 							location++;
 
 							gp.getVertexInputAttributeDescription(location).location = location;
 							gp.getVertexInputAttributeDescription(location).binding = 0;
 							gp.getVertexInputAttributeDescription(location).format = VK_FORMAT_R32G32B32_SFLOAT;
-							gp.getVertexInputAttributeDescription(location).offset = commonGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_TANGENT, vertexBufferType);
+							gp.getVertexInputAttributeDescription(location).offset = commonGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_TANGENT, subMesh->getVertexBufferType());
 						}
 					}
 
@@ -2605,7 +2605,7 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
 						gp.getVertexInputAttributeDescription(location).location = location;
 						gp.getVertexInputAttributeDescription(location).binding = 0;
 						gp.getVertexInputAttributeDescription(location).format = VK_FORMAT_R32G32_SFLOAT;
-						gp.getVertexInputAttributeDescription(location).offset = commonGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_TEXCOORD, vertexBufferType);
+						gp.getVertexInputAttributeDescription(location).offset = commonGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_TEXCOORD, subMesh->getVertexBufferType());
 					}
 
 
@@ -2616,35 +2616,35 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
 						gp.getVertexInputAttributeDescription(location).location = location;
 						gp.getVertexInputAttributeDescription(location).binding = 0;
 						gp.getVertexInputAttributeDescription(location).format = VK_FORMAT_R32G32B32A32_SFLOAT;
-						gp.getVertexInputAttributeDescription(location).offset = commonGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_BONE_INDICES0, vertexBufferType);
+						gp.getVertexInputAttributeDescription(location).offset = commonGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_BONE_INDICES0, subMesh->getVertexBufferType());
 
 						location++;
 
 						gp.getVertexInputAttributeDescription(location).location = location;
 						gp.getVertexInputAttributeDescription(location).binding = 0;
 						gp.getVertexInputAttributeDescription(location).format = VK_FORMAT_R32G32B32A32_SFLOAT;
-						gp.getVertexInputAttributeDescription(location).offset = commonGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_BONE_INDICES1, vertexBufferType);
+						gp.getVertexInputAttributeDescription(location).offset = commonGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_BONE_INDICES1, subMesh->getVertexBufferType());
 
 						location++;
 
 						gp.getVertexInputAttributeDescription(location).location = location;
 						gp.getVertexInputAttributeDescription(location).binding = 0;
 						gp.getVertexInputAttributeDescription(location).format = VK_FORMAT_R32G32B32A32_SFLOAT;
-						gp.getVertexInputAttributeDescription(location).offset = commonGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_BONE_WEIGHTS0, vertexBufferType);
+						gp.getVertexInputAttributeDescription(location).offset = commonGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_BONE_WEIGHTS0, subMesh->getVertexBufferType());
 
 						location++;
 
 						gp.getVertexInputAttributeDescription(location).location = location;
 						gp.getVertexInputAttributeDescription(location).binding = 0;
 						gp.getVertexInputAttributeDescription(location).format = VK_FORMAT_R32G32B32A32_SFLOAT;
-						gp.getVertexInputAttributeDescription(location).offset = commonGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_BONE_WEIGHTS1, vertexBufferType);
+						gp.getVertexInputAttributeDescription(location).offset = commonGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_BONE_WEIGHTS1, subMesh->getVertexBufferType());
 
 						location++;
 
 						gp.getVertexInputAttributeDescription(location).location = location;
 						gp.getVertexInputAttributeDescription(location).binding = 0;
 						gp.getVertexInputAttributeDescription(location).format = VK_FORMAT_R32_SFLOAT;
-						gp.getVertexInputAttributeDescription(location).offset = commonGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_BONE_NUMBERS, vertexBufferType);
+						gp.getVertexInputAttributeDescription(location).offset = commonGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_BONE_NUMBERS, subMesh->getVertexBufferType());
 					}
 
 					//
@@ -2665,12 +2665,16 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
 
 
 					gp.getPipelineMultisampleStateCreateInfo();
-					gp.getPipelineDepthStencilStateCreateInfo();
 
+					gp.getPipelineDepthStencilStateCreateInfo().depthTestEnable = VK_TRUE;
+					gp.getPipelineDepthStencilStateCreateInfo().depthWriteEnable = VK_TRUE;
+					gp.getPipelineDepthStencilStateCreateInfo().depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
 
-					gp.getPipelineColorBlendAttachmentState(0).blendEnable = VK_FALSE;
-					gp.getPipelineColorBlendAttachmentState(0).colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-
+					for (uint32_t i = 0; i < 5; i++)
+					{
+						gp.getPipelineColorBlendAttachmentState(i).blendEnable = VK_FALSE;
+						gp.getPipelineColorBlendAttachmentState(i).colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+					}
 
 					gp.getDynamicState(0) = VK_DYNAMIC_STATE_VIEWPORT;
 					gp.getDynamicState(1) = VK_DYNAMIC_STATE_SCISSOR;

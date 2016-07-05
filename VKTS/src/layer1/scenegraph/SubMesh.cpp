@@ -358,7 +358,7 @@ void SubMesh::bindDrawIndexedRecursive(const std::string& nodeName, const IComma
     if (bsdfMaterial.get())
     {
     	// Pipeline is bound inside the material.
-    	bsdfMaterial->bindDrawIndexedRecursive(nodeName,cmdBuffer, IGraphicsPipelineSP(), renderOverwrite, bufferIndex);
+    	bsdfMaterial->bindDrawIndexedRecursive(nodeName,cmdBuffer, graphicsPipeline, renderOverwrite, bufferIndex);
     }
     else if (phongMaterial.get())
     {

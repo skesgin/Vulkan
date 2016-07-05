@@ -37,23 +37,23 @@ PhongMaterial::PhongMaterial() :
 PhongMaterial::PhongMaterial(const PhongMaterial& other) :
     IPhongMaterial(), Material(other), name(other.name), alpha(other.alpha), displacement(other.displacement), normal(other.normal), ambient(other.ambient), emissive(other.emissive), diffuse(other.diffuse), specular(other.specular), specularShininess(other.specularShininess), transparent(other.transparent)
 {
-    updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_PHONG_EMISSIVE - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT, this->emissive->getSampler()->getSampler(), this->emissive->getImageView()->getImageView(), this->emissive->getMemoryImage()->getImage()->getImageLayout());
+    updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_PHONG_EMISSIVE - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT, VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT, this->emissive->getSampler()->getSampler(), this->emissive->getImageView()->getImageView(), this->emissive->getMemoryImage()->getImage()->getImageLayout());
 
-    updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_PHONG_ALPHA - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT, this->alpha->getSampler()->getSampler(), this->alpha->getImageView()->getImageView(), this->alpha->getMemoryImage()->getImage()->getImageLayout());
+    updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_PHONG_ALPHA - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT, VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT, this->alpha->getSampler()->getSampler(), this->alpha->getImageView()->getImageView(), this->alpha->getMemoryImage()->getImage()->getImageLayout());
 
-    updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT, this->displacement->getSampler()->getSampler(), this->displacement->getImageView()->getImageView(), this->displacement->getMemoryImage()->getImage()->getImageLayout());
+    updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT, VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT, this->displacement->getSampler()->getSampler(), this->displacement->getImageView()->getImageView(), this->displacement->getMemoryImage()->getImage()->getImageLayout());
 
-    updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_PHONG_NORMAL - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT, this->normal->getSampler()->getSampler(), this->normal->getImageView()->getImageView(), this->normal->getMemoryImage()->getImage()->getImageLayout());
+    updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_PHONG_NORMAL - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT, VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT, this->normal->getSampler()->getSampler(), this->normal->getImageView()->getImageView(), this->normal->getMemoryImage()->getImage()->getImageLayout());
 
     //
 
-    updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_PHONG_AMBIENT - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT, this->ambient->getSampler()->getSampler(), this->ambient->getImageView()->getImageView(), this->ambient->getMemoryImage()->getImage()->getImageLayout());
+    updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_PHONG_AMBIENT - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT, VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT, this->ambient->getSampler()->getSampler(), this->ambient->getImageView()->getImageView(), this->ambient->getMemoryImage()->getImage()->getImageLayout());
 
-    updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DIFFUSE - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT, this->diffuse->getSampler()->getSampler(), this->diffuse->getImageView()->getImageView(), this->diffuse->getMemoryImage()->getImage()->getImageLayout());
+    updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DIFFUSE - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT, VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT, this->diffuse->getSampler()->getSampler(), this->diffuse->getImageView()->getImageView(), this->diffuse->getMemoryImage()->getImage()->getImageLayout());
 
-    updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_PHONG_SPECULAR - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT, this->specular->getSampler()->getSampler(), this->specular->getImageView()->getImageView(), this->specular->getMemoryImage()->getImage()->getImageLayout());
+    updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_PHONG_SPECULAR - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT, VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT, this->specular->getSampler()->getSampler(), this->specular->getImageView()->getImageView(), this->specular->getMemoryImage()->getImage()->getImageLayout());
 
-    updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_PHONG_SPECULAR_SHININESS - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT, this->specularShininess->getSampler()->getSampler(), this->specularShininess->getImageView()->getImageView(), this->specularShininess->getMemoryImage()->getImage()->getImageLayout());
+    updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_PHONG_SPECULAR_SHININESS - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT, VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT, this->specularShininess->getSampler()->getSampler(), this->specularShininess->getImageView()->getImageView(), this->specularShininess->getMemoryImage()->getImage()->getImageLayout());
 }
 
 PhongMaterial::~PhongMaterial()
@@ -88,7 +88,7 @@ void PhongMaterial::setAlpha(const ITextureSP& alpha)
 
     if (this->alpha.get())
     {
-        updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_PHONG_ALPHA - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT, this->alpha->getSampler()->getSampler(), this->alpha->getImageView()->getImageView(), this->alpha->getMemoryImage()->getImage()->getImageLayout());
+        updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_PHONG_ALPHA - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT, VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT, this->alpha->getSampler()->getSampler(), this->alpha->getImageView()->getImageView(), this->alpha->getMemoryImage()->getImage()->getImageLayout());
     }
 }
 
@@ -103,7 +103,7 @@ void PhongMaterial::setDisplacement(const ITextureSP& displacement)
 
     if (this->displacement.get())
     {
-        updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT, this->displacement->getSampler()->getSampler(), this->displacement->getImageView()->getImageView(), this->displacement->getMemoryImage()->getImage()->getImageLayout());
+        updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT, VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT, this->displacement->getSampler()->getSampler(), this->displacement->getImageView()->getImageView(), this->displacement->getMemoryImage()->getImage()->getImageLayout());
     }
 }
 
@@ -118,7 +118,7 @@ void PhongMaterial::setNormal(const ITextureSP& normal)
 
     if (this->normal.get())
     {
-        updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_PHONG_NORMAL - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT, this->normal->getSampler()->getSampler(), this->normal->getImageView()->getImageView(), this->normal->getMemoryImage()->getImage()->getImageLayout());
+        updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_PHONG_NORMAL - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT, VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT, this->normal->getSampler()->getSampler(), this->normal->getImageView()->getImageView(), this->normal->getMemoryImage()->getImage()->getImageLayout());
     }
 }
 
@@ -135,7 +135,7 @@ void PhongMaterial::setEmissive(const ITextureSP& emissive)
 
     if (this->emissive.get())
     {
-        updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_PHONG_EMISSIVE - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT, this->emissive->getSampler()->getSampler(), this->emissive->getImageView()->getImageView(), this->emissive->getMemoryImage()->getImage()->getImageLayout());
+        updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_PHONG_EMISSIVE - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT, VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT, this->emissive->getSampler()->getSampler(), this->emissive->getImageView()->getImageView(), this->emissive->getMemoryImage()->getImage()->getImageLayout());
     }
 }
 
@@ -150,7 +150,7 @@ void PhongMaterial::setAmbient(const ITextureSP& ambient)
 
     if (this->ambient.get())
     {
-        updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_PHONG_AMBIENT - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT, this->ambient->getSampler()->getSampler(), this->ambient->getImageView()->getImageView(), this->ambient->getMemoryImage()->getImage()->getImageLayout());
+        updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_PHONG_AMBIENT - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT, VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT, this->ambient->getSampler()->getSampler(), this->ambient->getImageView()->getImageView(), this->ambient->getMemoryImage()->getImage()->getImageLayout());
     }
 }
 
@@ -165,7 +165,7 @@ void PhongMaterial::setDiffuse(const ITextureSP& diffuse)
 
     if (this->diffuse.get())
     {
-        updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DIFFUSE - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT, this->diffuse->getSampler()->getSampler(), this->diffuse->getImageView()->getImageView(), this->diffuse->getMemoryImage()->getImage()->getImageLayout());
+        updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DIFFUSE - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT, VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT, this->diffuse->getSampler()->getSampler(), this->diffuse->getImageView()->getImageView(), this->diffuse->getMemoryImage()->getImage()->getImageLayout());
     }
 }
 
@@ -180,7 +180,7 @@ void PhongMaterial::setSpecular(const ITextureSP& specular)
 
     if (this->specular.get())
     {
-        updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_PHONG_SPECULAR - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT, this->specular->getSampler()->getSampler(), this->specular->getImageView()->getImageView(), this->specular->getMemoryImage()->getImage()->getImageLayout());
+        updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_PHONG_SPECULAR - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT, VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT, this->specular->getSampler()->getSampler(), this->specular->getImageView()->getImageView(), this->specular->getMemoryImage()->getImage()->getImageLayout());
     }
 }
 
@@ -195,7 +195,7 @@ void PhongMaterial::setSpecularShininess(const ITextureSP& specularShininess)
 
     if (this->specularShininess.get())
     {
-        updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_PHONG_SPECULAR_SHININESS - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT, this->specularShininess->getSampler()->getSampler(), this->specularShininess->getImageView()->getImageView(), this->specularShininess->getMemoryImage()->getImage()->getImageLayout());
+        updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_PHONG_SPECULAR_SHININESS - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT, VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT, this->specularShininess->getSampler()->getSampler(), this->specularShininess->getImageView()->getImageView(), this->specularShininess->getMemoryImage()->getImage()->getImageLayout());
     }
 }
 

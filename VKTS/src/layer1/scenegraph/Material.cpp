@@ -84,9 +84,9 @@ IDescriptorSetsSP Material::getDescriptorSetsByName(const std::string& nodeName)
 	return IDescriptorSetsSP();
 }
 
-void Material::updateDescriptorImageInfo(const uint32_t colorIndex, const VkSampler sampler, const VkImageView imageView, const VkImageLayout imageLayout)
+void Material::updateDescriptorImageInfo(const uint32_t colorIndex, const uint32_t dstBindingOffset, const VkSampler sampler, const VkImageView imageView, const VkImageLayout imageLayout)
 {
-    if (colorIndex >= VKTS_BINDING_UNIFORM_PHONG_BINDING_COUNT)
+    if (colorIndex >= VKTS_BINDING_UNIFORM_MATERIAL_TOTAL_BINDING_COUNT)
     {
         return;
     }
@@ -101,7 +101,7 @@ void Material::updateDescriptorImageInfo(const uint32_t colorIndex, const VkSamp
 
     writeDescriptorSets[colorIndex].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
     writeDescriptorSets[colorIndex].dstSet = VK_NULL_HANDLE; // Defined later.
-    writeDescriptorSets[colorIndex].dstBinding = VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT + colorIndex;
+    writeDescriptorSets[colorIndex].dstBinding = dstBindingOffset + colorIndex;
     writeDescriptorSets[colorIndex].dstArrayElement = 0;
     writeDescriptorSets[colorIndex].descriptorCount = 1;
     writeDescriptorSets[colorIndex].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;

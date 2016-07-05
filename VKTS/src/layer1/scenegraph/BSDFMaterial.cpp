@@ -78,7 +78,7 @@ void BSDFMaterial::addTexture(const ITextureSP& texture)
 {
     if (texture.get())
     {
-        updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_BSDF_FIRST + (uint32_t)allTextures.size(), texture->getSampler()->getSampler(), texture->getImageView()->getImageView(), texture->getMemoryImage()->getImage()->getImageLayout());
+        updateDescriptorImageInfo((uint32_t)allTextures.size(), VKTS_BINDING_UNIFORM_SAMPLER_BSDF_FIRST, texture->getSampler()->getSampler(), texture->getImageView()->getImageView(), texture->getMemoryImage()->getImage()->getImageLayout());
     }
 
     allTextures.append(texture);
@@ -153,17 +153,10 @@ void BSDFMaterial::updateDescriptorSetsRecursive(const std::string& nodeName, co
     VkWriteDescriptorSet finalWriteDescriptorSets[VKTS_BINDING_UNIFORM_BSDF_BINDING_COUNT];
     uint32_t finalWriteDescriptorSetsCount = 0;
 
+    uint32_t currentTexture = 0;
+
     for (uint32_t i = 0; i < allWriteDescriptorSetsCount; i++)
     {
-        for (uint32_t k = 0; k < VKTS_BINDING_UNIFORM_BSDF_BINDING_COUNT; k++)
-        {
-        	// Assign used descriptor set.
-			if (allWriteDescriptorSets[i].dstBinding == writeDescriptorSets[k].dstBinding && writeDescriptorSets[k].sType == VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET)
-			{
-				allWriteDescriptorSets[i] = writeDescriptorSets[k];
-			}
-        }
-
         // Gather valid descriptor sets.
     	if (allWriteDescriptorSets[i].sType == VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET)
     	{
@@ -171,6 +164,19 @@ void BSDFMaterial::updateDescriptorSetsRecursive(const std::string& nodeName, co
 
     		finalWriteDescriptorSets[finalWriteDescriptorSetsCount].dstSet = currentDescriptorSets->getDescriptorSets()[0];
 
+			finalWriteDescriptorSetsCount++;
+    	}
+    	else
+    	{
+        	if ((size_t)currentTexture == allTextures.size())
+        	{
+        		break;
+        	}
+
+    		finalWriteDescriptorSets[finalWriteDescriptorSetsCount] = writeDescriptorSets[currentTexture];
+    		finalWriteDescriptorSets[finalWriteDescriptorSetsCount].dstSet = currentDescriptorSets->getDescriptorSets()[0];
+
+    		currentTexture++;
 			finalWriteDescriptorSetsCount++;
     	}
     }

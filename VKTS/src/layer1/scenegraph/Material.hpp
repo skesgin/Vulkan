@@ -49,7 +49,7 @@ protected:
     IDescriptorSetsSP createDescriptorSetsByName(const std::string& nodeName);
     IDescriptorSetsSP getDescriptorSetsByName(const std::string& nodeName) const;
 
-    void updateDescriptorImageInfo(const uint32_t colorIndex, const VkSampler sampler, const VkImageView imageView, const VkImageLayout imageLayout);
+    void updateDescriptorImageInfo(const uint32_t colorIndex, const uint32_t dstBindingOffset, const VkSampler sampler, const VkImageView imageView, const VkImageLayout imageLayout);
 
 public:
 

@@ -176,6 +176,10 @@ void Image::getImageMemoryRequirements(VkMemoryRequirements& memoryRequirements)
 
 void Image::getImageSubresourceLayout(VkSubresourceLayout& subresourceLayout, const VkImageSubresource& imageSubresource) const
 {
+	// Reset for undefined cases.
+	subresourceLayout.arrayPitch = 0;
+	subresourceLayout.depthPitch = 0;
+
     vkGetImageSubresourceLayout(device, image, &imageSubresource, &subresourceLayout);
 }
 

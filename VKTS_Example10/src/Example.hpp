@@ -77,21 +77,23 @@ private:
     vkts::ISemaphoreSP imageAcquiredSemaphore;
     vkts::ISemaphoreSP renderingCompleteSemaphore;
 
-	vkts::IDescriptorSetLayoutSP descriptorSetLayout;
+	vkts::IDescriptorSetLayoutSP environmentDescriptorSetLayout;
+    VkDescriptorBufferInfo environmentDescriptorBufferInfos[1];
     VkDescriptorBufferInfo descriptorBufferInfos[1];
-    VkDescriptorImageInfo descriptorImageInfos[1];
+    VkDescriptorImageInfo environmentDescriptorImageInfos[1];
 
     VkWriteDescriptorSet writeDescriptorSets[VKTS_BINDING_UNIFORM_BSDF_TOTAL_BINDING_COUNT];
     VkWriteDescriptorSet environmentWriteDescriptorSets[VKTS_ENVIRONMENT_DESCRIPTOR_SET_COUNT];
 
-	vkts::IBufferObjectSP vertexViewProjectionUniformBuffer;
+    vkts::IBufferObjectSP vertexViewProjectionUniformBuffer;
+	vkts::IBufferObjectSP environmentVertexViewProjectionUniformBuffer;
 
 	vkts::SmartPointerVector<vkts::IShaderModuleSP> allBSDFVertexShaderModules;
 
 	vkts::IShaderModuleSP envVertexShaderModule;
 	vkts::IShaderModuleSP envFragmentShaderModule;
 
-	vkts::IPipelineLayoutSP pipelineLayout;
+	vkts::IPipelineLayoutSP environmentPipelineLayout;
 
     vkts::IFontSP font;
 
@@ -109,11 +111,13 @@ private:
 	vkts::SmartPointerVector<vkts::IGraphicsPipelineSP> allGraphicsPipelines;
 
 	vkts::SmartPointerVector<vkts::IMemoryImageSP> allGBufferTextures;
+	vkts::SmartPointerVector<vkts::IImageViewSP> allGBufferImageViews;
 
     uint32_t swapchainImagesCount;
 
     vkts::SmartPointerVector<vkts::IImageViewSP> swapchainImageView;
 
+    vkts::SmartPointerVector<vkts::IFramebufferSP> gbufferFramebuffer;
     vkts::SmartPointerVector<vkts::IFramebufferSP> framebuffer;
 
     vkts::SmartPointerVector<vkts::ICommandBuffersSP> cmdBuffer;
@@ -134,6 +138,8 @@ private:
 	VkBool32 buildScene(const vkts::ICommandBuffersSP& cmdBuffer);
 
 	VkBool32 buildSwapchainImageView(const int32_t usedBuffer);
+
+	VkBool32 buildGBufferImageView();
 
 	VkBool32 buildGBufferTexture(const vkts::ICommandBuffersSP& cmdBuffer);
 

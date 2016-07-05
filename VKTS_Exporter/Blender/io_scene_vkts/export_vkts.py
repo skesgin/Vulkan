@@ -46,16 +46,16 @@ layout (location = 2) out vec4 ob_glossyColor;             // Glossy color and a
 layout (location = 1) out vec4 ob_diffuseNormalRoughness;  // Diffuse normal and roughness.
 layout (location = 0) out vec4 ob_diffuseColor;            // Diffuse color and alpha.
 
-mat3 translate(vec3 t)
+mat4 translate(vec3 t)
 {
-    return mat3(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, t.x, t.y, t.z);
+    return mat4(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, t.x, t.y, t.z, 1.0);
 }
 
-mat3 rotateRzRyRx(vec3 rotate)
+mat4 rotateRzRyRx(vec3 rotate)
 {
     if (rotate.x == 0.0 && rotate.y == 0.0 && rotate.z == 0.0)
     {
-        return mat3(1.0);
+        return mat4(1.0);
     }
 
     float rz = radians(rotate.z);
@@ -68,12 +68,12 @@ mat3 rotateRzRyRx(vec3 rotate)
     float sz = sin(rz);
     float cz = cos(rz);
 
-    return mat3(cy * cz, cy * sz, -sy, -cx * sz + cz * sx * sy, cx * cz + sx * sy * sz, cy * sx, sz * sx + cx * cz * sy, -cz * sx + cx * sy * sz, cx * cy);
+    return mat4(cy * cz, cy * sz, -sy, 0.0, -cx * sz + cz * sx * sy, cx * cz + sx * sy * sz, cy * sx, 0.0, sz * sx + cx * cz * sy, -cz * sx + cx * sy * sz, cx * cy, 0.0, 0.0, 0.0, 0.0, 1.0);
 }
 
-mat3 scale(vec3 s)
+mat4 scale(vec3 s)
 {
-    return mat3(s.x, 0.0, 0.0, 0.0, s.y, 0.0, 0.0, 0.0, s.z);
+    return mat4(s.x, 0.0, 0.0, 0.0, 0.0, s.y, 0.0, 0.0, 0.0, 0.0, s.z, 0.0, 0.0, 0.0, 0.0, 1.0);
 }
 
 void main()
@@ -139,14 +139,14 @@ texCheckerMain = """#previousMain#
     vec4 %s = %s;
     float %s = %s;
 
-    bool %s = mod(mod(%s.s * %s, 1.0), 2.0) == 0.0;
-    bool %s = mod(mod(%s.t * %s, 1.0), 2.0) == 0.0;
+    bool %s = mod(floor(%s.s * %s), 2.0) == 1.0;
+    bool %s = mod(floor(%s.t * %s), 2.0) == 1.0;
     
     // Out
     vec4 %s = %s;
     float %s = 0.0;
         
-    if ((%s && %s) || (!%s && !%s))
+    if ((%s && !%s) || (!%s && %s))
     {
         %s = %s;
         %s = 1.0;
@@ -226,12 +226,12 @@ mappingMain = """#previousMain#
     // Mapping start
 
     // In
-    vec3 %s = %s;
+    vec4 %s = vec4(%s, 0.0);
 
     %s = %s;
     
     // Out
-    vec3 %s = %s%s%s;
+    vec3 %s = %s%s%s.xyz;
     
     // Mapping end"""
 
@@ -1157,7 +1157,7 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
 
                     #
 
-                    finalValue = "rotateRzRyRx(" + getVec3(currentNode.rotation) + ") * scale(" + getVec3(currentNode.scale) + ")" 
+                    finalValue = "rotateRzRyRx(" + getVec3(currentNode.rotation) + ") * scale(" + getVec3(currentNode.scale) + ")"
 
                     if currentNode.vector_type == 'TEXTURE' or currentNode.vector_type == 'POINT':
                         finalValue = "translate(" + getVec3(currentNode.translation) + ") * "  + finalValue
