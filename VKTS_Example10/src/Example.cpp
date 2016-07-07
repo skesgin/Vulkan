@@ -170,7 +170,20 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 
 	cmdBuffer[usedBuffer]->cmdEndRenderPass();
 
-	// TODO: Add barrier, that GBuffer can be read.
+	//
+	// Barrier, that GBuffer can be read.
+	//
+
+	VkImageSubresourceRange colorSubresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
+
+	for (uint32_t i = 0; i < 5; i++)
+	{
+		allGBufferTextures[i]->getImage()->cmdPipelineBarrier(cmdBuffer[usedBuffer]->getCommandBuffer(), VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, colorSubresourceRange);
+	}
+
+	VkImageSubresourceRange depthSubresourceRange = {VK_IMAGE_ASPECT_DEPTH_BIT, 0, 1, 0, 1};
+
+	allGBufferTextures[5]->getImage()->cmdPipelineBarrier(cmdBuffer[usedBuffer]->getCommandBuffer(), VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, depthSubresourceRange);
 
     //
     // Default pass.
@@ -236,6 +249,17 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
     //
 
     swapchain->cmdPipelineBarrier(cmdBuffer[usedBuffer]->getCommandBuffer(), VK_ACCESS_MEMORY_READ_BIT, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, usedBuffer);
+
+	//
+	// Barrier, that GBuffer can be written.
+	//
+
+	for (uint32_t i = 0; i < 5; i++)
+	{
+		allGBufferTextures[i]->getImage()->cmdPipelineBarrier(cmdBuffer[usedBuffer]->getCommandBuffer(), VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, colorSubresourceRange);
+	}
+
+	allGBufferTextures[5]->getImage()->cmdPipelineBarrier(cmdBuffer[usedBuffer]->getCommandBuffer(), VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, depthSubresourceRange);
 
     //
 
