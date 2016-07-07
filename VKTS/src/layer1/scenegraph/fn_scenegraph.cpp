@@ -2434,7 +2434,7 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
                     IDeviceMemorySP stageDeviceMemory;
                     IBufferSP stageBuffer;
 
-                    auto vertexBuffer = bufferObjectCreate(stageBuffer, stageDeviceMemory, context->getInitialResources(), context->getCommandBuffer(), vertexBinaryBuffer, bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+                    auto vertexBuffer = bufferObjectCreate(stageBuffer, stageDeviceMemory, context->getInitialResources(), context->getCommandBuffer(), vertexBinaryBuffer, bufferCreateInfo, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
                     context->addStageBuffer(stageBuffer);
                     context->addStageDeviceMemory(stageDeviceMemory);
@@ -2478,13 +2478,13 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
 
                     bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
                     bufferCreateInfo.size = indicesBinaryBuffer->getSize();
-                    bufferCreateInfo.usage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
+                    bufferCreateInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
                     bufferCreateInfo.flags = 0;
 
                     IDeviceMemorySP stageDeviceMemory;
                     IBufferSP stageBuffer;
 
-                    auto indicesVertexBuffer = bufferObjectCreate(stageBuffer, stageDeviceMemory, context->getInitialResources(), context->getCommandBuffer(), indicesBinaryBuffer, bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+                    auto indicesVertexBuffer = bufferObjectCreate(stageBuffer, stageDeviceMemory, context->getInitialResources(), context->getCommandBuffer(), indicesBinaryBuffer, bufferCreateInfo, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
                     context->addStageBuffer(stageBuffer);
                     context->addStageDeviceMemory(stageDeviceMemory);

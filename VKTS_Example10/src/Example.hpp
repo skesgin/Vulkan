@@ -47,6 +47,10 @@
 #define VKTS_ENV_VERTEX_SHADER_NAME "shader/SPIR/V/environment.vert.spv"
 #define VKTS_ENV_FRAGMENT_SHADER_NAME "shader/SPIR/V/environment.frag.spv"
 
+#define VKTS_RESOLVE_VERTEX_SHADER_NAME "shader/SPIR/V/texture_ndc.vert.spv"
+#define VKTS_RESOLVE_FRAGMENT_SHADER_NAME "shader/SPIR/V/resolve_bsdf.frag.spv"
+
+
 #define VKTS_SCENE_NAME "material_probes/material_probes.vkts"
 #define VKTS_ENVIRONMENT_SCENE_NAME "primitives/sphere.vkts"
 
@@ -93,6 +97,9 @@ private:
 	vkts::IShaderModuleSP envVertexShaderModule;
 	vkts::IShaderModuleSP envFragmentShaderModule;
 
+	vkts::IShaderModuleSP resolveVertexShaderModule;
+	vkts::IShaderModuleSP resolveFragmentShaderModule;
+
 	vkts::IPipelineLayoutSP environmentPipelineLayout;
 
     vkts::IFontSP font;
@@ -102,6 +109,8 @@ private:
 
 	vkts::IContextSP environmentSceneContext;
 	vkts::ISceneSP environmentScene;
+
+	vkts::IBufferObjectSP screenPlaneVertexBuffer;
 
 	vkts::ISwapchainSP swapchain;
 

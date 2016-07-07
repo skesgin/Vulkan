@@ -27,7 +27,7 @@
 #include "Example.hpp"
 
 Example::Example(const vkts::IInitialResourcesSP& initialResources, const int32_t windowIndex, const vkts::ISurfaceSP& surface) :
-		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), environmentDescriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), environmentVertexViewProjectionUniformBuffer(nullptr), allBSDFVertexShaderModules(), envVertexShaderModule(nullptr), envFragmentShaderModule(nullptr), environmentPipelineLayout(nullptr), font(nullptr), sceneContext(nullptr), scene(nullptr), environmentSceneContext(nullptr), environmentScene(nullptr), swapchain(nullptr), renderPass(nullptr), gbufferRenderPass(nullptr), allGraphicsPipelines(), allGBufferTextures(), allGBufferImageViews(), swapchainImagesCount(0), swapchainImageView(), gbufferFramebuffer(), framebuffer(), cmdBuffer(), rebuildCmdBufferCounter(0), fps(0), ram(0), cpuUsageApp(0.0f), processors(0)
+		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), environmentDescriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), environmentVertexViewProjectionUniformBuffer(nullptr), allBSDFVertexShaderModules(), envVertexShaderModule(nullptr), envFragmentShaderModule(nullptr), resolveVertexShaderModule(nullptr), resolveFragmentShaderModule(nullptr), environmentPipelineLayout(nullptr), font(nullptr), sceneContext(nullptr), scene(nullptr), environmentSceneContext(nullptr), environmentScene(nullptr), screenPlaneVertexBuffer(nullptr), swapchain(nullptr), renderPass(nullptr), gbufferRenderPass(nullptr), allGraphicsPipelines(), allGBufferTextures(), allGBufferImageViews(), swapchainImagesCount(0), swapchainImageView(), gbufferFramebuffer(), framebuffer(), cmdBuffer(), rebuildCmdBufferCounter(0), fps(0), ram(0), cpuUsageApp(0.0f), processors(0)
 {
 	processors = glm::min(vkts::processorGetNumber(), VKTS_MAX_CORES);
 
@@ -478,6 +478,47 @@ VkBool32 Example::buildScene(const vkts::ICommandBuffersSP& cmdBuffer)
 
 	vkts::logPrint(VKTS_LOG_INFO, "Example: Number objects: %d", environmentScene->getNumberObjects());
 
+	//
+	// Full screen plane for later resolving GBuffer.
+	//
+
+	// Window clip origin is upper left.
+	static const float vertices[4 * (4 + 2)] = { -1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, -1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 1.0f, 1.0f };
+
+	auto vertexBinaryBuffer = vkts::binaryBufferCreate((const uint8_t*)vertices, sizeof(vertices));
+
+	if (!vertexBinaryBuffer.get())
+	{
+        return VK_FALSE;
+	}
+
+    VkBufferCreateInfo bufferCreateInfo;
+
+    memset(&bufferCreateInfo, 0, sizeof(VkBufferCreateInfo));
+
+    bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+
+    bufferCreateInfo.size = sizeof(vertices);
+    bufferCreateInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+    bufferCreateInfo.flags = 0;
+    bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    bufferCreateInfo.queueFamilyIndexCount = 0;
+    bufferCreateInfo.pQueueFamilyIndices = nullptr;
+
+    vkts::IDeviceMemorySP stageDeviceMemory;
+    vkts::IBufferSP stageBuffer;
+
+    screenPlaneVertexBuffer = vkts::bufferObjectCreate(stageBuffer, stageDeviceMemory, initialResources, cmdBuffer, vertexBinaryBuffer, bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+
+    // Using this scene context to manage the staging objects.
+    environmentSceneContext->addStageBuffer(stageBuffer);
+    environmentSceneContext->addStageDeviceMemory(stageDeviceMemory);
+
+    if (!screenPlaneVertexBuffer.get())
+    {
+        return VK_FALSE;
+    }
+
 	return VK_TRUE;
 }
 
@@ -867,6 +908,44 @@ VkBool32 Example::buildShader()
 	envFragmentShaderModule = vkts::shaderModuleCreate(VKTS_ENV_FRAGMENT_SHADER_NAME, initialResources->getDevice()->getDevice(), 0, fragmentShaderBinary->getSize(), (uint32_t*)fragmentShaderBinary->getData());
 
 	if (!envFragmentShaderModule.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create fragment shader module.");
+
+		return VK_FALSE;
+	}
+
+	//
+
+	vertexShaderBinary = vkts::fileLoadBinary(VKTS_RESOLVE_VERTEX_SHADER_NAME);
+
+	if (!vertexShaderBinary.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not load vertex shader: '%s'", VKTS_RESOLVE_VERTEX_SHADER_NAME);
+
+		return VK_FALSE;
+	}
+
+	resolveVertexShaderModule = vkts::shaderModuleCreate(VKTS_RESOLVE_VERTEX_SHADER_NAME, initialResources->getDevice()->getDevice(), 0, vertexShaderBinary->getSize(), (uint32_t*)vertexShaderBinary->getData());
+
+	if (!resolveVertexShaderModule.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create vertex shader module.");
+
+		return VK_FALSE;
+	}
+
+	fragmentShaderBinary = vkts::fileLoadBinary(VKTS_RESOLVE_FRAGMENT_SHADER_NAME);
+
+	if (!fragmentShaderBinary.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not load vertex shader: '%s'", VKTS_RESOLVE_FRAGMENT_SHADER_NAME);
+
+		return VK_FALSE;
+	}
+
+	resolveFragmentShaderModule = vkts::shaderModuleCreate(VKTS_RESOLVE_FRAGMENT_SHADER_NAME, initialResources->getDevice()->getDevice(), 0, fragmentShaderBinary->getSize(), (uint32_t*)fragmentShaderBinary->getData());
+
+	if (!resolveFragmentShaderModule.get())
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create fragment shader module.");
 
@@ -1632,6 +1711,11 @@ void Example::terminate(const vkts::IUpdateThreadContext& updateContext)
 
 			//
 
+			if (screenPlaneVertexBuffer.get())
+			{
+				screenPlaneVertexBuffer->destroy();
+			}
+
 			if (environmentSceneContext.get())
 			{
 				environmentSceneContext->destroy();
@@ -1679,6 +1763,16 @@ void Example::terminate(const vkts::IUpdateThreadContext& updateContext)
 			if (envFragmentShaderModule.get())
 			{
 				envFragmentShaderModule->destroy();
+			}
+
+			if (resolveVertexShaderModule.get())
+			{
+				resolveVertexShaderModule->destroy();
+			}
+
+			if (resolveFragmentShaderModule.get())
+			{
+				resolveFragmentShaderModule->destroy();
 			}
 
 			for (size_t i = 0; i < allBSDFVertexShaderModules.size(); i++)
