@@ -27,7 +27,7 @@
 #include "Example.hpp"
 
 Example::Example(const vkts::IInitialResourcesSP& initialResources, const int32_t windowIndex, const vkts::ISurfaceSP& surface) :
-		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), environmentDescriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), environmentVertexViewProjectionUniformBuffer(nullptr), allBSDFVertexShaderModules(), envVertexShaderModule(nullptr), envFragmentShaderModule(nullptr), resolveVertexShaderModule(nullptr), resolveFragmentShaderModule(nullptr), environmentPipelineLayout(nullptr), font(nullptr), sceneContext(nullptr), scene(nullptr), environmentSceneContext(nullptr), environmentScene(nullptr), screenPlaneVertexBuffer(nullptr), swapchain(nullptr), renderPass(nullptr), gbufferRenderPass(nullptr), allGraphicsPipelines(), allGBufferTextures(), allGBufferImageViews(), swapchainImagesCount(0), swapchainImageView(), gbufferFramebuffer(), framebuffer(), cmdBuffer(), rebuildCmdBufferCounter(0), fps(0), ram(0), cpuUsageApp(0.0f), processors(0)
+		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), environmentDescriptorSetLayout(nullptr), resolveDescriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), environmentVertexViewProjectionUniformBuffer(nullptr), allBSDFVertexShaderModules(), envVertexShaderModule(nullptr), envFragmentShaderModule(nullptr), resolveVertexShaderModule(nullptr), resolveFragmentShaderModule(nullptr), environmentPipelineLayout(nullptr), resolvePipelineLayout(nullptr), font(nullptr), sceneContext(nullptr), scene(nullptr), environmentSceneContext(nullptr), environmentScene(nullptr), screenPlaneVertexBuffer(nullptr), swapchain(nullptr), renderPass(nullptr), gbufferRenderPass(nullptr), allGraphicsPipelines(), resolveGraphicsPipeline(nullptr), allGBufferTextures(), allGBufferImageViews(), gbufferSampler(nullptr), swapchainImagesCount(0), swapchainImageView(), gbufferFramebuffer(), framebuffer(), cmdBuffer(), rebuildCmdBufferCounter(0), fps(0), ram(0), cpuUsageApp(0.0f), processors(0)
 {
 	processors = glm::min(vkts::processorGetNumber(), VKTS_MAX_CORES);
 
@@ -376,7 +376,40 @@ VkBool32 Example::updateDescriptorSets()
 	writeDescriptorSets[0].pBufferInfo = &descriptorBufferInfos[0];
 	writeDescriptorSets[0].pTexelBufferView = nullptr;
 
+
+	writeDescriptorSets[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+
 	writeDescriptorSets[1].dstBinding = VKTS_BINDING_UNIFORM_BUFFER_TRANSFORM;
+
+	//
+	//
+
+	memset(resolveDescriptorImageInfos, 0, sizeof(resolveDescriptorImageInfos));
+
+	memset(resolveWriteDescriptorSets, 0, sizeof(resolveWriteDescriptorSets));
+
+	// TODO: Build descriptor set.
+
+	for (uint32_t i = 0; i < 6; i++)
+	{
+		resolveDescriptorImageInfos[i].sampler = gbufferSampler->getSampler();
+		resolveDescriptorImageInfos[i].imageView = allGBufferImageViews[i]->getImageView();
+		resolveDescriptorImageInfos[i].imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+
+		resolveWriteDescriptorSets[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+
+		// TODO: Use descriptor set.
+		resolveWriteDescriptorSets[0].dstSet = VK_NULL_HANDLE;
+		resolveWriteDescriptorSets[0].dstBinding = i;
+		resolveWriteDescriptorSets[0].dstArrayElement = 0;
+		resolveWriteDescriptorSets[0].descriptorCount = 1;
+		resolveWriteDescriptorSets[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		resolveWriteDescriptorSets[0].pImageInfo = &resolveDescriptorImageInfos[i];
+		resolveWriteDescriptorSets[0].pBufferInfo = nullptr;
+		resolveWriteDescriptorSets[0].pTexelBufferView = nullptr;
+	}
+
+	// TODO: Update descriptor set.
 
 	return VK_TRUE;
 }
@@ -532,6 +565,20 @@ VkBool32 Example::buildSwapchainImageView(const int32_t usedBuffer)
 	if (!swapchainImageView[usedBuffer].get())
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create color attachment view.");
+
+		return VK_FALSE;
+	}
+
+	return VK_TRUE;
+}
+
+VkBool32 Example::buildGBufferSampler()
+{
+	gbufferSampler = vkts::samplerCreate(initialResources->getDevice()->getDevice(), 0, VK_FILTER_LINEAR, VK_FILTER_LINEAR, VK_SAMPLER_MIPMAP_MODE_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, 0.0f, VK_FALSE, 1.0f, VK_FALSE, VK_COMPARE_OP_NEVER, 0.0f, 0.0f, VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK, VK_FALSE);
+
+	if (!gbufferSampler.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create sampler.");
 
 		return VK_FALSE;
 	}
@@ -700,6 +747,73 @@ VkBool32 Example::buildPipeline()
 
 	allGraphicsPipelines.append(pipeline);
 
+	//
+
+    vkts::defaultGraphicsPipeline resolveGP;
+
+    resolveGP.getPipelineShaderStageCreateInfo(0).stage = VK_SHADER_STAGE_VERTEX_BIT;
+    resolveGP.getPipelineShaderStageCreateInfo(0).module = resolveVertexShaderModule->getShaderModule();
+
+    resolveGP.getPipelineShaderStageCreateInfo(1).stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+    resolveGP.getPipelineShaderStageCreateInfo(1).module = resolveFragmentShaderModule->getShaderModule();
+
+
+	vertexBufferType = VKTS_VERTEX_BUFFER_TYPE_VERTEX | VKTS_VERTEX_BUFFER_TYPE_TEXCOORD;
+
+	resolveGP.getVertexInputBindingDescription(0).binding = VKTS_BINDING_VERTEX_BUFFER;
+	resolveGP.getVertexInputBindingDescription(0).stride = vkts::commonGetStrideInBytes(vertexBufferType);
+	resolveGP.getVertexInputBindingDescription(0).inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+	resolveGP.getVertexInputAttributeDescription(0).location = 0;
+	resolveGP.getVertexInputAttributeDescription(0).binding = VKTS_BINDING_VERTEX_BUFFER;
+	resolveGP.getVertexInputAttributeDescription(0).format = VK_FORMAT_R32G32B32A32_SFLOAT;
+	resolveGP.getVertexInputAttributeDescription(0).offset = vkts::commonGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_VERTEX, vertexBufferType);
+
+	resolveGP.getVertexInputAttributeDescription(1).location = 1;
+	resolveGP.getVertexInputAttributeDescription(1).binding = VKTS_BINDING_VERTEX_BUFFER;
+	resolveGP.getVertexInputAttributeDescription(1).format = VK_FORMAT_R32G32_SFLOAT;
+	resolveGP.getVertexInputAttributeDescription(1).offset = vkts::commonGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_TEXCOORD, vertexBufferType);
+
+	resolveGP.getPipelineInputAssemblyStateCreateInfo().topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+
+	resolveGP.getViewports(0).x = 0.0f;
+	resolveGP.getViewports(0).y = 0.0f;
+	resolveGP.getViewports(0).width = (float) swapchain->getImageExtent().width;
+	resolveGP.getViewports(0).height = (float) swapchain->getImageExtent().height;
+	resolveGP.getViewports(0).minDepth = 0.0f;
+	resolveGP.getViewports(0).maxDepth = 1.0f;
+
+
+	resolveGP.getScissors(0).offset.x = 0;
+	resolveGP.getScissors(0).offset.y = 0;
+	resolveGP.getScissors(0).extent = swapchain->getImageExtent();
+
+
+	resolveGP.getPipelineMultisampleStateCreateInfo();
+	resolveGP.getPipelineDepthStencilStateCreateInfo();
+
+
+	resolveGP.getPipelineColorBlendAttachmentState(0).blendEnable = VK_FALSE;
+	resolveGP.getPipelineColorBlendAttachmentState(0).colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+
+
+	resolveGP.getDynamicState(0) = VK_DYNAMIC_STATE_VIEWPORT;
+	resolveGP.getDynamicState(1) = VK_DYNAMIC_STATE_SCISSOR;
+
+
+	resolveGP.getGraphicsPipelineCreateInfo().layout = resolvePipelineLayout->getPipelineLayout();
+	resolveGP.getGraphicsPipelineCreateInfo().renderPass = renderPass->getRenderPass();
+
+
+	resolveGraphicsPipeline = vkts::pipelineCreateGraphics(initialResources->getDevice()->getDevice(), VK_NULL_HANDLE, resolveGP.getGraphicsPipelineCreateInfo(), vertexBufferType);
+
+	if (!resolveGraphicsPipeline.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create graphics pipeline.");
+
+		return VK_FALSE;
+	}
+
 	return VK_TRUE;
 }
 
@@ -835,6 +949,19 @@ VkBool32 Example::buildPipelineLayout()
 		return VK_FALSE;
 	}
 
+	//
+
+	setLayouts[0] = resolveDescriptorSetLayout->getDescriptorSetLayout();
+
+	resolvePipelineLayout = vkts::pipelineCreateLayout(initialResources->getDevice()->getDevice(), 0, 1, setLayouts, 0, nullptr);
+
+	if (!resolvePipelineLayout.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create pipeline layout.");
+
+		return VK_FALSE;
+	}
+
 	return VK_TRUE;
 }
 
@@ -865,6 +992,30 @@ VkBool32 Example::buildDescriptorSetLayout()
 	environmentDescriptorSetLayout = vkts::descriptorSetLayoutCreate(initialResources->getDevice()->getDevice(), 0, 3, descriptorSetLayoutBinding);
 
 	if (!environmentDescriptorSetLayout.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create descriptor set layout.");
+
+		return VK_FALSE;
+	}
+
+	//
+
+	VkDescriptorSetLayoutBinding resolveDescriptorSetLayoutBinding[6];
+
+	memset(&resolveDescriptorSetLayoutBinding, 0, sizeof(resolveDescriptorSetLayoutBinding));
+
+	for (uint32_t binding = 0; binding < 6; binding++)
+	{
+		resolveDescriptorSetLayoutBinding[binding].binding = binding;
+		resolveDescriptorSetLayoutBinding[binding].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		resolveDescriptorSetLayoutBinding[binding].descriptorCount = 1;
+		resolveDescriptorSetLayoutBinding[binding].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+		resolveDescriptorSetLayoutBinding[binding].pImmutableSamplers = nullptr;
+	}
+
+	resolveDescriptorSetLayout = vkts::descriptorSetLayoutCreate(initialResources->getDevice()->getDevice(), 0, 6, resolveDescriptorSetLayoutBinding);
+
+	if (!resolveDescriptorSetLayout.get())
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create descriptor set layout.");
 
@@ -1219,6 +1370,11 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 		return VK_FALSE;
 	}
 
+	if (!buildGBufferSampler())
+	{
+		return VK_FALSE;
+	}
+
 	//
 
 	for (size_t i = 0; i < allStageImages.size(); i++)
@@ -1296,11 +1452,23 @@ void Example::terminateResources(const vkts::IUpdateThreadContext& updateContext
 				}
 			}
 
+			if (resolveGraphicsPipeline.get())
+			{
+				resolveGraphicsPipeline->destroy();
+			}
+
 			for (size_t i = 0; i < allGraphicsPipelines.size(); i++)
 			{
 				allGraphicsPipelines[i]->destroy();
 			}
 			allGraphicsPipelines.clear();
+
+
+			if (gbufferSampler.get())
+			{
+				gbufferSampler->destroy();
+			}
+
 
 			for (size_t i = 0; i < allGBufferImageViews.size(); i++)
 			{
@@ -1750,6 +1918,11 @@ void Example::terminate(const vkts::IUpdateThreadContext& updateContext)
 				swapchain->destroy();
 			}
 
+			if (resolvePipelineLayout.get())
+			{
+				resolvePipelineLayout->destroy();
+			}
+
 			if (environmentPipelineLayout.get())
 			{
 				environmentPipelineLayout->destroy();
@@ -1789,6 +1962,11 @@ void Example::terminate(const vkts::IUpdateThreadContext& updateContext)
 			if (vertexViewProjectionUniformBuffer.get())
 			{
 				vertexViewProjectionUniformBuffer->destroy();
+			}
+
+			if (resolveDescriptorSetLayout.get())
+			{
+				resolveDescriptorSetLayout->destroy();
 			}
 
 			if (environmentDescriptorSetLayout.get())
