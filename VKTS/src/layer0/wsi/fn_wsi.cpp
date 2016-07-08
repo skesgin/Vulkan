@@ -87,16 +87,6 @@ VkBool32 VKTS_APIENTRY wsiGatherNeededInstanceExtensions()
     return _wsiGatherNeededInstanceExtensions(allInstanceExtensionProperties);
 }
 
-VkBool32 VKTS_APIENTRY wsiInitInstanceExtensions(const VkInstance instance)
-{
-    if (!instance)
-    {
-        return VK_FALSE;
-    }
-
-    return _wsiInitInstanceExtensions(instance);
-}
-
 //
 
 VkBool32 VKTS_APIENTRY wsiGatherNeededDeviceExtensions(const VkPhysicalDevice physicalDevice)
@@ -148,16 +138,6 @@ VkBool32 VKTS_APIENTRY wsiGatherNeededDeviceExtensions(const VkPhysicalDevice ph
     }
 
     return extensionFound;
-}
-
-VkBool32 VKTS_APIENTRY wsiInitDeviceExtensions(const VkDevice device)
-{
-    if (!device)
-    {
-        return VK_FALSE;
-    }
-
-    return VK_TRUE;
 }
 
 //

@@ -85,16 +85,6 @@ VkBool32 VKTS_APIENTRY _wsiGatherNeededInstanceExtensions(const std::vector<VkEx
     return VK_TRUE;
 }
 
-VkBool32 VKTS_APIENTRY _wsiInitInstanceExtensions(const VkInstance instance)
-{
-    if (!instance || !(g_hasXcb || g_hasXlib))
-    {
-        return VK_FALSE;
-    }
-
-    return VK_TRUE;
-}
-
 VkSurfaceKHR VKTS_APIENTRY _wsiSurfaceCreate(const VkInstance instance, VKTS_NATIVE_DISPLAY nativeDisplay, VKTS_NATIVE_WINDOW nativeWindow)
 {
     if (!instance)

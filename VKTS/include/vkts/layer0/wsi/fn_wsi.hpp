@@ -34,13 +34,9 @@ namespace vkts
 
 VKTS_APICALL VkBool32 VKTS_APIENTRY wsiGatherNeededInstanceExtensions();
 
-VKTS_APICALL VkBool32 VKTS_APIENTRY wsiInitInstanceExtensions(const VkInstance instance);
-
 //
 
 VKTS_APICALL VkBool32 VKTS_APIENTRY wsiGatherNeededDeviceExtensions(const VkPhysicalDevice physicalDevice);
-
-VKTS_APICALL VkBool32 VKTS_APIENTRY wsiInitDeviceExtensions(const VkDevice device);
 
 VKTS_APICALL VkResult VKTS_APIENTRY wsiGetPhysicalDeviceSurfaceSupport(const VkPhysicalDevice physicalDevice, const VkSurfaceKHR surface, const uint32_t queueFamilyIndexCount, std::vector<VkBool32>& supported);
 

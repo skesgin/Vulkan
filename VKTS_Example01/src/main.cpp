@@ -158,13 +158,6 @@ int main()
 		return -1;
 	}
 
-	if (!vkts::wsiInitInstanceExtensions(instance))
-	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Main: Could not initialize instance extensions.");
-
-		return -1;
-	}
-
 	//
 
 	uint32_t physicalDeviceCount;
@@ -334,13 +327,6 @@ int main()
 	if (result != VK_SUCCESS)
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, "Main: Could not create device.");
-
-		return -1;
-	}
-
-	if (!vkts::wsiInitDeviceExtensions(device))
-	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Main: Could not initialize device extensions.");
 
 		return -1;
 	}

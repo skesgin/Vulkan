@@ -84,6 +84,8 @@ private:
 	vkts::IDescriptorSetLayoutSP environmentDescriptorSetLayout;
 	vkts::IDescriptorSetLayoutSP resolveDescriptorSetLayout;
 
+	vkts::IDescriptorPoolSP resolveDescriptorPool;
+
     VkDescriptorBufferInfo environmentDescriptorBufferInfos[1];
     VkDescriptorBufferInfo descriptorBufferInfos[1];
     VkDescriptorImageInfo environmentDescriptorImageInfos[1];
@@ -166,6 +168,8 @@ private:
 	VkBool32 buildRenderPass();
 
 	VkBool32 buildPipelineLayout();
+
+	VkBool32 buildDescriptorSetPool();
 
 	VkBool32 buildDescriptorSetLayout();
 

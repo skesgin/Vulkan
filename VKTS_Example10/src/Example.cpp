@@ -27,7 +27,7 @@
 #include "Example.hpp"
 
 Example::Example(const vkts::IInitialResourcesSP& initialResources, const int32_t windowIndex, const vkts::ISurfaceSP& surface) :
-		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), environmentDescriptorSetLayout(nullptr), resolveDescriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), environmentVertexViewProjectionUniformBuffer(nullptr), allBSDFVertexShaderModules(), envVertexShaderModule(nullptr), envFragmentShaderModule(nullptr), resolveVertexShaderModule(nullptr), resolveFragmentShaderModule(nullptr), environmentPipelineLayout(nullptr), resolvePipelineLayout(nullptr), font(nullptr), sceneContext(nullptr), scene(nullptr), environmentSceneContext(nullptr), environmentScene(nullptr), screenPlaneVertexBuffer(nullptr), swapchain(nullptr), renderPass(nullptr), gbufferRenderPass(nullptr), allGraphicsPipelines(), resolveGraphicsPipeline(nullptr), allGBufferTextures(), allGBufferImageViews(), gbufferSampler(nullptr), swapchainImagesCount(0), swapchainImageView(), gbufferFramebuffer(), framebuffer(), cmdBuffer(), rebuildCmdBufferCounter(0), fps(0), ram(0), cpuUsageApp(0.0f), processors(0)
+		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), environmentDescriptorSetLayout(nullptr), resolveDescriptorSetLayout(nullptr), resolveDescriptorPool(nullptr), vertexViewProjectionUniformBuffer(nullptr), environmentVertexViewProjectionUniformBuffer(nullptr), allBSDFVertexShaderModules(), envVertexShaderModule(nullptr), envFragmentShaderModule(nullptr), resolveVertexShaderModule(nullptr), resolveFragmentShaderModule(nullptr), environmentPipelineLayout(nullptr), resolvePipelineLayout(nullptr), font(nullptr), sceneContext(nullptr), scene(nullptr), environmentSceneContext(nullptr), environmentScene(nullptr), screenPlaneVertexBuffer(nullptr), swapchain(nullptr), renderPass(nullptr), gbufferRenderPass(nullptr), allGraphicsPipelines(), resolveGraphicsPipeline(nullptr), allGBufferTextures(), allGBufferImageViews(), gbufferSampler(nullptr), swapchainImagesCount(0), swapchainImageView(), gbufferFramebuffer(), framebuffer(), cmdBuffer(), rebuildCmdBufferCounter(0), fps(0), ram(0), cpuUsageApp(0.0f), processors(0)
 {
 	processors = glm::min(vkts::processorGetNumber(), VKTS_MAX_CORES);
 
@@ -965,6 +965,25 @@ VkBool32 Example::buildPipelineLayout()
 	return VK_TRUE;
 }
 
+VkBool32 Example::buildDescriptorSetPool()
+{
+    VkDescriptorPoolSize descriptorPoolSize[1];
+
+    memset(&descriptorPoolSize, 0, sizeof(descriptorPoolSize));
+
+	descriptorPoolSize[0].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+	descriptorPoolSize[0].descriptorCount = 6;
+
+	resolveDescriptorPool = vkts::descriptorPoolCreate(initialResources->getDevice()->getDevice(), VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT, 1, 1, descriptorPoolSize);
+
+    if (!resolveDescriptorPool.get())
+    {
+        return VK_FALSE;
+    }
+
+	return VK_TRUE;
+}
+
 VkBool32 Example::buildDescriptorSetLayout()
 {
 	VkDescriptorSetLayoutBinding descriptorSetLayoutBinding[3];
@@ -1583,6 +1602,13 @@ VkBool32 Example::init(const vkts::IUpdateThreadContext& updateContext)
 		return VK_FALSE;
 	}
 
+	if (!buildDescriptorSetPool())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not build descriptor set pool.");
+
+		return VK_FALSE;
+	}
+
 	if (!buildPipelineLayout())
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not build pipeline cache.");
@@ -1962,6 +1988,11 @@ void Example::terminate(const vkts::IUpdateThreadContext& updateContext)
 			if (vertexViewProjectionUniformBuffer.get())
 			{
 				vertexViewProjectionUniformBuffer->destroy();
+			}
+
+			if (resolveDescriptorPool.get())
+			{
+				resolveDescriptorPool->destroy();
 			}
 
 			if (resolveDescriptorSetLayout.get())

@@ -127,15 +127,6 @@ int main()
 		return -1;
 	}
 
-	if (!vkts::wsiInitInstanceExtensions(instance->getInstance()))
-	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Main: Could not initialize instance extension.");
-
-		terminateApp();
-
-		return -1;
-	}
-
 	physicalDevice = vkts::physicalDeviceCreate(instance->getInstance(), 0);
 
 	if (!physicalDevice.get())
@@ -257,15 +248,6 @@ int main()
 	if (!device.get())
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, "Main: Could not create device.");
-
-		terminateApp();
-
-		return -1;
-	}
-
-	if (!vkts::wsiInitDeviceExtensions(device->getDevice()))
-	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Main: Could not initialize device extension.");
 
 		terminateApp();
 
