@@ -27,7 +27,7 @@
 #include "Example.hpp"
 
 Example::Example(const vkts::IInitialResourcesSP& initialResources, const int32_t windowIndex, const vkts::ISurfaceSP& surface) :
-		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), environmentDescriptorSetLayout(nullptr), resolveDescriptorSetLayout(nullptr), resolveDescriptorPool(nullptr), vertexViewProjectionUniformBuffer(nullptr), environmentVertexViewProjectionUniformBuffer(nullptr), allBSDFVertexShaderModules(), envVertexShaderModule(nullptr), envFragmentShaderModule(nullptr), resolveVertexShaderModule(nullptr), resolveFragmentShaderModule(nullptr), environmentPipelineLayout(nullptr), resolvePipelineLayout(nullptr), font(nullptr), sceneContext(nullptr), scene(nullptr), environmentSceneContext(nullptr), environmentScene(nullptr), screenPlaneVertexBuffer(nullptr), swapchain(nullptr), renderPass(nullptr), gbufferRenderPass(nullptr), allGraphicsPipelines(), resolveGraphicsPipeline(nullptr), allGBufferTextures(), allGBufferImageViews(), gbufferSampler(nullptr), swapchainImagesCount(0), swapchainImageView(), gbufferFramebuffer(), framebuffer(), cmdBuffer(), rebuildCmdBufferCounter(0), fps(0), ram(0), cpuUsageApp(0.0f), processors(0)
+		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), environmentDescriptorSetLayout(nullptr), resolveDescriptorSetLayout(nullptr), resolveDescriptorPool(nullptr), resolveDescriptorSet(nullptr), vertexViewProjectionUniformBuffer(nullptr), environmentVertexViewProjectionUniformBuffer(nullptr), allBSDFVertexShaderModules(), envVertexShaderModule(nullptr), envFragmentShaderModule(nullptr), resolveVertexShaderModule(nullptr), resolveFragmentShaderModule(nullptr), environmentPipelineLayout(nullptr), resolvePipelineLayout(nullptr), font(nullptr), sceneContext(nullptr), scene(nullptr), environmentSceneContext(nullptr), environmentScene(nullptr), screenPlaneVertexBuffer(nullptr), swapchain(nullptr), renderPass(nullptr), gbufferRenderPass(nullptr), allGraphicsPipelines(), resolveGraphicsPipeline(nullptr), allGBufferTextures(), allGBufferImageViews(), gbufferSampler(nullptr), swapchainImagesCount(0), swapchainImageView(), gbufferFramebuffer(), framebuffer(), cmdBuffer(), rebuildCmdBufferCounter(0), fps(0), ram(0), cpuUsageApp(0.0f), processors(0)
 {
 	processors = glm::min(vkts::processorGetNumber(), VKTS_MAX_CORES);
 
@@ -214,9 +214,20 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 		environmentScene->bindDrawIndexedRecursive(cmdBuffer[usedBuffer], allGraphicsPipelines);
 	}
 
-	// Render main scene.
+	//
+	// Render main scene by resolving content.
+	//
 
-	// TODO: Resolve GBuffer and render scene.
+	vkCmdBindPipeline(cmdBuffer[usedBuffer]->getCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, resolveGraphicsPipeline->getPipeline());
+
+	vkCmdBindDescriptorSets(cmdBuffer[usedBuffer]->getCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, resolvePipelineLayout->getPipelineLayout(), 0, 1, resolveDescriptorSet->getDescriptorSets(), 0, nullptr);
+
+	VkDeviceSize offsets[1] = { 0 };
+	VkBuffer buffers[1] = { screenPlaneVertexBuffer->getBuffer()->getBuffer() };
+
+	vkCmdBindVertexBuffers(cmdBuffer[usedBuffer]->getCommandBuffer(), 0, 1, buffers, offsets);
+
+	vkCmdDraw(cmdBuffer[usedBuffer]->getCommandBuffer(), 4, 1, 0, 0);
 
 	// Render font.
 
@@ -388,28 +399,25 @@ VkBool32 Example::updateDescriptorSets()
 
 	memset(resolveWriteDescriptorSets, 0, sizeof(resolveWriteDescriptorSets));
 
-	// TODO: Build descriptor set.
-
 	for (uint32_t i = 0; i < 6; i++)
 	{
 		resolveDescriptorImageInfos[i].sampler = gbufferSampler->getSampler();
 		resolveDescriptorImageInfos[i].imageView = allGBufferImageViews[i]->getImageView();
 		resolveDescriptorImageInfos[i].imageLayout = VK_IMAGE_LAYOUT_GENERAL;
 
-		resolveWriteDescriptorSets[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		resolveWriteDescriptorSets[i].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 
-		// TODO: Use descriptor set.
-		resolveWriteDescriptorSets[0].dstSet = VK_NULL_HANDLE;
-		resolveWriteDescriptorSets[0].dstBinding = i;
-		resolveWriteDescriptorSets[0].dstArrayElement = 0;
-		resolveWriteDescriptorSets[0].descriptorCount = 1;
-		resolveWriteDescriptorSets[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		resolveWriteDescriptorSets[0].pImageInfo = &resolveDescriptorImageInfos[i];
-		resolveWriteDescriptorSets[0].pBufferInfo = nullptr;
-		resolveWriteDescriptorSets[0].pTexelBufferView = nullptr;
+		resolveWriteDescriptorSets[i].dstSet = resolveDescriptorSet->getDescriptorSets()[0];
+		resolveWriteDescriptorSets[i].dstBinding = i;
+		resolveWriteDescriptorSets[i].dstArrayElement = 0;
+		resolveWriteDescriptorSets[i].descriptorCount = 1;
+		resolveWriteDescriptorSets[i].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		resolveWriteDescriptorSets[i].pImageInfo = &resolveDescriptorImageInfos[i];
+		resolveWriteDescriptorSets[i].pBufferInfo = nullptr;
+		resolveWriteDescriptorSets[i].pTexelBufferView = nullptr;
 	}
 
-	// TODO: Update descriptor set.
+	resolveDescriptorSet->updateDescriptorSets(6, resolveWriteDescriptorSets, 0, nullptr);
 
 	return VK_TRUE;
 }
@@ -515,8 +523,11 @@ VkBool32 Example::buildScene(const vkts::ICommandBuffersSP& cmdBuffer)
 	// Full screen plane for later resolving GBuffer.
 	//
 
-	// Window clip origin is upper left.
-	static const float vertices[4 * (4 + 2)] = { -1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, -1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 1.0f, 1.0f };
+	// Window clip origin is upper left, but the image is already upside down.
+	static const float vertices[4 * (4 + 2)] = {	-1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+													1.0f, -1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+													-1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+													1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f };
 
 	auto vertexBinaryBuffer = vkts::binaryBufferCreate((const uint8_t*)vertices, sizeof(vertices));
 
@@ -774,7 +785,7 @@ VkBool32 Example::buildPipeline()
 	resolveGP.getVertexInputAttributeDescription(1).format = VK_FORMAT_R32G32_SFLOAT;
 	resolveGP.getVertexInputAttributeDescription(1).offset = vkts::commonGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_TEXCOORD, vertexBufferType);
 
-	resolveGP.getPipelineInputAssemblyStateCreateInfo().topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+	resolveGP.getPipelineInputAssemblyStateCreateInfo().topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
 
 	resolveGP.getViewports(0).x = 0.0f;
 	resolveGP.getViewports(0).y = 0.0f;
@@ -961,6 +972,22 @@ VkBool32 Example::buildPipelineLayout()
 
 		return VK_FALSE;
 	}
+
+	return VK_TRUE;
+}
+
+VkBool32 Example::buildDescriptorSets()
+{
+	const auto allDescriptorSetLayouts = resolveDescriptorSetLayout->getDescriptorSetLayout();
+
+    resolveDescriptorSet = vkts::descriptorSetsCreate(initialResources->getDevice()->getDevice(), resolveDescriptorPool->getDescriptorPool(), 1, &allDescriptorSetLayouts);
+
+    if (!resolveDescriptorSet.get())
+    {
+    	vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create descriptor sets.");
+
+        return VK_FALSE;
+    }
 
 	return VK_TRUE;
 }
@@ -1609,6 +1636,13 @@ VkBool32 Example::init(const vkts::IUpdateThreadContext& updateContext)
 		return VK_FALSE;
 	}
 
+	if (!buildDescriptorSets())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not build descriptor sets.");
+
+		return VK_FALSE;
+	}
+
 	if (!buildPipelineLayout())
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not build pipeline cache.");
@@ -1988,6 +2022,11 @@ void Example::terminate(const vkts::IUpdateThreadContext& updateContext)
 			if (vertexViewProjectionUniformBuffer.get())
 			{
 				vertexViewProjectionUniformBuffer->destroy();
+			}
+
+			if (resolveDescriptorSet.get())
+			{
+				resolveDescriptorSet->destroy();
 			}
 
 			if (resolveDescriptorPool.get())
