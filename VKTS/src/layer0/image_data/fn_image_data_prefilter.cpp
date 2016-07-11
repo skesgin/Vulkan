@@ -88,5 +88,69 @@ SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilter(const IImageDa
     return result;
 }
 
+IImageDataSP VKTS_APIENTRY imageDataEnvironmentBRDF(const uint32_t length, const uint32_t m, const std::string& name)
+{
+	if (name.size() == 0 || length <= 1 || m == 0 || m > 32)
+	{
+		return IImageDataSP();
+	}
+
+    std::string sourceImageFilename = name;
+
+    auto dotIndex = sourceImageFilename.rfind(".");
+
+    if (dotIndex == sourceImageFilename.npos)
+    {
+    	return IImageDataSP();
+    }
+
+    auto sourceImageName = sourceImageFilename.substr(0, dotIndex);
+    auto sourceImageExtension = sourceImageFilename.substr(dotIndex);
+
+    std::string targetImageFilename = sourceImageName + "_" + std::to_string(length) + "_" + std::to_string(m) + sourceImageExtension;
+
+    auto currentTargetImage = imageDataCreate(targetImageFilename, length, length, 1, 0.0f, 0.0f, 0.0f, 0.0f, VK_IMAGE_TYPE_2D, VK_FORMAT_R32G32_SFLOAT);
+
+	if (!currentTargetImage.get())
+	{
+		return IImageDataSP();
+	}
+
+	//
+
+	uint32_t samples = 1 << m;
+
+	glm::vec3 N = glm::vec3(0.0f, 0.0f, 1.0f);
+
+	for (uint32_t y = 0; y < length; y++)
+	{
+		float roughness = float(y) / float(length - 1);
+
+		float k = (roughness + 1.0f) * (roughness + 1.0f) / 8.0f;
+
+		for (uint32_t x = 0; x < length; x++)
+		{
+			float NdotV = float(x) / float(length - 1);
+
+			glm::vec3 V = glm::vec3(sqrtf(1.0f - NdotV * NdotV), 0.0f, NdotV);
+
+			glm::vec2 outputCookTorrance = glm::vec2(0.0f, 0.0f);
+
+			for (uint32_t sampleIndex = 0; sampleIndex < samples; sampleIndex++)
+			{
+				glm::vec2 randomPoint = randomHammersley(sampleIndex, m);
+
+				// Specular
+				outputCookTorrance += renderIntegrateCookTorrance(randomPoint, N, V, k, roughness);
+			}
+
+			currentTargetImage->setTexel(glm::vec4(outputCookTorrance, 0.0f, 0.0f), x, y, 0, 0, 0);
+		}
+	}
+
+	//
+
+	return currentTargetImage;
+}
 
 }

@@ -98,6 +98,12 @@ VKTS_APICALL SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataCubemap(con
  */
 VKTS_APICALL SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilter(const IImageDataSP& sourceImage, const std::string& name);
 
+/**
+ *
+ * @ThreadSafe
+ */
+VKTS_APICALL IImageDataSP VKTS_APIENTRY imageDataEnvironmentBRDF(const uint32_t length, const uint32_t m, const std::string& name);
+
 }
 
 #endif /* VKTS_FN_IMAGE_DATA_HPP_ */
