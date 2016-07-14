@@ -44,6 +44,10 @@
 #define _WIN32_WINNT 0x0601
 #endif
 
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+
 #define VKTS_CACHE_ENABLED VK_TRUE
 
 #if defined(VKTS_NO_VISUAL)
@@ -55,10 +59,6 @@
 // Include nothing for now.
 
 #else
-
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
 
 #include <windows.h>
 
