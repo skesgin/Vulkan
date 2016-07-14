@@ -48,6 +48,9 @@
 #define VKTS_BEZIER_TOLERANCE 0.1f
 #define VKTS_BEZIER_LOOPS 10
 
+#define VKTS_BSDF_LENGTH 512
+#define VKTS_BSDF_M 8
+
 /**
  * Functions.
  */

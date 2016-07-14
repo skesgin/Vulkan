@@ -48,6 +48,12 @@ VKTS_APICALL VkBool32 VKTS_APIENTRY cacheSaveImageData(const IImageDataSP& image
  */
 VKTS_APICALL IImageDataSP VKTS_APIENTRY cacheLoadImageData(const char* filename);
 
+/**
+ *
+ * @ThreadSafe
+ */
+VKTS_APICALL IImageDataSP VKTS_APIENTRY cacheLoadRawImageData(const char* filename, const uint32_t width, const uint32_t height, const VkFormat format);
+
 }
 
 #endif /* VKTS_FN_CACHE_HPP_ */

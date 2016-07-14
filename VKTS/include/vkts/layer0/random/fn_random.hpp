@@ -38,7 +38,7 @@ VKTS_APICALL float VKTS_APIENTRY randomUniform(const float start, const float en
 
 VKTS_APICALL float VKTS_APIENTRY randomNormal(const float mean, const float standardDeviation);
 
-VKTS_APICALL glm::vec2 VKTS_APIENTRY randomHammersley(const uint32_t sample, const uint8_t m);
+VKTS_APICALL glm::vec2 VKTS_APIENTRY randomHammersley(const uint32_t sample, const uint32_t m);
 
 }
 

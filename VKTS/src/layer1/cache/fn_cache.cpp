@@ -111,4 +111,16 @@ IImageDataSP VKTS_APIENTRY cacheLoadImageData(const char* filename)
 	return imageDataLoad(cacheFilename.c_str());
 }
 
+IImageDataSP VKTS_APIENTRY cacheLoadRawImageData(const char* filename, const uint32_t width, const uint32_t height, const VkFormat format)
+{
+	if (!filename || width == 0 || height == 0)
+	{
+		return IImageDataSP();
+	}
+
+	std::string cacheFilename = cacheGetFilename(filename);
+
+	return imageDataLoadRaw(cacheFilename.c_str(), width, height, format);
+}
+
 }

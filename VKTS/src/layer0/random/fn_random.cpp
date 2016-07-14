@@ -52,10 +52,9 @@ float VKTS_APIENTRY randomNormal(const float mean, const float standardDeviation
 	return mean + standardDeviation * (sqrtf(-2.0f * logf(x1)) * cosf(2.0f * VKTS_PI * x2));
 }
 
-glm::vec2 VKTS_APIENTRY randomHammersley(const uint32_t sample, const uint8_t m)
+glm::vec2 VKTS_APIENTRY randomHammersley(const uint32_t sample, const uint32_t m)
 {
-	uint8_t revertSample;
-	float binaryFractionFactor;
+	uint32_t revertSample;
 
 	// Check, if m is in the allowed range, as only 32bit unsigned integer is supported.
 	if (m == 0 || m > 32)
@@ -79,9 +78,9 @@ glm::vec2 VKTS_APIENTRY randomHammersley(const uint32_t sample, const uint8_t m)
 	// Shift back, as only m bits are used.
 	revertSample = revertSample >> (32 - m);
 
-	binaryFractionFactor = 1.0f / (powf(2.0f, (float)m) - 1.0f);
+	float binaryFractionFactor = 1.0f / (powf(2.0f, (float)m) - 1.0f);
 
-	return glm::vec2(revertSample * binaryFractionFactor, sample * binaryFractionFactor);
+	return glm::vec2((float)revertSample * binaryFractionFactor, (float)sample * binaryFractionFactor);
 }
 
 }

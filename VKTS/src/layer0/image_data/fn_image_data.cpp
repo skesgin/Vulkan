@@ -884,7 +884,7 @@ VkBool32 VKTS_APIENTRY imageDataSave(const char* filename, const IImageDataSP& i
 
         return fileSaveBinary(filename, buffer);
     }
-    else
+    else if (lowerCaseExtension == ".data")
     {
     	VkExtent3D currentExtent;
     	size_t offset;

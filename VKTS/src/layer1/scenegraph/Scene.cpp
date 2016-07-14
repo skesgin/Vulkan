@@ -32,7 +32,7 @@ namespace vkts
 {
 
 Scene::Scene() :
-    IScene(), name(""), allObjects(), environment(nullptr)
+    IScene(), name(""), allObjects(), environment(nullptr), lut(nullptr)
 {
 }
 
@@ -67,6 +67,7 @@ Scene::Scene(const Scene& other) :
     }
 
     environment = other.environment;
+    lut = other.lut;
 }
 
 Scene::~Scene()
@@ -131,6 +132,16 @@ ITextureSP Scene::getEnvironment() const
     return environment;
 }
 
+void Scene::setLut(const ITextureSP& lut)
+{
+    this->lut = lut;
+}
+
+ITextureSP Scene::getLut() const
+{
+    return lut;
+}
+
 void Scene::updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets)
 {
     for (size_t i = 0; i < allObjects.size(); i++)
@@ -191,6 +202,13 @@ ISceneSP Scene::clone() const
 
 void Scene::destroy()
 {
+	if (lut.get())
+	{
+		lut->destroy();
+
+		lut.reset();
+	}
+
 	if (environment.get())
 	{
 		environment->destroy();

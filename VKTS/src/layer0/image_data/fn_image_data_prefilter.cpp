@@ -83,7 +83,7 @@ SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilter(const IImageDa
 
     //
 
-    // TODO: Prefilter.
+    // TODO: Prefilter cube map.
 
     return result;
 }
@@ -120,13 +120,9 @@ IImageDataSP VKTS_APIENTRY imageDataEnvironmentBRDF(const uint32_t length, const
 
 	uint32_t samples = 1 << m;
 
-	glm::vec3 N = glm::vec3(0.0f, 0.0f, 1.0f);
-
 	for (uint32_t y = 0; y < length; y++)
 	{
 		float roughness = float(y) / float(length - 1);
-
-		float k = (roughness + 1.0f) * (roughness + 1.0f) / 8.0f;
 
 		for (uint32_t x = 0; x < length; x++)
 		{
@@ -141,10 +137,10 @@ IImageDataSP VKTS_APIENTRY imageDataEnvironmentBRDF(const uint32_t length, const
 				glm::vec2 randomPoint = randomHammersley(sampleIndex, m);
 
 				// Specular
-				outputCookTorrance += renderIntegrateCookTorrance(randomPoint, N, V, k, roughness);
+				outputCookTorrance += renderIntegrateCookTorrance(randomPoint, NdotV, V, roughness);
 			}
 
-			currentTargetImage->setTexel(glm::vec4(outputCookTorrance, 0.0f, 0.0f), x, y, 0, 0, 0);
+			currentTargetImage->setTexel(glm::vec4(outputCookTorrance / float(samples), 0.0f, 1.0f), x, y, 0, 0, 0);
 		}
 	}
 

@@ -854,7 +854,37 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
                             return VK_FALSE;
                         }
 
-                        // TODO: Implement pre-filter if needed.
+                        if (preFiltered)
+                        {
+                        	// TODO: Implement pre-filter for cube map.
+
+                        	// Generate BSDF environment look up table.
+
+                        	auto targetImageFilename = "texture/BSDF_LUT_" + std::to_string(VKTS_BSDF_LENGTH) + "_" + std::to_string(VKTS_BSDF_M) + ".data";
+
+                        	IImageDataSP lut = imageDataLoadRaw(targetImageFilename.c_str(), VKTS_BSDF_LENGTH, VKTS_BSDF_LENGTH, VK_FORMAT_R32G32_SFLOAT);
+
+                            if (!lut.get())
+                            {
+                            	lut = imageDataEnvironmentBRDF(VKTS_BSDF_LENGTH, VKTS_BSDF_M, "BSDF_LUT.data");
+
+                                if (!lut.get())
+                                {
+                                	logPrint(VKTS_LOG_ERROR, "Scenegraph: Could not generate BSDF lut");
+
+                                    return VK_FALSE;
+                                }
+
+                            	if (!imageDataSave(targetImageFilename.c_str(), lut))
+                            	{
+									logPrint(VKTS_LOG_ERROR, "Scenegraph: Could not save BSDF lut");
+
+									return VK_FALSE;
+                                }
+
+                                context->addImageData(lut);
+                            }
+                        }
                     }
 
                     //

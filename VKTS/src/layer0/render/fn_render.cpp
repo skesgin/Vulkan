@@ -24,33 +24,44 @@
  * THE SOFTWARE.
  */
 
+// see Specular BRDF Reference: http://graphicrants.blogspot.com/2013/08/specular-brdf-reference.html
+
 #include <vkts/vkts.hpp>
 
 namespace vkts
 {
 
-float VKTS_APIENTRY renderGetGeometricShadowingSchlickBeckmann(const float NdotV, const float k)
+float VKTS_APIENTRY renderGetGeometricShadowingSchlick(const float NdotV, const float k)
 {
 	return NdotV / (NdotV * (1.0f - k) + k);
 }
 
-float VKTS_APIENTRY renderGetGeometricShadowingSmith(const float NdotL, const float NdotV, const float k)
+float VKTS_APIENTRY renderGetGeometricShadowingSmithSchlickBeckmann(const float NdotL, const float NdotV, const float roughness)
 {
-	return renderGetGeometricShadowingSchlickBeckmann(NdotL, k) * renderGetGeometricShadowingSchlickBeckmann(NdotV, k);
+	float k = roughness * roughness * sqrtf(2.0f / VKTS_PI);
+
+	return renderGetGeometricShadowingSchlick(NdotL, k) * renderGetGeometricShadowingSchlick(NdotV, k);
 }
 
-glm::vec3 VKTS_APIENTRY renderGetMicrofacetWeightedVector(const glm::vec2& e, const float roughness)
+float VKTS_APIENTRY renderGetGeometricShadowingSmithSchlickGGX(float NdotL, float NdotV, float roughness)
+{
+	float k = roughness * roughness * 0.5f;
+
+	return renderGetGeometricShadowingSchlick(NdotL, k) * renderGetGeometricShadowingSchlick(NdotV, k);
+}
+
+glm::vec3 VKTS_APIENTRY renderGetGGXWeightedVector(const glm::vec2& e, const float roughness)
 {
 	float alpha = roughness * roughness;
+
+	float phi = 2.0f * VKTS_PI * e.y;
+	float cosTheta = sqrtf((1.0f - e.x) / (1.0f + (alpha*alpha - 1.0f) * e.x));
+	float sinTheta = sqrtf(1.0f - cosTheta*cosTheta);
 
 	// Note: Polar Coordinates
 	// x = sin(theta)*cos(phi)
 	// y = sin(theta)*sin(phi)
 	// z = cos(theta)
-
-	float phi = 2.0f * VKTS_PI * e.y;
-	float cosTheta = sqrtf((1.0f - e.x) / (1.0f + (alpha*alpha - 1.0f) * e.x));
-	float sinTheta = sqrtf(1.0f - cosTheta*cosTheta);
 
 	float x = sinTheta * cosf(phi);
 	float y = sinTheta * sinf(phi);
@@ -68,66 +79,25 @@ glm::vec3 VKTS_APIENTRY renderGetCosineWeightedVector(const glm::vec2& e)
 	return glm::vec3(x, y, z);
 }
 
-glm::vec3 VKTS_APIENTRY renderLightCookTorrance(const IImageDataSP& cubeMap, const VkFilter filter, const uint32_t mipLevel, const glm::vec2& randomPoint, const glm::mat3& basis, const glm::vec3& N, const glm::vec3& V, const float roughness)
+
+glm::vec2 VKTS_APIENTRY renderIntegrateCookTorrance(const glm::vec2& randomPoint, const float NdotV, const glm::vec3& V, const float roughness)
 {
-	if (!cubeMap.get())
-	{
-		return glm::vec3(0.0f, 0.0f, 0.0f);
-	}
-
-	glm::vec3 HtangentSpace = renderGetMicrofacetWeightedVector(randomPoint, roughness);
-
-	// Transform H to world space.
-	glm::vec3 H = basis * HtangentSpace;
-
-	// Note: reflect takes incident vector.
-	glm::vec3 L = glm::reflect(-V, H);
-
-	float NdotL = glm::dot(N, L);
-	float NdotV = glm::dot(N, V);
-
-	// Lighted and visible
-	if (NdotL > 0.0f && NdotV > 0.0f)
-	{
-		return glm::vec3(cubeMap->getSampleCubeMap(L.x, L.y, L.z, filter, mipLevel));
-	}
-
-	return glm::vec3(0.0f, 0.0f, 0.0f);
-}
-
-glm::vec3 VKTS_APIENTRY renderLightLambert(const IImageDataSP& cubeMap, const VkFilter filter, const uint32_t mipLevel, const glm::vec2& randomPoint, const glm::mat3& basis)
-{
-	if (!cubeMap.get())
-	{
-		return glm::vec3(0.0f, 0.0f, 0.0f);
-	}
-
-	glm::vec3 LtangentSpace = renderGetCosineWeightedVector(randomPoint);
-
-	// Transform light ray to world space.
-	glm::vec3 L = basis * LtangentSpace;
-
-	return glm::vec3(cubeMap->getSampleCubeMap(L.x, L.y, L.z, filter, mipLevel));
-}
-
-glm::vec2 VKTS_APIENTRY renderIntegrateCookTorrance(const glm::vec2& randomPoint, glm::vec3& N, glm::vec3& V, const float k, const float roughness)
-{
-	glm::vec3 H = renderGetMicrofacetWeightedVector(randomPoint, roughness);
+	glm::vec3 H = renderGetGGXWeightedVector(randomPoint, roughness);
 
 	// Note: reflect takes incident vector.
 	glm::vec3 L = reflect(-V, H);
 
-	float NdotL = dot(N, L);
-	float NdotV = dot(N, V);
-	float NdotH = dot(N, H);
+	// N is vec3(0.0, 0.0, 1.0)
+	float NdotL = L.z;
+	float NdotH = H.z;
 
 	// Lighted and visible
-	if (NdotL > 0.0 && NdotV > 0.0)
+	if (NdotL > 0.0 && NdotV != 0.0f && NdotH != 0.0f)
 	{
-		float VdotH = dot(V, H);
+		float VdotH = glm::dot(V, H);
 
 		// Geometric Shadowing
-		float G = renderGetGeometricShadowingSmith(NdotL, NdotV, k);
+		float G = renderGetGeometricShadowingSmithSchlickGGX(NdotL, NdotV, roughness);
 
 		//
 		// Lo = BRDF * L * NdotL / PDF
@@ -141,12 +111,6 @@ glm::vec2 VKTS_APIENTRY renderIntegrateCookTorrance(const glm::vec2& randomPoint
 		// L is stored in the cube map array, F is replaced and color is later used in the real-time BRDF shader.
 
 		float colorFactor = G * VdotH / (NdotV * NdotH);
-
-		// Note: Needed for robustness. With specific parameters, a NaN can be the result.
-		if (glm::isnan(colorFactor))
-		{
-			return glm::vec2(0.0f, 0.0f);
-		}
 
 		float fresnelFactor = powf(1.0f - VdotH, 5.0f);
 

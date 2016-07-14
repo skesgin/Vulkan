@@ -43,6 +43,8 @@ private:
 
     ITextureSP environment;
 
+    ITextureSP lut;
+
 public:
 
     Scene();
@@ -75,6 +77,10 @@ public:
     virtual void setEnvironment(const ITextureSP& environment) override;
 
     virtual ITextureSP getEnvironment() const override;
+
+    virtual void setLut(const ITextureSP& environment) override;
+
+    virtual ITextureSP getLut() const override;
 
     virtual void updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets) override;
 
