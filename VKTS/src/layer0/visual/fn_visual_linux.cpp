@@ -102,131 +102,140 @@ VkBool32 VKTS_APIENTRY _visualDispatchMessagesGamepad()
 
     ssize_t bytesRead;
 
+    VkBool32 keepPooling;
+
     for (int32_t i = 0; i < VKTS_MAX_GAMEPADS; i++)
     {
         if (joystickFile[i] != -1)
         {
-            bytesRead = read(joystickFile[i], &joystickEvent, sizeof(joystickEvent));
+        	keepPooling = VK_TRUE;
 
-            if (bytesRead == -1 || bytesRead != sizeof(joystickEvent))
-            {
-                continue;
-            }
+        	while (keepPooling)
+        	{
+				bytesRead = read(joystickFile[i], &joystickEvent, sizeof(joystickEvent));
 
-            int32_t buttonIndex = -1;
-            VkBool32 buttonPressed;
+				if (bytesRead == -1 || bytesRead != sizeof(joystickEvent))
+				{
+					keepPooling = VK_FALSE;
 
-            int32_t axisIndex = -1;
-            float axisValue = 0.0f;
+					break;
+				}
 
-            if (joystickEvent.type & JS_EVENT_BUTTON)
-            {
-                buttonPressed = joystickEvent.value == 0 ? VK_FALSE : VK_TRUE;
+				int32_t buttonIndex = -1;
+				VkBool32 buttonPressed;
 
-                switch (joystickEvent.number)
-                {
-                    case 0:
-                        buttonIndex = VKTS_GAMEPAD_A;
-                        break;
-                    case 1:
-                        buttonIndex = VKTS_GAMEPAD_B;
-                        break;
-                    case 2:
-                        buttonIndex = VKTS_GAMEPAD_X;
-                        break;
-                    case 3:
-                        buttonIndex = VKTS_GAMEPAD_Y;
-                        break;
-                    case 4:
-                        buttonIndex = VKTS_GAMEPAD_LEFT_SHOULDER;
-                        break;
-                    case 5:
-                        buttonIndex = VKTS_GAMEPAD_RIGHT_SHOULDER;
-                        break;
-                    case 6:
-                        buttonIndex = VKTS_GAMEPAD_BACK;
-                        break;
-                    case 7:
-                        buttonIndex = VKTS_GAMEPAD_START;
-                        break;
-                    case 9:
-                        buttonIndex = VKTS_GAMEPAD_LEFT_THUMB;
-                        break;
-                    case 10:
-                        buttonIndex = VKTS_GAMEPAD_RIGHT_THUMB;
-                        break;
-                }
-            }
+				int32_t axisIndex = -1;
+				float axisValue = 0.0f;
 
-            if (joystickEvent.type & JS_EVENT_AXIS)
-            {
-                axisValue = static_cast<const float>(joystickEvent.value) / 32767.0f;
+				if (joystickEvent.type & JS_EVENT_BUTTON)
+				{
+					buttonPressed = joystickEvent.value == 0 ? VK_FALSE : VK_TRUE;
 
-                switch (joystickEvent.number)
-                {
-                    case 0:
-                        axisIndex = VKTS_GAMEPAD_LEFT_STICK_X;
-                        break;
-                    case 1:
-                        axisIndex = VKTS_GAMEPAD_LEFT_STICK_Y;
+					switch (joystickEvent.number)
+					{
+						case 0:
+							buttonIndex = VKTS_GAMEPAD_A;
+							break;
+						case 1:
+							buttonIndex = VKTS_GAMEPAD_B;
+							break;
+						case 2:
+							buttonIndex = VKTS_GAMEPAD_X;
+							break;
+						case 3:
+							buttonIndex = VKTS_GAMEPAD_Y;
+							break;
+						case 4:
+							buttonIndex = VKTS_GAMEPAD_LEFT_SHOULDER;
+							break;
+						case 5:
+							buttonIndex = VKTS_GAMEPAD_RIGHT_SHOULDER;
+							break;
+						case 6:
+							buttonIndex = VKTS_GAMEPAD_BACK;
+							break;
+						case 7:
+							buttonIndex = VKTS_GAMEPAD_START;
+							break;
+						case 9:
+							buttonIndex = VKTS_GAMEPAD_LEFT_THUMB;
+							break;
+						case 10:
+							buttonIndex = VKTS_GAMEPAD_RIGHT_THUMB;
+							break;
+					}
+				}
 
-                        axisValue = -axisValue;
+				if (joystickEvent.type & JS_EVENT_AXIS)
+				{
+					axisValue = static_cast<const float>(joystickEvent.value) / 32767.0f;
 
-                        break;
-                    case 2:
-                        axisIndex = VKTS_GAMEPAD_LEFT_TRIGGER;
+					switch (joystickEvent.number)
+					{
+						case 0:
+							axisIndex = VKTS_GAMEPAD_LEFT_STICK_X;
+							break;
+						case 1:
+							axisIndex = VKTS_GAMEPAD_LEFT_STICK_Y;
 
-                        axisValue = glm::clamp((axisValue + 1.0f) * 0.5f, 0.0f, 1.0f);
-                        break;
-                    case 3:
-                        axisIndex = VKTS_GAMEPAD_RIGHT_STICK_X;
-                        break;
-                    case 4:
-                        axisIndex = VKTS_GAMEPAD_RIGHT_STICK_Y;
+							axisValue = -axisValue;
 
-                        axisValue = -axisValue;
+							break;
+						case 2:
+							axisIndex = VKTS_GAMEPAD_LEFT_TRIGGER;
 
-                        break;
-                    case 5:
-                        axisIndex = VKTS_GAMEPAD_RIGHT_TRIGGER;
+							axisValue = glm::clamp((axisValue + 1.0f) * 0.5f, 0.0f, 1.0f);
+							break;
+						case 3:
+							axisIndex = VKTS_GAMEPAD_RIGHT_STICK_X;
+							break;
+						case 4:
+							axisIndex = VKTS_GAMEPAD_RIGHT_STICK_Y;
 
-                        axisValue = glm::clamp((axisValue + 1.0f) * 0.5f, 0.0f, 1.0f);
-                        break;
-                    case 6:
-                    {
-                        buttonPressed = axisValue < 0.0f ? VK_TRUE : VK_FALSE;
+							axisValue = -axisValue;
 
-                        _visualGamepadSetButton(i, VKTS_GAMEPAD_DPAD_LEFT, buttonPressed);
+							break;
+						case 5:
+							axisIndex = VKTS_GAMEPAD_RIGHT_TRIGGER;
 
-                        buttonPressed = axisValue > 0.0f ? VK_TRUE : VK_FALSE;
+							axisValue = glm::clamp((axisValue + 1.0f) * 0.5f, 0.0f, 1.0f);
+							break;
+						case 6:
+						{
+							buttonPressed = axisValue < 0.0f ? VK_TRUE : VK_FALSE;
 
-                        _visualGamepadSetButton(i, VKTS_GAMEPAD_DPAD_RIGHT, buttonPressed);
-                    }
-                    break;
-                    case 7:
-                    {
-                        buttonPressed = axisValue > 0.0f ? VK_TRUE : VK_FALSE;
+							_visualGamepadSetButton(i, VKTS_GAMEPAD_DPAD_LEFT, buttonPressed);
 
-                        _visualGamepadSetButton(i, VKTS_GAMEPAD_DPAD_DOWN, buttonPressed);
+							buttonPressed = axisValue > 0.0f ? VK_TRUE : VK_FALSE;
 
-                        buttonPressed = axisValue < 0.0f ? VK_TRUE : VK_FALSE;
+							_visualGamepadSetButton(i, VKTS_GAMEPAD_DPAD_RIGHT, buttonPressed);
+						}
+						break;
+						case 7:
+						{
+							buttonPressed = axisValue > 0.0f ? VK_TRUE : VK_FALSE;
 
-                        _visualGamepadSetButton(i, VKTS_GAMEPAD_DPAD_UP, buttonPressed);
-                    }
-                    break;
-                }
+							_visualGamepadSetButton(i, VKTS_GAMEPAD_DPAD_DOWN, buttonPressed);
 
-            }
+							buttonPressed = axisValue < 0.0f ? VK_TRUE : VK_FALSE;
 
-            if (buttonIndex != -1)
-            {
-            	_visualGamepadSetButton(i, buttonIndex, buttonPressed);
-            }
+							_visualGamepadSetButton(i, VKTS_GAMEPAD_DPAD_UP, buttonPressed);
+						}
+						break;
+					}
 
-            if (axisIndex != -1)
-            {
-            	_visualGamepadSetAxis(i, axisIndex, axisValue);
-            }
+				}
+
+				if (buttonIndex != -1)
+				{
+					_visualGamepadSetButton(i, buttonIndex, buttonPressed);
+				}
+
+				if (axisIndex != -1)
+				{
+					_visualGamepadSetAxis(i, axisIndex, axisValue);
+				}
+        	}
         }
     }
 
