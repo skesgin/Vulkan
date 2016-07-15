@@ -83,7 +83,7 @@ VkBool32 VKTS_APIENTRY _visualInit(const VkInstance instance, const VkPhysicalDe
 
     //
 
-    // TODO: Initialize native display and planes.
+    // Native displays and planes are already initialized or this is done automativally.
 
 	//
 
@@ -456,11 +456,7 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
 		currentDisplayContainer->display->setDimension(glm::uvec2(allDisplayModeProperties[bestMatch].parameters.visibleRegion.width, allDisplayModeProperties[bestMatch].parameters.visibleRegion.height));
 
-        //
-
-        // TODO: Resize native display and planes.
-
-	    //
+        // Resolution is changed automatically during Vulkan API call.
     }
 
 	//
@@ -677,11 +673,7 @@ void VKTS_APIENTRY _visualDestroyWindow(const NativeWindowSP& window)
     {
     	_visualInitDisplay(window->getNativeDisplay().lock()->getIndex());
 
-        //
-
-        // TODO: Resize back native display and planes.
-
-	    //
+        // Resize back happens when Vulkan is quit.
     }
 
     auto currentWindow = g_allWindows.find(window->getIndex());
@@ -738,9 +730,7 @@ void VKTS_APIENTRY _visualTerminate()
 
     //
 
-    // TODO: Shut down native display and planes.
-
-    //
+    // Native display and planes not needed to be shut down.
 }
 
 //
