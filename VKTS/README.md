@@ -82,6 +82,9 @@ How to build:
 Changelog:
 ----------
 
+07/16/2016
+- Added several, minor features. Please have a look at the git history.
+
 06/28/2016
 - Fixed, working and tested cube map generation.
 

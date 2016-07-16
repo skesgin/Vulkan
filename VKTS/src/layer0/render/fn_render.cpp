@@ -126,4 +126,47 @@ glm::vec2 VKTS_APIENTRY renderIntegrateCookTorrance(const glm::vec2& randomPoint
 	return glm::vec2(0.0f, 0.0f);
 }
 
+glm::vec3 VKTS_APIENTRY renderCookTorrance(const IImageDataSP& cubeMap, const VkFilter filter, const uint32_t mipLevel, const glm::vec2& randomPoint, const glm::mat3& basis, const glm::vec3& N, const glm::vec3& V, const float roughness)
+{
+	if (!cubeMap.get() || cubeMap->getArrayLayers() != 6)
+	{
+		return glm::vec3(0.0f, 0.0f, 0.0f);
+	}
+
+	glm::vec3 HtangentSpace = renderGetGGXWeightedVector(randomPoint, roughness);
+
+	// Transform H to world space.
+	glm::vec3 H = basis * HtangentSpace;
+
+	// Note: reflect takes incident vector.
+	glm::vec3 L = glm::reflect(-V, H);
+
+	float NdotL = glm::dot(N, L);
+	float NdotV = glm::dot(N, V);
+	float NdotH = glm::dot(N, H);
+
+	// Lighted and visible
+	if (NdotL > 0.0f && NdotV != 0.0f && NdotH != 0.0f)
+	{
+		return glm::vec3(cubeMap->getSampleCubeMap(L.x, L.y, L.z, filter, mipLevel));
+	}
+
+	return glm::vec3(0.0f, 0.0f, 0.0f);
+}
+
+glm::vec3 VKTS_APIENTRY renderLambert(const IImageDataSP& cubeMap, const VkFilter filter, const uint32_t mipLevel, const glm::vec2& randomPoint, const glm::mat3& basis)
+{
+	if (!cubeMap.get() || cubeMap->getArrayLayers() != 6)
+	{
+		return glm::vec3(0.0f, 0.0f, 0.0f);
+	}
+
+	glm::vec3 LtangentSpace = renderGetCosineWeightedVector(randomPoint);
+
+	// Transform light ray to world space.
+	glm::vec3 L = basis * LtangentSpace;
+
+	return glm::vec3(cubeMap->getSampleCubeMap(L.x, L.y, L.z, filter, mipLevel));
+}
+
 }
