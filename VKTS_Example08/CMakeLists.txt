@@ -8,6 +8,8 @@ set (VKTS_Example "VKTS_Example08")
 
 project (${VKTS_Example})
 
+set(VKTS_WSI "" CACHE STRING "Enter VKTS_DISPLAY_VISUAL for alternative WSI.")
+
 set(VKTS_WSI "VKTS_NO_DISPLAY" CACHE STRING "Keep VKTS_NO_VISUAL for no WSI.")
 
 add_definitions(-DVKTS_NO_VISUAL)
@@ -84,8 +86,12 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 	set(VKTS_COMPILER "GNU")
 
 	set(VKTS_LIB "lib")
-	
-	set(VKTS_ADDITIONAL_LIBS vulkan pthread xcb X11-xcb Xrandr X11)
+
+	if (${VKTS_WSI} MATCHES "VKTS_DISPLAY_VISUAL")
+		set(VKTS_ADDITIONAL_LIBS vulkan pthread)
+	else ()
+		set(VKTS_ADDITIONAL_LIBS vulkan pthread xcb X11-xcb Xrandr X11)
+	endif ()
 
 endif ()
 

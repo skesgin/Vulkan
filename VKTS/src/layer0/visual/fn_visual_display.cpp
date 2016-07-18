@@ -375,12 +375,16 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
 	if (!currentNativeDisplay.get())
 	{
+        logPrint(VKTS_LOG_ERROR, "Visual: No native display.");
+
 		return INativeWindowWP();
 	}
 
 	if (currentNativeDisplay->getIndex() >= _visualGetNumberDisplays())
 	{
-		return INativeWindowWP();
+        logPrint(VKTS_LOG_ERROR, "Visual: Invalid native display.");
+
+        return INativeWindowWP();
 	}
 
     //
@@ -420,7 +424,9 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
 		if (result != VK_SUCCESS || propertyCount == 0)
 		{
-			return INativeWindowWP();
+	        logPrint(VKTS_LOG_ERROR, "Visual: Could not get display mode properties count.");
+
+	        return INativeWindowWP();
 		}
 
 		std::vector<VkDisplayModePropertiesKHR> allDisplayModeProperties = std::vector<VkDisplayModePropertiesKHR>(propertyCount);
@@ -429,6 +435,8 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
 		if (result != VK_SUCCESS)
 		{
+	        logPrint(VKTS_LOG_ERROR, "Visual: Could not get display mode properties.");
+
 			return INativeWindowWP();
 		}
 
@@ -447,6 +455,8 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
 		if (refreshRate == 0)
 		{
+	        logPrint(VKTS_LOG_ERROR, "Visual: Invalid refresh rate.");
+
 			return INativeWindowWP();
 		}
 
@@ -467,10 +477,7 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
 	if (result != VK_SUCCESS || propertyCount == 0)
 	{
-		if (fullscreen)
-		{
-			_visualInitDisplay(currentNativeDisplay->getIndex());
-		}
+        logPrint(VKTS_LOG_ERROR, "Visual: Could not get physical device display plane properties.");
 
 		return INativeWindowWP();
 	}
@@ -481,10 +488,7 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
 	if (result != VK_SUCCESS)
 	{
-		if (fullscreen)
-		{
-			_visualInitDisplay(currentNativeDisplay->getIndex());
-		}
+        logPrint(VKTS_LOG_ERROR, "Visual: Could not get physical device display plane properties.");
 
 		return INativeWindowWP();
 	}
@@ -493,10 +497,14 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
 	VkDisplayKHR currentDisplay = VK_NULL_HANDLE;
 	uint32_t currentPlaneIndex = 0;
+	uint32_t currentPlaneStackIndex = 0;
+	VkExtent2D currentExtent = {(uint32_t)width, (uint32_t)height};
 
+	// Go through all planes.
 	for (uint32_t planeIndex = 0; planeIndex < propertyCount; planeIndex++)
 	{
-		if (allDisplayPlaneProperties[planeIndex].currentDisplay == VK_NULL_HANDLE)
+		// Check, if plane is attached to a display.
+		if (allDisplayPlaneProperties[planeIndex].currentDisplay != VK_NULL_HANDLE)
 		{
 			uint32_t displayCount;
 
@@ -504,10 +512,7 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
 			if (result != VK_SUCCESS|| displayCount == 0)
 			{
-				if (fullscreen)
-				{
-					_visualInitDisplay(currentNativeDisplay->getIndex());
-				}
+		        logPrint(VKTS_LOG_ERROR, "Visual: Could not get display plane supported displays count.");
 
 				return INativeWindowWP();
 			}
@@ -518,17 +523,15 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
 			if (result != VK_SUCCESS)
 			{
-				if (fullscreen)
-				{
-					_visualInitDisplay(currentNativeDisplay->getIndex());
-				}
+		        logPrint(VKTS_LOG_ERROR, "Visual: Could not get display plane supported displays.");
 
 				return INativeWindowWP();
 			}
 
-			for (uint32_t i; i < displayCount; i++)
+			for (uint32_t displayIndex = 0; displayIndex < displayCount; displayIndex++)
 			{
-				if (allDisplays[i] == g_allDisplayProperties[currentNativeDisplay->getIndex()].display)
+				// Check, if plane can be used on requested display.
+				if (allDisplays[displayIndex] == g_allDisplayProperties[currentNativeDisplay->getIndex()].display)
 				{
 					VkDisplayPlaneCapabilitiesKHR displayPlaneCapabilities;
 
@@ -536,39 +539,34 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
 					if (result != VK_SUCCESS)
 					{
-						if (fullscreen)
-						{
-							_visualInitDisplay(currentNativeDisplay->getIndex());
-						}
+				        logPrint(VKTS_LOG_ERROR, "Visual: Could not get display plane capabilities.");
 
 						return INativeWindowWP();
 					}
 
-					if (displayPlaneCapabilities.minSrcExtent.width > (uint32_t)width || displayPlaneCapabilities.minSrcExtent.height > (uint32_t)height)
-					{
-						if (fullscreen)
-						{
-							_visualInitDisplay(currentNativeDisplay->getIndex());
-						}
+					// Check, if plane fulfills extent requirements.
 
-						return INativeWindowWP();
+					if (displayPlaneCapabilities.minDstExtent.width > (uint32_t)width || displayPlaneCapabilities.minDstExtent.height > (uint32_t)height)
+					{
+				        logPrint(VKTS_LOG_DEBUG, "Visual: Extent to small.");
+
+						continue;
 					}
 
-					if (displayPlaneCapabilities.maxSrcExtent.width < (uint32_t)width || displayPlaneCapabilities.maxSrcExtent.height < (uint32_t)height)
+					if (displayPlaneCapabilities.maxDstExtent.width < (uint32_t)width || displayPlaneCapabilities.maxDstExtent.height < (uint32_t)height)
 					{
-						if (fullscreen)
-						{
-							_visualInitDisplay(currentNativeDisplay->getIndex());
-						}
+				        logPrint(VKTS_LOG_DEBUG, "Visual: Extent to large.");
 
-						return INativeWindowWP();
+						continue;
 					}
 
 					//
 
-					currentDisplay = allDisplays[i];
-
 					currentPlaneIndex = planeIndex;
+
+					currentDisplay = allDisplayPlaneProperties[planeIndex].currentDisplay;
+
+					currentPlaneStackIndex = allDisplayPlaneProperties[planeIndex].currentStackIndex;
 
 					break;
 				}
@@ -583,12 +581,26 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
 	if (currentDisplay == VK_NULL_HANDLE)
 	{
-		if (fullscreen)
+        logPrint(VKTS_LOG_INFO, "Visual: No plane found. Falling back to plane with current resolution.");
+
+		currentPlaneIndex = 0;
+
+		currentDisplay = allDisplayPlaneProperties[currentPlaneIndex].currentDisplay;
+
+		currentPlaneStackIndex = allDisplayPlaneProperties[currentPlaneIndex].currentStackIndex;
+
+		VkDisplayPlaneCapabilitiesKHR displayPlaneCapabilities;
+
+		result = vkGetDisplayPlaneCapabilitiesKHR(g_physicalDevice, displayMode, currentPlaneIndex, &displayPlaneCapabilities);
+
+		if (result != VK_SUCCESS)
 		{
-			_visualInitDisplay(currentNativeDisplay->getIndex());
+	        logPrint(VKTS_LOG_ERROR, "Visual: Could not get display plane capabilities.");
+
+			return INativeWindowWP();
 		}
 
-		return INativeWindowWP();
+		currentExtent = displayPlaneCapabilities.maxDstExtent;
 	}
 
 	//
@@ -597,15 +609,12 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
 	if (!currentNativeWindowContainer)
 	{
-		if (fullscreen)
-		{
-			_visualInitDisplay(currentNativeDisplay->getIndex());
-		}
+        logPrint(VKTS_LOG_ERROR, "Visual: Could not create native window container.");
 
 		return INativeWindowWP();
 	}
 
-	auto currentNativeWindow = NativeWindowSP(new NativeWindow(display, &currentNativeWindowContainer->displaySurfaceCreateInfo, currentWindowIndex, title, width, height, fullscreen, VK_FALSE, invisibleCursor));
+	auto currentNativeWindow = NativeWindowSP(new NativeWindow(display, &currentNativeWindowContainer->displaySurfaceCreateInfo, currentWindowIndex, title, (int32_t)currentExtent.width, (int32_t)currentExtent.height, fullscreen, VK_FALSE, invisibleCursor));
 
 	memset(&currentNativeWindowContainer->displaySurfaceCreateInfo, 0, sizeof(VkDisplaySurfaceCreateInfoKHR));
 
@@ -614,11 +623,11 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 	currentNativeWindowContainer->displaySurfaceCreateInfo.flags = 0;
 	currentNativeWindowContainer->displaySurfaceCreateInfo.displayMode = displayMode;
 	currentNativeWindowContainer->displaySurfaceCreateInfo.planeIndex = currentPlaneIndex;
-	currentNativeWindowContainer->displaySurfaceCreateInfo.planeStackIndex = currentPlaneIndex;
+	currentNativeWindowContainer->displaySurfaceCreateInfo.planeStackIndex = currentPlaneStackIndex;
 	currentNativeWindowContainer->displaySurfaceCreateInfo.transform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
 	currentNativeWindowContainer->displaySurfaceCreateInfo.globalAlpha = 1.0f;
 	currentNativeWindowContainer->displaySurfaceCreateInfo.alphaMode = VK_DISPLAY_PLANE_ALPHA_OPAQUE_BIT_KHR;
-	currentNativeWindowContainer->displaySurfaceCreateInfo.imageExtent = {(uint32_t)width, (uint32_t)height};
+	currentNativeWindowContainer->displaySurfaceCreateInfo.imageExtent = currentExtent;
 
 
 	currentNativeWindowContainer->window = currentNativeWindow;
@@ -627,7 +636,7 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
     //
 
-    _visualSetDisplayExtent(glm::ivec2(width, height));
+    _visualSetDisplayExtent(glm::ivec2((int32_t)currentExtent.width, (int32_t)currentExtent.height));
 
     //
 
@@ -671,8 +680,6 @@ void VKTS_APIENTRY _visualDestroyWindow(const NativeWindowSP& window)
 
     if (window->isFullscreen())
     {
-    	_visualInitDisplay(window->getNativeDisplay().lock()->getIndex());
-
         // Resize back happens when Vulkan is quit.
     }
 

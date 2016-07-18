@@ -72,12 +72,16 @@ VkBool32 VKTS_APIENTRY _visualInitDisplay(const VkInstance instance, const VkPhy
 
 		if (eventBits == 0x120013)
 		{
+	        logPrint(VKTS_LOG_INFO, "Visual: Found keyboard");
+
             system("stty -echo");
 
             g_keyFileDescriptor = fileDescriptor;
 		}
         else if (eventBits == 0x17)
         {
+	        logPrint(VKTS_LOG_INFO, "Visual: Found mouse");
+
             g_mouseFileDescriptor = fileDescriptor;
         }
         else
@@ -93,7 +97,7 @@ VkBool32 VKTS_APIENTRY _visualInitDisplay(const VkInstance instance, const VkPhy
     	return VK_FALSE;
     }
 
-    return VK_TRUE;
+    return _visualInitKey();
 }
 
 VkBool32 VKTS_APIENTRY _visualDispatchMessagesDisplay()
@@ -112,7 +116,7 @@ VkBool32 VKTS_APIENTRY _visualDispatchMessagesDisplay()
 
 			if (numBytes > 0 && keyEvent.type == EV_KEY)
 			{
-                int32_t keyIndex = _visualTranslateKey(keyEvent.code);
+                int32_t keyIndex = _visualTranslateKey((int32_t)keyEvent.code);
                 
                 if (keyIndex != VKTS_KEY_UNKNOWN)
                 {

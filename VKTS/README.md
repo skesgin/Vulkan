@@ -82,6 +82,10 @@ How to build:
 Changelog:
 ----------
 
+07/18/2016
+- Fixed VK_KHR_display configuration.
+- Added support for i.MX8 device.
+
 07/16/2016
 - Added several, minor features. Please have a look at the git history.
 

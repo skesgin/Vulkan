@@ -76,6 +76,8 @@ VkBool32 VKTS_APIENTRY _visualInitGamepad(const VkInstance instance, const VkPhy
     			{
     				joystickFile[gamepadIndex] = file;
 
+    		        logPrint(VKTS_LOG_INFO, "Visual: Found gamepad %d", gamepadIndex);
+
     				gamepadIndex++;
     			}
             	else
