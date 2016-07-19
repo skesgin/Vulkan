@@ -92,6 +92,24 @@ VKTS_APICALL size_t VKTS_APIENTRY commonGetStructureTypeSize(const void* ptr);
  */
 VKTS_APICALL IBinaryBufferSP VKTS_APIENTRY commonSerializeStructureType(const void* ptr);
 
+/**
+ *
+ * @ThreadSafe
+ */
+VKTS_APICALL VkBool32 VKTS_APIENTRY commonGetInt32Parameter(int32_t& out, const std::string& parameter, int argc, char *argv[]);
+
+/**
+ *
+ * @ThreadSafe
+ */
+VKTS_APICALL VkBool32 VKTS_APIENTRY commonGetUInt32Parameter(uint32_t& out, const std::string& parameter, int argc, char *argv[]);
+
+/**
+ *
+ * @ThreadSafe
+ */
+VKTS_APICALL VkBool32 VKTS_APIENTRY commonGetStringParameter(std::string& out, const std::string& parameter, int argc, char *argv[]);
+
 }
 
 #endif /* VKTS_FN_COMMON_HPP_ */

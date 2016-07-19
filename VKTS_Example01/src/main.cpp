@@ -96,7 +96,7 @@ static void terminateApp()
 	vkts::engineTerminate();
 }
 
-int main()
+int main(int argc, char* argv[])
 {
 	//
 	// Engine initialization.
@@ -189,7 +189,23 @@ int main()
 		return -1;
 	}
 
-	physicalDevice = allPhysicalDevices[0];
+	//
+
+	uint32_t physicalDeviceIndex = 0;
+
+	if (vkts::commonGetUInt32Parameter(physicalDeviceIndex, std::string("-pd"), argc, argv))
+	{
+		if (physicalDeviceIndex >= physicalDeviceCount)
+		{
+			vkts::logPrint(VKTS_LOG_ERROR, "Main: Physical device %u does not exist.", physicalDeviceIndex);
+
+			return -1;
+		}
+	}
+
+	//
+
+	physicalDevice = allPhysicalDevices[physicalDeviceIndex];
 
 	if (!vkts::wsiGatherNeededDeviceExtensions(physicalDevice))
 	{

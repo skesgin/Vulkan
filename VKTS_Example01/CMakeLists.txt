@@ -77,15 +77,19 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
 	set(VKTS_OS "Linux")
 	
-	set(VKTS_WINDOW "Xlib")
-		
 	set(VKTS_COMPILER "GNU")
 
 	set(VKTS_LIB "lib")
 
 	if (${VKTS_WSI} MATCHES "VKTS_DISPLAY_VISUAL")
+		add_definitions(-DVKTS_DISPLAY_VISUAL)
+
+		set(VKTS_WINDOW "Display")
+
 		set(VKTS_ADDITIONAL_LIBS vulkan pthread)
 	else ()
+		set(VKTS_WINDOW "Xlib")
+		
 		set(VKTS_ADDITIONAL_LIBS vulkan pthread xcb X11-xcb Xrandr X11)
 	endif ()
 

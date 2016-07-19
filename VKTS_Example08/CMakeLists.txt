@@ -8,11 +8,11 @@ set (VKTS_Example "VKTS_Example08")
 
 project (${VKTS_Example})
 
-set(VKTS_WSI "" CACHE STRING "Enter VKTS_DISPLAY_VISUAL for alternative WSI.")
-
 set(VKTS_WSI "VKTS_NO_DISPLAY" CACHE STRING "Keep VKTS_NO_VISUAL for no WSI.")
 
 add_definitions(-DVKTS_NO_VISUAL)
+
+set(VKTS_WINDOW "None")
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_External/include ${CMAKE_CURRENT_SOURCE_DIR}/../VKTS/include)
 
@@ -42,8 +42,6 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
 	set(VKTS_OS "Windows")
 	
-	set(VKTS_WINDOW "Win32")
-
     if (${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
 		
 		set(VKTS_COMPILER "MSVC")
@@ -60,9 +58,10 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 		
     endif ()        
 
-	set(VKTS_ADDITIONAL_LIBS vulkan-1 WinMM Xinput9_1_0 Pdh Psapi)
+	set(VKTS_ADDITIONAL_LIBS vulkan-1 Pdh Psapi)
 
     find_path(Vulkan_INCLUDE_DIR NAMES vulkan/vulkan.h PATHS "$ENV{VULKAN_SDK}/Include")
+    
     include_directories(AFTER ${Vulkan_INCLUDE_DIR})
 	
     if (${VKTS_BITS} MATCHES "64")
@@ -81,20 +80,13 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
 	set(VKTS_OS "Linux")
 	
-	set(VKTS_WINDOW "Xlib")
-		
 	set(VKTS_COMPILER "GNU")
 
 	set(VKTS_LIB "lib")
 
-	if (${VKTS_WSI} MATCHES "VKTS_DISPLAY_VISUAL")
-		set(VKTS_ADDITIONAL_LIBS vulkan pthread)
-	else ()
-		set(VKTS_ADDITIONAL_LIBS vulkan pthread xcb X11-xcb Xrandr X11)
-	endif ()
+	set(VKTS_ADDITIONAL_LIBS vulkan pthread)
 
 endif ()
-
 
 link_directories(${CMAKE_CURRENT_SOURCE_DIR}/../VKTS/${VKTS_LIB})
 

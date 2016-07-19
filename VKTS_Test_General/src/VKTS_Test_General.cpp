@@ -90,7 +90,7 @@ public:
 
 };
 
-int main()
+int main(int argc, char* argv[])
 {
 	vkts::IUpdateThreadSP a = vkts::IUpdateThreadSP(new Test("a"));
 	vkts::IUpdateThreadSP b = vkts::IUpdateThreadSP(new Test("b"));

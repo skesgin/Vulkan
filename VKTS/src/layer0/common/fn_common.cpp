@@ -493,4 +493,68 @@ IBinaryBufferSP VKTS_APIENTRY commonSerializeStructureType(const void* ptr)
     return binaryBufferCreate(&data[0], totalSize);
 }
 
+static int32_t VKTS_APIENTRY commonGetParameterIndex(const std::string& parameter, int argc, char *argv[])
+{
+	if (argc == 0 || !argv)
+	{
+		return -1;
+	}
+
+	int i = 0;
+
+	while (i < argc - 1)
+	{
+		if (parameter == argv[i])
+		{
+			return (int32_t)(i + 1);
+		}
+
+		i++;
+	}
+
+    return -1;
+}
+
+VkBool32 VKTS_APIENTRY commonGetInt32Parameter(int32_t& out, const std::string& parameter, int argc, char *argv[])
+{
+	auto index = commonGetParameterIndex(parameter, argc, argv);
+
+	if (index < 0)
+	{
+		return VK_FALSE;
+	}
+
+	out = (int32_t)atol(argv[index]);
+
+	return VK_TRUE;
+}
+
+VkBool32 VKTS_APIENTRY commonGetUInt32Parameter(uint32_t& out, const std::string& parameter, int argc, char *argv[])
+{
+	auto index = commonGetParameterIndex(parameter, argc, argv);
+
+	if (index < 0)
+	{
+		return VK_FALSE;
+	}
+
+	out = (uint32_t)atol(argv[index]);
+
+	return VK_TRUE;
+}
+
+VkBool32 VKTS_APIENTRY commonGetStringParameter(std::string& out, const std::string& parameter, int argc, char *argv[])
+{
+	auto index = commonGetParameterIndex(parameter, argc, argv);
+
+	if (index < 0)
+	{
+		return VK_FALSE;
+	}
+
+	out = argv[index];
+
+	return VK_TRUE;
+}
+
 }

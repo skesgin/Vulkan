@@ -40,12 +40,18 @@ IPhysicalDeviceSP VKTS_APIENTRY physicalDeviceCreate(const VkInstance instance, 
 
     uint32_t physicalDeviceCount;
 
-    VkResult result = vkEnumeratePhysicalDevices(instance, &physicalDeviceCount,
-                                                 nullptr);
+    VkResult result = vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, nullptr);
 
-    if (result != VK_SUCCESS || index >= physicalDeviceCount)
+    if (result != VK_SUCCESS)
     {
         logPrint(VKTS_LOG_ERROR, "PhysicalDevice: Could not get physical devices count.");
+
+        return IPhysicalDeviceSP();
+    }
+
+    if (index >= physicalDeviceCount)
+    {
+        logPrint(VKTS_LOG_ERROR, "PhysicalDevice: Invalid physical device index %u >= %u.", index, physicalDeviceCount);
 
         return IPhysicalDeviceSP();
     }

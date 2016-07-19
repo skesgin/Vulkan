@@ -82,6 +82,10 @@ How to build:
 Changelog:
 ----------
 
+07/19/2016
+- Fixed CMake files for i.MX8.
+- Added possibility to choose physical device via console option (e.g. "-pd 1" for physical device at index 1).
+
 07/18/2016
 - Fixed VK_KHR_display configuration.
 - Added support for i.MX8 device.

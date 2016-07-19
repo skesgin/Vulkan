@@ -61,7 +61,7 @@ static void terminateApp()
 	vkts::engineTerminate();
 }
 
-int main()
+int main(int argc, char* argv[])
 {
 	//
 	// Engine initialization.
@@ -87,7 +87,15 @@ int main()
 		return -1;
 	}
 
-	physicalDevice = vkts::physicalDeviceCreate(instance->getInstance(), 0);
+	//
+
+	uint32_t physicalDeviceIndex = 0;
+
+	vkts::commonGetUInt32Parameter(physicalDeviceIndex, std::string("-pd"), argc, argv);
+
+	//
+
+	physicalDevice = vkts::physicalDeviceCreate(instance->getInstance(), physicalDeviceIndex);
 
 	if (!physicalDevice.get())
 	{
