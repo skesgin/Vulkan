@@ -1590,7 +1590,7 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
                 return VK_FALSE;
             }
 
-            texture = scenegraphCreateTexture(fdata[0] / 128.0f, 0.0f, 0.0f, VK_FORMAT_R8_UNORM, context);
+            texture = scenegraphCreateTexture(fdata[0], 0.0f, 0.0f, VK_FORMAT_R8_UNORM, context);
 
             if (!texture.get())
             {

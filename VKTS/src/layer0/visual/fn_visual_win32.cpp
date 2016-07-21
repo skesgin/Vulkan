@@ -962,7 +962,6 @@ void VKTS_APIENTRY _visualDestroyWindow(const NativeWindowSP& window)
 
     if (window->getNativeWindow())
     {
-        g_allWindows[window->getNativeWindow()].reset();
         g_allWindows.remove(window->getNativeWindow());
     }
 }

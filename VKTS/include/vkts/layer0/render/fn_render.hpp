@@ -48,6 +48,8 @@ VKTS_APICALL glm::vec3 VKTS_APIENTRY renderCookTorrance(const IImageDataSP& cube
 
 VKTS_APICALL glm::vec3 VKTS_APIENTRY renderLambert(const IImageDataSP& cubeMap, const VkFilter filter, const uint32_t mipLevel, const glm::vec2& randomPoint, const glm::mat3& basis);
 
+VKTS_APICALL glm::mat3 VKTS_APIENTRY renderGetBasis(const glm::vec3& normal);
+
 }
 
 #endif /* VKTS_FN_RENDER_HPP_ */

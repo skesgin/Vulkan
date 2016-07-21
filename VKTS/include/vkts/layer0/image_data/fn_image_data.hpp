@@ -96,7 +96,13 @@ VKTS_APICALL SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataCubemap(con
  *
  * @ThreadSafe
  */
-VKTS_APICALL SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilter(const IImageDataSP& sourceImage, const std::string& name);
+VKTS_APICALL SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterCookTorrance(const IImageDataSP& sourceImage, const uint32_t m, const std::string& name);
+
+/**
+ *
+ * @ThreadSafe
+ */
+VKTS_APICALL SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterLambert(const IImageDataSP& sourceImage, const uint32_t m, const std::string& name);
 
 /**
  *

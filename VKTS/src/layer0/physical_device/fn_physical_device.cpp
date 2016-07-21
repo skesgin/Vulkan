@@ -31,6 +31,27 @@
 namespace vkts
 {
 
+uint32_t VKTS_APIENTRY physicalDeviceGetCount(const VkInstance instance)
+{
+    if (!instance)
+    {
+        return 0;
+    }
+
+    uint32_t physicalDeviceCount = 0;
+
+    VkResult result = vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, nullptr);
+
+    if (result != VK_SUCCESS)
+    {
+        logPrint(VKTS_LOG_ERROR, "PhysicalDevice: Could not get physical devices count.");
+
+        return 0;
+    }
+
+    return physicalDeviceCount;
+}
+
 IPhysicalDeviceSP VKTS_APIENTRY physicalDeviceCreate(const VkInstance instance, const uint32_t index)
 {
     if (!instance)

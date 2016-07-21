@@ -36,6 +36,12 @@ namespace vkts
  *
  * @ThreadSafe
  */
+VKTS_APICALL uint32_t VKTS_APIENTRY physicalDeviceGetCount(const VkInstance instance);
+
+/**
+ *
+ * @ThreadSafe
+ */
 VKTS_APICALL IPhysicalDeviceSP VKTS_APIENTRY physicalDeviceCreate(const VkInstance instance, const uint32_t index);
 
 }

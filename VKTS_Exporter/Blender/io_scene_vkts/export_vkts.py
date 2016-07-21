@@ -1595,7 +1595,7 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
             if not phongSpecularWritten:
                 fw("phong_specular_color %f %f %f\n" % (material.specular_intensity * material.specular_color[0], material.specular_intensity * material.specular_color[1], material.specular_intensity * material.specular_color[2]))
             if not phongSpecularShininessWritten:
-                fw("phong_specular_shininess_value %f\n" % (((float(material.specular_hardness) - 1.0) / 510.0) * 128.0))
+                fw("phong_specular_shininess_value %f\n" % ((float(material.specular_hardness) - 1.0) / 510.0))
                 
             if material.use_transparency:
                 fw("\n")    

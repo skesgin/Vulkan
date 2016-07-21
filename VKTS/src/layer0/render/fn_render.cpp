@@ -169,4 +169,25 @@ glm::vec3 VKTS_APIENTRY renderLambert(const IImageDataSP& cubeMap, const VkFilte
 	return glm::vec3(cubeMap->getSampleCubeMap(L.x, L.y, L.z, filter, mipLevel));
 }
 
+glm::mat3 VKTS_APIENTRY renderGetBasis(const glm::vec3& normal)
+{
+	glm::vec3 bitangent = glm::vec3(0.0f, 1.0f, 0.0f);
+
+	float NdotB = glm::dot(normal, bitangent);
+
+	if (NdotB == 1.0f)
+	{
+		bitangent = glm::vec3(0.0f, 0.0f, -1.0f);
+	}
+	else if (NdotB == -1.0f)
+	{
+		bitangent = glm::vec3(0.0f, 0.0f, 1.0f);
+	}
+
+	glm::vec3 tangent = glm::cross(bitangent, normal);
+	bitangent = glm::cross(normal, tangent);
+
+	return glm::mat3(tangent, bitangent, normal);
+}
+
 }

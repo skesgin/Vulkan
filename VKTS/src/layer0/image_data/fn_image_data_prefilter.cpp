@@ -29,9 +29,9 @@
 namespace vkts
 {
 
-SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilter(const IImageDataSP& sourceImage, const std::string& name)
+SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterCookTorrance(const IImageDataSP& sourceImage, const uint32_t m, const std::string& name)
 {
-    if (name.size() == 0 || !sourceImage.get() || sourceImage->getArrayLayers() != 6 || sourceImage->getDepth() != 1)
+    if (name.size() == 0 || !sourceImage.get() || sourceImage->getArrayLayers() != 6 || sourceImage->getDepth() != 1 || sourceImage->getWidth() != sourceImage->getHeight() || m == 0 || m > 32 || sourceImage->getWidth() < 2)
     {
         return SmartPointerVector<IImageDataSP>();
     }
@@ -81,9 +81,223 @@ SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilter(const IImageDa
 		}
     }
 
+    uint32_t roughnessSamples = (uint32_t)(result.size() / 6);
+
+    //
+    // Cook torrance specular.
     //
 
-    // TODO: Prefilter cube map.
+    uint32_t samples = 1 << m;
+
+    uint32_t length = (uint32_t)sourceImage->getWidth();
+
+    // 0.5 as step goes form -1.0 to 1.0 and not just 0.0 to 1.0
+	float step = 2.0f / (float)length;
+	float offset = step * 0.5f;
+
+	//
+
+	glm::vec3 scanVector;
+
+	for (uint32_t y = 0; y < length; y++)
+	{
+		for (uint32_t x = 0; x < length; x++)
+		{
+			for (uint32_t i = 0; i < 6; i++)
+			{
+				switch (i)
+				{
+					case 0:
+
+						// Positive X
+						scanVector = glm::vec3(1.0f, 1.0f - offset - step * (float)y, 1.0f - offset - step * (float)x);
+
+						break;
+					case 1:
+
+						// Negative X
+						scanVector = glm::vec3(-1.0f, 1.0f - offset - step * (float)y, -1.0f + offset + step * (float)x);
+
+						break;
+					case 2:
+
+						// Positive Y
+						scanVector = glm::vec3(-1.0f + offset + step * (float)x, 1.0f, -1.0f + offset + step * (float)y);
+
+						break;
+					case 3:
+
+						// Negative Y
+						scanVector = glm::vec3(-1.0f + offset + step * (float)x, -1.0f, 1.0f - offset - step * (float)y);
+
+						break;
+					case 4:
+
+						// Positive Z
+						scanVector = glm::vec3(-1.0f + offset + step * (float)x, 1.0f - offset - step * (float)y, 1.0f);
+
+						break;
+					case 5:
+
+						// Negative Z
+						scanVector = glm::vec3(1.0f - offset - step * (float)x, 1.0f - offset - step * (float)y, -1.0f);
+
+						break;
+				}
+
+				scanVector = glm::normalize(scanVector);
+
+				//
+
+				glm::mat3 basis = renderGetBasis(scanVector);
+
+				for (uint32_t roughnessSampleIndex = 0; roughnessSampleIndex < roughnessSamples; roughnessSampleIndex++)
+				{
+					glm::vec3 colorCookTorrance = glm::vec3(0.0f, 0.0f, 0.0f);
+
+					float roughness = (float)roughnessSampleIndex / (float)(roughnessSamples - 1);
+
+					for (uint32_t sampleIndex = 0; sampleIndex < samples; sampleIndex++)
+					{
+						glm::vec2 randomPoint = randomHammersley(sampleIndex, m);
+
+						// N = V
+						colorCookTorrance += renderCookTorrance(sourceImage, VK_FILTER_LINEAR, 0, randomPoint, basis, scanVector, scanVector, roughness);
+					}
+
+					//
+
+					result[i * roughnessSamples + roughnessSampleIndex]->setTexel(glm::vec4(colorCookTorrance / (float) samples, 1.0f), x, y, 0, 0, 0);
+				}
+			}
+		}
+	}
+
+    return result;
+}
+
+SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterLambert(const IImageDataSP& sourceImage, const uint32_t m, const std::string& name)
+{
+    if (name.size() == 0 || !sourceImage.get() || sourceImage->getArrayLayers() != 6 || sourceImage->getDepth() != 1 || sourceImage->getWidth() != sourceImage->getHeight() || m == 0 || m > 32)
+    {
+        return SmartPointerVector<IImageDataSP>();
+    }
+
+    std::string sourceImageFilename = name;
+
+    auto dotIndex = sourceImageFilename.rfind(".");
+
+    if (dotIndex == sourceImageFilename.npos)
+    {
+        return SmartPointerVector<IImageDataSP>();
+    }
+
+    auto sourceImageName = sourceImageFilename.substr(0, dotIndex);
+    auto sourceImageExtension = sourceImageFilename.substr(dotIndex);
+
+    IImageDataSP currentTargetImage;
+    std::string targetImageFilename;
+
+    SmartPointerVector<IImageDataSP> result;
+
+    // Create mip maps for all six layers.
+    for (uint32_t layer = 0; layer < 6; layer++)
+    {
+		targetImageFilename = sourceImageName + "_LEVEL0_LAYER" + std::to_string(layer) + sourceImageExtension;
+
+		currentTargetImage = imageDataCreate(targetImageFilename, sourceImage->getWidth(), sourceImage->getHeight(), 1, 0.0f, 0.0f, 0.0f, 0.0f, sourceImage->getImageType(), sourceImage->getFormat());
+
+		if (!currentTargetImage.get())
+		{
+			return SmartPointerVector<IImageDataSP>();
+		}
+
+		result.append(currentTargetImage);
+    }
+
+    //
+    // Lambert
+    //
+
+    uint32_t samples = 1 << m;
+
+    uint32_t length = (uint32_t)sourceImage->getWidth();
+
+    // 0.5 as step goes form -1.0 to 1.0 and not just 0.0 to 1.0
+	float step = 2.0f / (float)length;
+	float offset = step * 0.5f;
+
+	//
+
+	glm::vec3 scanVector;
+
+	for (uint32_t y = 0; y < length; y++)
+	{
+		for (uint32_t x = 0; x < length; x++)
+		{
+			for (uint32_t i = 0; i < 6; i++)
+			{
+				switch (i)
+				{
+					case 0:
+
+						// Positive X
+						scanVector = glm::vec3(1.0f, 1.0f - offset - step * (float)y, 1.0f - offset - step * (float)x);
+
+						break;
+					case 1:
+
+						// Negative X
+						scanVector = glm::vec3(-1.0f, 1.0f - offset - step * (float)y, -1.0f + offset + step * (float)x);
+
+						break;
+					case 2:
+
+						// Positive Y
+						scanVector = glm::vec3(-1.0f + offset + step * (float)x, 1.0f, -1.0f + offset + step * (float)y);
+
+						break;
+					case 3:
+
+						// Negative Y
+						scanVector = glm::vec3(-1.0f + offset + step * (float)x, -1.0f, 1.0f - offset - step * (float)y);
+
+						break;
+					case 4:
+
+						// Positive Z
+						scanVector = glm::vec3(-1.0f + offset + step * (float)x, 1.0f - offset - step * (float)y, 1.0f);
+
+						break;
+					case 5:
+
+						// Negative Z
+						scanVector = glm::vec3(1.0f - offset - step * (float)x, 1.0f - offset - step * (float)y, -1.0f);
+
+						break;
+				}
+
+				scanVector = glm::normalize(scanVector);
+
+				//
+
+				glm::mat3 basis = renderGetBasis(scanVector);
+
+				glm::vec3 colorLambert = glm::vec3(0.0f, 0.f, 0.0f);
+
+				for (uint32_t sampleIndex = 0; sampleIndex < samples; sampleIndex++)
+				{
+					glm::vec2 randomPoint = randomHammersley(sampleIndex, m);
+
+					colorLambert += renderLambert(sourceImage, VK_FILTER_LINEAR, 0, randomPoint, basis);
+				}
+
+				//
+
+				result[i]->setTexel(glm::vec4(colorLambert / (float) samples, 1.0f), x, y, 0, 0, 0);
+			}
+		}
+	}
 
     return result;
 }
