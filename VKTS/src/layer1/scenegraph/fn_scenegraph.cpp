@@ -1196,27 +1196,6 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
             {
                 bsdfMaterial = IBSDFMaterialSP(new BSDFMaterial());
                 phongMaterial = IPhongMaterialSP();
-
-                // Create all possibilities, even when not used.
-
-                VkDescriptorPoolSize descriptorPoolSize[2];
-
-                memset(&descriptorPoolSize, 0, sizeof(descriptorPoolSize));
-
-				descriptorPoolSize[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-				descriptorPoolSize[0].descriptorCount = 5;
-
-				descriptorPoolSize[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-				descriptorPoolSize[1].descriptorCount = 18;
-
-                auto descriptorPool = descriptorPoolCreate(context->getInitialResources()->getDevice()->getDevice(), VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT, 1, 2, descriptorPoolSize);
-
-                if (!descriptorPool.get())
-                {
-                    return VK_FALSE;
-                }
-
-                bsdfMaterial->setDescriptorPool(descriptorPool);
             }
             else if (strncmp(sdata, "Phong", 5) == 0)
             {
@@ -1769,108 +1748,6 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
 
             if (bsdfMaterial.get())
             {
-            	bsdfMaterial->setAttributes((VkTsVertexBufferType)uidata);
-
-            	//
-
-            	VkDescriptorSetLayoutBinding descriptorSetLayoutBinding[VKTS_BINDING_UNIFORM_BSDF_TOTAL_BINDING_COUNT];
-
-            	memset(&descriptorSetLayoutBinding, 0, sizeof(descriptorSetLayoutBinding));
-
-            	uint32_t bindingCount = 0;
-
-            	descriptorSetLayoutBinding[bindingCount].binding = VKTS_BINDING_UNIFORM_BUFFER_VIEWPROJECTION;
-            	descriptorSetLayoutBinding[bindingCount].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-            	descriptorSetLayoutBinding[bindingCount].descriptorCount = 1;
-            	descriptorSetLayoutBinding[bindingCount].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-            	descriptorSetLayoutBinding[bindingCount].pImmutableSamplers = nullptr;
-
-            	bindingCount++;
-
-            	descriptorSetLayoutBinding[bindingCount].binding = VKTS_BINDING_UNIFORM_BUFFER_TRANSFORM;
-            	descriptorSetLayoutBinding[bindingCount].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-            	descriptorSetLayoutBinding[bindingCount].descriptorCount = 1;
-            	descriptorSetLayoutBinding[bindingCount].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-            	descriptorSetLayoutBinding[bindingCount].pImmutableSamplers = nullptr;
-
-            	bindingCount++;
-
-            	if ((bsdfMaterial->getAttributes() & VKTS_VERTEX_BUFFER_TYPE_BONES) == VKTS_VERTEX_BUFFER_TYPE_BONES)
-            	{
-                	descriptorSetLayoutBinding[bindingCount].binding = VKTS_BINDING_UNIFORM_BUFFER_BONE_TRANSFORM;
-                	descriptorSetLayoutBinding[bindingCount].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-                	descriptorSetLayoutBinding[bindingCount].descriptorCount = 1;
-                	descriptorSetLayoutBinding[bindingCount].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-                	descriptorSetLayoutBinding[bindingCount].pImmutableSamplers = nullptr;
-
-                	bindingCount++;
-            	}
-
-            	if (bsdfMaterial->getNumberTextures() > VKTS_BINDING_UNIFORM_BSDF_BINDING_COUNT)
-            	{
-            		vkts::logPrint(VKTS_LOG_ERROR, "Scenegraph: Too many textures.");
-
-            		return VK_FALSE;
-            	}
-
-                for (size_t i = 0; i < bsdfMaterial->getNumberTextures(); i++)
-                {
-            		descriptorSetLayoutBinding[bindingCount].binding = VKTS_BINDING_UNIFORM_SAMPLER_BSDF_FIRST + (uint32_t)i;
-            		descriptorSetLayoutBinding[bindingCount].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-            		descriptorSetLayoutBinding[bindingCount].descriptorCount = 1;
-            		descriptorSetLayoutBinding[bindingCount].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-            		descriptorSetLayoutBinding[bindingCount].pImmutableSamplers = nullptr;
-
-            		bindingCount++;
-                }
-
-                //
-
-                auto descriptorSetLayout = descriptorSetLayoutCreate(context->getInitialResources()->getDevice()->getDevice(), 0, bindingCount, descriptorSetLayoutBinding);
-
-            	if (!descriptorSetLayout.get())
-            	{
-            		vkts::logPrint(VKTS_LOG_ERROR, "Scenegraph: Could not create descriptor set layout.");
-
-            		return VK_FALSE;
-            	}
-
-            	bsdfMaterial->setDescriptorSetLayout(descriptorSetLayout);
-
-            	//
-
-            	const auto allDescriptorSetLayouts = descriptorSetLayout->getDescriptorSetLayout();
-
-                auto descriptorSets = descriptorSetsCreate(context->getInitialResources()->getDevice()->getDevice(), bsdfMaterial->getDescriptorPool()->getDescriptorPool(), 1, &allDescriptorSetLayouts);
-
-                if (!descriptorSets.get())
-                {
-                	vkts::logPrint(VKTS_LOG_ERROR, "Scenegraph: Could not create descriptor sets.");
-
-                    return VK_FALSE;
-                }
-
-                bsdfMaterial->setDescriptorSets(descriptorSets);
-
-                //
-
-            	VkDescriptorSetLayout setLayouts[1];
-
-            	setLayouts[0] = descriptorSetLayout->getDescriptorSetLayout();
-
-            	auto pipelineLayout = pipelineCreateLayout(context->getInitialResources()->getDevice()->getDevice(), 0, 1, setLayouts, 0, nullptr);
-
-            	if (!pipelineLayout.get())
-            	{
-            		vkts::logPrint(VKTS_LOG_ERROR, "Scenegraph: Could not create pipeline layout.");
-
-            		return VK_FALSE;
-            	}
-
-            	bsdfMaterial->setPipelineLayout(pipelineLayout);
-
-            	//
-
             	bsdfMaterial->setAttributes((VkTsVertexBufferType)uidata);
             }
             else
@@ -2541,6 +2418,125 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
 
                 if (subMesh->getBSDFMaterial().get())
                 {
+                	VkDescriptorSetLayoutBinding descriptorSetLayoutBinding[VKTS_BINDING_UNIFORM_BSDF_TOTAL_BINDING_COUNT];
+
+                	memset(&descriptorSetLayoutBinding, 0, sizeof(descriptorSetLayoutBinding));
+
+                	uint32_t bindingCount = 0;
+
+                	descriptorSetLayoutBinding[bindingCount].binding = VKTS_BINDING_UNIFORM_BUFFER_VIEWPROJECTION;
+                	descriptorSetLayoutBinding[bindingCount].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+                	descriptorSetLayoutBinding[bindingCount].descriptorCount = 1;
+                	descriptorSetLayoutBinding[bindingCount].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+                	descriptorSetLayoutBinding[bindingCount].pImmutableSamplers = nullptr;
+
+                	bindingCount++;
+
+                	descriptorSetLayoutBinding[bindingCount].binding = VKTS_BINDING_UNIFORM_BUFFER_TRANSFORM;
+                	descriptorSetLayoutBinding[bindingCount].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+                	descriptorSetLayoutBinding[bindingCount].descriptorCount = 1;
+                	descriptorSetLayoutBinding[bindingCount].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+                	descriptorSetLayoutBinding[bindingCount].pImmutableSamplers = nullptr;
+
+                	bindingCount++;
+
+                	if ((subMesh->getVertexBufferType() & VKTS_VERTEX_BUFFER_TYPE_BONES) == VKTS_VERTEX_BUFFER_TYPE_BONES)
+                	{
+                    	descriptorSetLayoutBinding[bindingCount].binding = VKTS_BINDING_UNIFORM_BUFFER_BONE_TRANSFORM;
+                    	descriptorSetLayoutBinding[bindingCount].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+                    	descriptorSetLayoutBinding[bindingCount].descriptorCount = 1;
+                    	descriptorSetLayoutBinding[bindingCount].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+                    	descriptorSetLayoutBinding[bindingCount].pImmutableSamplers = nullptr;
+
+                    	bindingCount++;
+                	}
+
+                	if (subMesh->getBSDFMaterial()->getNumberTextures() > VKTS_BINDING_UNIFORM_BSDF_BINDING_COUNT)
+                	{
+                		vkts::logPrint(VKTS_LOG_ERROR, "Scenegraph: Too many textures.");
+
+                		return VK_FALSE;
+                	}
+
+                    for (size_t i = 0; i < subMesh->getBSDFMaterial()->getNumberTextures(); i++)
+                    {
+                		descriptorSetLayoutBinding[bindingCount].binding = VKTS_BINDING_UNIFORM_SAMPLER_BSDF_FIRST + (uint32_t)i;
+                		descriptorSetLayoutBinding[bindingCount].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+                		descriptorSetLayoutBinding[bindingCount].descriptorCount = 1;
+                		descriptorSetLayoutBinding[bindingCount].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+                		descriptorSetLayoutBinding[bindingCount].pImmutableSamplers = nullptr;
+
+                		bindingCount++;
+                    }
+
+                    //
+
+                    auto descriptorSetLayout = descriptorSetLayoutCreate(context->getInitialResources()->getDevice()->getDevice(), 0, bindingCount, descriptorSetLayoutBinding);
+
+                	if (!descriptorSetLayout.get())
+                	{
+                		vkts::logPrint(VKTS_LOG_ERROR, "Scenegraph: Could not create descriptor set layout.");
+
+                		return VK_FALSE;
+                	}
+
+                	subMesh->setDescriptorSetLayout(descriptorSetLayout);
+
+                    // Create all possibilities, even when not used.
+
+                    VkDescriptorPoolSize descriptorPoolSize[2];
+
+                    memset(&descriptorPoolSize, 0, sizeof(descriptorPoolSize));
+
+    				descriptorPoolSize[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    				descriptorPoolSize[0].descriptorCount = 5;
+
+    				descriptorPoolSize[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    				descriptorPoolSize[1].descriptorCount = 18;
+
+                    auto descriptorPool = descriptorPoolCreate(context->getInitialResources()->getDevice()->getDevice(), VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT, 1, 2, descriptorPoolSize);
+
+                    if (!descriptorPool.get())
+                    {
+                		vkts::logPrint(VKTS_LOG_ERROR, "Scenegraph: Could not create descriptor pool.");
+
+                        return VK_FALSE;
+                    }
+
+            		subMesh->getBSDFMaterial()->setDescriptorPool(descriptorPool);
+
+                	//
+
+                	const auto allDescriptorSetLayouts = descriptorSetLayout->getDescriptorSetLayout();
+
+                    auto descriptorSets = descriptorSetsCreate(context->getInitialResources()->getDevice()->getDevice(), subMesh->getBSDFMaterial()->getDescriptorPool()->getDescriptorPool(), 1, &allDescriptorSetLayouts);
+
+                    if (!descriptorSets.get())
+                    {
+                    	vkts::logPrint(VKTS_LOG_ERROR, "Scenegraph: Could not create descriptor sets.");
+
+                        return VK_FALSE;
+                    }
+
+                    subMesh->getBSDFMaterial()->setDescriptorSets(descriptorSets);
+
+                    //
+
+                	VkDescriptorSetLayout setLayouts[1];
+
+                	setLayouts[0] = descriptorSetLayout->getDescriptorSetLayout();
+
+                	auto pipelineLayout = pipelineCreateLayout(context->getInitialResources()->getDevice()->getDevice(), 0, 1, setLayouts, 0, nullptr);
+
+                	if (!pipelineLayout.get())
+                	{
+                		vkts::logPrint(VKTS_LOG_ERROR, "Scenegraph: Could not create pipeline layout.");
+
+                		return VK_FALSE;
+                	}
+
+                	subMesh->setPipelineLayout(pipelineLayout);
+
 					// Create graphics pipeline for this sub mesh.
 
                 	auto currentRenderPass = context->getRenderPass();
@@ -2552,7 +2548,7 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
 	                    return VK_FALSE;
 					}
 
-					auto currentPipelineLayout = subMesh->getBSDFMaterial()->getPipelineLayout();
+					auto currentPipelineLayout = subMesh->getPipelineLayout();
 
 					if (!currentPipelineLayout.get())
 					{
@@ -2569,6 +2565,11 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
 	                    logPrint(VKTS_LOG_ERROR, "Scenegraph: Sub mesh vertex buffer type does not match with material");
 
 	                    return VK_FALSE;
+					}
+
+					if ((subMesh->getVertexBufferType() & VKTS_VERTEX_BUFFER_TYPE_BONES) == VKTS_VERTEX_BUFFER_TYPE_BONES)
+					{
+						vertexBufferType |= VKTS_VERTEX_BUFFER_TYPE_BONES;
 					}
 
 					auto currentVertexShaderModule = context->useVertexShaderModule(vertexBufferType);

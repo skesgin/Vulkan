@@ -42,6 +42,7 @@
 #define VKTS_BSDF0_VERTEX_SHADER_NAME "shader/SPIR/V/bsdf.vert.spv"
 #define VKTS_BSDF1_VERTEX_SHADER_NAME "shader/SPIR/V/bsdf_no_texcoord.vert.spv"
 #define VKTS_BSDF2_VERTEX_SHADER_NAME "shader/SPIR/V/bsdf_tangents.vert.spv"
+#define VKTS_BSDF3_VERTEX_SHADER_NAME "shader/SPIR/V/bsdf_skinning.vert.spv"
 
 
 #define VKTS_ENV_VERTEX_SHADER_NAME "shader/SPIR/V/environment.vert.spv"

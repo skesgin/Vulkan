@@ -52,6 +52,9 @@ private:
     VkPrimitiveTopology primitiveTopology;
 
     IBSDFMaterialSP bsdfMaterial;
+
+    IDescriptorSetLayoutSP descriptorSetLayout;
+    IPipelineLayoutSP pipelineLayout;
     IGraphicsPipelineSP graphicsPipeline;
 
     IPhongMaterialSP phongMaterial;
@@ -121,6 +124,14 @@ public:
     virtual const IBSDFMaterialSP& getBSDFMaterial() const override;
 
     virtual void setBSDFMaterial(const IBSDFMaterialSP& bsdfMaterial) override;
+
+    virtual IDescriptorSetLayoutSP getDescriptorSetLayout() const override;
+
+    virtual void setDescriptorSetLayout(const IDescriptorSetLayoutSP& descriptorSetLayout) override;
+
+    virtual IPipelineLayoutSP getPipelineLayout() const override;
+
+    virtual void setPipelineLayout(const IPipelineLayoutSP& pipelineLayout) override;
 
     virtual const IGraphicsPipelineSP& getGraphicsPipeline() const override;
 

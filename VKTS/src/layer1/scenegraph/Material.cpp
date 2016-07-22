@@ -31,6 +31,11 @@ namespace vkts
 
 IDescriptorSetsSP Material::createDescriptorSetsByName(const std::string& nodeName)
 {
+	if (!descriptorPool.get() || !descriptorSets.get())
+	{
+		return IDescriptorSetsSP();
+	}
+
 	if (allDescriptorSets.contains(nodeName))
 	{
 		return allDescriptorSets[nodeName];
@@ -122,63 +127,6 @@ Material::Material(const Material& other) :
 {
 	memset(descriptorImageInfos, 0, sizeof(descriptorImageInfos));
 	memset(writeDescriptorSets, 0, sizeof(writeDescriptorSets));
-
-    // Textures cannot be cloned, just replaced.
-
-    descriptorPool = descriptorPoolCreate(other.descriptorPool->getDevice(), other.descriptorPool->getFlags(), other.descriptorPool->getMaxSets(), other.descriptorPool->getPoolSizeCount(), other.descriptorPool->getPoolSizes());
-
-    if (!descriptorPool.get())
-    {
-        destroy();
-
-        return;
-    }
-
-    descriptorSets = descriptorSetsCreate(descriptorPool->getDevice(), descriptorPool->getDescriptorPool(), other.descriptorSets->getDescriptorSetCount(), other.descriptorSets->getSetLayouts());
-
-    if (!descriptorSets.get())
-    {
-    	destroy();
-
-        return;
-    }
-
-    //
-
-    if (other.allDescriptorPools.size() != other.allDescriptorSets.size())
-    {
-    	destroy();
-
-        return;
-    }
-
-
-    for (size_t i = 0; i < other.allDescriptorPools.size(); i++)
-    {
-    	auto currentDescriptorPool = descriptorPoolCreate(other.allDescriptorPools.valueAt(i)->getDevice(), other.allDescriptorPools.valueAt(i)->getFlags(), other.allDescriptorPools.valueAt(i)->getMaxSets(), other.allDescriptorPools.valueAt(i)->getPoolSizeCount(), other.allDescriptorPools.valueAt(i)->getPoolSizes());
-
-        if (!currentDescriptorPool.get())
-        {
-        	destroy();
-
-            return;
-        }
-
-        allDescriptorPools[other.allDescriptorPools.keyAt(i)] = currentDescriptorPool;
-
-        //
-
-        auto currentDescriptorSets = descriptorSetsCreate(currentDescriptorPool->getDevice(), currentDescriptorPool->getDescriptorPool(), other.allDescriptorSets.valueAt(i)->getDescriptorSetCount(), other.allDescriptorSets.valueAt(i)->getSetLayouts());
-
-        if (!currentDescriptorSets.get())
-        {
-        	destroy();
-
-            return;
-        }
-
-        allDescriptorSets[other.allDescriptorSets.keyAt(i)] = currentDescriptorSets;
-    }
 }
 
 Material::~Material()
@@ -188,7 +136,6 @@ Material::~Material()
 
 void Material::destroy()
 {
-
     descriptorSets = IDescriptorSetsSP();
 
     descriptorPool = IDescriptorPoolSP();

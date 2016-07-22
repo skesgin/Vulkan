@@ -47,14 +47,10 @@ protected:
 
     SmartPointerVector<ITextureSP> allTextures;
 
-    IDescriptorSetLayoutSP descriptorSetLayout;
-
-    IPipelineLayoutSP pipelineLayout;
-
 public:
 
     BSDFMaterial();
-    BSDFMaterial(const BSDFMaterial& other) = delete;
+    BSDFMaterial(const BSDFMaterial& other);
     BSDFMaterial(BSDFMaterial&& other) = delete;
     virtual ~BSDFMaterial();
 
@@ -89,23 +85,21 @@ public:
 
     virtual void setDescriptorPool(const IDescriptorPoolSP& descriptorPool) override;
 
-    virtual IDescriptorSetLayoutSP getDescriptorSetLayout() const override;
-
-    virtual void setDescriptorSetLayout(const IDescriptorSetLayoutSP& descriptorSetLayout) override;
-
     virtual IDescriptorSetsSP getDescriptorSets() const override;
 
     virtual void setDescriptorSets(const IDescriptorSetsSP& descriptorSets) override;
-
-    virtual IPipelineLayoutSP getPipelineLayout() const override;
-
-    virtual void setPipelineLayout(const IPipelineLayoutSP& pipelineLayout) override;
 
     virtual void updateDescriptorSetsRecursive(const std::string& nodeName, const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets) override;
 
     virtual void bindDescriptorSets(const std::string& nodeName, const ICommandBuffersSP& cmdBuffer, const VkPipelineLayout layout, const uint32_t bufferIndex = 0) const override;
 
     virtual void bindDrawIndexedRecursive(const std::string& nodeName, const ICommandBuffersSP& cmdBuffer, const IGraphicsPipelineSP& graphicsPipeline, const overwrite* renderOverwrite = nullptr, const uint32_t bufferIndex = 0) const override;
+
+    //
+    // ICloneable
+    //
+
+    virtual IBSDFMaterialSP clone() const override;
 
     //
     // IDestroyable

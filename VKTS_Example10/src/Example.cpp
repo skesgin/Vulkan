@@ -392,6 +392,11 @@ VkBool32 Example::updateDescriptorSets()
 
 	writeDescriptorSets[1].dstBinding = VKTS_BINDING_UNIFORM_BUFFER_TRANSFORM;
 
+
+	writeDescriptorSets[2].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+
+	writeDescriptorSets[2].dstBinding = VKTS_BINDING_UNIFORM_BUFFER_BONE_TRANSFORM;
+
 	//
 	//
 
@@ -470,11 +475,12 @@ VkBool32 Example::buildScene(const vkts::ICommandBuffersSP& cmdBuffer)
 
 	//
 
-	if (allBSDFVertexShaderModules.size() == 3)
+	if (allBSDFVertexShaderModules.size() == 4)
 	{
 		sceneContext->addVertexShaderModule(VKTS_VERTEX_BUFFER_TYPE_VERTEX | VKTS_VERTEX_BUFFER_TYPE_NORMAL | VKTS_VERTEX_BUFFER_TYPE_TEXCOORD, allBSDFVertexShaderModules[0]);
 		sceneContext->addVertexShaderModule(VKTS_VERTEX_BUFFER_TYPE_VERTEX | VKTS_VERTEX_BUFFER_TYPE_NORMAL, allBSDFVertexShaderModules[1]);
 		sceneContext->addVertexShaderModule(VKTS_VERTEX_BUFFER_TYPE_VERTEX | VKTS_VERTEX_BUFFER_TYPE_TANGENTS | VKTS_VERTEX_BUFFER_TYPE_TEXCOORD, allBSDFVertexShaderModules[2]);
+		sceneContext->addVertexShaderModule(VKTS_VERTEX_BUFFER_TYPE_VERTEX | VKTS_VERTEX_BUFFER_TYPE_TANGENTS | VKTS_VERTEX_BUFFER_TYPE_TEXCOORD | VKTS_VERTEX_BUFFER_TYPE_BONES, allBSDFVertexShaderModules[3]);
 	}
 
 	sceneContext->setRenderPass(gbufferRenderPass);
@@ -1203,6 +1209,27 @@ VkBool32 Example::buildShader()
 	}
 
 	bsdfVertexShaderModule = vkts::shaderModuleCreate(VKTS_BSDF2_VERTEX_SHADER_NAME, initialResources->getDevice()->getDevice(), 0, vertexShaderBinary->getSize(), (uint32_t*)vertexShaderBinary->getData());
+
+	if (!bsdfVertexShaderModule.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create vertex shader module.");
+
+		return VK_FALSE;
+	}
+
+	allBSDFVertexShaderModules.append(bsdfVertexShaderModule);
+
+
+	vertexShaderBinary = vkts::fileLoadBinary(VKTS_BSDF3_VERTEX_SHADER_NAME);
+
+	if (!vertexShaderBinary.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not load vertex shader: '%s'", VKTS_BSDF3_VERTEX_SHADER_NAME);
+
+		return VK_FALSE;
+	}
+
+	bsdfVertexShaderModule = vkts::shaderModuleCreate(VKTS_BSDF3_VERTEX_SHADER_NAME, initialResources->getDevice()->getDevice(), 0, vertexShaderBinary->getSize(), (uint32_t*)vertexShaderBinary->getData());
 
 	if (!bsdfVertexShaderModule.get())
 	{

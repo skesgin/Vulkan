@@ -34,7 +34,7 @@ namespace vkts
 
 class overwrite;
 
-class IBSDFMaterial : public IDestroyable
+class IBSDFMaterial : public ICloneable<IBSDFMaterial>, public IDestroyable
 {
 
 public:
@@ -72,17 +72,9 @@ public:
 
     virtual void setDescriptorPool(const IDescriptorPoolSP& descriptorPool) = 0;
 
-    virtual IDescriptorSetLayoutSP getDescriptorSetLayout() const = 0;
-
-    virtual void setDescriptorSetLayout(const IDescriptorSetLayoutSP& descriptorSetLayout) = 0;
-
     virtual IDescriptorSetsSP getDescriptorSets() const = 0;
 
     virtual void setDescriptorSets(const IDescriptorSetsSP& descriptorSets) = 0;
-
-    virtual IPipelineLayoutSP getPipelineLayout() const = 0;
-
-    virtual void setPipelineLayout(const IPipelineLayoutSP& pipelineLayout) = 0;
 
     virtual void updateDescriptorSetsRecursive(const std::string& nodeName, const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets) = 0;
 

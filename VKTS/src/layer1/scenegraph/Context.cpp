@@ -30,7 +30,7 @@ namespace vkts
 {
 
 Context::Context(const VkBool32 replace, const IInitialResourcesSP& initialResources, const ICommandBuffersSP& cmdBuffer, const VkSamplerCreateInfo& samplerCreateInfo, const VkImageViewCreateInfo& imageViewCreateInfo, const IDescriptorSetLayoutSP& descriptorSetLayout) :
-    IContext(), replace(replace), initialResources(initialResources), cmdBuffer(cmdBuffer), samplerCreateInfo(samplerCreateInfo), imageViewCreateInfo(imageViewCreateInfo), descriptorSetLayout(descriptorSetLayout), allObjects(), allUsedObjects(), allMeshes(), allSubMeshes(), allAnimations(), allChannels(), allBSDFMaterials(), allPhongMaterials(), allUsedPhongMaterials(), allTextures(), allImageDatas(), allVertexShaderModules(), allFragmentShaderModules(), renderPass()
+    IContext(), replace(replace), initialResources(initialResources), cmdBuffer(cmdBuffer), samplerCreateInfo(samplerCreateInfo), imageViewCreateInfo(imageViewCreateInfo), descriptorSetLayout(descriptorSetLayout), allObjects(), allUsedObjects(), allMeshes(), allSubMeshes(), allAnimations(), allChannels(), allBSDFMaterials(), allUsedBSDFMaterials(), allPhongMaterials(), allUsedPhongMaterials(), allTextures(), allImageDatas(), allVertexShaderModules(), allFragmentShaderModules(), renderPass()
 {
 }
 
@@ -262,16 +262,22 @@ IBSDFMaterialSP Context::useBSDFMaterial(const std::string& name) const
 
 	//
 
-	return get(name, allBSDFMaterials);
+	IBSDFMaterialSP result = get(name, allBSDFMaterials);
+
+	if (std::find(allUsedBSDFMaterials.begin(), allUsedBSDFMaterials.end(), name) != allUsedBSDFMaterials.end())
+	{
+		result = result->clone();
+	}
+	else
+	{
+		allUsedBSDFMaterials.push_back(name);
+	}
+
+    return result;
 }
 
 VkBool32 Context::addBSDFMaterial(const IBSDFMaterialSP& material)
 {
-    if (!material.get())
-    {
-        return VK_FALSE;
-    }
-
     if (!material.get())
     {
         return VK_FALSE;
@@ -285,6 +291,12 @@ VkBool32 Context::removeBSDFMaterial(const IBSDFMaterialSP& material)
     if (!material.get())
     {
         return VK_FALSE;
+    }
+
+    auto removeElement = std::find(allUsedBSDFMaterials.begin(), allUsedBSDFMaterials.end(), material->getName());
+    if (removeElement != allUsedBSDFMaterials.end())
+    {
+    	allUsedBSDFMaterials.erase(removeElement);
     }
 
     return remove(material->getName(), allBSDFMaterials);

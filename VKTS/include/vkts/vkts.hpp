@@ -107,7 +107,7 @@
 #define VKTS_ENGINE_NAME            "VKTS"
 #define VKTS_ENGINE_MAJOR           0
 #define VKTS_ENGINE_MINOR           9
-#define VKTS_ENGINE_PATCH           1
+#define VKTS_ENGINE_PATCH           2
 
 #define VKTS_PI                     3.1415926535897932384626433832795f
 

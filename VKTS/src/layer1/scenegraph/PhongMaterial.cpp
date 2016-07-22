@@ -37,6 +37,72 @@ PhongMaterial::PhongMaterial() :
 PhongMaterial::PhongMaterial(const PhongMaterial& other) :
     IPhongMaterial(), Material(other), name(other.name), alpha(other.alpha), displacement(other.displacement), normal(other.normal), ambient(other.ambient), emissive(other.emissive), diffuse(other.diffuse), specular(other.specular), specularShininess(other.specularShininess), transparent(other.transparent)
 {
+
+    // Textures cannot be cloned, just replaced.
+
+	if (other.descriptorPool.get())
+	{
+		descriptorPool = descriptorPoolCreate(other.descriptorPool->getDevice(), other.descriptorPool->getFlags(), other.descriptorPool->getMaxSets(), other.descriptorPool->getPoolSizeCount(), other.descriptorPool->getPoolSizes());
+
+		if (!descriptorPool.get())
+		{
+			destroy();
+
+			return;
+		}
+
+		if (other.descriptorSets.get())
+		{
+			descriptorSets = descriptorSetsCreate(descriptorPool->getDevice(), descriptorPool->getDescriptorPool(), other.descriptorSets->getDescriptorSetCount(), other.descriptorSets->getSetLayouts());
+
+			if (!descriptorSets.get())
+			{
+				destroy();
+
+				return;
+			}
+		}
+
+	    //
+
+	    if (other.allDescriptorPools.size() != other.allDescriptorSets.size())
+	    {
+	    	destroy();
+
+	        return;
+	    }
+
+
+	    for (size_t i = 0; i < other.allDescriptorPools.size(); i++)
+	    {
+	    	auto currentDescriptorPool = descriptorPoolCreate(other.allDescriptorPools.valueAt(i)->getDevice(), other.allDescriptorPools.valueAt(i)->getFlags(), other.allDescriptorPools.valueAt(i)->getMaxSets(), other.allDescriptorPools.valueAt(i)->getPoolSizeCount(), other.allDescriptorPools.valueAt(i)->getPoolSizes());
+
+	        if (!currentDescriptorPool.get())
+	        {
+	        	destroy();
+
+	            return;
+	        }
+
+	        allDescriptorPools[other.allDescriptorPools.keyAt(i)] = currentDescriptorPool;
+
+	        //
+
+	        auto currentDescriptorSets = descriptorSetsCreate(currentDescriptorPool->getDevice(), currentDescriptorPool->getDescriptorPool(), other.allDescriptorSets.valueAt(i)->getDescriptorSetCount(), other.allDescriptorSets.valueAt(i)->getSetLayouts());
+
+	        if (!currentDescriptorSets.get())
+	        {
+	        	destroy();
+
+	            return;
+	        }
+
+	        allDescriptorSets[other.allDescriptorSets.keyAt(i)] = currentDescriptorSets;
+	    }
+	}
+
+	//
+
     updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_PHONG_EMISSIVE - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT, VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT, this->emissive->getSampler()->getSampler(), this->emissive->getImageView()->getImageView(), this->emissive->getMemoryImage()->getImage()->getImageLayout());
 
     updateDescriptorImageInfo(VKTS_BINDING_UNIFORM_SAMPLER_PHONG_ALPHA - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT, VKTS_BINDING_UNIFORM_SAMPLER_PHONG_DISPLACEMENT, this->alpha->getSampler()->getSampler(), this->alpha->getImageView()->getImageView(), this->alpha->getMemoryImage()->getImage()->getImageLayout());

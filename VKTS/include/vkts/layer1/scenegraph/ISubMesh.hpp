@@ -80,6 +80,14 @@ public:
 
     virtual void setBSDFMaterial(const IBSDFMaterialSP& bsdfMaterial) = 0;
 
+    virtual IDescriptorSetLayoutSP getDescriptorSetLayout() const = 0;
+
+    virtual void setDescriptorSetLayout(const IDescriptorSetLayoutSP& descriptorSetLayout) = 0;
+
+    virtual IPipelineLayoutSP getPipelineLayout() const = 0;
+
+    virtual void setPipelineLayout(const IPipelineLayoutSP& pipelineLayout) = 0;
+
     virtual const IGraphicsPipelineSP& getGraphicsPipeline() const = 0;
 
     virtual void setGraphicsPipeline(const IGraphicsPipelineSP& graphicsPipeline) = 0;
