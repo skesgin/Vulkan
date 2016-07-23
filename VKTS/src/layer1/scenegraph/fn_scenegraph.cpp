@@ -856,7 +856,58 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
 
                         if (preFiltered)
                         {
-                        	// TODO: Implement pre-filter for cube map.
+                        	// Pre-filtered diffuse cube map.
+
+                        	SmartPointerVector<IImageDataSP> allDiffuseCubeMaps;
+
+                            if (cacheGetEnabled())
+                            {
+                                for (uint32_t layer = 0; layer < 6; layer++)
+    							{
+    								auto targetImageFilename = sourceImageName + "_LEVEL0_LAYER" + std::to_string(layer) + "_LAMBERT" + sourceImageExtension;
+
+    								auto targetImage = cacheLoadImageData(targetImageFilename.c_str());
+
+    								if (!targetImage.get())
+    								{
+    									allDiffuseCubeMaps.clear();
+
+    									break;
+    								}
+
+    								allDiffuseCubeMaps.append(targetImage);
+    							}
+                            }
+
+                            if (allDiffuseCubeMaps.size() == 0)
+                            {
+                            	allDiffuseCubeMaps = imageDataPrefilterLambert(imageData, VKTS_BSDF_M_CUBE_MAP, finalImageDataFilename);
+
+                                if (allDiffuseCubeMaps.size() == 0)
+                                {
+                                	logPrint(VKTS_LOG_ERROR, "Scenegraph: Could not create diffzse cube maps for '%s'", finalImageDataFilename.c_str());
+
+                                    return VK_FALSE;
+                                }
+
+                                if (cacheGetEnabled())
+                                {
+    								logPrint(VKTS_LOG_INFO, "Scenegraph: Storing cached data for '%s'", finalImageDataFilename.c_str());
+
+    								for (size_t i = 0; i < allDiffuseCubeMaps.size(); i++)
+    								{
+    									cacheSaveImageData(allDiffuseCubeMaps[i]);
+    								}
+                                }
+                            }
+                            else
+                            {
+                            	logPrint(VKTS_LOG_INFO, "Scenegraph: Using cached data for '%s'", finalImageDataFilename.c_str());
+                            }
+
+                            // TODO: Merge diffuse and assign to scene.
+
+                        	// TODO: Implement pre-filter cook torrance cube map.
 
                         	// Generate BSDF environment look up table.
 

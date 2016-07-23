@@ -50,6 +50,7 @@
 
 #define VKTS_BSDF_LENGTH 512
 #define VKTS_BSDF_M 8
+#define VKTS_BSDF_M_CUBE_MAP 4
 
 /**
  * Functions.

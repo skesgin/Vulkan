@@ -126,53 +126,66 @@ int32_t ImageData::getCubeMapFace(float& s, float& t, const float x, const float
 	float tc = 0.0f;
 	float rc = 0.0f;
 
-	if (z <= 0.0f && y <= 0.0f && x > 0.0f)
-	{
-		faceLayer = 0;
+	float absX = fabsf(x);
+	float absY = fabsf(y);
+	float absZ = fabsf(z);
 
-		sc = -z;
-		tc = -y;
-		rc = x;
+	if (absX > absY && absX > absZ)
+	{
+		if (x > 0.0f)
+		{
+			faceLayer = 0;
+
+			sc = -z;
+			tc = -y;
+			rc = x;
+		}
+		else
+		{
+			faceLayer = 1;
+
+			sc = z;
+			tc = -y;
+			rc = x;
+		}
 	}
-	else if (z > 0.0f && y <= 0.0f && x > 0.0f)
+	else if (absY >= absX && absY > absZ)
 	{
-		faceLayer = 1;
+		if (y > 0.0f)
+		{
+			faceLayer = 2;
 
-		sc = z;
-		tc = -y;
-		rc = x;
+			sc = x;
+			tc = z;
+			rc = y;
+		}
+		else
+		{
+			faceLayer = 3;
+
+			sc = x;
+			tc = -z;
+			rc = y;
+		}
 	}
-	else if (x > 0.0f && z > 0.0f && y > 0.0f)
+	else if (absZ >= absX && absZ >= absY)
 	{
-		faceLayer = 2;
+		if (z > 0.0f)
+		{
+			faceLayer = 4;
 
-		sc = x;
-		tc = z;
-		rc = y;
-	}
-	else if (x > 0.0f && z <= 0.0f && y > 0.0f)
-	{
-		faceLayer = 3;
+			sc = x;
+			tc = -y;
+			rc = z;
+		}
+		else
+		{
+			faceLayer = 5;
 
-		sc = x;
-		tc = -z;
-		rc = y;
-	}
-	else if (x > 0.0f && y <= 0.0f && z > 0.0f)
-	{
-		faceLayer = 4;
-
-		sc = x;
-		tc = -y;
-		rc = z;
-	}
-	else if (x <= 0.0f && y <= 0.0f && z > 0.0f)
-	{
-		faceLayer = 5;
-
-		sc = -x;
-		tc = -y;
-		rc = z;
+			sc = -x;
+			tc = -y;
+			rc = z;
+		}
 	}
 	else
 	{
@@ -666,14 +679,14 @@ glm::vec4 ImageData::getSampleCubeMap(const float x, const float y, const float 
 
 	//
 
-	glm::vec3 noramlized = glm::normalize(glm::vec3(x, y ,z));
+	glm::vec3 normalized = glm::normalize(glm::vec3(x, y ,z));
 
 	//
 
 	float s;
 	float t;
 
-	auto faceLayer = getCubeMapFace(s, t, noramlized.x, noramlized.y, noramlized.z);
+	auto faceLayer = getCubeMapFace(s, t, normalized.x, normalized.y, normalized.z);
 
 	if (faceLayer == -1)
 	{

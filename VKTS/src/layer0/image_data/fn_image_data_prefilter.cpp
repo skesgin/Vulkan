@@ -63,7 +63,7 @@ SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterCookTorrance(co
 
 		while (width > 1 || height > 1)
 		{
-			targetImageFilename = sourceImageName + "_LEVEL" + std::to_string(level++) + "_LAYER" + std::to_string(layer) + sourceImageExtension;
+			targetImageFilename = sourceImageName + "_LEVEL" + std::to_string(level++) + "_LAYER" + std::to_string(layer) + "_COOKTORRANCE" + sourceImageExtension;
 
 			currentTargetImage = imageDataCreate(targetImageFilename, width, height, 1, 0.0f, 0.0f, 0.0f, 0.0f, sourceImage->getImageType(), sourceImage->getFormat());
 
@@ -203,7 +203,7 @@ SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterLambert(const I
     // Create mip maps for all six layers.
     for (uint32_t layer = 0; layer < 6; layer++)
     {
-		targetImageFilename = sourceImageName + "_LEVEL0_LAYER" + std::to_string(layer) + sourceImageExtension;
+		targetImageFilename = sourceImageName + "_LEVEL0_LAYER" + std::to_string(layer) + "_LAMBERT" + sourceImageExtension;
 
 		currentTargetImage = imageDataCreate(targetImageFilename, sourceImage->getWidth(), sourceImage->getHeight(), 1, 0.0f, 0.0f, 0.0f, 0.0f, sourceImage->getImageType(), sourceImage->getFormat());
 
@@ -283,7 +283,7 @@ SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterLambert(const I
 
 				glm::mat3 basis = renderGetBasis(scanVector);
 
-				glm::vec3 colorLambert = glm::vec3(0.0f, 0.f, 0.0f);
+				glm::vec3 colorLambert = glm::vec3(0.0f, 0.0f, 0.0f);
 
 				for (uint32_t sampleIndex = 0; sampleIndex < samples; sampleIndex++)
 				{
@@ -291,8 +291,6 @@ SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterLambert(const I
 
 					colorLambert += renderLambert(sourceImage, VK_FILTER_LINEAR, 0, randomPoint, basis);
 				}
-
-				//
 
 				result[i]->setTexel(glm::vec4(colorLambert / (float) samples, 1.0f), x, y, 0, 0, 0);
 			}
