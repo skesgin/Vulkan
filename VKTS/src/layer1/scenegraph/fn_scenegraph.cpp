@@ -885,7 +885,7 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
 
                                 if (allDiffuseCubeMaps.size() == 0)
                                 {
-                                	logPrint(VKTS_LOG_ERROR, "Scenegraph: Could not create diffzse cube maps for '%s'", finalImageDataFilename.c_str());
+                                	logPrint(VKTS_LOG_ERROR, "Scenegraph: Could not create diffuse cube maps for '%s'", finalImageDataFilename.c_str());
 
                                     return VK_FALSE;
                                 }
@@ -905,7 +905,18 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
                             	logPrint(VKTS_LOG_INFO, "Scenegraph: Using cached data for '%s'", finalImageDataFilename.c_str());
                             }
 
-                            // TODO: Merge diffuse and assign to scene.
+                            auto diffuseImageData = imageDataMerge(allDiffuseCubeMaps, finalImageDataFilename, 1, (uint32_t)allDiffuseCubeMaps.size());
+
+                            if (!diffuseImageData.get())
+                            {
+                            	logPrint(VKTS_LOG_ERROR, "Scenegraph: No merged image for '%s'", finalImageDataFilename.c_str());
+
+                                return VK_FALSE;
+                            }
+
+                            context->addImageData(diffuseImageData);
+
+                            //
 
                         	// TODO: Implement pre-filter cook torrance cube map.
 
@@ -1173,6 +1184,13 @@ static VkBool32 scenegraphLoadTextures(const char* directory, const char* filena
             }
 
             context->addTexture(texture);
+
+            //
+
+            if (preFiltered)
+            {
+            	// TODO: Create LUT and pre-filtered textures.
+            }
         }
         else
         {
@@ -3857,6 +3875,10 @@ ISceneSP VKTS_APIENTRY scenegraphLoadScene(const char* filename, const IContextS
             }
 
             scene->setEnvironment(texture);
+
+            //
+
+            // TODO: If present, set LUT and pre-filtered textures as well.
         }
         else
         {

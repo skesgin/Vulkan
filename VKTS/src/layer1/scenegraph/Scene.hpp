@@ -43,6 +43,10 @@ private:
 
     ITextureSP environment;
 
+    ITextureSP diffuseEnvironment;
+
+    ITextureSP cookTorranceEnvironment;
+
     ITextureSP lut;
 
 public:
@@ -77,6 +81,14 @@ public:
     virtual void setEnvironment(const ITextureSP& environment) override;
 
     virtual ITextureSP getEnvironment() const override;
+
+    virtual void setDiffuseEnvironment(const ITextureSP& diffuseEnvironment) override;
+
+    virtual ITextureSP getDiffuseEnvironment() const override;
+
+    virtual void setCookTorranceEnvironment(const ITextureSP& cookTorranceEnvironment) override;
+
+    virtual ITextureSP getCookTorranceEnvironment() const override;
 
     virtual void setLut(const ITextureSP& environment) override;
 

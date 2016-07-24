@@ -32,7 +32,7 @@ namespace vkts
 {
 
 Scene::Scene() :
-    IScene(), name(""), allObjects(), environment(nullptr), lut(nullptr)
+    IScene(), name(""), allObjects(), environment(nullptr), diffuseEnvironment(nullptr), cookTorranceEnvironment(nullptr), lut(nullptr)
 {
 }
 
@@ -67,6 +67,8 @@ Scene::Scene(const Scene& other) :
     }
 
     environment = other.environment;
+    diffuseEnvironment = other.diffuseEnvironment;
+    cookTorranceEnvironment = other.cookTorranceEnvironment;
     lut = other.lut;
 }
 
@@ -130,6 +132,26 @@ void Scene::setEnvironment(const ITextureSP& environment)
 ITextureSP Scene::getEnvironment() const
 {
     return environment;
+}
+
+void Scene::setDiffuseEnvironment(const ITextureSP& diffuseEnvironment)
+{
+    this->diffuseEnvironment = diffuseEnvironment;
+}
+
+ITextureSP Scene::getDiffuseEnvironment() const
+{
+    return diffuseEnvironment;
+}
+
+void Scene::setCookTorranceEnvironment(const ITextureSP& cookTorranceEnvironment)
+{
+    this->cookTorranceEnvironment = cookTorranceEnvironment;
+}
+
+ITextureSP Scene::getCookTorranceEnvironment() const
+{
+    return cookTorranceEnvironment;
 }
 
 void Scene::setLut(const ITextureSP& lut)
@@ -207,6 +229,20 @@ void Scene::destroy()
 		lut->destroy();
 
 		lut.reset();
+	}
+
+	if (cookTorranceEnvironment.get())
+	{
+		cookTorranceEnvironment->destroy();
+
+		cookTorranceEnvironment.reset();
+	}
+
+	if (diffuseEnvironment.get())
+	{
+		diffuseEnvironment->destroy();
+
+		diffuseEnvironment.reset();
 	}
 
 	if (environment.get())

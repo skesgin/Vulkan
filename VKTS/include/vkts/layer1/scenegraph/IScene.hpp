@@ -66,6 +66,14 @@ public:
 
     virtual ITextureSP getEnvironment() const = 0;
 
+    virtual void setDiffuseEnvironment(const ITextureSP& diffuseEnvironment) = 0;
+
+    virtual ITextureSP getDiffuseEnvironment() const = 0;
+
+    virtual void setCookTorranceEnvironment(const ITextureSP& cookTorranceEnvironment) = 0;
+
+    virtual ITextureSP getCookTorranceEnvironment() const = 0;
+
     virtual void setLut(const ITextureSP& environment) = 0;
 
     virtual ITextureSP getLut() const = 0;
