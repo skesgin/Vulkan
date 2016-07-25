@@ -4051,7 +4051,20 @@ ISceneSP VKTS_APIENTRY scenegraphLoadScene(const char* filename, const IContextS
             {
                 scene->setDiffuseEnvironment(texture);
 
-                // TODO: Set cook torrance pre-filtered textures as well.
+                //
+
+                texture = context->useTexture(std::string(sdata) + "_COOK_TORRANCE");
+
+                if (!texture.get())
+                {
+                	// TODO: Enable again.
+                	//return ISceneSP();
+                }
+
+                // TODO: Enable again.
+                //scene->setCookTorranceEnvironment(texture);
+
+                //
 
                 texture = context->useTexture("BSDF_LUT_" + std::to_string(VKTS_BSDF_LENGTH) + "_" + std::to_string(VKTS_BSDF_M));
 
