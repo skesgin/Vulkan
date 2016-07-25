@@ -856,6 +856,11 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
 
                         if (preFiltered)
                         {
+                            if (memoryImageName == "")
+                            {
+                                return VK_FALSE;
+                            }
+
                         	// Pre-filtered diffuse cube map.
 
                         	SmartPointerVector<IImageDataSP> allDiffuseCubeMaps;
@@ -918,11 +923,82 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
 
                             //
 
+                            VkImageTiling imageTiling;
+                            VkMemoryPropertyFlags memoryPropertyFlags;
+
+                            if (!context->getInitialResources()->getPhysicalDevice()->getGetImageTilingAndMemoryProperty(imageTiling, memoryPropertyFlags, diffuseImageData->getFormat(), diffuseImageData->getImageType(), 0, diffuseImageData->getExtent3D(), diffuseImageData->getMipLevels(), 1, VK_SAMPLE_COUNT_1_BIT, diffuseImageData->getSize()))
+                            {
+                                logPrint(VKTS_LOG_ERROR, "Scenegraph: Format not supported.");
+
+                                return VK_FALSE;
+                            }
+
+
+                            VkImageLayout initialLayout = VK_IMAGE_LAYOUT_PREINITIALIZED;
+                            VkAccessFlags srcAccessMask = VK_ACCESS_HOST_WRITE_BIT;
+
+                            if (imageTiling == VK_IMAGE_TILING_OPTIMAL)
+                            {
+                            	initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+                            	srcAccessMask = 0;
+                            }
+
+                            //
+
+                            VkImageCreateInfo imageCreateInfo;
+
+                            memset(&imageCreateInfo, 0, sizeof(VkImageCreateInfo));
+
+                            imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+
+                            imageCreateInfo.flags = environment ? VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT : 0;
+                            imageCreateInfo.imageType = diffuseImageData->getImageType();
+                            imageCreateInfo.format = diffuseImageData->getFormat();
+                            imageCreateInfo.extent = diffuseImageData->getExtent3D();
+                            imageCreateInfo.mipLevels = diffuseImageData->getMipLevels();
+                            imageCreateInfo.arrayLayers = diffuseImageData->getArrayLayers();
+                            imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+                            imageCreateInfo.tiling = imageTiling;
+                            imageCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+                            imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+                            imageCreateInfo.queueFamilyIndexCount = 0;
+                            imageCreateInfo.pQueueFamilyIndices = nullptr;
+                            imageCreateInfo.initialLayout = initialLayout;
+
+                            VkImageSubresourceRange subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, diffuseImageData->getMipLevels(), 0, diffuseImageData->getArrayLayers()};
+
+                            IDeviceMemorySP stageDeviceMemory;
+                            IImageSP stageImage;
+                            IBufferSP stageBuffer;
+
+                            auto memoryImage = memoryImageCreate(stageImage, stageBuffer, stageDeviceMemory, context->getInitialResources(), context->getCommandBuffer(), memoryImageName + "_LAMBERT", diffuseImageData, imageCreateInfo, srcAccessMask, VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, subresourceRange, memoryPropertyFlags);
+
+                            context->addStageImage(stageImage);
+                            context->addStageBuffer(stageBuffer);
+                            context->addStageDeviceMemory(stageDeviceMemory);
+
+                            if (!memoryImage.get())
+                            {
+                            	logPrint(VKTS_LOG_ERROR, "Scenegraph: No memory image for '%s'", finalImageDataFilename.c_str());
+
+                                return VK_FALSE;
+                            }
+
+                            context->addMemoryImage(memoryImage);
+
+                            //
+                            //
+
                         	// TODO: Implement pre-filter cook torrance cube map.
+
+                            //
+                            //
 
                         	// Generate BSDF environment look up table.
 
-                        	auto targetImageFilename = "texture/BSDF_LUT_" + std::to_string(VKTS_BSDF_LENGTH) + "_" + std::to_string(VKTS_BSDF_M) + ".data";
+                            auto lutName = "BSDF_LUT_" + std::to_string(VKTS_BSDF_LENGTH) + "_" + std::to_string(VKTS_BSDF_M);
+
+                        	auto targetImageFilename = "texture/" + lutName + ".data";
 
                         	IImageDataSP lut = imageDataLoadRaw(targetImageFilename.c_str(), VKTS_BSDF_LENGTH, VKTS_BSDF_LENGTH, VK_FORMAT_R32G32_SFLOAT);
 
@@ -946,6 +1022,57 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
 
                                 context->addImageData(lut);
                             }
+
+                            if (!context->getInitialResources()->getPhysicalDevice()->getGetImageTilingAndMemoryProperty(imageTiling, memoryPropertyFlags, lut->getFormat(), lut->getImageType(), 0, lut->getExtent3D(), lut->getMipLevels(), 1, VK_SAMPLE_COUNT_1_BIT, lut->getSize()))
+                            {
+                                logPrint(VKTS_LOG_ERROR, "Scenegraph: Format not supported.");
+
+                                return VK_FALSE;
+                            }
+
+                            initialLayout = VK_IMAGE_LAYOUT_PREINITIALIZED;
+                            srcAccessMask = VK_ACCESS_HOST_WRITE_BIT;
+
+                            if (imageTiling == VK_IMAGE_TILING_OPTIMAL)
+                            {
+                            	initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+                            	srcAccessMask = 0;
+                            }
+
+                            //
+
+                            memset(&imageCreateInfo, 0, sizeof(VkImageCreateInfo));
+
+                            imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+
+                            imageCreateInfo.flags = 0;
+                            imageCreateInfo.imageType = lut->getImageType();
+                            imageCreateInfo.format = lut->getFormat();
+                            imageCreateInfo.extent = lut->getExtent3D();
+                            imageCreateInfo.mipLevels = lut->getMipLevels();
+                            imageCreateInfo.arrayLayers = lut->getArrayLayers();
+                            imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+                            imageCreateInfo.tiling = imageTiling;
+                            imageCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+                            imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+                            imageCreateInfo.queueFamilyIndexCount = 0;
+                            imageCreateInfo.pQueueFamilyIndices = nullptr;
+                            imageCreateInfo.initialLayout = initialLayout;
+
+                            subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, lut->getMipLevels(), 0, lut->getArrayLayers()};
+
+                            memoryImage = memoryImageCreate(stageImage, stageBuffer, stageDeviceMemory, context->getInitialResources(), context->getCommandBuffer(), lutName, lut, imageCreateInfo, srcAccessMask, VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, subresourceRange, memoryPropertyFlags);
+
+                            context->addStageImage(stageImage);
+                            context->addStageBuffer(stageBuffer);
+                            context->addStageDeviceMemory(stageDeviceMemory);
+
+                            if (!memoryImage.get())
+                            {
+                                return VK_FALSE;
+                            }
+
+                            context->addMemoryImage(memoryImage);
                         }
                     }
 
@@ -1189,7 +1316,47 @@ static VkBool32 scenegraphLoadTextures(const char* directory, const char* filena
 
             if (preFiltered)
             {
-            	// TODO: Create LUT and pre-filtered textures.
+            	auto lambertName = std::string(sdata) + "_LAMBERT";
+
+                memoryImage = context->useMemoryImage(lambertName);
+
+    			if (!memoryImage.get())
+    			{
+    				logPrint(VKTS_LOG_ERROR, "Scenegraph: Memory image not found: '%s'", lambertName.c_str());
+
+    				return VK_FALSE;
+    			}
+
+                texture = textureCreate(context->getInitialResources(), textureName + "_LAMBERT", mipMap, environment, memoryImage, context->getSamplerCreateInfo(), context->getImageViewCreateInfo());
+
+                if (!texture.get())
+                {
+                    return VK_FALSE;
+                }
+
+                context->addTexture(texture);
+
+                // TODO: Create cook torrance pre-filtered textures.
+
+            	auto lutName = "BSDF_LUT_" + std::to_string(VKTS_BSDF_LENGTH) + "_" + std::to_string(VKTS_BSDF_M);
+
+                memoryImage = context->useMemoryImage(lutName);
+
+    			if (!memoryImage.get())
+    			{
+    				logPrint(VKTS_LOG_ERROR, "Scenegraph: Memory image not found: '%s'", lutName.c_str());
+
+    				return VK_FALSE;
+    			}
+
+                texture = textureCreate(context->getInitialResources(), lutName, VK_FALSE, VK_FALSE, memoryImage, context->getSamplerCreateInfo(), context->getImageViewCreateInfo());
+
+                if (!texture.get())
+                {
+                    return VK_FALSE;
+                }
+
+                context->addTexture(texture);
             }
         }
         else
@@ -3878,7 +4045,23 @@ ISceneSP VKTS_APIENTRY scenegraphLoadScene(const char* filename, const IContextS
 
             //
 
-            // TODO: If present, set LUT and pre-filtered textures as well.
+            texture = context->useTexture(std::string(sdata) + "_LAMBERT");
+
+            if (texture.get())
+            {
+                scene->setDiffuseEnvironment(texture);
+
+                // TODO: Set cook torrance pre-filtered textures as well.
+
+                texture = context->useTexture("BSDF_LUT_" + std::to_string(VKTS_BSDF_LENGTH) + "_" + std::to_string(VKTS_BSDF_M));
+
+                if (!texture.get())
+                {
+                	return ISceneSP();
+                }
+
+                scene->setLut(texture);
+            }
         }
         else
         {

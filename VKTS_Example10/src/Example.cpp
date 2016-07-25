@@ -422,7 +422,41 @@ VkBool32 Example::updateDescriptorSets()
 		resolveWriteDescriptorSets[i].pTexelBufferView = nullptr;
 	}
 
-	resolveDescriptorSet->updateDescriptorSets(6, resolveWriteDescriptorSets, 0, nullptr);
+	// Diffuse/lambert.
+	resolveDescriptorImageInfos[6].sampler = scene->getDiffuseEnvironment()->getSampler()->getSampler();
+	resolveDescriptorImageInfos[6].imageView = scene->getDiffuseEnvironment()->getImageView()->getImageView();
+	resolveDescriptorImageInfos[6].imageLayout = scene->getDiffuseEnvironment()->getMemoryImage()->getImage()->getImageLayout();
+
+	resolveWriteDescriptorSets[6].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+
+	resolveWriteDescriptorSets[6].dstSet = resolveDescriptorSet->getDescriptorSets()[0];
+	resolveWriteDescriptorSets[6].dstBinding = 6;
+	resolveWriteDescriptorSets[6].dstArrayElement = 0;
+	resolveWriteDescriptorSets[6].descriptorCount = 1;
+	resolveWriteDescriptorSets[6].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+	resolveWriteDescriptorSets[6].pImageInfo = &resolveDescriptorImageInfos[6];
+	resolveWriteDescriptorSets[6].pBufferInfo = nullptr;
+	resolveWriteDescriptorSets[6].pTexelBufferView = nullptr;
+
+	//Lut
+	resolveDescriptorImageInfos[7].sampler = scene->getLut()->getSampler()->getSampler();
+	resolveDescriptorImageInfos[7].imageView = scene->getLut()->getImageView()->getImageView();
+	resolveDescriptorImageInfos[7].imageLayout = scene->getLut()->getMemoryImage()->getImage()->getImageLayout();
+
+	resolveWriteDescriptorSets[7].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+
+	resolveWriteDescriptorSets[7].dstSet = resolveDescriptorSet->getDescriptorSets()[0];
+	resolveWriteDescriptorSets[7].dstBinding = 7;
+	resolveWriteDescriptorSets[7].dstArrayElement = 0;
+	resolveWriteDescriptorSets[7].descriptorCount = 1;
+	resolveWriteDescriptorSets[7].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+	resolveWriteDescriptorSets[7].pImageInfo = &resolveDescriptorImageInfos[7];
+	resolveWriteDescriptorSets[7].pBufferInfo = nullptr;
+	resolveWriteDescriptorSets[7].pTexelBufferView = nullptr;
+
+	//
+
+	resolveDescriptorSet->updateDescriptorSets(8, resolveWriteDescriptorSets, 0, nullptr);
 
 	return VK_TRUE;
 }
@@ -1005,7 +1039,7 @@ VkBool32 Example::buildDescriptorSetPool()
     memset(&descriptorPoolSize, 0, sizeof(descriptorPoolSize));
 
 	descriptorPoolSize[0].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	descriptorPoolSize[0].descriptorCount = 6;
+	descriptorPoolSize[0].descriptorCount = 8;
 
 	resolveDescriptorPool = vkts::descriptorPoolCreate(initialResources->getDevice()->getDevice(), VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT, 1, 1, descriptorPoolSize);
 
@@ -1052,11 +1086,11 @@ VkBool32 Example::buildDescriptorSetLayout()
 
 	//
 
-	VkDescriptorSetLayoutBinding resolveDescriptorSetLayoutBinding[6];
+	VkDescriptorSetLayoutBinding resolveDescriptorSetLayoutBinding[8];
 
 	memset(&resolveDescriptorSetLayoutBinding, 0, sizeof(resolveDescriptorSetLayoutBinding));
 
-	for (uint32_t binding = 0; binding < 6; binding++)
+	for (uint32_t binding = 0; binding < 8; binding++)
 	{
 		resolveDescriptorSetLayoutBinding[binding].binding = binding;
 		resolveDescriptorSetLayoutBinding[binding].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
@@ -1065,7 +1099,7 @@ VkBool32 Example::buildDescriptorSetLayout()
 		resolveDescriptorSetLayoutBinding[binding].pImmutableSamplers = nullptr;
 	}
 
-	resolveDescriptorSetLayout = vkts::descriptorSetLayoutCreate(initialResources->getDevice()->getDevice(), 0, 6, resolveDescriptorSetLayoutBinding);
+	resolveDescriptorSetLayout = vkts::descriptorSetLayoutCreate(initialResources->getDevice()->getDevice(), 0, 8, resolveDescriptorSetLayoutBinding);
 
 	if (!resolveDescriptorSetLayout.get())
 	{

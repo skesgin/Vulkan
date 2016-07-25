@@ -67,7 +67,7 @@ glm::vec3 VKTS_APIENTRY renderGetGGXWeightedVector(const glm::vec2& e, const flo
 	float y = sinTheta * sinf(phi);
 	float z = cosTheta;
 
-	return glm::vec3(x, y, z);
+	return glm::normalize(glm::vec3(x, y, z));
 }
 
 glm::vec3 VKTS_APIENTRY renderGetCosineWeightedVector(const glm::vec2& e)
@@ -76,9 +76,8 @@ glm::vec3 VKTS_APIENTRY renderGetCosineWeightedVector(const glm::vec2& e)
 	float y = sqrtf(1.0f - e.x) * sinf(2.0f * VKTS_PI * e.y);
 	float z = sqrtf(e.x);
 
-	return glm::vec3(x, y, z);
+	return glm::normalize(glm::vec3(x, y, z));
 }
-
 
 glm::vec2 VKTS_APIENTRY renderIntegrateCookTorrance(const glm::vec2& randomPoint, const float NdotV, const glm::vec3& V, const float roughness)
 {
@@ -184,7 +183,7 @@ glm::mat3 VKTS_APIENTRY renderGetBasis(const glm::vec3& normal)
 		bitangent = glm::vec3(0.0f, 0.0f, 1.0f);
 	}
 
-	glm::vec3 tangent = glm::cross(bitangent, normal);
+	glm::vec3 tangent = glm::normalize(glm::cross(bitangent, normal));
 	bitangent = glm::cross(normal, tangent);
 
 	return glm::mat3(tangent, bitangent, normal);
