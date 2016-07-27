@@ -29,17 +29,30 @@ print("Copying project assets")
 
 copy("../../VKTS_Binaries/shader/SPIR/V/font.vert.spv", "./assets/shader/SPIR/V/")
 copy("../../VKTS_Binaries/shader/SPIR/V/font.frag.spv", "./assets/shader/SPIR/V/")
+
 copy("../../VKTS_Binaries/shader/SPIR/V/bsdf.vert.spv", "./assets/shader/SPIR/V/")
 copy("../../VKTS_Binaries/shader/SPIR/V/bsdf_no_texcoord.vert.spv", "./assets/shader/SPIR/V/")
 copy("../../VKTS_Binaries/shader/SPIR/V/bsdf_tangents.vert.spv", "./assets/shader/SPIR/V/")
+copy("../../VKTS_Binaries/shader/SPIR/V/bsdf_skinning.vert.spv", "./assets/shader/SPIR/V/")
+
 copy("../../VKTS_Binaries/shader/SPIR/V/environment.vert.spv", "./assets/shader/SPIR/V/")
 copy("../../VKTS_Binaries/shader/SPIR/V/environment.frag.spv", "./assets/shader/SPIR/V/")
+
+copy("../../VKTS_Binaries/shader/SPIR/V/texture_ndc.vert.spv", "./assets/shader/SPIR/V/")
+copy("../../VKTS_Binaries/shader/SPIR/V/resolve_bsdf.frag.spv", "./assets/shader/SPIR/V/")
+
 copy("../../VKTS_Binaries/font/*.fnt", "./assets/font/")
 copy("../../VKTS_Binaries/font/*.tga", "./assets/font/")
+
 copy("../../VKTS_Binaries/material_probes/*.spv", "./assets/material_probes/")
 copy("../../VKTS_Binaries/material_probes/*.vkts", "./assets/material_probes/")
 copy("../../VKTS_Binaries/material_probes/*.tga", "./assets/material_probes/")
+
 copy("../../VKTS_Binaries/primitives/*.vkts", "./assets/primitives/")
+
+copy("../../VKTS_Binaries/texture/BSDF_LUT_512_8.data", "./assets/texture/")
+
+copy("../../VKTS_Binaries/cache/material_probes/*.tga", "./assets/cache/material_probes/")
 
 print("Building project")
 
