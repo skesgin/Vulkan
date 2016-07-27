@@ -989,7 +989,139 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
                             //
                             //
 
-                        	// TODO: Implement pre-filter cook torrance cube map.
+                        	// Pre-filtered cook torrance cube map.
+
+                        	SmartPointerVector<IImageDataSP> allCookTorranceCubeMaps;
+
+                        	uint32_t levelCount = 1;
+
+                            if (cacheGetEnabled())
+                            {
+                                for (uint32_t layer = 0; layer < 6; layer++)
+    							{
+                                    for (uint32_t level = 0; level < levelCount; level++)
+        							{
+										auto targetImageFilename = sourceImageName + "_LEVEL" + std::to_string(level) + "_LAYER" + std::to_string(layer) + "_COOKTORRANCE" + sourceImageExtension;
+
+										auto targetImage = cacheLoadImageData(targetImageFilename.c_str());
+
+										if (!targetImage.get())
+										{
+											allCookTorranceCubeMaps.clear();
+
+											break;
+										}
+
+										// Gather level count iterations by first image.
+										if (layer == 0 && level == 0)
+										{
+											uint32_t testWidth = targetImage->getWidth();
+
+											while (testWidth > 1)
+											{
+												testWidth /= 2;
+
+												levelCount++;
+											}
+										}
+
+										allCookTorranceCubeMaps.append(targetImage);
+    								}
+    							}
+                            }
+
+                            if (allCookTorranceCubeMaps.size() == 0)
+                            {
+                            	allCookTorranceCubeMaps = imageDataPrefilterCookTorrance(imageData, VKTS_BSDF_M_CUBE_MAP, finalImageDataFilename);
+
+                                if (allCookTorranceCubeMaps.size() == 0)
+                                {
+                                	logPrint(VKTS_LOG_ERROR, "Scenegraph: Could not create cook torrance cube maps for '%s'", finalImageDataFilename.c_str());
+
+                                    return VK_FALSE;
+                                }
+
+                                if (cacheGetEnabled())
+                                {
+    								logPrint(VKTS_LOG_INFO, "Scenegraph: Storing cached data for '%s'", finalImageDataFilename.c_str());
+
+    								for (size_t i = 0; i < allCookTorranceCubeMaps.size(); i++)
+    								{
+    									cacheSaveImageData(allCookTorranceCubeMaps[i]);
+    								}
+                                }
+                            }
+                            else
+                            {
+                            	logPrint(VKTS_LOG_INFO, "Scenegraph: Using cached data for '%s'", finalImageDataFilename.c_str());
+                            }
+
+                            auto cookTorranceImageData = imageDataMerge(allCookTorranceCubeMaps, finalImageDataFilename, levelCount, 6);
+
+                            if (!cookTorranceImageData.get())
+                            {
+                            	logPrint(VKTS_LOG_ERROR, "Scenegraph: No merged image for '%s'", finalImageDataFilename.c_str());
+
+                                return VK_FALSE;
+                            }
+
+                            context->addImageData(cookTorranceImageData);
+
+                            //
+
+                            if (!context->getInitialResources()->getPhysicalDevice()->getGetImageTilingAndMemoryProperty(imageTiling, memoryPropertyFlags, cookTorranceImageData->getFormat(), cookTorranceImageData->getImageType(), 0, cookTorranceImageData->getExtent3D(), cookTorranceImageData->getMipLevels(), 1, VK_SAMPLE_COUNT_1_BIT, cookTorranceImageData->getSize()))
+                            {
+                                logPrint(VKTS_LOG_ERROR, "Scenegraph: Format not supported.");
+
+                                return VK_FALSE;
+                            }
+
+
+                            initialLayout = VK_IMAGE_LAYOUT_PREINITIALIZED;
+                            srcAccessMask = VK_ACCESS_HOST_WRITE_BIT;
+
+                            if (imageTiling == VK_IMAGE_TILING_OPTIMAL)
+                            {
+                            	initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+                            	srcAccessMask = 0;
+                            }
+
+                            //
+
+                            memset(&imageCreateInfo, 0, sizeof(VkImageCreateInfo));
+
+                            imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+
+                            imageCreateInfo.flags = environment ? VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT : 0;
+                            imageCreateInfo.imageType = cookTorranceImageData->getImageType();
+                            imageCreateInfo.format = cookTorranceImageData->getFormat();
+                            imageCreateInfo.extent = cookTorranceImageData->getExtent3D();
+                            imageCreateInfo.mipLevels = cookTorranceImageData->getMipLevels();
+                            imageCreateInfo.arrayLayers = cookTorranceImageData->getArrayLayers();
+                            imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+                            imageCreateInfo.tiling = imageTiling;
+                            imageCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+                            imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+                            imageCreateInfo.queueFamilyIndexCount = 0;
+                            imageCreateInfo.pQueueFamilyIndices = nullptr;
+                            imageCreateInfo.initialLayout = initialLayout;
+
+                            subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, cookTorranceImageData->getMipLevels(), 0, cookTorranceImageData->getArrayLayers()};
+
+                            memoryImage = memoryImageCreate(stageImage, stageBuffer, stageDeviceMemory, context->getInitialResources(), context->getCommandBuffer(), memoryImageName + "_COOKTORRANCE", cookTorranceImageData, imageCreateInfo, srcAccessMask, VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, subresourceRange, memoryPropertyFlags);
+
+                            context->addStageImage(stageImage);
+                            context->addStageBuffer(stageBuffer);
+                            context->addStageDeviceMemory(stageDeviceMemory);
+
+                            if (!memoryImage.get())
+                            {
+                            	logPrint(VKTS_LOG_ERROR, "Scenegraph: No memory image for '%s'", finalImageDataFilename.c_str());
+
+                                return VK_FALSE;
+                            }
+
+                            context->addMemoryImage(memoryImage);
 
                             //
                             //
@@ -1336,7 +1468,29 @@ static VkBool32 scenegraphLoadTextures(const char* directory, const char* filena
 
                 context->addTexture(texture);
 
-                // TODO: Create cook torrance pre-filtered textures.
+                //
+
+            	auto cookTorranceName = std::string(sdata) + "_COOKTORRANCE";
+
+                memoryImage = context->useMemoryImage(cookTorranceName);
+
+    			if (!memoryImage.get())
+    			{
+    				logPrint(VKTS_LOG_ERROR, "Scenegraph: Memory image not found: '%s'", cookTorranceName.c_str());
+
+    				return VK_FALSE;
+    			}
+
+                texture = textureCreate(context->getInitialResources(), textureName + "_COOKTORRANCE", mipMap, environment, memoryImage, context->getSamplerCreateInfo(), context->getImageViewCreateInfo());
+
+                if (!texture.get())
+                {
+                    return VK_FALSE;
+                }
+
+                context->addTexture(texture);
+
+                //
 
             	auto lutName = "BSDF_LUT_" + std::to_string(VKTS_BSDF_LENGTH) + "_" + std::to_string(VKTS_BSDF_M);
 
@@ -4053,16 +4207,14 @@ ISceneSP VKTS_APIENTRY scenegraphLoadScene(const char* filename, const IContextS
 
                 //
 
-                texture = context->useTexture(std::string(sdata) + "_COOK_TORRANCE");
+                texture = context->useTexture(std::string(sdata) + "_COOKTORRANCE");
 
                 if (!texture.get())
                 {
-                	// TODO: Enable again.
-                	//return ISceneSP();
+                	return ISceneSP();
                 }
 
-                // TODO: Enable again.
-                //scene->setCookTorranceEnvironment(texture);
+                scene->setCookTorranceEnvironment(texture);
 
                 //
 

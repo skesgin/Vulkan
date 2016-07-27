@@ -27,7 +27,7 @@
 #include "Example.hpp"
 
 Example::Example(const vkts::IInitialResourcesSP& initialResources, const int32_t windowIndex, const vkts::ISurfaceSP& surface) :
-		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), environmentDescriptorSetLayout(nullptr), resolveDescriptorSetLayout(nullptr), resolveDescriptorPool(nullptr), resolveDescriptorSet(nullptr), vertexViewProjectionUniformBuffer(nullptr), environmentVertexViewProjectionUniformBuffer(nullptr), allBSDFVertexShaderModules(), envVertexShaderModule(nullptr), envFragmentShaderModule(nullptr), resolveVertexShaderModule(nullptr), resolveFragmentShaderModule(nullptr), environmentPipelineLayout(nullptr), resolvePipelineLayout(nullptr), font(nullptr), sceneContext(nullptr), scene(nullptr), environmentSceneContext(nullptr), environmentScene(nullptr), screenPlaneVertexBuffer(nullptr), swapchain(nullptr), renderPass(nullptr), gbufferRenderPass(nullptr), allGraphicsPipelines(), resolveGraphicsPipeline(nullptr), allGBufferTextures(), allGBufferImageViews(), gbufferSampler(nullptr), swapchainImagesCount(0), swapchainImageView(), gbufferFramebuffer(), framebuffer(), cmdBuffer(), rebuildCmdBufferCounter(0), fps(0), ram(0), cpuUsageApp(0.0f), processors(0)
+		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), environmentDescriptorSetLayout(nullptr), resolveDescriptorSetLayout(nullptr), resolveDescriptorPool(nullptr), resolveDescriptorSet(nullptr), vertexViewProjectionUniformBuffer(nullptr), environmentVertexViewProjectionUniformBuffer(nullptr), resolveFragmentMatricesUniformBuffer(nullptr), allBSDFVertexShaderModules(), envVertexShaderModule(nullptr), envFragmentShaderModule(nullptr), resolveVertexShaderModule(nullptr), resolveFragmentShaderModule(nullptr), environmentPipelineLayout(nullptr), resolvePipelineLayout(nullptr), font(nullptr), sceneContext(nullptr), scene(nullptr), environmentSceneContext(nullptr), environmentScene(nullptr), screenPlaneVertexBuffer(nullptr), swapchain(nullptr), renderPass(nullptr), gbufferRenderPass(nullptr), allGraphicsPipelines(), resolveGraphicsPipeline(nullptr), allGBufferTextures(), allGBufferImageViews(), gbufferSampler(nullptr), swapchainImagesCount(0), swapchainImageView(), gbufferFramebuffer(), framebuffer(), cmdBuffer(), rebuildCmdBufferCounter(0), fps(0), ram(0), cpuUsageApp(0.0f), processors(0)
 {
 	processors = glm::min(vkts::processorGetNumber(), VKTS_MAX_CORES);
 
@@ -400,6 +400,12 @@ VkBool32 Example::updateDescriptorSets()
 	//
 	//
 
+	memset(resolveDescriptorBufferInfos, 0, sizeof(resolveDescriptorBufferInfos));
+
+	resolveDescriptorBufferInfos[0].buffer = resolveFragmentMatricesUniformBuffer->getBuffer()->getBuffer();
+	resolveDescriptorBufferInfos[0].offset = 0;
+	resolveDescriptorBufferInfos[0].range = resolveFragmentMatricesUniformBuffer->getBuffer()->getSize();
+
 	memset(resolveDescriptorImageInfos, 0, sizeof(resolveDescriptorImageInfos));
 
 	memset(resolveWriteDescriptorSets, 0, sizeof(resolveWriteDescriptorSets));
@@ -453,6 +459,22 @@ VkBool32 Example::updateDescriptorSets()
 	resolveWriteDescriptorSets[7].pImageInfo = &resolveDescriptorImageInfos[7];
 	resolveWriteDescriptorSets[7].pBufferInfo = nullptr;
 	resolveWriteDescriptorSets[7].pTexelBufferView = nullptr;
+
+	resolveDescriptorImageInfos[7].sampler = scene->getLut()->getSampler()->getSampler();
+	resolveDescriptorImageInfos[7].imageView = scene->getLut()->getImageView()->getImageView();
+	resolveDescriptorImageInfos[7].imageLayout = scene->getLut()->getMemoryImage()->getImage()->getImageLayout();
+
+
+	resolveWriteDescriptorSets[8].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+
+	resolveWriteDescriptorSets[8].dstSet = resolveDescriptorSet->getDescriptorSets()[0];
+	resolveWriteDescriptorSets[8].dstBinding = 8;
+	resolveWriteDescriptorSets[8].dstArrayElement = 0;
+	resolveWriteDescriptorSets[8].descriptorCount = 1;
+	resolveWriteDescriptorSets[8].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	resolveWriteDescriptorSets[8].pImageInfo = nullptr;
+	resolveWriteDescriptorSets[8].pBufferInfo = resolveDescriptorBufferInfos;
+	resolveWriteDescriptorSets[8].pTexelBufferView = nullptr;
 
 	//
 
@@ -1086,7 +1108,7 @@ VkBool32 Example::buildDescriptorSetLayout()
 
 	//
 
-	VkDescriptorSetLayoutBinding resolveDescriptorSetLayoutBinding[8];
+	VkDescriptorSetLayoutBinding resolveDescriptorSetLayoutBinding[9];
 
 	memset(&resolveDescriptorSetLayoutBinding, 0, sizeof(resolveDescriptorSetLayoutBinding));
 
@@ -1099,7 +1121,13 @@ VkBool32 Example::buildDescriptorSetLayout()
 		resolveDescriptorSetLayoutBinding[binding].pImmutableSamplers = nullptr;
 	}
 
-	resolveDescriptorSetLayout = vkts::descriptorSetLayoutCreate(initialResources->getDevice()->getDevice(), 0, 8, resolveDescriptorSetLayoutBinding);
+	resolveDescriptorSetLayoutBinding[8].binding = 8;
+	resolveDescriptorSetLayoutBinding[8].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	resolveDescriptorSetLayoutBinding[8].descriptorCount = 1;
+	resolveDescriptorSetLayoutBinding[8].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+	resolveDescriptorSetLayoutBinding[8].pImmutableSamplers = nullptr;
+
+	resolveDescriptorSetLayout = vkts::descriptorSetLayoutCreate(initialResources->getDevice()->getDevice(), 0, 9, resolveDescriptorSetLayoutBinding);
 
 	if (!resolveDescriptorSetLayout.get())
 	{
@@ -1305,6 +1333,18 @@ VkBool32 Example::buildUniformBuffers()
 	environmentVertexViewProjectionUniformBuffer = vkts::bufferObjectCreate(initialResources, bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
 
 	if (!environmentVertexViewProjectionUniformBuffer.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create vertex uniform buffer.");
+
+		return VK_FALSE;
+	}
+
+
+	bufferCreateInfo.size = vkts::commonGetDeviceSize(16 * sizeof(float), 16);
+
+	resolveFragmentMatricesUniformBuffer = vkts::bufferObjectCreate(initialResources, bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+
+	if (!resolveFragmentMatricesUniformBuffer.get())
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create vertex uniform buffer.");
 
@@ -1769,6 +1809,8 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 
 		projectionMatrix = vkts::perspectiveMat4(45.0f, (float)currentExtent.width / (float)currentExtent.height, 1.0f, 100.0f);
 
+		auto inverseProjectionMatrix = glm::inverse(projectionMatrix);
+
 		viewMatrix = camera->getViewMatrix();
 
 		if (!vertexViewProjectionUniformBuffer->upload(0 * sizeof(float) * 16, 0, projectionMatrix))
@@ -1778,6 +1820,12 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 			return VK_FALSE;
 		}
 		if (!environmentVertexViewProjectionUniformBuffer->upload(0 * sizeof(float) * 16, 0, projectionMatrix))
+		{
+			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not upload matrices.");
+
+			return VK_FALSE;
+		}
+		if (!resolveFragmentMatricesUniformBuffer->upload(0 * sizeof(float) * 16, 0, inverseProjectionMatrix))
 		{
 			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not upload matrices.");
 
@@ -2074,6 +2122,11 @@ void Example::terminate(const vkts::IUpdateThreadContext& updateContext)
 				allBSDFVertexShaderModules[i]->destroy();
 			}
 			allBSDFVertexShaderModules.clear();
+
+			if (resolveFragmentMatricesUniformBuffer.get())
+			{
+				resolveFragmentMatricesUniformBuffer->destroy();
+			}
 
 			if (environmentVertexViewProjectionUniformBuffer.get())
 			{

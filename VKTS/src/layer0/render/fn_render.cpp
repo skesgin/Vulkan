@@ -153,6 +153,46 @@ glm::vec3 VKTS_APIENTRY renderCookTorrance(const IImageDataSP& cubeMap, const Vk
 	return glm::vec3(0.0f, 0.0f, 0.0f);
 }
 
+glm::vec3 VKTS_APIENTRY renderOrenNayar(const IImageDataSP& cubeMap, const VkFilter filter, const uint32_t mipLevel, const glm::vec2& randomPoint, const glm::mat3& basis, const glm::vec3& N, const glm::vec3& V, const float roughness)
+{
+	if (!cubeMap.get() || cubeMap->getArrayLayers() != 6)
+	{
+		return glm::vec3(0.0f, 0.0f, 0.0f);
+	}
+
+	glm::vec3 LtangentSpace = renderGetCosineWeightedVector(randomPoint);
+
+	// Transform light ray to world space.
+	glm::vec3 L = basis * LtangentSpace;
+
+
+    float NdotL = glm::dot(N, L);
+    float NdotV = glm::dot(N, V);
+
+    float angleVN = acosf(NdotV);
+    float angleLN = acosf(NdotL);
+
+    float alpha = glm::max(angleVN, angleLN);
+    float beta = glm::min(angleVN, angleLN);
+    float gamma = glm::dot(V - N * NdotV, L - N * NdotL);
+
+
+    float roughnessSquared = roughness * roughness;
+
+
+    float A = 1.0f - 0.5f * (roughnessSquared / (roughnessSquared + 0.57f));
+
+    float B = 0.45f * (roughnessSquared / (roughnessSquared + 0.09f));
+
+    float C = sinf(alpha) * tanf(beta);
+
+
+    float Lr = glm::max(0.0f, NdotL) * (A + B * glm::max(0.0f, gamma) * C);
+
+
+	return glm::vec3(cubeMap->getSampleCubeMap(L.x, L.y, L.z, filter, mipLevel)) * Lr;
+}
+
 glm::vec3 VKTS_APIENTRY renderLambert(const IImageDataSP& cubeMap, const VkFilter filter, const uint32_t mipLevel, const glm::vec2& randomPoint, const glm::mat3& basis)
 {
 	if (!cubeMap.get() || cubeMap->getArrayLayers() != 6)

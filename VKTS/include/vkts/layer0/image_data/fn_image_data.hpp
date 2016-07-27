@@ -102,6 +102,12 @@ VKTS_APICALL SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterCo
  *
  * @ThreadSafe
  */
+VKTS_APICALL SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterOrenNayar(const IImageDataSP& sourceImage, const uint32_t m, const std::string& name);
+
+/**
+ *
+ * @ThreadSafe
+ */
 VKTS_APICALL SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterLambert(const IImageDataSP& sourceImage, const uint32_t m, const std::string& name);
 
 /**

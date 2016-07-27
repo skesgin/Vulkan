@@ -91,14 +91,16 @@ private:
     VkDescriptorBufferInfo environmentDescriptorBufferInfos[1];
     VkDescriptorBufferInfo descriptorBufferInfos[1];
     VkDescriptorImageInfo environmentDescriptorImageInfos[1];
+    VkDescriptorBufferInfo resolveDescriptorBufferInfos[1];
     VkDescriptorImageInfo resolveDescriptorImageInfos[8];
 
     VkWriteDescriptorSet writeDescriptorSets[VKTS_BINDING_UNIFORM_BSDF_TOTAL_BINDING_COUNT];
     VkWriteDescriptorSet environmentWriteDescriptorSets[VKTS_ENVIRONMENT_DESCRIPTOR_SET_COUNT];
-    VkWriteDescriptorSet resolveWriteDescriptorSets[8];
+    VkWriteDescriptorSet resolveWriteDescriptorSets[9];
 
     vkts::IBufferObjectSP vertexViewProjectionUniformBuffer;
 	vkts::IBufferObjectSP environmentVertexViewProjectionUniformBuffer;
+	vkts::IBufferObjectSP resolveFragmentMatricesUniformBuffer;
 
 	vkts::SmartPointerVector<vkts::IShaderModuleSP> allBSDFVertexShaderModules;
 
