@@ -61,6 +61,8 @@
 
 #define VKTS_OUTPUT_BUFFER_SIZE 1024
 
+#define VKTS_BSDF_DESCRIPTOR_SET_COUNT 10
+
 class Example: public vkts::IUpdateThread
 {
 
@@ -71,6 +73,8 @@ private:
 	const int32_t windowIndex;
 
 	const vkts::ISurfaceSP surface;
+
+	VkBool32 showStats;
 
 	vkts::ICameraSP camera;
 	vkts::IInputControllerSP inputController;
@@ -92,11 +96,11 @@ private:
     VkDescriptorBufferInfo descriptorBufferInfos[1];
     VkDescriptorImageInfo environmentDescriptorImageInfos[1];
     VkDescriptorBufferInfo resolveDescriptorBufferInfos[1];
-    VkDescriptorImageInfo resolveDescriptorImageInfos[8];
+    VkDescriptorImageInfo resolveDescriptorImageInfos[9];
 
     VkWriteDescriptorSet writeDescriptorSets[VKTS_BINDING_UNIFORM_BSDF_TOTAL_BINDING_COUNT];
     VkWriteDescriptorSet environmentWriteDescriptorSets[VKTS_ENVIRONMENT_DESCRIPTOR_SET_COUNT];
-    VkWriteDescriptorSet resolveWriteDescriptorSets[9];
+    VkWriteDescriptorSet resolveWriteDescriptorSets[VKTS_BSDF_DESCRIPTOR_SET_COUNT];
 
     vkts::IBufferObjectSP vertexViewProjectionUniformBuffer;
 	vkts::IBufferObjectSP environmentVertexViewProjectionUniformBuffer;

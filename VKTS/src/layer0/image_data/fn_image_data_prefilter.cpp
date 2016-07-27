@@ -63,11 +63,11 @@ SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterCookTorrance(co
         int32_t width = sourceImage->getWidth();
         int32_t height = sourceImage->getHeight();
 
-		while (width > 1 || height > 1)
+		while (width > 0 || height > 0)
 		{
 			targetImageFilename = sourceImageName + "_LEVEL" + std::to_string(level++) + "_LAYER" + std::to_string(layer) + "_COOKTORRANCE" + sourceImageExtension;
 
-			currentTargetImage = imageDataCreate(targetImageFilename, width, height, 1, 0.0f, 0.0f, 0.0f, 0.0f, sourceImage->getImageType(), sourceImage->getFormat());
+			currentTargetImage = imageDataCreate(targetImageFilename, glm::max(width, 1), glm::max(height, 1), 1, 0.0f, 0.0f, 0.0f, 0.0f, sourceImage->getImageType(), sourceImage->getFormat());
 
 			if (!currentTargetImage.get())
 			{
@@ -78,8 +78,8 @@ SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterCookTorrance(co
 
 			//
 
-			width = glm::max(width / 2, 1);
-			height = glm::max(height / 2, 1);
+			width = width / 2;
+			height = height / 2;
 		}
     }
 
@@ -91,85 +91,101 @@ SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterCookTorrance(co
 
     uint32_t samples = 1 << m;
 
-    uint32_t length = (uint32_t)sourceImage->getWidth();
-
-    // 0.5 as step goes form -1.0 to 1.0 and not just 0.0 to 1.0
-	float step = 2.0f / (float)length;
-	float offset = step * 0.5f;
-
-	//
-
-	glm::vec3 scanVector;
-
-	for (uint32_t y = 0; y < length; y++)
+	for (uint32_t roughnessSampleIndex = 0; roughnessSampleIndex < roughnessSamples; roughnessSampleIndex++)
 	{
-		for (uint32_t x = 0; x < length; x++)
+		uint32_t length = (uint32_t)sourceImage->getWidth() / (1 << roughnessSampleIndex);
+
+		// 0.5 as step goes form -1.0 to 1.0 and not just 0.0 to 1.0
+		float step = 2.0f / (float)length;
+		float offset = step * 0.5f;
+
+		//
+
+		float roughness = (float)roughnessSampleIndex / (float)(roughnessSamples - 1);
+
+		//
+
+		glm::vec3 scanVector;
+
+		for (uint32_t y = 0; y < length; y++)
 		{
-			for (uint32_t i = 0; i < 6; i++)
+			for (uint32_t x = 0; x < length; x++)
 			{
-				switch (i)
+				for (uint32_t i = 0; i < 6; i++)
 				{
-					case 0:
+					switch (i)
+					{
+						case 0:
 
-						// Positive X
-						scanVector = glm::vec3(1.0f, 1.0f - offset - step * (float)y, 1.0f - offset - step * (float)x);
+							// Positive X
+							scanVector = glm::vec3(1.0f, 1.0f - offset - step * (float)y, 1.0f - offset - step * (float)x);
 
-						break;
-					case 1:
+							break;
+						case 1:
 
-						// Negative X
-						scanVector = glm::vec3(-1.0f, 1.0f - offset - step * (float)y, -1.0f + offset + step * (float)x);
+							// Negative X
+							scanVector = glm::vec3(-1.0f, 1.0f - offset - step * (float)y, -1.0f + offset + step * (float)x);
 
-						break;
-					case 2:
+							break;
+						case 2:
 
-						// Positive Y
-						scanVector = glm::vec3(-1.0f + offset + step * (float)x, 1.0f, -1.0f + offset + step * (float)y);
+							// Positive Y
+							scanVector = glm::vec3(-1.0f + offset + step * (float)x, 1.0f, -1.0f + offset + step * (float)y);
 
-						break;
-					case 3:
+							break;
+						case 3:
 
-						// Negative Y
-						scanVector = glm::vec3(-1.0f + offset + step * (float)x, -1.0f, 1.0f - offset - step * (float)y);
+							// Negative Y
+							scanVector = glm::vec3(-1.0f + offset + step * (float)x, -1.0f, 1.0f - offset - step * (float)y);
 
-						break;
-					case 4:
+							break;
+						case 4:
 
-						// Positive Z
-						scanVector = glm::vec3(-1.0f + offset + step * (float)x, 1.0f - offset - step * (float)y, 1.0f);
+							// Positive Z
+							scanVector = glm::vec3(-1.0f + offset + step * (float)x, 1.0f - offset - step * (float)y, 1.0f);
 
-						break;
-					case 5:
+							break;
+						case 5:
 
-						// Negative Z
-						scanVector = glm::vec3(1.0f - offset - step * (float)x, 1.0f - offset - step * (float)y, -1.0f);
+							// Negative Z
+							scanVector = glm::vec3(1.0f - offset - step * (float)x, 1.0f - offset - step * (float)y, -1.0f);
 
-						break;
-				}
+							break;
+					}
 
-				scanVector = glm::normalize(scanVector);
+					scanVector = glm::normalize(scanVector);
 
-				//
+					//
 
-				glm::mat3 basis = renderGetBasis(scanVector);
+					glm::mat3 basis = renderGetBasis(scanVector);
 
-				for (uint32_t roughnessSampleIndex = 0; roughnessSampleIndex < roughnessSamples; roughnessSampleIndex++)
-				{
 					glm::vec3 colorCookTorrance = glm::vec3(0.0f, 0.0f, 0.0f);
 
-					float roughness = (float)roughnessSampleIndex / (float)(roughnessSamples - 1);
+					float sampleDivisior = 0.0f;
 
 					for (uint32_t sampleIndex = 0; sampleIndex < samples; sampleIndex++)
 					{
 						glm::vec2 randomPoint = randomHammersley(sampleIndex, m);
 
 						// N = V
-						colorCookTorrance += renderCookTorrance(sourceImage, VK_FILTER_LINEAR, 0, randomPoint, basis, scanVector, scanVector, roughness);
+						auto currentColorCookTorrance = renderCookTorrance(sourceImage, VK_FILTER_LINEAR, 0, randomPoint, basis, scanVector, scanVector, roughness);
+
+						if (!std::isnan(currentColorCookTorrance.x) && !std::isnan(currentColorCookTorrance.y) && !std::isnan(currentColorCookTorrance.z))
+						{
+							colorCookTorrance += currentColorCookTorrance;
+
+							sampleDivisior += 1.0f;
+						}
 					}
 
 					//
 
-					result[i * roughnessSamples + roughnessSampleIndex]->setTexel(glm::vec4(colorCookTorrance / (float) samples, 1.0f), x, y, 0, 0, 0);
+					if (sampleDivisior > 0.0f)
+					{
+						colorCookTorrance = colorCookTorrance / sampleDivisior;
+					}
+
+					result[i * roughnessSamples + roughnessSampleIndex]->setTexel(glm::vec4(colorCookTorrance, 1.0f), x, y, 0, 0, 0);
 				}
 			}
 		}

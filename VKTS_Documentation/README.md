@@ -69,6 +69,13 @@ This example renders into an offscreen framebuffer, writing only the depth value
 ![VKTS_Example09](screenshots/VKTS_Example09.png)
   
   
+[VKTS_Example10](../VKTS_Example10) - Deferred real-time physically based rendering (PBR).
+      
+This example uses the exported Cycles materials from Blender to render the diffuse and specular shader into an offscreen G-Buffer. The environment is pre-filtered and stored in several textures and cube maps. This allows to do image based lighting and to resolve the PBR materials in real-time. This example uses no anti-aliasing, which could be either done in a post process or using a multi-sample G-Buffer.  
+    
+![VKTS_Example10](screenshots/VKTS_Example10.png)
+  
+  
 VKTS test program:
 ------------------
 

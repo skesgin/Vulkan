@@ -1041,6 +1041,8 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
                                     return VK_FALSE;
                                 }
 
+                                levelCount = (uint32_t)allCookTorranceCubeMaps.size() / 6;
+
                                 if (cacheGetEnabled())
                                 {
     								logPrint(VKTS_LOG_INFO, "Scenegraph: Storing cached data for '%s'", finalImageDataFilename.c_str());
@@ -1503,7 +1505,16 @@ static VkBool32 scenegraphLoadTextures(const char* directory, const char* filena
     				return VK_FALSE;
     			}
 
-                texture = textureCreate(context->getInitialResources(), lutName, VK_FALSE, VK_FALSE, memoryImage, context->getSamplerCreateInfo(), context->getImageViewCreateInfo());
+    			//
+
+    			VkSamplerCreateInfo lutSamplerCreateInfo = context->getSamplerCreateInfo();
+
+    			lutSamplerCreateInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_NEAREST;
+    			lutSamplerCreateInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+    			lutSamplerCreateInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+    			lutSamplerCreateInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+
+                texture = textureCreate(context->getInitialResources(), lutName, VK_FALSE, VK_FALSE, memoryImage, lutSamplerCreateInfo, context->getImageViewCreateInfo());
 
                 if (!texture.get())
                 {
@@ -4214,7 +4225,7 @@ ISceneSP VKTS_APIENTRY scenegraphLoadScene(const char* filename, const IContextS
                 	return ISceneSP();
                 }
 
-                scene->setCookTorranceEnvironment(texture);
+                scene->setSpecularEnvironment(texture);
 
                 //
 

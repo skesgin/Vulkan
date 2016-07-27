@@ -82,6 +82,10 @@ How to build:
 Changelog:
 ----------
 
+07/27/2016
+- Fixed cycles material exporter: Translate mapping now works.
+- Real-time PBR working.
+
 07/19/2016
 - Fixed CMake files for i.MX8.
 - Added possibility to choose physical device via console option (e.g. "-pd 1" for physical device at index 1).

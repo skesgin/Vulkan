@@ -672,9 +672,9 @@ glm::vec4 ImageData::getSample(const float x, const VkFilter filterX, const VkSa
 
 glm::vec4 ImageData::getSampleCubeMap(const float x, const float y, const float z, const VkFilter filter, const uint32_t mipLevel) const
 {
-	if (arrayLayers != 6 || extent.depth != 1)
+	if (arrayLayers != 6 || extent.depth != 1 || std::isnan(x) || std::isnan(y) || std::isnan(z))
 	{
-		return glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
+		return glm::vec4(NAN, NAN, NAN, NAN);
 	}
 
 	//
@@ -690,7 +690,7 @@ glm::vec4 ImageData::getSampleCubeMap(const float x, const float y, const float 
 
 	if (faceLayer == -1)
 	{
-		return glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
+		return glm::vec4(NAN, NAN, NAN, NAN);
 	}
 
 	//

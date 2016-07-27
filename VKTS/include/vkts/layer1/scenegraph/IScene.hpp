@@ -70,9 +70,9 @@ public:
 
     virtual ITextureSP getDiffuseEnvironment() const = 0;
 
-    virtual void setCookTorranceEnvironment(const ITextureSP& cookTorranceEnvironment) = 0;
+    virtual void setSpecularEnvironment(const ITextureSP& specularEnvironment) = 0;
 
-    virtual ITextureSP getCookTorranceEnvironment() const = 0;
+    virtual ITextureSP getSpecularEnvironment() const = 0;
 
     virtual void setLut(const ITextureSP& environment) = 0;
 

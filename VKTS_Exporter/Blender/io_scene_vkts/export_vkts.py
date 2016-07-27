@@ -226,7 +226,7 @@ mappingMain = """#previousMain#
     // Mapping start
 
     // In
-    vec4 %s = vec4(%s, 0.0);
+    vec4 %s = vec4(%s, 1.0);
 
     %s = %s;
     

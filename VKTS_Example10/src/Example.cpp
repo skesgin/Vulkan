@@ -27,7 +27,7 @@
 #include "Example.hpp"
 
 Example::Example(const vkts::IInitialResourcesSP& initialResources, const int32_t windowIndex, const vkts::ISurfaceSP& surface) :
-		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), environmentDescriptorSetLayout(nullptr), resolveDescriptorSetLayout(nullptr), resolveDescriptorPool(nullptr), resolveDescriptorSet(nullptr), vertexViewProjectionUniformBuffer(nullptr), environmentVertexViewProjectionUniformBuffer(nullptr), resolveFragmentMatricesUniformBuffer(nullptr), allBSDFVertexShaderModules(), envVertexShaderModule(nullptr), envFragmentShaderModule(nullptr), resolveVertexShaderModule(nullptr), resolveFragmentShaderModule(nullptr), environmentPipelineLayout(nullptr), resolvePipelineLayout(nullptr), font(nullptr), sceneContext(nullptr), scene(nullptr), environmentSceneContext(nullptr), environmentScene(nullptr), screenPlaneVertexBuffer(nullptr), swapchain(nullptr), renderPass(nullptr), gbufferRenderPass(nullptr), allGraphicsPipelines(), resolveGraphicsPipeline(nullptr), allGBufferTextures(), allGBufferImageViews(), gbufferSampler(nullptr), swapchainImagesCount(0), swapchainImageView(), gbufferFramebuffer(), framebuffer(), cmdBuffer(), rebuildCmdBufferCounter(0), fps(0), ram(0), cpuUsageApp(0.0f), processors(0)
+		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), showStats(VK_TRUE), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), environmentDescriptorSetLayout(nullptr), resolveDescriptorSetLayout(nullptr), resolveDescriptorPool(nullptr), resolveDescriptorSet(nullptr), vertexViewProjectionUniformBuffer(nullptr), environmentVertexViewProjectionUniformBuffer(nullptr), resolveFragmentMatricesUniformBuffer(nullptr), allBSDFVertexShaderModules(), envVertexShaderModule(nullptr), envFragmentShaderModule(nullptr), resolveVertexShaderModule(nullptr), resolveFragmentShaderModule(nullptr), environmentPipelineLayout(nullptr), resolvePipelineLayout(nullptr), font(nullptr), sceneContext(nullptr), scene(nullptr), environmentSceneContext(nullptr), environmentScene(nullptr), screenPlaneVertexBuffer(nullptr), swapchain(nullptr), renderPass(nullptr), gbufferRenderPass(nullptr), allGraphicsPipelines(), resolveGraphicsPipeline(nullptr), allGBufferTextures(), allGBufferImageViews(), gbufferSampler(nullptr), swapchainImagesCount(0), swapchainImageView(), gbufferFramebuffer(), framebuffer(), cmdBuffer(), rebuildCmdBufferCounter(0), fps(0), ram(0), cpuUsageApp(0.0f), processors(0)
 {
 	processors = glm::min(vkts::processorGetNumber(), VKTS_MAX_CORES);
 
@@ -231,7 +231,7 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 
 	// Render font.
 
-	if (font.get())
+	if (font.get() && showStats)
 	{
 		glm::mat4 projectionMatrix = vkts::orthoMat4((float)swapchain->getImageExtent().width * -0.5f, (float)swapchain->getImageExtent().width * 0.5f, (float)swapchain->getImageExtent().height * -0.5f, (float)swapchain->getImageExtent().height  * 0.5f, 0.0f, 100.0f);
 
@@ -402,10 +402,6 @@ VkBool32 Example::updateDescriptorSets()
 
 	memset(resolveDescriptorBufferInfos, 0, sizeof(resolveDescriptorBufferInfos));
 
-	resolveDescriptorBufferInfos[0].buffer = resolveFragmentMatricesUniformBuffer->getBuffer()->getBuffer();
-	resolveDescriptorBufferInfos[0].offset = 0;
-	resolveDescriptorBufferInfos[0].range = resolveFragmentMatricesUniformBuffer->getBuffer()->getSize();
-
 	memset(resolveDescriptorImageInfos, 0, sizeof(resolveDescriptorImageInfos));
 
 	memset(resolveWriteDescriptorSets, 0, sizeof(resolveWriteDescriptorSets));
@@ -444,10 +440,10 @@ VkBool32 Example::updateDescriptorSets()
 	resolveWriteDescriptorSets[6].pBufferInfo = nullptr;
 	resolveWriteDescriptorSets[6].pTexelBufferView = nullptr;
 
-	//Lut
-	resolveDescriptorImageInfos[7].sampler = scene->getLut()->getSampler()->getSampler();
-	resolveDescriptorImageInfos[7].imageView = scene->getLut()->getImageView()->getImageView();
-	resolveDescriptorImageInfos[7].imageLayout = scene->getLut()->getMemoryImage()->getImage()->getImageLayout();
+	// Specular/Cook-Torrance.
+	resolveDescriptorImageInfos[7].sampler = scene->getSpecularEnvironment()->getSampler()->getSampler();
+	resolveDescriptorImageInfos[7].imageView = scene->getSpecularEnvironment()->getImageView()->getImageView();
+	resolveDescriptorImageInfos[7].imageLayout = scene->getSpecularEnvironment()->getMemoryImage()->getImage()->getImageLayout();
 
 	resolveWriteDescriptorSets[7].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 
@@ -460,10 +456,10 @@ VkBool32 Example::updateDescriptorSets()
 	resolveWriteDescriptorSets[7].pBufferInfo = nullptr;
 	resolveWriteDescriptorSets[7].pTexelBufferView = nullptr;
 
-	resolveDescriptorImageInfos[7].sampler = scene->getLut()->getSampler()->getSampler();
-	resolveDescriptorImageInfos[7].imageView = scene->getLut()->getImageView()->getImageView();
-	resolveDescriptorImageInfos[7].imageLayout = scene->getLut()->getMemoryImage()->getImage()->getImageLayout();
-
+	//Lut
+	resolveDescriptorImageInfos[8].sampler = scene->getLut()->getSampler()->getSampler();
+	resolveDescriptorImageInfos[8].imageView = scene->getLut()->getImageView()->getImageView();
+	resolveDescriptorImageInfos[8].imageLayout = scene->getLut()->getMemoryImage()->getImage()->getImageLayout();
 
 	resolveWriteDescriptorSets[8].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 
@@ -471,14 +467,30 @@ VkBool32 Example::updateDescriptorSets()
 	resolveWriteDescriptorSets[8].dstBinding = 8;
 	resolveWriteDescriptorSets[8].dstArrayElement = 0;
 	resolveWriteDescriptorSets[8].descriptorCount = 1;
-	resolveWriteDescriptorSets[8].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-	resolveWriteDescriptorSets[8].pImageInfo = nullptr;
-	resolveWriteDescriptorSets[8].pBufferInfo = resolveDescriptorBufferInfos;
+	resolveWriteDescriptorSets[8].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+	resolveWriteDescriptorSets[8].pImageInfo = &resolveDescriptorImageInfos[8];
+	resolveWriteDescriptorSets[8].pBufferInfo = nullptr;
 	resolveWriteDescriptorSets[8].pTexelBufferView = nullptr;
+
+	// Inverse matrix.
+	resolveDescriptorBufferInfos[0].buffer = resolveFragmentMatricesUniformBuffer->getBuffer()->getBuffer();
+	resolveDescriptorBufferInfos[0].offset = 0;
+	resolveDescriptorBufferInfos[0].range = resolveFragmentMatricesUniformBuffer->getBuffer()->getSize();
+
+	resolveWriteDescriptorSets[9].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+
+	resolveWriteDescriptorSets[9].dstSet = resolveDescriptorSet->getDescriptorSets()[0];
+	resolveWriteDescriptorSets[9].dstBinding = 9;
+	resolveWriteDescriptorSets[9].dstArrayElement = 0;
+	resolveWriteDescriptorSets[9].descriptorCount = 1;
+	resolveWriteDescriptorSets[9].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	resolveWriteDescriptorSets[9].pImageInfo = nullptr;
+	resolveWriteDescriptorSets[9].pBufferInfo = &resolveDescriptorBufferInfos[0];
+	resolveWriteDescriptorSets[9].pTexelBufferView = nullptr;
 
 	//
 
-	resolveDescriptorSet->updateDescriptorSets(8, resolveWriteDescriptorSets, 0, nullptr);
+	resolveDescriptorSet->updateDescriptorSets(VKTS_BSDF_DESCRIPTOR_SET_COUNT, resolveWriteDescriptorSets, 0, nullptr);
 
 	return VK_TRUE;
 }
@@ -1056,14 +1068,17 @@ VkBool32 Example::buildDescriptorSets()
 
 VkBool32 Example::buildDescriptorSetPool()
 {
-    VkDescriptorPoolSize descriptorPoolSize[1];
+    VkDescriptorPoolSize descriptorPoolSize[2];
 
     memset(&descriptorPoolSize, 0, sizeof(descriptorPoolSize));
 
 	descriptorPoolSize[0].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	descriptorPoolSize[0].descriptorCount = 8;
+	descriptorPoolSize[0].descriptorCount = 9;
 
-	resolveDescriptorPool = vkts::descriptorPoolCreate(initialResources->getDevice()->getDevice(), VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT, 1, 1, descriptorPoolSize);
+	descriptorPoolSize[1].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	descriptorPoolSize[1].descriptorCount = 1;
+
+	resolveDescriptorPool = vkts::descriptorPoolCreate(initialResources->getDevice()->getDevice(), VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT, 1, 2, descriptorPoolSize);
 
     if (!resolveDescriptorPool.get())
     {
@@ -1108,11 +1123,11 @@ VkBool32 Example::buildDescriptorSetLayout()
 
 	//
 
-	VkDescriptorSetLayoutBinding resolveDescriptorSetLayoutBinding[9];
+	VkDescriptorSetLayoutBinding resolveDescriptorSetLayoutBinding[VKTS_BSDF_DESCRIPTOR_SET_COUNT];
 
 	memset(&resolveDescriptorSetLayoutBinding, 0, sizeof(resolveDescriptorSetLayoutBinding));
 
-	for (uint32_t binding = 0; binding < 8; binding++)
+	for (uint32_t binding = 0; binding < 9; binding++)
 	{
 		resolveDescriptorSetLayoutBinding[binding].binding = binding;
 		resolveDescriptorSetLayoutBinding[binding].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
@@ -1121,13 +1136,13 @@ VkBool32 Example::buildDescriptorSetLayout()
 		resolveDescriptorSetLayoutBinding[binding].pImmutableSamplers = nullptr;
 	}
 
-	resolveDescriptorSetLayoutBinding[8].binding = 8;
-	resolveDescriptorSetLayoutBinding[8].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-	resolveDescriptorSetLayoutBinding[8].descriptorCount = 1;
-	resolveDescriptorSetLayoutBinding[8].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-	resolveDescriptorSetLayoutBinding[8].pImmutableSamplers = nullptr;
+	resolveDescriptorSetLayoutBinding[9].binding = 9;
+	resolveDescriptorSetLayoutBinding[9].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	resolveDescriptorSetLayoutBinding[9].descriptorCount = 1;
+	resolveDescriptorSetLayoutBinding[9].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+	resolveDescriptorSetLayoutBinding[9].pImmutableSamplers = nullptr;
 
-	resolveDescriptorSetLayout = vkts::descriptorSetLayoutCreate(initialResources->getDevice()->getDevice(), 0, 9, resolveDescriptorSetLayoutBinding);
+	resolveDescriptorSetLayout = vkts::descriptorSetLayoutCreate(initialResources->getDevice()->getDevice(), 0, VKTS_BSDF_DESCRIPTOR_SET_COUNT, resolveDescriptorSetLayoutBinding);
 
 	if (!resolveDescriptorSetLayout.get())
 	{
@@ -1766,6 +1781,21 @@ VkBool32 Example::init(const vkts::IUpdateThreadContext& updateContext)
 //
 VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 {
+	static VkBool32 pressedA = VK_FALSE;
+
+	if (updateContext.getGamepadButton(windowIndex, 0, VKTS_GAMEPAD_A))
+	{
+		pressedA = VK_TRUE;
+	}
+	else if (pressedA && !updateContext.getGamepadButton(windowIndex, 0, VKTS_GAMEPAD_A))
+	{
+		pressedA = VK_FALSE;
+
+		showStats = !showStats;
+	}
+
+	//
+
 	for (size_t i = 0; i < allUpdateables.size(); i++)
 	{
 		allUpdateables[i]->update(updateContext.getDeltaTime(), updateContext.getDeltaTicks());
@@ -1813,6 +1843,8 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 
 		viewMatrix = camera->getViewMatrix();
 
+		auto inverseViewMatrix = glm::inverse(viewMatrix);
+
 		if (!vertexViewProjectionUniformBuffer->upload(0 * sizeof(float) * 16, 0, projectionMatrix))
 		{
 			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not upload matrices.");
@@ -1835,6 +1867,12 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 		//
 
 		if (!vertexViewProjectionUniformBuffer->upload(1 * sizeof(float) * 16, 0, viewMatrix))
+		{
+			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not upload matrices.");
+
+			return VK_FALSE;
+		}
+		if (!resolveFragmentMatricesUniformBuffer->upload(1 * sizeof(float) * 16, 0, inverseViewMatrix))
 		{
 			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not upload matrices.");
 
