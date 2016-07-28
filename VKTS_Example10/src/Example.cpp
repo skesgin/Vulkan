@@ -568,74 +568,78 @@ VkBool32 Example::buildScene(const vkts::ICommandBuffersSP& cmdBuffer)
 
 	//
 
-	environmentSceneContext = vkts::scenegraphCreateContext(VK_FALSE, initialResources, cmdBuffer, samplerCreateInfo, imageViewCreateInfo, environmentDescriptorSetLayout);
-
-	if (!environmentSceneContext.get())
+	if (!environmentSceneContext.get() && !environmentScene.get())
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create cache.");
 
-		return VK_FALSE;
+		environmentSceneContext = vkts::scenegraphCreateContext(VK_FALSE, initialResources, cmdBuffer, samplerCreateInfo, imageViewCreateInfo, environmentDescriptorSetLayout);
+
+		if (!environmentSceneContext.get())
+		{
+			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create cache.");
+
+			return VK_FALSE;
+		}
+
+		//
+
+		environmentScene = vkts::scenegraphLoadScene(VKTS_ENVIRONMENT_SCENE_NAME, environmentSceneContext);
+
+		if (!environmentScene.get() || environmentScene->getNumberObjects() == 0)
+		{
+			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not load scene.");
+
+			return VK_FALSE;
+		}
+
+		// Enlarge the sphere.
+		environmentScene->getObjects()[0]->setScale(glm::vec3(10.0f, 10.0f, 10.0f));
+
+		vkts::logPrint(VKTS_LOG_INFO, "Example: Number objects: %d", environmentScene->getNumberObjects());
+
+		//
+		// Full screen plane for later resolving GBuffer.
+		//
+
+		// Window clip origin is upper left, but the image is already upside down.
+		static const float vertices[4 * (4 + 2)] = {	-1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+														1.0f, -1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+														-1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+														1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f };
+
+		auto vertexBinaryBuffer = vkts::binaryBufferCreate((const uint8_t*)vertices, sizeof(vertices));
+
+		if (!vertexBinaryBuffer.get())
+		{
+	        return VK_FALSE;
+		}
+
+	    VkBufferCreateInfo bufferCreateInfo;
+
+	    memset(&bufferCreateInfo, 0, sizeof(VkBufferCreateInfo));
+
+	    bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+
+	    bufferCreateInfo.size = sizeof(vertices);
+	    bufferCreateInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+	    bufferCreateInfo.flags = 0;
+	    bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+	    bufferCreateInfo.queueFamilyIndexCount = 0;
+	    bufferCreateInfo.pQueueFamilyIndices = nullptr;
+
+	    vkts::IDeviceMemorySP stageDeviceMemory;
+	    vkts::IBufferSP stageBuffer;
+
+	    screenPlaneVertexBuffer = vkts::bufferObjectCreate(stageBuffer, stageDeviceMemory, initialResources, cmdBuffer, vertexBinaryBuffer, bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+
+	    // Using this scene context to manage the staging objects.
+	    environmentSceneContext->addStageBuffer(stageBuffer);
+	    environmentSceneContext->addStageDeviceMemory(stageDeviceMemory);
+
+	    if (!screenPlaneVertexBuffer.get())
+	    {
+	        return VK_FALSE;
+	    }
 	}
-
-	//
-
-	environmentScene = vkts::scenegraphLoadScene(VKTS_ENVIRONMENT_SCENE_NAME, environmentSceneContext);
-
-	if (!environmentScene.get() || environmentScene->getNumberObjects() == 0)
-	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not load scene.");
-
-		return VK_FALSE;
-	}
-
-	// Enlarge the sphere.
-	environmentScene->getObjects()[0]->setScale(glm::vec3(10.0f, 10.0f, 10.0f));
-
-	vkts::logPrint(VKTS_LOG_INFO, "Example: Number objects: %d", environmentScene->getNumberObjects());
-
-	//
-	// Full screen plane for later resolving GBuffer.
-	//
-
-	// Window clip origin is upper left, but the image is already upside down.
-	static const float vertices[4 * (4 + 2)] = {	-1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-													1.0f, -1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-													-1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-													1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f };
-
-	auto vertexBinaryBuffer = vkts::binaryBufferCreate((const uint8_t*)vertices, sizeof(vertices));
-
-	if (!vertexBinaryBuffer.get())
-	{
-        return VK_FALSE;
-	}
-
-    VkBufferCreateInfo bufferCreateInfo;
-
-    memset(&bufferCreateInfo, 0, sizeof(VkBufferCreateInfo));
-
-    bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-
-    bufferCreateInfo.size = sizeof(vertices);
-    bufferCreateInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-    bufferCreateInfo.flags = 0;
-    bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-    bufferCreateInfo.queueFamilyIndexCount = 0;
-    bufferCreateInfo.pQueueFamilyIndices = nullptr;
-
-    vkts::IDeviceMemorySP stageDeviceMemory;
-    vkts::IBufferSP stageBuffer;
-
-    screenPlaneVertexBuffer = vkts::bufferObjectCreate(stageBuffer, stageDeviceMemory, initialResources, cmdBuffer, vertexBinaryBuffer, bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
-
-    // Using this scene context to manage the staging objects.
-    environmentSceneContext->addStageBuffer(stageBuffer);
-    environmentSceneContext->addStageDeviceMemory(stageDeviceMemory);
-
-    if (!screenPlaneVertexBuffer.get())
-    {
-        return VK_FALSE;
-    }
 
 	return VK_TRUE;
 }
@@ -1355,7 +1359,7 @@ VkBool32 Example::buildUniformBuffers()
 	}
 
 
-	bufferCreateInfo.size = vkts::commonGetDeviceSize(16 * sizeof(float), 16);
+	bufferCreateInfo.size = vkts::commonGetDeviceSize(16 * sizeof(float) * 2, 16);
 
 	resolveFragmentMatricesUniformBuffer = vkts::bufferObjectCreate(initialResources, bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
 
@@ -1470,7 +1474,7 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 
 	VkBool32 doUpdateDescriptorSets = VK_FALSE;
 
-	if (!scene.get() && !environmentScene.get())
+	//if (!scene.get() && !environmentScene.get())
 	{
 		if (!buildScene(updateCmdBuffer))
 		{
@@ -1612,6 +1616,18 @@ void Example::terminateResources(const vkts::IUpdateThreadContext& updateContext
 				{
 					swapchainImageView[i]->destroy();
 				}
+			}
+
+			if (sceneContext.get())
+			{
+				sceneContext->destroy();
+
+				sceneContext.reset();
+			}
+
+			if (scene.get())
+			{
+				scene->destroy();
 			}
 
 			if (resolveGraphicsPipeline.get())
@@ -2101,18 +2117,6 @@ void Example::terminate(const vkts::IUpdateThreadContext& updateContext)
 			if (environmentScene.get())
 			{
 				environmentScene->destroy();
-			}
-
-			if (sceneContext.get())
-			{
-				sceneContext->destroy();
-
-				sceneContext.reset();
-			}
-
-			if (scene.get())
-			{
-				scene->destroy();
 			}
 
 			if (font.get())
