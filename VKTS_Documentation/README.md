@@ -26,28 +26,34 @@ Vulkan examples based on VKTS:
 
 [VKTS_Example01](../VKTS_Example01) - Initializing Vulkan and clearing the background.  
 ![VKTS_Example01](screenshots/VKTS_Example01.png)  
-  
-  
+      
+This example brings up a simple window and clears the content every frame. No shaders, buffers or graphics pipelines are used.    
+      
 [VKTS_Example02](../VKTS_Example02) - Rendering of a red triangle.  
 ![VKTS_Example02](screenshots/VKTS_Example02.png)  
-  
-  
+      
+This example renders a red triangle by passing NDC coordiantes. This example utilizes shaders, vertex buffers and a graphics pipeline.    
+      
 [VKTS_Example03](../VKTS_Example03) - Rendering of a full screen texture.  
 ![VKTS_Example03](screenshots/VKTS_Example03.png)  
-  
-  
+      
+This example renders a a full screen texture. Main topic of this example is on how to use staging buffers in Vulkan.    
+      
 [VKTS_Example04](../VKTS_Example04) - Loading and rendering of an animated, mip mapped textured cube.  
 ![VKTS_Example04](screenshots/VKTS_Example04.png)  
-  
-  
+      
+This example loads and renders an animated, textured cube modeled in Blender. The crate texture does have several mip levels.    
+      
 [VKTS_Example05](../VKTS_Example05) - Phong rendering of a tree and an animated plane with several animations.  
 ![VKTS_Example05](screenshots/VKTS_Example05.png)  
-  
-  
+      
+This example loads another scene modeled in Blender. This scene has a node tree, having several animations.    
+      
 [VKTS_Example06](../VKTS_Example06) - Skeletal animation plus camera movement depending on gamepad input.  
 ![VKTS_Example06](screenshots/VKTS_Example06.png)  
-  
-  
+      
+This example loads and renders a skeletal animated character modeled in Blender. Also, the scene can be cotrolled with a gamepad.    
+      
 [VKTS_Example07](../VKTS_Example07) - Multi-threaded terrain rendering using normal and displacement mapping.
       
 The terrain scene has 64 patches, which are processed in parallel by several threads. Only if a patch is visible by the camera, it is added to the secondary command buffers. After all patches are processed, the primary command buffer is drawing the terrain by executing the above secondary command buffers.    

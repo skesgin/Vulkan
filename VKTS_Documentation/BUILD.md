@@ -73,6 +73,7 @@ Using Visual C++ 2015:
 7. The executables are located in the [VKTS_Binaries](VKTS_Binaries/README.md) folder.
 8. __The VKTS_Binaries folder has to be the working directory, otherwise shaders and assets are not found__.
 
+
 ---
 
 Using make:
@@ -86,6 +87,33 @@ Using make:
 5. __Run make and build VKTS first__.
 6. Do step 3 to 5 with VKTS_Example*.
 7. The executables are located in the [VKTS_Binaries](VKTS_Binaries/README.md) folder.
+
+
+---
+
+Using LunarG SDK under Linux:
+-----------------------------
+
+Append the following lines to your `.profile` file in your home directory: 
+
+`#`
+`# Vulkan development setup.`
+`#`
+
+`export VULKAN_SDK=~/Development/VulkanSDK/1.0.21.1/x86_64`
+
+`export PATH=$PATH:$VULKAN_SDK/bin`
+`export LD_LIBRARY_PATH=$VULKAN_SDK/lib`
+`export VK_LAYER_PATH=$VULKAN_SDK/etc/explicit_layer.d`
+
+`C_INCLUDE_PATH=$VULKAN_SDK/include` 
+`export C_INCLUDE_PATH`
+`CPLUS_INCLUDE_PATH=$VULKAN_SDK/include` 
+`export CPLUS_INCLUDE_PATH`
+`LIBRARY_PATH=$VULKAN_SDK/lib`
+`export LIBRARY_PATH``
+
+Finally, change the path of `VULKAN_SDK` depending on your installation directory and SDK version.
 
 
 ---
@@ -133,6 +161,7 @@ Setting up the Android device:
 The following has only be done once:
 
 1. Enable developer mode on the Android device.
+2. Enable USB debugging on the Android device.
 
 The following has only be done once, if automatic TCPIP debugging is wanted:
 

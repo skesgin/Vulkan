@@ -17,6 +17,9 @@ Depending Vulkan extensions, when using a window system:
 Linux X11:
 - `VK_KHR_xlib_surface` or 
 - `VK_KHR_xcb_surface`  
+
+Linux i.MX8:
+- `VK_KHR_display`
   
 Android:
 - `VK_KHR_android_surface`
@@ -41,7 +44,7 @@ Used libraries (beside C++ 11):
 Supported platforms:
 --------------------
 
-- Linux X11 or console only (GNU GCC)
+- Linux X11, i.MX8 or console only (GNU GCC)
 - Android (Clang) 
 - Microsoft Windows or console only (GNU MinGW & Visual C++ 2015)
 
@@ -81,6 +84,9 @@ How to build:
 
 Changelog:
 ----------
+
+07/29/2016
+- Updated documentation.
 
 07/27/2016
 - Fixed cycles material exporter: Translate mapping now works.
