@@ -111,7 +111,7 @@ Append the following lines to your `.profile` file in your home directory:
 `CPLUS_INCLUDE_PATH=$VULKAN_SDK/include` 
 `export CPLUS_INCLUDE_PATH`
 `LIBRARY_PATH=$VULKAN_SDK/lib`
-`export LIBRARY_PATH``
+`export LIBRARY_PATH`
 
 Finally, change the path of `VULKAN_SDK` depending on your installation directory and SDK version.
 
