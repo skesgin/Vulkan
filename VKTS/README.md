@@ -85,6 +85,10 @@ How to build:
 Changelog:
 ----------
 
+08/09/2016
+- Added layers to node tree.
+- Blender export script writes now the layers.
+
 07/29/2016
 - Updated documentation.
 

@@ -144,6 +144,16 @@ public:
 
     virtual sphere getBoundingSphere() const = 0;
 
+    virtual uint32_t getLayers() const = 0;
+
+    virtual void setLayers(const uint32_t layers) = 0;
+
+    virtual VkBool32 isOnLayer(const uint8_t layer) const = 0;
+
+    virtual void setOnLayer(const uint8_t layer) = 0;
+
+    virtual void removeFromLayer(const uint8_t layer) = 0;
+
 };
 
 typedef std::shared_ptr<INode> INodeSP;

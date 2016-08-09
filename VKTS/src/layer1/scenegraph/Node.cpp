@@ -77,16 +77,18 @@ void Node::reset()
     memset(&jointWriteDescriptorSet, 0, sizeof(jointWriteDescriptorSet));
 
     box = aabb(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+
+    layers = 0x01;
 }
 
 Node::Node() :
-    INode(), name(""), parentNode(), translate(0.0f, 0.0f, 0.0f), rotate(0.0f, 0.0f, 0.0f), scale(1.0f, 1.0f, 1.0f), transformMatrix(1.0f), transformMatrixDirty(VK_TRUE), jointIndex(-1), joints(0), bindTranslate(0.0f, 0.0f, 0.0f), bindRotate(0.0f, 0.0f,0.0f), bindScale(1.0f, 1.0f, 1.0f), bindMatrix(1.0f), inverseBindMatrix(1.0f), bindMatrixDirty(VK_FALSE), allChildNodes(), allMeshes(), allAnimations(), currentAnimation(-1), currentTime(0.0f), transformUniformBuffer(), jointsUniformBuffer(), box(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f))
+    INode(), name(""), parentNode(), translate(0.0f, 0.0f, 0.0f), rotate(0.0f, 0.0f, 0.0f), scale(1.0f, 1.0f, 1.0f), transformMatrix(1.0f), transformMatrixDirty(VK_TRUE), jointIndex(-1), joints(0), bindTranslate(0.0f, 0.0f, 0.0f), bindRotate(0.0f, 0.0f,0.0f), bindScale(1.0f, 1.0f, 1.0f), bindMatrix(1.0f), inverseBindMatrix(1.0f), bindMatrixDirty(VK_FALSE), allChildNodes(), allMeshes(), allAnimations(), currentAnimation(-1), currentTime(0.0f), transformUniformBuffer(), jointsUniformBuffer(), box(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)), layers(0x01)
 {
     reset();
 }
 
 Node::Node(const Node& other) :
-    INode(), name(other.name), parentNode(other.parentNode), translate(other.translate), rotate(other.rotate), scale(other.scale), transformMatrix(other.transformMatrix), transformMatrixDirty(other.transformMatrixDirty), jointIndex(-1), joints(0), bindTranslate(other.bindTranslate), bindRotate(other.bindRotate), bindScale(other.bindScale), bindMatrix(other.bindMatrix), inverseBindMatrix(other.inverseBindMatrix), bindMatrixDirty(other.bindMatrixDirty), box(other.box)
+    INode(), name(other.name), parentNode(other.parentNode), translate(other.translate), rotate(other.rotate), scale(other.scale), transformMatrix(other.transformMatrix), transformMatrixDirty(other.transformMatrixDirty), jointIndex(-1), joints(0), bindTranslate(other.bindTranslate), bindRotate(other.bindRotate), bindScale(other.bindScale), bindMatrix(other.bindMatrix), inverseBindMatrix(other.inverseBindMatrix), bindMatrixDirty(other.bindMatrixDirty), box(other.box), layers(other.layers)
 {
     for (size_t i = 0; i < other.allChildNodes.size(); i++)
     {
@@ -820,6 +822,46 @@ sphere Node::getBoundingSphere() const
     }
 
 	return boundingSphere;
+}
+
+uint32_t Node::getLayers() const
+{
+	return layers;
+}
+
+void Node::setLayers(const uint32_t layers)
+{
+	this->layers = layers;
+}
+
+VkBool32 Node::isOnLayer(const uint8_t layer) const
+{
+	if (layer >= 20)
+	{
+		throw std::out_of_range("layer >= 20");
+	}
+
+	return layers & (1 << (uint32_t)layer);
+}
+
+void Node::setOnLayer(const uint8_t layer)
+{
+	if (layer >= 20)
+	{
+		throw std::out_of_range("layer >= 20");
+	}
+
+	layers |= 1 << (uint32_t)layer;
+}
+
+void Node::removeFromLayer(const uint8_t layer)
+{
+	if (layer >= 20)
+	{
+		throw std::out_of_range("layer >= 20");
+	}
+
+	layers &= ~(1 << (uint32_t)layer) & 0x000FFFFF;
 }
 
 //

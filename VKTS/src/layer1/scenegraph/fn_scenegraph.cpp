@@ -3660,6 +3660,7 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
     char sdata1[VKTS_MAX_TOKEN_CHARS + 1];
     float fdata[3];
     int32_t idata;
+    uint32_t uidata;
     glm::mat4 mat4;
 
     auto object = IObjectSP();
@@ -3772,6 +3773,24 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
             else
             {
                 logPrint(VKTS_LOG_ERROR, "Scenegraph: No object");
+
+                return VK_FALSE;
+            }
+        }
+        else if (scenegraphIsToken(buffer, "layers"))
+        {
+            if (!scenegraphParseUIntHex(buffer, &uidata))
+            {
+                return VK_FALSE;
+            }
+
+            if (node.get())
+            {
+                node->setLayers(uidata);
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No node");
 
                 return VK_FALSE;
             }

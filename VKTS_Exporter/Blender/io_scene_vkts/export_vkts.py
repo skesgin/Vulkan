@@ -2121,6 +2121,14 @@ def saveNode(context, fw, fw_animation, fw_channel, currentObject):
 
     fw("node %s %s\n" % (friendlyName(currentObject.name), friendlyName(parentName)))
     fw("\n")
+
+    layers = 0
+    for layerIndex in range(0, 20):
+        if currentObject.layers[layerIndex]:
+            layers = layers | (1 << layerIndex)
+    fw("layers %x\n" % (layers))             
+
+    fw("\n")
     fw("translate %f %f %f\n" % location)
     fw("rotate %f %f %f\n" % rotation)
     fw("scale %f %f %f\n" % scale)

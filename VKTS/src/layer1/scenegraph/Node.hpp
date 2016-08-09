@@ -81,6 +81,8 @@ private:
 
     aabb box;
 
+    uint32_t layers;
+
     void reset();
 
     void updateTransformDescriptorBufferInfo(const VkBuffer buffer, const VkDeviceSize offset, const VkDeviceSize range);
@@ -177,9 +179,9 @@ public:
 
     virtual IBufferObjectSP getTransformUniformBuffer() const override;
 
-    virtual void setTransformUniformBuffer(const IBufferObjectSP& transformUniformBuffer)
+    virtual void setTransformUniformBuffer(const IBufferObjectSP& transformUniformBuffer) override;
 
-    override; virtual IBufferObjectSP getJointsUniformBuffer() const override;
+    virtual IBufferObjectSP getJointsUniformBuffer() const override;
 
     virtual void setJointsUniformBuffer(const int32_t joints, const IBufferObjectSP& jointsUniformBuffer) override;
 
@@ -194,6 +196,16 @@ public:
     virtual const aabb& getAABB() const override;
 
     virtual sphere getBoundingSphere() const override;
+
+    virtual uint32_t getLayers() const override;
+
+    virtual void setLayers(const uint32_t layers) override;
+
+    virtual VkBool32 isOnLayer(const uint8_t layer) const override;
+
+    virtual void setOnLayer(const uint8_t layer) override;
+
+    virtual void removeFromLayer(const uint8_t layer) override;
 
     //
     // ICloneable
