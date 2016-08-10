@@ -85,6 +85,9 @@ How to build:
 Changelog:
 ----------
 
+08/10/2016
+- Continued on particle system export and loading.
+
 08/09/2016
 - Added layers to node tree.
 - Blender export script writes now the layers.

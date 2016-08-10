@@ -3634,6 +3634,44 @@ static VkBool32 scenegraphLoadAnimations(const char* directory, const char* file
     return VK_TRUE;
 }
 
+static VkBool32 scenegraphLoadParticleSystems(const char* directory, const char* filename, const IContextSP& context)
+{
+    if (!directory || !filename || !context.get())
+    {
+        return VK_FALSE;
+    }
+
+    std::string finalFilename = std::string(directory) + std::string(filename);
+
+    auto textBuffer = fileLoadText(finalFilename.c_str());
+
+    if (!textBuffer.get())
+    {
+        textBuffer = fileLoadText(filename);
+
+        if (!textBuffer.get())
+        {
+            return VK_FALSE;
+        }
+    }
+
+    char buffer[VKTS_MAX_BUFFER_CHARS + 1];
+
+    auto animation = IAnimationSP();
+
+    while (textBuffer->gets(buffer, VKTS_MAX_BUFFER_CHARS))
+    {
+        if (scenegraphSkipBuffer(buffer))
+        {
+            continue;
+        }
+
+        // TODO: Load particle systems and its data.
+    }
+
+    return VK_TRUE;
+}
+
 static VkBool32 scenegraphLoadObjects(const char* directory, const char* filename, const IContextSP& context)
 {
     if (!directory || !filename || !context.get())
@@ -3700,6 +3738,20 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
             if (!scenegraphLoadAnimations(directory, sdata0, context))
             {
                 logPrint(VKTS_LOG_ERROR, "Could not load animations: '%s'", sdata0);
+
+                return VK_FALSE;
+            }
+        }
+        else if (scenegraphIsToken(buffer, "particle_system_library"))
+        {
+            if (!scenegraphParseString(buffer, sdata0))
+            {
+                return VK_FALSE;
+            }
+
+            if (!scenegraphLoadParticleSystems(directory, sdata0, context))
+            {
+                logPrint(VKTS_LOG_ERROR, "Could not load particles: '%s'", sdata0);
 
                 return VK_FALSE;
             }
@@ -3787,6 +3839,24 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
             if (node.get())
             {
                 node->setLayers(uidata);
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No node");
+
+                return VK_FALSE;
+            }
+        }
+        else if (scenegraphIsToken(buffer, "particle_system"))
+        {
+            if (!scenegraphParseString(buffer, sdata0))
+            {
+                return VK_FALSE;
+            }
+
+            if (node.get())
+            {
+                // TODO: Append particle system.
             }
             else
             {

@@ -1607,6 +1607,38 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
 
     return allEnvironmentTextures
 
+def saveParticleSystems(context, filepath):
+    
+    particleSystems = {}
+
+    # Gather all particles.
+    for currentObject in context.scene.objects:
+        currentParticleSystems = currentObject.particle_systems.values()
+
+        if len(currentParticleSystems) > 0:
+            for currentParticleSystem in currentParticleSystems:
+                particleSystems.setdefault(currentParticleSystem.settings)
+
+    file = open(filepath, "w", encoding="utf8", newline="\n")
+    fw = file.write
+    fw("#\n")
+    fw("# VulKan ToolS particle systems.\n")
+    fw("#\n")
+    fw("\n")
+
+    for currentParticleSystem in particleSystems:
+        fw("#\n")
+        fw("# Particle system.\n")
+        fw("#\n")
+        fw("\n")        
+        fw("particle_system %s\n" % (currentParticleSystem.name))
+
+        #TODO Save particle system parameters.
+
+        fw("\n")
+
+    file.close()
+
 def saveMeshes(context, filepath, materialsLibraryName, subMeshLibraryName):
     
     subMeshLibraryFilepath = os.path.dirname(filepath) + "/" + subMeshLibraryName
@@ -2100,10 +2132,6 @@ def saveBone(context, fw, fw_animation, fw_channel, currentPoseBone, armatureNam
     return
 
 def saveNode(context, fw, fw_animation, fw_channel, currentObject):
-
-    #convertMatrix = mathutils.Matrix(((1, 0, 0, 0), (0, 0, 1, 0), (0, -1, 0, 0) , (0, 0, 0, 1)))
-
-    #location, rotation, scale = (convertMatrix * currentObject.matrix_local).decompose()
     location, rotation, scale = currentObject.matrix_local.decompose()
 
     location = convertLocation(location)
@@ -2127,8 +2155,15 @@ def saveNode(context, fw, fw_animation, fw_channel, currentObject):
         if currentObject.layers[layerIndex]:
             layers = layers | (1 << layerIndex)
     fw("layers %x\n" % (layers))             
-
     fw("\n")
+
+    particleSystems = currentObject.particle_systems.values()
+    if len(particleSystems) > 0:
+        for currentParticleSystem in particleSystems:
+            fw("particle_system %s\n" % (currentParticleSystem.settings.name))
+
+        fw("\n")
+
     fw("translate %f %f %f\n" % location)
     fw("rotate %f %f %f\n" % rotation)
     fw("scale %f %f %f\n" % scale)
@@ -2155,7 +2190,7 @@ def saveNode(context, fw, fw_animation, fw_channel, currentObject):
     
     return
 
-def saveObjects(context, filepath, meshLibraryName, animationLibraryName, channelLibraryName):
+def saveObjects(context, filepath, meshLibraryName, animationLibraryName, channelLibraryName, particleSystemLibraryName):
 
     channelLibraryFilepath = os.path.dirname(filepath) + "/" + channelLibraryName
 
@@ -2187,6 +2222,10 @@ def saveObjects(context, filepath, meshLibraryName, animationLibraryName, channe
     fw("# VulKan ToolS objects.\n")
     fw("#\n")
     fw("\n")
+
+    if particleSystemLibraryName is not None:
+        fw("particle_system_library %s\n" % friendlyName(particleSystemLibraryName))
+        fw("\n")
 
     if meshLibraryName is not None:
         fw("mesh_library %s\n" % friendlyName(meshLibraryName))
@@ -2282,6 +2321,14 @@ def save(operator,
 
     #
 
+    particleSystemLibraryName = bpy.path.basename(sceneFilepath).replace(".vkts", "_particles.vkts")
+
+    particleSystemLibraryFilepath = os.path.dirname(sceneFilepath) + "/" + particleSystemLibraryName
+
+    saveParticleSystems(context, particleSystemLibraryFilepath)
+
+    #
+
     subMeshLibraryName = bpy.path.basename(sceneFilepath).replace(".vkts", "_submeshes.vkts")
 
     meshLibraryName = bpy.path.basename(sceneFilepath).replace(".vkts", "_meshes.vkts")
@@ -2305,7 +2352,7 @@ def save(operator,
     
     objectLibraryFilepath = os.path.dirname(sceneFilepath) + "/" + objectLibraryName
 
-    saveObjects(context, objectLibraryFilepath, meshLibraryName, animationLibraryName, channelLibraryName)
+    saveObjects(context, objectLibraryFilepath, meshLibraryName, animationLibraryName, channelLibraryName, particleSystemLibraryName)
 
     #
     
