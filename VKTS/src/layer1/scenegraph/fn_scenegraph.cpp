@@ -3865,6 +3865,24 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
                 return VK_FALSE;
             }
         }
+        else if (scenegraphIsToken(buffer, "seed"))
+        {
+            if (!scenegraphParseInt(buffer, &idata))
+            {
+                return VK_FALSE;
+            }
+
+            if (node.get())
+            {
+                // TODO: Add seed.
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, "Scenegraph: No node");
+
+                return VK_FALSE;
+            }
+        }
         else if (scenegraphIsToken(buffer, "translate"))
         {
             if (!scenegraphParseVec3(buffer, fdata))

@@ -1631,7 +1631,13 @@ def saveParticleSystems(context, filepath):
         fw("# Particle system.\n")
         fw("#\n")
         fw("\n")        
-        fw("particle_system %s\n" % (currentParticleSystem.name))
+        fw("name %s\n" % (currentParticleSystem.name))
+        fw("\n")        
+        fw("emission_number %d\n" % (currentParticleSystem.count))
+        fw("emission_start %f\n" % (currentParticleSystem.frame_start / context.scene.render.fps))
+        fw("emission_end %f\n" % (currentParticleSystem.frame_end / context.scene.render.fps))
+        fw("emission_lifetime %f\n" % (currentParticleSystem.lifetime / context.scene.render.fps))
+        fw("emission_random %f\n" % (currentParticleSystem.lifetime_random))
 
         #TODO Save particle system parameters.
 
@@ -2162,6 +2168,7 @@ def saveNode(context, fw, fw_animation, fw_channel, currentObject):
         for currentParticleSystem in particleSystems:
             fw("particle_system %s\n" % (currentParticleSystem.settings.name))
 
+        fw("seed %d\n" % (currentParticleSystem.seed))
         fw("\n")
 
     fw("translate %f %f %f\n" % location)
