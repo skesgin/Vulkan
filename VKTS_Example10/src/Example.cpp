@@ -43,8 +43,6 @@ Example::~Example()
 
 VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 {
-	// TODO: Use two sub passes instead of two single render passes.
-
 	VkResult result;
 
 	if (cmdBuffer[usedBuffer].get())
