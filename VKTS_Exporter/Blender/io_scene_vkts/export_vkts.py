@@ -335,6 +335,10 @@ def friendlyNodeName(name):
 
     return friendlyName(name).replace(".", "_") 
 
+def friendlyTextureName(name):
+
+    return friendlyName(name).replace(".", "_") 
+
 def friendlyImageName(name):
 
     return friendlyName(os.path.splitext(bpy.path.basename(name))[0])
@@ -502,7 +506,7 @@ def saveTextures(context, filepath, imagesLibraryName, materials):
                     storeTexture = True
 
                 if storeTexture:
-                    cyclesEnvTextures.setdefault(friendlyImageName(currentNode.name), currentNode)
+                    cyclesEnvTextures.setdefault(friendlyTextureName(currentNode.name), currentNode)
     else:
         if context.scene.world.light_settings.environment_color == 'SKY_TEXTURE':
             for materialName in materials:
@@ -517,7 +521,7 @@ def saveTextures(context, filepath, imagesLibraryName, materials):
                             storeTexture = True
 
                         if storeTexture:
-                            envTextures.setdefault(friendlyImageName(currentTextureSlot.texture.name), currentTextureSlot.texture)
+                            envTextures.setdefault(friendlyTextureName(currentTextureSlot.texture.name), currentTextureSlot.texture)
 
     #
 
@@ -528,7 +532,7 @@ def saveTextures(context, filepath, imagesLibraryName, materials):
         for currentTextureSlot in material.texture_slots:
             if currentTextureSlot and currentTextureSlot.texture and currentTextureSlot.texture.type == 'IMAGE':
                 image = currentTextureSlot.texture.image
-                if image and image.has_data:
+                if image:
                     storeTexture = False
                     if currentTextureSlot.use_map_emit:
                         images.setdefault(friendlyImageName(image.filepath), image)
@@ -554,9 +558,9 @@ def saveTextures(context, filepath, imagesLibraryName, materials):
                     if currentTextureSlot.use_map_hardness:
                         images.setdefault(friendlyImageName(image.filepath), image)
                         storeTexture = True
-                        
-                    if storeTexture:
-                        textures.setdefault(friendlyImageName(currentTextureSlot.texture.name), currentTextureSlot.texture)
+
+                    if storeTexture:    
+                        textures.setdefault(friendlyTextureName(currentTextureSlot.texture.name), currentTextureSlot.texture)
                                            
         # Cycles
         if material.use_nodes == True:
@@ -858,33 +862,14 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
         fw("texture_library %s\n" % friendlyName(texturesLibraryName))
         fw("\n")
 
-    meshes = {}
-
-    # Gather all meshes.
-    for currentObject in context.scene.objects:
-
-        if currentObject.type == 'MESH':
-
-            meshes.setdefault(currentObject.data)
-
     materials = {}
 
     # Gather all materials.
-    for mesh in meshes:
+    for currentObject in context.scene.objects:
 
-        for face in mesh.polygons:
-
-            # Create default material if none is set.        
-            if len(mesh.materials) == 0:
-            
-                if "DefaultMaterial" not in materials:
-                    materials.setdefault("DefaultMaterial", bpy.data.materials.new("DefaultMaterial"))
-                    
-            else:
-            
-                if mesh.materials[face.material_index].name not in materials:
-            
-                    materials.setdefault(mesh.materials[face.material_index].name, mesh.materials[face.material_index])
+        for currentMaterialSlot in currentObject.material_slots:
+        
+            materials.setdefault(currentMaterialSlot.material.name, currentMaterialSlot.material)
 
     # Save textures.
 
@@ -1543,18 +1528,18 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
             for currentTextureSlot in material.texture_slots:
                 if currentTextureSlot and currentTextureSlot.texture and currentTextureSlot.texture.type == 'IMAGE':
                     image = currentTextureSlot.texture.image
-                    if image and image.has_data:
+                    if image:
                         if currentTextureSlot.use_map_emit:
-                            fw("emissive_texture %s\n" % (friendlyImageName(currentTextureSlot.texture.name) + "_texture"))
+                            fw("emissive_texture %s\n" % (friendlyTextureName(currentTextureSlot.texture.name) + "_texture"))
                             emissiveWritten = True
                         if currentTextureSlot.use_map_alpha:
-                            fw("alpha_texture %s\n" % (friendlyImageName(currentTextureSlot.texture.name) + "_texture"))
+                            fw("alpha_texture %s\n" % (friendlyTextureName(currentTextureSlot.texture.name) + "_texture"))
                             alphaWritten = True
                         if currentTextureSlot.use_map_displacement:
-                            fw("displacement_texture %s\n" % (friendlyImageName(currentTextureSlot.texture.name) + "_texture"))
+                            fw("displacement_texture %s\n" % (friendlyTextureName(currentTextureSlot.texture.name) + "_texture"))
                             displacementWritten = True
                         if currentTextureSlot.use_map_normal:
-                            fw("normal_texture %s\n" % (friendlyImageName(currentTextureSlot.texture.name) + "_texture"))
+                            fw("normal_texture %s\n" % (friendlyTextureName(currentTextureSlot.texture.name) + "_texture"))
                             normalWritten = True
 
             if not emissiveWritten:
@@ -1576,16 +1561,16 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
                     image = currentTextureSlot.texture.image
                     if image:
                         if currentTextureSlot.use_map_ambient:
-                            fw("phong_ambient_texture %s\n" % (friendlyImageName(currentTextureSlot.texture.name) + "_texture"))
+                            fw("phong_ambient_texture %s\n" % (friendlyTextureName(currentTextureSlot.texture.name) + "_texture"))
                             phongAmbientWritten = True
                         if currentTextureSlot.use_map_color_diffuse:
-                            fw("phong_diffuse_texture %s\n" % (friendlyImageName(currentTextureSlot.texture.name) + "_texture"))
+                            fw("phong_diffuse_texture %s\n" % (friendlyTextureName(currentTextureSlot.texture.name) + "_texture"))
                             phongDiffuseWritten = True
                         if currentTextureSlot.use_map_color_spec:
-                            fw("phong_specular_texture %s\n" % (friendlyImageName(currentTextureSlot.texture.name) + "_texture"))
+                            fw("phong_specular_texture %s\n" % (friendlyTextureName(currentTextureSlot.texture.name) + "_texture"))
                             phongSpecularWritten = True
                         if currentTextureSlot.use_map_hardness:
-                            fw("phong_specular_shininess_texture %s\n" % (friendlyImageName(currentTextureSlot.texture.name) + "_texture"))
+                            fw("phong_specular_shininess_texture %s\n" % (friendlyTextureName(currentTextureSlot.texture.name) + "_texture"))
                             phongSpecularShininessWritten = True
 
             if not phongAmbientWritten:
