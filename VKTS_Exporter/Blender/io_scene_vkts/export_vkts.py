@@ -356,6 +356,13 @@ def friendlyTransformName(name):
 
     return "UNKNOWN"
 
+def friendlyBooleanName(bool):
+
+    if bool:
+        return "true"
+
+    return "false"
+
 def friendlyElementName(index, name, isJoint):
     
     newIndex = index
@@ -1612,6 +1619,13 @@ def saveParticleSystems(context, filepath):
     fw("\n")
 
     for currentParticleSystem in particleSystems:
+
+        emitFrom = 'Vertices'
+        if currentParticleSystem.emit_from == 'FACE':
+            emitFrom = 'Faces'
+        elif currentParticleSystem.emit_from == 'VOLUME':
+            emitFrom = 'Volume'
+
         fw("#\n")
         fw("# Particle system.\n")
         fw("#\n")
@@ -1623,6 +1637,35 @@ def saveParticleSystems(context, filepath):
         fw("emission_end %f\n" % (currentParticleSystem.frame_end / context.scene.render.fps))
         fw("emission_lifetime %f\n" % (currentParticleSystem.lifetime / context.scene.render.fps))
         fw("emission_random %f\n" % (currentParticleSystem.lifetime_random))
+        fw("\n")
+        if currentParticleSystem.emit_from == 'FACE' or currentParticleSystem.emit_from == 'VOLUME':
+
+            if currentParticleSystem.distribution == 'JIT' or currentParticleSystem.distribution == 'RAND':
+                fw("emission_use_emit_random %s\n" % (friendlyBooleanName(currentParticleSystem.use_emit_random)))
+                fw("emission_use_even_distribution %s\n" % (friendlyBooleanName(currentParticleSystem.use_even_distribution)))
+            else:
+                fw("emission_invert_grid %s\n" % (friendlyBooleanName(currentParticleSystem.invert_grid)))
+                fw("emission_hexagonal_grid %s\n" % (friendlyBooleanName(currentParticleSystem.hexagonal_grid)))
+
+            distribution = 'Random'
+            if currentParticleSystem.distribution == 'JIT':
+                distribution = 'Jittered'
+            elif currentParticleSystem.distribution == 'GRID':
+                distribution = 'Grid'
+            fw("emission_distribution %s\n" % (distribution))
+
+            if currentParticleSystem.distribution == 'JIT':
+                fw("emission_userjit %d\n" % (currentParticleSystem.userjit))
+                fw("emission_jitter_factor %f\n" % (currentParticleSystem.jitter_factor))
+            elif currentParticleSystem.distribution == 'GRID':
+                fw("emission_grid_resolution %d\n" % (currentParticleSystem.grid_resolution))
+                fw("emission_grid_random %f\n" % (currentParticleSystem.grid_random))
+
+        else:
+
+            fw("emission_use_emit_random %s\n" % (friendlyBooleanName(currentParticleSystem.use_emit_random)))
+
+        fw("emission_use_modifier_stack %s\n" % (friendlyBooleanName(currentParticleSystem.use_modifier_stack)))
 
         #TODO Save particle system parameters.
 
