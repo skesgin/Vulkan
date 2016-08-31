@@ -53,6 +53,12 @@
 
 #define VKTS_DESCRIPTOR_SET_COUNT (VKTS_BINDING_UNIFORM_PHONG_NO_DISPLACEMENT_BINDING_COUNT + VKTS_BINDING_UNIFORM_TRANSFORM_BINDING_COUNT + VKTS_BINDING_UNIFORM_LIGHTING_BINDING_COUNT + VKTS_BINDING_UNIFORM_SHADOW_BINDING_COUNT)
 
+#define VKTS_VOXELIZE_VERTEX_SHADER_NAME 			"shader/SPIR/V/voxelize.vert.spv"
+#define VKTS_VOXELIZE_GEOMETRY_SHADER_NAME 			"shader/SPIR/V/voxelize.vert.spv"
+#define VKTS_VOXELIZE_FRAGMENT_SHADER_NAME 			"shader/SPIR/V/voxelize.frag.spv"
+
+#define VKTS_VOXEL_CUBE_SIZE 256
+
 class Example: public vkts::IUpdateThread
 {
 
@@ -88,6 +94,10 @@ private:
 	vkts::IShaderModuleSP standardFragmentShaderModule;
 	vkts::IShaderModuleSP standardShadowFragmentShaderModule;
 
+	vkts::IShaderModuleSP voxelizeVertexShaderModule;
+	vkts::IShaderModuleSP voxelizeGeometryShaderModule;
+	vkts::IShaderModuleSP voxelizeFragmentShaderModule;
+
 	vkts::IPipelineLayoutSP pipelineLayout;
 
 	ILoadTaskSP loadTask;
@@ -110,6 +120,7 @@ private:
 	vkts::IMemoryImageSP msaaColorTexture;
 	vkts::IMemoryImageSP msaaDepthTexture;
 	vkts::IMemoryImageSP depthTexture;
+	vkts::IMemoryImageSP voxelTexture[3];
 
 	vkts::IImageViewSP shadowImageView;
 	vkts::IImageViewSP msaaColorImageView;
@@ -149,6 +160,8 @@ private:
 	VkBool32 buildMSAAColorImageView();
 
 	VkBool32 buildShadowImageView();
+
+	VkBool32 buildVoxelTexture(const vkts::ICommandBuffersSP& cmdBuffer);
 
 	VkBool32 buildDepthTexture(const vkts::ICommandBuffersSP& cmdBuffer);
 

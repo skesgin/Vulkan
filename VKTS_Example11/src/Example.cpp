@@ -27,7 +27,7 @@
 #include "Example.hpp"
 
 Example::Example(const vkts::IInitialResourcesSP& initialResources, const int32_t windowIndex, const vkts::ISurfaceSP& surface) :
-		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), descriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), fragmentUniformBuffer(nullptr), shadowUniformBuffer(nullptr), standardVertexShaderModule(nullptr), standardFragmentShaderModule(nullptr), standardShadowFragmentShaderModule(nullptr), pipelineLayout(nullptr), loadTask(), sceneLoaded(VK_FALSE), sceneContext(nullptr), scene(nullptr), swapchain(nullptr), renderPass(nullptr), shadowRenderPass(nullptr), allOpaqueGraphicsPipelines(), allBlendGraphicsPipelines(), allBlendCwGraphicsPipelines(), allShadowGraphicsPipelines(), shadowTexture(nullptr), msaaColorTexture(nullptr), msaaDepthTexture(nullptr), depthTexture(nullptr), shadowImageView(nullptr), msaaColorImageView(nullptr), msaaDepthStencilImageView(nullptr), depthStencilImageView(nullptr), shadowSampler(nullptr), swapchainImagesCount(0), swapchainImageView(), framebuffer(), shadowFramebuffer(), fences(), cmdBuffer(), shadowCmdBuffer()
+		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), descriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), fragmentUniformBuffer(nullptr), shadowUniformBuffer(nullptr), standardVertexShaderModule(nullptr), standardFragmentShaderModule(nullptr), standardShadowFragmentShaderModule(nullptr), voxelizeVertexShaderModule(nullptr), voxelizeGeometryShaderModule(nullptr), voxelizeFragmentShaderModule(nullptr), pipelineLayout(nullptr), loadTask(), sceneLoaded(VK_FALSE), sceneContext(nullptr), scene(nullptr), swapchain(nullptr), renderPass(nullptr), shadowRenderPass(nullptr), allOpaqueGraphicsPipelines(), allBlendGraphicsPipelines(), allBlendCwGraphicsPipelines(), allShadowGraphicsPipelines(), shadowTexture(nullptr), msaaColorTexture(nullptr), msaaDepthTexture(nullptr), depthTexture(nullptr), voxelTexture{nullptr, nullptr, nullptr}, shadowImageView(nullptr), msaaColorImageView(nullptr), msaaDepthStencilImageView(nullptr), depthStencilImageView(nullptr), shadowSampler(nullptr), swapchainImagesCount(0), swapchainImageView(), framebuffer(), shadowFramebuffer(), fences(), cmdBuffer(), shadowCmdBuffer()
 {
 }
 
@@ -504,6 +504,55 @@ VkBool32 Example::buildShadowImageView()
 	return VK_TRUE;
 }
 
+VkBool32 Example::buildVoxelTexture(const vkts::ICommandBuffersSP& cmdBuffer)
+{
+	if (voxelTexture[0].get() && voxelTexture[1].get() && voxelTexture[2].get())
+	{
+		return VK_TRUE;
+	}
+	else if (voxelTexture[0].get() || voxelTexture[1].get() || voxelTexture[2].get())
+	{
+		return VK_FALSE;
+	}
+
+	//
+
+	VkImageCreateInfo imageCreateInfo;
+
+	memset(&imageCreateInfo, 0, sizeof(VkImageCreateInfo));
+
+	imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+
+	imageCreateInfo.flags = 0;
+	imageCreateInfo.imageType = VK_IMAGE_TYPE_3D;
+	imageCreateInfo.format = VK_FORMAT_R32_UINT;
+	imageCreateInfo.extent = {VKTS_VOXEL_CUBE_SIZE, VKTS_VOXEL_CUBE_SIZE, VKTS_VOXEL_CUBE_SIZE};
+	imageCreateInfo.mipLevels = 1;
+	imageCreateInfo.arrayLayers = 1;
+	imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+	imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+	imageCreateInfo.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT;
+	imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+	imageCreateInfo.queueFamilyIndexCount = 0;
+	imageCreateInfo.pQueueFamilyIndices = nullptr;
+	imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+
+	VkImageSubresourceRange subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
+
+	for (uint32_t i = 0; i < 3; i++)
+	{
+		voxelTexture[i] = vkts::memoryImageCreate(initialResources, cmdBuffer, "VoxelTexture_" + std::to_string(i), imageCreateInfo, 0, VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_GENERAL, subresourceRange, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+		if (!voxelTexture[i].get())
+		{
+			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create voxel texture.");
+
+			return VK_FALSE;
+		}
+	}
+
+	return VK_TRUE;
+}
 
 VkBool32 Example::buildDepthTexture(const vkts::ICommandBuffersSP& cmdBuffer)
 {
@@ -1275,6 +1324,67 @@ VkBool32 Example::buildShader()
 		return VK_FALSE;
 	}
 
+	//
+	// Shader modules for voxelisation.
+	//
+
+	vertexShaderBinary = vkts::fileLoadBinary(VKTS_VOXELIZE_VERTEX_SHADER_NAME);
+
+	if (!vertexShaderBinary.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not load vertex shader: '%s'", VKTS_VOXELIZE_VERTEX_SHADER_NAME);
+
+		return VK_FALSE;
+	}
+
+
+	auto geometryShaderBinary = vkts::fileLoadBinary(VKTS_VOXELIZE_GEOMETRY_SHADER_NAME);
+
+	if (!geometryShaderBinary.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not load geometry shader: '%s'", VKTS_VOXELIZE_GEOMETRY_SHADER_NAME);
+
+		return VK_FALSE;
+	}
+
+	fragmentShaderBinary = vkts::fileLoadBinary(VKTS_VOXELIZE_FRAGMENT_SHADER_NAME);
+
+	if (!fragmentShaderBinary.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not load fragment shader: '%s'", VKTS_VOXELIZE_FRAGMENT_SHADER_NAME);
+
+		return VK_FALSE;
+	}
+
+	//
+
+	voxelizeVertexShaderModule = vkts::shaderModuleCreate(VKTS_VOXELIZE_VERTEX_SHADER_NAME, initialResources->getDevice()->getDevice(), 0, vertexShaderBinary->getSize(), (uint32_t*)vertexShaderBinary->getData());
+
+	if (!voxelizeVertexShaderModule.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create vertex shader module.");
+
+		return VK_FALSE;
+	}
+
+	voxelizeGeometryShaderModule = vkts::shaderModuleCreate(VKTS_VOXELIZE_GEOMETRY_SHADER_NAME, initialResources->getDevice()->getDevice(), 0, geometryShaderBinary->getSize(), (uint32_t*)geometryShaderBinary->getData());
+
+	if (!voxelizeGeometryShaderModule.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create geometry shader module.");
+
+		return VK_FALSE;
+	}
+
+	voxelizeFragmentShaderModule = vkts::shaderModuleCreate(VKTS_VOXELIZE_FRAGMENT_SHADER_NAME, initialResources->getDevice()->getDevice(), 0, fragmentShaderBinary->getSize(), (uint32_t*)fragmentShaderBinary->getData());
+
+	if (!voxelizeFragmentShaderModule.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create fragment shader module.");
+
+		return VK_FALSE;
+	}
+
 	return VK_TRUE;
 }
 
@@ -1445,6 +1555,13 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 	if (!buildDepthTexture(updateCmdBuffer))
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not build depth texture.");
+
+		return VK_FALSE;
+	}
+
+	if (!buildVoxelTexture(updateCmdBuffer))
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not build voxel texture.");
 
 		return VK_FALSE;
 	}
@@ -2180,6 +2297,16 @@ void Example::terminate(const vkts::IUpdateThreadContext& updateContext)
 
 			//
 
+			for (uint32_t i = 0; i < 3; i++)
+			{
+				if (voxelTexture[i].get())
+				{
+					voxelTexture[i]->destroy();
+				}
+			}
+
+			//
+
 			if (sceneContext.get())
 			{
 				sceneContext->destroy();
@@ -2200,6 +2327,21 @@ void Example::terminate(const vkts::IUpdateThreadContext& updateContext)
 			if (pipelineLayout.get())
 			{
 				pipelineLayout->destroy();
+			}
+
+			if (voxelizeVertexShaderModule.get())
+			{
+				voxelizeVertexShaderModule->destroy();
+			}
+
+			if (voxelizeGeometryShaderModule.get())
+			{
+				voxelizeGeometryShaderModule->destroy();
+			}
+
+			if (voxelizeFragmentShaderModule.get())
+			{
+				voxelizeFragmentShaderModule->destroy();
 			}
 
 			if (standardVertexShaderModule.get())
