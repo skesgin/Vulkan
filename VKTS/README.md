@@ -7,7 +7,7 @@ Authors:
 
 VKTS version: **0.9.2**
 
-Depending Vulkan API header version: **1.0.21**
+Depending Vulkan API header version: **1.0.24**
 
 Depending Vulkan extensions, when using a window system:
 
@@ -84,6 +84,9 @@ How to build:
 
 Changelog:
 ----------
+
+02/09/2016
+- Updated to LunarG SDK 1.0.24.0.
 
 08/10/2016
 - Continued on particle system export and loading.
