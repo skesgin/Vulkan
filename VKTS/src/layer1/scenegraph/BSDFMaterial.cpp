@@ -219,7 +219,14 @@ void BSDFMaterial::bindDrawIndexedRecursive(const std::string& nodeName, const I
 
 IBSDFMaterialSP BSDFMaterial::clone() const
 {
-    return IBSDFMaterialSP(new BSDFMaterial(*this));
+	auto result = IBSDFMaterialSP(new BSDFMaterial(*this));
+
+	if (result && result->getNumberTextures() != getNumberTextures())
+	{
+		return IBSDFMaterialSP();
+	}
+
+    return result;
 }
 
 

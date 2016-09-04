@@ -215,7 +215,14 @@ void Scene::updateRecursive(const IUpdateThreadContext& updateContext, const uin
 
 ISceneSP Scene::clone() const
 {
-    return ISceneSP(new Scene(*this));
+	auto result = ISceneSP(new Scene(*this));
+
+	if (result.get() && result->getNumberObjects() != getNumberObjects())
+	{
+		return ISceneSP();
+	}
+
+    return result;
 }
 
 //

@@ -152,7 +152,14 @@ const aabb& Mesh::getAABB() const
 
 IMeshSP Mesh::clone() const
 {
-    return IMeshSP(new Mesh(*this));
+	auto result = IMeshSP(new Mesh(*this));
+
+	if (result.get() && result->getNumberSubMeshes() != getNumberSubMeshes())
+	{
+		return IMeshSP();
+	}
+
+    return result;
 }
 
 //

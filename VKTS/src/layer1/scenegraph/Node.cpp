@@ -187,7 +187,6 @@ Node::Node(const Node& other) :
 
     if (other.jointsUniformBuffer.get())
     {
-
         IBufferObjectSP jointsUniformBuffer = bufferObjectCreate(other.jointsUniformBuffer->getInitialResources(), other.jointsUniformBuffer->getBuffer()->getBufferCreateInfo(), other.jointsUniformBuffer->getDeviceMemory()->getMemoryPropertyFlags());
 
         if (!jointsUniformBuffer.get())
@@ -870,7 +869,34 @@ void Node::removeFromLayer(const uint8_t layer)
 
 INodeSP Node::clone() const
 {
-    return INodeSP(new Node(*this));
+	auto result = INodeSP(new Node(*this));
+
+	if (result.get() && result->getNumberChildNodes() != getNumberChildNodes())
+	{
+		return INodeSP();
+	}
+
+	if (result.get() && result->getNumberMeshes() != getNumberMeshes())
+	{
+		return INodeSP();
+	}
+
+	if (result.get() && result->getNumberAnimations() != getNumberAnimations())
+	{
+		return INodeSP();
+	}
+
+	if (result.get() && getTransformUniformBuffer().get() && !result->getTransformUniformBuffer().get())
+	{
+		return INodeSP();
+	}
+
+	if (result.get() && getJointsUniformBuffer().get() && !result->getJointsUniformBuffer().get())
+	{
+		return INodeSP();
+	}
+
+    return result;
 }
 
 //

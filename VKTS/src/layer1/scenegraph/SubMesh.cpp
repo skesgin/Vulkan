@@ -428,7 +428,19 @@ const aabb& SubMesh::getAABB() const
 
 ISubMeshSP SubMesh::clone() const
 {
-    return ISubMeshSP(new SubMesh(*this));
+	auto result = ISubMeshSP(new SubMesh(*this));
+
+	if (result.get() && getBSDFMaterial().get() && !result->getBSDFMaterial().get())
+	{
+		return ISubMeshSP();
+	}
+
+	if (result.get() && getPhongMaterial().get() && !result->getPhongMaterial().get())
+	{
+		return ISubMeshSP();
+	}
+
+    return result;
 }
 
 //

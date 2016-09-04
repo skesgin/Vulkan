@@ -377,7 +377,21 @@ void PhongMaterial::bindDrawIndexedRecursive(const std::string& nodeName, const 
 
 IPhongMaterialSP PhongMaterial::clone() const
 {
-    return IPhongMaterialSP(new PhongMaterial(*this));
+	auto result = IPhongMaterialSP(new PhongMaterial(*this));
+
+	if (result.get() && getDescriptorPool().get() && !result->getDescriptorPool().get())
+	{
+		return IPhongMaterialSP();
+	}
+
+	if (result.get() && getDescriptorSets().get() && !result->getDescriptorSets().get())
+	{
+		return IPhongMaterialSP();
+	}
+
+	// If something else failed, the above content is also invalid.
+
+    return result;
 }
 
 //

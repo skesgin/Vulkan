@@ -28,7 +28,6 @@
 #define VKTS_HPP_
 
 // TODO: Make all shared pointer classes upper case and others lower case.
-// TODO: All cloneable classes should return null pointer, if clone failed. Use throw/catch.
 // TODO: Check, if functions are thread safe.
 // TODO: Remove memset and use constructor to zero members.
 // TODO: Change invalid color etc. to not a number.

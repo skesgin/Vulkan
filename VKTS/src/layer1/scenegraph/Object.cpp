@@ -51,11 +51,7 @@ Object::Object(const Object& other) :
 {
     if (!other.rootNode.get())
     {
-        name = "";
-
-        setTranslate(glm::vec3(0.0f, 0.0f, 0.0f));
-        setRotate(glm::vec3(0.0f, 0.0f, 0.0f));
-        scale = glm::vec3(1.0f, 1.0f, 1.0f);
+    	// No error case.
 
         return;
     }
@@ -175,7 +171,14 @@ void Object::updateRecursive(const IUpdateThreadContext& updateContext)
 
 IObjectSP Object::clone() const
 {
-    return IObjectSP(new Object(*this));
+	auto result = IObjectSP(new Object(*this));
+
+	if (result.get() && getRootNode().get() && !result->getRootNode().get())
+	{
+		return IObjectSP();
+	}
+
+    return result;
 }
 
 //

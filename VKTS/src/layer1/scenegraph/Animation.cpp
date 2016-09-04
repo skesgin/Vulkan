@@ -108,7 +108,14 @@ const SmartPointerVector<IChannelSP>& Animation::getChannels() const
 
 IAnimationSP Animation::clone() const
 {
-    return IAnimationSP(new Animation(*this));
+	auto result = IAnimationSP(new Animation(*this));
+
+	if (result.get() && result->getNumberChannels() != getNumberChannels())
+	{
+		return IAnimationSP();
+	}
+
+    return result;
 }
 
 //
