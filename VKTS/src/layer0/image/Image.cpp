@@ -263,9 +263,7 @@ void Image::cmdPipelineBarrier(const VkCommandBuffer cmdBuffer, const VkAccessFl
 		return;
 	}
 
-	VkImageMemoryBarrier imageMemoryBarrier;
-
-	memset(&imageMemoryBarrier, 0, sizeof(VkImageMemoryBarrier));
+	VkImageMemoryBarrier imageMemoryBarrier{};
 
 	imageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
 

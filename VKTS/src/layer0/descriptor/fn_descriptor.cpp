@@ -42,9 +42,7 @@ IDescriptorSetLayoutSP VKTS_APIENTRY descriptorSetLayoutCreate(const VkDevice de
 
     VkResult result;
 
-    VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo;
-
-    memset(&descriptorSetLayoutCreateInfo, 0, sizeof(VkDescriptorSetLayoutCreateInfo));
+    VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo{};
 
     descriptorSetLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
 
@@ -84,9 +82,7 @@ IDescriptorPoolSP VKTS_APIENTRY descriptorPoolCreate(const VkDevice device, cons
 
     VkResult result;
 
-    VkDescriptorPoolCreateInfo descriptorPoolCreateInfo;
-
-    memset(&descriptorPoolCreateInfo, 0, sizeof(VkDescriptorPoolCreateInfo));
+    VkDescriptorPoolCreateInfo descriptorPoolCreateInfo{};
 
     descriptorPoolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 
@@ -135,9 +131,7 @@ IDescriptorSetsSP VKTS_APIENTRY descriptorSetsCreate(const VkDevice device, cons
 
     //
 
-    VkDescriptorSetAllocateInfo descriptorSetAllocateInfo;
-
-    memset(&descriptorSetAllocateInfo, 0, sizeof(VkDescriptorSetAllocateInfo));
+    VkDescriptorSetAllocateInfo descriptorSetAllocateInfo{};
 
     descriptorSetAllocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
 

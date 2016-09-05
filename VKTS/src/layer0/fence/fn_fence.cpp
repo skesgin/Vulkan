@@ -40,9 +40,7 @@ IFenceSP VKTS_APIENTRY fenceCreate(const VkDevice device, const VkFenceCreateFla
 
     VkResult result;
 
-    VkFenceCreateInfo fenceCreateInfo;
-
-    memset(&fenceCreateInfo, 0, sizeof(VkFenceCreateInfo));
+    VkFenceCreateInfo fenceCreateInfo{};
 
     fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 

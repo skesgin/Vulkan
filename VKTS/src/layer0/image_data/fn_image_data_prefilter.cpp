@@ -29,7 +29,56 @@
 namespace vkts
 {
 
-// TODO: Merge code and make generic.
+static glm::vec3 imageDataGetScanVector(const uint32_t x, const uint32_t y, const uint32_t side, const float step, const float offset)
+{
+	glm::vec3 scanVector;
+
+	switch (side)
+	{
+		case 0:
+
+			// Positive X
+			scanVector = glm::vec3(1.0f, 1.0f - offset - step * (float)y, 1.0f - offset - step * (float)x);
+
+			break;
+		case 1:
+
+			// Negative X
+			scanVector = glm::vec3(-1.0f, 1.0f - offset - step * (float)y, -1.0f + offset + step * (float)x);
+
+			break;
+		case 2:
+
+			// Positive Y
+			scanVector = glm::vec3(-1.0f + offset + step * (float)x, 1.0f, -1.0f + offset + step * (float)y);
+
+			break;
+		case 3:
+
+			// Negative Y
+			scanVector = glm::vec3(-1.0f + offset + step * (float)x, -1.0f, 1.0f - offset - step * (float)y);
+
+			break;
+		case 4:
+
+			// Positive Z
+			scanVector = glm::vec3(-1.0f + offset + step * (float)x, 1.0f - offset - step * (float)y, 1.0f);
+
+			break;
+		case 5:
+
+			// Negative Z
+			scanVector = glm::vec3(1.0f - offset - step * (float)x, 1.0f - offset - step * (float)y, -1.0f);
+
+			break;
+		default:
+
+			// Invalid
+			return glm::vec3(NAN, NAN, NAN);
+	}
+
+	return glm::normalize(scanVector);
+}
 
 SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterCookTorrance(const IImageDataSP& sourceImage, const uint32_t m, const std::string& name)
 {
@@ -111,49 +160,9 @@ SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterCookTorrance(co
 		{
 			for (uint32_t x = 0; x < length; x++)
 			{
-				for (uint32_t i = 0; i < 6; i++)
+				for (uint32_t side = 0; side < 6; side++)
 				{
-					switch (i)
-					{
-						case 0:
-
-							// Positive X
-							scanVector = glm::vec3(1.0f, 1.0f - offset - step * (float)y, 1.0f - offset - step * (float)x);
-
-							break;
-						case 1:
-
-							// Negative X
-							scanVector = glm::vec3(-1.0f, 1.0f - offset - step * (float)y, -1.0f + offset + step * (float)x);
-
-							break;
-						case 2:
-
-							// Positive Y
-							scanVector = glm::vec3(-1.0f + offset + step * (float)x, 1.0f, -1.0f + offset + step * (float)y);
-
-							break;
-						case 3:
-
-							// Negative Y
-							scanVector = glm::vec3(-1.0f + offset + step * (float)x, -1.0f, 1.0f - offset - step * (float)y);
-
-							break;
-						case 4:
-
-							// Positive Z
-							scanVector = glm::vec3(-1.0f + offset + step * (float)x, 1.0f - offset - step * (float)y, 1.0f);
-
-							break;
-						case 5:
-
-							// Negative Z
-							scanVector = glm::vec3(1.0f - offset - step * (float)x, 1.0f - offset - step * (float)y, -1.0f);
-
-							break;
-					}
-
-					scanVector = glm::normalize(scanVector);
+					scanVector = imageDataGetScanVector(x, y, side, step, offset);
 
 					//
 
@@ -185,7 +194,7 @@ SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterCookTorrance(co
 						colorCookTorrance = colorCookTorrance / sampleDivisior;
 					}
 
-					result[i * roughnessSamples + roughnessSampleIndex]->setTexel(glm::vec4(colorCookTorrance, 1.0f), x, y, 0, 0, 0);
+					result[side * roughnessSamples + roughnessSampleIndex]->setTexel(glm::vec4(colorCookTorrance, 1.0f), x, y, 0, 0, 0);
 				}
 			}
 		}
@@ -268,49 +277,9 @@ SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterOrenNayar(const
 	{
 		for (uint32_t x = 0; x < length; x++)
 		{
-			for (uint32_t i = 0; i < 6; i++)
+			for (uint32_t side = 0; side < 6; side++)
 			{
-				switch (i)
-				{
-					case 0:
-
-						// Positive X
-						scanVector = glm::vec3(1.0f, 1.0f - offset - step * (float)y, 1.0f - offset - step * (float)x);
-
-						break;
-					case 1:
-
-						// Negative X
-						scanVector = glm::vec3(-1.0f, 1.0f - offset - step * (float)y, -1.0f + offset + step * (float)x);
-
-						break;
-					case 2:
-
-						// Positive Y
-						scanVector = glm::vec3(-1.0f + offset + step * (float)x, 1.0f, -1.0f + offset + step * (float)y);
-
-						break;
-					case 3:
-
-						// Negative Y
-						scanVector = glm::vec3(-1.0f + offset + step * (float)x, -1.0f, 1.0f - offset - step * (float)y);
-
-						break;
-					case 4:
-
-						// Positive Z
-						scanVector = glm::vec3(-1.0f + offset + step * (float)x, 1.0f - offset - step * (float)y, 1.0f);
-
-						break;
-					case 5:
-
-						// Negative Z
-						scanVector = glm::vec3(1.0f - offset - step * (float)x, 1.0f - offset - step * (float)y, -1.0f);
-
-						break;
-				}
-
-				scanVector = glm::normalize(scanVector);
+				scanVector = imageDataGetScanVector(x, y, side, step, offset);
 
 				//
 
@@ -322,17 +291,32 @@ SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterOrenNayar(const
 
 					float roughness = (float)roughnessSampleIndex / (float)(roughnessSamples - 1);
 
+					float sampleDivisior = 0.0f;
+
 					for (uint32_t sampleIndex = 0; sampleIndex < samples; sampleIndex++)
 					{
 						glm::vec2 randomPoint = randomHammersley(sampleIndex, m);
 
 						// N = V
-						colorOrenNayar += renderOrenNayar(sourceImage, VK_FILTER_LINEAR, 0, randomPoint, basis, scanVector, scanVector, roughness);
+						auto currentColorOrenNayar = renderOrenNayar(sourceImage, VK_FILTER_LINEAR, 0, randomPoint, basis, scanVector, scanVector, roughness);
+
+						if (!std::isnan(currentColorOrenNayar.x) && !std::isnan(currentColorOrenNayar.y) && !std::isnan(currentColorOrenNayar.z))
+						{
+							colorOrenNayar += currentColorOrenNayar;
+
+							sampleDivisior += 1.0f;
+						}
+
 					}
 
 					//
 
-					result[i * roughnessSamples + roughnessSampleIndex]->setTexel(glm::vec4(colorOrenNayar / (float) samples, 1.0f), x, y, 0, 0, 0);
+					if (sampleDivisior > 0.0f)
+					{
+						colorOrenNayar = colorOrenNayar / sampleDivisior;
+					}
+
+					result[side * roughnessSamples + roughnessSampleIndex]->setTexel(glm::vec4(colorOrenNayar, 1.0f), x, y, 0, 0, 0);
 				}
 			}
 		}
@@ -400,49 +384,9 @@ SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterLambert(const I
 	{
 		for (uint32_t x = 0; x < length; x++)
 		{
-			for (uint32_t i = 0; i < 6; i++)
+			for (uint32_t side = 0; side < 6; side++)
 			{
-				switch (i)
-				{
-					case 0:
-
-						// Positive X
-						scanVector = glm::vec3(1.0f, 1.0f - offset - step * (float)y, 1.0f - offset - step * (float)x);
-
-						break;
-					case 1:
-
-						// Negative X
-						scanVector = glm::vec3(-1.0f, 1.0f - offset - step * (float)y, -1.0f + offset + step * (float)x);
-
-						break;
-					case 2:
-
-						// Positive Y
-						scanVector = glm::vec3(-1.0f + offset + step * (float)x, 1.0f, -1.0f + offset + step * (float)y);
-
-						break;
-					case 3:
-
-						// Negative Y
-						scanVector = glm::vec3(-1.0f + offset + step * (float)x, -1.0f, 1.0f - offset - step * (float)y);
-
-						break;
-					case 4:
-
-						// Positive Z
-						scanVector = glm::vec3(-1.0f + offset + step * (float)x, 1.0f - offset - step * (float)y, 1.0f);
-
-						break;
-					case 5:
-
-						// Negative Z
-						scanVector = glm::vec3(1.0f - offset - step * (float)x, 1.0f - offset - step * (float)y, -1.0f);
-
-						break;
-				}
-
-				scanVector = glm::normalize(scanVector);
+				scanVector = imageDataGetScanVector(x, y, side, step, offset);
 
 				//
 
@@ -457,7 +401,7 @@ SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterLambert(const I
 					colorLambert += renderLambert(sourceImage, VK_FILTER_LINEAR, 0, randomPoint, basis);
 				}
 
-				result[i]->setTexel(glm::vec4(colorLambert / (float) samples, 1.0f), x, y, 0, 0, 0);
+				result[side]->setTexel(glm::vec4(colorLambert / (float) samples, 1.0f), x, y, 0, 0, 0);
 			}
 		}
 	}

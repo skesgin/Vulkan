@@ -124,9 +124,7 @@ int main(int argc, char* argv[])
 
 	//
 
-	VkApplicationInfo applicationInfo;
-
-	memset(&applicationInfo, 0, sizeof(VkApplicationInfo));
+	VkApplicationInfo applicationInfo{};
 
 	applicationInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
 
@@ -136,9 +134,7 @@ int main(int argc, char* argv[])
 	applicationInfo.engineVersion = VK_MAKE_VERSION(VKTS_ENGINE_MAJOR, VKTS_ENGINE_MINOR, VKTS_ENGINE_PATCH);
 	applicationInfo.apiVersion = VK_MAKE_VERSION(1, 0, 0);
 
-	VkInstanceCreateInfo instanceCreateInfo;
-
-	memset(&instanceCreateInfo, 0, sizeof(VkInstanceCreateInfo));
+	VkInstanceCreateInfo instanceCreateInfo{};
 
 	instanceCreateInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 
@@ -312,9 +308,7 @@ int main(int argc, char* argv[])
 
 	float queuePriorities[1] = { 0.0f };
 
-	VkDeviceQueueCreateInfo deviceQueueCreateInfo;
-
-	memset(&deviceQueueCreateInfo, 0, sizeof(VkDeviceQueueCreateInfo));
+	VkDeviceQueueCreateInfo deviceQueueCreateInfo{};
 
 	deviceQueueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
 
@@ -323,9 +317,7 @@ int main(int argc, char* argv[])
 	deviceQueueCreateInfo.queueCount = 1;
 	deviceQueueCreateInfo.pQueuePriorities = queuePriorities;
 
-	VkDeviceCreateInfo deviceCreateInfo;
-
-	memset(&deviceCreateInfo, 0, sizeof(VkDeviceCreateInfo));
+	VkDeviceCreateInfo deviceCreateInfo{};
 
 	deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 

@@ -61,9 +61,7 @@ VkBool32 LoadTask::execute()
 
 	//
 
-	VkSamplerCreateInfo samplerCreateInfo;
-
-	memset(&samplerCreateInfo, 0, sizeof(VkSamplerCreateInfo));
+	VkSamplerCreateInfo samplerCreateInfo{};
 
 	samplerCreateInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
 
@@ -83,9 +81,7 @@ VkBool32 LoadTask::execute()
 	samplerCreateInfo.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
 	samplerCreateInfo.unnormalizedCoordinates = VK_FALSE;
 
-	VkImageViewCreateInfo imageViewCreateInfo;
-
-	memset(&imageViewCreateInfo, 0, sizeof(VkImageViewCreateInfo));
+	VkImageViewCreateInfo imageViewCreateInfo{};
 
 	imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 

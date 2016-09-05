@@ -105,9 +105,7 @@ IDeviceSP VKTS_APIENTRY deviceCreate(const VkPhysicalDevice physicalDevice, cons
 
     VkResult result;
 
-    VkDeviceCreateInfo deviceCreateInfo;
-
-    memset(&deviceCreateInfo, 0, sizeof(VkDeviceCreateInfo));
+    VkDeviceCreateInfo deviceCreateInfo{};
 
     deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 

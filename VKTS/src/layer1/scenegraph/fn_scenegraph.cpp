@@ -486,9 +486,7 @@ static ITextureSP scenegraphCreateTexture(const float red, const float green, co
 
     //
 
-    VkImageCreateInfo imageCreateInfo;
-
-    memset(&imageCreateInfo, 0, sizeof(VkImageCreateInfo));
+    VkImageCreateInfo imageCreateInfo{};
 
     imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 
@@ -945,9 +943,7 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
 
                             //
 
-                            VkImageCreateInfo imageCreateInfo;
-
-                            memset(&imageCreateInfo, 0, sizeof(VkImageCreateInfo));
+                            VkImageCreateInfo imageCreateInfo{};
 
                             imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 
@@ -1251,9 +1247,7 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
 
             //
 
-            VkImageCreateInfo imageCreateInfo;
-
-            memset(&imageCreateInfo, 0, sizeof(VkImageCreateInfo));
+            VkImageCreateInfo imageCreateInfo{};
 
             imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 
@@ -1605,9 +1599,7 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
 
                 // Create all possibilities, even when not used.
 
-                VkDescriptorPoolSize descriptorPoolSize[2];
-
-                memset(&descriptorPoolSize, 0, sizeof(descriptorPoolSize));
+                VkDescriptorPoolSize descriptorPoolSize[2]{};
 
 				descriptorPoolSize[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 				descriptorPoolSize[0].descriptorCount = 5;
@@ -2726,9 +2718,7 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
 
                     //
 
-                    VkBufferCreateInfo bufferCreateInfo;
-
-                    memset(&bufferCreateInfo, 0, sizeof(VkBufferCreateInfo));
+                    VkBufferCreateInfo bufferCreateInfo{};
 
                     bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 
@@ -2780,9 +2770,7 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
 
                     //
 
-                    VkBufferCreateInfo bufferCreateInfo;
-
-                    memset(&bufferCreateInfo, 0, sizeof(VkBufferCreateInfo));
+                    VkBufferCreateInfo bufferCreateInfo{};
 
                     bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
                     bufferCreateInfo.size = indicesBinaryBuffer->getSize();
@@ -2819,9 +2807,7 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
 
                 if (subMesh->getBSDFMaterial().get())
                 {
-                	VkDescriptorSetLayoutBinding descriptorSetLayoutBinding[VKTS_BINDING_UNIFORM_BSDF_TOTAL_BINDING_COUNT];
-
-                	memset(&descriptorSetLayoutBinding, 0, sizeof(descriptorSetLayoutBinding));
+                	VkDescriptorSetLayoutBinding descriptorSetLayoutBinding[VKTS_BINDING_UNIFORM_BSDF_TOTAL_BINDING_COUNT]{};
 
                 	uint32_t bindingCount = 0;
 
@@ -2885,9 +2871,7 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
 
                     // Create all possibilities, even when not used.
 
-                    VkDescriptorPoolSize descriptorPoolSize[2];
-
-                    memset(&descriptorPoolSize, 0, sizeof(descriptorPoolSize));
+                    VkDescriptorPoolSize descriptorPoolSize[2]{};
 
     				descriptorPoolSize[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     				descriptorPoolSize[0].descriptorCount = 5;
@@ -3964,9 +3948,7 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
 
             if (node.get())
             {
-                VkBufferCreateInfo bufferCreateInfo;
-
-                memset(&bufferCreateInfo, 0, sizeof(VkBufferCreateInfo));
+                VkBufferCreateInfo bufferCreateInfo{};
 
                 bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
                 // mat3 in std140 consumes three vec4 columns.
@@ -4055,9 +4037,7 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
 
             if (node.get())
             {
-                VkBufferCreateInfo bufferCreateInfo;
-
-                memset(&bufferCreateInfo, 0, sizeof(VkBufferCreateInfo));
+                VkBufferCreateInfo bufferCreateInfo{};
 
                 bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
                 // mat3 in std140 consumes three vec4 columns.

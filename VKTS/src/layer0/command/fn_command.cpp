@@ -41,9 +41,7 @@ ICommandPoolSP VKTS_APIENTRY commandPoolCreate(const VkDevice device, const VkCo
 
     VkResult result;
 
-    VkCommandPoolCreateInfo commandPoolCreateInfo;
-
-    memset(&commandPoolCreateInfo, 0, sizeof(VkCommandPoolCreateInfo));
+    VkCommandPoolCreateInfo commandPoolCreateInfo{};
 
     commandPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 
@@ -82,9 +80,7 @@ ICommandBuffersSP VKTS_APIENTRY commandBuffersCreate(const VkDevice device, cons
 
     VkResult result;
 
-    VkCommandBufferAllocateInfo commandBufferAllocateInfo;
-
-    memset(&commandBufferAllocateInfo, 0, sizeof(VkCommandBufferAllocateInfo));
+    VkCommandBufferAllocateInfo commandBufferAllocateInfo{};
 
     commandBufferAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 

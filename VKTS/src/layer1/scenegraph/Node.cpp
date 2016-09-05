@@ -69,12 +69,12 @@ void Node::reset()
 
     transformUniformBuffer = IBufferObjectSP();
 
-    memset(&transformDescriptorBufferInfo, 0, sizeof(transformDescriptorBufferInfo));
-    memset(&transformWriteDescriptorSet, 0, sizeof(transformWriteDescriptorSet));
+    memset(&transformDescriptorBufferInfo, 0, sizeof(VkDescriptorBufferInfo));
+    memset(&transformWriteDescriptorSet, 0, sizeof(VkWriteDescriptorSet));
 
     jointsUniformBuffer = IBufferObjectSP();
-    memset(&jointDescriptorBufferInfo, 0, sizeof(jointDescriptorBufferInfo));
-    memset(&jointWriteDescriptorSet, 0, sizeof(jointWriteDescriptorSet));
+    memset(&jointDescriptorBufferInfo, 0, sizeof(VkDescriptorBufferInfo));
+    memset(&jointWriteDescriptorSet, 0, sizeof(VkWriteDescriptorSet));
 
     box = aabb(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 

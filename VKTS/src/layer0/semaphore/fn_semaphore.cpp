@@ -40,9 +40,7 @@ ISemaphoreSP VKTS_APIENTRY semaphoreCreate(const VkDevice device, VkSemaphoreCre
 
     VkResult result;
 
-    VkSemaphoreCreateInfo semaphoreCreateInfo;
-
-    memset(&semaphoreCreateInfo, 0, sizeof(VkSemaphoreCreateInfo));
+    VkSemaphoreCreateInfo semaphoreCreateInfo{};
 
     semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 

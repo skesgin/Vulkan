@@ -386,9 +386,8 @@ static void _visualProcessMessages(const XEvent* msg)
 
             if (key == VKTS_KEY_ESCAPE)
             {
-                XEvent msg;
+                XEvent msg{};
 
-                memset(&msg, 0, sizeof(msg));
                 msg.xclient.type = ClientMessage;
                 msg.xclient.display = g_nativeDisplay;
                 msg.xclient.window = currentNativeWindow;
@@ -455,8 +454,7 @@ VkBool32 VKTS_APIENTRY _visualInit(const VkInstance instance, const VkPhysicalDe
         return VK_FALSE;
     }
 
-    XColor color;
-    memset(&color, 0, sizeof(XColor));
+    XColor color{};
 
     g_invisibleCursor = XCreatePixmapCursor(g_nativeDisplay, pixmap, pixmap, &color, &color, 0, 0);
 
@@ -1000,8 +998,8 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
         Atom stateAtom = XInternAtom(g_nativeDisplay, "_NET_WM_STATE", False);
         Atom stateFullscreenAtom = XInternAtom(g_nativeDisplay, "_NET_WM_STATE_FULLSCREEN", False);
 
-        XEvent xev;
-        memset(&xev, 0, sizeof(xev));
+        XEvent xev{};
+
         xev.type = ClientMessage;
         xev.xclient.window = nativeWindow;
         xev.xclient.message_type = stateAtom;

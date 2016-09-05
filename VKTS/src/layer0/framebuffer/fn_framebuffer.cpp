@@ -41,9 +41,7 @@ framebufferCreate(const VkDevice device, const VkFramebufferCreateFlags flags, c
 
     VkResult result;
 
-    VkFramebufferCreateInfo framebufferCreateInfo;
-
-    memset(&framebufferCreateInfo, 0, sizeof(VkFramebufferCreateInfo));
+    VkFramebufferCreateInfo framebufferCreateInfo{};
 
     framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 

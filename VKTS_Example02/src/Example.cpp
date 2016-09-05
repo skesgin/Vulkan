@@ -63,9 +63,7 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 
     //
 
-	VkClearColorValue clearColorValue;
-
-	memset(&clearColorValue, 0, sizeof(VkClearColorValue));
+	VkClearColorValue clearColorValue{};
 
 	clearColorValue.float32[0] = 0.0f;
 	clearColorValue.float32[1] = 0.0f;
@@ -74,9 +72,7 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 
 	VkClearValue clearValues[1] = {clearColorValue};
 
-	VkRenderPassBeginInfo renderPassBeginInfo;
-
-	memset(&renderPassBeginInfo, 0, sizeof(VkRenderPassBeginInfo));
+	VkRenderPassBeginInfo renderPassBeginInfo{};
 
 	renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 	renderPassBeginInfo.renderPass = renderPass->getRenderPass();
@@ -92,9 +88,7 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 	vkCmdBindPipeline(cmdBuffer[usedBuffer]->getCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
 
 
-	VkViewport viewport;
-
-	memset(&viewport, 0, sizeof(VkViewport));
+	VkViewport viewport{};
 
 	viewport.x = 0.0f;
 	viewport.y = 0.0f;
@@ -106,9 +100,7 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 	vkCmdSetViewport(cmdBuffer[usedBuffer]->getCommandBuffer(), 0, 1, &viewport);
 
 
-	VkRect2D scissor;
-
-	memset(&scissor, 0, sizeof(VkRect2D));
+	VkRect2D scissor{};
 
 	scissor.offset.x = 0;
 	scissor.offset.y = 0;
@@ -182,9 +174,7 @@ VkBool32 Example::buildPipeline()
 
 	//
 
-	VkPipelineShaderStageCreateInfo pipelineShaderStageCreateInfo[VKTS_SHADER_STAGE_COUNT];
-
-	memset(&pipelineShaderStageCreateInfo, 0, sizeof(pipelineShaderStageCreateInfo));
+	VkPipelineShaderStageCreateInfo pipelineShaderStageCreateInfo[VKTS_SHADER_STAGE_COUNT]{};
 
 	pipelineShaderStageCreateInfo[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 
@@ -205,26 +195,20 @@ VkBool32 Example::buildPipeline()
 
 	//
 
-	VkVertexInputBindingDescription vertexInputBindingDescription;
-
-	memset(&vertexInputBindingDescription, 0, sizeof(VkVertexInputBindingDescription));
+	VkVertexInputBindingDescription vertexInputBindingDescription{};
 
 	vertexInputBindingDescription.binding = 0;
 	vertexInputBindingDescription.stride = 4 * sizeof(float);
 	vertexInputBindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
-	VkVertexInputAttributeDescription vertexInputAttributeDescription;
-
-	memset(&vertexInputAttributeDescription, 0, sizeof(VkVertexInputAttributeDescription));
+	VkVertexInputAttributeDescription vertexInputAttributeDescription{};
 
 	vertexInputAttributeDescription.location = 0;
 	vertexInputAttributeDescription.binding = 0;
 	vertexInputAttributeDescription.format = VK_FORMAT_R32G32B32A32_SFLOAT;
 	vertexInputAttributeDescription.offset = 0;
 
-	VkPipelineVertexInputStateCreateInfo pipelineVertexInputCreateInfo;
-
-	memset(&pipelineVertexInputCreateInfo, 0, sizeof(VkPipelineVertexInputStateCreateInfo));
+	VkPipelineVertexInputStateCreateInfo pipelineVertexInputCreateInfo{};
 
 	pipelineVertexInputCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 
@@ -236,9 +220,7 @@ VkBool32 Example::buildPipeline()
 
 	//
 
-	VkPipelineInputAssemblyStateCreateInfo pipelineInputAssemblyStateCreateInfo;
-
-	memset(&pipelineInputAssemblyStateCreateInfo, 0, sizeof(VkPipelineInputAssemblyStateCreateInfo));
+	VkPipelineInputAssemblyStateCreateInfo pipelineInputAssemblyStateCreateInfo{};
 
 	pipelineInputAssemblyStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
 
@@ -248,8 +230,7 @@ VkBool32 Example::buildPipeline()
 
 	//
 
-	VkViewport viewport;
-	memset(&viewport, 0, sizeof(VkViewport));
+	VkViewport viewport{};
 
 	viewport.x = 0.0f;
 	viewport.y = 0.0f;
@@ -258,16 +239,13 @@ VkBool32 Example::buildPipeline()
 	viewport.minDepth = 0.0f;
 	viewport.maxDepth = 1.0f;
 
-	VkRect2D scissor;
-	memset(&scissor, 0, sizeof(VkRect2D));
+	VkRect2D scissor{};
 
 	scissor.offset.x = 0;
 	scissor.offset.y = 0;
 	scissor.extent = swapchain->getImageExtent();
 
-	VkPipelineViewportStateCreateInfo pipelineViewportStateCreateInfo;
-
-	memset(&pipelineViewportStateCreateInfo, 0, sizeof(VkPipelineViewportStateCreateInfo));
+	VkPipelineViewportStateCreateInfo pipelineViewportStateCreateInfo{};
 
 	pipelineViewportStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
 
@@ -279,9 +257,7 @@ VkBool32 Example::buildPipeline()
 
 	//
 
-	VkPipelineRasterizationStateCreateInfo pipelineRasterizationStateCreateInfo;
-
-	memset(&pipelineRasterizationStateCreateInfo, 0, sizeof(VkPipelineRasterizationStateCreateInfo));
+	VkPipelineRasterizationStateCreateInfo pipelineRasterizationStateCreateInfo{};
 
 	pipelineRasterizationStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
 
@@ -299,9 +275,7 @@ VkBool32 Example::buildPipeline()
 
 	//
 
-	VkPipelineMultisampleStateCreateInfo pipelineMultisampleStateCreateInfo;
-
-	memset(&pipelineMultisampleStateCreateInfo, 0, sizeof(VkPipelineMultisampleStateCreateInfo));
+	VkPipelineMultisampleStateCreateInfo pipelineMultisampleStateCreateInfo{};
 
 	pipelineMultisampleStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
 
@@ -315,9 +289,7 @@ VkBool32 Example::buildPipeline()
 
 	//
 
-	VkPipelineColorBlendAttachmentState pipelineColorBlendAttachmentState;
-
-	memset(&pipelineColorBlendAttachmentState, 0, sizeof(VkPipelineColorBlendAttachmentState));
+	VkPipelineColorBlendAttachmentState pipelineColorBlendAttachmentState{};
 
 	pipelineColorBlendAttachmentState.blendEnable = VK_FALSE;
 	pipelineColorBlendAttachmentState.srcColorBlendFactor = VK_BLEND_FACTOR_ZERO;
@@ -328,9 +300,7 @@ VkBool32 Example::buildPipeline()
 	pipelineColorBlendAttachmentState.alphaBlendOp = VK_BLEND_OP_ADD;
 	pipelineColorBlendAttachmentState.colorWriteMask = 0xf;
 
-	VkPipelineColorBlendStateCreateInfo pipelineColorBlendStateCreateInfo;
-
-	memset(&pipelineColorBlendStateCreateInfo, 0, sizeof(VkPipelineColorBlendStateCreateInfo));
+	VkPipelineColorBlendStateCreateInfo pipelineColorBlendStateCreateInfo{};
 
 	pipelineColorBlendStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
 
@@ -348,9 +318,7 @@ VkBool32 Example::buildPipeline()
 
 	VkDynamicState dynamicState[VKTS_NUMBER_DYNAMIC_STATES] = {VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR};
 
-	VkPipelineDynamicStateCreateInfo pipelineDynamicStateCreateInfo;
-
-	memset(&pipelineDynamicStateCreateInfo, 0, sizeof(VkPipelineDynamicStateCreateInfo));
+	VkPipelineDynamicStateCreateInfo pipelineDynamicStateCreateInfo{};
 
 	pipelineDynamicStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
 
@@ -360,9 +328,7 @@ VkBool32 Example::buildPipeline()
 
 	//
 
-	VkGraphicsPipelineCreateInfo graphicsPipelineCreateInfo;
-
-	memset(&graphicsPipelineCreateInfo, 0, sizeof(VkGraphicsPipelineCreateInfo));
+	VkGraphicsPipelineCreateInfo graphicsPipelineCreateInfo{};
 
 	graphicsPipelineCreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
 
@@ -398,9 +364,7 @@ VkBool32 Example::buildPipeline()
 
 VkBool32 Example::buildRenderPass()
 {
-	VkAttachmentDescription attachmentDescription;
-
-	memset(&attachmentDescription, 0, sizeof(VkAttachmentDescription));
+	VkAttachmentDescription attachmentDescription{};
 
 	attachmentDescription.flags = 0;
 	attachmentDescription.format = swapchain->getImageFormat();
@@ -412,14 +376,12 @@ VkBool32 Example::buildRenderPass()
 	attachmentDescription.initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 	attachmentDescription.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
-	VkAttachmentReference colorAttachmentReference;
+	VkAttachmentReference colorAttachmentReference{};
 
 	colorAttachmentReference.attachment = 0;
 	colorAttachmentReference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
-	VkSubpassDescription subpassDescription;
-
-	memset(&subpassDescription, 0, sizeof(VkSubpassDescription));
+	VkSubpassDescription subpassDescription{};
 
 	subpassDescription.flags = 0;
 	subpassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
@@ -450,9 +412,7 @@ VkBool32 Example::buildPipelineLayout()
 
 	//
 
-	VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo;
-
-	memset(&pipelineLayoutCreateInfo, 0, sizeof(VkPipelineLayoutCreateInfo));
+	VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo{};
 
 	pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 
@@ -498,9 +458,7 @@ VkBool32 Example::buildShader()
 
 	VkResult result;
 
-	VkShaderModuleCreateInfo shaderModuleCreateInfo;
-
-	memset(&shaderModuleCreateInfo, 0, sizeof(VkShaderModuleCreateInfo));
+	VkShaderModuleCreateInfo shaderModuleCreateInfo{};
 
 	shaderModuleCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
 
@@ -545,9 +503,7 @@ VkBool32 Example::buildVertexBuffer()
 
 	VkResult result;
 
-	VkBufferCreateInfo bufferCreateInfo;
-
-	memset(&bufferCreateInfo, 0, sizeof(VkBufferCreateInfo));
+	VkBufferCreateInfo bufferCreateInfo{};
 
 	bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 
@@ -571,9 +527,7 @@ VkBool32 Example::buildVertexBuffer()
 
 	vkGetBufferMemoryRequirements(device->getDevice(), vertexBuffer, &memoryRequirements);
 
-	VkMemoryAllocateInfo memoryAllocInfo;
-
-	memset(&memoryAllocInfo, 0, sizeof(VkMemoryAllocateInfo));
+	VkMemoryAllocateInfo memoryAllocInfo{};
 
 	memoryAllocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 
@@ -614,9 +568,7 @@ VkBool32 Example::buildVertexBuffer()
 
 	if (!(physicalDeviceMemoryProperties.memoryTypes[memoryAllocInfo.memoryTypeIndex].propertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT))
 	{
-		VkMappedMemoryRange mappedMemoryRange;
-
-		memset(&mappedMemoryRange, 0, sizeof(mappedMemoryRange));
+		VkMappedMemoryRange mappedMemoryRange{};
 
 		mappedMemoryRange.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
 
@@ -875,9 +827,7 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 
 		VkPipelineStageFlags waitDstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
 
-		VkSubmitInfo submitInfo;
-
-		memset(&submitInfo, 0, sizeof(VkSubmitInfo));
+		VkSubmitInfo submitInfo{};
 
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 

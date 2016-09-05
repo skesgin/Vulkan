@@ -133,9 +133,7 @@ void* DeviceMemory::getMemory()
 
 VkResult DeviceMemory::flushMappedMemoryRanges(const VkDeviceSize offset, const VkDeviceSize size) const
 {
-	VkMappedMemoryRange mappedMemoryRange;
-
-	memset(&mappedMemoryRange, 0, sizeof(mappedMemoryRange));
+	VkMappedMemoryRange mappedMemoryRange{};
 
 	mappedMemoryRange.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
 
@@ -148,9 +146,7 @@ VkResult DeviceMemory::flushMappedMemoryRanges(const VkDeviceSize offset, const 
 
 VkResult DeviceMemory::invalidateMappedMemoryRanges(const VkDeviceSize offset, const VkDeviceSize size) const
 {
-	VkMappedMemoryRange mappedMemoryRange;
-
-	memset(&mappedMemoryRange, 0, sizeof(mappedMemoryRange));
+	VkMappedMemoryRange mappedMemoryRange{};
 
 	mappedMemoryRange.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
 

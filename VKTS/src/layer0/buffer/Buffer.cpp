@@ -165,9 +165,7 @@ void Buffer::cmdPipelineBarrier(const VkCommandBuffer cmdBuffer, const VkAccessF
 		return;
 	}
 
-    VkBufferMemoryBarrier bufferMemoryBarrier;
-
-    memset(&bufferMemoryBarrier, 0, sizeof(VkBufferMemoryBarrier));
+    VkBufferMemoryBarrier bufferMemoryBarrier{};
 
     bufferMemoryBarrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
 

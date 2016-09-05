@@ -40,9 +40,7 @@ IImageSP VKTS_APIENTRY imageCreate(const VkDevice device, const VkImageCreateFla
 
     VkResult result;
 
-    VkImageCreateInfo imageCreateInfo;
-
-    memset(&imageCreateInfo, 0, sizeof(VkImageCreateInfo));
+    VkImageCreateInfo imageCreateInfo{};
 
     imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 

@@ -70,9 +70,7 @@ VkSurfaceKHR VKTS_APIENTRY _wsiSurfaceCreate(const VkInstance instance, VKTS_NAT
 
     if (g_hasAndroid)
     {
-    	VkAndroidSurfaceCreateInfoKHR androidSurfaceCreateInfoKHR;
-
-    	memset(&androidSurfaceCreateInfoKHR, 0, sizeof(VkAndroidSurfaceCreateInfoKHR));
+    	VkAndroidSurfaceCreateInfoKHR androidSurfaceCreateInfoKHR{};
 
     	androidSurfaceCreateInfoKHR.sType = VK_STRUCTURE_TYPE_ANDROID_SURFACE_CREATE_INFO_KHR;
 

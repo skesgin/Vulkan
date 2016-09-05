@@ -121,9 +121,7 @@ VkBool32 VKTS_APIENTRY debugCreateDebugReportCallback(const VkInstance instance,
 		return VK_FALSE;
 	}
 
-	VkDebugReportCallbackCreateInfoEXT debugReportCallbackCreateInfo;
-
-	memset(&debugReportCallbackCreateInfo, 0, sizeof(VkDebugReportCallbackCreateInfoEXT));
+	VkDebugReportCallbackCreateInfoEXT debugReportCallbackCreateInfo{};
 
 	debugReportCallbackCreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CREATE_INFO_EXT;
 	debugReportCallbackCreateInfo.flags = flags;

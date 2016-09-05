@@ -43,9 +43,7 @@ IPipelineCacheSP VKTS_APIENTRY pipelineCreateCache(const VkDevice device, const 
 
     VkResult result;
 
-    VkPipelineCacheCreateInfo pipelineCacheCreateInfo;
-
-    memset(&pipelineCacheCreateInfo, 0, sizeof(VkPipelineCacheCreateInfo));
+    VkPipelineCacheCreateInfo pipelineCacheCreateInfo{};
 
     pipelineCacheCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
 
@@ -85,9 +83,7 @@ IPipelineLayoutSP VKTS_APIENTRY pipelineCreateLayout(const VkDevice device, cons
 
     VkResult result;
 
-    VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo;
-
-    memset(&pipelineLayoutCreateInfo, 0, sizeof(VkPipelineLayoutCreateInfo));
+    VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo{};
 
     pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 

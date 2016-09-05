@@ -214,9 +214,7 @@ void Swapchain::cmdPipelineBarrier(const VkCommandBuffer cmdBuffer, const VkAcce
         return;
     }
 
-	VkImageMemoryBarrier imageMemoryBarrier;
-
-	memset(&imageMemoryBarrier, 0, sizeof(VkImageMemoryBarrier));
+	VkImageMemoryBarrier imageMemoryBarrier{};
 
 	imageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
 
@@ -242,9 +240,7 @@ VkResult Swapchain::acquireNextImage(const uint64_t timeout, const VkSemaphore s
 
 VkResult Swapchain::queuePresent(const VkQueue queue, const uint32_t waitSemaphoreCount, const VkSemaphore* waitSemaphores, const uint32_t swapchainCount, const VkSwapchainKHR* swapchains, const uint32_t* imageIndices, VkResult* results) const
 {
-    VkPresentInfoKHR presentInfo;
-
-    memset(&presentInfo, 0, sizeof(VkPresentInfoKHR));
+    VkPresentInfoKHR presentInfo{};
 
     presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 

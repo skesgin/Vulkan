@@ -41,9 +41,7 @@ IBufferSP VKTS_APIENTRY bufferCreate(const VkDevice device, const VkBufferCreate
 
     VkResult result;
 
-    VkBufferCreateInfo bufferCreateInfo;
-
-    memset(&bufferCreateInfo, 0, sizeof(VkBufferCreateInfo));
+    VkBufferCreateInfo bufferCreateInfo{};
 
     bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 
@@ -86,9 +84,7 @@ IBufferViewSP VKTS_APIENTRY bufferViewCreate(const VkDevice device, const VkBuff
 
     VkResult result;
 
-    VkBufferViewCreateInfo bufferViewCreateInfo;
-
-    memset(&bufferViewCreateInfo, 0, sizeof(VkBufferViewCreateInfo));
+    VkBufferViewCreateInfo bufferViewCreateInfo{};
 
     bufferViewCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_VIEW_CREATE_INFO;
 

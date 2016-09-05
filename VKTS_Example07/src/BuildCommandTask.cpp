@@ -54,9 +54,7 @@ VkBool32 BuildCommandTask::execute()
     // Record secondary command buffer.
     //
 
-    VkCommandBufferBeginInfo commandBufferBeginInfo;
-
-    memset(&commandBufferBeginInfo, 0, sizeof(VkCommandBufferBeginInfo));
+    VkCommandBufferBeginInfo commandBufferBeginInfo{};
 
     commandBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
@@ -65,8 +63,7 @@ VkBool32 BuildCommandTask::execute()
 
     vkBeginCommandBuffer(cmdBuffer->getCommandBuffer(), &commandBufferBeginInfo);
 
-    VkViewport viewport;
-    memset(&viewport, 0, sizeof(VkViewport));
+    VkViewport viewport{};
 
     viewport.x = 0.0f;
     viewport.y = 0.0f;
@@ -77,8 +74,7 @@ VkBool32 BuildCommandTask::execute()
 
     vkCmdSetViewport(cmdBuffer->getCommandBuffer(), 0, 1, &viewport);
 
-    VkRect2D scissor;
-    memset(&scissor, 0, sizeof(VkRect2D));
+    VkRect2D scissor{};
 
     scissor.offset.x = 0;
     scissor.offset.y = 0;

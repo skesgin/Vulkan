@@ -107,9 +107,7 @@ vkts::IImageDataSP Example::gatherImageData() const
 		}
 
 
-		VkSubmitInfo submitInfo;
-
-		memset(&submitInfo, 0, sizeof(VkSubmitInfo));
+		VkSubmitInfo submitInfo{};
 
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
@@ -190,9 +188,7 @@ vkts::IImageDataSP Example::gatherImageData() const
 		vkts::IBufferSP stageBuffer;
 		vkts::IDeviceMemorySP stageDeviceMemory;
 
-		VkBufferCreateInfo bufferCreateInfo;
-
-        memset(&bufferCreateInfo, 0, sizeof(VkBufferCreateInfo));
+		VkBufferCreateInfo bufferCreateInfo{};
 
         bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
         bufferCreateInfo.size = imageData->getSize();
@@ -246,9 +242,7 @@ vkts::IImageDataSP Example::gatherImageData() const
 		}
 
 
-		VkSubmitInfo submitInfo;
-
-		memset(&submitInfo, 0, sizeof(VkSubmitInfo));
+		VkSubmitInfo submitInfo{};
 
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
@@ -390,9 +384,7 @@ VkBool32 Example::buildCmdPool()
 
 VkBool32 Example::buildPipeline()
 {
-	VkPipelineShaderStageCreateInfo pipelineShaderStageCreateInfo;
-
-	memset(&pipelineShaderStageCreateInfo, 0, sizeof(VkPipelineShaderStageCreateInfo));
+	VkPipelineShaderStageCreateInfo pipelineShaderStageCreateInfo{};
 
 	pipelineShaderStageCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 
@@ -404,9 +396,7 @@ VkBool32 Example::buildPipeline()
 
 	//
 
-	VkComputePipelineCreateInfo computePipelineCreateInfo;
-
-	memset(&computePipelineCreateInfo, 0, sizeof(VkComputePipelineCreateInfo));
+	VkComputePipelineCreateInfo computePipelineCreateInfo{};
 
 	computePipelineCreateInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
 
@@ -460,17 +450,13 @@ VkBool32 Example::buildDescriptorSets()
 
 	//
 
-	VkDescriptorImageInfo descriptorImageInfo;
-
-	memset(&descriptorImageInfo, 0, sizeof(VkDescriptorImageInfo));
+	VkDescriptorImageInfo descriptorImageInfo{};
 
 	descriptorImageInfo.sampler = VK_NULL_HANDLE;
 	descriptorImageInfo.imageView = imageView->getImageView();
 	descriptorImageInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
 
-	VkWriteDescriptorSet writeDescriptorSet;
-
-	memset(&writeDescriptorSet, 0, sizeof(writeDescriptorSet));
+	VkWriteDescriptorSet writeDescriptorSet{};
 
 	writeDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 
@@ -490,9 +476,7 @@ VkBool32 Example::buildDescriptorSets()
 
 VkBool32 Example::buildDescriptorSetPool()
 {
-	VkDescriptorPoolSize descriptorTypeCount;
-
-	memset(&descriptorTypeCount, 0, sizeof(VkDescriptorPoolSize));
+	VkDescriptorPoolSize descriptorTypeCount{};
 
 	descriptorTypeCount.type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
 	descriptorTypeCount.descriptorCount = 1;
@@ -511,9 +495,7 @@ VkBool32 Example::buildDescriptorSetPool()
 
 VkBool32 Example::buildDescriptorSetLayout()
 {
-	VkDescriptorSetLayoutBinding descriptorSetLayoutBinding;
-
-	memset(&descriptorSetLayoutBinding, 0, sizeof(VkDescriptorSetLayoutBinding));
+	VkDescriptorSetLayoutBinding descriptorSetLayoutBinding{};
 
 	descriptorSetLayoutBinding.binding = 0;
 	descriptorSetLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
@@ -803,9 +785,7 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 
 	if (!executed)
 	{
-		VkSubmitInfo submitInfo;
-
-		memset(&submitInfo, 0, sizeof(VkSubmitInfo));
+		VkSubmitInfo submitInfo{};
 
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 

@@ -70,9 +70,7 @@ VkSurfaceKHR VKTS_APIENTRY _wsiSurfaceCreate(const VkInstance instance, VKTS_NAT
 
     if (g_hasWin32)
     {
-        VkWin32SurfaceCreateInfoKHR win32SurfaceCreateInfoKHR;
-
-        memset(&win32SurfaceCreateInfoKHR, 0, sizeof(VkWin32SurfaceCreateInfoKHR));
+        VkWin32SurfaceCreateInfoKHR win32SurfaceCreateInfoKHR{};
 
         win32SurfaceCreateInfoKHR.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
 

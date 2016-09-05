@@ -40,9 +40,7 @@ ISamplerSP VKTS_APIENTRY samplerCreate(const VkDevice device, const VkSamplerCre
 
     VkResult result;
 
-    VkSamplerCreateInfo samplerCreateInfo;
-
-    memset(&samplerCreateInfo, 0, sizeof(VkSamplerCreateInfo));
+    VkSamplerCreateInfo samplerCreateInfo{};
 
     samplerCreateInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
 

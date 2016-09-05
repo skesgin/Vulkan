@@ -40,9 +40,7 @@ IRenderPassSP VKTS_APIENTRY renderPassCreate(const VkDevice device, const VkRend
 
     VkResult result;
 
-    VkRenderPassCreateInfo renderPassCreateInfo;
-
-    memset(&renderPassCreateInfo, 0, sizeof(VkRenderPassCreateInfo));
+    VkRenderPassCreateInfo renderPassCreateInfo{};
 
     renderPassCreateInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
 

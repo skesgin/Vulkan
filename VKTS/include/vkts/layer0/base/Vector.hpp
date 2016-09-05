@@ -253,9 +253,7 @@ public:
     	else if (index == topElement)
     	{
     		// Allow to append at the end.
-    		V v;
-
-    		memset(&v, 0, sizeof(V));
+    		V v{};
 
     		append(v);
     	}

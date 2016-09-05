@@ -83,8 +83,7 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 
     //
 
-	VkViewport viewport;
-	memset(&viewport, 0, sizeof(VkViewport));
+	VkViewport viewport{};
 
 	viewport.x = 0.0f;
 	viewport.y = 0.0f;
@@ -93,8 +92,7 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 	viewport.minDepth = 0.0f;
 	viewport.maxDepth = 1.0f;
 
-	VkRect2D scissor;
-	memset(&scissor, 0, sizeof(VkRect2D));
+	VkRect2D scissor{};
 
 	scissor.offset.x = 0;
 	scissor.offset.y = 0;
@@ -104,34 +102,26 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
     // Gbuffer pass.
     //
 
-	VkClearColorValue positionClearColorValue;
-
-	memset(&positionClearColorValue, 0, sizeof(VkClearColorValue));
+	VkClearColorValue positionClearColorValue{};
 
 	positionClearColorValue.float32[0] = 0.5f;
 	positionClearColorValue.float32[1] = 0.5f;
 	positionClearColorValue.float32[2] = 0.5f;
 	positionClearColorValue.float32[3] = 1.5f;
 
-	VkClearColorValue clearColorValue;
-
-	memset(&clearColorValue, 0, sizeof(VkClearColorValue));
+	VkClearColorValue clearColorValue{};
 
 	clearColorValue.float32[0] = 0.0f;
 	clearColorValue.float32[1] = 0.0f;
 	clearColorValue.float32[2] = 0.0f;
 	clearColorValue.float32[3] = 0.0f;
 
-	VkClearDepthStencilValue clearDepthStencilValue;
-
-	memset(&clearDepthStencilValue, 0, sizeof(VkClearDepthStencilValue));
+	VkClearDepthStencilValue clearDepthStencilValue{};
 
 	clearDepthStencilValue.depth = 1.0f;
 	clearDepthStencilValue.stencil = 0;
 
-	VkClearValue clearValues[6];
-
-	memset(clearValues, 0, sizeof(clearValues));
+	VkClearValue clearValues[6]{};
 
 	clearValues[0].color = clearColorValue;
 	clearValues[1].color = clearColorValue;
@@ -141,9 +131,7 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 	clearValues[5].depthStencil = clearDepthStencilValue;
 
 
-	VkRenderPassBeginInfo renderPassBeginInfo;
-
-	memset(&renderPassBeginInfo, 0, sizeof(VkRenderPassBeginInfo));
+	VkRenderPassBeginInfo renderPassBeginInfo{};
 
 	renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 
@@ -497,9 +485,7 @@ VkBool32 Example::updateDescriptorSets()
 
 VkBool32 Example::buildScene(const vkts::ICommandBuffersSP& cmdBuffer)
 {
-	VkSamplerCreateInfo samplerCreateInfo;
-
-	memset(&samplerCreateInfo, 0, sizeof(VkSamplerCreateInfo));
+	VkSamplerCreateInfo samplerCreateInfo{};
 
 	samplerCreateInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
 
@@ -519,9 +505,7 @@ VkBool32 Example::buildScene(const vkts::ICommandBuffersSP& cmdBuffer)
 	samplerCreateInfo.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
 	samplerCreateInfo.unnormalizedCoordinates = VK_FALSE;
 
-	VkImageViewCreateInfo imageViewCreateInfo;
-
-	memset(&imageViewCreateInfo, 0, sizeof(VkImageViewCreateInfo));
+	VkImageViewCreateInfo imageViewCreateInfo{};
 
 	imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 
@@ -613,9 +597,7 @@ VkBool32 Example::buildScene(const vkts::ICommandBuffersSP& cmdBuffer)
 	        return VK_FALSE;
 		}
 
-	    VkBufferCreateInfo bufferCreateInfo;
-
-	    memset(&bufferCreateInfo, 0, sizeof(VkBufferCreateInfo));
+	    VkBufferCreateInfo bufferCreateInfo{};
 
 	    bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 
@@ -714,9 +696,7 @@ VkBool32 Example::buildGBufferImageView()
 
 VkBool32 Example::buildGBufferTexture(const vkts::ICommandBuffersSP& cmdBuffer)
 {
-	VkImageCreateInfo imageCreateInfo;
-
-	memset(&imageCreateInfo, 0, sizeof(VkImageCreateInfo));
+	VkImageCreateInfo imageCreateInfo{};
 
 	imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 
@@ -908,9 +888,7 @@ VkBool32 Example::buildPipeline()
 
 VkBool32 Example::buildRenderPass()
 {
-	VkAttachmentDescription attachmentDescription[1];
-
-	memset(&attachmentDescription, 0, sizeof(attachmentDescription));
+	VkAttachmentDescription attachmentDescription[1]{};
 
 	attachmentDescription[0].flags = 0;
 	attachmentDescription[0].format = swapchain->getImageFormat();
@@ -922,14 +900,12 @@ VkBool32 Example::buildRenderPass()
 	attachmentDescription[0].initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 	attachmentDescription[0].finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
-	VkAttachmentReference colorAttachmentReference;
+	VkAttachmentReference colorAttachmentReference{};
 
 	colorAttachmentReference.attachment = 0;
 	colorAttachmentReference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
-	VkSubpassDescription subpassDescription;
-
-	memset(&subpassDescription, 0, sizeof(VkSubpassDescription));
+	VkSubpassDescription subpassDescription{};
 
 	subpassDescription.flags = 0;
 	subpassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
@@ -955,9 +931,7 @@ VkBool32 Example::buildRenderPass()
 
 	//Create G-Buffer render pass.
 
-	VkAttachmentDescription gbufferAttachmentDescription[6];
-
-	memset(&gbufferAttachmentDescription, 0, sizeof(gbufferAttachmentDescription));
+	VkAttachmentDescription gbufferAttachmentDescription[6]{};
 
 	for (uint32_t i = 0; i < 5; i++)
 	{
@@ -995,9 +969,7 @@ VkBool32 Example::buildRenderPass()
 	gbufferDeptStencilAttachmentReference.attachment = 5;
 	gbufferDeptStencilAttachmentReference.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
-	VkSubpassDescription gbufferSubpassDescription;
-
-	memset(&gbufferSubpassDescription, 0, sizeof(VkSubpassDescription));
+	VkSubpassDescription gbufferSubpassDescription{};
 
 	gbufferSubpassDescription.flags = 0;
 	gbufferSubpassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
@@ -1072,9 +1044,7 @@ VkBool32 Example::buildDescriptorSets()
 
 VkBool32 Example::buildDescriptorSetPool()
 {
-    VkDescriptorPoolSize descriptorPoolSize[2];
-
-    memset(&descriptorPoolSize, 0, sizeof(descriptorPoolSize));
+    VkDescriptorPoolSize descriptorPoolSize[2]{};
 
 	descriptorPoolSize[0].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 	descriptorPoolSize[0].descriptorCount = 9;
@@ -1094,9 +1064,7 @@ VkBool32 Example::buildDescriptorSetPool()
 
 VkBool32 Example::buildDescriptorSetLayout()
 {
-	VkDescriptorSetLayoutBinding descriptorSetLayoutBinding[3];
-
-	memset(&descriptorSetLayoutBinding, 0, sizeof(descriptorSetLayoutBinding));
+	VkDescriptorSetLayoutBinding descriptorSetLayoutBinding[3]{};
 
 	descriptorSetLayoutBinding[0].binding = VKTS_BINDING_UNIFORM_BUFFER_VIEWPROJECTION;
 	descriptorSetLayoutBinding[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -1127,9 +1095,7 @@ VkBool32 Example::buildDescriptorSetLayout()
 
 	//
 
-	VkDescriptorSetLayoutBinding resolveDescriptorSetLayoutBinding[VKTS_BSDF_DESCRIPTOR_SET_COUNT];
-
-	memset(&resolveDescriptorSetLayoutBinding, 0, sizeof(resolveDescriptorSetLayoutBinding));
+	VkDescriptorSetLayoutBinding resolveDescriptorSetLayoutBinding[VKTS_BSDF_DESCRIPTOR_SET_COUNT]{};
 
 	for (uint32_t binding = 0; binding < 9; binding++)
 	{
@@ -1326,9 +1292,7 @@ VkBool32 Example::buildShader()
 
 VkBool32 Example::buildUniformBuffers()
 {
-	VkBufferCreateInfo bufferCreateInfo;
-
-	memset(&bufferCreateInfo, 0, sizeof(VkBufferCreateInfo));
+	VkBufferCreateInfo bufferCreateInfo{};
 
 	bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 
@@ -1496,9 +1460,7 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 	}
 
 
-	VkSubmitInfo submitInfo;
-
-	memset(&submitInfo, 0, sizeof(VkSubmitInfo));
+	VkSubmitInfo submitInfo{};
 
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
@@ -1976,9 +1938,7 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 
         VkPipelineStageFlags waitDstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
 
-        VkSubmitInfo submitInfo;
-
-        memset(&submitInfo, 0, sizeof(VkSubmitInfo));
+        VkSubmitInfo submitInfo{};
 
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 

@@ -40,9 +40,7 @@ IShaderModuleSP VKTS_APIENTRY shaderModuleCreate(const std::string& name, const 
 
     VkResult result;
 
-    VkShaderModuleCreateInfo shaderModuleCreateInfo;
-
-    memset(&shaderModuleCreateInfo, 0, sizeof(VkShaderModuleCreateInfo));
+    VkShaderModuleCreateInfo shaderModuleCreateInfo{};
 
     shaderModuleCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
 

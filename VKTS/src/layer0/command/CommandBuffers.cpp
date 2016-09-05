@@ -89,9 +89,7 @@ VkResult CommandBuffers::beginCommandBuffer(const VkCommandBufferBeginInfo* cmdB
 
 VkResult CommandBuffers::beginCommandBuffer(const VkCommandBufferUsageFlags flags, const VkRenderPass renderPass, const uint32_t subpass, const VkFramebuffer framebuffer, const VkBool32 occlusionQueryEnable, const VkQueryControlFlags queryFlags, const VkQueryPipelineStatisticFlags pipelineStatistics, const uint32_t bufferIndex) const
 {
-	VkCommandBufferInheritanceInfo commandBufferInheritanceInfo;
-
-	memset(&commandBufferInheritanceInfo, 0, sizeof(VkCommandBufferInheritanceInfo));
+	VkCommandBufferInheritanceInfo commandBufferInheritanceInfo{};
 
 	commandBufferInheritanceInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO;
 
@@ -103,9 +101,7 @@ VkResult CommandBuffers::beginCommandBuffer(const VkCommandBufferUsageFlags flag
 	commandBufferInheritanceInfo.pipelineStatistics = pipelineStatistics;
 
 
-    VkCommandBufferBeginInfo commandBufferBeginInfo;
-
-    memset(&commandBufferBeginInfo, 0, sizeof(VkCommandBufferBeginInfo));
+    VkCommandBufferBeginInfo commandBufferBeginInfo{};
 
     commandBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 

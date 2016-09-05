@@ -100,9 +100,7 @@ VkSurfaceKHR VKTS_APIENTRY _wsiSurfaceCreate(const VkInstance instance, VKTS_NAT
 
     if (g_hasXcb)
     {
-        VkXcbSurfaceCreateInfoKHR xcbSurfaceCreateInfoKHR;
-
-        memset(&xcbSurfaceCreateInfoKHR, 0, sizeof(VkXcbSurfaceCreateInfoKHR));
+        VkXcbSurfaceCreateInfoKHR xcbSurfaceCreateInfoKHR{};
 
         xcbSurfaceCreateInfoKHR.sType = VK_STRUCTURE_TYPE_XCB_SURFACE_CREATE_INFO_KHR;
 
@@ -122,9 +120,7 @@ VkSurfaceKHR VKTS_APIENTRY _wsiSurfaceCreate(const VkInstance instance, VKTS_NAT
 
     if (g_hasXlib)
     {
-    	VkXlibSurfaceCreateInfoKHR xlibSurfaceCreateInfoKHR;
-
-    	memset(&xlibSurfaceCreateInfoKHR, 0, sizeof(VkXlibSurfaceCreateInfoKHR));
+    	VkXlibSurfaceCreateInfoKHR xlibSurfaceCreateInfoKHR{};
 
     	xlibSurfaceCreateInfoKHR.sType = VK_STRUCTURE_TYPE_XLIB_SURFACE_CREATE_INFO_KHR;
 

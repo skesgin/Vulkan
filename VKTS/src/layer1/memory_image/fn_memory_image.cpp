@@ -285,9 +285,7 @@ IMemoryImageSP VKTS_APIENTRY memoryImageCreate(IImageSP& stageImage, IBufferSP& 
         }
         else
         {
-            VkBufferCreateInfo bufferCreateInfo;
-
-            memset(&bufferCreateInfo, 0, sizeof(VkBufferCreateInfo));
+            VkBufferCreateInfo bufferCreateInfo{};
 
             bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
             bufferCreateInfo.size = imageData->getSize();

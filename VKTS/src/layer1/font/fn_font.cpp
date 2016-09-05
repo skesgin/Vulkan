@@ -317,9 +317,7 @@ IFontSP VKTS_APIENTRY fontCreate(const char* filename, const IInitialResourcesSP
 
             //
 
-            VkImageCreateInfo imageCreateInfo;
-
-            memset(&imageCreateInfo, 0, sizeof(VkImageCreateInfo));
+            VkImageCreateInfo imageCreateInfo{};
 
             imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 
@@ -365,9 +363,7 @@ IFontSP VKTS_APIENTRY fontCreate(const char* filename, const IInitialResourcesSP
 
             //
 
-        	VkSamplerCreateInfo samplerCreateInfo;
-
-        	memset(&samplerCreateInfo, 0, sizeof(VkSamplerCreateInfo));
+        	VkSamplerCreateInfo samplerCreateInfo{};
 
         	samplerCreateInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
 
@@ -387,9 +383,7 @@ IFontSP VKTS_APIENTRY fontCreate(const char* filename, const IInitialResourcesSP
         	samplerCreateInfo.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
         	samplerCreateInfo.unnormalizedCoordinates = VK_FALSE;
 
-        	VkImageViewCreateInfo imageViewCreateInfo;
-
-        	memset(&imageViewCreateInfo, 0, sizeof(VkImageViewCreateInfo));
+        	VkImageViewCreateInfo imageViewCreateInfo{};
 
         	imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 
@@ -532,9 +526,7 @@ IFontSP VKTS_APIENTRY fontCreate(const char* filename, const IInitialResourcesSP
 
     //
 
-    VkBufferCreateInfo bufferCreateInfo;
-
-    memset(&bufferCreateInfo, 0, sizeof(VkBufferCreateInfo));
+    VkBufferCreateInfo bufferCreateInfo{};
 
     bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 
@@ -616,19 +608,17 @@ IFontSP VKTS_APIENTRY fontCreate(const char* filename, const IInitialResourcesSP
 	// Descriptor set layout.
 	//
 
-	VkDescriptorSetLayoutBinding descriptorSetLayoutBinding[1];
+	VkDescriptorSetLayoutBinding descriptorSetLayoutBinding{};
 
-	memset(&descriptorSetLayoutBinding, 0, sizeof(descriptorSetLayoutBinding));
-
-	descriptorSetLayoutBinding[0].binding = 0;
-	descriptorSetLayoutBinding[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	descriptorSetLayoutBinding[0].descriptorCount = 1;
-	descriptorSetLayoutBinding[0].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-	descriptorSetLayoutBinding[0].pImmutableSamplers = nullptr;
+	descriptorSetLayoutBinding.binding = 0;
+	descriptorSetLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+	descriptorSetLayoutBinding.descriptorCount = 1;
+	descriptorSetLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+	descriptorSetLayoutBinding.pImmutableSamplers = nullptr;
 
     //
 
-    auto descriptorSetLayout = descriptorSetLayoutCreate(initialResources->getDevice()->getDevice(), 0, 1, descriptorSetLayoutBinding);
+    auto descriptorSetLayout = descriptorSetLayoutCreate(initialResources->getDevice()->getDevice(), 0, 1, &descriptorSetLayoutBinding);
 
 	if (!descriptorSetLayout.get())
 	{
@@ -641,14 +631,12 @@ IFontSP VKTS_APIENTRY fontCreate(const char* filename, const IInitialResourcesSP
 
 	//
 
-    VkDescriptorPoolSize descriptorPoolSize[1];
+    VkDescriptorPoolSize descriptorPoolSize{};
 
-    memset(&descriptorPoolSize, 0, sizeof(descriptorPoolSize));
+    descriptorPoolSize.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    descriptorPoolSize.descriptorCount = 1;
 
-    descriptorPoolSize[0].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    descriptorPoolSize[0].descriptorCount = 1;
-
-    auto descriptorPool = descriptorPoolCreate(initialResources->getDevice()->getDevice(), VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT, 1, 1, descriptorPoolSize);
+    auto descriptorPool = descriptorPoolCreate(initialResources->getDevice()->getDevice(), VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT, 1, 1, &descriptorPoolSize);
 
     if (!descriptorPool.get())
     {
@@ -672,17 +660,13 @@ IFontSP VKTS_APIENTRY fontCreate(const char* filename, const IInitialResourcesSP
 
 	//
 
-	VkDescriptorImageInfo descriptorImageInfo;
-
-	memset(&descriptorImageInfo, 0, sizeof(VkDescriptorImageInfo));
+	VkDescriptorImageInfo descriptorImageInfo{};
 
 	descriptorImageInfo.sampler = font->getTexture()->getSampler()->getSampler();
 	descriptorImageInfo.imageView = font->getTexture()->getImageView()->getImageView();
 	descriptorImageInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
 
-	VkWriteDescriptorSet writeDescriptorSet;
-
-	memset(&writeDescriptorSet, 0, sizeof(writeDescriptorSet));
+	VkWriteDescriptorSet writeDescriptorSet{};
 
 	writeDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 

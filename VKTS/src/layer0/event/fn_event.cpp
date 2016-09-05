@@ -40,9 +40,7 @@ IEventSP VKTS_APIENTRY eventCreate(const VkDevice device, const VkEventCreateFla
 
     VkResult result;
 
-    VkEventCreateInfo eventCreateInfo;
-
-    memset(&eventCreateInfo, 0, sizeof(VkEventCreateInfo));
+    VkEventCreateInfo eventCreateInfo{};
 
     eventCreateInfo.sType = VK_STRUCTURE_TYPE_EVENT_CREATE_INFO;
 

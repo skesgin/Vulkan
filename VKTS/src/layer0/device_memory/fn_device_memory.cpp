@@ -42,9 +42,7 @@ IDeviceMemorySP VKTS_APIENTRY deviceMemoryCreate(const VkDevice device, const Vk
 
     //
 
-    VkMemoryAllocateInfo memoryAllocInfo;
-
-    memset(&memoryAllocInfo, 0, sizeof(VkMemoryAllocateInfo));
+    VkMemoryAllocateInfo memoryAllocInfo{};
 
     memoryAllocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     memoryAllocInfo.allocationSize = memoryRequirements.size;

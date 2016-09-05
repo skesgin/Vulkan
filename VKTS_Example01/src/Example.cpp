@@ -27,9 +27,8 @@
 #include "Example.hpp"
 
 Example::Example(const VkInstance instance, const VkPhysicalDevice physicalDevice, const int32_t windowIndex, const vkts::ISurfaceSP& surface, const VkDevice device, const uint32_t queueFamilyIndex, const VkQueue queue) :
-		IUpdateThread(), instance(instance), physicalDevice(physicalDevice), windowIndex(windowIndex), surface(surface), device(device), queueFamilyIndex(queueFamilyIndex), queue(queue), commandPool(VK_NULL_HANDLE), imageAcquiredSemaphore(VK_NULL_HANDLE), renderingCompleteSemaphore(VK_NULL_HANDLE), swapchain(VK_NULL_HANDLE), renderPass(VK_NULL_HANDLE), swapchainImagesCount(0), swapchainImage(), swapchainImageView(), framebuffer(), cmdBuffer()
+		IUpdateThread(), instance(instance), physicalDevice(physicalDevice), windowIndex(windowIndex), surface(surface), device(device), queueFamilyIndex(queueFamilyIndex), queue(queue), commandPool(VK_NULL_HANDLE), imageAcquiredSemaphore(VK_NULL_HANDLE), renderingCompleteSemaphore(VK_NULL_HANDLE), swapchainCreateInfo{}, swapchain(VK_NULL_HANDLE), renderPass(VK_NULL_HANDLE), swapchainImagesCount(0), swapchainImage(), swapchainImageView(), framebuffer(), cmdBuffer()
 {
-	memset(&swapchainCreateInfo, 0, sizeof(VkSwapchainCreateInfoKHR));
 }
 
 Example::~Example()
@@ -42,9 +41,7 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 
 	//
 
-	VkCommandBufferAllocateInfo cmdBufferCreateInfo;
-
-	memset(&cmdBufferCreateInfo, 0, sizeof(VkCommandBufferAllocateInfo));
+	VkCommandBufferAllocateInfo cmdBufferCreateInfo{};
 
 	cmdBufferCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 
@@ -62,9 +59,7 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 	}
 
 
-	VkCommandBufferInheritanceInfo commandBufferInheritanceInfo;
-
-	memset(&commandBufferInheritanceInfo, 0, sizeof(VkCommandBufferInheritanceInfo));
+	VkCommandBufferInheritanceInfo commandBufferInheritanceInfo{};
 
 	commandBufferInheritanceInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO;
 
@@ -75,9 +70,7 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 	commandBufferInheritanceInfo.queryFlags = 0;
 	commandBufferInheritanceInfo.pipelineStatistics = 0;
 
-	VkCommandBufferBeginInfo commandBufferBeginInfo;
-
-	memset(&commandBufferBeginInfo, 0, sizeof(VkCommandBufferBeginInfo));
+	VkCommandBufferBeginInfo commandBufferBeginInfo{};
 
 	commandBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
@@ -95,9 +88,7 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 
 	//
 
-    VkImageMemoryBarrier imageMemoryBarrier;
-
-    memset(&imageMemoryBarrier, 0, sizeof(VkImageMemoryBarrier));
+    VkImageMemoryBarrier imageMemoryBarrier{};
 
     imageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
 
@@ -114,9 +105,7 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 
 	//
 
-	VkClearColorValue clearColorValue;
-
-	memset(&clearColorValue, 0, sizeof(VkClearColorValue));
+	VkClearColorValue clearColorValue{};
 
 	clearColorValue.float32[0] = 0.0f;
 	clearColorValue.float32[1] = 0.0f;
@@ -125,9 +114,7 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 
 	VkClearValue clearValues[1] = {clearColorValue};
 
-	VkRenderPassBeginInfo renderPassBeginInfo;
-
-	memset(&renderPassBeginInfo, 0, sizeof(VkRenderPassBeginInfo));
+	VkRenderPassBeginInfo renderPassBeginInfo{};
 
 	renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 
@@ -182,9 +169,7 @@ VkBool32 Example::buildFramebuffer(const int32_t usedBuffer)
 
 	//
 
-	VkFramebufferCreateInfo framebufferCreateInfo;
-
-	memset(&framebufferCreateInfo, 0, sizeof(VkFramebufferCreateInfo));
+	VkFramebufferCreateInfo framebufferCreateInfo{};
 
 	framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 
@@ -214,9 +199,7 @@ VkBool32 Example::buildSwapchainImageView(const int32_t usedBuffer)
 
 	//
 
-	VkImageViewCreateInfo imageViewCreateInfo;
-
-	memset(&imageViewCreateInfo, 0, sizeof(VkImageViewCreateInfo));
+	VkImageViewCreateInfo imageViewCreateInfo{};
 
 	imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 
@@ -245,9 +228,7 @@ VkBool32 Example::buildRenderPass()
 
 	//
 
-	VkAttachmentDescription attachmentDescription;
-
-	memset(&attachmentDescription, 0, sizeof(VkAttachmentDescription));
+	VkAttachmentDescription attachmentDescription{};
 
 	attachmentDescription.flags = 0;
 	attachmentDescription.format = swapchainCreateInfo.imageFormat;
@@ -264,9 +245,7 @@ VkBool32 Example::buildRenderPass()
 	colorAttachmentReference.attachment = 0;
 	colorAttachmentReference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
-	VkSubpassDescription subpassDescription;
-
-	memset(&subpassDescription, 0, sizeof(VkSubpassDescription));
+	VkSubpassDescription subpassDescription{};
 
 	subpassDescription.flags = 0;
 	subpassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
@@ -279,9 +258,7 @@ VkBool32 Example::buildRenderPass()
 	subpassDescription.preserveAttachmentCount = 0;
 	subpassDescription.pPreserveAttachments = nullptr;
 
-	VkRenderPassCreateInfo renderPassCreateInfo;
-
-	memset(&renderPassCreateInfo, 0, sizeof(VkRenderPassCreateInfo));
+	VkRenderPassCreateInfo renderPassCreateInfo{};
 
 	renderPassCreateInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
 
@@ -585,9 +562,7 @@ VkBool32 Example::init(const vkts::IUpdateThreadContext& updateContext)
 
 	//
 
-	VkCommandPoolCreateInfo commandPoolCreateInfo;
-
-	memset(&commandPoolCreateInfo, 0, sizeof(VkCommandPoolCreateInfo));
+	VkCommandPoolCreateInfo commandPoolCreateInfo{};
 
 	commandPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 	commandPoolCreateInfo.flags = 0;
@@ -604,9 +579,7 @@ VkBool32 Example::init(const vkts::IUpdateThreadContext& updateContext)
 
 	//
 
-	VkSemaphoreCreateInfo semaphoreCreateInfo;
-
-	memset(&semaphoreCreateInfo, 0, sizeof(VkSemaphoreCreateInfo));
+	VkSemaphoreCreateInfo semaphoreCreateInfo{};
 
 	semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
@@ -679,9 +652,7 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 	{
 		VkPipelineStageFlags waitDstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
 
-		VkSubmitInfo submitInfo;
-
-		memset(&submitInfo, 0, sizeof(VkSubmitInfo));
+		VkSubmitInfo submitInfo{};
 
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
@@ -702,9 +673,7 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 			return VK_FALSE;
 		}
 
-		VkPresentInfoKHR presentInfo;
-
-		memset(&presentInfo, 0, sizeof(VkPresentInfoKHR));
+		VkPresentInfoKHR presentInfo{};
 
 		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 
@@ -778,9 +747,7 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 
     //
 
-	VkSemaphoreCreateInfo semaphoreCreateInfo;
-
-	memset(&semaphoreCreateInfo, 0, sizeof(VkSemaphoreCreateInfo));
+	VkSemaphoreCreateInfo semaphoreCreateInfo{};
 
 	semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 

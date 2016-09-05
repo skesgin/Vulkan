@@ -116,17 +116,13 @@ void Material::updateDescriptorImageInfo(const uint32_t colorIndex, const uint32
 }
 
 Material::Material() :
-    descriptorPool(), descriptorSets(), nodeName(), allDescriptorPools(), allDescriptorSets()
+    descriptorPool(), descriptorSets(), descriptorImageInfos{}, writeDescriptorSets{}, nodeName(), allDescriptorPools(), allDescriptorSets()
 {
-	memset(descriptorImageInfos, 0, sizeof(descriptorImageInfos));
-	memset(writeDescriptorSets, 0, sizeof(writeDescriptorSets));
 }
 
 Material::Material(const Material& other) :
-    descriptorPool(), descriptorSets(), nodeName(), allDescriptorPools(), allDescriptorSets()
+    descriptorPool(), descriptorSets(), descriptorImageInfos{}, writeDescriptorSets{}, nodeName(), allDescriptorPools(), allDescriptorSets()
 {
-	memset(descriptorImageInfos, 0, sizeof(descriptorImageInfos));
-	memset(writeDescriptorSets, 0, sizeof(writeDescriptorSets));
 }
 
 Material::~Material()
@@ -140,8 +136,8 @@ void Material::destroy()
 
     descriptorPool = IDescriptorPoolSP();
 
-    memset(&descriptorImageInfos, 0, sizeof(descriptorImageInfos));
-    memset(&writeDescriptorSets, 0, sizeof(writeDescriptorSets));
+    memset(descriptorImageInfos, 0, sizeof(descriptorImageInfos));
+    memset(writeDescriptorSets, 0, sizeof(writeDescriptorSets));
 
     for (size_t i = 0; i < allDescriptorSets.size(); i++)
     {

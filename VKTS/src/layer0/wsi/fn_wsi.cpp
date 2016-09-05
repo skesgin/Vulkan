@@ -292,9 +292,7 @@ ISwapchainSP VKTS_APIENTRY wsiSwapchainCreate(const VkPhysicalDevice physicalDev
     VkFormat imageFormat = surfaceFormats[0].format;
     VkColorSpaceKHR imageColorSpace = surfaceFormats[0].colorSpace;
 
-    VkSwapchainCreateInfoKHR swapchainCreateInfo;
-
-    memset(&swapchainCreateInfo, 0, sizeof(VkSwapchainCreateInfoKHR));
+    VkSwapchainCreateInfoKHR swapchainCreateInfo{};
 
     swapchainCreateInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
 

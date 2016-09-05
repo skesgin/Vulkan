@@ -171,9 +171,7 @@ const std::vector<VkQueueFamilyProperties>& PhysicalDevice::getAllQueueFamilyPro
 
         vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &physicalDeviceQueueCount, nullptr);
 
-        VkQueueFamilyProperties queueFamilyProperties;
-
-        memset(&queueFamilyProperties, 0, sizeof(VkQueueFamilyProperties));
+        VkQueueFamilyProperties queueFamilyProperties{};
 
         for (uint32_t index = 0; index < physicalDeviceQueueCount; index++)
         {

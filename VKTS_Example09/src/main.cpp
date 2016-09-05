@@ -268,9 +268,7 @@ int main(int argc, char* argv[])
 
 	float queuePriorities[1] = {0.0f};
 
-	VkDeviceQueueCreateInfo deviceQueueCreateInfo;
-
-	memset(&deviceQueueCreateInfo, 0, sizeof(VkDeviceQueueCreateInfo));
+	VkDeviceQueueCreateInfo deviceQueueCreateInfo{};
 
 	deviceQueueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
 

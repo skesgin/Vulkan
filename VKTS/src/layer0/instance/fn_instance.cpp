@@ -100,9 +100,7 @@ IInstanceSP VKTS_APIENTRY instanceCreate(const char* applicationName, const uint
 
     VkResult result;
 
-    VkApplicationInfo applicationInfo;
-
-    memset(&applicationInfo, 0, sizeof(VkApplicationInfo));
+    VkApplicationInfo applicationInfo{};
 
     applicationInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
 
@@ -112,9 +110,7 @@ IInstanceSP VKTS_APIENTRY instanceCreate(const char* applicationName, const uint
     applicationInfo.engineVersion = VK_MAKE_VERSION(VKTS_ENGINE_MAJOR, VKTS_ENGINE_MINOR, VKTS_ENGINE_PATCH);
     applicationInfo.apiVersion = apiVersion;
 
-    VkInstanceCreateInfo instanceCreateInfo;
-
-    memset(&instanceCreateInfo, 0, sizeof(VkInstanceCreateInfo));
+    VkInstanceCreateInfo instanceCreateInfo{};
 
     instanceCreateInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 

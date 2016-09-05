@@ -164,9 +164,7 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 
     //
 
-	VkClearColorValue clearColorValue;
-
-	memset(&clearColorValue, 0, sizeof(VkClearColorValue));
+	VkClearColorValue clearColorValue{};
 
 	clearColorValue.float32[0] = 0.0f;
 	clearColorValue.float32[1] = 0.0f;
@@ -175,9 +173,7 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 
 	VkClearValue clearValues[1] = { clearColorValue };
 
-	VkRenderPassBeginInfo renderPassBeginInfo;
-
-	memset(&renderPassBeginInfo, 0, sizeof(VkRenderPassBeginInfo));
+	VkRenderPassBeginInfo renderPassBeginInfo{};
 
 	renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 
@@ -195,8 +191,7 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 
 	vkCmdBindDescriptorSets(cmdBuffer[usedBuffer]->getCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout->getPipelineLayout(), 0, 1, &descriptorSet, 0, nullptr);
 
-	VkViewport viewport;
-	memset(&viewport, 0, sizeof(VkViewport));
+	VkViewport viewport{};
 
 	viewport.x = 0.0f;
 	viewport.y = 0.0f;
@@ -207,8 +202,7 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 
 	vkCmdSetViewport(cmdBuffer[usedBuffer]->getCommandBuffer(), 0, 1, &viewport);
 
-	VkRect2D scissor;
-	memset(&scissor, 0, sizeof(VkRect2D));
+	VkRect2D scissor{};
 
 	scissor.offset.x = 0;
 	scissor.offset.y = 0;
@@ -279,17 +273,13 @@ VkBool32 Example::buildSwapchainImageView(const int32_t usedBuffer)
 
 VkBool32 Example::updateDescriptorSets()
 {
-	VkDescriptorImageInfo descriptorImageInfo;
-
-	memset(&descriptorImageInfo, 0, sizeof(VkDescriptorImageInfo));
+	VkDescriptorImageInfo descriptorImageInfo{};
 
 	descriptorImageInfo.sampler = sampler->getSampler();
 	descriptorImageInfo.imageView = imageView->getImageView();
 	descriptorImageInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
 
-	VkWriteDescriptorSet writeDescriptorSet;
-
-	memset(&writeDescriptorSet, 0, sizeof(writeDescriptorSet));
+	VkWriteDescriptorSet writeDescriptorSet{};
 
 	writeDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 
@@ -356,9 +346,7 @@ VkBool32 Example::buildTexture(const vkts::ICommandBuffersSP& cmdBuffer, vkts::I
 
 	//
 
-	VkImageMemoryBarrier imageMemoryBarrier;
-
-	memset(&imageMemoryBarrier, 0, sizeof(VkImageMemoryBarrier));
+	VkImageMemoryBarrier imageMemoryBarrier{};
 
 	imageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
 
@@ -458,9 +446,7 @@ VkBool32 Example::buildTexture(const vkts::ICommandBuffersSP& cmdBuffer, vkts::I
 
 VkBool32 Example::buildPipeline()
 {
-	VkPipelineShaderStageCreateInfo pipelineShaderStageCreateInfo[VKTS_SHADER_STAGE_COUNT];
-
-	memset(&pipelineShaderStageCreateInfo, 0, sizeof(pipelineShaderStageCreateInfo));
+	VkPipelineShaderStageCreateInfo pipelineShaderStageCreateInfo[VKTS_SHADER_STAGE_COUNT]{};
 
 	pipelineShaderStageCreateInfo[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 
@@ -483,17 +469,13 @@ VkBool32 Example::buildPipeline()
 	VkTsVertexBufferType vertexBufferType = VKTS_VERTEX_BUFFER_TYPE_VERTEX | VKTS_VERTEX_BUFFER_TYPE_TEXCOORD;
 
 
-	VkVertexInputBindingDescription vertexInputBindingDescription;
-
-	memset(&vertexInputBindingDescription, 0, sizeof(VkVertexInputBindingDescription));
+	VkVertexInputBindingDescription vertexInputBindingDescription{};
 
 	vertexInputBindingDescription.binding = 0;
 	vertexInputBindingDescription.stride = (4 + 2) * sizeof(float);
 	vertexInputBindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
-	VkVertexInputAttributeDescription vertexInputAttributeDescription[2];
-
-	memset(&vertexInputAttributeDescription, 0, sizeof(vertexInputAttributeDescription));
+	VkVertexInputAttributeDescription vertexInputAttributeDescription[2]{};
 
 	vertexInputAttributeDescription[0].location = 0;
 	vertexInputAttributeDescription[0].binding = 0;
@@ -505,9 +487,7 @@ VkBool32 Example::buildPipeline()
 	vertexInputAttributeDescription[1].format = VK_FORMAT_R32G32_SFLOAT;
 	vertexInputAttributeDescription[1].offset = 4 * sizeof(float);
 
-	VkPipelineVertexInputStateCreateInfo pipelineVertexInputCreateInfo;
-
-	memset(&pipelineVertexInputCreateInfo, 0, sizeof(VkPipelineVertexInputStateCreateInfo));
+	VkPipelineVertexInputStateCreateInfo pipelineVertexInputCreateInfo{};
 
 	pipelineVertexInputCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 
@@ -519,9 +499,7 @@ VkBool32 Example::buildPipeline()
 
 	//
 
-	VkPipelineInputAssemblyStateCreateInfo pipelineInputAssemblyStateCreateInfo;
-
-	memset(&pipelineInputAssemblyStateCreateInfo, 0, sizeof(VkPipelineInputAssemblyStateCreateInfo));
+	VkPipelineInputAssemblyStateCreateInfo pipelineInputAssemblyStateCreateInfo{};
 
 	pipelineInputAssemblyStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
 
@@ -531,8 +509,7 @@ VkBool32 Example::buildPipeline()
 
 	//
 
-	VkViewport viewport;
-	memset(&viewport, 0, sizeof(VkViewport));
+	VkViewport viewport{};
 
 	viewport.x = 0.0f;
 	viewport.y = 0.0f;
@@ -541,16 +518,13 @@ VkBool32 Example::buildPipeline()
 	viewport.minDepth = 0.0f;
 	viewport.maxDepth = 1.0f;
 
-	VkRect2D scissor;
-	memset(&scissor, 0, sizeof(VkRect2D));
+	VkRect2D scissor{};
 
 	scissor.offset.x = 0;
 	scissor.offset.y = 0;
 	scissor.extent = swapchain->getImageExtent();
 
-	VkPipelineViewportStateCreateInfo pipelineViewportStateCreateInfo;
-
-	memset(&pipelineViewportStateCreateInfo, 0, sizeof(VkPipelineViewportStateCreateInfo));
+	VkPipelineViewportStateCreateInfo pipelineViewportStateCreateInfo{};
 
 	pipelineViewportStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
 
@@ -562,9 +536,7 @@ VkBool32 Example::buildPipeline()
 
 	//
 
-	VkPipelineRasterizationStateCreateInfo pipelineRasterizationStateCreateInfo;
-
-	memset(&pipelineRasterizationStateCreateInfo, 0, sizeof(VkPipelineRasterizationStateCreateInfo));
+	VkPipelineRasterizationStateCreateInfo pipelineRasterizationStateCreateInfo{};
 
 	pipelineRasterizationStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
 
@@ -582,9 +554,7 @@ VkBool32 Example::buildPipeline()
 
 	//
 
-	VkPipelineMultisampleStateCreateInfo pipelineMultisampleStateCreateInfo;
-
-	memset(&pipelineMultisampleStateCreateInfo, 0, sizeof(VkPipelineMultisampleStateCreateInfo));
+	VkPipelineMultisampleStateCreateInfo pipelineMultisampleStateCreateInfo{};
 
 	pipelineMultisampleStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
 
@@ -598,9 +568,7 @@ VkBool32 Example::buildPipeline()
 
 	//
 
-	VkPipelineColorBlendAttachmentState pipelineColorBlendAttachmentState;
-
-	memset(&pipelineColorBlendAttachmentState, 0, sizeof(VkPipelineColorBlendAttachmentState));
+	VkPipelineColorBlendAttachmentState pipelineColorBlendAttachmentState{};
 
 	pipelineColorBlendAttachmentState.blendEnable = VK_FALSE;
 	pipelineColorBlendAttachmentState.srcColorBlendFactor = VK_BLEND_FACTOR_ZERO;
@@ -611,9 +579,7 @@ VkBool32 Example::buildPipeline()
 	pipelineColorBlendAttachmentState.alphaBlendOp = VK_BLEND_OP_ADD;
 	pipelineColorBlendAttachmentState.colorWriteMask = 0xf;
 
-	VkPipelineColorBlendStateCreateInfo pipelineColorBlendStateCreateInfo;
-
-	memset(&pipelineColorBlendStateCreateInfo, 0, sizeof(VkPipelineColorBlendStateCreateInfo));
+	VkPipelineColorBlendStateCreateInfo pipelineColorBlendStateCreateInfo{};
 
 	pipelineColorBlendStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
 
@@ -631,9 +597,7 @@ VkBool32 Example::buildPipeline()
 
 	VkDynamicState dynamicState[VKTS_NUMBER_DYNAMIC_STATES] = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR };
 
-	VkPipelineDynamicStateCreateInfo pipelineDynamicStateCreateInfo;
-
-	memset(&pipelineDynamicStateCreateInfo, 0, sizeof(VkPipelineDynamicStateCreateInfo));
+	VkPipelineDynamicStateCreateInfo pipelineDynamicStateCreateInfo{};
 
 	pipelineDynamicStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
 
@@ -643,9 +607,7 @@ VkBool32 Example::buildPipeline()
 
 	//
 
-	VkGraphicsPipelineCreateInfo graphicsPipelineCreateInfo;
-
-	memset(&graphicsPipelineCreateInfo, 0, sizeof(VkGraphicsPipelineCreateInfo));
+	VkGraphicsPipelineCreateInfo graphicsPipelineCreateInfo{};
 
 	graphicsPipelineCreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
 
@@ -681,9 +643,7 @@ VkBool32 Example::buildPipeline()
 
 VkBool32 Example::buildRenderPass()
 {
-	VkAttachmentDescription attachmentDescription;
-
-	memset(&attachmentDescription, 0, sizeof(VkAttachmentDescription));
+	VkAttachmentDescription attachmentDescription{};
 
 	attachmentDescription.flags = 0;
 	attachmentDescription.format = swapchain->getImageFormat();
@@ -695,14 +655,12 @@ VkBool32 Example::buildRenderPass()
 	attachmentDescription.initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 	attachmentDescription.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
-	VkAttachmentReference colorAttachmentReference;
+	VkAttachmentReference colorAttachmentReference{};
 
 	colorAttachmentReference.attachment = 0;
 	colorAttachmentReference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
-	VkSubpassDescription subpassDescription;
-
-	memset(&subpassDescription, 0, sizeof(VkSubpassDescription));
+	VkSubpassDescription subpassDescription{};
 
 	subpassDescription.flags = 0;
 	subpassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
@@ -747,9 +705,7 @@ VkBool32 Example::buildDescriptorSets()
 
 	//
 
-	VkDescriptorSetAllocateInfo descriptorSetAllocateInfo;
-
-	memset(&descriptorSetAllocateInfo, 0, sizeof(VkDescriptorSetAllocateInfo));
+	VkDescriptorSetAllocateInfo descriptorSetAllocateInfo{};
 
 	descriptorSetAllocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
 
@@ -775,16 +731,12 @@ VkBool32 Example::buildDescriptorSetPool()
 
 	//
 
-	VkDescriptorPoolSize descriptorTypeCount;
-
-	memset(&descriptorTypeCount, 0, sizeof(VkDescriptorPoolSize));
+	VkDescriptorPoolSize descriptorTypeCount{};
 
 	descriptorTypeCount.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 	descriptorTypeCount.descriptorCount = 1;
 
-	VkDescriptorPoolCreateInfo descriptorPoolCreateInfo;
-
-	memset(&descriptorPoolCreateInfo, 0, sizeof(VkDescriptorPoolCreateInfo));
+	VkDescriptorPoolCreateInfo descriptorPoolCreateInfo{};
 
 	descriptorPoolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 
@@ -811,9 +763,7 @@ VkBool32 Example::buildDescriptorSetLayout()
 
 	//
 
-	VkDescriptorSetLayoutBinding descriptorSetLayoutBinding;
-
-	memset(&descriptorSetLayoutBinding, 0, sizeof(VkDescriptorSetLayoutBinding));
+	VkDescriptorSetLayoutBinding descriptorSetLayoutBinding{};
 
 	descriptorSetLayoutBinding.binding = 0;
 	descriptorSetLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
@@ -821,9 +771,7 @@ VkBool32 Example::buildDescriptorSetLayout()
 	descriptorSetLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 	descriptorSetLayoutBinding.pImmutableSamplers = nullptr;
 
-	VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo;
-
-	memset(&descriptorSetLayoutCreateInfo, 0, sizeof(VkDescriptorSetLayoutCreateInfo));
+	VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo{};
 
 	descriptorSetLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
 
@@ -1039,9 +987,7 @@ VkBool32 Example::buildResources( const vkts::IUpdateThreadContext& updateContex
 		return VK_FALSE;
 	}
 
-	VkSubmitInfo submitInfo;
-
-	memset(&submitInfo, 0, sizeof(VkSubmitInfo));
+	VkSubmitInfo submitInfo{};
 
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
@@ -1282,9 +1228,7 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 
         VkPipelineStageFlags waitDstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
 
-		VkSubmitInfo submitInfo;
-
-		memset(&submitInfo, 0, sizeof(VkSubmitInfo));
+		VkSubmitInfo submitInfo{};
 
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
