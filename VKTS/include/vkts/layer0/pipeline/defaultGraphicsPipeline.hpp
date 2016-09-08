@@ -37,7 +37,7 @@
 
 namespace vkts {
 
-class defaultGraphicsPipeline
+class DefaultGraphicsPipeline
 {
 
 private:
@@ -67,9 +67,9 @@ private:
 
 public:
 
-	defaultGraphicsPipeline();
+	DefaultGraphicsPipeline();
 
-	~defaultGraphicsPipeline();
+	~DefaultGraphicsPipeline();
 
 	void reset();
 

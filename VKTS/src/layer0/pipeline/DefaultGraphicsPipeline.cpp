@@ -28,16 +28,16 @@
 
 namespace vkts {
 
-defaultGraphicsPipeline::defaultGraphicsPipeline()
+DefaultGraphicsPipeline::DefaultGraphicsPipeline()
 {
 	reset();
 }
 
-defaultGraphicsPipeline::~defaultGraphicsPipeline()
+DefaultGraphicsPipeline::~DefaultGraphicsPipeline()
 {
 }
 
-void defaultGraphicsPipeline::reset()
+void DefaultGraphicsPipeline::reset()
 {
     memset(pipelineShaderStageCreateInfo, 0, sizeof(pipelineShaderStageCreateInfo));
 
@@ -148,7 +148,7 @@ void defaultGraphicsPipeline::reset()
 
 //
 
-VkVertexInputBindingDescription& defaultGraphicsPipeline::getVertexInputBindingDescription(const uint32_t index)
+VkVertexInputBindingDescription& DefaultGraphicsPipeline::getVertexInputBindingDescription(const uint32_t index)
 {
 	if (index >= VKTS_MAX_VERTEX_BINDING_DESCRIPTION_COUNT)
 	{
@@ -167,7 +167,7 @@ VkVertexInputBindingDescription& defaultGraphicsPipeline::getVertexInputBindingD
 	return vertexInputBindingDescription[index];
 }
 
-VkVertexInputAttributeDescription& defaultGraphicsPipeline::getVertexInputAttributeDescription(const uint32_t index)
+VkVertexInputAttributeDescription& DefaultGraphicsPipeline::getVertexInputAttributeDescription(const uint32_t index)
 {
 	if (index >= VKTS_MAX_VERTEX_ATTRIBUTE_DESCRIPTION_COUNT)
 	{
@@ -186,7 +186,7 @@ VkVertexInputAttributeDescription& defaultGraphicsPipeline::getVertexInputAttrib
 	return vertexInputAttributeDescription[index];
 }
 
-VkViewport& defaultGraphicsPipeline::getViewports(const uint32_t index)
+VkViewport& DefaultGraphicsPipeline::getViewports(const uint32_t index)
 {
 	if (index >= VKTS_MAX_VIEWPORTS)
 	{
@@ -205,7 +205,7 @@ VkViewport& defaultGraphicsPipeline::getViewports(const uint32_t index)
 	return viewports[index];
 }
 
-VkRect2D& defaultGraphicsPipeline::getScissors(const uint32_t index)
+VkRect2D& DefaultGraphicsPipeline::getScissors(const uint32_t index)
 {
 	if (index >= VKTS_MAX_SCISSORS)
 	{
@@ -224,7 +224,7 @@ VkRect2D& defaultGraphicsPipeline::getScissors(const uint32_t index)
 	return scissors[index];
 }
 
-VkPipelineColorBlendAttachmentState& defaultGraphicsPipeline::getPipelineColorBlendAttachmentState(const uint32_t index)
+VkPipelineColorBlendAttachmentState& DefaultGraphicsPipeline::getPipelineColorBlendAttachmentState(const uint32_t index)
 {
 	if (index >= VKTS_MAX_BLEND_ATTACHMENTS)
 	{
@@ -243,7 +243,7 @@ VkPipelineColorBlendAttachmentState& defaultGraphicsPipeline::getPipelineColorBl
 	return pipelineColorBlendAttachmentState[index];
 }
 
-VkDynamicState&	defaultGraphicsPipeline::getDynamicState(const uint32_t index)
+VkDynamicState&	DefaultGraphicsPipeline::getDynamicState(const uint32_t index)
 {
 	if (index >= VK_DYNAMIC_STATE_RANGE_SIZE)
 	{
@@ -264,7 +264,7 @@ VkDynamicState&	defaultGraphicsPipeline::getDynamicState(const uint32_t index)
 
 //
 
-VkPipelineShaderStageCreateInfo& defaultGraphicsPipeline::getPipelineShaderStageCreateInfo(const uint32_t index)
+VkPipelineShaderStageCreateInfo& DefaultGraphicsPipeline::getPipelineShaderStageCreateInfo(const uint32_t index)
 {
 	if (index >= 5)
 	{
@@ -281,7 +281,7 @@ VkPipelineShaderStageCreateInfo& defaultGraphicsPipeline::getPipelineShaderStage
 	return pipelineShaderStageCreateInfo[index];
 }
 
-VkPipelineVertexInputStateCreateInfo& defaultGraphicsPipeline::getPipelineVertexInputStateCreateInfo()
+VkPipelineVertexInputStateCreateInfo& DefaultGraphicsPipeline::getPipelineVertexInputStateCreateInfo()
 {
 	if (!graphicsPipelineCreateInfo.pVertexInputState)
 	{
@@ -291,7 +291,7 @@ VkPipelineVertexInputStateCreateInfo& defaultGraphicsPipeline::getPipelineVertex
 	return pipelineVertexInputStateCreateInfo;
 }
 
-VkPipelineInputAssemblyStateCreateInfo&	defaultGraphicsPipeline::getPipelineInputAssemblyStateCreateInfo()
+VkPipelineInputAssemblyStateCreateInfo&	DefaultGraphicsPipeline::getPipelineInputAssemblyStateCreateInfo()
 {
 	if (!graphicsPipelineCreateInfo.pInputAssemblyState)
 	{
@@ -301,7 +301,7 @@ VkPipelineInputAssemblyStateCreateInfo&	defaultGraphicsPipeline::getPipelineInpu
 	return pipelineInputAssemblyStateCreateInfo;
 }
 
-VkPipelineTessellationStateCreateInfo& defaultGraphicsPipeline::getPipelineTessellationStateCreateInfo()
+VkPipelineTessellationStateCreateInfo& DefaultGraphicsPipeline::getPipelineTessellationStateCreateInfo()
 {
 	if (!graphicsPipelineCreateInfo.pTessellationState)
 	{
@@ -311,7 +311,7 @@ VkPipelineTessellationStateCreateInfo& defaultGraphicsPipeline::getPipelineTesse
 	return pipelineTessellationStateCreateInfo;
 }
 
-VkPipelineViewportStateCreateInfo& defaultGraphicsPipeline::getPipelineViewportStateCreateInfo()
+VkPipelineViewportStateCreateInfo& DefaultGraphicsPipeline::getPipelineViewportStateCreateInfo()
 {
 	if (!graphicsPipelineCreateInfo.pViewportState)
 	{
@@ -321,7 +321,7 @@ VkPipelineViewportStateCreateInfo& defaultGraphicsPipeline::getPipelineViewportS
 	return pipelineViewportStateCreateInfo;
 }
 
-VkPipelineRasterizationStateCreateInfo&	defaultGraphicsPipeline::getPipelineRasterizationStateCreateInfo()
+VkPipelineRasterizationStateCreateInfo&	DefaultGraphicsPipeline::getPipelineRasterizationStateCreateInfo()
 {
 	if (!graphicsPipelineCreateInfo.pRasterizationState)
 	{
@@ -331,7 +331,7 @@ VkPipelineRasterizationStateCreateInfo&	defaultGraphicsPipeline::getPipelineRast
 	return pipelineRasterizationStateCreateInfo;
 }
 
-VkPipelineMultisampleStateCreateInfo& defaultGraphicsPipeline::getPipelineMultisampleStateCreateInfo()
+VkPipelineMultisampleStateCreateInfo& DefaultGraphicsPipeline::getPipelineMultisampleStateCreateInfo()
 {
 	if (!graphicsPipelineCreateInfo.pMultisampleState)
 	{
@@ -341,7 +341,7 @@ VkPipelineMultisampleStateCreateInfo& defaultGraphicsPipeline::getPipelineMultis
 	return pipelineMultisampleStateCreateInfo;
 }
 
-VkPipelineDepthStencilStateCreateInfo& defaultGraphicsPipeline::getPipelineDepthStencilStateCreateInfo()
+VkPipelineDepthStencilStateCreateInfo& DefaultGraphicsPipeline::getPipelineDepthStencilStateCreateInfo()
 {
 	if (!graphicsPipelineCreateInfo.pDepthStencilState)
 	{
@@ -351,7 +351,7 @@ VkPipelineDepthStencilStateCreateInfo& defaultGraphicsPipeline::getPipelineDepth
 	return pipelineDepthStencilStateCreateInfo;
 }
 
-VkPipelineColorBlendStateCreateInfo& defaultGraphicsPipeline::getPipelineColorBlendStateCreateInfo()
+VkPipelineColorBlendStateCreateInfo& DefaultGraphicsPipeline::getPipelineColorBlendStateCreateInfo()
 {
 	if (!graphicsPipelineCreateInfo.pColorBlendState)
 	{
@@ -361,7 +361,7 @@ VkPipelineColorBlendStateCreateInfo& defaultGraphicsPipeline::getPipelineColorBl
 	return pipelineColorBlendStateCreateInfo;
 }
 
-VkPipelineDynamicStateCreateInfo& defaultGraphicsPipeline::getPipelineDynamicStateCreateInfo()
+VkPipelineDynamicStateCreateInfo& DefaultGraphicsPipeline::getPipelineDynamicStateCreateInfo()
 {
 	if (!graphicsPipelineCreateInfo.pDynamicState)
 	{
@@ -373,7 +373,7 @@ VkPipelineDynamicStateCreateInfo& defaultGraphicsPipeline::getPipelineDynamicSta
 
 //
 
-VkGraphicsPipelineCreateInfo& defaultGraphicsPipeline::getGraphicsPipelineCreateInfo()
+VkGraphicsPipelineCreateInfo& DefaultGraphicsPipeline::getGraphicsPipelineCreateInfo()
 {
 	return graphicsPipelineCreateInfo;
 }

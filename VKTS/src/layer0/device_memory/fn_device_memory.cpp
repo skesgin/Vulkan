@@ -50,7 +50,7 @@ IDeviceMemorySP VKTS_APIENTRY deviceMemoryCreate(const VkDevice device, const Vk
 
     if (!commonGetMemoryTypeIndex(memoryTypeCount, memoryTypes, memoryRequirements.memoryTypeBits, propertyFlags, memoryAllocInfo.memoryTypeIndex))
     {
-        logPrint(VKTS_LOG_ERROR, "DeviceMemory: Could not get memory type index.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not get memory type index.");
 
         return IDeviceMemorySP();
     }
@@ -61,7 +61,7 @@ IDeviceMemorySP VKTS_APIENTRY deviceMemoryCreate(const VkDevice device, const Vk
 
     if (result != VK_SUCCESS)
     {
-        logPrint(VKTS_LOG_ERROR, "DeviceMemory: Could not allocate device memory.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not allocate device memory.");
 
         return IDeviceMemorySP();
     }

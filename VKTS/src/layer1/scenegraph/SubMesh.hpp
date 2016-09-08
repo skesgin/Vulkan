@@ -76,7 +76,7 @@ private:
 
     uint32_t strideInBytes;
 
-    aabb box;
+    Aabb box;
 
 public:
 
@@ -101,7 +101,7 @@ public:
 
     virtual VkTsVertexBufferType getVertexBufferType() const override;
 
-    virtual void setVertexBuffer(const IBufferObjectSP& vertexBuffer, const VkTsVertexBufferType vertexBufferType, const aabb& verticesAABB) override;
+    virtual void setVertexBuffer(const IBufferObjectSP& vertexBuffer, const VkTsVertexBufferType vertexBufferType, const Aabb& verticesAABB) override;
 
     virtual int32_t getNumberVertices() const override;
 
@@ -195,9 +195,9 @@ public:
 
     virtual void drawIndexed(const ICommandBuffersSP& cmdBuffer, const uint32_t bufferIndex = 0) const override;
 
-    virtual void bindDrawIndexedRecursive(const std::string& nodeName, const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const overwrite* renderOverwrite = nullptr, const uint32_t bufferIndex = 0) const override;
+    virtual void bindDrawIndexedRecursive(const std::string& nodeName, const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const Overwrite* renderOverwrite = nullptr, const uint32_t bufferIndex = 0) const override;
 
-    virtual const aabb& getAABB() const override;
+    virtual const Aabb& getAABB() const override;
 
     //
     // ICloneable

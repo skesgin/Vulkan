@@ -57,7 +57,7 @@ IImageViewSP VKTS_APIENTRY imageViewCreate(const VkDevice device, const VkImageV
 
     if (result != VK_SUCCESS)
     {
-        logPrint(VKTS_LOG_ERROR, "ImageView: Could not create image view.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create image view.");
 
         return IImageViewSP();
     }

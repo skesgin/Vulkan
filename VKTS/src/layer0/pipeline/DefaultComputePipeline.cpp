@@ -28,16 +28,16 @@
 
 namespace vkts {
 
-defaultComputePipeline::defaultComputePipeline()
+DefaultComputePipeline::DefaultComputePipeline()
 {
 	reset();
 }
 
-defaultComputePipeline::~defaultComputePipeline()
+DefaultComputePipeline::~DefaultComputePipeline()
 {
 }
 
-void defaultComputePipeline::reset()
+void DefaultComputePipeline::reset()
 {
 	memset(&computePipelineCreateInfo, 0, sizeof(VkComputePipelineCreateInfo));
 
@@ -50,14 +50,14 @@ void defaultComputePipeline::reset()
 
 //
 
-VkPipelineShaderStageCreateInfo& defaultComputePipeline::getPipelineShaderStageCreateInfo()
+VkPipelineShaderStageCreateInfo& DefaultComputePipeline::getPipelineShaderStageCreateInfo()
 {
 	return computePipelineCreateInfo.stage;
 }
 
 //
 
-VkComputePipelineCreateInfo& defaultComputePipeline::getComputePipelineCreateInfo()
+VkComputePipelineCreateInfo& DefaultComputePipeline::getComputePipelineCreateInfo()
 {
 	return computePipelineCreateInfo;
 }

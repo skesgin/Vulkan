@@ -43,7 +43,7 @@ private:
 
     glm::vec2 displace;
 
-    aabb box;
+    Aabb box;
 
 public:
 
@@ -73,15 +73,15 @@ public:
 
     virtual void updateDescriptorSetsRecursive(const std::string& nodeName, const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets) override;
 
-    virtual void bindDrawIndexedRecursive(const std::string& nodeName, const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const overwrite* renderOverwrite = nullptr, const uint32_t bufferIndex = 0) const override;
+    virtual void bindDrawIndexedRecursive(const std::string& nodeName, const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const Overwrite* renderOverwrite = nullptr, const uint32_t bufferIndex = 0) const override;
 
     virtual void setDisplace(const glm::vec2& displace) override;
 
     virtual const glm::vec2& getDisplace() const override;
 
-    virtual void setAABB(const aabb& box) override;
+    virtual void setAABB(const Aabb& box) override;
 
-    virtual const aabb& getAABB() const override;
+    virtual const Aabb& getAABB() const override;
 
     //
     // ICloneable

@@ -56,7 +56,7 @@ IDescriptorSetLayoutSP VKTS_APIENTRY descriptorSetLayoutCreate(const VkDevice de
 
     if (result != VK_SUCCESS)
     {
-        logPrint(VKTS_LOG_ERROR, "Descriptor: Could not create descriptor set layout.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create descriptor set layout.");
 
         return IDescriptorSetLayoutSP();
     }
@@ -97,7 +97,7 @@ IDescriptorPoolSP VKTS_APIENTRY descriptorPoolCreate(const VkDevice device, cons
 
     if (result != VK_SUCCESS)
     {
-        logPrint(VKTS_LOG_ERROR, "Descriptor: Could not create descriptor pool.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create descriptor pool.");
 
         return IDescriptorPoolSP();
     }
@@ -145,7 +145,7 @@ IDescriptorSetsSP VKTS_APIENTRY descriptorSetsCreate(const VkDevice device, cons
 
     if (result != VK_SUCCESS)
     {
-        logPrint(VKTS_LOG_ERROR, "Descriptor: Could not allocate descriptor sets.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not allocate descriptor sets.");
 
         return IDescriptorSetsSP();
     }

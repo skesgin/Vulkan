@@ -24,9 +24,9 @@ public:
 
 	virtual VkBool32 init(const vkts::IUpdateThreadContext& updateContext)
 	{
-		vkts::logPrint(VKTS_LOG_INFO, "Test '%s': Initialize done.", name.c_str());
+		vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Test '%s': Initialize done.", name.c_str());
 
-		vkts::logPrint(VKTS_LOG_INFO, "Test '%s': Thread %d from %d.", name.c_str(), updateContext.getThreadIndex(), updateContext.getThreadCount());
+		vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Test '%s': Thread %d from %d.", name.c_str(), updateContext.getThreadIndex(), updateContext.getThreadCount());
 
 		const auto displayIndexWalker = updateContext.getAttachedDisplayIndices().begin();
 
@@ -37,10 +37,10 @@ public:
 			displayIndex = *displayIndexWalker;
 			windowIndex = *windowIndexWalker;
 
-			vkts::logPrint(VKTS_LOG_INFO, "Test '%s': Found display index = %d", name.c_str(), displayIndex);
-			vkts::logPrint(VKTS_LOG_INFO, "Test '%s': Width x Height = %d x %d", name.c_str(), updateContext.getDisplayDimension(displayIndex).x, updateContext.getDisplayDimension(displayIndex).y);
-			vkts::logPrint(VKTS_LOG_INFO, "Test '%s': Found window index = %d", name.c_str(), windowIndex);
-			vkts::logPrint(VKTS_LOG_INFO, "Test '%s': Width x Height = %d x %d", name.c_str(), updateContext.getWindowDimension(windowIndex).x, updateContext.getWindowDimension(windowIndex).y);
+			vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Test '%s': Found display index = %d", name.c_str(), displayIndex);
+			vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Test '%s': Width x Height = %d x %d", name.c_str(), updateContext.getDisplayDimension(displayIndex).x, updateContext.getDisplayDimension(displayIndex).y);
+			vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Test '%s': Found window index = %d", name.c_str(), windowIndex);
+			vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Test '%s': Width x Height = %d x %d", name.c_str(), updateContext.getWindowDimension(windowIndex).x, updateContext.getWindowDimension(windowIndex).y);
 		}
 
 		return VK_TRUE;
@@ -50,32 +50,32 @@ public:
 	{
 		if (windowIndex >= 0)
 		{
-			vkts::logPrint(VKTS_LOG_DEBUG, "Test '%s': Width x Height = %d x %d", name.c_str(), updateContext.getWindowDimension(windowIndex).x, updateContext.getWindowDimension(windowIndex).y);
+			vkts::logPrint(VKTS_LOG_DEBUG, __FILE__, __LINE__, "Test '%s': Width x Height = %d x %d", name.c_str(), updateContext.getWindowDimension(windowIndex).x, updateContext.getWindowDimension(windowIndex).y);
 
 			if (updateContext.getKey(windowIndex, VKTS_KEY_Q))
 			{
-				vkts::logPrint(VKTS_LOG_INFO, "Test '%s': Quit pressed!", name.c_str());
+				vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Test '%s': Quit pressed!", name.c_str());
 
 				return VK_FALSE;
 			}
 		}
 
-		vkts::logPrint(VKTS_LOG_DEBUG, "Test '%s': Updating %f", name.c_str(), updateContext.getTotalTime());
+		vkts::logPrint(VKTS_LOG_DEBUG, __FILE__, __LINE__, "Test '%s': Updating %f", name.c_str(), updateContext.getTotalTime());
 
-		vkts::logPrint(VKTS_LOG_DEBUG, "Test '%s': Before barrier.", name.c_str());
+		vkts::logPrint(VKTS_LOG_DEBUG, __FILE__, __LINE__, "Test '%s': Before barrier.", name.c_str());
 
 		if (!vkts::barrierSync())
 		{
-			vkts::logPrint(VKTS_LOG_INFO, "Test '%s': Barrier killed.", name.c_str());
+			vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Test '%s': Barrier killed.", name.c_str());
 
 			return VK_FALSE;
 		}
 
-		vkts::logPrint(VKTS_LOG_DEBUG, "Test '%s': After barrier.", name.c_str());
+		vkts::logPrint(VKTS_LOG_DEBUG, __FILE__, __LINE__, "Test '%s': After barrier.", name.c_str());
 
 		if (name == "a" && updateContext.getTotalTime() > 10.0)
 		{
-			vkts::logPrint(VKTS_LOG_INFO, "Test '%s': Time reached!", name.c_str());
+			vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Test '%s': Time reached!", name.c_str());
 
 			return VK_FALSE;
 		}
@@ -85,7 +85,7 @@ public:
 
 	virtual void terminate(const vkts::IUpdateThreadContext& updateContext)
 	{
-		vkts::logPrint(VKTS_LOG_INFO, "Test '%s': Terminate done.", name.c_str());
+		vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Test '%s': Terminate done.", name.c_str());
 	}
 
 };
@@ -107,7 +107,7 @@ int main(int argc, char* argv[])
 
 	vkts::logSetLevel(VKTS_LOG_INFO);
 
-	vkts::logPrint(VKTS_LOG_INFO, "Test: Number of processors = %u.", vkts::processorGetNumber());
+	vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Test: Number of processors = %u.", vkts::processorGetNumber());
 
 	//
 	// Visual setup.
@@ -116,20 +116,20 @@ int main(int argc, char* argv[])
 	// Note: If using VK_KHR_display, values have to be set.
 	if (!vkts::visualInit(VK_NULL_HANDLE, VK_NULL_HANDLE))
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Test: Could not initialize visual.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Test: Could not initialize visual.");
 
 		vkts::engineTerminate();
 
 		return -1;
 	}
 
-	vkts::logPrint(VKTS_LOG_INFO, "Test: Number of displays = %d", vkts::visualGetNumberDisplays());
+	vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Test: Number of displays = %d", vkts::visualGetNumberDisplays());
 
 	auto display = vkts::visualCreateDefaultDisplay().lock();
 
 	if (!display.get())
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Test: Could not create display.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Test: Could not create display.");
 
 		vkts::visualTerminate();
 
@@ -138,7 +138,7 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 
-	vkts::logPrint(VKTS_LOG_INFO, "Test: Display = %d Width x Height = %d x %d", display->getIndex(), display->getWidth(), display->getHeight());
+	vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Test: Display = %d Width x Height = %d x %d", display->getIndex(), display->getWidth(), display->getHeight());
 
 	auto window = vkts::visualCreateWindow(display, "Test", 1024, 768, VK_FALSE, VK_TRUE, VK_FALSE).lock();
 
@@ -148,7 +148,7 @@ int main(int argc, char* argv[])
 
 		if (!window.get())
 		{
-			vkts::logPrint(VKTS_LOG_ERROR, "Test: Could not create window.");
+			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Test: Could not create window.");
 
 			display->destroy();
 
@@ -178,12 +178,12 @@ int main(int argc, char* argv[])
 	{
 		if (!vkts::fileSaveText("test/general/output.txt", textBuffer))
 		{
-			vkts::logPrint(VKTS_LOG_WARNING, "Test: Could not save file.");
+			vkts::logPrint(VKTS_LOG_WARNING, __FILE__, __LINE__, "Test: Could not save file.");
 		}
 	}
 	else
 	{
-		vkts::logPrint(VKTS_LOG_WARNING, "Test: Could not load file.");
+		vkts::logPrint(VKTS_LOG_WARNING, __FILE__, __LINE__, "Test: Could not load file.");
 	}
 
 	auto createdTextBuffer = vkts::textBufferCreate("");
@@ -195,7 +195,7 @@ int main(int argc, char* argv[])
 
 		if (!vkts::fileSaveText("test/general/created.txt", createdTextBuffer))
 		{
-			vkts::logPrint(VKTS_LOG_WARNING, "Test: Could not save created text file.");
+			vkts::logPrint(VKTS_LOG_WARNING, __FILE__, __LINE__, "Test: Could not save created text file.");
 		}
 
 		createdTextBuffer->seek(0, VKTS_SEARCH_ABSOLUTE);
@@ -204,12 +204,12 @@ int main(int argc, char* argv[])
 
 		while (createdTextBuffer->gets(buffer, 256))
 		{
-			vkts::logPrint(VKTS_LOG_INFO, "Test: Created text line: '%s'", buffer);
+			vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Test: Created text line: '%s'", buffer);
 		}
 	}
 	else
 	{
-		vkts::logPrint(VKTS_LOG_WARNING, "Test: Could not create text.");
+		vkts::logPrint(VKTS_LOG_WARNING, __FILE__, __LINE__, "Test: Could not create text.");
 	}
 
 	//
@@ -222,7 +222,7 @@ int main(int argc, char* argv[])
 	{
 		if (!vkts::imageDataSave("test/general/crate_output.tga", imageTga))
 		{
-			vkts::logPrint(VKTS_LOG_WARNING, "Test: Could not save TGA image.");
+			vkts::logPrint(VKTS_LOG_WARNING, __FILE__, __LINE__, "Test: Could not save TGA image.");
 		}
 
 		auto mipMaps = vkts::imageDataMipmap(imageTga, VK_TRUE, "test/general/crate_output.tga");
@@ -231,13 +231,13 @@ int main(int argc, char* argv[])
 		{
 			if (!vkts::imageDataSave(mipMaps[i]->getName().c_str(), mipMaps[i]))
 			{
-				vkts::logPrint(VKTS_LOG_WARNING, "Test: Could not save mip map TGA image.");
+				vkts::logPrint(VKTS_LOG_WARNING, __FILE__, __LINE__, "Test: Could not save mip map TGA image.");
 			}
 		}
 	}
 	else
 	{
-		vkts::logPrint(VKTS_LOG_WARNING, "Test: Could not load TGA image.");
+		vkts::logPrint(VKTS_LOG_WARNING, __FILE__, __LINE__, "Test: Could not load TGA image.");
 	}
 
 	//
@@ -248,12 +248,12 @@ int main(int argc, char* argv[])
 	{
 		if (!vkts::imageDataSave("test/general/CraterLake_output.hdr", imageHdr))
 		{
-			vkts::logPrint(VKTS_LOG_WARNING, "Test: Could not save HDR image.");
+			vkts::logPrint(VKTS_LOG_WARNING, __FILE__, __LINE__, "Test: Could not save HDR image.");
 		}
 	}
 	else
 	{
-		vkts::logPrint(VKTS_LOG_WARNING, "Test: Could not load HDR image.");
+		vkts::logPrint(VKTS_LOG_WARNING, __FILE__, __LINE__, "Test: Could not load HDR image.");
 	}
 
 	//
@@ -271,12 +271,12 @@ int main(int argc, char* argv[])
 		}
 		else
 		{
-			vkts::logPrint(VKTS_LOG_WARNING, "Test: Could not generate cube maps.");
+			vkts::logPrint(VKTS_LOG_WARNING, __FILE__, __LINE__, "Test: Could not generate cube maps.");
 		}
 	}
 	else
 	{
-		vkts::logPrint(VKTS_LOG_WARNING, "Test: Could not load HDR image.");
+		vkts::logPrint(VKTS_LOG_WARNING, __FILE__, __LINE__, "Test: Could not load HDR image.");
 	}
 
 	//
@@ -287,12 +287,12 @@ int main(int argc, char* argv[])
 	{
 		if (!vkts::imageDataSave(createdTga->getName().c_str(), createdTga))
 		{
-			vkts::logPrint(VKTS_LOG_WARNING, "Test: Could not save created TGA image.");
+			vkts::logPrint(VKTS_LOG_WARNING, __FILE__, __LINE__, "Test: Could not save created TGA image.");
 		}
 	}
 	else
 	{
-		vkts::logPrint(VKTS_LOG_WARNING, "Test: Could not create TGA image.");
+		vkts::logPrint(VKTS_LOG_WARNING, __FILE__, __LINE__, "Test: Could not create TGA image.");
 	}
 
 	//
@@ -303,12 +303,12 @@ int main(int argc, char* argv[])
 	{
 		if (!vkts::imageDataSave(createdHdr->getName().c_str(), createdHdr))
 		{
-			vkts::logPrint(VKTS_LOG_WARNING, "Test: Could not save created HDR image.");
+			vkts::logPrint(VKTS_LOG_WARNING, __FILE__, __LINE__, "Test: Could not save created HDR image.");
 		}
 	}
 	else
 	{
-		vkts::logPrint(VKTS_LOG_WARNING, "Test: Could not create HDR image.");
+		vkts::logPrint(VKTS_LOG_WARNING, __FILE__, __LINE__, "Test: Could not create HDR image.");
 	}
 
 	//
@@ -323,17 +323,17 @@ int main(int argc, char* argv[])
 		{
 			if (!vkts::imageDataSave("test/general/parque_rgba.tga", imageRGBA))
 			{
-				vkts::logPrint(VKTS_LOG_WARNING, "Test: Could not save converted RGBA image.");
+				vkts::logPrint(VKTS_LOG_WARNING, __FILE__, __LINE__, "Test: Could not save converted RGBA image.");
 			}
 		}
 		else
 		{
-			vkts::logPrint(VKTS_LOG_WARNING, "Test: Could not convert RGB image.");
+			vkts::logPrint(VKTS_LOG_WARNING, __FILE__, __LINE__, "Test: Could not convert RGB image.");
 		}
 	}
 	else
 	{
-		vkts::logPrint(VKTS_LOG_WARNING, "Test: Could not load RGB image.");
+		vkts::logPrint(VKTS_LOG_WARNING, __FILE__, __LINE__, "Test: Could not load RGB image.");
 	}
 
 	//

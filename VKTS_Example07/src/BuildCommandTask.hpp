@@ -34,7 +34,7 @@ class BuildCommandTask : public vkts::ITask
 
 private:
 
-    static vkts::overwrite* overwrite;
+    static vkts::Overwrite* overwrite;
 
 	const vkts::IUpdateThreadContext& updateContext;
 
@@ -62,7 +62,7 @@ protected:
 
 public:
 
-    static void setOverwrite(vkts::overwrite* overwrite);
+    static void setOverwrite(vkts::Overwrite* overwrite);
 
 	BuildCommandTask(const uint64_t id, const vkts::IUpdateThreadContext& updateContext, const vkts::IInitialResourcesSP& initialResources, const vkts::SmartPointerVector<vkts::IGraphicsPipelineSP>& allGraphicsPipelines, const vkts::ISceneSP& scene, const uint32_t& objectOffset, const uint32_t& objectStep);
 	virtual ~BuildCommandTask();

@@ -29,46 +29,46 @@
 namespace vkts
 {
 
-float VKTS_APIENTRY norm(const quat& q)
+float VKTS_APIENTRY norm(const Quat& q)
 {
     return sqrtf(q.x * q.x + q.y * q.y + q.z * q.z + q.w * q.w);
 }
 
-quat VKTS_APIENTRY normalize(const quat& q)
+Quat VKTS_APIENTRY normalize(const Quat& q)
 {
     float n = norm(q);
 
     if (n == 0.0f)
     {
-        return quat(0.0f, 0.0f, 0.0f, 0.0f);
+        return Quat(0.0f, 0.0f, 0.0f, 0.0f);
     }
 
     return q * 1.0f / n;
 }
 
-quat VKTS_APIENTRY conjugate(const quat& q)
+Quat VKTS_APIENTRY conjugate(const Quat& q)
 {
-    return quat(-q.x, -q.y, -q.z, q.w);
+    return Quat(-q.x, -q.y, -q.z, q.w);
 }
 
-quat VKTS_APIENTRY inverse(const quat& q)
+Quat VKTS_APIENTRY inverse(const Quat& q)
 {
     float n = norm(q);
 
     if (n == 0.0f)
     {
-        return quat(0.0f, 0.0f, 0.0f, 0.0f);
+        return Quat(0.0f, 0.0f, 0.0f, 0.0f);
     }
 
     return conjugate(q) / (n * n);
 }
 
-float VKTS_APIENTRY dot(const quat& q0, const quat& q1)
+float VKTS_APIENTRY dot(const Quat& q0, const Quat& q1)
 {
 	return q0.x * q1.x + q0.y * q1.y + q0.z * q1.z + q0.w * q1.w;
 }
 
-quat VKTS_APIENTRY slerp(const quat& q0, const quat& q1, const float t)
+Quat VKTS_APIENTRY slerp(const Quat& q0, const Quat& q1, const float t)
 {
     float cosAlpha = q0.x * q1.x + q0.y * q1.y + q0.z * q1.z + q0.w * q1.w;
 
@@ -88,7 +88,7 @@ quat VKTS_APIENTRY slerp(const quat& q0, const quat& q1, const float t)
     return q0 * a + q1 * b;
 }
 
-quat VKTS_APIENTRY rotateAxis(const float angle, const float x, const float y, const float z)
+Quat VKTS_APIENTRY rotateAxis(const float angle, const float x, const float y, const float z)
 {
     float halfAngleRadian = glm::radians(angle) * 0.5f;
 
@@ -96,30 +96,30 @@ quat VKTS_APIENTRY rotateAxis(const float angle, const float x, const float y, c
 
     auto axis = glm::normalize(glm::vec3(x, y, z));
 
-    return quat(axis.x * s, axis.y * s, axis.z * s, cosf(halfAngleRadian));
+    return Quat(axis.x * s, axis.y * s, axis.z * s, cosf(halfAngleRadian));
 }
 
-quat VKTS_APIENTRY rotateRx(const float anglex)
+Quat VKTS_APIENTRY rotateRx(const float anglex)
 {
     return rotateAxis(anglex, 1.0f, 0.0f, 0.0f);
 }
 
-quat VKTS_APIENTRY rotateRy(const float angley)
+Quat VKTS_APIENTRY rotateRy(const float angley)
 {
     return rotateAxis(angley, 0.0f, 1.0f, 0.0f);
 }
 
-quat VKTS_APIENTRY rotateRz(const float anglez)
+Quat VKTS_APIENTRY rotateRz(const float anglez)
 {
     return rotateAxis(anglez, 0.0f, 0.0f, 1.0f);
 }
 
-quat VKTS_APIENTRY rotateRzRyRx(const float anglez, const float angley, const float anglex)
+Quat VKTS_APIENTRY rotateRzRyRx(const float anglez, const float angley, const float anglex)
 {
     return rotateRz(anglez) * rotateRy(angley) * rotateRx(anglex);
 }
 
-quat VKTS_APIENTRY rotateRzRxRy(const float anglez, const float anglex, const float angley)
+Quat VKTS_APIENTRY rotateRzRxRy(const float anglez, const float anglex, const float angley)
 {
     return rotateRz(anglez) * rotateRx(anglex) * rotateRy(angley);
 }

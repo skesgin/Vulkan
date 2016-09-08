@@ -76,7 +76,7 @@ void Node::reset()
     memset(&jointDescriptorBufferInfo, 0, sizeof(VkDescriptorBufferInfo));
     memset(&jointWriteDescriptorSet, 0, sizeof(VkWriteDescriptorSet));
 
-    box = aabb(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+    box = Aabb(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 
     layers = 0x01;
 }
@@ -532,7 +532,7 @@ void Node::setJointsUniformBuffer(const int32_t joints, const IBufferObjectSP& j
     this->bindMatrixDirty = VK_TRUE;
 }
 
-void Node::setNodeParameterRecursive(const parameter* p)
+void Node::setNodeParameterRecursive(const Parameter* p)
 {
 	if (!p)
 	{
@@ -585,9 +585,9 @@ void Node::updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCo
     }
 }
 
-void Node::bindDrawIndexedRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const overwrite* renderOverwrite, const uint32_t bufferIndex) const
+void Node::bindDrawIndexedRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const Overwrite* renderOverwrite, const uint32_t bufferIndex) const
 {
-    const overwrite* currentOverwrite = renderOverwrite;
+    const Overwrite* currentOverwrite = renderOverwrite;
     while (currentOverwrite)
     {
     	if (!currentOverwrite->nodeBindDrawIndexedRecursive(*this, cmdBuffer, allGraphicsPipelines, bufferIndex))
@@ -632,7 +632,7 @@ void Node::updateRecursive(const IUpdateThreadContext& updateContext, const glm:
 
         //
 
-        quat quaternion;
+        Quat quaternion;
 
         VkBool32 quaternionDirty = VK_FALSE;
 
@@ -788,7 +788,7 @@ void Node::updateRecursive(const IUpdateThreadContext& updateContext, const glm:
         }
         else if (jointIndex >= VKTS_MAX_JOINTS)
         {
-        	logPrint(VKTS_LOG_ERROR, "Node: Too many joints: %d >= %d",  jointIndex, VKTS_MAX_JOINTS);
+        	logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Too many joints: %d >= %d",  jointIndex, VKTS_MAX_JOINTS);
 
         	return;
         }
@@ -806,14 +806,14 @@ void Node::updateRecursive(const IUpdateThreadContext& updateContext, const glm:
     bindMatrixDirty = VK_FALSE;
 }
 
-const aabb& Node::getAABB() const
+const Aabb& Node::getAABB() const
 {
 	return box;
 }
 
-sphere Node::getBoundingSphere() const
+Sphere Node::getBoundingSphere() const
 {
-	sphere boundingSphere = transformMatrix * box.getSphere();
+	Sphere boundingSphere = transformMatrix * box.getSphere();
 
 	for (size_t i = 0; i < allChildNodes.size(); i++)
     {

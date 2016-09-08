@@ -32,7 +32,7 @@
 namespace vkts
 {
 
-class overwrite;
+class Overwrite;
 
 class IFont : public IDestroyable
 {

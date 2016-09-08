@@ -31,7 +31,7 @@
 
 namespace vkts {
 
-class defaultComputePipeline
+class DefaultComputePipeline
 {
 
 private:
@@ -40,9 +40,9 @@ private:
 
 public:
 
-	defaultComputePipeline();
+	DefaultComputePipeline();
 
-	~defaultComputePipeline();
+	~DefaultComputePipeline();
 
 	void reset();
 

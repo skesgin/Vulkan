@@ -64,7 +64,7 @@ IImageSP VKTS_APIENTRY imageCreate(const VkDevice device, const VkImageCreateFla
 
     if (result != VK_SUCCESS)
     {
-        logPrint(VKTS_LOG_ERROR, "Image: Could not create image.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create image.");
 
         return IImageSP();
     }

@@ -32,12 +32,12 @@
 namespace vkts
 {
 
-class quat
+class Quat
 {
 
 private:
 
-    void multiply(quat& result, const quat& q0, const quat& q1) const;
+    void multiply(Quat& result, const Quat& q0, const Quat& q1) const;
 
 public:
 
@@ -46,43 +46,43 @@ public:
     float z;
     float w;
 
-    quat();
-    quat(const float x, const float y, const float z, const float w);
-    quat(const quat& other);
-    quat(const glm::vec3& other);
-    quat(const glm::vec4& other);
-    ~quat();
+    Quat();
+    Quat(const float x, const float y, const float z, const float w);
+    Quat(const Quat& other);
+    Quat(const glm::vec3& other);
+    Quat(const glm::vec4& other);
+    ~Quat();
 
-    bool operator ==(const quat& other) const;
+    bool operator ==(const Quat& other) const;
 
-    bool operator !=(const quat& other) const;
-
-
-    quat operator +() const;
-    quat operator -() const;
+    bool operator !=(const Quat& other) const;
 
 
-    quat operator +(const quat& other) const;
+    Quat operator +() const;
+    Quat operator -() const;
 
-    quat& operator +=(const quat& other);
 
-    quat operator -(const quat& other) const;
+    Quat operator +(const Quat& other) const;
 
-    quat& operator -=(const quat& other);
+    Quat& operator +=(const Quat& other);
 
-    quat operator *(const quat& other) const;
+    Quat operator -(const Quat& other) const;
 
-    quat& operator *=(const quat& other);
+    Quat& operator -=(const Quat& other);
 
-    quat operator *(const float other) const;
+    Quat operator *(const Quat& other) const;
 
-    quat& operator *=(const float other);
+    Quat& operator *=(const Quat& other);
 
-    quat operator /(const float other) const;
+    Quat operator *(const float other) const;
 
-    quat& operator /=(const float other);
+    Quat& operator *=(const float other);
 
-    quat& operator =(const quat& other);
+    Quat operator /(const float other) const;
+
+    Quat& operator /=(const float other);
+
+    Quat& operator =(const Quat& other);
 
 
     glm::vec3 operator *(const glm::vec3& other) const;
@@ -97,9 +97,9 @@ public:
 
 };
 
-glm::mat4 operator* (const glm::mat4& matrix, const quat& q);
+glm::mat4 operator* (const glm::mat4& matrix, const Quat& q);
 
-glm::mat4 operator* (const quat& q, const glm::mat4& matrix);
+glm::mat4 operator* (const Quat& q, const glm::mat4& matrix);
 
 } /* namespace vkts */
 

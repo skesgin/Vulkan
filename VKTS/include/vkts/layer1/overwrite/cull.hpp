@@ -32,37 +32,37 @@
 namespace vkts
 {
 
-class cull : public overwrite
+class Cull : public Overwrite
 {
 
 private:
 
-	const frustum* viewFrustum;
+	const Frustum* viewFrustum;
 
 public:
 
-	cull() :
-		overwrite(), viewFrustum(nullptr)
+	Cull() :
+		Overwrite(), viewFrustum(nullptr)
     {
     }
 
-	cull(const frustum* viewFrustum) :
-		overwrite(), viewFrustum(viewFrustum)
+	Cull(const Frustum* viewFrustum) :
+		Overwrite(), viewFrustum(viewFrustum)
     {
     }
 
-    virtual ~cull()
+    virtual ~Cull()
     {
     }
 
     //
 
-	const frustum* getViewFrustum() const
+	const Frustum* getViewFrustum() const
 	{
 		return viewFrustum;
 	}
 
-	void setViewFrustum(const frustum* viewFrustum)
+	void setViewFrustum(const Frustum* viewFrustum)
 	{
 		this->viewFrustum = viewFrustum;
 	}

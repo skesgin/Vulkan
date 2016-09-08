@@ -577,14 +577,14 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
     if (!sharedDisplay.get())
     {
-        logPrint(VKTS_LOG_ERROR, "Visual: No display.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No display.");
 
         return INativeWindowWP();
     }
 
     if (sharedDisplay->getIndex() < 0 || sharedDisplay->getIndex() >= _visualGetNumberDisplays())
     {
-        logPrint(VKTS_LOG_ERROR, "Visual: Invalid display index.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Invalid display index.");
 
         return INativeWindowWP();
     }
@@ -593,14 +593,14 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
     if (walkerDisplayContainer == g_allDisplays.end() || !walkerDisplayContainer->second || !walkerDisplayContainer->second->display)
     {
-        logPrint(VKTS_LOG_ERROR, "Visual: Display not known.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Display not known.");
 
         return INativeWindowWP();
     }
 
     if (!sharedDisplay->getNativeDisplay())
     {
-        logPrint(VKTS_LOG_ERROR, "Visual: No native display.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No native display.");
 
         return INativeWindowWP();
     }
@@ -612,7 +612,7 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
     if (g_numberWindows == VKTS_WINDOWS_MAX_WINDOWS)
     {
-        logPrint(VKTS_LOG_ERROR, "Visual: Maximum windows reached.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Maximum windows reached.");
 
         return INativeWindowWP();
     }
@@ -645,7 +645,7 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
         if (!currentDisplayContainer)
         {
-            logPrint(VKTS_LOG_ERROR, "Visual: Could not find display.");
+            logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not find display.");
 
             return INativeWindowWP();
         }
@@ -676,7 +676,7 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
         if (!found)
         {
-            logPrint(VKTS_LOG_ERROR, "Visual: Could not find full screen mode.");
+            logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not find full screen mode.");
 
             return INativeWindowWP();
         }
@@ -688,7 +688,7 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
         if (ChangeDisplaySettingsEx(currentDisplayContainer->deviceName, &dm, NULL, CDS_FULLSCREEN, NULL) != DISP_CHANGE_SUCCESSFUL)
         {
-            logPrint(VKTS_LOG_ERROR, "Visual: Could not switch to full screen.");
+            logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not switch to full screen.");
 
             return INativeWindowWP();
         }
@@ -786,7 +786,7 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
     if (!currentWindow.get())
     {
-        logPrint(VKTS_LOG_ERROR, "Visual: Could not create native window.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create native window.");
 
         char className[VKTS_WINDOWS_MAX_CHARS + 1];
 
@@ -819,7 +819,7 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
     if (g_allWindows.find(nativeWindow) != g_allWindows.size())
     {
-        logPrint(VKTS_LOG_ERROR, "Visual: Native window already in list.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Native window already in list.");
 
         _visualDestroyWindow(currentWindow);
 

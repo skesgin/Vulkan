@@ -126,9 +126,9 @@ void Object::updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSets
     }
 }
 
-void Object::bindDrawIndexedRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const overwrite* renderOverwrite, const uint32_t bufferIndex) const
+void Object::bindDrawIndexedRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const Overwrite* renderOverwrite, const uint32_t bufferIndex) const
 {
-    const overwrite* currentOverwrite = renderOverwrite;
+    const Overwrite* currentOverwrite = renderOverwrite;
     while (currentOverwrite)
     {
     	if (!currentOverwrite->objectBindDrawIndexedRecursive(*this, cmdBuffer, allGraphicsPipelines, bufferIndex))

@@ -31,7 +31,7 @@ namespace vkts
 
 void IMoveable::updateVectors()
 {
-    quat rotation = rotateZ * rotateY * rotateX;
+    Quat rotation = rotateZ * rotateY * rotateX;
 
     forward = rotation * glm::vec3(0.0f, 0.0f, -1.0f);
     left = rotation * glm::vec3(-1.0f, 0.0f, 0.0f);
@@ -88,7 +88,7 @@ IMoveable::IMoveable(const glm::vec3& translate, const glm::vec3& rotate) :
     setTranslateRotate(translate, rotate);
 }
 
-IMoveable::IMoveable(const glm::vec3& translate, const quat& rotateZ, const quat& rotateY, const quat& rotateX) :
+IMoveable::IMoveable(const glm::vec3& translate, const Quat& rotateZ, const Quat& rotateY, const Quat& rotateX) :
     IUpdateable(), translate(), rotateZ(), rotateY(), rotateX(), targetTranslate(), targetRotateZ(), targetRotateY(), targetRotateX(), forward(0.0f, 0.0f, -1.0f), left(-1.0f, 0.0f, 0.0f), up(0.0f, 1.0f, 0.0f)
 {
     setTranslateRotate(translate, rotateZ, rotateY, rotateX);
@@ -142,7 +142,7 @@ void IMoveable::setTranslateRotate(const glm::vec3& translate, const glm::vec3& 
     update();
 }
 
-void IMoveable::setTranslateRotate(const glm::vec3& translate, const quat& rotateZ, const quat& rotateY, const quat& rotateX)
+void IMoveable::setTranslateRotate(const glm::vec3& translate, const Quat& rotateZ, const Quat& rotateY, const Quat& rotateX)
 {
     this->translate = translate;
     this->rotateZ = rotateZ;
@@ -186,7 +186,7 @@ void IMoveable::setRotate(const glm::vec3& rotate)
     update();
 }
 
-void IMoveable::setRotate(const quat& rotateZ, const quat& rotateY, const quat& rotateX)
+void IMoveable::setRotate(const Quat& rotateZ, const Quat& rotateY, const Quat& rotateX)
 {
     this->rotateZ = rotateZ;
     this->rotateY = rotateY;
@@ -200,17 +200,17 @@ void IMoveable::setRotate(const quat& rotateZ, const quat& rotateY, const quat& 
     update();
 }
 
-const quat& IMoveable::getRotateX() const
+const Quat& IMoveable::getRotateX() const
 {
 	return rotateX;
 }
 
-const quat& IMoveable::getRotateY() const
+const Quat& IMoveable::getRotateY() const
 {
 	return rotateY;
 }
 
-const quat& IMoveable::getRotateZ() const
+const Quat& IMoveable::getRotateZ() const
 {
 	return rotateZ;
 }
@@ -268,7 +268,7 @@ void IMoveable::moveTranslateRotate(const glm::vec3& translate, const glm::vec3&
     this->targetRotateX = targetRotateX * rotateRx(rotate.x);
 }
 
-void IMoveable::moveTranslateRotate(const glm::vec3& translate, const quat& rotateZ, const quat& rotateY, const quat& rotateX)
+void IMoveable::moveTranslateRotate(const glm::vec3& translate, const Quat& rotateZ, const Quat& rotateY, const Quat& rotateX)
 {
     this->targetTranslate = translate;
     this->targetRotateZ = targetRotateZ * rotateZ;
@@ -284,7 +284,7 @@ void IMoveable::moveTranslateRotate(const float forwardFactor, const float straf
     this->targetRotateX = targetRotateX * rotateRx(rotate.x);
 }
 
-void IMoveable::moveTranslateRotate(const float forwardFactor, const float strafeFactor, const float upFactor, const quat& rotateZ, const quat& rotateY, const quat& rotateX)
+void IMoveable::moveTranslateRotate(const float forwardFactor, const float strafeFactor, const float upFactor, const Quat& rotateZ, const Quat& rotateY, const Quat& rotateX)
 {
     this->targetTranslate += forward * forwardFactor + left * strafeFactor + up * upFactor;
     this->targetRotateZ = targetRotateZ * rotateZ;
@@ -315,9 +315,9 @@ VkBool32 IMoveable::update(const double deltaTime, const uint64_t deltaTicks)
 			targetRotateX = -targetRotateX;
         }
 
-		quat currentRotateZ = slerp(targetRotateZ, rotateZ, 0.5f);
-		quat currentRotateY = slerp(targetRotateY, rotateY, 0.5f);
-		quat currentRotateX = slerp(targetRotateX, rotateX, 0.5f);
+		Quat currentRotateZ = slerp(targetRotateZ, rotateZ, 0.5f);
+		Quat currentRotateY = slerp(targetRotateY, rotateY, 0.5f);
+		Quat currentRotateX = slerp(targetRotateX, rotateX, 0.5f);
 
         this->translate = currentTranslate;
         this->rotateZ = currentRotateZ;

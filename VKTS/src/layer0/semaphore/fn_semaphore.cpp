@@ -52,7 +52,7 @@ ISemaphoreSP VKTS_APIENTRY semaphoreCreate(const VkDevice device, VkSemaphoreCre
 
     if (result != VK_SUCCESS)
     {
-        logPrint(VKTS_LOG_ERROR, "Semaphore: Could not create semaphore.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create semaphore.");
 
         return ISemaphoreSP();
     }

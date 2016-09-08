@@ -375,14 +375,14 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
 	if (!currentNativeDisplay.get())
 	{
-        logPrint(VKTS_LOG_ERROR, "Visual: No native display.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No native display.");
 
 		return INativeWindowWP();
 	}
 
 	if (currentNativeDisplay->getIndex() >= _visualGetNumberDisplays())
 	{
-        logPrint(VKTS_LOG_ERROR, "Visual: Invalid native display.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Invalid native display.");
 
         return INativeWindowWP();
 	}
@@ -394,7 +394,7 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
     if (g_numberWindows == VKTS_WINDOWS_MAX_WINDOWS)
     {
-        logPrint(VKTS_LOG_ERROR, "Visual: Maximum windows reached.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Maximum windows reached.");
 
         return INativeWindowWP();
     }
@@ -424,7 +424,7 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
 		if (result != VK_SUCCESS || propertyCount == 0)
 		{
-	        logPrint(VKTS_LOG_ERROR, "Visual: Could not get display mode properties count.");
+	        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not get display mode properties count.");
 
 	        return INativeWindowWP();
 		}
@@ -435,7 +435,7 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
 		if (result != VK_SUCCESS)
 		{
-	        logPrint(VKTS_LOG_ERROR, "Visual: Could not get display mode properties.");
+	        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not get display mode properties.");
 
 			return INativeWindowWP();
 		}
@@ -455,7 +455,7 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
 		if (refreshRate == 0)
 		{
-	        logPrint(VKTS_LOG_ERROR, "Visual: Invalid refresh rate.");
+	        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Invalid refresh rate.");
 
 			return INativeWindowWP();
 		}
@@ -477,7 +477,7 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
 	if (result != VK_SUCCESS || propertyCount == 0)
 	{
-        logPrint(VKTS_LOG_ERROR, "Visual: Could not get physical device display plane properties.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not get physical device display plane properties.");
 
 		return INativeWindowWP();
 	}
@@ -488,7 +488,7 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
 	if (result != VK_SUCCESS)
 	{
-        logPrint(VKTS_LOG_ERROR, "Visual: Could not get physical device display plane properties.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not get physical device display plane properties.");
 
 		return INativeWindowWP();
 	}
@@ -512,7 +512,7 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
 			if (result != VK_SUCCESS|| displayCount == 0)
 			{
-		        logPrint(VKTS_LOG_ERROR, "Visual: Could not get display plane supported displays count.");
+		        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not get display plane supported displays count.");
 
 				return INativeWindowWP();
 			}
@@ -523,7 +523,7 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
 			if (result != VK_SUCCESS)
 			{
-		        logPrint(VKTS_LOG_ERROR, "Visual: Could not get display plane supported displays.");
+		        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not get display plane supported displays.");
 
 				return INativeWindowWP();
 			}
@@ -539,7 +539,7 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
 					if (result != VK_SUCCESS)
 					{
-				        logPrint(VKTS_LOG_ERROR, "Visual: Could not get display plane capabilities.");
+				        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not get display plane capabilities.");
 
 						return INativeWindowWP();
 					}
@@ -548,14 +548,14 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
 					if (displayPlaneCapabilities.minDstExtent.width > (uint32_t)width || displayPlaneCapabilities.minDstExtent.height > (uint32_t)height)
 					{
-				        logPrint(VKTS_LOG_DEBUG, "Visual: Extent to small.");
+				        logPrint(VKTS_LOG_DEBUG, __FILE__, __LINE__, "Extent to small.");
 
 						continue;
 					}
 
 					if (displayPlaneCapabilities.maxDstExtent.width < (uint32_t)width || displayPlaneCapabilities.maxDstExtent.height < (uint32_t)height)
 					{
-				        logPrint(VKTS_LOG_DEBUG, "Visual: Extent to large.");
+				        logPrint(VKTS_LOG_DEBUG, __FILE__, __LINE__, "Extent to large.");
 
 						continue;
 					}
@@ -581,7 +581,7 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
 	if (currentDisplay == VK_NULL_HANDLE)
 	{
-        logPrint(VKTS_LOG_INFO, "Visual: No plane found. Falling back to plane with current resolution.");
+        logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "No plane found. Falling back to plane with current resolution.");
 
 		currentPlaneIndex = 0;
 
@@ -595,7 +595,7 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
 		if (result != VK_SUCCESS)
 		{
-	        logPrint(VKTS_LOG_ERROR, "Visual: Could not get display plane capabilities.");
+	        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not get display plane capabilities.");
 
 			return INativeWindowWP();
 		}
@@ -609,7 +609,7 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
 	if (!currentNativeWindowContainer)
 	{
-        logPrint(VKTS_LOG_ERROR, "Visual: Could not create native window container.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create native window container.");
 
 		return INativeWindowWP();
 	}

@@ -58,7 +58,7 @@ IRenderPassSP VKTS_APIENTRY renderPassCreate(const VkDevice device, const VkRend
 
     if (result != VK_SUCCESS)
     {
-        logPrint(VKTS_LOG_ERROR, "RenderPass: Could not create render pass.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create render pass.");
 
         return IRenderPassSP();
     }

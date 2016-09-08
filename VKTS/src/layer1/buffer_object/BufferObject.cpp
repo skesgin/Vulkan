@@ -76,7 +76,7 @@ VkBool32 BufferObject::upload(const size_t offset, const VkMemoryMapFlags flags,
 
     if (result != VK_SUCCESS)
     {
-        logPrint(VKTS_LOG_ERROR, "BufferObject: Could not unmap memory.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not unmap memory.");
 
         return VK_FALSE;
     }

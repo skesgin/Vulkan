@@ -37,6 +37,11 @@ static std::mutex g_logMutex;
 
 static int32_t g_verbosity;
 
+static const char* logGetFilename(const char* fileName)
+{
+	return strrchr(fileName, '/') ? strrchr(fileName, '/') + 1 : (strrchr(fileName, '\\') ? strrchr(fileName, '\\') + 1 : fileName);
+}
+
 VkBool32 VKTS_APIENTRY logInit()
 {
     return logSetLevel(VKTS_LOG_INFO);
@@ -63,7 +68,7 @@ int32_t VKTS_APIENTRY logGetLevel()
     return g_verbosity;
 }
 
-void VKTS_APIENTRY logPrint(const int32_t verbosity, const char* format, ...)
+void VKTS_APIENTRY logPrint(const int32_t verbosity, const char* fileName, const int32_t lineNumber, const char* format, ...)
 {
     std::lock_guard<std::mutex> logLockGuard(g_logMutex);
 
@@ -89,7 +94,7 @@ void VKTS_APIENTRY logPrint(const int32_t verbosity, const char* format, ...)
 
         vsnprintf(buffer, VKTS_MAX_LOG_CHARS, format, argList);
 
-        VKTS_PRINTF("LOG [%s]: %s\n", logString, buffer);
+        VKTS_PRINTF("VKTS log [%s] in '%s' at %d: %s\n", logString, logGetFilename(fileName), lineNumber, buffer);
 
         va_end(argList);
     }

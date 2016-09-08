@@ -51,7 +51,7 @@ Camera::Camera(const glm::vec4& eye, const glm::vec3& rotation) :
     setTranslateRotate(glm::vec3(eye), rotation);
 }
 
-Camera::Camera(const glm::vec4& eye, const quat& rotationZ, const quat& rotationY, const quat& rotationX) :
+Camera::Camera(const glm::vec4& eye, const Quat& rotationZ, const Quat& rotationY, const Quat& rotationX) :
     ICamera()
 {
     setTranslateRotate(glm::vec3(eye), rotationZ, rotationY, rotationX);

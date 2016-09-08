@@ -117,7 +117,7 @@ int main(int argc, char* argv[])
 
 	if (!vkts::wsiGatherNeededInstanceExtensions())
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Main: Could not gather needed instance extensions.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not gather needed instance extensions.");
 
 		return -1;
 	}
@@ -149,7 +149,7 @@ int main(int argc, char* argv[])
 
 	if (result != VK_SUCCESS)
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Main: Could not create instance.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create instance.");
 
 		return -1;
 	}
@@ -162,7 +162,7 @@ int main(int argc, char* argv[])
 
 	if (result != VK_SUCCESS || physicalDeviceCount == 0)
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Main: Could not get physical devices count.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not get physical devices count.");
 
 		return -1;
 	}
@@ -171,7 +171,7 @@ int main(int argc, char* argv[])
 
 	if (!allPhysicalDevices.get())
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Main: Could not create physical devices array.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create physical devices array.");
 
 		return -1;
 	}
@@ -180,7 +180,7 @@ int main(int argc, char* argv[])
 
 	if (result != VK_SUCCESS || physicalDeviceCount == 0)
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Main: Could not enumerate physical devices.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not enumerate physical devices.");
 
 		return -1;
 	}
@@ -193,7 +193,7 @@ int main(int argc, char* argv[])
 	{
 		if (physicalDeviceIndex >= physicalDeviceCount)
 		{
-			vkts::logPrint(VKTS_LOG_ERROR, "Main: Physical device %u does not exist.", physicalDeviceIndex);
+			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Physical device %u does not exist.", physicalDeviceIndex);
 
 			return -1;
 		}
@@ -205,7 +205,7 @@ int main(int argc, char* argv[])
 
 	if (!vkts::wsiGatherNeededDeviceExtensions(physicalDevice))
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Main: Could not gather needed device extensions.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not gather needed device extensions.");
 
 		return -1;
 	}
@@ -216,7 +216,7 @@ int main(int argc, char* argv[])
 
 	if (!vkts::visualInit(instance, physicalDevice))
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Main: Could not initialize visual.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not initialize visual.");
 
 		return -1;
 	}
@@ -225,7 +225,7 @@ int main(int argc, char* argv[])
 
 	if (!display.get())
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Main: Could not create display.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create display.");
 
 		return -1;
 	}
@@ -238,7 +238,7 @@ int main(int argc, char* argv[])
 
 		if (!window.get())
 		{
-			vkts::logPrint(VKTS_LOG_ERROR, "Main: Could not create window.");
+			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create window.");
 
 			return -1;
 		}
@@ -250,7 +250,7 @@ int main(int argc, char* argv[])
 
 	if (!surface.get())
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create surface.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create surface.");
 
 		return -1;
 	}
@@ -266,7 +266,7 @@ int main(int argc, char* argv[])
 
 	if (!queueFamilyProperties.get())
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not get queue family properties.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not get queue family properties.");
 
 		return -1;
 	}
@@ -284,7 +284,7 @@ int main(int argc, char* argv[])
 
 		if (result != VK_SUCCESS)
 		{
-			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not get physical device surface support.");
+			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not get physical device surface support.");
 
 			return -1;
 		}
@@ -299,7 +299,7 @@ int main(int argc, char* argv[])
 
 	if (queueFamilyIndex == physicalDeviceQueueFamilyPropertiesCount)
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not find queue family index.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not find queue family index.");
 
 		return -1;
 	}
@@ -334,7 +334,7 @@ int main(int argc, char* argv[])
 
 	if (result != VK_SUCCESS)
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Main: Could not create device.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create device.");
 
 		return -1;
 	}
@@ -352,7 +352,7 @@ int main(int argc, char* argv[])
 
 	if (!example.get())
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Main: Could not create application.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create application.");
 
 		return -1;
 	}

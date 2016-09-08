@@ -32,7 +32,7 @@
 namespace vkts
 {
 
-class overwrite;
+class Overwrite;
 
 class ISubMesh: public IDestroyable, public ICloneable<ISubMesh>
 {
@@ -56,7 +56,7 @@ public:
 
     virtual VkTsVertexBufferType getVertexBufferType() const = 0;
 
-    virtual void setVertexBuffer(const IBufferObjectSP& vertexBuffer, const VkTsVertexBufferType vertexBufferType, const aabb& verticesAABB) = 0;
+    virtual void setVertexBuffer(const IBufferObjectSP& vertexBuffer, const VkTsVertexBufferType vertexBufferType, const Aabb& verticesAABB) = 0;
 
     virtual int32_t getNumberVertices() const = 0;
 
@@ -150,9 +150,9 @@ public:
 
     virtual void drawIndexed(const ICommandBuffersSP& cmdBuffer, const uint32_t bufferIndex = 0) const = 0;
 
-    virtual void bindDrawIndexedRecursive(const std::string& nodeName, const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const overwrite* renderOverwrite = nullptr, const uint32_t bufferIndex = 0) const = 0;
+    virtual void bindDrawIndexedRecursive(const std::string& nodeName, const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const Overwrite* renderOverwrite = nullptr, const uint32_t bufferIndex = 0) const = 0;
 
-    virtual const aabb& getAABB() const = 0;
+    virtual const Aabb& getAABB() const = 0;
 
 };
 

@@ -131,7 +131,7 @@ static void _visualEnumerateDisplays()
                 continue;
             }
 
-            logPrint(VKTS_LOG_DEBUG, "Visual: Processing display '%s' - %s", outputInfo->name, (outputInfo->connection == RR_Connected ? "Connected" : "Disconnected"));
+            logPrint(VKTS_LOG_DEBUG, __FILE__, __LINE__, "Processing display '%s' - %s", outputInfo->name, (outputInfo->connection == RR_Connected ? "Connected" : "Disconnected"));
 
             if (outputInfo->connection == RR_Connected)
             {
@@ -676,14 +676,14 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
     if (!sharedDisplay.get())
     {
-        logPrint(VKTS_LOG_ERROR, "Visual: No display.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No display.");
 
         return INativeWindowWP();
     }
 
     if (sharedDisplay->getIndex() < 0 || sharedDisplay->getIndex() >= _visualGetNumberDisplays())
     {
-        logPrint(VKTS_LOG_ERROR, "Visual: Invalid display index.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Invalid display index.");
 
         return INativeWindowWP();
     }
@@ -692,7 +692,7 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
     if (walkerDisplayContainer == g_allDisplays.end() || !walkerDisplayContainer->second || !walkerDisplayContainer->second->display)
     {
-        logPrint(VKTS_LOG_ERROR, "Visual: Display not known.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Display not known.");
 
         return INativeWindowWP();
     }
@@ -708,7 +708,7 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
     if (g_numberWindows == VKTS_WINDOWS_MAX_WINDOWS)
     {
-        logPrint(VKTS_LOG_ERROR, "Visual: Maximum windows reached.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Maximum windows reached.");
 
         return INativeWindowWP();
     }
@@ -728,7 +728,7 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
         if (!screenResources)
         {
-            logPrint(VKTS_LOG_ERROR, "Visual: Could not get screen resources.");
+            logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not get screen resources.");
 
             return INativeWindowWP();
         }
@@ -827,7 +827,7 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
         if (!found)
         {
-            logPrint(VKTS_LOG_ERROR, "Visual: Could not find full screen mode.");
+            logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not find full screen mode.");
 
             return INativeWindowWP();
         }
@@ -851,7 +851,7 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
     if (!visualInfo)
     {
-        logPrint(VKTS_LOG_ERROR, "Could not get visual info");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not get visual info");
 
         return INativeWindowWP();
     }
@@ -867,7 +867,7 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
     if (currentContainerWalker == g_allDisplays.end() || !currentContainerWalker->second)
     {
-        logPrint(VKTS_LOG_ERROR, "Could not find native display");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not find native display");
 
         return INativeWindowWP();
     }
@@ -959,7 +959,7 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
     if (!window.get())
     {
-        logPrint(VKTS_LOG_ERROR, "Visual: Could not create native window.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create native window.");
 
         if (invisibleCursor)
         {
@@ -978,7 +978,7 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
     if (g_allWindows.find(nativeWindow) != g_allWindows.size())
     {
-        logPrint(VKTS_LOG_ERROR, "Visual: Native window already in list.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Native window already in list.");
 
         _visualDestroyWindow(window);
 

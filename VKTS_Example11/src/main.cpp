@@ -98,7 +98,7 @@ int main(int argc, char* argv[])
 	// Set one task executor for parallel loading of the scene.
 	if (!vkts::engineSetTaskExecutorCount(1))
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Main: Could not set task executors.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not set task executors.");
 
 		terminateApp();
 
@@ -113,7 +113,7 @@ int main(int argc, char* argv[])
 
 	if (!vkts::wsiGatherNeededInstanceExtensions())
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not gather instance extensions.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not gather instance extensions.");
 
 		terminateApp();
 
@@ -124,7 +124,7 @@ int main(int argc, char* argv[])
 
 	if (!instance.get())
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Main: Could not create instance.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create instance.");
 
 		terminateApp();
 
@@ -143,7 +143,7 @@ int main(int argc, char* argv[])
 
 	if (!physicalDevice.get())
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Main: Could not get physical device.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not get physical device.");
 
 		terminateApp();
 
@@ -159,7 +159,7 @@ int main(int argc, char* argv[])
 	// Check, if geometry and tessellation shader are available.
 	if (!(physicalDeviceProperties.limits.framebufferColorSampleCounts & VKTS_SAMPLE_COUNT_BIT) || !(physicalDeviceProperties.limits.framebufferDepthSampleCounts & VKTS_SAMPLE_COUNT_BIT))
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Main: Physical device not capable of MSAA sample counts.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Physical device not capable of MSAA sample counts.");
 
 		return VK_FALSE;
 	}
@@ -167,7 +167,7 @@ int main(int argc, char* argv[])
 	// Check, if uniform buffer size is large enough.
 	if (physicalDeviceProperties.limits.maxUniformBufferRange < VKTS_MAX_JOINTS_BUFFERSIZE)
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Main: Physical device does not have needed uniform buffer range: %u < %u", physicalDeviceProperties.limits.maxUniformBufferRange, VKTS_MAX_JOINTS_BUFFERSIZE);
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Physical device does not have needed uniform buffer range: %u < %u", physicalDeviceProperties.limits.maxUniformBufferRange, VKTS_MAX_JOINTS_BUFFERSIZE);
 
 		return VK_FALSE;
 	}
@@ -176,7 +176,7 @@ int main(int argc, char* argv[])
 
 	if (!vkts::wsiGatherNeededDeviceExtensions(physicalDevice->getPhysicalDevice()))
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Main: Could not gather device extension.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not gather device extension.");
 
 		terminateApp();
 
@@ -189,7 +189,7 @@ int main(int argc, char* argv[])
 
 	if (!vkts::visualInit(instance->getInstance(), physicalDevice->getPhysicalDevice()))
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Main: Could not initialize visual.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not initialize visual.");
 
 		terminateApp();
 
@@ -200,7 +200,7 @@ int main(int argc, char* argv[])
 
 	if (!display.get())
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Main: Could not create display.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create display.");
 
 		terminateApp();
 
@@ -215,7 +215,7 @@ int main(int argc, char* argv[])
 
 		if (!window.get())
 		{
-			vkts::logPrint(VKTS_LOG_ERROR, "Main: Could not create window.");
+			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create window.");
 
 			terminateApp();
 
@@ -229,7 +229,7 @@ int main(int argc, char* argv[])
 
 	if (!surface.get())
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Main: Could not create surface.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create surface.");
 
 		terminateApp();
 
@@ -244,7 +244,7 @@ int main(int argc, char* argv[])
 
 	if (result != VK_SUCCESS || supportFilter.size() == 0)
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Main: Could not get physical device surface support.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not get physical device surface support.");
 
 		terminateApp();
 
@@ -257,7 +257,7 @@ int main(int argc, char* argv[])
 
 	if (!vkts::queueGetFamilyIndex(physicalDevice->getAllQueueFamilyProperties(), VK_QUEUE_GRAPHICS_BIT, 0, &supportFilter, queueFamilyIndex))
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Main: Could not find queue family index.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not find queue family index.");
 
 		terminateApp();
 
@@ -281,7 +281,7 @@ int main(int argc, char* argv[])
 
 	if (!device.get())
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Main: Could not create device.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create device.");
 
 		terminateApp();
 
@@ -294,7 +294,7 @@ int main(int argc, char* argv[])
 
 	if (!queue.get())
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Main: Could not get device queue.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not get device queue.");
 
 		terminateApp();
 
@@ -307,7 +307,7 @@ int main(int argc, char* argv[])
 
 	if (!initialResources.get())
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Main: Could not create initial resources.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create initial resources.");
 
 		terminateApp();
 
@@ -323,7 +323,7 @@ int main(int argc, char* argv[])
 
 	if (!example.get())
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Main: Could not create application.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create application.");
 
 		terminateApp();
 

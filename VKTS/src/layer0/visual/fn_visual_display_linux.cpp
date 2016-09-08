@@ -72,7 +72,7 @@ VkBool32 VKTS_APIENTRY _visualInitDisplay(const VkInstance instance, const VkPhy
 
 		if (eventBits == 0x120013)
 		{
-	        logPrint(VKTS_LOG_INFO, "Visual: Found keyboard");
+	        logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Found keyboard");
 
             system("stty -echo");
 
@@ -80,7 +80,7 @@ VkBool32 VKTS_APIENTRY _visualInitDisplay(const VkInstance instance, const VkPhy
 		}
         else if (eventBits == 0x17)
         {
-	        logPrint(VKTS_LOG_INFO, "Visual: Found mouse");
+	        logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Found mouse");
 
             g_mouseFileDescriptor = fileDescriptor;
         }

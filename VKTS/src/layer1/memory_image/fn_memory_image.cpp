@@ -46,7 +46,7 @@ static VkBool32 memoryImageUpload(const IDeviceMemorySP& deviceMemory, const IIm
 
         if (result != VK_SUCCESS)
         {
-            logPrint(VKTS_LOG_ERROR, "MemoryImage: Could not map memory.");
+            logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not map memory.");
 
             return VK_FALSE;
         }
@@ -59,7 +59,7 @@ static VkBool32 memoryImageUpload(const IDeviceMemorySP& deviceMemory, const IIm
 
 			if (result != VK_SUCCESS)
 			{
-				vkts::logPrint(VKTS_LOG_ERROR, "MemoryImage: Could not flush memory.");
+				logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not flush memory.");
 
 				return VK_FALSE;
 			}
@@ -90,7 +90,7 @@ static VkBool32 memoryImagePrepare(IImageSP& image, IDeviceMemorySP& deviceMemor
 
     if (!image.get())
     {
-        logPrint(VKTS_LOG_ERROR, "MemoryImage: Could not create image.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create image.");
 
         return VK_FALSE;
     }
@@ -110,7 +110,7 @@ static VkBool32 memoryImagePrepare(IImageSP& image, IDeviceMemorySP& deviceMemor
 
     if (!deviceMemory.get())
     {
-        logPrint(VKTS_LOG_ERROR, "MemoryImage: Could not allocate memory.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not allocate memory.");
 
         return VK_FALSE;
     }
@@ -121,7 +121,7 @@ static VkBool32 memoryImagePrepare(IImageSP& image, IDeviceMemorySP& deviceMemor
 
     if (result != VK_SUCCESS)
     {
-        logPrint(VKTS_LOG_ERROR, "MemoryImage: Could not bind image memory.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not bind image memory.");
 
         return VK_FALSE;
     }
@@ -144,7 +144,7 @@ static VkBool32 memoryImagePrepare(IBufferSP& buffer, IDeviceMemorySP& deviceMem
 
     if (!buffer.get())
     {
-        logPrint(VKTS_LOG_ERROR, "MemoryImage: Could not create buffer.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create buffer.");
 
         return VK_FALSE;
     }
@@ -164,7 +164,7 @@ static VkBool32 memoryImagePrepare(IBufferSP& buffer, IDeviceMemorySP& deviceMem
 
     if (!deviceMemory.get())
     {
-        logPrint(VKTS_LOG_ERROR, "MemoryImage: Could not allocate memory.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not allocate memory.");
 
         return VK_FALSE;
     }
@@ -175,7 +175,7 @@ static VkBool32 memoryImagePrepare(IBufferSP& buffer, IDeviceMemorySP& deviceMem
 
     if (result != VK_SUCCESS)
     {
-        logPrint(VKTS_LOG_ERROR, "MemoryImage: Could not bind buffer memory.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not bind buffer memory.");
 
         return VK_FALSE;
     }
@@ -225,7 +225,7 @@ IMemoryImageSP VKTS_APIENTRY memoryImageCreate(IImageSP& stageImage, IBufferSP& 
 
 				if (!memoryImageUpload(deviceMemory, imageData, mipLevel, arrayLayer, subresourceLayout))
 				{
-					logPrint(VKTS_LOG_ERROR, "MemoryImage: Could not upload image data.");
+					logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not upload image data.");
 
 					return IMemoryImageSP();
 				}
@@ -246,7 +246,7 @@ IMemoryImageSP VKTS_APIENTRY memoryImageCreate(IImageSP& stageImage, IBufferSP& 
 
             if (!memoryImagePrepare(stageImage, stageDeviceMemory, initialResources, cmdBuffer, stageImageCreateInfo, VK_ACCESS_HOST_WRITE_BIT, VK_ACCESS_TRANSFER_READ_BIT, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, subresourceRange, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT))
             {
-                logPrint(VKTS_LOG_ERROR, "MemoryImage: Could not prepare staging image.");
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not prepare staging image.");
 
                 return IMemoryImageSP();
             }
@@ -266,7 +266,7 @@ IMemoryImageSP VKTS_APIENTRY memoryImageCreate(IImageSP& stageImage, IBufferSP& 
 
 					if (!memoryImageUpload(stageDeviceMemory, imageData, mipLevel, arrayLayer, subresourceLayout))
 					{
-						logPrint(VKTS_LOG_ERROR, "MemoryImage: Could not upload image data.");
+						logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not upload image data.");
 
 						return IMemoryImageSP();
 					}
@@ -297,7 +297,7 @@ IMemoryImageSP VKTS_APIENTRY memoryImageCreate(IImageSP& stageImage, IBufferSP& 
 
             if (!memoryImagePrepare(stageBuffer, stageDeviceMemory, initialResources, bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT))
             {
-                logPrint(VKTS_LOG_ERROR, "MemoryImage: Could not prepare staging buffer.");
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not prepare staging buffer.");
 
                 return IMemoryImageSP();
             }
@@ -308,7 +308,7 @@ IMemoryImageSP VKTS_APIENTRY memoryImageCreate(IImageSP& stageImage, IBufferSP& 
 
             if (result != VK_SUCCESS)
             {
-                logPrint(VKTS_LOG_ERROR, "MemoryImage: Could not copy data to stage buffer.");
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not copy data to stage buffer.");
 
                 return IMemoryImageSP();
             }

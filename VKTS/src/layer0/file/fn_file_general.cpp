@@ -62,7 +62,7 @@ VkBool32 VKTS_APIENTRY _fileInit()
 		directory = "../" + directory;
 	}
 
-	logPrint(VKTS_LOG_WARNING, "File: Could not find base directory");
+	logPrint(VKTS_LOG_WARNING, __FILE__, __LINE__, "Could not find base directory");
 
 	return VK_TRUE;
 }

@@ -29,60 +29,60 @@
 namespace vkts
 {
 
-sphere::sphere() :
+Sphere::Sphere() :
 	c(0.0f, 0.0f, 0.0f, 1.0f), r(1.0f)
 {
 }
 
-sphere::sphere(const float x, const float y, const float z, const float radius) :
+Sphere::Sphere(const float x, const float y, const float z, const float radius) :
 	c(x, y, z, 1.0f), r(glm::abs(radius))
 {
 }
 
-sphere::sphere(const glm::vec4& center, const float radius) :
+Sphere::Sphere(const glm::vec4& center, const float radius) :
 	c(center), r(glm::abs(radius))
 {
 }
 
-sphere::~sphere()
+Sphere::~Sphere()
 {
 }
 
-const glm::vec4& sphere::getCenter() const
+const glm::vec4& Sphere::getCenter() const
 {
 	return c;
 }
 
-float sphere::getRadius() const
+float Sphere::getRadius() const
 {
 	return r;
 }
 
-float sphere::distance(const glm::vec4& point) const
+float Sphere::distance(const glm::vec4& point) const
 {
 	return glm::abs(glm::distance(c, point)) - r;
 }
 
-float sphere::distance(const plane& plane) const
+float Sphere::distance(const Plane& plane) const
 {
 	return plane.distance(*this);
 }
 
-float sphere::distance(const sphere& sphere) const
+float Sphere::distance(const Sphere& sphere) const
 {
 	return glm::abs(glm::distance(c, sphere.getCenter())) - r - sphere.getRadius();
 }
 
-sphere sphere::operator +(const sphere& other) const
+Sphere Sphere::operator +(const Sphere& other) const
 {
 	glm::vec4 center = (c + other.getCenter()) * 0.5f;
 
 	float radius = glm::distance(c, center) + glm::max(r, other.getRadius());
 
-	return sphere(center, radius);
+	return Sphere(center, radius);
 }
 
-sphere& sphere::operator +=(const sphere& other)
+Sphere& Sphere::operator +=(const Sphere& other)
 {
 	glm::vec4 center = (c + other.getCenter()) * 0.5f;
 
@@ -99,7 +99,7 @@ sphere& sphere::operator +=(const sphere& other)
 
 //
 
-sphere operator *(const glm::mat4& transform, const sphere& s)
+Sphere operator *(const glm::mat4& transform, const Sphere& s)
 {
 	float sx = glm::length(glm::vec3(glm::column(transform, 0)));
 	float sy = glm::length(glm::vec3(glm::column(transform, 1)));
@@ -107,7 +107,7 @@ sphere operator *(const glm::mat4& transform, const sphere& s)
 
 	float scale = glm::max(sx, glm::max(sy, sz));
 
-	return sphere(transform * s.getCenter(), s.getRadius() * scale);
+	return Sphere(transform * s.getCenter(), s.getRadius() * scale);
 }
 
 } /* namespace vkts */

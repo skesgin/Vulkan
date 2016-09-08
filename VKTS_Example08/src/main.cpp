@@ -80,7 +80,7 @@ int main(int argc, char* argv[])
 
 	if (!instance.get())
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Main: Could not create instance.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create instance.");
 
 		terminateApp();
 
@@ -99,7 +99,7 @@ int main(int argc, char* argv[])
 
 	if (!physicalDevice.get())
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Main: Could not get physical device.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not get physical device.");
 
 		terminateApp();
 
@@ -112,7 +112,7 @@ int main(int argc, char* argv[])
 
 	if (!vkts::queueGetFamilyIndex(physicalDevice->getAllQueueFamilyProperties(), VK_QUEUE_COMPUTE_BIT, 0, nullptr, queueFamilyIndex))
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Main: Could not find queue family index.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not find queue family index.");
 
 		terminateApp();
 
@@ -136,7 +136,7 @@ int main(int argc, char* argv[])
 
 	if (!device.get())
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Main: Could not create device.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create device.");
 
 		terminateApp();
 
@@ -149,7 +149,7 @@ int main(int argc, char* argv[])
 
 	if (!queue.get())
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Main: Could not get device queue.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not get device queue.");
 
 		terminateApp();
 
@@ -164,7 +164,7 @@ int main(int argc, char* argv[])
 
 	if (!example.get())
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Main: Could not create application.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create application.");
 
 		terminateApp();
 

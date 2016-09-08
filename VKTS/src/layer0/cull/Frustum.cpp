@@ -32,19 +32,19 @@ namespace vkts
 // Note:  Top and Bottom "switched", as everything is upside down.
 //		  For Near, d is 0.0, as NDC for from 0.0 to 1.0.
 // Order: Left, Right, Top, Bottom, Near, Far
-const plane frustum::sidesNDC[6] = {plane(glm::vec3(1.0f, 0.0f, 0.0f), 1.0f), plane(glm::vec3(-1.0f, 0.0f, 0.0f), 1.0f), plane(glm::vec3(0.0f, -1.0f, 0.0f), 1.0f), plane(glm::vec3(0.0f, 1.0f, 0.0f), 1.0f), plane(glm::vec3(0.0f, 0.0f, 1.0f), 0.0f), plane(glm::vec3(0.0f, 0.0f, -1.0f), 1.0f)};
+const Plane Frustum::sidesNDC[6] = {Plane(glm::vec3(1.0f, 0.0f, 0.0f), 1.0f), Plane(glm::vec3(-1.0f, 0.0f, 0.0f), 1.0f), Plane(glm::vec3(0.0f, -1.0f, 0.0f), 1.0f), Plane(glm::vec3(0.0f, 1.0f, 0.0f), 1.0f), Plane(glm::vec3(0.0f, 0.0f, 1.0f), 0.0f), Plane(glm::vec3(0.0f, 0.0f, -1.0f), 1.0f)};
 
-frustum::frustum(const glm::mat4& projectionMatrix, const glm::mat4& viewMatrix) :
+Frustum::Frustum(const glm::mat4& projectionMatrix, const glm::mat4& viewMatrix) :
 	sidesWorld()
 {
 	toWorldSpace(projectionMatrix, viewMatrix);
 }
 
-frustum::~frustum()
+Frustum::~Frustum()
 {
 }
 
-void frustum::toWorldSpace(const glm::mat4& projectionMatrix, const glm::mat4& viewMatrix)
+void Frustum::toWorldSpace(const glm::mat4& projectionMatrix, const glm::mat4& viewMatrix)
 {
 	glm::mat4 transposedViewProjectionMatrix = glm::transpose(projectionMatrix * viewMatrix);
 
@@ -54,7 +54,7 @@ void frustum::toWorldSpace(const glm::mat4& projectionMatrix, const glm::mat4& v
 	}
 }
 
-VkBool32 frustum::isVisible(const glm::vec4& pointWorld) const
+VkBool32 Frustum::isVisible(const glm::vec4& pointWorld) const
 {
 	for (auto& currentSide : sidesWorld)
 	{
@@ -67,7 +67,7 @@ VkBool32 frustum::isVisible(const glm::vec4& pointWorld) const
 	return VK_TRUE;
 }
 
-VkBool32 frustum::isVisible(const sphere& sphereWorld) const
+VkBool32 Frustum::isVisible(const Sphere& sphereWorld) const
 {
 	float distance;
 
@@ -84,12 +84,12 @@ VkBool32 frustum::isVisible(const sphere& sphereWorld) const
 	return VK_TRUE;
 }
 
-VkBool32 frustum::isVisible(const aabb& aabbWorld) const
+VkBool32 Frustum::isVisible(const Aabb& aabbWorld) const
 {
 	return isVisible(aabbWorld.getObb());
 }
 
-VkBool32 frustum::isVisible(const obb& obbWorld) const
+VkBool32 Frustum::isVisible(const Obb& obbWorld) const
 {
 	for (auto& currentSide : sidesWorld)
 	{

@@ -41,7 +41,7 @@ static VkBool32 bufferObjectPrepare(IBufferSP& buffer, IDeviceMemorySP& deviceMe
 
     if (!buffer.get())
     {
-        logPrint(VKTS_LOG_ERROR, "BufferObject: Could not create buffer.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create buffer.");
 
         return VK_FALSE;
     }
@@ -57,7 +57,7 @@ static VkBool32 bufferObjectPrepare(IBufferSP& buffer, IDeviceMemorySP& deviceMe
 
     if (!deviceMemory.get())
     {
-        logPrint(VKTS_LOG_ERROR, "BufferObject: Could not allocate memory.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not allocate memory.");
 
         return VK_FALSE;
     }
@@ -66,7 +66,7 @@ static VkBool32 bufferObjectPrepare(IBufferSP& buffer, IDeviceMemorySP& deviceMe
 
     if (result != VK_SUCCESS)
     {
-        logPrint(VKTS_LOG_ERROR, "BufferObject: Could not bind buffer memory.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not bind buffer memory.");
 
         return VK_FALSE;
     }
@@ -104,7 +104,7 @@ IBufferObjectSP VKTS_APIENTRY bufferObjectCreate(IBufferSP& stageBuffer, IDevice
 
         if (result != VK_SUCCESS)
         {
-            logPrint(VKTS_LOG_ERROR, "BufferObject: Could not upload vertex data.");
+            logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not upload vertex data.");
 
             return IBufferObjectSP();
         }
@@ -113,7 +113,7 @@ IBufferObjectSP VKTS_APIENTRY bufferObjectCreate(IBufferSP& stageBuffer, IDevice
     {
         if (!bufferObjectPrepare(stageBuffer, stageDeviceMemory, initialResources, bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT))
         {
-            logPrint(VKTS_LOG_ERROR, "BufferObject: Could not create vertex buffer.");
+            logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create vertex buffer.");
 
             return IBufferObjectSP();
         }
@@ -122,7 +122,7 @@ IBufferObjectSP VKTS_APIENTRY bufferObjectCreate(IBufferSP& stageBuffer, IDevice
 
         if (result != VK_SUCCESS)
         {
-            logPrint(VKTS_LOG_ERROR, "BufferObject: Could not upload vertex data.");
+            logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not upload vertex data.");
 
             return IBufferObjectSP();
         }

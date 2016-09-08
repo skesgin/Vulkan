@@ -44,7 +44,7 @@ uint32_t VKTS_APIENTRY physicalDeviceGetCount(const VkInstance instance)
 
     if (result != VK_SUCCESS)
     {
-        logPrint(VKTS_LOG_ERROR, "PhysicalDevice: Could not get physical devices count.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not get physical devices count.");
 
         return 0;
     }
@@ -65,14 +65,14 @@ IPhysicalDeviceSP VKTS_APIENTRY physicalDeviceCreate(const VkInstance instance, 
 
     if (result != VK_SUCCESS)
     {
-        logPrint(VKTS_LOG_ERROR, "PhysicalDevice: Could not get physical devices count.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not get physical devices count.");
 
         return IPhysicalDeviceSP();
     }
 
     if (index >= physicalDeviceCount)
     {
-        logPrint(VKTS_LOG_ERROR, "PhysicalDevice: Invalid physical device index %u >= %u.", index, physicalDeviceCount);
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Invalid physical device index %u >= %u.", index, physicalDeviceCount);
 
         return IPhysicalDeviceSP();
     }
@@ -88,7 +88,7 @@ IPhysicalDeviceSP VKTS_APIENTRY physicalDeviceCreate(const VkInstance instance, 
 
     if (result != VK_SUCCESS)
     {
-        logPrint(VKTS_LOG_ERROR, "PhysicalDevice: Could not enumerate physical devices.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not enumerate physical devices.");
 
         return IPhysicalDeviceSP();
     }

@@ -29,14 +29,14 @@
 namespace vkts
 {
 
-const glm::vec4 obb::cornersUnit[8] = {glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec4(-1.0f, 1.0f, 1.0f, 1.0f), glm::vec4(-1.0f, -1.0f, 1.0f, 1.0f), glm::vec4(1.0f, -1.0f, 1.0f, 1.0f), glm::vec4(1.0f, 1.0f, -1.0f, 1.0f), glm::vec4(-1.0f, 1.0f, -1.0f, 1.0f), glm::vec4(-1.0f, -1.0f, -1.0f, 1.0f), glm::vec4(1.0f, -1.0f, -1.0f, 1.0f), };
+const glm::vec4 Obb::cornersUnit[8] = {glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec4(-1.0f, 1.0f, 1.0f, 1.0f), glm::vec4(-1.0f, -1.0f, 1.0f, 1.0f), glm::vec4(1.0f, -1.0f, 1.0f, 1.0f), glm::vec4(1.0f, 1.0f, -1.0f, 1.0f), glm::vec4(-1.0f, 1.0f, -1.0f, 1.0f), glm::vec4(-1.0f, -1.0f, -1.0f, 1.0f), glm::vec4(1.0f, -1.0f, -1.0f, 1.0f), };
 
-obb::obb() :
-	obb(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f))
+Obb::Obb() :
+	Obb(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f))
 {
 }
 
-obb::obb(const glm::vec3& translate, const glm::vec3& rotate, const glm::vec3& scale) :
+Obb::Obb(const glm::vec3& translate, const glm::vec3& rotate, const glm::vec3& scale) :
 	corners()
 {
 	glm::mat4 transform = translateMat4(translate.x, translate.y, translate.z) * rotateRzRyRxMat4(rotate.z, rotate.y, rotate.x) * scaleMat4(scale.x, scale.y, scale.z);
@@ -47,7 +47,7 @@ obb::obb(const glm::vec3& translate, const glm::vec3& rotate, const glm::vec3& s
 	}
 }
 
-obb::obb(const glm::vec4& min, const glm::vec4& max) :
+Obb::Obb(const glm::vec4& min, const glm::vec4& max) :
 	corners{glm::vec4(max.x, max.y, max.z, 1.0f), glm::vec4(min.x, max.y, max.z, 1.0f),
 			glm::vec4(min.x, min.y, max.z, 1.0f), glm::vec4(max.x, min.y, max.z, 1.0f),
 			glm::vec4(max.x, max.y, min.z, 1.0f), glm::vec4(min.x, max.y, min.z, 1.0f),
@@ -55,7 +55,7 @@ obb::obb(const glm::vec4& min, const glm::vec4& max) :
 {
 }
 
-obb::obb(const glm::vec4 corners[8]) :
+Obb::Obb(const glm::vec4 corners[8]) :
 	corners()
 {
 	for (int32_t i = 0; i < 8; i++)
@@ -64,17 +64,17 @@ obb::obb(const glm::vec4 corners[8]) :
 	}
 }
 
-obb::~obb()
+Obb::~Obb()
 {
 }
 
-const glm::vec4& obb::getCorner(const uint32_t i) const
+const glm::vec4& Obb::getCorner(const uint32_t i) const
 {
 	// No check by purpose.
 	return corners[i];
 }
 
-obb operator *(const glm::mat4& transform, const obb& box)
+Obb operator *(const glm::mat4& transform, const Obb& box)
 {
 	glm::vec4 transformedCorners[8];
 
@@ -83,7 +83,7 @@ obb operator *(const glm::mat4& transform, const obb& box)
 		transformedCorners[i] = transform* box.getCorner(i);
 	}
 
-	return obb(transformedCorners);
+	return Obb(transformedCorners);
 }
 
 } /* namespace vkts */

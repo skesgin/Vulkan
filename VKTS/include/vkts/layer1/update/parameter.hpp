@@ -32,16 +32,16 @@
 namespace vkts
 {
 
-class parameter
+class Parameter
 {
 
 public:
 
-	parameter()
+	Parameter()
     {
     }
 
-    virtual ~parameter()
+    virtual ~Parameter()
     {
     }
 

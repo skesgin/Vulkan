@@ -29,30 +29,30 @@
 namespace vkts
 {
 
-const glm::vec4 aabb::cornersUnit[2] = {glm::vec4(-1.0f, -1.0f, -1.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)};
+const glm::vec4 Aabb::cornersUnit[2] = {glm::vec4(-1.0f, -1.0f, -1.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)};
 
-void aabb::calculateObb()
+void Aabb::calculateObb()
 {
 	glm::vec4 center = (corners[0] + corners[1]) * 0.5f;
 
-	asObb = obb(glm::vec3(center), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(corners[1] - center));
+	asObb = Obb(glm::vec3(center), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(corners[1] - center));
 }
 
-void aabb::calculateSphere()
+void Aabb::calculateSphere()
 {
 	glm::vec4 center = (corners[0] + corners[1]) * 0.5f;
 
 	float radius = glm::distance(corners[1], center);
 
-	asSphere = sphere(center, radius);
+	asSphere = Sphere(center, radius);
 }
 
-aabb::aabb() :
-	aabb(glm::vec3(-1.0f, -1.0f, -1.0f), glm::vec3(1.0f, 1.0f, 1.0f))
+Aabb::Aabb() :
+	Aabb(glm::vec3(-1.0f, -1.0f, -1.0f), glm::vec3(1.0f, 1.0f, 1.0f))
 {
 }
 
-aabb::aabb(const glm::vec3& translate, const glm::vec3& scale) :
+Aabb::Aabb(const glm::vec3& translate, const glm::vec3& scale) :
 	corners(), asObb(), asSphere()
 {
 	glm::mat4 transfom = translateMat4(translate.x, translate.y, translate.z) * scaleMat4(scale.x, scale.y, scale.z);
@@ -67,7 +67,7 @@ aabb::aabb(const glm::vec3& translate, const glm::vec3& scale) :
 	calculateSphere();
 }
 
-aabb::aabb(const glm::vec4& min, const glm::vec4& max) :
+Aabb::Aabb(const glm::vec4& min, const glm::vec4& max) :
 	corners{min, max}, asObb(), asSphere()
 {
 	calculateObb();
@@ -75,7 +75,7 @@ aabb::aabb(const glm::vec4& min, const glm::vec4& max) :
 	calculateSphere();
 }
 
-aabb::aabb(const float* vertices, const uint32_t numberVertices, const uint32_t stride) :
+Aabb::Aabb(const float* vertices, const uint32_t numberVertices, const uint32_t stride) :
 	corners(), asObb(), asSphere()
 {
 	glm::vec4 min;
@@ -131,27 +131,27 @@ aabb::aabb(const float* vertices, const uint32_t numberVertices, const uint32_t 
 	calculateSphere();
 }
 
-aabb::~aabb()
+Aabb::~Aabb()
 {
 }
 
-const glm::vec4& aabb::getCorner(const uint32_t i) const
+const glm::vec4& Aabb::getCorner(const uint32_t i) const
 {
 	// No check by purpose.
 	return corners[i];
 }
 
-const obb& aabb::getObb() const
+const Obb& Aabb::getObb() const
 {
 	return asObb;
 }
 
-const sphere& aabb::getSphere() const
+const Sphere& Aabb::getSphere() const
 {
 	return asSphere;
 }
 
-VkBool32 aabb::intersect(const aabb& other) const
+VkBool32 Aabb::intersect(const Aabb& other) const
 {
 	for (int32_t element = 0; element < 3; element++)
 	{
@@ -164,9 +164,9 @@ VkBool32 aabb::intersect(const aabb& other) const
 	return VK_TRUE;
 }
 
-aabb aabb::operator +(const aabb& other) const
+Aabb Aabb::operator +(const Aabb& other) const
 {
-	aabb result(*this);
+	Aabb result(*this);
 
 	for (int32_t element = 0; element < 3; element++)
 	{
@@ -192,7 +192,7 @@ aabb aabb::operator +(const aabb& other) const
 	return result;
 }
 
-aabb& aabb::operator +=(const aabb& other)
+Aabb& Aabb::operator +=(const Aabb& other)
 {
 	for (int32_t element = 0; element < 3; element++)
 	{

@@ -54,7 +54,7 @@ IShaderModuleSP VKTS_APIENTRY shaderModuleCreate(const std::string& name, const 
 
     if (result != VK_SUCCESS)
     {
-        logPrint(VKTS_LOG_ERROR, "Shader: Could not create shader module.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create shader module.");
 
         return IShaderModuleSP();
     }

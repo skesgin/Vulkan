@@ -98,6 +98,12 @@
 #include "layer0/file/fn_file_internal.hpp"
 
 //
+// Image data.
+//
+
+#include "layer0/image_data/fn_image_data_internal.hpp"
+
+//
 // Visual.
 //
 

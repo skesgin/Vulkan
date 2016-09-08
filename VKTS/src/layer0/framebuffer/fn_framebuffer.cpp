@@ -59,7 +59,7 @@ framebufferCreate(const VkDevice device, const VkFramebufferCreateFlags flags, c
 
     if (result != VK_SUCCESS)
     {
-        logPrint(VKTS_LOG_ERROR, "Framebuffer: Could not create frame buffer.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create frame buffer.");
 
         return IFramebufferSP();
     }

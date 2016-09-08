@@ -172,14 +172,14 @@ void Scene::updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsC
     }
 }
 
-void Scene::bindDrawIndexedRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const overwrite* renderOverwrite, const uint32_t bufferIndex, const uint32_t objectOffset, const uint32_t objectStep, const size_t objectLimit) const
+void Scene::bindDrawIndexedRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const Overwrite* renderOverwrite, const uint32_t bufferIndex, const uint32_t objectOffset, const uint32_t objectStep, const size_t objectLimit) const
 {
     if (objectStep == 0)
     {
         return;
     }
 
-    const overwrite* currentOverwrite = renderOverwrite;
+    const Overwrite* currentOverwrite = renderOverwrite;
     while (currentOverwrite)
     {
     	if (!currentOverwrite->sceneBindDrawIndexedRecursive(*this, cmdBuffer, allGraphicsPipelines, bufferIndex, objectOffset, objectStep, objectLimit))

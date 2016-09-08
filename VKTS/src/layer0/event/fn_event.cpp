@@ -52,7 +52,7 @@ IEventSP VKTS_APIENTRY eventCreate(const VkDevice device, const VkEventCreateFla
 
     if (result != VK_SUCCESS)
     {
-        logPrint(VKTS_LOG_ERROR, "Event: Could not create event.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create event.");
 
         return IEventSP();
     }

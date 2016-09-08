@@ -105,7 +105,7 @@ VKAPI_ATTR VkBool32 VKAPI_CALL vktsDebugReportCallback(VkDebugReportFlagsEXT fla
 {
 	std::lock_guard<std::mutex> lockGuard(g_debugMutex);
 
-	logPrint(VKTS_LOG_INFO, "Debug: Flags 0x%x ObjectType %d Object %u Location %u MessageCode %d LayerPrefix '%s' Message '%s' UserData #%p", flags, objectType, object, location, messageCode, pLayerPrefix, pMessage, pUserData);
+	logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Debug Flags 0x%x ObjectType %d Object %u Location %u MessageCode %d LayerPrefix '%s' Message '%s' UserData #%p", flags, objectType, object, location, messageCode, pLayerPrefix, pMessage, pUserData);
 
     return VK_TRUE;
 }

@@ -32,7 +32,7 @@
 namespace vkts
 {
 
-class blend : public overwrite
+class Blend : public Overwrite
 {
 
 private:
@@ -41,12 +41,12 @@ private:
 
 public:
 
-	blend() :
-		overwrite(), passTransparent(VK_FALSE)
+	Blend() :
+		Overwrite(), passTransparent(VK_FALSE)
     {
     }
 
-    virtual ~blend()
+    virtual ~Blend()
     {
     }
 

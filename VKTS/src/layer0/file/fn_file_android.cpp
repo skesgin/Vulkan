@@ -41,7 +41,7 @@ VkBool32 VKTS_APIENTRY _fileInit()
 
 	if (!androidApp)
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "File: No android application.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No android application.");
 
 		return VK_FALSE;
 	}
@@ -74,7 +74,7 @@ VkBool32 VKTS_APIENTRY _filePrepareLoadBinary(const char* filename)
 
 	if (!androidApp)
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "File: No android application.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No android application.");
 
 		return VK_FALSE;
 	}
@@ -83,7 +83,7 @@ VkBool32 VKTS_APIENTRY _filePrepareLoadBinary(const char* filename)
 
     if (!assetManager)
     {
-		vkts::logPrint(VKTS_LOG_ERROR, "File: No asset manager.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No asset manager.");
 
 		return VK_FALSE;
     }
@@ -124,7 +124,7 @@ VkBool32 VKTS_APIENTRY _filePrepareLoadBinary(const char* filename)
 
 	if (!targetAsset)
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "File: No target asset.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No target asset.");
 
 		AAsset_close(sourceAsset);
 
@@ -135,7 +135,7 @@ VkBool32 VKTS_APIENTRY _filePrepareLoadBinary(const char* filename)
 
 	if (sourceLength != targetLength)
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "File: Could not copy '%s'.", filename);
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not copy '%s'.", filename);
 
 		fclose(targetAsset);
 
@@ -160,7 +160,7 @@ VkBool32 VKTS_APIENTRY _filePrepareSaveBinary(const char* filename)
 
 	if (!androidApp)
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "File: No android application.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No android application.");
 
 		return VK_FALSE;
 	}

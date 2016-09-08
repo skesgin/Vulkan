@@ -32,7 +32,7 @@
 namespace vkts
 {
 
-class obb
+class Obb
 {
 
 private:
@@ -43,18 +43,18 @@ private:
 
 public:
 
-	obb();
-	obb(const glm::vec3& translate, const glm::vec3& rotate, const glm::vec3& scale);
-	obb(const glm::vec4& min, const glm::vec4& max);
-	obb(const glm::vec4 corners[8]);
+	Obb();
+	Obb(const glm::vec3& translate, const glm::vec3& rotate, const glm::vec3& scale);
+	Obb(const glm::vec4& min, const glm::vec4& max);
+	Obb(const glm::vec4 corners[8]);
 
-    ~obb();
+    ~Obb();
 
     const glm::vec4& getCorner(const uint32_t i) const;
 
 };
 
-obb operator *(const glm::mat4& transform, const obb& box);
+Obb operator *(const glm::mat4& transform, const Obb& box);
 
 } /* namespace vkts */
 

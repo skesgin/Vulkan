@@ -429,7 +429,10 @@ void ImageData::setTexel(const glm::vec4& rgba, const uint32_t x, const uint32_t
 	VkExtent3D currentExtent;
 	size_t offset;
 
-    getExtentAndOffset(currentExtent, offset, mipLevel, arrayLayer);
+    if (!getExtentAndOffset(currentExtent, offset, mipLevel, arrayLayer))
+    {
+    	return;
+    }
 
     //
 
@@ -479,7 +482,7 @@ glm::vec4 ImageData::getTexel(const uint32_t x, const uint32_t y, const uint32_t
 {
     if (x >= extent.width || y >= extent.height || z >= extent.depth || mipLevel >= mipLevels || arrayLayer >= arrayLayers)
     {
-        return glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
+        return glm::vec4(NAN, NAN, NAN, NAN);
     }
 
 	VkExtent3D currentExtent;

@@ -45,7 +45,7 @@ int32_t TaskExecutor::getIndex() const
 
 void TaskExecutor::run() const
 {
-    logPrint(VKTS_LOG_SEVERE, "TaskExecutor %d: Started.", index);
+    logPrint(VKTS_LOG_SEVERE, __FILE__, __LINE__, "TaskExecutor %d started.", index);
 
     ITaskSP task;
 
@@ -79,7 +79,7 @@ void TaskExecutor::run() const
         std::this_thread::yield();
     }
 
-    logPrint(VKTS_LOG_SEVERE, "TaskExecutor %d: Terminated.", index);
+    logPrint(VKTS_LOG_SEVERE, __FILE__, __LINE__, "TaskExecutor %d terminated.", index);
 }
 
 } /* namespace vkts */

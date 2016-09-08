@@ -216,7 +216,7 @@ ISwapchainSP VKTS_APIENTRY wsiSwapchainCreate(const VkPhysicalDevice physicalDev
 
     if (result != VK_SUCCESS)
     {
-        vkts::logPrint(VKTS_LOG_ERROR, "Wsi: Could not get surface properties.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not get surface properties.");
 
         return ISwapchainSP();
     }
@@ -234,7 +234,7 @@ ISwapchainSP VKTS_APIENTRY wsiSwapchainCreate(const VkPhysicalDevice physicalDev
 
     if (result != VK_SUCCESS)
     {
-        vkts::logPrint(VKTS_LOG_ERROR, "Wsi: Could not get surface present mode count.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not get surface present mode count.");
 
         return ISwapchainSP();
     }
@@ -243,7 +243,7 @@ ISwapchainSP VKTS_APIENTRY wsiSwapchainCreate(const VkPhysicalDevice physicalDev
 
     if (!surfacePresentModes.get())
     {
-        vkts::logPrint(VKTS_LOG_ERROR, "Wsi: Could not create surface present modes.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create surface present modes.");
 
         return ISwapchainSP();
     }
@@ -252,7 +252,7 @@ ISwapchainSP VKTS_APIENTRY wsiSwapchainCreate(const VkPhysicalDevice physicalDev
 
     if (result != VK_SUCCESS)
     {
-        vkts::logPrint(VKTS_LOG_ERROR, "Wsi: Could not get surface present modes.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not get surface present modes.");
 
         return ISwapchainSP();
     }
@@ -266,7 +266,7 @@ ISwapchainSP VKTS_APIENTRY wsiSwapchainCreate(const VkPhysicalDevice physicalDev
 
     if (result != VK_SUCCESS || surfaceFormatsCount == 0)
     {
-        vkts::logPrint(VKTS_LOG_ERROR, "Wsi: Could not get surface formats count.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not get surface formats count.");
 
         return ISwapchainSP();
     }
@@ -275,7 +275,7 @@ ISwapchainSP VKTS_APIENTRY wsiSwapchainCreate(const VkPhysicalDevice physicalDev
 
     if (!surfaceFormats.get())
     {
-        vkts::logPrint(VKTS_LOG_ERROR, "Wsi: Could not create surface formats.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create surface formats.");
 
         return ISwapchainSP();
     }
@@ -284,7 +284,7 @@ ISwapchainSP VKTS_APIENTRY wsiSwapchainCreate(const VkPhysicalDevice physicalDev
 
     if (result != VK_SUCCESS)
     {
-        vkts::logPrint(VKTS_LOG_ERROR, "Wsi: Could not get surface formats.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not get surface formats.");
 
         return ISwapchainSP();
     }
@@ -319,7 +319,7 @@ ISwapchainSP VKTS_APIENTRY wsiSwapchainCreate(const VkPhysicalDevice physicalDev
 
     if (result != VK_SUCCESS)
     {
-        logPrint(VKTS_LOG_ERROR, "Wsi: Could not create swapchain.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create swapchain.");
 
         return ISwapchainSP();
     }

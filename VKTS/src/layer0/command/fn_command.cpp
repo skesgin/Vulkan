@@ -54,7 +54,7 @@ ICommandPoolSP VKTS_APIENTRY commandPoolCreate(const VkDevice device, const VkCo
 
     if (result != VK_SUCCESS)
     {
-        logPrint(VKTS_LOG_ERROR, "CommandPool: Could not create command pool.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create command pool.");
 
         return ICommandPoolSP();
     }
@@ -101,7 +101,7 @@ ICommandBuffersSP VKTS_APIENTRY commandBuffersCreate(const VkDevice device, cons
 
     if (result != VK_SUCCESS)
     {
-        logPrint(VKTS_LOG_ERROR, "CommandBuffer: Could not create command buffer.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create command buffer.");
 
         return ICommandBuffersSP();
     }

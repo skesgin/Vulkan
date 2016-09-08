@@ -32,37 +32,37 @@
 namespace vkts
 {
 
-class overwrite
+class Overwrite
 {
 
 private:
 
-	const overwrite* nextOverwrite;
+	const Overwrite* nextOverwrite;
 
 public:
 
-	overwrite() :
+	Overwrite() :
 		nextOverwrite(nullptr)
     {
     }
 
-	overwrite(const overwrite* nextOverwrite) :
+	Overwrite(const Overwrite* nextOverwrite) :
 		nextOverwrite(nextOverwrite)
     {
     }
 
-    virtual ~overwrite()
+    virtual ~Overwrite()
     {
     }
 
     //
 
-	const overwrite* getNextOverwrite() const
+	const Overwrite* getNextOverwrite() const
 	{
 		return nextOverwrite;
 	}
 
-	void setNextOverwrite(const overwrite* nextOverwrite)
+	void setNextOverwrite(const Overwrite* nextOverwrite)
 	{
 		this->nextOverwrite = nextOverwrite;
 	}

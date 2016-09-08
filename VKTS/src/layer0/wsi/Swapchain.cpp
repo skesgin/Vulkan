@@ -163,7 +163,7 @@ const std::vector<VkImage>& Swapchain::getAllSwapchainImages(const VkBool32 refr
 
         if (result != VK_SUCCESS)
         {
-            logPrint(VKTS_LOG_ERROR, "Swapchain: Could not get swapchain images count.");
+            logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not get swapchain images count.");
 
             return allSwapchainImages;
         }
@@ -176,7 +176,7 @@ const std::vector<VkImage>& Swapchain::getAllSwapchainImages(const VkBool32 refr
 
         if (result != VK_SUCCESS)
         {
-            logPrint(VKTS_LOG_ERROR, "Swapchain: Could not get swapchain image info.");
+            logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not get swapchain image info.");
 
             allSwapchainImages.clear();
             allSwapchainAccessFlags.clear();

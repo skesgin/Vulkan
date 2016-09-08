@@ -53,7 +53,7 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 
 	if (result != VK_SUCCESS)
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create command buffer.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create command buffer.");
 
 		return VK_FALSE;
 	}
@@ -81,7 +81,7 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 
 	if (result != VK_SUCCESS)
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not begin command buffer.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not begin command buffer.");
 
 		return VK_FALSE;
 	}
@@ -155,7 +155,7 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 
 	if (result != VK_SUCCESS)
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not end command buffer.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not end command buffer.");
 
 		return VK_FALSE;
 	}
@@ -185,7 +185,7 @@ VkBool32 Example::buildFramebuffer(const int32_t usedBuffer)
 
 	if (result != VK_SUCCESS)
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create frame buffer.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create frame buffer.");
 
 		return VK_FALSE;
 	}
@@ -214,7 +214,7 @@ VkBool32 Example::buildSwapchainImageView(const int32_t usedBuffer)
 
 	if (result != VK_SUCCESS)
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create color attachment view.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create color attachment view.");
 
 		return VK_FALSE;
 	}
@@ -274,7 +274,7 @@ VkBool32 Example::buildRenderPass()
 
 	if (result != VK_SUCCESS)
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create render pass.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create render pass.");
 
 		return VK_FALSE;
 	}
@@ -292,7 +292,7 @@ VkBool32 Example::buildSwapchain()
 
 	if (result != VK_SUCCESS)
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create swap chain.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create swap chain.");
 
 		return VK_FALSE;
 	}
@@ -312,7 +312,7 @@ VkBool32 Example::buildSwapchain()
 
 	if (result != VK_SUCCESS)
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not get swap chain images size.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not get swap chain images size.");
 
 		return VK_FALSE;
 	}
@@ -326,7 +326,7 @@ VkBool32 Example::buildSwapchain()
 
 	if (result != VK_SUCCESS)
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not get swap chain image info.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not get swap chain image info.");
 
 		return VK_FALSE;
 	}
@@ -348,7 +348,7 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 
 	if (result != VK_SUCCESS)
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not get surface capabilities.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not get surface capabilities.");
 
 		return VK_FALSE;
 	}
@@ -366,7 +366,7 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 
 	if (result != VK_SUCCESS)
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not get surface present modes count.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not get surface present modes count.");
 
 		return VK_FALSE;
 	}
@@ -375,7 +375,7 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 
 	if (!surfacePresentModes.get())
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not get surface present modes.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not get surface present modes.");
 
 		return VK_FALSE;
 	}
@@ -384,7 +384,7 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 
 	if (result != VK_SUCCESS)
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not get surface present modes.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not get surface present modes.");
 
 		return VK_FALSE;
 	}
@@ -398,7 +398,7 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 
 	if (result != VK_SUCCESS || surfaceFormatsCount == 0)
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not get surface formats count.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not get surface formats count.");
 
 		return VK_FALSE;
 	}
@@ -407,7 +407,7 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 
 	if (!surfaceFormats.get())
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create surface formats.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create surface formats.");
 
 		return VK_FALSE;
 	}
@@ -416,7 +416,7 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 
 	if (result != VK_SUCCESS)
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not get surface formats.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not get surface formats.");
 
 		return VK_FALSE;
 	}
@@ -466,14 +466,14 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 
 	if (!buildSwapchain())
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not build swap chain.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not build swap chain.");
 
 		return VK_FALSE;
 	}
 
 	if (!buildRenderPass())
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not build render pass.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not build render pass.");
 
 		return VK_FALSE;
 	}
@@ -547,7 +547,7 @@ VkBool32 Example::init(const vkts::IUpdateThreadContext& updateContext)
 {
 	if (!updateContext.isWindowAttached(windowIndex))
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not get window.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not get window.");
 
 		return VK_FALSE;
 	}
@@ -572,7 +572,7 @@ VkBool32 Example::init(const vkts::IUpdateThreadContext& updateContext)
 
 	if (result != VK_SUCCESS)
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create command pool.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create command pool.");
 
 		return VK_FALSE;
 	}
@@ -589,7 +589,7 @@ VkBool32 Example::init(const vkts::IUpdateThreadContext& updateContext)
 
 	if (result != VK_SUCCESS)
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create semaphore.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create semaphore.");
 
 		return VK_FALSE;
 	}
@@ -598,7 +598,7 @@ VkBool32 Example::init(const vkts::IUpdateThreadContext& updateContext)
 
     if (result != VK_SUCCESS)
     {
-        vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create semaphore.");
+        vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create semaphore.");
 
         return VK_FALSE;
     }
@@ -607,7 +607,7 @@ VkBool32 Example::init(const vkts::IUpdateThreadContext& updateContext)
 
 	if (!buildResources(updateContext))
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not build resources.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not build resources.");
 
 		return VK_FALSE;
 	}
@@ -668,7 +668,7 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 
 		if (result != VK_SUCCESS)
 		{
-			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not submit queue.");
+			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not submit queue.");
 
 			return VK_FALSE;
 		}
@@ -692,7 +692,7 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 
 			if (result != VK_SUCCESS)
 			{
-				vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not wait for idle queue.");
+				vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not wait for idle queue.");
 
 				return VK_FALSE;
 			}
@@ -705,14 +705,14 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 
 				if (!buildResources(updateContext))
 				{
-					vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not build resources.");
+					vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not build resources.");
 
 					return VK_FALSE;
 				}
 			}
 			else
 			{
-				vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not present queue.");
+				vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not present queue.");
 
 				return VK_FALSE;
 			}
@@ -726,14 +726,14 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 
 			if (!buildResources(updateContext))
 			{
-				vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not build resources.");
+				vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not build resources.");
 
 				return VK_FALSE;
 			}
 		}
 		else
 		{
-			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not acquire next image.");
+			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not acquire next image.");
 
 			return VK_FALSE;
 		}
@@ -757,7 +757,7 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 
 	if (result != VK_SUCCESS)
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create semaphore.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create semaphore.");
 
 		return VK_FALSE;
 	}
@@ -766,7 +766,7 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 
     if (result != VK_SUCCESS)
     {
-        vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create semaphore.");
+        vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create semaphore.");
 
         return VK_FALSE;
     }

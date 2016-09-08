@@ -24,41 +24,53 @@
  * THE SOFTWARE.
  */
 
-#ifndef VKTS_FRUSTUM_HPP_
-#define VKTS_FRUSTUM_HPP_
+#ifndef VKTS_TIMEPARAMETER_HPP_
+#define VKTS_TIMEPARAMETER_HPP_
 
 #include <vkts/vkts.hpp>
 
 namespace vkts
 {
 
-class Frustum
+class TimeParameter : public Parameter
 {
 
 private:
 
-	static const Plane sidesNDC[6];
-
-	Plane sidesWorld[6];
+	float currentTime;
 
 public:
 
-	Frustum() = delete;
-	Frustum(const glm::mat4& projectionMatrix, const glm::mat4& viewMatrix);
-    virtual ~Frustum();
+	TimeParameter() :
+		Parameter(), currentTime(0.0f)
+    {
+    }
 
-    void toWorldSpace(const glm::mat4& projectionMatrix, const glm::mat4& viewMatrix);
+	TimeParameter(const float currentTime) :
+		Parameter(), currentTime(currentTime)
+    {
+    }
 
-    VkBool32 isVisible(const glm::vec4& pointWorld) const;
+    virtual ~TimeParameter()
+    {
+    }
 
-    VkBool32 isVisible(const Sphere& sphereWorld) const;
+    virtual void setNodeParameter(INode& node) const
+    {
+    	node.setCurrentTime(currentTime);
+    }
 
-    VkBool32 isVisible(const Aabb& aabbWorld) const;
+	float getCurrentTime() const
+	{
+		return currentTime;
+	}
 
-    VkBool32 isVisible(const Obb& obbWorld) const;
-
+	void setCurrentTime(const float currentTime)
+	{
+		this->currentTime = currentTime;
+	}
 };
 
 } /* namespace vkts */
 
-#endif /* VKTS_FRUSTUM_HPP_ */
+#endif /* VKTS_TIMEPARAMETER_HPP_ */

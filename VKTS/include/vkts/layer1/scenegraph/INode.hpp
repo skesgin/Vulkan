@@ -32,9 +32,9 @@
 namespace vkts
 {
 
-class overwrite;
+class Overwrite;
 
-class parameter;
+class Parameter;
 
 class INode: public ICloneable<INode>, public IDestroyable, public std::enable_shared_from_this<INode>
 {
@@ -132,17 +132,17 @@ public:
 
     virtual void setJointsUniformBuffer(const int32_t joints, const IBufferObjectSP& jointsUniformBuffer) = 0;
 
-    virtual void setNodeParameterRecursive(const parameter* p) = 0;
+    virtual void setNodeParameterRecursive(const Parameter* p) = 0;
 
     virtual void updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets) = 0;
 
-    virtual void bindDrawIndexedRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const overwrite* renderOverwrite = nullptr, const uint32_t bufferIndex = 0) const = 0;
+    virtual void bindDrawIndexedRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const Overwrite* renderOverwrite = nullptr, const uint32_t bufferIndex = 0) const = 0;
 
     virtual void updateRecursive(const IUpdateThreadContext& updateContext, const glm::mat4& parentTransformMatrix, const VkBool32 parentTransformMatrixDirty, const glm::mat4& parentBindMatrix, const VkBool32 parentBindMatrixDirty, const std::shared_ptr<INode>& armatureNode) = 0;
 
-    virtual const aabb& getAABB() const = 0;
+    virtual const Aabb& getAABB() const = 0;
 
-    virtual sphere getBoundingSphere() const = 0;
+    virtual Sphere getBoundingSphere() const = 0;
 
     virtual uint32_t getLayers() const = 0;
 

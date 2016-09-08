@@ -72,21 +72,21 @@ VkBool32 VKTS_APIENTRY engineInit()
 
     if (!timeInit())
     {
-        logPrint(VKTS_LOG_ERROR, "Engine: Initialization failed! Could not initialize the timer!");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Initialization failed! Could not initialize the timer!");
 
         return VK_FALSE;
     }
 
     if (!barrierInit())
     {
-        logPrint(VKTS_LOG_ERROR, "Engine: Initialization failed! Could not initialize the barrier!");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Initialization failed! Could not initialize the barrier!");
 
         return VK_FALSE;
     }
 
     if (!fileInit())
     {
-        logPrint(VKTS_LOG_ERROR, "Engine: Initialization failed! Could not initialize the file system!");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Initialization failed! Could not initialize the file system!");
 
         return VK_FALSE;
     }
@@ -98,21 +98,21 @@ VkBool32 VKTS_APIENTRY engineAddUpdateThread(const IUpdateThreadSP& updateThread
 {
     if (g_engineState != VKTS_ENGINE_INIT_STATE)
     {
-        logPrint(VKTS_LOG_ERROR, "Engine: Adding update thread failed! Not in initialize state.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Adding update thread failed! Not in initialize state.");
 
         return VK_FALSE;
     }
 
     if (!updateThread.get())
     {
-        logPrint(VKTS_LOG_ERROR, "Engine: Adding update thread failed! No update thread.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Adding update thread failed! No update thread.");
 
         return VK_FALSE;
     }
 
     if (engineGetNumberUpdateThreads() >= VKTS_MAX_UPDATE_THREADS)
     {
-        logPrint(VKTS_LOG_ERROR, "Engine: Adding update thread failed! Too many update threads.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Adding update thread failed! Too many update threads.");
 
         return VK_FALSE;
     }
@@ -126,14 +126,14 @@ VkBool32 VKTS_APIENTRY engineAttachDisplayToUpdateThread(const INativeDisplayWP&
 {
     if (g_engineState != VKTS_ENGINE_INIT_STATE)
     {
-        logPrint(VKTS_LOG_ERROR, "Engine: Adding attaching display failed! Not in initialize state.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Adding attaching display failed! Not in initialize state.");
 
         return VK_FALSE;
     }
 
     if (!updateThread.get())
     {
-        logPrint(VKTS_LOG_ERROR, "Engine: No display or update thread.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No display or update thread.");
 
         return VK_FALSE;
     }
@@ -161,14 +161,14 @@ VkBool32 VKTS_APIENTRY engineAttachWindowToUpdateThread(const INativeWindowWP& w
 {
     if (g_engineState != VKTS_ENGINE_INIT_STATE)
     {
-        logPrint(VKTS_LOG_ERROR, "Engine: Adding attaching window failed! Not in initialize state.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Adding attaching window failed! Not in initialize state.");
 
         return VK_FALSE;
     }
 
     if (!updateThread.get())
     {
-        logPrint(VKTS_LOG_ERROR, "Engine: No window or update thread.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No window or update thread.");
 
         return VK_FALSE;
     }
@@ -196,7 +196,7 @@ VkBool32 VKTS_APIENTRY engineSetTicksPerSecond(const double ticksPerSecond)
 {
     if (g_engineState != VKTS_ENGINE_INIT_STATE)
     {
-        logPrint(VKTS_LOG_ERROR, "Engine: Setting ticks failed! Not in initialize state.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Setting ticks failed! Not in initialize state.");
 
         return VK_FALSE;
     }
@@ -212,14 +212,14 @@ VkBool32 VKTS_APIENTRY engineRun()
 {
     if (g_engineState != VKTS_ENGINE_INIT_STATE)
     {
-        logPrint(VKTS_LOG_ERROR, "Engine: Run failed! Not in initialize state.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Run failed! Not in initialize state.");
 
         return VK_FALSE;
     }
 
     if (engineGetNumberUpdateThreads() < VKTS_MIN_UPDATE_THREADS || engineGetNumberUpdateThreads() > VKTS_MAX_UPDATE_THREADS)
     {
-        logPrint(VKTS_LOG_ERROR, "Engine: Run failed! Number of update threads not correct.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Run failed! Number of update threads not correct.");
 
         return VK_FALSE;
     }
@@ -246,7 +246,7 @@ VkBool32 VKTS_APIENTRY engineRun()
 
     g_engineState = VKTS_ENGINE_UPDATE_STATE;
 
-    logPrint(VKTS_LOG_INFO, "Engine: Started.");
+    logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Started.");
 
     // Task queue creation.
 
@@ -259,7 +259,7 @@ VkBool32 VKTS_APIENTRY engineRun()
 
         if (!sendTaskQueue.get())
         {
-            logPrint(VKTS_LOG_ERROR, "Engine: Run failed! Could not create task queue.");
+            logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Run failed! Could not create task queue.");
 
             return VK_FALSE;
         }
@@ -268,7 +268,7 @@ VkBool32 VKTS_APIENTRY engineRun()
 
         if (!executedTaskQueue.get())
         {
-            logPrint(VKTS_LOG_ERROR, "Engine: Run failed! Could not create task queue.");
+            logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Run failed! Could not create task queue.");
 
             return VK_FALSE;
         }
@@ -280,7 +280,7 @@ VkBool32 VKTS_APIENTRY engineRun()
 
     if (!messageDispatcher.get())
     {
-        logPrint(VKTS_LOG_ERROR, "Engine: Run failed! Could not create message dispatcher.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Run failed! Could not create message dispatcher.");
 
         return VK_FALSE;
     }
@@ -302,7 +302,7 @@ VkBool32 VKTS_APIENTRY engineRun()
 
         if (!currentTaskExecutor.get())
         {
-            logPrint(VKTS_LOG_ERROR, "Engine: Run failed! Could not create current task executor.");
+            logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Run failed! Could not create current task executor.");
 
             return VK_FALSE;
         }
@@ -311,7 +311,7 @@ VkBool32 VKTS_APIENTRY engineRun()
 
         if (!currentRealThread.get())
         {
-            logPrint(VKTS_LOG_ERROR, "Engine: Run failed! Could not create current real thread.");
+            logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Run failed! Could not create current real thread.");
 
             return VK_FALSE;
         }
@@ -321,7 +321,7 @@ VkBool32 VKTS_APIENTRY engineRun()
         realTaskExecutors.append(currentTaskExecutor);
         realTaskThreads.append(currentRealThread);
 
-        logPrint(VKTS_LOG_INFO, "Engine: Task %d started.", currentTaskExecutor->getIndex());
+        logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Task %d started.", currentTaskExecutor->getIndex());
     }
 
     //
@@ -349,7 +349,7 @@ VkBool32 VKTS_APIENTRY engineRun()
 
         if (!currentUpdateThreadContext.get())
         {
-            logPrint(VKTS_LOG_ERROR, "Engine: Run failed! Could not create update thread context.");
+            logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Run failed! Could not create update thread context.");
 
             return VK_FALSE;
         }
@@ -377,7 +377,7 @@ VkBool32 VKTS_APIENTRY engineRun()
 
             if (!mainUpdateThreadExecutor.get())
             {
-                logPrint(VKTS_LOG_ERROR, "Engine: Run failed! Could not create main update thread executor.");
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Run failed! Could not create main update thread executor.");
 
                 return VK_FALSE;
             }
@@ -389,20 +389,20 @@ VkBool32 VKTS_APIENTRY engineRun()
 
             if (!currentUpdateThreadExecutor.get())
             {
-                logPrint(VKTS_LOG_ERROR, "Engine: Run failed! Could not create current update thread executor.");
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Run failed! Could not create current update thread executor.");
 
                 return VK_FALSE;
             }
 
             realUpdateThreadExecutors.append(currentUpdateThreadExecutor);
 
-            logPrint(VKTS_LOG_INFO, "Engine: Thread %d started.", currentUpdateThreadExecutor->getIndex());
+            logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Thread %d started.", currentUpdateThreadExecutor->getIndex());
 
             auto currentRealThread = ThreadSP(new std::thread(&UpdateThreadExecutor::run, currentUpdateThreadExecutor));
 
             if (!currentRealThread.get())
             {
-                logPrint(VKTS_LOG_ERROR, "Engine: Run failed! Could not create current real thread.");
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Run failed! Could not create current real thread.");
 
                 return VK_FALSE;
             }
@@ -412,7 +412,7 @@ VkBool32 VKTS_APIENTRY engineRun()
     }
 
     // Run last thread and loop.
-    logPrint(VKTS_LOG_INFO, "Engine: Thread %d started.", mainUpdateThreadExecutor->getIndex());
+    logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Thread %d started.", mainUpdateThreadExecutor->getIndex());
 
     mainUpdateThreadExecutor->run();
 
@@ -420,7 +420,7 @@ VkBool32 VKTS_APIENTRY engineRun()
     // Stopping everything.
     //
 
-    logPrint(VKTS_LOG_INFO, "Engine: Thread %d stopped.", mainUpdateThreadExecutor->getIndex());
+    logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Thread %d stopped.", mainUpdateThreadExecutor->getIndex());
 
     // Wait for all threads to finish in the reverse order they were created.
     for (auto reverseIndex = static_cast<int32_t>(realUpdateThreads.size()) - 1; reverseIndex >= 0; reverseIndex--)
@@ -429,7 +429,7 @@ VkBool32 VKTS_APIENTRY engineRun()
 
         currentRealThread->join();
 
-        logPrint(VKTS_LOG_INFO, "Engine: Thread %d stopped.", reverseIndex);
+        logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Thread %d stopped.", reverseIndex);
     }
 
     realUpdateThreadExecutors.clear();
@@ -448,7 +448,7 @@ VkBool32 VKTS_APIENTRY engineRun()
 
     	ITaskSP stopTask;
 
-        logPrint(VKTS_LOG_SEVERE, "Engine: Disabling task queue.");
+        logPrint(VKTS_LOG_SEVERE, __FILE__, __LINE__, "Disabling task queue.");
 
     	for (uint32_t i = 0; i < g_taskExecutorCount; i++)
     	{
@@ -464,7 +464,7 @@ VkBool32 VKTS_APIENTRY engineRun()
 
         currentRealThread->join();
 
-        logPrint(VKTS_LOG_INFO, "Engine: Task %d stopped.", reverseIndex);
+        logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Task %d stopped.", reverseIndex);
     }
 
     realTaskExecutors.clear();
@@ -474,7 +474,7 @@ VkBool32 VKTS_APIENTRY engineRun()
 
     g_engineState = VKTS_ENGINE_INIT_STATE;
 
-    logPrint(VKTS_LOG_INFO, "Engine: Stopped.");
+    logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Stopped.");
 
     return VK_TRUE;
 }

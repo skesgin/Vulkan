@@ -32,7 +32,7 @@ VkBool32 LoadTask::execute()
 
 	if (!commandPool.get())
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not get command pool.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not get command pool.");
 
 		return VK_FALSE;
 	}
@@ -43,7 +43,7 @@ VkBool32 LoadTask::execute()
 
 	if (!cmdBuffer.get())
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create command buffer.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create command buffer.");
 
 		return VK_FALSE;
 	}
@@ -54,7 +54,7 @@ VkBool32 LoadTask::execute()
 
 	if (result != VK_SUCCESS)
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not begin command buffer.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not begin command buffer.");
 
 		return VK_FALSE;
 	}
@@ -96,14 +96,14 @@ VkBool32 LoadTask::execute()
 
 	if (!sceneContext.get())
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create cache.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create cache.");
 
 		return VK_FALSE;
 	}
 
 	//
 
-	vkts::logPrint(VKTS_LOG_INFO, "Example: Loading '%s'", VKTS_SCENE_NAME);
+	vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Loading '%s'", VKTS_SCENE_NAME);
 
 	//
 
@@ -111,7 +111,7 @@ VkBool32 LoadTask::execute()
 
 	if (!scene.get())
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not load scene.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load scene.");
 
 		return VK_FALSE;
 	}
@@ -122,12 +122,12 @@ VkBool32 LoadTask::execute()
 
 	if (result != VK_SUCCESS)
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not end command buffer.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not end command buffer.");
 
 		return VK_FALSE;
 	}
 
-	vkts::logPrint(VKTS_LOG_INFO, "Example: Number objects: %d", scene->getNumberObjects());
+	vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Number objects: %d", scene->getNumberObjects());
 
 	return VK_TRUE;
 }

@@ -79,7 +79,7 @@ private:
     VkDescriptorBufferInfo jointDescriptorBufferInfo;
     VkWriteDescriptorSet jointWriteDescriptorSet;
 
-    aabb box;
+    Aabb box;
 
     uint32_t layers;
 
@@ -185,17 +185,17 @@ public:
 
     virtual void setJointsUniformBuffer(const int32_t joints, const IBufferObjectSP& jointsUniformBuffer) override;
 
-    virtual void setNodeParameterRecursive(const parameter* p) override;
+    virtual void setNodeParameterRecursive(const Parameter* p) override;
 
     virtual void updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets) override;
 
-    virtual void bindDrawIndexedRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const overwrite* renderOverwrite = nullptr, const uint32_t bufferIndex = 0) const override;
+    virtual void bindDrawIndexedRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const Overwrite* renderOverwrite = nullptr, const uint32_t bufferIndex = 0) const override;
 
     virtual void updateRecursive(const IUpdateThreadContext& updateContext, const glm::mat4& parentTransformMatrix, const VkBool32 parentTransformMatrixDirty, const glm::mat4& parentBindMatrix, const VkBool32 parentBindMatrixDirty, const INodeSP& armatureNode) override;
 
-    virtual const aabb& getAABB() const override;
+    virtual const Aabb& getAABB() const override;
 
-    virtual sphere getBoundingSphere() const override;
+    virtual Sphere getBoundingSphere() const override;
 
     virtual uint32_t getLayers() const override;
 

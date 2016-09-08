@@ -60,7 +60,7 @@ VkBool32 VKTS_APIENTRY queueGetFamilyIndex(const std::vector<VkQueueFamilyProper
         }
     }
 
-    logPrint(VKTS_LOG_ERROR, "Example: Could not find matching physical device queue properties.");
+    logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not find matching physical device queue properties.");
 
     return VK_FALSE;
 }

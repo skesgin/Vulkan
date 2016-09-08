@@ -76,7 +76,7 @@ VkTsVertexBufferType SubMesh::getVertexBufferType() const
     return vertexBufferType;
 }
 
-void SubMesh::setVertexBuffer(const IBufferObjectSP& vertexBuffer, const VkTsVertexBufferType vertexBufferType, const aabb& verticesAABB)
+void SubMesh::setVertexBuffer(const IBufferObjectSP& vertexBuffer, const VkTsVertexBufferType vertexBufferType, const Aabb& verticesAABB)
 {
     this->vertexBuffer = vertexBuffer;
     this->vertexBufferType = vertexBufferType;
@@ -362,9 +362,9 @@ void SubMesh::drawIndexed(const ICommandBuffersSP& cmdBuffer, const uint32_t buf
     vkCmdDrawIndexed(cmdBuffer->getCommandBuffer(bufferIndex), getNumberIndices(), 1, 0, 0, 0);
 }
 
-void SubMesh::bindDrawIndexedRecursive(const std::string& nodeName, const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const overwrite* renderOverwrite, const uint32_t bufferIndex) const
+void SubMesh::bindDrawIndexedRecursive(const std::string& nodeName, const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const Overwrite* renderOverwrite, const uint32_t bufferIndex) const
 {
-    const overwrite* currentOverwrite = renderOverwrite;
+    const Overwrite* currentOverwrite = renderOverwrite;
     while (currentOverwrite)
     {
     	if (!currentOverwrite->submeshBindDrawIndexedRecursive(*this, cmdBuffer, allGraphicsPipelines, bufferIndex))
@@ -396,7 +396,7 @@ void SubMesh::bindDrawIndexedRecursive(const std::string& nodeName, const IComma
 
 		if (!graphicsPipeline.get())
 		{
-	        logPrint(VKTS_LOG_SEVERE, "SubMesh: Vertex buffer type not found %x", vertexBufferType);
+	        logPrint(VKTS_LOG_SEVERE, __FILE__, __LINE__, "Vertex buffer type not found %x", vertexBufferType);
 
 	        return;
 		}
@@ -407,7 +407,7 @@ void SubMesh::bindDrawIndexedRecursive(const std::string& nodeName, const IComma
     }
     else
     {
-        logPrint(VKTS_LOG_SEVERE, "SubMesh: No material");
+        logPrint(VKTS_LOG_SEVERE, __FILE__, __LINE__, "No material");
 
         return;
     }
@@ -417,7 +417,7 @@ void SubMesh::bindDrawIndexedRecursive(const std::string& nodeName, const IComma
     drawIndexed(cmdBuffer, bufferIndex);
 }
 
-const aabb& SubMesh::getAABB() const
+const Aabb& SubMesh::getAABB() const
 {
 	return box;
 }

@@ -32,7 +32,7 @@
 namespace vkts
 {
 
-class overwrite;
+class Overwrite;
 
 class IObject: public ICloneable<IObject>, public IDestroyable, public IMoveable
 {
@@ -64,7 +64,7 @@ public:
 
     virtual void updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets) = 0;
 
-    virtual void bindDrawIndexedRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const overwrite* renderOverwrite = nullptr, const uint32_t bufferIndex = 0) const = 0;
+    virtual void bindDrawIndexedRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const Overwrite* renderOverwrite = nullptr, const uint32_t bufferIndex = 0) const = 0;
 
     virtual void updateRecursive(const IUpdateThreadContext& updateContext) = 0;
 

@@ -5,7 +5,7 @@ Authors:
 
 **Norbert Nopper** (norbert@nopper.tv)
 
-VKTS version: **0.9.2**
+VKTS version: **0.9.3**
 
 Depending Vulkan API header version: **1.0.24**
 
@@ -85,7 +85,11 @@ How to build:
 Changelog:
 ----------
 
-02/09/2016
+09/08/2016
+- Refactored classes, that all are now uppercase. Changed VKTS version.
+- Improved and cleaned up logging.
+
+09/02/2016
 - Updated to LunarG SDK 1.0.24.0.
 
 08/10/2016

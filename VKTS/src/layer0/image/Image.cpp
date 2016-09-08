@@ -258,7 +258,7 @@ void Image::cmdPipelineBarrier(const VkCommandBuffer cmdBuffer, const VkAccessFl
 {
 	if (newLayout == VK_IMAGE_LAYOUT_UNDEFINED || newLayout == VK_IMAGE_LAYOUT_PREINITIALIZED)
 	{
-		logPrint(VKTS_LOG_WARNING, "Image: New layout not allowed: %d", newLayout);
+		logPrint(VKTS_LOG_WARNING, __FILE__, __LINE__, "New layout not allowed: %d", newLayout);
 
 		return;
 	}

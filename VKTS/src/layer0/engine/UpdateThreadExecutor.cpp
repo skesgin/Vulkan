@@ -51,18 +51,18 @@ void UpdateThreadExecutor::run() const
 
     if (!updateThread->init(*updateThreadContext))
     {
-        logPrint(VKTS_LOG_ERROR, "UpdateThreadExecutor %d: Run failed! Update thread Initialize failed.", index);
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "UpdateThreadExecutor %d run failed! Update thread Initialize failed.", index);
 
         doRun = VK_FALSE;
         executorSync.setDoAllRunFalse();
 
-        logPrint(VKTS_LOG_SEVERE, "UpdateThreadExecutor %d: Killing barrier.", index);
+        logPrint(VKTS_LOG_SEVERE, __FILE__, __LINE__, "UpdateThreadExecutor %d killing barrier.", index);
 
         barrierKill();
     }
     else
     {
-        logPrint(VKTS_LOG_SEVERE, "UpdateThreadExecutor %d: Initialized.", index);
+        logPrint(VKTS_LOG_SEVERE, __FILE__, __LINE__, "UpdateThreadExecutor %d initialized.", index);
     }
 
     // Update loop.
@@ -73,16 +73,16 @@ void UpdateThreadExecutor::run() const
 
         if (!doRun)
         {
-            logPrint(VKTS_LOG_INFO, "UpdateThreadExecutor %d: Update ended.", index);
+            logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "UpdateThreadExecutor %d update ended.", index);
 
             doRun = VK_FALSE;
             executorSync.setDoAllRunFalse();
 
-            logPrint(VKTS_LOG_SEVERE, "UpdateThreadExecutor %d: Killing barrier.", index);
+            logPrint(VKTS_LOG_SEVERE, __FILE__, __LINE__, "UpdateThreadExecutor %d killing barrier.", index);
 
             barrierKill();
 
-            logPrint(VKTS_LOG_SEVERE, "UpdateThreadExecutor %d: Disabling task queue.", index);
+            logPrint(VKTS_LOG_SEVERE, __FILE__, __LINE__, "UpdateThreadExecutor %d disabling task queue.", index);
 
             updateThreadContext->sendTask(ITaskSP());
 
@@ -95,16 +95,16 @@ void UpdateThreadExecutor::run() const
         {
             if (!messageDispatcher->update())
             {
-                logPrint(VKTS_LOG_INFO, "UpdateThreadExecutor %d: Received quit message.", index);
+                logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "UpdateThreadExecutor %d received quit message.", index);
 
                 doRun = VK_FALSE;
                 executorSync.setDoAllRunFalse();
 
-                logPrint(VKTS_LOG_SEVERE, "UpdateThreadExecutor %d: Killing barrier.", index);
+                logPrint(VKTS_LOG_SEVERE, __FILE__, __LINE__, "UpdateThreadExecutor %d killing barrier.", index);
 
                 barrierKill();
 
-                logPrint(VKTS_LOG_SEVERE, "UpdateThreadExecutor %d: Disabling task queue.", index);
+                logPrint(VKTS_LOG_SEVERE, __FILE__, __LINE__, "UpdateThreadExecutor %d disabling task queue.", index);
 
                 updateThreadContext->sendTask(ITaskSP(nullptr));
 
@@ -123,7 +123,7 @@ void UpdateThreadExecutor::run() const
 
     updateThread->terminate(*updateThreadContext);
 
-    logPrint(VKTS_LOG_SEVERE, "UpdateThreadExecutor %d: Terminated.", index);
+    logPrint(VKTS_LOG_SEVERE, __FILE__, __LINE__, "UpdateThreadExecutor %d terminated.", index);
 }
 
 } /* namespace vkts */

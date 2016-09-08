@@ -67,7 +67,7 @@ ISamplerSP VKTS_APIENTRY samplerCreate(const VkDevice device, const VkSamplerCre
 
     if (result != VK_SUCCESS)
     {
-        logPrint(VKTS_LOG_ERROR, "Image: Could not create sampler.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create sampler.");
 
         return ISamplerSP();
     }

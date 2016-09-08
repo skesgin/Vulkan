@@ -199,7 +199,7 @@ static VkBool32 fontExtractStringValue(const char* buffer, const char* parameter
     return VK_TRUE;
 }
 
-IFontSP VKTS_APIENTRY fontCreate(const char* filename, const IInitialResourcesSP& initialResources, const ICommandBuffersSP& commandBuffer, const IRenderPassSP& renderPass, SmartPointerVector<vkts::IImageSP>& allStageImages, vkts::SmartPointerVector<vkts::IBufferSP>& allStageBuffers, vkts::SmartPointerVector<vkts::IDeviceMemorySP>& allStageDeviceMemories)
+IFontSP VKTS_APIENTRY fontCreate(const char* filename, const IInitialResourcesSP& initialResources, const ICommandBuffersSP& commandBuffer, const IRenderPassSP& renderPass, SmartPointerVector<IImageSP>& allStageImages, SmartPointerVector<IBufferSP>& allStageBuffers, SmartPointerVector<IDeviceMemorySP>& allStageDeviceMemories)
 {
     if (!filename || !initialResources.get() || !commandBuffer.get())
     {
@@ -566,7 +566,7 @@ IFontSP VKTS_APIENTRY fontCreate(const char* filename, const IInitialResourcesSP
 
 	if (!vertexShaderBinary.get())
 	{
-		logPrint(VKTS_LOG_ERROR, "Font: Could not load vertex shader: '%s'", VKTS_FONT_VERTEX_SHADER_NAME);
+		logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load vertex shader: '%s'", VKTS_FONT_VERTEX_SHADER_NAME);
 
 		return IFontSP();
 	}
@@ -575,7 +575,7 @@ IFontSP VKTS_APIENTRY fontCreate(const char* filename, const IInitialResourcesSP
 
 	if (!fragmentShaderBinary.get())
 	{
-		logPrint(VKTS_LOG_ERROR, "Font: Could not load fragment shader: '%s'", VKTS_FONT_FRAGMENT_SHADER_NAME);
+		logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load fragment shader: '%s'", VKTS_FONT_FRAGMENT_SHADER_NAME);
 
 		return IFontSP();
 	}
@@ -586,7 +586,7 @@ IFontSP VKTS_APIENTRY fontCreate(const char* filename, const IInitialResourcesSP
 
 	if (!vertexShaderModule.get())
 	{
-		logPrint(VKTS_LOG_ERROR, "Font: Could not create vertex shader module.");
+		logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create vertex shader module.");
 
 		return IFontSP();
 	}
@@ -597,7 +597,7 @@ IFontSP VKTS_APIENTRY fontCreate(const char* filename, const IInitialResourcesSP
 
 	if (!fragmentShaderModule.get())
 	{
-		logPrint(VKTS_LOG_ERROR, "Font: Could not create fragment shader module.");
+		logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create fragment shader module.");
 
 		return VK_FALSE;
 	}
@@ -622,7 +622,7 @@ IFontSP VKTS_APIENTRY fontCreate(const char* filename, const IInitialResourcesSP
 
 	if (!descriptorSetLayout.get())
 	{
-		logPrint(VKTS_LOG_ERROR, "Font: Could not create descriptor set layout.");
+		logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create descriptor set layout.");
 
 		return IFontSP();
 	}
@@ -697,11 +697,11 @@ IFontSP VKTS_APIENTRY fontCreate(const char* filename, const IInitialResourcesSP
 
 	setLayouts[0] = descriptorSetLayout->getDescriptorSetLayout();
 
-	auto pipelineLayout = vkts::pipelineCreateLayout(initialResources->getDevice()->getDevice(), 0, 1, setLayouts, 1, pushConstantRange);
+	auto pipelineLayout = pipelineCreateLayout(initialResources->getDevice()->getDevice(), 0, 1, setLayouts, 1, pushConstantRange);
 
 	if (!pipelineLayout.get())
 	{
-		logPrint(VKTS_LOG_ERROR, "Font: Could not create pipeline layout.");
+		logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create pipeline layout.");
 
 		return IFontSP();
 	}
@@ -712,7 +712,7 @@ IFontSP VKTS_APIENTRY fontCreate(const char* filename, const IInitialResourcesSP
 	// Graphics pipeline.
 	//
 
-    defaultGraphicsPipeline gp;
+    DefaultGraphicsPipeline gp;
 
     gp.getPipelineShaderStageCreateInfo(0).stage = VK_SHADER_STAGE_VERTEX_BIT;
     gp.getPipelineShaderStageCreateInfo(0).module = vertexShaderModule->getShaderModule();

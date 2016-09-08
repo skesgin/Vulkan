@@ -426,12 +426,12 @@ size_t VKTS_APIENTRY commonGetStructureTypeSize(const void* ptr)
             return sizeof(VkMemoryBarrier);
 
         default:
-            logPrint(VKTS_LOG_WARNING, "StructureType: Structure type not found 0x%x", structureTypeHeader->sType);
+            logPrint(VKTS_LOG_WARNING, __FILE__, __LINE__, "Structure type not found 0x%x", structureTypeHeader->sType);
 
             return 0;
     }
 
-    logPrint(VKTS_LOG_WARNING, "StructureType: Structure type not found 0x%x", structureTypeHeader->sType);
+    logPrint(VKTS_LOG_WARNING, __FILE__, __LINE__, "Structure type not found 0x%x", structureTypeHeader->sType);
 
     return 0;
 }

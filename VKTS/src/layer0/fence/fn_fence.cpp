@@ -52,7 +52,7 @@ IFenceSP VKTS_APIENTRY fenceCreate(const VkDevice device, const VkFenceCreateFla
 
     if (result != VK_SUCCESS)
     {
-        logPrint(VKTS_LOG_ERROR, "Fence: Could not create fence.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create fence.");
 
         return IFenceSP();
     }

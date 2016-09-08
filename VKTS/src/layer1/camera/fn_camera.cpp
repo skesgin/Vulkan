@@ -43,7 +43,7 @@ ICameraSP VKTS_APIENTRY cameraCreate(const glm::vec4& position, const glm::vec3&
     return ICameraSP(newInstance);
 }
 
-ICameraSP VKTS_APIENTRY cameraCreate(const glm::vec4& position, const quat& rotationZ, const quat& rotationY, const quat& rotationX)
+ICameraSP VKTS_APIENTRY cameraCreate(const glm::vec4& position, const Quat& rotationZ, const Quat& rotationY, const Quat& rotationX)
 {
     auto newInstance = new Camera(position, rotationZ, rotationY, rotationX);
 

@@ -24,41 +24,16 @@
  * THE SOFTWARE.
  */
 
-#ifndef VKTS_FRUSTUM_HPP_
-#define VKTS_FRUSTUM_HPP_
+#ifndef VKTS_FN_IMAGE_DATA_INTERNAL_HPP_
+#define VKTS_FN_IMAGE_DATA_INTERNAL_HPP_
 
 #include <vkts/vkts.hpp>
 
 namespace vkts
 {
 
-class Frustum
-{
+VKTS_APICALL glm::vec3 VKTS_APIENTRY imageDataGetScanVector(const uint32_t x, const uint32_t y, const uint32_t side, const float step, const float offset);
 
-private:
+}
 
-	static const Plane sidesNDC[6];
-
-	Plane sidesWorld[6];
-
-public:
-
-	Frustum() = delete;
-	Frustum(const glm::mat4& projectionMatrix, const glm::mat4& viewMatrix);
-    virtual ~Frustum();
-
-    void toWorldSpace(const glm::mat4& projectionMatrix, const glm::mat4& viewMatrix);
-
-    VkBool32 isVisible(const glm::vec4& pointWorld) const;
-
-    VkBool32 isVisible(const Sphere& sphereWorld) const;
-
-    VkBool32 isVisible(const Aabb& aabbWorld) const;
-
-    VkBool32 isVisible(const Obb& obbWorld) const;
-
-};
-
-} /* namespace vkts */
-
-#endif /* VKTS_FRUSTUM_HPP_ */
+#endif /* VKTS_FN_IMAGE_DATA_INTERNAL_HPP_ */

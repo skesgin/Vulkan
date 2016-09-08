@@ -32,17 +32,17 @@
 namespace vkts
 {
 
-class displace : public overwrite
+class Displace : public Overwrite
 {
 
 public:
 
-	displace() :
-		overwrite()
+	Displace() :
+		Overwrite()
     {
     }
 
-    virtual ~displace()
+    virtual ~Displace()
     {
     }
 
@@ -62,7 +62,7 @@ public:
 
     	if (!graphicsPipeline.get())
     	{
-            logPrint(VKTS_LOG_WARNING, "displace: No tessellation state found");
+            logPrint(VKTS_LOG_WARNING, __FILE__, __LINE__, "No tessellation state found");
 
             return VK_FALSE;
     	}

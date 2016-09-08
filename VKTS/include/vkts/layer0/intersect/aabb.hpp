@@ -32,7 +32,7 @@
 namespace vkts
 {
 
-class aabb
+class Aabb
 {
 
 private:
@@ -41,9 +41,9 @@ private:
 
 	glm::vec4 corners[2];
 
-	obb asObb;
+	Obb asObb;
 
-	sphere asSphere;
+	Sphere asSphere;
 
 	void calculateObb();
 
@@ -51,24 +51,24 @@ private:
 
 public:
 
-    aabb();
-    aabb(const glm::vec3& translate, const glm::vec3& scale);
-    aabb(const glm::vec4& min, const glm::vec4& max);
-    aabb(const float* vertices, const uint32_t numberVertices, const uint32_t stride);
+    Aabb();
+    Aabb(const glm::vec3& translate, const glm::vec3& scale);
+    Aabb(const glm::vec4& min, const glm::vec4& max);
+    Aabb(const float* vertices, const uint32_t numberVertices, const uint32_t stride);
 
-    ~aabb();
+    ~Aabb();
 
     const glm::vec4& getCorner(const uint32_t i) const;
 
-    const obb& getObb() const;
+    const Obb& getObb() const;
 
-    const sphere& getSphere() const;
+    const Sphere& getSphere() const;
 
-    VkBool32 intersect(const aabb& other) const;
+    VkBool32 intersect(const Aabb& other) const;
 
-    aabb operator +(const aabb& other) const;
+    Aabb operator +(const Aabb& other) const;
 
-    aabb& operator +=(const aabb& other);
+    Aabb& operator +=(const Aabb& other);
 
 };
 

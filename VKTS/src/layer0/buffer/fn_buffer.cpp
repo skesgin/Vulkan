@@ -57,7 +57,7 @@ IBufferSP VKTS_APIENTRY bufferCreate(const VkDevice device, const VkBufferCreate
     result = vkCreateBuffer(device, &bufferCreateInfo, nullptr, &buffer);
     if (result != VK_SUCCESS)
     {
-        logPrint(VKTS_LOG_ERROR, "Buffer: Could not create buffer.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create buffer.");
 
         return IBufferSP();
     }
@@ -100,7 +100,7 @@ IBufferViewSP VKTS_APIENTRY bufferViewCreate(const VkDevice device, const VkBuff
                                 &bufferView);
     if (result != VK_SUCCESS)
     {
-        logPrint(VKTS_LOG_ERROR, "BufferView: Could not create buffer view.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create buffer view.");
 
         return IBufferViewSP();
     }

@@ -27,9 +27,7 @@
 #ifndef VKTS_HPP_
 #define VKTS_HPP_
 
-// TODO: Make all shared pointer classes upper case and others lower case.
-// TODO: Check, if functions are thread safe.
-// TODO: Change invalid color etc. to not a number.
+// TODO: Mark, if functions are thread safe or not.
 // TODO: Add documentation.
 
 /**
@@ -112,7 +110,7 @@
 #define VKTS_ENGINE_NAME            "VKTS"
 #define VKTS_ENGINE_MAJOR           0
 #define VKTS_ENGINE_MINOR           9
-#define VKTS_ENGINE_PATCH           2
+#define VKTS_ENGINE_PATCH           3
 
 #define VKTS_PI                     3.1415926535897932384626433832795f
 
@@ -249,27 +247,27 @@
  * Geometry.
  */
 
-#include <vkts/layer0/geometry/plane.hpp>
-#include <vkts/layer0/geometry/sphere.hpp>
+#include <vkts/layer0/geometry/Plane.hpp>
+#include <vkts/layer0/geometry/Sphere.hpp>
 
 /**
  * Intersect.
  */
 
-#include <vkts/layer0/intersect/obb.hpp>
-#include <vkts/layer0/intersect/aabb.hpp>
+#include <vkts/layer0/intersect/Obb.hpp>
+#include <vkts/layer0/intersect/Aabb.hpp>
 
 /**
  * Cull.
  */
 
-#include <vkts/layer0/cull/frustum.hpp>
+#include <vkts/layer0/cull/Frustum.hpp>
 
 /**
  * Quaternion.
  */
 
-#include <vkts/layer0/quaternion/quat.hpp>
+#include <vkts/layer0/quaternion/Quat.hpp>
 
 #include <vkts/layer0/quaternion/fn_quat.hpp>
 
@@ -442,8 +440,8 @@
 #include <vkts/layer0/pipeline/IPipelineCache.hpp>
 #include <vkts/layer0/pipeline/IPipelineLayout.hpp>
 
-#include <vkts/layer0/pipeline/defaultComputePipeline.hpp>
-#include <vkts/layer0/pipeline/defaultGraphicsPipeline.hpp>
+#include <vkts/layer0/pipeline/DefaultComputePipeline.hpp>
+#include <vkts/layer0/pipeline/DefaultGraphicsPipeline.hpp>
 
 #include <vkts/layer0/pipeline/fn_pipeline.hpp>
 
@@ -568,19 +566,19 @@
  * Render overwrites.
  */
 
-#include <vkts/layer1/overwrite/overwrite.hpp>
+#include <vkts/layer1/overwrite/Overwrite.hpp>
 
-#include <vkts/layer1/overwrite/blend.hpp>
-#include <vkts/layer1/overwrite/cull.hpp>
-#include <vkts/layer1/overwrite/displace.hpp>
+#include <vkts/layer1/overwrite/Blend.hpp>
+#include <vkts/layer1/overwrite/Cull.hpp>
+#include <vkts/layer1/overwrite/Displace.hpp>
 
 /**
  * Parameter updater.
  */
 
-#include <vkts/layer1/update/parameter.hpp>
+#include <vkts/layer1/update/Parameter.hpp>
 
-#include <vkts/layer1/update/time.hpp>
+#include <vkts/layer1/update/TimeParameter.hpp>
 
 /**
  * Interpolator.

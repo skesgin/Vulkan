@@ -26,7 +26,7 @@
 
 #include "BuildCommandTask.hpp"
 
-vkts::overwrite* BuildCommandTask::overwrite = nullptr;
+vkts::Overwrite* BuildCommandTask::overwrite = nullptr;
 
 VkBool32 BuildCommandTask::execute()
 {
@@ -106,7 +106,7 @@ BuildCommandTask::BuildCommandTask(const uint64_t id, const vkts::IUpdateThreadC
 
 	if (!commandPool.get())
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "BuildCommandTask: Could not get command pool.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not get command pool.");
 	}
 
 	//
@@ -115,7 +115,7 @@ BuildCommandTask::BuildCommandTask(const uint64_t id, const vkts::IUpdateThreadC
 
 	if (!cmdBuffer.get())
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "BuildCommandTask: Could not create command buffer.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create command buffer.");
 
 		commandPool->destroy();
 	}
@@ -154,7 +154,7 @@ VkCommandBuffer BuildCommandTask::getCommandBuffer() const
 	return VK_NULL_HANDLE;
 }
 
-void BuildCommandTask::setOverwrite(vkts::overwrite* overwrite)
+void BuildCommandTask::setOverwrite(vkts::Overwrite* overwrite)
 {
     BuildCommandTask::overwrite = overwrite;
 }

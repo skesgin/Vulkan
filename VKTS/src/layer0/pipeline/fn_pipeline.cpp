@@ -57,7 +57,7 @@ IPipelineCacheSP VKTS_APIENTRY pipelineCreateCache(const VkDevice device, const 
 
     if (result != VK_SUCCESS)
     {
-        logPrint(VKTS_LOG_ERROR, "Pipeline: Could not create pipeline cache.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create pipeline cache.");
 
         return IPipelineCacheSP();
     }
@@ -99,7 +99,7 @@ IPipelineLayoutSP VKTS_APIENTRY pipelineCreateLayout(const VkDevice device, cons
 
     if (result != VK_SUCCESS)
     {
-        logPrint(VKTS_LOG_ERROR, "Pipeline: Could not create pipeline layout.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create pipeline layout.");
 
         return IPipelineLayoutSP();
     }
@@ -131,7 +131,7 @@ IGraphicsPipelineSP VKTS_APIENTRY pipelineCreateGraphics(const VkDevice device, 
 
     if (result != VK_SUCCESS)
     {
-        logPrint(VKTS_LOG_ERROR, "GraphicsPipeline: Could not create graphics pipeline.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create graphics pipeline.");
 
         return IGraphicsPipelineSP();
     }
@@ -163,7 +163,7 @@ IComputePipelineSP VKTS_APIENTRY pipelineCreateCompute(const VkDevice device, co
 
     if (result != VK_SUCCESS)
     {
-        logPrint(VKTS_LOG_ERROR, "ComputePipeline: Could not create compute pipeline.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create compute pipeline.");
 
         return IComputePipelineSP();
     }

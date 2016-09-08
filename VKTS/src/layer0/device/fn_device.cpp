@@ -124,7 +124,7 @@ IDeviceSP VKTS_APIENTRY deviceCreate(const VkPhysicalDevice physicalDevice, cons
 
     if (result != VK_SUCCESS)
     {
-        logPrint(VKTS_LOG_ERROR, "Device: Could not create device.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create device.");
 
         return IDeviceSP();
     }
@@ -133,7 +133,7 @@ IDeviceSP VKTS_APIENTRY deviceCreate(const VkPhysicalDevice physicalDevice, cons
     {
         if (!deviceExtensionsAvailable(physicalDevice, enabledExtensionCount, enabledExtensionNames))
         {
-            logPrint(VKTS_LOG_ERROR, "Device: Could not initialize device extension.");
+            logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not initialize device extension.");
 
             vkDestroyDevice(device, nullptr);
 

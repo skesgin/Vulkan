@@ -29,7 +29,7 @@
 namespace vkts
 {
 
-static glm::vec3 imageDataGetScanVector(const uint32_t x, const uint32_t y, const uint32_t side, const float step, const float offset)
+VKTS_APICALL glm::vec3 VKTS_APIENTRY imageDataGetScanVector(const uint32_t x, const uint32_t y, const uint32_t side, const float step, const float offset)
 {
 	glm::vec3 scanVector;
 

@@ -127,7 +127,7 @@ IInstanceSP VKTS_APIENTRY instanceCreate(const char* applicationName, const uint
 
     if (result != VK_SUCCESS)
     {
-        logPrint(VKTS_LOG_ERROR, "Instance: Could not create instance.");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create instance.");
 
         return IInstanceSP();
     }

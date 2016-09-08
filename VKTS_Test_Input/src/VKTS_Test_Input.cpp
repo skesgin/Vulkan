@@ -49,52 +49,52 @@ public:
 
 		if (updateContext.getMouseButton(windowIndex, VKTS_MOUSE_BUTTON_LEFT) && !lastMouseButtons[VKTS_MOUSE_BUTTON_LEFT])
 		{
-			vkts::logPrint(VKTS_LOG_INFO, "Left mouse button pressed.");
+			vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Left mouse button pressed.");
 
 			lastMouseButtons[VKTS_MOUSE_BUTTON_LEFT] = VK_TRUE;
 		}
 		if (updateContext.getMouseButton(windowIndex, VKTS_MOUSE_BUTTON_RIGHT) && !lastMouseButtons[VKTS_MOUSE_BUTTON_RIGHT])
 		{
-			vkts::logPrint(VKTS_LOG_INFO, "Right mouse button pressed.");
+			vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Right mouse button pressed.");
 
 			lastMouseButtons[VKTS_MOUSE_BUTTON_RIGHT] = VK_TRUE;
 		}
 		if (updateContext.getMouseButton(windowIndex, VKTS_MOUSE_BUTTON_MIDDLE) && !lastMouseButtons[VKTS_MOUSE_BUTTON_MIDDLE])
 		{
-			vkts::logPrint(VKTS_LOG_INFO, "Middle mouse button pressed.");
+			vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Middle mouse button pressed.");
 
 			lastMouseButtons[VKTS_MOUSE_BUTTON_MIDDLE] = VK_TRUE;
 		}
 
 		if (!updateContext.getMouseButton(windowIndex, VKTS_MOUSE_BUTTON_LEFT) && lastMouseButtons[VKTS_MOUSE_BUTTON_LEFT])
 		{
-			vkts::logPrint(VKTS_LOG_INFO, "Left mouse button released.");
+			vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Left mouse button released.");
 
 			lastMouseButtons[VKTS_MOUSE_BUTTON_LEFT] = VK_FALSE;
 		}
 		if (!updateContext.getMouseButton(windowIndex, VKTS_MOUSE_BUTTON_RIGHT) && lastMouseButtons[VKTS_MOUSE_BUTTON_RIGHT])
 		{
-			vkts::logPrint(VKTS_LOG_INFO, "Right mouse button released.");
+			vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Right mouse button released.");
 
 			lastMouseButtons[VKTS_MOUSE_BUTTON_RIGHT] = VK_FALSE;
 		}
 		if (!updateContext.getMouseButton(windowIndex, VKTS_MOUSE_BUTTON_MIDDLE) && lastMouseButtons[VKTS_MOUSE_BUTTON_MIDDLE])
 		{
-			vkts::logPrint(VKTS_LOG_INFO, "Middle mouse button released.");
+			vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Middle mouse button released.");
 
 			lastMouseButtons[VKTS_MOUSE_BUTTON_MIDDLE] = VK_FALSE;
 		}
 
 		if (lastMouseLocation.x != updateContext.getMouseLocation(windowIndex).x || lastMouseLocation.y != updateContext.getMouseLocation(windowIndex).y)
 		{
-			vkts::logPrint(VKTS_LOG_INFO, "Mouse location changed: %d %d", updateContext.getMouseLocation(windowIndex).x, updateContext.getMouseLocation(windowIndex).y);
+			vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Mouse location changed: %d %d", updateContext.getMouseLocation(windowIndex).x, updateContext.getMouseLocation(windowIndex).y);
 
 			lastMouseLocation = updateContext.getMouseLocation(windowIndex);
 		}
 
 		if (lastMouseWheel != updateContext.getMouseWheel(windowIndex))
 		{
-			vkts::logPrint(VKTS_LOG_INFO, "Mouse wheel changed: %d", updateContext.getMouseWheel(windowIndex));
+			vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Mouse wheel changed: %d", updateContext.getMouseWheel(windowIndex));
 
 			lastMouseWheel = updateContext.getMouseWheel(windowIndex);
 		}
@@ -109,22 +109,22 @@ public:
 		{
 			if (updateContext.getKey(windowIndex, keyCode) && !lastKeys[keyCode])
 			{
-				vkts::logPrint(VKTS_LOG_INFO, "Key pressed: %d", keyCode);
+				vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Key pressed: %d", keyCode);
 
 				if (keyCode < 256)
 				{
-					vkts::logPrint(VKTS_LOG_INFO, "           : '%c'", keyCode);
+					vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "           : '%c'", keyCode);
 				}
 
 				lastKeys[keyCode] = VK_TRUE;
 			}
 			if (!updateContext.getKey(windowIndex, keyCode) && lastKeys[keyCode])
 			{
-				vkts::logPrint(VKTS_LOG_INFO, "Key released: %d", keyCode);
+				vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Key released: %d", keyCode);
 
 				if (keyCode < 256)
 				{
-					vkts::logPrint(VKTS_LOG_INFO, "           : '%c'", keyCode);
+					vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "           : '%c'", keyCode);
 				}
 
 				lastKeys[keyCode] = VK_FALSE;
@@ -143,13 +143,13 @@ public:
 		{
 			if (updateContext.getGamepadButton(windowIndex, 0, buttonIndex) && !lastGamepadButtons[buttonIndex])
 			{
-				vkts::logPrint(VKTS_LOG_INFO, "Gamepad button pressed: %d", buttonIndex);
+				vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Gamepad button pressed: %d", buttonIndex);
 
 				lastGamepadButtons[buttonIndex] = VK_TRUE;
 			}
 			if (!updateContext.getGamepadButton(windowIndex, 0, buttonIndex) && lastGamepadButtons[buttonIndex])
 			{
-				vkts::logPrint(VKTS_LOG_INFO, "Gamepad button released: %d", buttonIndex);
+				vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Gamepad button released: %d", buttonIndex);
 
 				lastGamepadButtons[buttonIndex] = VK_FALSE;
 			}
@@ -159,7 +159,7 @@ public:
 		{
 			if (updateContext.getGamepadAxis(windowIndex, 0, axisIndex) != lastJoystickAxis[axisIndex])
 			{
-				vkts::logPrint(VKTS_LOG_INFO, "Gamepad axis changed: %d %f", axisIndex, updateContext.getGamepadAxis(windowIndex, 0, axisIndex));
+				vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Gamepad axis changed: %d %f", axisIndex, updateContext.getGamepadAxis(windowIndex, 0, axisIndex));
 
 				lastJoystickAxis[axisIndex] = updateContext.getGamepadAxis(windowIndex, 0, axisIndex);
 			}
@@ -194,7 +194,7 @@ int main(int argc, char* argv[])
 	// Note: If using VK_KHR_display, values have to be set.
 	if (!vkts::visualInit(VK_NULL_HANDLE, VK_NULL_HANDLE))
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Main: Could not initialize visual.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not initialize visual.");
 
 		vkts::engineTerminate();
 
@@ -205,7 +205,7 @@ int main(int argc, char* argv[])
 
 	if (!display.get())
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Main: Could not create display.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create display.");
 
 		vkts::visualTerminate();
 
@@ -222,7 +222,7 @@ int main(int argc, char* argv[])
 
 		if (!window.get())
 		{
-			vkts::logPrint(VKTS_LOG_ERROR, "Main: Could not create window.");
+			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create window.");
 
 			display->destroy();
 
@@ -243,7 +243,7 @@ int main(int argc, char* argv[])
 
 	if (!example.get())
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, "Main: Could not create application.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create application.");
 
 		window->destroy();
 

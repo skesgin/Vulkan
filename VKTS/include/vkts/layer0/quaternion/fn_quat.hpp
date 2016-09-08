@@ -36,73 +36,73 @@ namespace vkts
  *
  * @ThreadSafe
  */
-VKTS_APICALL float VKTS_APIENTRY norm(const quat& q);
+VKTS_APICALL float VKTS_APIENTRY norm(const Quat& q);
 
 /**
  *
  * @ThreadSafe
  */
-VKTS_APICALL quat VKTS_APIENTRY normalize(const quat& q);
+VKTS_APICALL Quat VKTS_APIENTRY normalize(const Quat& q);
 
 /**
  *
  * @ThreadSafe
  */
-VKTS_APICALL quat VKTS_APIENTRY conjugate(const quat& q);
+VKTS_APICALL Quat VKTS_APIENTRY conjugate(const Quat& q);
 
 /**
  *
  * @ThreadSafe
  */
-VKTS_APICALL quat VKTS_APIENTRY inverse(const quat& q);
+VKTS_APICALL Quat VKTS_APIENTRY inverse(const Quat& q);
 
 /**
  *
  * @ThreadSafe
  */
-VKTS_APICALL float VKTS_APIENTRY dot(const quat& q0, const quat& q1);
+VKTS_APICALL float VKTS_APIENTRY dot(const Quat& q0, const Quat& q1);
 
 /**
  *
  * @ThreadSafe
  */
-VKTS_APICALL quat VKTS_APIENTRY slerp(const quat& q0, const quat& q1, const float t);
+VKTS_APICALL Quat VKTS_APIENTRY slerp(const Quat& q0, const Quat& q1, const float t);
 
 /**
  *
  * @ThreadSafe
  */
-VKTS_APICALL quat VKTS_APIENTRY rotateAxis(const float angle, const float x, const float y, const float z);
+VKTS_APICALL Quat VKTS_APIENTRY rotateAxis(const float angle, const float x, const float y, const float z);
 
 /**
  *
  * @ThreadSafe
  */
-VKTS_APICALL quat VKTS_APIENTRY rotateRx(const float anglex);
+VKTS_APICALL Quat VKTS_APIENTRY rotateRx(const float anglex);
 
 /**
  *
  * @ThreadSafe
  */
-VKTS_APICALL quat VKTS_APIENTRY rotateRy(const float angley);
+VKTS_APICALL Quat VKTS_APIENTRY rotateRy(const float angley);
 
 /**
  *
  * @ThreadSafe
  */
-VKTS_APICALL quat VKTS_APIENTRY rotateRz(const float anglez);
+VKTS_APICALL Quat VKTS_APIENTRY rotateRz(const float anglez);
 
 /**
  *
  * @ThreadSafe
  */
-VKTS_APICALL quat VKTS_APIENTRY rotateRzRyRx(const float anglez, const float angley, const float anglex);
+VKTS_APICALL Quat VKTS_APIENTRY rotateRzRyRx(const float anglez, const float angley, const float anglex);
 
 /**
  *
  * @ThreadSafe
  */
-VKTS_APICALL quat VKTS_APIENTRY rotateRzRxRy(const float anglez, const float anglex, const float angley);
+VKTS_APICALL Quat VKTS_APIENTRY rotateRzRxRy(const float anglez, const float anglex, const float angley);
 
 }
 

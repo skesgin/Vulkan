@@ -55,7 +55,7 @@ VKTS_APICALL int32_t VKTS_APIENTRY logGetLevel();
  *
  * @ThreadSafe
  */
-VKTS_APICALL void VKTS_APIENTRY logPrint(const int32_t verbosity, const char* format, ...);
+VKTS_APICALL void VKTS_APIENTRY logPrint(const int32_t verbosity, const char* fileName, const int32_t lineNumber, const char* format, ...);
 
 }
 

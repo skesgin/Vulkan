@@ -29,7 +29,7 @@
 namespace vkts
 {
 
-void plane::normalize()
+void Plane::normalize()
 {
 	float length = glm::length(p);
 
@@ -41,53 +41,53 @@ void plane::normalize()
 	}
 }
 
-plane::plane() :
+Plane::Plane() :
 	p(0.0f, 1.0f, 0.0f), d(0.0f)
 {
 }
 
-plane::plane(const float x, const float y, const float z, const float d) :
+Plane::Plane(const float x, const float y, const float z, const float d) :
 	p(x, y, z), d(d)
 {
 	normalize();
 }
 
-plane::plane(const glm::vec3& normal, const float d) :
+Plane::Plane(const glm::vec3& normal, const float d) :
 	p(normal), d(d)
 {
 	normalize();
 }
 
-plane::plane(const glm::vec3& normal, const glm::vec4& point) :
+Plane::Plane(const glm::vec3& normal, const glm::vec4& point) :
 	p(glm::normalize(normal)), d(-glm::dot(glm::normalize(normal), glm::vec3(point)))
 {
 }
 
-plane::~plane()
+Plane::~Plane()
 {
 }
 
-const glm::vec3& plane::getNormal() const
+const glm::vec3& Plane::getNormal() const
 {
 	return p;
 }
 
-float plane::getD() const
+float Plane::getD() const
 {
 	return d;
 }
 
-float plane::distance(const glm::vec4& point) const
+float Plane::distance(const glm::vec4& point) const
 {
 	return glm::dot(getNormal(), glm::vec3(point)) + getD();
 }
 
-float plane::distance(const sphere& sphere) const
+float Plane::distance(const Sphere& sphere) const
 {
 	return glm::abs(distance(sphere.getCenter())) - sphere.getRadius();
 }
 
-float plane::distance(const plane& plane) const
+float Plane::distance(const Plane& plane) const
 {
 	float dot = glm::dot(getNormal(), plane.getNormal());
 
@@ -106,11 +106,11 @@ float plane::distance(const plane& plane) const
 
 //
 
-plane operator* (const glm::mat4& matrix, const plane& p)
+Plane operator* (const glm::mat4& matrix, const Plane& p)
 {
 	glm::vec4 temp = matrix * glm::vec4(p.getNormal(), p.getD());
 
-	return plane(glm::vec3(temp), temp.w);
+	return Plane(glm::vec3(temp), temp.w);
 }
 
 } /* namespace vkts */

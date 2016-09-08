@@ -26,6 +26,8 @@
 
 #include <vkts/vkts.hpp>
 
+#include "fn_image_data_internal.hpp"
+
 namespace vkts
 {
 
@@ -80,49 +82,9 @@ SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataCubemap(const IImageData
 	{
 		for (uint32_t x = 0; x < length; x++)
 		{
-			for (uint32_t i = 0; i < 6; i++)
+			for (uint32_t side = 0; side < 6; side++)
 			{
-				switch (i)
-				{
-					case 0:
-
-						// Positive X
-						scanVector = glm::vec3(1.0f, 1.0f - offset - step * (float)y, 1.0f - offset - step * (float)x);
-
-						break;
-					case 1:
-
-						// Negative X
-						scanVector = glm::vec3(-1.0f, 1.0f - offset - step * (float)y, -1.0f + offset + step * (float)x);
-
-						break;
-					case 2:
-
-						// Positive Y
-						scanVector = glm::vec3(-1.0f + offset + step * (float)x, 1.0f, -1.0f + offset + step * (float)y);
-
-						break;
-					case 3:
-
-						// Negative Y
-						scanVector = glm::vec3(-1.0f + offset + step * (float)x, -1.0f, 1.0f - offset - step * (float)y);
-
-						break;
-					case 4:
-
-						// Positive Z
-						scanVector = glm::vec3(-1.0f + offset + step * (float)x, 1.0f - offset - step * (float)y, 1.0f);
-
-						break;
-					case 5:
-
-						// Negative Z
-						scanVector = glm::vec3(1.0f - offset - step * (float)x, 1.0f - offset - step * (float)y, -1.0f);
-
-						break;
-				}
-
-				scanVector = glm::normalize(scanVector);
+				scanVector = imageDataGetScanVector(x, y, side, step, offset);
 
 				//
 
@@ -133,7 +95,7 @@ SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataCubemap(const IImageData
 
 				texel = sourceImage->getSample(sampleLocation.s, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_REPEAT, sampleLocation.t, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT, 0.5f, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, 0, 0);
 
-				result[i]->setTexel(texel, x, y, 0, 0, 0);
+				result[side]->setTexel(texel, x, y, 0, 0, 0);
 			}
 		}
 	}

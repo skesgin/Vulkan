@@ -29,9 +29,9 @@
 namespace vkts
 {
 
-void quat::multiply(quat& result, const quat& q0, const quat& q1) const
+void Quat::multiply(Quat& result, const Quat& q0, const Quat& q1) const
 {
-    quat temp;
+    Quat temp;
 
     temp.x = q0.w * q1.x + q0.x * q1.w + q0.y * q1.z - q0.z * q1.y;
     temp.y = q0.w * q1.y - q0.x * q1.z + q0.y * q1.w + q0.z * q1.x;
@@ -41,61 +41,61 @@ void quat::multiply(quat& result, const quat& q0, const quat& q1) const
     result = temp;
 }
 
-quat::quat() :
+Quat::Quat() :
     x(0.0f), y(0.0f), z(0.0f), w(1.0f)
 {
 }
 
-quat::quat(const float x, const float y, const float z, const float w) :
+Quat::Quat(const float x, const float y, const float z, const float w) :
     x(x), y(y), z(z), w(w)
 {
 }
 
-quat::quat(const quat& other) :
+Quat::Quat(const Quat& other) :
     x(other.x), y(other.y), z(other.z), w(other.w)
 {
 }
 
-quat::quat(const glm::vec3& other) :
+Quat::Quat(const glm::vec3& other) :
     x(other.x), y(other.y), z(other.z), w(0.0f)
 {
 }
 
-quat::quat(const glm::vec4& other) :
+Quat::Quat(const glm::vec4& other) :
     x(other.x), y(other.y), z(other.z), w(0.0f)
 {
 }
 
-quat::~quat()
+Quat::~Quat()
 {
 }
 
-bool quat::operator ==(const quat& other) const
+bool Quat::operator ==(const Quat& other) const
 {
     return (x == other.x) && (y == other.y) && (z == other.z) && (w == other.w);
 }
 
-bool quat::operator !=(const quat& other) const
+bool Quat::operator !=(const Quat& other) const
 {
     return !(*this == other);
 }
 
-quat quat::operator +() const
+Quat Quat::operator +() const
 {
 	return *this;
 }
 
-quat quat::operator -() const
+Quat Quat::operator -() const
 {
-	return quat(-x, -y, -z, -w);
+	return Quat(-x, -y, -z, -w);
 }
 
-quat quat::operator +(const quat& other) const
+Quat Quat::operator +(const Quat& other) const
 {
-    return quat(x + other.x, y + other.y, z + other.z, w + other.w);
+    return Quat(x + other.x, y + other.y, z + other.z, w + other.w);
 }
 
-quat& quat::operator +=(const quat& other)
+Quat& Quat::operator +=(const Quat& other)
 {
     x += other.x;
     y += other.y;
@@ -105,12 +105,12 @@ quat& quat::operator +=(const quat& other)
     return *this;
 }
 
-quat quat::operator -(const quat& other) const
+Quat Quat::operator -(const Quat& other) const
 {
-    return quat(x - other.x, y - other.y, z - other.z, w - other.w);
+    return Quat(x - other.x, y - other.y, z - other.z, w - other.w);
 }
 
-quat& quat::operator -=(const quat& other)
+Quat& Quat::operator -=(const Quat& other)
 {
     x -= other.x;
     y -= other.y;
@@ -120,28 +120,28 @@ quat& quat::operator -=(const quat& other)
     return *this;
 }
 
-quat quat::operator *(const quat& other) const
+Quat Quat::operator *(const Quat& other) const
 {
-    quat result;
+    Quat result;
 
     multiply(result, *this, other);
 
     return result;
 }
 
-quat& quat::operator *=(const quat& other)
+Quat& Quat::operator *=(const Quat& other)
 {
     multiply(*this, *this, other);
 
     return *this;
 }
 
-quat quat::operator *(const float other) const
+Quat Quat::operator *(const float other) const
 {
-    return quat(x * other, y * other, z * other, w * other);
+    return Quat(x * other, y * other, z * other, w * other);
 }
 
-quat& quat::operator *=(const float other)
+Quat& Quat::operator *=(const float other)
 {
     x *= other;
     y *= other;
@@ -151,12 +151,12 @@ quat& quat::operator *=(const float other)
     return *this;
 }
 
-quat quat::operator /(const float other) const
+Quat Quat::operator /(const float other) const
 {
-    return quat(x / other, y / other, z / other, w / other);
+    return Quat(x / other, y / other, z / other, w / other);
 }
 
-quat& quat::operator /=(const float other)
+Quat& Quat::operator /=(const float other)
 {
     x /= other;
     y /= other;
@@ -166,7 +166,7 @@ quat& quat::operator /=(const float other)
     return *this;
 }
 
-quat& quat::operator =(const quat& other)
+Quat& Quat::operator =(const Quat& other)
 {
     this->x = other.x;
     this->y = other.y;
@@ -176,21 +176,21 @@ quat& quat::operator =(const quat& other)
     return *this;
 }
 
-glm::vec3 quat::operator *(const glm::vec3& other) const
+glm::vec3 Quat::operator *(const glm::vec3& other) const
 {
-    auto result = *this * quat(other) * conjugate(*this);
+    auto result = *this * Quat(other) * conjugate(*this);
 
     return glm::vec3(result.x, result.y, result.z);
 }
 
-glm::vec4 quat::operator *(const glm::vec4& other) const
+glm::vec4 Quat::operator *(const glm::vec4& other) const
 {
-    auto result = *this * quat(other) * conjugate(*this);
+    auto result = *this * Quat(other) * conjugate(*this);
 
     return glm::vec4(result.x, result.y, result.z, 1.0f);
 }
 
-glm::mat3 quat::mat3() const
+glm::mat3 Quat::mat3() const
 {
     glm::mat3 matrix;
 
@@ -209,12 +209,12 @@ glm::mat3 quat::mat3() const
     return matrix;
 }
 
-glm::mat4 quat::mat4() const
+glm::mat4 Quat::mat4() const
 {
     return glm::mat4(mat3());
 }
 
-glm::vec3 quat::rotation() const
+glm::vec3 Quat::rotation() const
 {
 	glm::vec3 rotation(0.0f, 0.0f, 0.0f);
 
@@ -238,12 +238,12 @@ glm::vec3 quat::rotation() const
 
 //
 
-glm::mat4 operator* (const glm::mat4& matrix, const quat& q)
+glm::mat4 operator* (const glm::mat4& matrix, const Quat& q)
 {
 	return matrix * q.mat4();
 }
 
-glm::mat4 operator* (const quat& q, const glm::mat4& matrix)
+glm::mat4 operator* (const Quat& q, const glm::mat4& matrix)
 {
 	return q.mat4() * matrix;
 }

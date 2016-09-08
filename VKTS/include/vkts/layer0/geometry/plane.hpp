@@ -32,9 +32,9 @@
 namespace vkts
 {
 
-class sphere;
+class Sphere;
 
-class plane
+class Plane
 {
 
 private:
@@ -47,11 +47,11 @@ private:
 
 public:
 
-    plane();
-    plane(const float x, const float y, const float z, const float d);
-    plane(const glm::vec3& normal, const float d);
-    plane(const glm::vec3& normal, const glm::vec4& point);
-    ~plane();
+    Plane();
+    Plane(const float x, const float y, const float z, const float d);
+    Plane(const glm::vec3& normal, const float d);
+    Plane(const glm::vec3& normal, const glm::vec4& point);
+    ~Plane();
 
     const glm::vec3& getNormal() const;
 
@@ -59,13 +59,13 @@ public:
 
     float distance(const glm::vec4& point) const;
 
-    float distance(const sphere& sphere) const;
+    float distance(const Sphere& sphere) const;
 
-    float distance(const plane& plane) const;
+    float distance(const Plane& plane) const;
 
 };
 
-plane operator* (const glm::mat4& matrix, const plane& p);
+Plane operator* (const glm::mat4& matrix, const Plane& p);
 
 } /* namespace vkts */
 

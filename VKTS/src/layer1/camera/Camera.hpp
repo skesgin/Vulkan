@@ -49,7 +49,7 @@ public:
 
     Camera();
     Camera(const glm::vec4& eye, const glm::vec3& rotation);
-    Camera(const glm::vec4& eye, const quat& rotationZ, const quat& rotationY, const quat& rotationX);
+    Camera(const glm::vec4& eye, const Quat& rotationZ, const Quat& rotationY, const Quat& rotationX);
     Camera(const Camera& other);
     Camera(Camera&& other) = delete;
     virtual ~Camera();

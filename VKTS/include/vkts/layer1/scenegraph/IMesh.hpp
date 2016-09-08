@@ -32,7 +32,7 @@
 namespace vkts
 {
 
-class overwrite;
+class Overwrite;
 
 class IMesh: public ICloneable<IMesh>, public IDestroyable
 {
@@ -62,15 +62,15 @@ public:
 
     virtual void updateDescriptorSetsRecursive(const std::string& nodeName, const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets) = 0;
 
-    virtual void bindDrawIndexedRecursive(const std::string& nodeName, const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const overwrite* renderOverwrite = nullptr, const uint32_t bufferIndex = 0) const = 0;
+    virtual void bindDrawIndexedRecursive(const std::string& nodeName, const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const Overwrite* renderOverwrite = nullptr, const uint32_t bufferIndex = 0) const = 0;
 
     virtual void setDisplace(const glm::vec2& displace) = 0;
 
     virtual const glm::vec2& getDisplace() const = 0;
 
-    virtual void setAABB(const aabb& box) = 0;
+    virtual void setAABB(const Aabb& box) = 0;
 
-    virtual const aabb& getAABB() const = 0;
+    virtual const Aabb& getAABB() const = 0;
 
 };
 

@@ -42,7 +42,7 @@ VKTS_APICALL ICameraSP VKTS_APIENTRY cameraCreate(const glm::vec4& position, con
  *
  * @ThreadSafe
  */
-VKTS_APICALL ICameraSP VKTS_APIENTRY cameraCreate(const glm::vec4& position, const quat& rotationZ, const quat& rotationY, const quat& rotationX);
+VKTS_APICALL ICameraSP VKTS_APIENTRY cameraCreate(const glm::vec4& position, const Quat& rotationZ, const Quat& rotationY, const Quat& rotationX);
 
 /**
  *

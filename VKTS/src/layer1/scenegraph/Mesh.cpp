@@ -106,9 +106,9 @@ void Mesh::updateDescriptorSetsRecursive(const std::string& nodeName, const uint
     }
 }
 
-void Mesh::bindDrawIndexedRecursive(const std::string& nodeName, const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const overwrite* renderOverwrite, const uint32_t bufferIndex) const
+void Mesh::bindDrawIndexedRecursive(const std::string& nodeName, const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const Overwrite* renderOverwrite, const uint32_t bufferIndex) const
 {
-    const overwrite* currentOverwrite = renderOverwrite;
+    const Overwrite* currentOverwrite = renderOverwrite;
     while (currentOverwrite)
     {
     	if (!currentOverwrite->meshBindDrawIndexedRecursive(*this, cmdBuffer, allGraphicsPipelines, bufferIndex))
@@ -136,12 +136,12 @@ const glm::vec2& Mesh::getDisplace() const
 	return displace;
 }
 
-void Mesh::setAABB(const aabb& box)
+void Mesh::setAABB(const Aabb& box)
 {
 	this->box = box;
 }
 
-const aabb& Mesh::getAABB() const
+const Aabb& Mesh::getAABB() const
 {
 	return box;
 }
