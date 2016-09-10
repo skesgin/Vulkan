@@ -76,6 +76,20 @@ static VkBool32 g_gamepadAvailable[VKTS_MAX_GAMEPADS];
 
 //
 
+typedef struct _TouchInfo  {
+	uint64_t id;
+
+	VkBool32 used;
+} TouchInfo;
+
+typedef struct _TouchInfoContainer  {
+	TouchInfo	touchInfo[VKTS_MAX_TOUCHPAD_SLOTS];
+} TouchInfoContainer;
+
+static std::map<HWND, TouchInfoContainer> g_allTouchInfoContainers;
+
+//
+
 static LRESULT CALLBACK _visualProcessMessages(HWND hWnd, UINT uiMsg, WPARAM wParam, LPARAM lParam)
 {
     NativeWindowSP currentWindow;
@@ -242,17 +256,78 @@ static LRESULT CALLBACK _visualProcessMessages(HWND hWnd, UINT uiMsg, WPARAM wPa
         }
         case WM_TOUCH:
         {
+        	if (g_allTouchInfoContainers.find(hWnd) == g_allTouchInfoContainers.end())
+        	{
+        		TouchInfoContainer newEntry{};
+
+        		g_allTouchInfoContainers[hWnd] = newEntry;
+        	}
+
+        	auto& currentTouchInfoContainers = g_allTouchInfoContainers[hWnd];
+
+        	//
+
         	auto input = std::vector<TOUCHINPUT>(VKTS_MAX_TOUCHPAD_SLOTS);
 
         	UINT inputCount = LOWORD(wParam);
 
 			if (GetTouchInputInfo((HTOUCHINPUT)lParam, inputCount, &input[0], sizeof(TOUCHINPUT)))
 			{
-				for (int32_t inputSlot = 0; inputSlot < glm::min((int32_t)inputCount, VKTS_MAX_TOUCHPAD_SLOTS); inputSlot++)
+				for (int32_t inputIndex = 0; inputIndex < glm::min((int32_t)inputCount, VKTS_MAX_TOUCHPAD_SLOTS); inputIndex++)
 				{
-					// TODO: Implement.
+					int32_t slotIndex = -1;
 
-					printf("%d: %u %s\n", inputSlot, (uint32_t)input[inputSlot].dwID, input[inputSlot].dwFlags & TOUCHEVENTF_DOWN ? "Pressed" : (input[inputSlot].dwFlags & TOUCHEVENTF_UP ? "Released" : "Other"));
+					// Look, if id is present.
+					for (int32_t searchSlotIndex = 0; searchSlotIndex < VKTS_MAX_TOUCHPAD_SLOTS; searchSlotIndex++)
+					{
+						if (currentTouchInfoContainers.touchInfo[searchSlotIndex].id == (uint64_t)input[inputIndex].dwID)
+						{
+							slotIndex = searchSlotIndex;
+
+							break;
+						}
+					}
+
+					if (slotIndex == -1)
+					{
+						// Look, if entry can be reused.
+						for (int32_t searchSlotIndex = 0; searchSlotIndex < VKTS_MAX_TOUCHPAD_SLOTS; searchSlotIndex++)
+						{
+							if (!currentTouchInfoContainers.touchInfo[searchSlotIndex].used)
+							{
+								slotIndex = searchSlotIndex;
+
+								currentTouchInfoContainers.touchInfo[slotIndex].id = (uint64_t)input[inputIndex].dwID;
+
+								currentTouchInfoContainers.touchInfo[slotIndex].used = VK_TRUE;
+
+								break;
+							}
+						}
+					}
+
+					if (slotIndex >= 0)
+					{
+						if (input[inputIndex].dwFlags & TOUCHEVENTF_DOWN)
+						{
+							currentWindow->getTouchpadInput().setPressed(slotIndex, VK_TRUE);
+						}
+						else if (input[inputIndex].dwFlags & TOUCHEVENTF_UP)
+						{
+							currentTouchInfoContainers.touchInfo[slotIndex].used = VK_FALSE;
+
+							currentWindow->getTouchpadInput().setPressed(slotIndex, VK_FALSE);
+						}
+
+						if (input[inputIndex].dwFlags & TOUCHEVENTF_MOVE)
+						{
+							currentWindow->getTouchpadInput().setLocation(slotIndex, glm::ivec2((int32_t)input[inputIndex].x, (int32_t)input[inputIndex].y));
+						}
+					}
+					else
+					{
+						logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No empty slot entry found.");
+					}
 				}
 
 				CloseTouchInputHandle((HTOUCHINPUT)lParam);
@@ -1015,6 +1090,8 @@ void VKTS_APIENTRY _visualTerminate()
     g_defaultDisplay.reset();
 
     // Terminate gamepad not needed.
+
+    g_allTouchInfoContainers.clear();
 }
 
 }

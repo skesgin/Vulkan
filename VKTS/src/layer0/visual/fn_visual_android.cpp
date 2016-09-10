@@ -105,7 +105,47 @@ static int32_t _onInputEvent(struct android_app* app, AInputEvent* event)
 
     int32_t source = AInputEvent_getSource(event);
 
-    if (source == AINPUT_SOURCE_MOUSE)
+    if (source == AINPUT_SOURCE_TOUCHSCREEN)
+    {
+        int32_t action = AMotionEvent_getAction(event);
+
+        int32_t actionEvent = action & AMOTION_EVENT_ACTION_MASK;
+
+        int32_t slotIndex = (action & AMOTION_EVENT_ACTION_POINTER_INDEX_MASK) >> AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT;          
+
+        if (slotIndex >= 0 && slotIndex < VKTS_MAX_TOUCHPAD_SLOTS)
+        {
+            switch (actionEvent)
+            {
+                case AMOTION_EVENT_ACTION_DOWN:
+                {
+                    g_defaultWindow->getTouchpadInput().setPressed(slotIndex, VK_TRUE);
+
+                    break;
+                }
+                break;
+                case AMOTION_EVENT_ACTION_UP:
+                {
+                    g_defaultWindow->getTouchpadInput().setPressed(slotIndex, VK_FALSE);
+
+                    break;
+                }
+                case AMOTION_EVENT_ACTION_MOVE:
+                {
+                    int32_t x = (int32_t)AMotionEvent_getX(event, slotIndex);
+                    int32_t y = (int32_t)AMotionEvent_getY(event, slotIndex);
+
+                    g_defaultWindow->getTouchpadInput().setLocation(slotIndex, glm::ivec2(x, y));
+
+                    break;
+                }                
+                default:
+                    // Do nothing.
+                break;
+            }
+        }
+    }
+    else if (source == AINPUT_SOURCE_MOUSE)
     {
         int32_t x = (int32_t)AMotionEvent_getX(event, 0);
         int32_t y = (int32_t)AMotionEvent_getY(event, 0);

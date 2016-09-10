@@ -85,6 +85,9 @@ How to build:
 Changelog:
 ----------
 
+09/10/2016
+- Added first version of touch input handler.
+
 09/08/2016
 - Refactored classes, that all are now uppercase. Changed VKTS version.
 - Improved and cleaned up logging.
