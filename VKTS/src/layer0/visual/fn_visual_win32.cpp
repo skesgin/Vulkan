@@ -240,6 +240,26 @@ static LRESULT CALLBACK _visualProcessMessages(HWND hWnd, UINT uiMsg, WPARAM wPa
 
             break;
         }
+        case WM_TOUCH:
+        {
+        	auto input = std::vector<TOUCHINPUT>(VKTS_MAX_TOUCHPAD_SLOTS);
+
+        	UINT inputCount = LOWORD(wParam);
+
+			if (GetTouchInputInfo((HTOUCHINPUT)lParam, inputCount, &input[0], sizeof(TOUCHINPUT)))
+			{
+				for (int32_t inputSlot = 0; inputSlot < glm::min((int32_t)inputCount, VKTS_MAX_TOUCHPAD_SLOTS); inputSlot++)
+				{
+					// TODO: Implement.
+
+					printf("%d: %u %s\n", inputSlot, (uint32_t)input[inputSlot].dwID, input[inputSlot].dwFlags & TOUCHEVENTF_DOWN ? "Pressed" : (input[inputSlot].dwFlags & TOUCHEVENTF_UP ? "Released" : "Other"));
+				}
+
+				CloseTouchInputHandle((HTOUCHINPUT)lParam);
+			}
+
+			break;
+        }
     }
 
     return DefWindowProc(hWnd, uiMsg, wParam, lParam);
@@ -771,6 +791,8 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
     HWND nativeWindow = CreateWindowEx(dwExStyle, VKTS_WINDOWS_CLASSNAME, title, dwStyle, xoffset, yoffset, wRect.right - wRect.left + 1, wRect.bottom - wRect.top + 1, NULL, NULL, hInstance, NULL);
 
+    RegisterTouchWindow(nativeWindow, 0);
+
     ShowWindow(nativeWindow, SW_SHOW);
     SetForegroundWindow(nativeWindow);
     SetFocus(nativeWindow);
@@ -925,6 +947,8 @@ void VKTS_APIENTRY _visualDestroyWindow(const NativeWindowSP& window)
         {
             while (ShowCursor(TRUE) < 0);
         }
+
+        UnregisterTouchWindow(nativeWindow);
 
         DestroyWindow(nativeWindow);
 
