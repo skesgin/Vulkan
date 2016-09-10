@@ -24,19 +24,60 @@
  * THE SOFTWARE.
  */
 
-#ifndef VKTS_FN_INPUT_INTERNAL_HPP_
-#define VKTS_FN_INPUT_INTERNAL_HPP_
+#ifndef VKTS_TOUCHPADINPUT_HPP_
+#define VKTS_TOUCHPADINPUT_HPP_
 
 #include <vkts/vkts.hpp>
-
-#include "GamepadInput.hpp"
-#include "KeyInput.hpp"
-#include "MouseInput.hpp"
-#include "TouchpadInput.hpp"
 
 namespace vkts
 {
 
-}
+class TouchpadInput
+{
 
-#endif /* VKTS_FN_INPUT_INTERNAL_HPP_ */
+private:
+
+    VkBool32 pressed[VKTS_MAX_TOUCHPAD_SLOTS];
+
+    mutable std::mutex mutexPressed;
+
+    glm::ivec2 location[VKTS_MAX_TOUCHPAD_SLOTS];
+
+    mutable std::mutex mutexLocation;
+
+public:
+
+    TouchpadInput();
+    TouchpadInput(const TouchpadInput& other) = delete;
+    TouchpadInput(TouchpadInput&& other) = delete;
+    virtual ~TouchpadInput();
+
+    TouchpadInput& operator =(const TouchpadInput& other) = delete;
+
+    TouchpadInput& operator =(TouchpadInput && other) = delete;
+
+    //
+
+    VkBool32 getPressed(const int32_t slotIndex) const;
+
+    void setPressed(const int32_t slotIndex, const VkBool32 pressed);
+
+    //
+
+    const glm::ivec2& getLocation(const int32_t slotIndex) const;
+
+    void setLocation(const int32_t slotIndex, const glm::ivec2& location);
+
+    void setLocationX(const int32_t slotIndex, const int32_t x);
+
+    void setLocationY(const int32_t slotIndex, const int32_t y);
+
+    //
+
+    void resetTouchpad();
+
+};
+
+} /* namespace vkts */
+
+#endif /* VKTS_TOUCHPADINPUT_HPP_ */

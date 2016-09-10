@@ -119,6 +119,7 @@
 #include <vkts/layer0/input/fn_input_gamepad.hpp>
 #include <vkts/layer0/input/fn_input_key.hpp>
 #include <vkts/layer0/input/fn_input_mouse.hpp>
+#include <vkts/layer0/input/fn_input_touchpad.hpp>
 
 /**
  * Types.

@@ -146,6 +146,10 @@ public:
 
     virtual float getGamepadAxis(const int32_t windowIndex, const int32_t gamepadIndex, const int32_t axisIndex) const override;
 
+    virtual VkBool32 getTouchpadPressed(const int32_t windowIndex, const int32_t slotIndex) const override;
+
+    virtual const glm::ivec2& getTouchpadLocation(const int32_t windowIndex, const int32_t slotIndex) const override;
+
     // Task functions
 
     virtual VkBool32 sendTask(const ITaskSP& task) const override;

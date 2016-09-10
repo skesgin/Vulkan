@@ -24,19 +24,11 @@
  * THE SOFTWARE.
  */
 
-#ifndef VKTS_FN_INPUT_INTERNAL_HPP_
-#define VKTS_FN_INPUT_INTERNAL_HPP_
+#ifndef VKTS_FN_INPUT_TOUCHPAD_HPP_
+#define VKTS_FN_INPUT_TOUCHPAD_HPP_
 
 #include <vkts/vkts.hpp>
 
-#include "GamepadInput.hpp"
-#include "KeyInput.hpp"
-#include "MouseInput.hpp"
-#include "TouchpadInput.hpp"
+#define VKTS_MAX_TOUCHPAD_SLOTS		2
 
-namespace vkts
-{
-
-}
-
-#endif /* VKTS_FN_INPUT_INTERNAL_HPP_ */
+#endif /* VKTS_FN_INPUT_TOUCHPAD_HPP_ */

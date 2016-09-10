@@ -110,8 +110,7 @@ void GamepadInput::resetGamepad()
     std::lock_guard<std::mutex> lockGuardButtons(mutexButtons);
     std::lock_guard<std::mutex> lockGuardMouseWheel(mutexAxis);
 
-    for (int32_t mouseButtonIndex = 0;
-            mouseButtonIndex < VKTS_MAX_GAMEPAD_BUTTONS; mouseButtonIndex++)
+    for (int32_t mouseButtonIndex = 0; mouseButtonIndex < VKTS_MAX_GAMEPAD_BUTTONS; mouseButtonIndex++)
     {
         buttons[mouseButtonIndex] = VK_FALSE;
     }

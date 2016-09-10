@@ -433,6 +433,11 @@ VkBool32 VKTS_APIENTRY _visualInit(const VkInstance instance, const VkPhysicalDe
 		return VK_FALSE;
 	}
 
+	if (!_visualInitTouchpad(instance, physicalDevice))
+	{
+		return VK_FALSE;
+	}
+
     //
 
     g_nativeDisplay = XOpenDisplay(0);
@@ -490,6 +495,8 @@ VkBool32 VKTS_APIENTRY _visualDispatchMessages()
     //
 
     _visualDispatchMessagesGamepad();
+
+    _visualDispatchMessagesTouchpad();
 
     //
 
@@ -1188,6 +1195,8 @@ void VKTS_APIENTRY _visualTerminate()
 
     //
 
+    _visualTerminateTouchpad();
+
     _visualTerminateGamepad();
 }
 
@@ -1206,6 +1215,32 @@ void VKTS_APIENTRY _visualGamepadSetAxis(const int32_t gamepadIndex, const int32
     for (size_t index = 0; index < g_allWindows.size(); index++)
     {
         g_allWindows.valueAt(index)->getGamepadInput(gamepadIndex).setAxis(axisIndex, value);
+    }
+}
+
+//
+
+void VKTS_APIENTRY _visualTouchpadSetLocationX(const int32_t slotIndex, const int32_t x)
+{
+    for (size_t index = 0; index < g_allWindows.size(); index++)
+    {
+    	g_allWindows.valueAt(index)->getTouchpadInput().setLocationX(slotIndex, x);
+    }
+}
+
+void VKTS_APIENTRY _visualTouchpadSetLocationY(const int32_t slotIndex, const int32_t y)
+{
+    for (size_t index = 0; index < g_allWindows.size(); index++)
+    {
+        g_allWindows.valueAt(index)->getTouchpadInput().setLocationX(slotIndex, y);
+    }
+}
+
+void VKTS_APIENTRY _visualTouchpadSetPressed(const int32_t slotIndex, const VkBool32 pressed)
+{
+    for (size_t index = 0; index < g_allWindows.size(); index++)
+    {
+        g_allWindows.valueAt(index)->getTouchpadInput().setPressed(slotIndex, pressed);
     }
 }
 

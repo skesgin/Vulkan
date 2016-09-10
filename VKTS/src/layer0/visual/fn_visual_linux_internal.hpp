@@ -51,6 +51,14 @@ VKTS_APICALL void VKTS_APIENTRY _visualTerminateGamepad();
 
 //
 
+VKTS_APICALL VkBool32 VKTS_APIENTRY _visualInitTouchpad(const VkInstance instance, const VkPhysicalDevice physicalDevice);
+
+VKTS_APICALL VkBool32 VKTS_APIENTRY _visualDispatchMessagesTouchpad();
+
+VKTS_APICALL void VKTS_APIENTRY _visualTerminateTouchpad();
+
+//
+
 VKTS_APICALL void VKTS_APIENTRY _visualKeySet(const int32_t keyIndex, const VkBool32 pressed);
 
 
@@ -64,6 +72,13 @@ VKTS_APICALL void VKTS_APIENTRY _visualMouseSetMouseWheel(const int32_t mosueWhe
 VKTS_APICALL void VKTS_APIENTRY _visualGamepadSetButton(const int32_t gamepadIndex, const int32_t buttonIndex, const VkBool32 pressed);
 
 VKTS_APICALL void VKTS_APIENTRY _visualGamepadSetAxis(const int32_t gamepadIndex, const int32_t axisIndex, const float value);
+
+
+VKTS_APICALL void VKTS_APIENTRY _visualTouchpadSetLocationX(const int32_t slotIndex, const int32_t x);
+
+VKTS_APICALL void VKTS_APIENTRY _visualTouchpadSetLocationY(const int32_t slotIndex, const int32_t y);
+
+VKTS_APICALL void VKTS_APIENTRY _visualTouchpadSetPressed(const int32_t slotIndex, const VkBool32 pressed);
 
 }
 

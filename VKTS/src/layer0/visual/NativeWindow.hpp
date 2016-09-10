@@ -67,6 +67,8 @@ private:
 
     GamepadInput gamepad[VKTS_MAX_GAMEPADS];
 
+    TouchpadInput touchpad;
+
 public:
 
     NativeWindow() = delete;
@@ -98,6 +100,10 @@ public:
     GamepadInput& getGamepadInput(const int32_t gamepadIndex);
 
     const GamepadInput& getGamepadInput(const int32_t gamepadIndex) const;
+
+    TouchpadInput& getTouchpadInput();
+
+    const TouchpadInput& getTouchpadInput() const;
 
     //
     // INativeWindow

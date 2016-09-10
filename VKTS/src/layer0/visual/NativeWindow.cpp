@@ -32,7 +32,7 @@ namespace vkts
 {
 
 NativeWindow::NativeWindow(const INativeDisplayWP& display, VKTS_NATIVE_WINDOW nativeWindow, const int32_t index, const char* title, const uint32_t width, const uint32_t height, const VkBool32 fullscreen, const VkBool32 resizable, const VkBool32 invisibleCursor) :
-    INativeWindow(), display(display), nativeWindow(nativeWindow), index(index), title(title), dimension(width, height), tempDimension(width, height), fullscreen(fullscreen), resizable(resizable), invisibleCursor(invisibleCursor), mutex(), keyInput(), mouseInput()
+    INativeWindow(), display(display), nativeWindow(nativeWindow), index(index), title(title), dimension(width, height), tempDimension(width, height), fullscreen(fullscreen), resizable(resizable), invisibleCursor(invisibleCursor), mutex(), keyInput(), mouseInput(), touchpad()
 {
 }
 
@@ -103,6 +103,16 @@ const GamepadInput& NativeWindow::getGamepadInput(const int32_t gamepadIndex) co
     assert(gamepadIndex >= 0 && gamepadIndex < VKTS_MAX_GAMEPADS);
 
     return gamepad[gamepadIndex];
+}
+
+TouchpadInput& NativeWindow::getTouchpadInput()
+{
+    return touchpad;
+}
+
+const TouchpadInput& NativeWindow::getTouchpadInput() const
+{
+    return touchpad;
 }
 
 //

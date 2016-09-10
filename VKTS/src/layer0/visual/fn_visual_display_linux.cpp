@@ -50,9 +50,19 @@ VkBool32 VKTS_APIENTRY _visualInitDisplay(const VkInstance instance, const VkPhy
 
 	strcpy(eventFilename, "/dev/input/event0");
 
-	for (eventNumber = 0; eventNumber < 10; eventNumber++)
+	for (eventNumber = 0; eventNumber < 32; eventNumber++)
 	{
-		eventFilename[16] = '0' + (char)eventNumber;
+		if (eventNumber < 10)
+		{
+			eventFilename[16] = '0' + (char)eventNumber;
+			eventFilename[17] = 0;
+		}
+		else
+		{
+			eventFilename[16] = '0' + (char)(eventNumber / 10);
+			eventFilename[17] = '0' + (char)(eventNumber % 10);
+			eventFilename[18] = 0;
+		}
 
 		fileDescriptor = open(eventFilename, O_RDONLY | O_NONBLOCK);
 		
@@ -93,6 +103,13 @@ VkBool32 VKTS_APIENTRY _visualInitDisplay(const VkInstance instance, const VkPhy
     // Detect gamepad.
     
     if (!_visualInitGamepad(instance, physicalDevice))
+    {
+    	return VK_FALSE;
+    }
+
+    // Detect touchpad.
+
+    if (!_visualInitTouchpad(instance, physicalDevice))
     {
     	return VK_FALSE;
     }
@@ -246,11 +263,20 @@ VkBool32 VKTS_APIENTRY _visualDispatchMessagesDisplay()
 		return VK_FALSE;
 	}
 
+	result = _visualDispatchMessagesTouchpad();
+
+	if (!result)
+	{
+		return VK_FALSE;
+	}
+
     return VK_TRUE;
 }
 
 void VKTS_APIENTRY _visualTerminateDisplay()
 {
+	_visualTerminateTouchpad();
+
 	_visualTerminateGamepad();
     
     if (g_mouseFileDescriptor >= 0)

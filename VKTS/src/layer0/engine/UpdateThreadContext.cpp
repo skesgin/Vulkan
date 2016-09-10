@@ -264,7 +264,7 @@ VkBool32 UpdateThreadContext::getMouseButton(const int32_t windowIndex, const in
 
 const glm::ivec2& UpdateThreadContext::getMouseLocation(const int32_t windowIndex) const
 {
-    static glm::ivec2 noLocation = glm::ivec2(-1.0, -1.0);
+    static glm::ivec2 noLocation = glm::ivec2(-1, -1);
 
     auto currentWindow = getWindow(windowIndex);
 
@@ -332,6 +332,32 @@ float UpdateThreadContext::getGamepadAxis(const int32_t windowIndex, const int32
     }
 
     return 0.0f;
+}
+
+VkBool32 UpdateThreadContext::getTouchpadPressed(const int32_t windowIndex, const int32_t slotIndex) const
+{
+    auto currentWindow = getWindow(windowIndex);
+
+    if (currentWindow.get())
+    {
+        return currentWindow->getTouchpadInput().getPressed(slotIndex);
+    }
+
+    return VK_FALSE;
+}
+
+const glm::ivec2& UpdateThreadContext::getTouchpadLocation(const int32_t windowIndex, const int32_t slotIndex) const
+{
+    static glm::ivec2 noLocation = glm::ivec2(-1, -1);
+
+    auto currentWindow = getWindow(windowIndex);
+
+    if (currentWindow.get())
+    {
+        return currentWindow->getTouchpadInput().getLocation(slotIndex);
+    }
+
+    return noLocation;
 }
 
 VkBool32 UpdateThreadContext::sendTask(const ITaskSP& task) const
