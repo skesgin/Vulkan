@@ -739,38 +739,6 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 		}
 	}
 
-	//
-
-	vkDestroySemaphore(device, imageAcquiredSemaphore, nullptr);
-
-    vkDestroySemaphore(device, renderingCompleteSemaphore, nullptr);
-
-    //
-
-	VkSemaphoreCreateInfo semaphoreCreateInfo{};
-
-	semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-
-	semaphoreCreateInfo.flags = 0;
-
-	result = vkCreateSemaphore(device, &semaphoreCreateInfo, nullptr, &imageAcquiredSemaphore);
-
-	if (result != VK_SUCCESS)
-	{
-		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create semaphore.");
-
-		return VK_FALSE;
-	}
-
-    result = vkCreateSemaphore(device, &semaphoreCreateInfo, nullptr, &renderingCompleteSemaphore);
-
-    if (result != VK_SUCCESS)
-    {
-        vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create semaphore.");
-
-        return VK_FALSE;
-    }
-
 	return VK_TRUE;
 }
 

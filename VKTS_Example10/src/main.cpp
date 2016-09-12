@@ -147,6 +147,22 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 
+	//
+
+	VkPhysicalDeviceProperties physicalDeviceProperties;
+
+	physicalDevice->getPhysicalDeviceProperties(physicalDeviceProperties);
+
+	// Check, if enough color attachments are possible.
+	if (physicalDeviceProperties.limits.maxColorAttachments < 5)
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Physical device provides not enough color attachments : %d < 5", physicalDeviceProperties.limits.maxColorAttachments);
+
+		return VK_FALSE;
+	}
+
+	//
+
 	if (!vkts::wsiGatherNeededDeviceExtensions(physicalDevice->getPhysicalDevice()))
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not gather device extension.");

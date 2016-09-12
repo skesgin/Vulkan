@@ -2018,26 +2018,6 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 		}
 	}
 
-	//
-
-    result = imageAcquiredSemaphore->reset();
-
-    if (result != VK_SUCCESS)
-    {
-        vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not reset semaphore.");
-
-        return VK_FALSE;
-    }
-
-    result = renderingCompleteSemaphore->reset();
-
-    if (result != VK_SUCCESS)
-    {
-        vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not reset semaphore.");
-
-        return VK_FALSE;
-    }
-
 	return VK_TRUE;
 }
 

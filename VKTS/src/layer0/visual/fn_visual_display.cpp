@@ -790,4 +790,31 @@ void VKTS_APIENTRY _visualGamepadSetAxis(const int32_t gamepadIndex, const int32
     }
 }
 
+//
+
+void VKTS_APIENTRY _visualTouchpadSetLocationX(const int32_t slotIndex, const int32_t x)
+{
+	for (const auto currentPair : g_allWindows)
+    {
+		currentPair.second->window->getTouchpadInput().setLocationX(slotIndex, x);
+    }
+}
+
+void VKTS_APIENTRY _visualTouchpadSetLocationY(const int32_t slotIndex, const int32_t y)
+{
+	for (const auto currentPair : g_allWindows)
+    {
+		currentPair.second->window->getTouchpadInput().setLocationX(slotIndex, y);
+    }
+}
+
+void VKTS_APIENTRY _visualTouchpadSetPressed(const int32_t slotIndex, const VkBool32 pressed)
+{
+	for (const auto currentPair : g_allWindows)
+    {
+		currentPair.second->window->getTouchpadInput().setPressed(slotIndex, pressed);
+    }
+}
+
+
 }
