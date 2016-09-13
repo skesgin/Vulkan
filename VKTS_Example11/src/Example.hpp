@@ -90,6 +90,9 @@ private:
 	vkts::IBufferObjectSP fragmentUniformBuffer;
 	vkts::IBufferObjectSP shadowUniformBuffer;
 
+	vkts::IBufferObjectSP voxelizeViewProjectionUniformBuffer;
+	vkts::IBufferObjectSP voxelizeModelNormalUniformBuffer;
+
 	vkts::IShaderModuleSP standardVertexShaderModule;
 	vkts::IShaderModuleSP standardFragmentShaderModule;
 	vkts::IShaderModuleSP standardShadowFragmentShaderModule;
