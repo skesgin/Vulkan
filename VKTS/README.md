@@ -7,7 +7,7 @@ Authors:
 
 VKTS version: **0.9.3**
 
-Depending Vulkan API header version: **1.0.24**
+Depending Vulkan API header version: **1.0.26**
 
 Depending Vulkan extensions, when using a window system:
 
@@ -84,6 +84,9 @@ How to build:
 
 Changelog:
 ----------
+
+09/15/2016
+- Updated to LunarG SDK 1.0.26.0.
 
 09/10/2016
 - Added first version of touch input handler.
