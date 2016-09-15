@@ -73,6 +73,8 @@
 
 #define VKTS_BINDING_UNIFORM_ENVIRONMENT_COUNT						1
 
+#define VKTS_BINDING_UNIFORM_VOXEL_COUNT 							1
+
 // Amount of bindings stored in phong material.
 
 #define VKTS_BINDING_UNIFORM_PHONG_BINDING_COUNT					8

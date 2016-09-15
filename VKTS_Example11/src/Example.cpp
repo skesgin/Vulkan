@@ -1190,6 +1190,14 @@ VkBool32 Example::buildDescriptorSetLayout()
 		descriptorSetLayoutBinding[5 + i - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_EMISSIVE].pImmutableSamplers = nullptr;
     }
 
+    descriptorSetLayoutBinding[VKTS_DESCRIPTOR_SET_COUNT - 1].binding = VKTS_BINDING_UNIFORM_IMAGE_VOXEL;
+    descriptorSetLayoutBinding[VKTS_DESCRIPTOR_SET_COUNT - 1].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+    descriptorSetLayoutBinding[VKTS_DESCRIPTOR_SET_COUNT - 1].descriptorCount = 1;
+    descriptorSetLayoutBinding[VKTS_DESCRIPTOR_SET_COUNT - 1].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    descriptorSetLayoutBinding[VKTS_DESCRIPTOR_SET_COUNT - 1].pImmutableSamplers = nullptr;
+
+    //
+
 	descriptorSetLayout = vkts::descriptorSetLayoutCreate(initialResources->getDevice()->getDevice(), 0, VKTS_DESCRIPTOR_SET_COUNT, descriptorSetLayoutBinding);
 
 	if (!descriptorSetLayout.get())

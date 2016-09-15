@@ -1599,7 +1599,7 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
 
                 // Create all possibilities, even when not used.
 
-                VkDescriptorPoolSize descriptorPoolSize[2]{};
+                VkDescriptorPoolSize descriptorPoolSize[3]{};
 
 				descriptorPoolSize[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 				descriptorPoolSize[0].descriptorCount = 5;
@@ -1607,7 +1607,10 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
 				descriptorPoolSize[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 				descriptorPoolSize[1].descriptorCount = 9;
 
-                auto descriptorPool = descriptorPoolCreate(context->getInitialResources()->getDevice()->getDevice(), VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT, 1, 2, descriptorPoolSize);
+				descriptorPoolSize[2].type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+				descriptorPoolSize[2].descriptorCount = 1;
+
+                auto descriptorPool = descriptorPoolCreate(context->getInitialResources()->getDevice()->getDevice(), VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT, 1, 3, descriptorPoolSize);
 
                 if (!descriptorPool.get())
                 {
