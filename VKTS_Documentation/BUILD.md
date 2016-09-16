@@ -96,22 +96,22 @@ Using LunarG SDK under Linux:
 
 Append the following lines to your `.profile` file in your home directory: 
 
-`#`
-`# Vulkan development setup.`
-`#`
-
-`export VULKAN_SDK=~/Development/VulkanSDK/1.0.26.0/x86_64`
-
-`export PATH=$PATH:$VULKAN_SDK/bin`
-`export LD_LIBRARY_PATH=$VULKAN_SDK/lib`
-`export VK_LAYER_PATH=$VULKAN_SDK/etc/explicit_layer.d`
-
-`C_INCLUDE_PATH=$VULKAN_SDK/include` 
-`export C_INCLUDE_PATH`
-`CPLUS_INCLUDE_PATH=$VULKAN_SDK/include` 
-`export CPLUS_INCLUDE_PATH`
-`LIBRARY_PATH=$VULKAN_SDK/lib`
-`export LIBRARY_PATH`
+`#`  
+`# Vulkan development setup.`  
+`#`  
+  
+`export VULKAN_SDK=~/Development/VulkanSDK/1.0.26.0/x86_64`  
+  
+`export PATH=$PATH:$VULKAN_SDK/bin`  
+`export LD_LIBRARY_PATH=$VULKAN_SDK/lib`  
+`export VK_LAYER_PATH=$VULKAN_SDK/etc/explicit_layer.d`  
+  
+`C_INCLUDE_PATH=$VULKAN_SDK/include`   
+`export C_INCLUDE_PATH`  
+`CPLUS_INCLUDE_PATH=$VULKAN_SDK/include`   
+`export CPLUS_INCLUDE_PATH`  
+`LIBRARY_PATH=$VULKAN_SDK/lib`  
+`export LIBRARY_PATH`  
 
 Finally, change the path of `VULKAN_SDK` depending on your installation directory and SDK version.
 
@@ -135,14 +135,14 @@ After this, create the following file if it does not exist:
 `/etc/X11/xorg.conf`  
   
 Append/insert following lines to the above file to enable DRI3:  
-
-`Section "Device"`
-`    Identifier  "Intel Graphics"`
-`    Driver      "intel"`
-`    Option      "SwapBuffersWait" "0"`
-`    Option      "DRI" "3"`
-`EndSection`
-
+  
+`Section "Device"`  
+`    Identifier  "Intel Graphics"`  
+`    Driver      "intel"`  
+`    Option      "SwapBuffersWait" "0"`  
+`    Option      "DRI" "3"`  
+`EndSection`  
+  
 
 ---
 
