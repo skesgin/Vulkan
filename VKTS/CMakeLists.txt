@@ -42,9 +42,11 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
                                     ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_display_linux_key.cpp
                                     ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_xlib.cpp
                                     ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_xlib_key.cpp
+                                    ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_wayland.cpp
                                     ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/wsi/fn_wsi_android.cpp
                                     ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/wsi/fn_wsi_display.cpp
                                     ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/wsi/fn_wsi_xlib.cpp
+                                    ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/wsi/fn_wsi_wayland.cpp
     )
 
     if (${VKTS_WSI} MATCHES "VKTS_NO_VISUAL")
@@ -90,9 +92,11 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
                                             ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_display_linux_key.cpp
                                             ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_xlib.cpp
                                             ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_xlib_key.cpp
+                                            ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_wayland.cpp
                                             ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/wsi/fn_wsi.cpp
                                             ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/wsi/fn_wsi_display.cpp
                                             ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/wsi/fn_wsi_xlib.cpp
+                                            ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/wsi/fn_wsi_wayland.cpp
                                             ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/wsi/Surface.cpp
                                             ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/wsi/Swapchain.cpp
         )
@@ -103,7 +107,23 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
         list(APPEND IGNORE_CPP_FILES    ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_xlib.cpp
                                         ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_xlib_key.cpp
+                                        ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_wayland.cpp
                                         ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_none.cpp
+                                        ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/wsi/fn_wsi_xlib.cpp
+                                        ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/wsi/fn_wsi_wayland.cpp
+        )
+
+    elseif (${VKTS_WSI} MATCHES "VKTS_WAYLAND_VISUAL")
+
+        add_definitions(-DVKTS_WAYLAND_VISUAL)
+
+        list(APPEND IGNORE_CPP_FILES    ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_display.cpp
+                                        ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_display_linux.cpp
+                                        ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_display_linux_key.cpp
+                                        ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_xlib.cpp
+                                        ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_xlib_key.cpp
+                                        ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_none.cpp
+                                        ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/wsi/fn_wsi_display.cpp
                                         ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/wsi/fn_wsi_xlib.cpp
         )
 
@@ -112,8 +132,10 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
         list(APPEND IGNORE_CPP_FILES    ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_display.cpp
                                         ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_display_linux.cpp
                                         ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_display_linux_key.cpp
+                                        ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_wayland.cpp
                                         ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_none.cpp
                                         ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/wsi/fn_wsi_display.cpp
+                                        ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/wsi/fn_wsi_wayland.cpp
         )
         
     endif ()

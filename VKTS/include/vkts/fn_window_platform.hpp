@@ -38,8 +38,17 @@
 
 #elif defined(VKTS_DISPLAY_VISUAL)
 
+// WSI display extension.
+
 #define VKTS_NATIVE_DISPLAY             VkDisplayKHR
 #define VKTS_NATIVE_WINDOW              VkDisplaySurfaceCreateInfoKHR*
+
+#elif defined(VKTS_WAYLAND_VISUAL)
+
+// Wayland windowing.
+
+#define VKTS_NATIVE_DISPLAY             struct wl_display*
+#define VKTS_NATIVE_WINDOW              struct wl_surface*
 
 #elif defined(_WIN32)
 

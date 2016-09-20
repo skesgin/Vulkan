@@ -110,6 +110,12 @@
 
 // Include nothing for now.
 
+#elif defined(VKTS_WAYLAND_VISUAL)
+
+#define VK_USE_PLATFORM_WAYLAND_KHR
+
+#include <wayland-client.h>
+
 #else
 
 #include <X11/X.h>
