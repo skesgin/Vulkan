@@ -28,10 +28,18 @@
 
 #include "fn_visual_internal.hpp"
 
-#define VKTS_WAYLAND_VERSION 2
+#define VKTS_WAYLAND_VERSION 1
+
+#define VKTS_WINDOWS_MAX_WINDOWS 64
 
 namespace vkts
 {
+
+static struct wl_shell* g_nativeShell = nullptr;
+
+static struct wl_compositor* g_nativeCompositor = nullptr;
+
+static struct wl_registry* g_nativeRegistry = nullptr;
 
 static struct wl_display* g_nativeDisplay = nullptr;
 
@@ -57,6 +65,48 @@ typedef struct _VKTS_NATIVE_DISPLAY_CONTAINER
 static NativeDisplaySP g_defaultDisplay;
 
 static std::map<int32_t, VKTS_NATIVE_DISPLAY_CONTAINER*> g_allDisplays;
+
+typedef struct _VKTS_NATIVE_WINDOW_CONTAINER
+{
+
+    int32_t index;
+
+    struct wl_surface* surface;
+    struct wl_shell_surface* shell_surface;
+
+    NativeWindowSP nativeWindow;
+
+} VKTS_NATIVE_WINDOW_CONTAINER;
+
+static std::map<struct wl_surface*, VKTS_NATIVE_WINDOW_CONTAINER*> g_allWindows;
+
+//
+
+static int32_t g_numberWindows = 0;
+
+static uint64_t g_windowBits = 0;
+
+//
+
+static void _visualWaylandPing(void* data, struct wl_shell_surface* shell_surface, uint32_t serial)
+{
+    wl_shell_surface_pong(shell_surface, serial);
+}
+
+void _visualWaylandConfigure(void* data, struct wl_shell_surface* shell_surface, uint32_t edges, int32_t width, int32_t height)
+{
+}
+
+void _visualWaylandPopupDone(void* data, struct wl_shell_surface* shell_surface)
+{
+}
+
+static const struct wl_shell_surface_listener shell_surface_listener =
+{
+	_visualWaylandPing, _visualWaylandConfigure, _visualWaylandPopupDone
+};
+
+//
 
 static void _visualWaylandGeometry(void* data, struct wl_output* output, int32_t x, int32_t y, int32_t physical_width, int32_t physical_height, int32_t subpixel, const char* make, const char* model, int32_t transform)
 {
@@ -110,7 +160,11 @@ static void _visualWaylandGlobal(void *data, struct wl_registry *registry, uint3
 {
     if (strcmp(interface, "wl_compositor") == 0)
     {
-    	// TODO: Implement.
+    	g_nativeCompositor = (struct wl_compositor*)wl_registry_bind(registry, name, &wl_compositor_interface, VKTS_WAYLAND_VERSION);
+    }
+	else if (strcmp(interface, "wl_shell") == 0)
+	{
+        g_nativeShell = (struct wl_shell*)wl_registry_bind(registry, name, &wl_shell_interface, VKTS_WAYLAND_VERSION);
     }
     else if (strcmp(interface, "wl_output") == 0)
     {
@@ -142,8 +196,6 @@ static void _visualWaylandGlobal(void *data, struct wl_registry *registry, uint3
 
     	wl_output_add_listener(currentDisplayContainer->output, &g_output_listener, currentDisplayContainer);
     }
-
-    // TODO: Implement.
 }
 
 static void _visualWaylandGlobal_remove(void *data, struct wl_registry *registry, uint32_t name)
@@ -167,8 +219,8 @@ VkBool32 VKTS_APIENTRY _visualInit(const VkInstance instance, const VkPhysicalDe
     	return VK_FALSE;
     }
 
-    auto registry = wl_display_get_registry(g_nativeDisplay);
-    wl_registry_add_listener(registry, &registry_listener, nullptr);
+    g_nativeRegistry = wl_display_get_registry(g_nativeDisplay);
+    wl_registry_add_listener(g_nativeRegistry, &registry_listener, nullptr);
 
     wl_display_dispatch(g_nativeDisplay);
     wl_display_roundtrip(g_nativeDisplay);
@@ -302,14 +354,137 @@ void VKTS_APIENTRY _visualDestroyDisplay(const NativeDisplaySP& display)
 
 INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& display, const char* title, const int32_t width, const int32_t height, const VkBool32 fullscreen, const VkBool32 resize, const VkBool32 invisibleCursor)
 {
-    // TODO: Implement.
+    const auto sharedDisplay = display.lock();
 
-    return INativeWindowWP();
+    if (!sharedDisplay.get())
+    {
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No display.");
+
+        return INativeWindowWP();
+    }
+
+    if (sharedDisplay->getIndex() < 0 || sharedDisplay->getIndex() >= _visualGetNumberDisplays())
+    {
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Invalid display index.");
+
+        return INativeWindowWP();
+    }
+
+    auto walkerDisplayContainer = g_allDisplays.find(sharedDisplay->getIndex());
+
+    if (walkerDisplayContainer == g_allDisplays.end() || !walkerDisplayContainer->second || !walkerDisplayContainer->second->display)
+    {
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Display not known.");
+
+        return INativeWindowWP();
+    }
+
+    //
+
+    VkBool32 finalResize = resize && !fullscreen;
+
+    //
+
+    uint32_t currentWindowBit = 1;
+    int32_t currentWindowIndex = 0;
+
+    if (g_numberWindows == VKTS_WINDOWS_MAX_WINDOWS)
+    {
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Maximum windows reached.");
+
+        return INativeWindowWP();
+    }
+
+    while (currentWindowBit & g_windowBits)
+    {
+        currentWindowBit = currentWindowBit << 1;
+
+        currentWindowIndex++;
+    }
+
+    //
+
+    if (fullscreen)
+    {
+    	// TODO: Implement fullscreen.
+    }
+
+	// TODO: Implement move to correct display.
+
+    //
+
+    // TODO: Implement correct window size.
+
+    // TODO: Implement resize window and invisible cursor.
+
+	auto surface = wl_compositor_create_surface(g_nativeCompositor);
+
+	if (!surface)
+	{
+		return INativeWindowWP();
+	}
+
+	auto shell_surface = wl_shell_get_shell_surface(g_nativeShell, surface);
+
+	if (!shell_surface)
+	{
+		wl_surface_destroy(surface);
+
+		return INativeWindowWP();
+	}
+
+	auto windowContainer = new VKTS_NATIVE_WINDOW_CONTAINER();
+
+	if (!windowContainer)
+	{
+		wl_surface_destroy(surface);
+
+		wl_shell_surface_destroy(shell_surface);
+
+		return INativeWindowWP();
+	}
+
+	//
+
+	auto nativeWindow = NativeWindowSP(new NativeWindow(display, surface, currentWindowIndex, title, width, height, fullscreen, finalResize, invisibleCursor));
+
+	if (!nativeWindow.get())
+	{
+		wl_surface_destroy(surface);
+
+		wl_shell_surface_destroy(shell_surface);
+
+		return INativeWindowWP();
+	}
+
+	//
+
+	windowContainer->index = currentWindowIndex;
+	windowContainer->surface = surface;
+	windowContainer->shell_surface = shell_surface;
+	windowContainer->nativeWindow = nativeWindow;
+
+	g_allWindows[surface] = windowContainer;
+
+	//
+
+	wl_shell_surface_add_listener(shell_surface, &shell_surface_listener, nullptr);
+
+	wl_shell_surface_set_toplevel(shell_surface);
+	wl_shell_surface_set_title(shell_surface, title);
+
+    return nativeWindow;
 }
 
 NativeWindowSP VKTS_APIENTRY _visualGetWindow(const int32_t windowIndex)
 {
-    // TODO: Implement.
+	for (auto& currentWindowContainer : g_allWindows)
+	{
+		if (currentWindowContainer.second->index == windowIndex)
+		{
+			return currentWindowContainer.second->nativeWindow;
+		}
+	}
 
     return NativeWindowSP();
 }
@@ -318,20 +493,73 @@ const SmartPointerVector<NativeWindowSP>& VKTS_APIENTRY _visualGetActiveWindows(
 {
     static SmartPointerVector<NativeWindowSP> windowList;
 
-    // TODO: Implement.
+    windowList.clear();
+
+	for (auto& currentWindowContainer : g_allWindows)
+	{
+		windowList.append(currentWindowContainer.second->nativeWindow);
+	}
 
     return windowList;
 }
 
 void VKTS_APIENTRY _visualDestroyWindow(const NativeWindowSP& window)
 {
-    // TODO: Implement.
+    if (!window.get())
+    {
+        return;
+    }
+
+	auto foundWindowContainerWalker = g_allWindows.find(window->getNativeWindow());
+
+	if (foundWindowContainerWalker == g_allWindows.end())
+	{
+		return;
+	}
+
+    if (window->getNativeWindow())
+    {
+
+        if (window->isInvisibleCursor())
+        {
+        	// TODO: Revert hidden cursor.
+        }
+
+        wl_shell_surface_destroy(foundWindowContainerWalker->second->shell_surface);
+        wl_surface_destroy(foundWindowContainerWalker->second->surface);
+
+        delete foundWindowContainerWalker->second;
+    }
+
+    uint32_t currentNegativeWindowBit = ~(1 << window->getIndex());
+
+    g_windowBits &= currentNegativeWindowBit;
+
+    //
+
+    if (window->isFullscreen())
+    {
+        // TODO: Revert fullscreen
+    }
+
+    if (window->getNativeWindow())
+    {
+        g_allWindows.erase(foundWindowContainerWalker);
+    }
 }
 
 //
 
 void VKTS_APIENTRY _visualTerminate()
 {
+    while (g_allWindows.size() > 0)
+    {
+        _visualDestroyWindow(g_allWindows.begin()->second->nativeWindow);
+    }
+    g_allWindows.clear();
+
+    //
+
     for (auto& walkerDisplayContainer : g_allDisplays)
     {
         if (walkerDisplayContainer.second)
@@ -346,6 +574,27 @@ void VKTS_APIENTRY _visualTerminate()
     g_defaultDisplay.reset();
 
     //
+
+    if (g_nativeShell)
+    {
+    	wl_shell_destroy(g_nativeShell);
+
+    	g_nativeShell = nullptr;
+    }
+
+    if (g_nativeCompositor)
+    {
+    	wl_compositor_destroy(g_nativeCompositor);
+
+    	g_nativeCompositor = nullptr;
+    }
+
+    if (g_nativeRegistry)
+    {
+    	wl_registry_destroy(g_nativeRegistry);
+
+    	g_nativeRegistry = nullptr;
+    }
 
     if (g_nativeDisplay)
     {
