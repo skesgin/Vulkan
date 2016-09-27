@@ -176,11 +176,20 @@ void Image::getImageMemoryRequirements(VkMemoryRequirements& memoryRequirements)
 
 void Image::getImageSubresourceLayout(VkSubresourceLayout& subresourceLayout, const VkImageSubresource& imageSubresource) const
 {
-	// Reset for undefined cases.
-	subresourceLayout.arrayPitch = 0;
-	subresourceLayout.depthPitch = 0;
+	memset(&subresourceLayout, 0, sizeof(VkSubresourceLayout));
 
     vkGetImageSubresourceLayout(device, image, &imageSubresource, &subresourceLayout);
+
+	// Reset for undefined cases.
+    if (imageCreateInfo.arrayLayers < 2)
+    {
+    	subresourceLayout.arrayPitch = 0;
+    }
+
+    if (imageCreateInfo.extent.depth < 2)
+    {
+    	subresourceLayout.depthPitch = 0;
+    }
 }
 
 void Image::copyImage(const VkCommandBuffer cmdBuffer, IImageSP& targetImage, const VkImageCopy& imageCopy)

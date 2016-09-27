@@ -342,7 +342,8 @@ VkBool32 ImageData::copy(void* data, const uint32_t mipLevel, const uint32_t arr
         {
             currentSourceChannel = &currentSourceBuffer[y * currentExtent.width * numberChannels * bytesPerChannel + z * currentExtent.height * currentExtent.width * numberChannels * bytesPerChannel];
 
-            currentTargetChannel = &currentTargetBuffer[y * subresourceLayout.rowPitch + z * subresourceLayout.depthPitch + arrayLayer * subresourceLayout.arrayPitch + subresourceLayout.offset];
+            // Do not calculate in array layer or mip level, as already accumulated in offset.
+            currentTargetChannel = &currentTargetBuffer[y * subresourceLayout.rowPitch + z * subresourceLayout.depthPitch + subresourceLayout.offset];
 
             memcpy(currentTargetChannel, currentSourceChannel, numberChannels * bytesPerChannel * currentExtent.width);
         }

@@ -85,6 +85,10 @@ How to build:
 Changelog:
 ----------
 
+09/27/2016
+- Fixed image data copy, by removing invalid usage of array pitch.
+- Reverted wrong window index counting.
+
 09/15/2016
 - Updated to LunarG SDK 1.0.26.0.
 

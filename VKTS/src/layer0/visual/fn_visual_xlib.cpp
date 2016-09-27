@@ -962,7 +962,7 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
     //
 
-    auto window = NativeWindowSP(new NativeWindow(display, nativeWindow, currentWindowIndex - 1, title, width, height, fullscreen, finalResize, invisibleCursor));
+    auto window = NativeWindowSP(new NativeWindow(display, nativeWindow, currentWindowIndex, title, width, height, fullscreen, finalResize, invisibleCursor));
 
     if (!window.get())
     {
