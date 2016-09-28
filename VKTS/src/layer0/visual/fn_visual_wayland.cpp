@@ -28,8 +28,6 @@
 
 #include "fn_visual_internal.hpp"
 
-#define VKTS_WAYLAND_VERSION 1
-
 #define VKTS_WINDOWS_MAX_WINDOWS 64
 
 namespace vkts
@@ -95,6 +93,21 @@ static void _visualWaylandPing(void* data, struct wl_shell_surface* shell_surfac
 
 void _visualWaylandConfigure(void* data, struct wl_shell_surface* shell_surface, uint32_t edges, int32_t width, int32_t height)
 {
+	if (!data)
+	{
+		return;
+	}
+
+	VKTS_NATIVE_WINDOW_CONTAINER* currentWindowContainer = (VKTS_NATIVE_WINDOW_CONTAINER*)data;
+
+	currentWindowContainer->nativeWindow->setDimension(glm::uvec2((uint32_t)width, (uint32_t)height));
+
+	//
+
+	auto region = wl_compositor_create_region(g_nativeCompositor);
+	wl_region_add(region, 0, 0, width, height);
+	wl_surface_set_opaque_region(currentWindowContainer->surface, region);
+	wl_region_destroy(region);
 }
 
 void _visualWaylandPopupDone(void* data, struct wl_shell_surface* shell_surface)
@@ -160,11 +173,11 @@ static void _visualWaylandGlobal(void *data, struct wl_registry *registry, uint3
 {
     if (strcmp(interface, "wl_compositor") == 0)
     {
-    	g_nativeCompositor = (struct wl_compositor*)wl_registry_bind(registry, name, &wl_compositor_interface, VKTS_WAYLAND_VERSION);
+    	g_nativeCompositor = (struct wl_compositor*)wl_registry_bind(registry, name, &wl_compositor_interface, 3);
     }
 	else if (strcmp(interface, "wl_shell") == 0)
 	{
-        g_nativeShell = (struct wl_shell*)wl_registry_bind(registry, name, &wl_shell_interface, VKTS_WAYLAND_VERSION);
+        g_nativeShell = (struct wl_shell*)wl_registry_bind(registry, name, &wl_shell_interface, 1);
     }
     else if (strcmp(interface, "wl_output") == 0)
     {
@@ -185,7 +198,7 @@ static void _visualWaylandGlobal(void *data, struct wl_registry *registry, uint3
 
     	currentDisplayContainer->defaultDisplay = VK_FALSE;
 
-    	currentDisplayContainer->output = (wl_output*)wl_registry_bind(registry, name, &wl_output_interface, VKTS_WAYLAND_VERSION);
+    	currentDisplayContainer->output = (wl_output*)wl_registry_bind(registry, name, &wl_output_interface, 1);
 
     	currentDisplayContainer->display = NativeDisplaySP();
 
@@ -230,7 +243,12 @@ VkBool32 VKTS_APIENTRY _visualInit(const VkInstance instance, const VkPhysicalDe
 
 VkBool32 VKTS_APIENTRY _visualDispatchMessages()
 {
-    // TODO: Implement.
+	if (g_nativeDisplay)
+	{
+		wl_display_dispatch(g_nativeDisplay);
+	}
+
+    // TODO: Dispatch input.
 
     return VK_TRUE;
 }
@@ -404,18 +422,11 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
     //
 
-    if (fullscreen)
-    {
-    	// TODO: Implement fullscreen.
-    }
-
-	// TODO: Implement move to correct display.
+    // TODO: Implement move to correct display.
 
     //
 
-    // TODO: Implement correct window size.
-
-    // TODO: Implement resize window and invisible cursor.
+    // TODO: Implement no resize window and invisible cursor.
 
 	auto surface = wl_compositor_create_surface(g_nativeCompositor);
 
@@ -468,10 +479,22 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
 	//
 
-	wl_shell_surface_add_listener(shell_surface, &shell_surface_listener, nullptr);
+	wl_shell_surface_add_listener(shell_surface, &shell_surface_listener, windowContainer);
 
-	wl_shell_surface_set_toplevel(shell_surface);
-	wl_shell_surface_set_title(shell_surface, title);
+    if (fullscreen)
+    {
+    	wl_shell_surface_set_fullscreen(shell_surface, WL_SHELL_SURFACE_FULLSCREEN_METHOD_DEFAULT, 0, walkerDisplayContainer->second->output);
+    }
+    else
+    {
+    	wl_shell_surface_set_toplevel(shell_surface);
+    	wl_shell_surface_set_title(shell_surface, title);
+
+    	auto region = wl_compositor_create_region(g_nativeCompositor);
+    	wl_region_add(region, 0, 0, width, height);
+    	wl_surface_set_opaque_region(surface, region);
+    	wl_region_destroy(region);
+    }
 
     return nativeWindow;
 }
@@ -520,6 +543,11 @@ void VKTS_APIENTRY _visualDestroyWindow(const NativeWindowSP& window)
     if (window->getNativeWindow())
     {
 
+        if (window->isFullscreen())
+        {
+        	wl_shell_surface_set_toplevel(foundWindowContainerWalker->second->shell_surface);
+        }
+
         if (window->isInvisibleCursor())
         {
         	// TODO: Revert hidden cursor.
@@ -536,11 +564,6 @@ void VKTS_APIENTRY _visualDestroyWindow(const NativeWindowSP& window)
     g_windowBits &= currentNegativeWindowBit;
 
     //
-
-    if (window->isFullscreen())
-    {
-        // TODO: Revert fullscreen
-    }
 
     if (window->getNativeWindow())
     {
