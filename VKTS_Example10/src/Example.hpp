@@ -61,7 +61,7 @@
 
 #define VKTS_OUTPUT_BUFFER_SIZE 1024
 
-#define VKTS_BSDF_DESCRIPTOR_SET_COUNT 10
+#define VKTS_BSDF_DESCRIPTOR_SET_COUNT 8
 
 class Example: public vkts::IUpdateThread
 {
@@ -96,7 +96,7 @@ private:
     VkDescriptorBufferInfo descriptorBufferInfos[1];
     VkDescriptorImageInfo environmentDescriptorImageInfos[1];
     VkDescriptorBufferInfo resolveDescriptorBufferInfos[1];
-    VkDescriptorImageInfo resolveDescriptorImageInfos[9];
+    VkDescriptorImageInfo resolveDescriptorImageInfos[VKTS_BSDF_DESCRIPTOR_SET_COUNT];
 
     VkWriteDescriptorSet writeDescriptorSets[VKTS_BINDING_UNIFORM_BSDF_TOTAL_BINDING_COUNT];
     VkWriteDescriptorSet environmentWriteDescriptorSets[VKTS_ENVIRONMENT_DESCRIPTOR_SET_COUNT];
