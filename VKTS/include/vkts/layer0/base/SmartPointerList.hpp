@@ -173,13 +173,13 @@ public:
         back = nullptr;
     }
 
-    VkBool32 emplaceBack(const V& value)
+    void emplaceBack(const V& value)
     {
         auto newElement = new SmartPointerListElement<V>(value);
 
         if (!newElement)
         {
-            return VK_FALSE;
+        	throw std::bad_alloc();
         }
 
         if (front == nullptr)
@@ -196,17 +196,15 @@ public:
         }
 
         listSize++;
-
-        return VK_TRUE;
     }
 
-    VkBool32 emplaceFront(const V& value)
+    void emplaceFront(const V& value)
     {
         auto newElement = new SmartPointerListElement<V>(value);
 
         if (!newElement)
         {
-            return VK_FALSE;
+        	throw std::bad_alloc();
         }
 
         if (front == nullptr)
@@ -223,8 +221,6 @@ public:
         }
 
         listSize++;
-
-        return VK_TRUE;
     }
 
     VkBool32 insert(const size_t index, const V& value)
@@ -258,7 +254,7 @@ public:
 
         if (!newElement)
         {
-            return VK_FALSE;
+        	throw std::bad_alloc();
         }
 
         newElement->prev = walker->prev;

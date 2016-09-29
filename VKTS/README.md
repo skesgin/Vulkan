@@ -85,6 +85,9 @@ How to build:
 Changelog:
 ----------
 
+09/29/2016
+- Throwing now an exception, when own container classes gets out of memory. 
+
 09/27/2016
 - Fixed image data copy, by removing invalid usage of array pitch.
 - Reverted wrong window index counting.

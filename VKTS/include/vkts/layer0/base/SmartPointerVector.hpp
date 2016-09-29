@@ -60,7 +60,7 @@ public:
 
         if (!allData)
         {
-            return;
+        	throw std::bad_alloc();
         }
 
         this->allDataCount = allDataCount;
@@ -78,7 +78,7 @@ public:
 
         if (!allData)
         {
-            return;
+        	throw std::bad_alloc();
         }
 
         for (size_t i = 0; i < other.allDataCount; i++)
@@ -119,7 +119,7 @@ public:
 
         if (!allData)
         {
-            return *this;
+        	throw std::bad_alloc();
         }
 
         for (size_t i = 0; i < other.allDataCount; i++)
@@ -190,7 +190,7 @@ public:
         topElement = 0;
     }
 
-    VkBool32 append(const V& value)
+    void append(const V& value)
     {
         if (topElement >= allDataCount)
         {
@@ -198,7 +198,7 @@ public:
 
             if (!newAllData)
             {
-                return VK_FALSE;
+            	throw std::bad_alloc();
             }
 
             for (size_t i = 0; i < allDataCount * 2; i++)
@@ -221,8 +221,6 @@ public:
 
         allData[topElement] = value;
         topElement++;
-
-        return VK_TRUE;
     }
 
     VkBool32 insert(const size_t index, const V& value)
@@ -245,7 +243,7 @@ public:
 
             if (!newAllData)
             {
-                return VK_FALSE;
+            	throw std::bad_alloc();
             }
 
             for (size_t i = 0; i < allDataCount * 2; i++)
