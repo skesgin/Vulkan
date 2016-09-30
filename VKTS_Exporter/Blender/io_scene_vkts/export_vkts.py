@@ -305,7 +305,6 @@ pbrMain = """#previousMain#
     float %s = %s;
     float %s = %s;
     float %s = %s;
-    float %s = %s;
     vec3 %s = %s;
     vec4 %s = %s;
     
@@ -496,7 +495,7 @@ def saveTextures(context, filepath, imagesLibraryName, materials):
         for currentNode in context.scene.world.node_tree.nodes:
             if isinstance(currentNode, bpy.types.ShaderNodeTexEnvironment):
                 storeTexture = False
-                if currentNode.image is not None and currentNode.image.has_data:
+                if currentNode.image is not None and checkImage(currentNode.image):
                     images.setdefault(friendlyImageName(currentNode.image.filepath), currentNode.image)
                     storeTexture = True
 
@@ -511,7 +510,7 @@ def saveTextures(context, filepath, imagesLibraryName, materials):
                 for currentTextureSlot in material.texture_slots:
                     if currentTextureSlot and currentTextureSlot.texture and currentTextureSlot.texture.type == 'ENVIRONMENT_MAP':
                         storeTexture = False
-                        if currentTextureSlot.texture.image is not None and currentTextureSlot.texture.image.has_data:
+                        if currentTextureSlot.texture.image is not None and checkImage(currentTextureSlot.texture.image):
                             images.setdefault(friendlyImageName(currentTextureSlot.texture.image.filepath), currentTextureSlot.texture.image)
                             storeTexture = True
 
@@ -527,7 +526,7 @@ def saveTextures(context, filepath, imagesLibraryName, materials):
         for currentTextureSlot in material.texture_slots:
             if currentTextureSlot and currentTextureSlot.texture and currentTextureSlot.texture.type == 'IMAGE':
                 image = currentTextureSlot.texture.image
-                if image and image.has_data:
+                if image and checkImage(image):
                     storeTexture = False
                     if currentTextureSlot.use_map_emit:
                         images.setdefault(friendlyImageName(image.filepath), image)
@@ -562,7 +561,7 @@ def saveTextures(context, filepath, imagesLibraryName, materials):
             for currentNode in material.node_tree.nodes:
                 if isinstance(currentNode, bpy.types.ShaderNodeTexImage):
                     storeTexture = False
-                    if currentNode.image is not None:
+                    if currentNode.image is not None and checkImage(currentNode.image):
                         images.setdefault(friendlyImageName(currentNode.image.filepath), currentNode.image)
                         storeTexture = True
 
@@ -710,6 +709,12 @@ def getVec4(value):
     return "vec4(%.3f, %.3f, %.3f, %.3f)"%(value[0], value[1], value[2], value[3])
 
 
+def checkImage(image):
+    if image is None:
+        return False
+
+    return image.size[0] > 0 and image.size[1] > 0 
+
 def enqueueNode(openNodes, currentNode):
     # Every node apears only once in the list.
     if currentNode in openNodes:
@@ -796,8 +801,8 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
     for currentObject in context.scene.objects:
 
         for currentMaterialSlot in currentObject.material_slots:
-        
-            materials.setdefault(currentMaterialSlot.material.name, currentMaterialSlot.material)
+            if currentMaterialSlot.material is not None:
+                materials.setdefault(currentMaterialSlot.material.name, currentMaterialSlot.material)
 
     # Save textures.
 
@@ -852,7 +857,6 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
             
             alphaCounter = 0
             colorCounter = 0
-            displacementCounter = 0
             facCounter = 0
             iorCounter = 0
             maskCounter = 0
@@ -1204,21 +1208,18 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
 
                     roughnessInputName = "Roughness_%d" % roughnessCounter
                     metallicInputName = "Metallic_%d" % metallicCounter
-                    displacementInputName = "Displacement_%d" % displacementCounter
                     maskInputName = "Mask_%d" % maskCounter
                     normalInputName = "Normal_%d" % normalCounter
                     colorInputName = "Color_%d" % colorCounter
 
                     roughnessCounter += 1
                     metallicCounter += 1
-                    displacementCounter += 1
                     maskCounter += 1
                     normalCounter += 1
                     colorCounter += 1
                     
                     roughnessInputParameterName = "Roughness_Dummy"
                     metallicInputParameterName = "Metallic_Dummy"
-                    displacementInputParameterName =  "Displacement_Dummy"
                     maskInputParameterName =  "Mask_Dummy"
                     normalInputParameterName =  "Normal_Dummy"
                     colorInputParameterName = "Color_Dummy"
@@ -1229,7 +1230,7 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
 
                     #                    
 
-                    currentMain = pbrMain % (roughnessInputName, roughnessInputParameterName, metallicInputName, metallicInputParameterName, displacementInputName, displacementInputParameterName, maskInputName, maskInputParameterName, normalInputName, normalInputParameterName, colorInputName, colorInputParameterName)
+                    currentMain = pbrMain % (roughnessInputName, roughnessInputParameterName, metallicInputName, metallicInputParameterName, maskInputName, maskInputParameterName, normalInputName, normalInputParameterName, colorInputName, colorInputParameterName)
 
                     #
 
