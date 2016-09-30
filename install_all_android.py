@@ -13,12 +13,15 @@ import os
 #
 ####################
 
-print("Installing all examples")
+print("Installing all Android projects
 
 allExamples = os.listdir()
 
 for example in allExamples:
     if example.startswith("VKTS_Example"):
+    
+        print("Processing '%s'" % (example))    
+    
         os.chdir(example)
         os.chdir("Android")
 
@@ -26,12 +29,13 @@ for example in allExamples:
 
         os.chdir("../..")
 
-print("Installing all tests")
-
 allExamples = os.listdir()
 
 for example in allExamples:
     if example.startswith("VKTS_Test"):
+    
+        print("Processing '%s'" % (example))    
+    
         os.chdir(example)
         os.chdir("Android")
 

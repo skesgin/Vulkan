@@ -13,20 +13,23 @@ import os
 #
 ####################
 
-print("Building VKTS")
+print("Building all Android projects")
 
 os.chdir("VKTS/Android/jni")
+
+print("Processing 'VKTS'")
 
 os.system("ndk-build")
 
 os.chdir("../../..")
 
-print("Building all examples")
-
 allExamples = os.listdir()
 
 for example in allExamples:
     if example.startswith("VKTS_Example"):
+    
+        print("Processing '%s'" % (example))    
+    
         os.chdir(example)
         os.chdir("Android")
 
@@ -34,12 +37,13 @@ for example in allExamples:
 
         os.chdir("../..")
 
-print("Building all tests")
-
 allExamples = os.listdir()
 
 for example in allExamples:
     if example.startswith("VKTS_Test"):
+    
+        print("Processing '%s'" % (example))    
+    
         os.chdir(example)
         os.chdir("Android")
 

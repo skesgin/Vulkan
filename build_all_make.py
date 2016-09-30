@@ -15,7 +15,7 @@ import sys
 #
 ####################
 
-print("Creating all MSVC projects")
+print("Building all make projects")
 
 noVisual = ["VKTS_Example08"]
 
@@ -28,13 +28,13 @@ for x in range(1, len(sys.argv)):
     if sys.argv[x] == "-DVKTS_WSI=VKTS_NO_VISUAL":
         isVisual = False
 
-os.chdir("VKTS/MSVC")
+os.chdir("VKTS")
 
 print("Processing 'VKTS'")
 
-subprocess.call("cmake .." + option, shell=True)
+subprocess.call("make", shell=True)
 
-os.chdir("../..")
+os.chdir("..")
 
 allExamples = os.listdir()
 
@@ -50,11 +50,10 @@ for example in allExamples:
         print("Processing '%s'" % (example))    
         
         os.chdir(example)
-        os.chdir("MSVC")
 
-        subprocess.call("cmake .." + option, shell=True)
+        subprocess.call("make", shell=True)
 
-        os.chdir("../..")
+        os.chdir("..")
 
 allExamples = os.listdir()
 
@@ -70,8 +69,7 @@ for example in allExamples:
         print("Processing '%s'" % (example))    
     
         os.chdir(example)
-        os.chdir("MSVC")
 
-        subprocess.call("cmake .." + option, shell=True)
+        subprocess.call("make", shell=True)
 
-        os.chdir("../..")        
+        os.chdir("..")        

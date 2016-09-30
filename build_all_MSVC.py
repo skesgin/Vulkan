@@ -15,7 +15,7 @@ import sys
 #
 ####################
 
-print("Creating all MSVC projects")
+print("Building all MSVC projects")
 
 noVisual = ["VKTS_Example08"]
 
@@ -32,7 +32,7 @@ os.chdir("VKTS/MSVC")
 
 print("Processing 'VKTS'")
 
-subprocess.call("cmake .." + option, shell=True)
+subprocess.call("msbuild VKTS.sln", shell=True)
 
 os.chdir("../..")
 
@@ -52,7 +52,7 @@ for example in allExamples:
         os.chdir(example)
         os.chdir("MSVC")
 
-        subprocess.call("cmake .." + option, shell=True)
+        subprocess.call("msbuild %s.sln" % (example), shell=True)
 
         os.chdir("../..")
 
@@ -72,6 +72,6 @@ for example in allExamples:
         os.chdir(example)
         os.chdir("MSVC")
 
-        subprocess.call("cmake .." + option, shell=True)
+        subprocess.call("msbuild %s.sln" % (example), shell=True)
 
         os.chdir("../..")        
