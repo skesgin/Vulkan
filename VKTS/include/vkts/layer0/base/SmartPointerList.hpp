@@ -29,8 +29,6 @@
 
 #include <vkts/vkts.hpp>
 
-#define VKTS_INITIAL_VECTOR_COUNT   16
-
 namespace vkts
 {
 

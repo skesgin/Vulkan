@@ -29,8 +29,6 @@
 
 #include <vkts/vkts.hpp>
 
-#define VKTS_INITIAL_VECTOR_COUNT   16
-
 namespace vkts
 {
 
@@ -45,10 +43,17 @@ protected:
     size_t topElement;
     size_t allDataCount;
 
+    size_t getAllocSize()
+    {
+    	size_t tempAllDataCount = allDataCount * 2;
+
+    	return tempAllDataCount > 0 ? tempAllDataCount : 1;
+    }
+
 public:
 
     SmartPointerVector() :
-        SmartPointerVector(VKTS_INITIAL_VECTOR_COUNT)
+        SmartPointerVector(0)
     {
 
     }
@@ -63,12 +68,13 @@ public:
         	throw std::bad_alloc();
         }
 
-        this->allDataCount = allDataCount;
-
         for (size_t i = 0; i < allDataCount; i++)
         {
             allData[i] = nullptr;
         }
+
+        this->topElement = allDataCount;
+        this->allDataCount = allDataCount;
     }
 
     SmartPointerVector(const SmartPointerVector& other) :
@@ -194,14 +200,14 @@ public:
     {
         if (topElement >= allDataCount)
         {
-            V* newAllData = new V[allDataCount * 2];
+            V* newAllData = new V[getAllocSize()];
 
             if (!newAllData)
             {
             	throw std::bad_alloc();
             }
 
-            for (size_t i = 0; i < allDataCount * 2; i++)
+            for (size_t i = 0; i < getAllocSize(); i++)
             {
                 newAllData[i] = nullptr;
 
@@ -216,7 +222,7 @@ public:
 
             allData = newAllData;
 
-            allDataCount *= 2;
+            allDataCount = getAllocSize();
         }
 
         allData[topElement] = value;
@@ -239,14 +245,14 @@ public:
 
         if (topElement + 1 >= allDataCount)
         {
-            V* newAllData = new V[allDataCount * 2];
+            V* newAllData = new V[getAllocSize()];
 
             if (!newAllData)
             {
             	throw std::bad_alloc();
             }
 
-            for (size_t i = 0; i < allDataCount * 2; i++)
+            for (size_t i = 0; i < getAllocSize(); i++)
             {
                 newAllData[i] = nullptr;
 
@@ -261,7 +267,7 @@ public:
 
             allData = newAllData;
 
-            allDataCount *= 2;
+            allDataCount = getAllocSize();
         }
 
         for (size_t copyIndex = topElement; copyIndex >= index + 1; copyIndex--)

@@ -85,6 +85,9 @@ How to build:
 Changelog:
 ----------
 
+10/03/2016
+- Fixed top element bug in own container class.
+
 09/29/2016
 - Throwing now an exception, when own container classes gets out of memory. 
 

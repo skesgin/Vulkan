@@ -44,7 +44,7 @@ protected:
 public:
 
     SmartPointerMap() :
-        SmartPointerMap(VKTS_INITIAL_VECTOR_COUNT)
+        SmartPointerMap(0)
     {
     }
 

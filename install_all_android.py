@@ -13,7 +13,7 @@ import os
 #
 ####################
 
-print("Installing all Android projects
+print("Installing all Android projects")
 
 allExamples = os.listdir()
 

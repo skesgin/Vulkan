@@ -44,7 +44,7 @@ protected:
 public:
 
     Map() :
-        Map(VKTS_INITIAL_VECTOR_COUNT)
+        Map(0)
     {
     }
 
