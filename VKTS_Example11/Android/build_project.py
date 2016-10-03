@@ -27,9 +27,9 @@ def copy(src, dst):
 
 print("Copying project assets")
 
-copy("../../VKTS_Binaries/shader/SPIR/V/phong_shadow.vert.spv", "./assets/shader/SPIR/V/")
-copy("../../VKTS_Binaries/shader/SPIR/V/phong_shadow.frag.spv", "./assets/shader/SPIR/V/")
-copy("../../VKTS_Binaries/shader/SPIR/V/phong_write_shadow.frag.spv", "./assets/shader/SPIR/V/")
+copy("../../VKTS_Binaries/shader/SPIR/V/phong_tangents_shadow.vert.spv", "./assets/shader/SPIR/V/")
+copy("../../VKTS_Binaries/shader/SPIR/V/phong_tangents_shadow.frag.spv", "./assets/shader/SPIR/V/")
+copy("../../VKTS_Binaries/shader/SPIR/V/phong_tangents_write_shadow.frag.spv", "./assets/shader/SPIR/V/")
 copy("../../VKTS_Binaries/shader/SPIR/V/voxelize.vert.spv", "./assets/shader/SPIR/V/")
 copy("../../VKTS_Binaries/shader/SPIR/V/voxelize.geom.spv", "./assets/shader/SPIR/V/")
 copy("../../VKTS_Binaries/shader/SPIR/V/voxelize.frag.spv", "./assets/shader/SPIR/V/")
