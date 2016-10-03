@@ -113,6 +113,7 @@ private:
 
 	vkts::IRenderPassSP renderPass;
 	vkts::IRenderPassSP shadowRenderPass;
+	vkts::IRenderPassSP voxelRenderPass;
 
 	vkts::SmartPointerVector<vkts::IGraphicsPipelineSP> allOpaqueGraphicsPipelines;
 	vkts::SmartPointerVector<vkts::IGraphicsPipelineSP> allBlendGraphicsPipelines;

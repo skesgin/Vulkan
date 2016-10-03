@@ -27,7 +27,7 @@
 #include "Example.hpp"
 
 Example::Example(const vkts::IInitialResourcesSP& initialResources, const int32_t windowIndex, const vkts::ISurfaceSP& surface) :
-		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), descriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), fragmentUniformBuffer(nullptr), shadowUniformBuffer(nullptr), voxelizeViewProjectionUniformBuffer(nullptr), voxelizeModelNormalUniformBuffer(nullptr), standardVertexShaderModule(nullptr), standardFragmentShaderModule(nullptr), standardShadowFragmentShaderModule(nullptr), voxelizeVertexShaderModule(nullptr), voxelizeGeometryShaderModule(nullptr), voxelizeFragmentShaderModule(nullptr), pipelineLayout(nullptr), loadTask(), sceneLoaded(VK_FALSE), sceneContext(nullptr), scene(nullptr), swapchain(nullptr), renderPass(nullptr), shadowRenderPass(nullptr), allOpaqueGraphicsPipelines(), allBlendGraphicsPipelines(), allBlendCwGraphicsPipelines(), allShadowGraphicsPipelines(), shadowTexture(nullptr), msaaColorTexture(nullptr), msaaDepthTexture(nullptr), depthTexture(nullptr), voxelTexture{nullptr, nullptr, nullptr}, shadowImageView(nullptr), msaaColorImageView(nullptr), msaaDepthStencilImageView(nullptr), depthStencilImageView(nullptr), shadowSampler(nullptr), swapchainImagesCount(0), swapchainImageView(), framebuffer(), shadowFramebuffer(), fences(), cmdBuffer(), shadowCmdBuffer()
+		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), descriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), fragmentUniformBuffer(nullptr), shadowUniformBuffer(nullptr), voxelizeViewProjectionUniformBuffer(nullptr), voxelizeModelNormalUniformBuffer(nullptr), standardVertexShaderModule(nullptr), standardFragmentShaderModule(nullptr), standardShadowFragmentShaderModule(nullptr), voxelizeVertexShaderModule(nullptr), voxelizeGeometryShaderModule(nullptr), voxelizeFragmentShaderModule(nullptr), pipelineLayout(nullptr), loadTask(), sceneLoaded(VK_FALSE), sceneContext(nullptr), scene(nullptr), swapchain(nullptr), renderPass(nullptr), shadowRenderPass(nullptr), voxelRenderPass(nullptr), allOpaqueGraphicsPipelines(), allBlendGraphicsPipelines(), allBlendCwGraphicsPipelines(), allShadowGraphicsPipelines(), shadowTexture(nullptr), msaaColorTexture(nullptr), msaaDepthTexture(nullptr), depthTexture(nullptr), voxelTexture{nullptr, nullptr, nullptr}, shadowImageView(nullptr), msaaColorImageView(nullptr), msaaDepthStencilImageView(nullptr), depthStencilImageView(nullptr), shadowSampler(nullptr), swapchainImagesCount(0), swapchainImageView(), framebuffer(), shadowFramebuffer(), fences(), cmdBuffer(), shadowCmdBuffer()
 {
 }
 
@@ -1126,6 +1126,32 @@ VkBool32 Example::buildRenderPass()
 		return VK_FALSE;
 	}
 
+	//
+	// Create voxel render pass.
+	//
+
+	attachmentDescription[0].format = VK_FORMAT_R32_UINT;
+	attachmentDescription[0].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+	attachmentDescription[0].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+	attachmentDescription[0].initialLayout = VK_IMAGE_LAYOUT_GENERAL;
+	attachmentDescription[0].finalLayout = VK_IMAGE_LAYOUT_GENERAL;
+
+	subpassDescription[0].colorAttachmentCount = 0;
+	subpassDescription[0].pColorAttachments = nullptr;
+	subpassDescription[0].pResolveAttachments = nullptr;
+	subpassDescription[0].pDepthStencilAttachment = nullptr;
+
+    //
+
+	voxelRenderPass = vkts::renderPassCreate(initialResources->getDevice()->getDevice(), 0, 1, attachmentDescription, 1, subpassDescription, 0, nullptr);
+
+	if (!voxelRenderPass.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create voxel render pass.");
+
+		return VK_FALSE;
+	}
+
 	return VK_TRUE;
 }
 
@@ -1759,6 +1785,11 @@ void Example::terminateResources(const vkts::IUpdateThreadContext& updateContext
 				allOpaqueGraphicsPipelines[i]->destroy();
 			}
 			allOpaqueGraphicsPipelines.clear();
+
+			if (voxelRenderPass.get())
+			{
+				voxelRenderPass->destroy();
+			}
 
 			if (shadowRenderPass.get())
 			{
