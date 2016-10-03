@@ -15,6 +15,11 @@ import sys
 #
 ####################
 
+#
+# Execute with: -G "Visual Studio 14 2015 Win64"
+# for 64but project files.
+# 
+
 print("Creating all MSVC projects")
 
 noVisual = ["VKTS_Example08"]
@@ -23,7 +28,10 @@ option = ""
 isVisual = True
 
 for x in range(1, len(sys.argv)):
-    option = option + " " + sys.argv[x]
+    if ' ' in sys.argv[x]:
+        option = option + " \"" + sys.argv[x] + "\""
+    else:
+        option = option + " " + sys.argv[x]
     
     if sys.argv[x] == "-DVKTS_WSI=VKTS_NO_VISUAL":
         isVisual = False

@@ -23,7 +23,10 @@ option = ""
 isVisual = True
 
 for x in range(1, len(sys.argv)):
-    option = option + " " + sys.argv[x]
+    if ' ' in sys.argv[x]:
+        option = option + " \"" + sys.argv[x] + "\""
+    else:
+        option = option + " " + sys.argv[x]
     
     if sys.argv[x] == "-DVKTS_WSI=VKTS_NO_VISUAL":
         isVisual = False
@@ -32,7 +35,7 @@ os.chdir("VKTS/MSVC")
 
 print("Processing 'VKTS'")
 
-subprocess.call("msbuild VKTS.sln", shell=True)
+subprocess.call("msbuild VKTS.sln /p:Configuration=Release", shell=True)
 
 os.chdir("../..")
 
@@ -52,7 +55,7 @@ for example in allExamples:
         os.chdir(example)
         os.chdir("MSVC")
 
-        subprocess.call("msbuild %s.sln" % (example), shell=True)
+        subprocess.call("msbuild %s.sln /p:Configuration=Release" % (example), shell=True)
 
         os.chdir("../..")
 
@@ -72,6 +75,6 @@ for example in allExamples:
         os.chdir(example)
         os.chdir("MSVC")
 
-        subprocess.call("msbuild %s.sln" % (example), shell=True)
+        subprocess.call("msbuild %s.sln /p:Configuration=Release" % (example), shell=True)
 
         os.chdir("../..")        
