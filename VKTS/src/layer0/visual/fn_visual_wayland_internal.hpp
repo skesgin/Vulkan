@@ -24,26 +24,20 @@
  * THE SOFTWARE.
  */
 
-#ifndef VKTS_FN_VISUAL_XLIB_INTERNAL_HPP_
-#define VKTS_FN_VISUAL_XLIB_INTERNAL_HPP_
+#ifndef VKTS_FN_VISUAL_WAYLAND_INTERNAL_HPP_
+#define VKTS_FN_VISUAL_WAYLAND_INTERNAL_HPP_
 
 #include <vkts/vkts.hpp>
-
-#include "fn_visual_linux_internal.hpp"
-
-#include <X11/X.h>
-#include <X11/Xatom.h>
-#include <X11/XKBlib.h>
-#include <X11/Xutil.h>
-#include <X11/extensions/Xrandr.h>
 
 namespace vkts
 {
 
-VKTS_APICALL VkBool32 VKTS_APIENTRY _visualInitKey(Display* display);
+VKTS_APICALL VkBool32 VKTS_APIENTRY _visualInitGamepad(const VkInstance instance, const VkPhysicalDevice physicalDevice);
 
-VKTS_APICALL int32_t VKTS_APIENTRY _visualTranslateKey(int scancode);
+VKTS_APICALL VkBool32 VKTS_APIENTRY _visualDispatchMessagesGamepad();
+
+VKTS_APICALL void VKTS_APIENTRY _visualTerminateGamepad();
 
 }
 
-#endif /* VKTS_FN_VISUAL_XLIB_INTERNAL_HPP_ */
+#endif /* VKTS_FN_VISUAL_WAYLAND_INTERNAL_HPP_ */

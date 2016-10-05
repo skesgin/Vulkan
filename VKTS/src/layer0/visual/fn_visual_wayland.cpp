@@ -28,10 +28,14 @@
 
 #include "fn_visual_internal.hpp"
 
+#include "fn_visual_wayland_internal.hpp"
+
 #define VKTS_WINDOWS_MAX_WINDOWS 64
 
 namespace vkts
 {
+
+static struct wl_seat* g_nativeSeat = nullptr;
 
 static struct wl_shell* g_nativeShell = nullptr;
 
@@ -85,6 +89,34 @@ static int32_t g_numberWindows = 0;
 static uint64_t g_windowBits = 0;
 
 //
+
+void _visualWaylandCapabilities(void *data, struct wl_seat *wl_seat, uint32_t capabilities)
+{
+    if (capabilities & WL_SEAT_CAPABILITY_POINTER)
+    {
+    	// TODO: Implement.
+    }
+
+    if (capabilities & WL_SEAT_CAPABILITY_KEYBOARD)
+    {
+    	// TODO: Implement.
+	}
+
+    if (capabilities & WL_SEAT_CAPABILITY_TOUCH)
+    {
+    	// TODO: Implement.
+    }
+}
+
+void _visualWaylandName(void *data, struct wl_seat *wl_seat, const char *name)
+{
+}
+
+static const struct wl_seat_listener seat_listener =
+{
+		_visualWaylandCapabilities, _visualWaylandName
+};
+
 
 static void _visualWaylandPing(void* data, struct wl_shell_surface* shell_surface, uint32_t serial)
 {
@@ -209,6 +241,12 @@ static void _visualWaylandGlobal(void *data, struct wl_registry *registry, uint3
 
     	wl_output_add_listener(currentDisplayContainer->output, &g_output_listener, currentDisplayContainer);
     }
+    else if (strcmp(interface, "wl_seat") == 0)
+    {
+    	g_nativeSeat = (struct wl_seat *)wl_registry_bind(registry, name, &wl_seat_interface, 1);
+
+    	wl_seat_add_listener(g_nativeSeat, &seat_listener, nullptr);
+    }
 }
 
 static void _visualWaylandGlobal_remove(void *data, struct wl_registry *registry, uint32_t name)
@@ -238,6 +276,11 @@ VkBool32 VKTS_APIENTRY _visualInit(const VkInstance instance, const VkPhysicalDe
     wl_display_dispatch(g_nativeDisplay);
     wl_display_roundtrip(g_nativeDisplay);
 
+	if (!_visualInitGamepad(instance, physicalDevice))
+	{
+		return VK_FALSE;
+	}
+
     return VK_TRUE;
 }
 
@@ -249,6 +292,8 @@ VkBool32 VKTS_APIENTRY _visualDispatchMessages()
 	}
 
     // TODO: Dispatch input.
+
+    _visualDispatchMessagesGamepad();
 
     return VK_TRUE;
 }
@@ -575,6 +620,10 @@ void VKTS_APIENTRY _visualDestroyWindow(const NativeWindowSP& window)
 
 void VKTS_APIENTRY _visualTerminate()
 {
+    _visualTerminateGamepad();
+
+    //
+
     while (g_allWindows.size() > 0)
     {
         _visualDestroyWindow(g_allWindows.begin()->second->nativeWindow);
@@ -597,6 +646,13 @@ void VKTS_APIENTRY _visualTerminate()
     g_defaultDisplay.reset();
 
     //
+
+    if (g_nativeSeat)
+    {
+    	wl_seat_destroy(g_nativeSeat);
+
+    	g_nativeSeat = nullptr;
+    }
 
     if (g_nativeShell)
     {
@@ -625,6 +681,35 @@ void VKTS_APIENTRY _visualTerminate()
 
         g_nativeDisplay = nullptr;
     }
+}
+
+//
+
+void VKTS_APIENTRY _visualGamepadSetButton(const int32_t gamepadIndex, const int32_t buttonIndex, const VkBool32 pressed)
+{
+	// TODO: Implement.
+}
+
+void VKTS_APIENTRY _visualGamepadSetAxis(const int32_t gamepadIndex, const int32_t axisIndex, const float value)
+{
+	// TODO: Implement.
+}
+
+//
+
+void VKTS_APIENTRY _visualTouchpadSetLocationX(const int32_t slotIndex, const int32_t x)
+{
+	// TODO: Implement.
+}
+
+void VKTS_APIENTRY _visualTouchpadSetLocationY(const int32_t slotIndex, const int32_t y)
+{
+	// TODO: Implement.
+}
+
+void VKTS_APIENTRY _visualTouchpadSetPressed(const int32_t slotIndex, const VkBool32 pressed)
+{
+	// TODO: Implement.
 }
 
 }
