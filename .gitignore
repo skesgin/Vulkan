@@ -16,3 +16,5 @@ arm64_Linux_None.iMX8_GNU_Debug/
 arm64_Linux_None.iMX8_GNU_Release/
 intel64_Linux_Wayland_GNU_Debug/
 intel64_Linux_Wayland_GNU_Release/
+*.tlog
+*.lastbuildstate
