@@ -27,6 +27,7 @@
 #ifndef VKTS_HPP_
 #define VKTS_HPP_
 
+// TODO: Add enabling validation layers by code and command line.
 // TODO: Mark, if functions are thread safe or not.
 // TODO: Add documentation.
 
