@@ -124,6 +124,23 @@ int main(int argc, char* argv[])
 
 	//
 
+	uint32_t validate = 0;
+
+	if (vkts::commonGetUInt32Parameter(validate, std::string("-v"), argc, argv))
+	{
+		if (validate)
+		{
+			if (!vkts::validationGatherNeededInstanceLayers())
+			{
+				vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not gather needed instance layers.");
+
+				return -1;
+			}
+		}
+	}
+
+	//
+
 	VkApplicationInfo applicationInfo{};
 
 	applicationInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -140,8 +157,8 @@ int main(int argc, char* argv[])
 
 	instanceCreateInfo.flags = 0;
 	instanceCreateInfo.pApplicationInfo = &applicationInfo;
-	instanceCreateInfo.enabledLayerCount = 0;
-	instanceCreateInfo.ppEnabledLayerNames = nullptr;
+	instanceCreateInfo.enabledLayerCount = vkts::layerGetNeededInstanceLayerCount();
+	instanceCreateInfo.ppEnabledLayerNames = vkts::layerGetNeededInstanceLayerNames();
 	instanceCreateInfo.enabledExtensionCount = vkts::extensionGetNeededInstanceExtensionCount();
 	instanceCreateInfo.ppEnabledExtensionNames = vkts::extensionGetNeededInstanceExtensionNames();
 

@@ -106,7 +106,26 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 
-	auto instance = vkts::instanceCreate(VKTS_EXAMPLE_NAME, VK_MAKE_VERSION(1, 0, 0), VK_MAKE_VERSION(1, 0, 0), 0, 0, nullptr, vkts::extensionGetNeededInstanceExtensionCount(), vkts::extensionGetNeededInstanceExtensionNames());
+	//
+
+	uint32_t validate = 0;
+
+	if (vkts::commonGetUInt32Parameter(validate, std::string("-v"), argc, argv))
+	{
+		if (validate)
+		{
+			if (!vkts::validationGatherNeededInstanceLayers())
+			{
+				vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not gather needed instance layers.");
+
+				return -1;
+			}
+		}
+	}
+
+	//
+
+	auto instance = vkts::instanceCreate(VKTS_EXAMPLE_NAME, VK_MAKE_VERSION(1, 0, 0), VK_MAKE_VERSION(1, 0, 0), 0, vkts::layerGetNeededInstanceLayerCount(), vkts::layerGetNeededInstanceLayerNames(), vkts::extensionGetNeededInstanceExtensionCount(), vkts::extensionGetNeededInstanceExtensionNames());
 
 	if (!instance.get())
 	{

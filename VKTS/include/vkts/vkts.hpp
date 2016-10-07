@@ -27,7 +27,6 @@
 #ifndef VKTS_HPP_
 #define VKTS_HPP_
 
-// TODO: Add enabling validation layers by code and command line.
 // TODO: Mark, if functions are thread safe or not.
 // TODO: Add documentation.
 
@@ -166,6 +165,12 @@
  */
 
 #include <vkts/layer0/extension/fn_extension.hpp>
+
+/**
+ * Layer.
+ */
+
+#include <vkts/layer0/layer/fn_layer.hpp>
 
 /**
  * Time.
@@ -452,6 +457,12 @@
  */
 
 #include <vkts/layer0/debug/fn_debug.hpp>
+
+/**
+ * Validation layers.
+ */
+
+#include <vkts/layer0/validation/fn_validation.hpp>
 
 /**
  * KHR.

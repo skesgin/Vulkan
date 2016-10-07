@@ -504,7 +504,7 @@ static int32_t VKTS_APIENTRY commonGetParameterIndex(const std::string& paramete
 
 	while (i < argc - 1)
 	{
-		if (parameter == argv[i])
+		if (parameter.compare(argv[i]) == 0)
 		{
 			return (int32_t)(i + 1);
 		}

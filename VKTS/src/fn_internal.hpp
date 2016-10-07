@@ -63,6 +63,12 @@
 #include "layer0/extension/fn_extension_internal.hpp"
 
 //
+// Layer.
+//
+
+#include "layer0/layer/fn_layer_internal.hpp"
+
+//
 // Processor.
 //
 #include "layer0/processor/fn_processor_internal.hpp"

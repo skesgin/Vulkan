@@ -36,6 +36,8 @@
 #include "../input/KeyInput.hpp"
 #include "../input/MouseInput.hpp"
 
+#include <dlfcn.h>
+
 #define VKTS_WINDOWS_MAX_DISPLAYS 1
 
 #define VKTS_WINDOWS_MAX_WINDOWS 1
@@ -331,6 +333,65 @@ void android_main(struct android_app* app)
     }
 
     //
+    //
+
+    // If layers are available, enable validation.
+    uint32_t propertyCount = 0;
+
+    VkResult result = vkEnumerateInstanceLayerProperties(&propertyCount, nullptr);
+
+    if (result != VK_SUCCESS)
+    {
+    	::exit(-1);
+    }
+
+    if (propertyCount)
+    {
+		std::vector<VkLayerProperties> allInstanceLayerProperties(propertyCount);
+
+		result = vkEnumerateInstanceLayerProperties(&propertyCount, &allInstanceLayerProperties[0]);
+
+		if (result != VK_SUCCESS)
+		{
+			::exit(-1);
+		}
+
+	    static const char* validationLayerNames[7] =
+	    {
+	        "VK_LAYER_GOOGLE_threading",
+	        "VK_LAYER_LUNARG_parameter_validation",
+	        "VK_LAYER_LUNARG_object_tracker",
+			"VK_LAYER_LUNARG_image",
+	        "VK_LAYER_LUNARG_core_validation",
+	        "VK_LAYER_LUNARG_swapchain",
+	        "VK_LAYER_GOOGLE_unique_objects"
+	    };
+
+		for (auto validationLayerName : validationLayerNames)
+		{
+			VkBool32 extensionFound = VK_FALSE;
+
+			for (uint32_t i = 0; i < propertyCount; i++)
+			{
+				if (strcmp(validationLayerName, allInstanceLayerProperties[i].layerName) == 0)
+				{
+					extensionFound = VK_TRUE;
+
+					break;
+				}
+			}
+
+			if (!extensionFound)
+			{
+				propertyCount = 0;
+
+				break;
+			}
+		}
+    }
+
+    //
+    //
 
     g_app = app;
 
@@ -375,7 +436,23 @@ void android_main(struct android_app* app)
 
     //
 
-    main(0, nullptr);
+    int argc = 0;
+    char* argv[16]{};
+
+    //
+
+    static char validate[3] = "-v";
+    static char validateValue[2] = "1";
+
+    if (propertyCount)
+    {
+    	argv[argc++] = validate;
+    	argv[argc++] = validateValue;
+    }
+
+    //
+
+    main(argc, argv);
 
     //
 
