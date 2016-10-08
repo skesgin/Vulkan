@@ -64,7 +64,7 @@ void _visualWaylandKey(void *data, struct wl_keyboard *wl_keyboard, uint32_t ser
 
     if (keyCode == VKTS_KEY_ESCAPE)
     {
-    	// TODO: Implement quit.
+    	_visualWaylandSetRunning(VK_FALSE);
 
         return;
     }
@@ -165,6 +165,32 @@ void _visualWaylandAxis(void *data, struct wl_pointer *wl_pointer, uint32_t time
 
 //
 
+typedef struct _TouchInfo {
+	VkBool32 pressed;
+	int32_t x;
+	int32_t y;
+
+	int32_t id;
+	VkBool32 valid;
+} TouchInfo;
+
+static TouchInfo touchInfo[VKTS_MAX_TOUCHPAD_SLOTS];
+
+VkBool32 VKTS_APIENTRY _visualInitTouchpad(const VkInstance instance, const VkPhysicalDevice physicalDevice)
+{
+	for (int32_t i = 0; i < VKTS_MAX_TOUCHPAD_SLOTS; i++)
+	{
+		touchInfo[i].pressed = VK_FALSE;
+		touchInfo[i].x = 0;
+		touchInfo[i].y = 0;
+
+		touchInfo[i].id = -1;
+		touchInfo[i].valid = VK_FALSE;
+	}
+
+	return VK_TRUE;
+}
+
 void  VKTS_APIENTRY _visualWaylandDown(void *data, struct wl_touch *wl_touch, uint32_t serial, uint32_t time, struct wl_surface *surface, int32_t id, wl_fixed_t x, wl_fixed_t y)
 {
 	g_currentTouchSurface = surface;
@@ -181,19 +207,81 @@ void  VKTS_APIENTRY _visualWaylandDown(void *data, struct wl_touch *wl_touch, ui
 		return;
 	}
 
-	// TODO: Implement.
+	for (int32_t slot = 0; slot < VKTS_MAX_TOUCHPAD_SLOTS; slot++)
+	{
+		if (!touchInfo[slot].valid)
+		{
+			touchInfo[slot].valid = VK_TRUE;
+
+			touchInfo[slot].id = id;
+
+			touchInfo[slot].pressed = VK_TRUE;
+			touchInfo[slot].x = x;
+			touchInfo[slot].y = y;
+
+			currentWindowContainer->nativeWindow->getTouchpadInput().setLocation(slot, glm::ivec2(x, y));
+			currentWindowContainer->nativeWindow->getTouchpadInput().setPressed(slot, VK_TRUE);
+		}
+	}
 }
 
 void  VKTS_APIENTRY _visualWaylandUp(void *data, struct wl_touch *wl_touch, uint32_t serial, uint32_t time, int32_t id)
 {
-	// TODO: Implement.
+	if (!g_currentTouchSurface)
+	{
+		return;
+	}
+
+	auto currentWindowContainer = (VKTS_NATIVE_WINDOW_CONTAINER*)wl_surface_get_user_data(g_currentTouchSurface);
+
+	if (!currentWindowContainer)
+	{
+		return;
+	}
+
+	for (int32_t slot = 0; slot < VKTS_MAX_TOUCHPAD_SLOTS; slot++)
+	{
+		if (touchInfo[slot].valid && touchInfo[slot].id == id)
+		{
+			touchInfo[slot].valid = VK_FALSE;
+
+			touchInfo[slot].id = -1;
+
+			touchInfo[slot].pressed = VK_FALSE;
+
+			currentWindowContainer->nativeWindow->getTouchpadInput().setPressed(slot, VK_FALSE);
+		}
+	}
+
+	//
 
 	g_currentTouchSurface = nullptr;
 }
 
 void  VKTS_APIENTRY _visualWaylandTouchMotion(void *data, struct wl_touch *wl_touch, uint32_t time, int32_t id, wl_fixed_t x, wl_fixed_t y)
 {
-	// TODO: Implement.
+	if (!g_currentTouchSurface)
+	{
+		return;
+	}
+
+	auto currentWindowContainer = (VKTS_NATIVE_WINDOW_CONTAINER*)wl_surface_get_user_data(g_currentTouchSurface);
+
+	if (!currentWindowContainer)
+	{
+		return;
+	}
+
+	for (int32_t slot = 0; slot < VKTS_MAX_TOUCHPAD_SLOTS; slot++)
+	{
+		if (touchInfo[slot].valid && touchInfo[slot].id == id)
+		{
+			touchInfo[slot].x = x;
+			touchInfo[slot].y = y;
+
+			currentWindowContainer->nativeWindow->getTouchpadInput().setLocation(slot, glm::ivec2(x, y));
+		}
+	}
 }
 
 void  VKTS_APIENTRY _visualWaylandFrame(void *data, struct wl_touch *wl_touch)

@@ -54,6 +54,9 @@ VKTS_APICALL VkBool32 VKTS_APIENTRY _visualInitKey();
 VKTS_APICALL int32_t VKTS_APIENTRY _visualTranslateKey(int scancode);
 
 
+VKTS_APICALL VkBool32 VKTS_APIENTRY _visualInitTouchpad(const VkInstance instance, const VkPhysicalDevice physicalDevice);
+
+
 VKTS_APICALL void VKTS_APIENTRY _visualWaylandKeymap(void *data, struct wl_keyboard *wl_keyboard, uint32_t format, int32_t fd, uint32_t size);
 
 VKTS_APICALL void VKTS_APIENTRY _visualWaylandKeyEnter(void *data, struct wl_keyboard *wl_keyboard, uint32_t serial, struct wl_surface *surface, struct wl_array *keys);
@@ -87,6 +90,10 @@ VKTS_APICALL void VKTS_APIENTRY _visualWaylandTouchMotion(void *data, struct wl_
 VKTS_APICALL void VKTS_APIENTRY _visualWaylandFrame(void *data, struct wl_touch *wl_touch);
 
 VKTS_APICALL void VKTS_APIENTRY _visualWaylandCancel(void *data, struct wl_touch *wl_touch);
+
+//
+
+VKTS_APICALL void VKTS_APIENTRY _visualWaylandSetRunning(const VkBool32 running);
 
 }
 

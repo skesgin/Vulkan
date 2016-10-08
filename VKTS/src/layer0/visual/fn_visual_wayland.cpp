@@ -35,6 +35,14 @@
 namespace vkts
 {
 
+
+static VkBool32 g_running = VK_TRUE;
+
+void VKTS_APIENTRY _visualWaylandSetRunning(const VkBool32 running)
+{
+	g_running = running;
+}
+
 static struct wl_touch* g_nativeTouch = nullptr;
 
 static struct wl_keyboard* g_nativeKeyboard = nullptr;
@@ -323,16 +331,28 @@ VkBool32 VKTS_APIENTRY _visualInit(const VkInstance instance, const VkPhysicalDe
 		return VK_FALSE;
 	}
 
+	if (!_visualInitTouchpad(instance, physicalDevice))
+	{
+		return VK_FALSE;
+	}
+
 	if (!_visualInitKey())
 	{
 		return VK_FALSE;
 	}
+
+	g_running = VK_TRUE;
 
 	return VK_TRUE;
 }
 
 VkBool32 VKTS_APIENTRY _visualDispatchMessages()
 {
+	if (!g_running)
+	{
+		return VK_FALSE;
+	}
+
 	if (g_nativeDisplay)
 	{
 		wl_display_dispatch_pending(g_nativeDisplay);
@@ -517,7 +537,7 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
     //
 
     // TODO: Implement no resize window.
-    // TODO: Implement invisible cursor.
+    // TODO: Implement hidden cursor.
 
 	auto surface = wl_compositor_create_surface(g_nativeCompositor);
 
