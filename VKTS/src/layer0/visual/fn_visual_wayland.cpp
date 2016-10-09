@@ -537,7 +537,7 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
     //
 
     // TODO: Implement no resize window.
-    // TODO: Implement hidden cursor.
+    // TODO: Implement hidden and game mode cursor.
 
 	auto surface = wl_compositor_create_surface(g_nativeCompositor);
 

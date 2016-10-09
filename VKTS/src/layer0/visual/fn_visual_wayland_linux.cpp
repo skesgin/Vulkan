@@ -102,10 +102,52 @@ void _visualWaylandRepeat_info(void *data, struct wl_keyboard *wl_keyboard, int3
 void _visualWaylandEnter(void *data, struct wl_pointer *wl_pointer, uint32_t serial, struct wl_surface *surface, wl_fixed_t surface_x, wl_fixed_t surface_y)
 {
 	g_currentPointerSurface = surface;
+
+	//
+
+	if (!g_currentPointerSurface)
+	{
+		return;
+	}
+
+	auto currentWindowContainer = (VKTS_NATIVE_WINDOW_CONTAINER*)wl_surface_get_user_data(g_currentPointerSurface);
+
+	if (!currentWindowContainer)
+	{
+		return;
+	}
+
+	if (currentWindowContainer->nativeWindow->isInvisibleCursor())
+	{
+		wl_pointer_set_cursor(wl_pointer, serial, nullptr, 0, 0);
+	}
+	else
+	{
+		// TODO: Set back to visible cursor.
+	}
 }
 
 void _visualWaylandLeave(void *data, struct wl_pointer *wl_pointer, uint32_t serial, struct wl_surface *surface)
 {
+	if (!g_currentPointerSurface)
+	{
+		return;
+	}
+
+	auto currentWindowContainer = (VKTS_NATIVE_WINDOW_CONTAINER*)wl_surface_get_user_data(g_currentPointerSurface);
+
+	if (!currentWindowContainer)
+	{
+		return;
+	}
+
+	if (currentWindowContainer->nativeWindow->isInvisibleCursor())
+	{
+		// TODO: Set back to visible cursor.
+	}
+
+	//
+
 	g_currentPointerSurface = nullptr;
 }
 
