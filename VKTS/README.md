@@ -85,6 +85,9 @@ How to build:
 Changelog:
 ----------
 
+10/10/2016
+- Added enabling of debug report by command line.
+
 10/03/2016
 - Fixed top element bug in own container class.
 

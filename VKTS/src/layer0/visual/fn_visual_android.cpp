@@ -444,10 +444,16 @@ void android_main(struct android_app* app)
     static char validate[3] = "-v";
     static char validateValue[2] = "1";
 
+    static char debug[3] = "-v";
+    static char debugValue[3] = "30";	// Without VK_DEBUG_REPORT_INFORMATION_BIT_EXT
+
     if (propertyCount)
     {
     	argv[argc++] = validate;
     	argv[argc++] = validateValue;
+
+    	argv[argc++] = debug;
+    	argv[argc++] = debugValue;
     }
 
     //

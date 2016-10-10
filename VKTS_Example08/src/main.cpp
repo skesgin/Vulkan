@@ -53,6 +53,10 @@ static void terminateApp()
 
 	if (instance.get())
 	{
+		vkts::debugDestroyDebugReportCallback(instance->getInstance());
+
+		//
+
 		instance->destroy();
 	}
 
@@ -91,6 +95,21 @@ int main(int argc, char* argv[])
 		}
 	}
 
+	uint32_t debug = 0;
+
+	if (vkts::commonGetUInt32Parameter(debug, std::string("-d"), argc, argv))
+	{
+		if (debug)
+		{
+			if (!vkts::debugGatherNeededInstanceExtensions())
+			{
+				vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not gather needed instance layers.");
+
+				return -1;
+			}
+		}
+	}
+
 	//
 
 	instance = vkts::instanceCreate(VKTS_EXAMPLE_NAME, VK_MAKE_VERSION(1, 0, 0), VK_MAKE_VERSION(1, 0, 0), 0, vkts::layerGetNeededInstanceLayerCount(), vkts::layerGetNeededInstanceLayerNames(), 0, nullptr);
@@ -102,6 +121,25 @@ int main(int argc, char* argv[])
 		terminateApp();
 
 		return -1;
+	}
+
+	//
+
+	if (debug)
+	{
+		if (!vkts::debugInitInstanceExtensions(instance->getInstance()))
+		{
+			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not initialize debug extensions.");
+
+			return -1;
+		}
+
+		if (!vkts::debugCreateDebugReportCallback(instance->getInstance(), debug))
+		{
+			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create debug callback.");
+
+			return -1;
+		}
 	}
 
 	//
