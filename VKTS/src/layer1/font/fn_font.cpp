@@ -750,7 +750,6 @@ IFontSP VKTS_APIENTRY fontCreate(const char* filename, const IInitialResourcesSP
 
 
     gp.getPipelineMultisampleStateCreateInfo();
-    gp.getPipelineDepthStencilStateCreateInfo();
 
 
     gp.getPipelineColorBlendAttachmentState(0).blendEnable = VK_TRUE;

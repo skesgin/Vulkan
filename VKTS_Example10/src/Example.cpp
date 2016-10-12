@@ -857,7 +857,6 @@ VkBool32 Example::buildPipeline()
 
 
 	resolveGP.getPipelineMultisampleStateCreateInfo();
-	resolveGP.getPipelineDepthStencilStateCreateInfo();
 
 
 	resolveGP.getPipelineColorBlendAttachmentState(0).blendEnable = VK_FALSE;
