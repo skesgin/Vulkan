@@ -131,6 +131,75 @@ texImageFunction = """layout (binding = %d) uniform sampler2D u_texture%d;
 #nextTexture#"""
 
 
+#########
+# Nodes #
+#########
+
+#
+# Group
+#
+
+pbrMain = """#previousMain#
+    
+    // PBR start
+
+    // In
+    float %s = %s;
+    float %s = %s;
+    float %s = %s;
+    vec3 %s = %s;
+    vec4 %s = %s;
+    
+    // PBR end"""
+        
+#
+# Converter
+#
+
+rgbToBwMain = """#previousMain#
+    
+    // RGB to BW start
+
+    // In
+    vec4 %s = %s;
+    
+    // Out
+    float %s = %s.r * 0.2126 + %s.g * 0.7152 + %s.g * 0.0722;
+    
+    // end"""
+
+separateRgbMain = """#previousMain#
+    
+    // Separate RGB start
+
+    // In
+    vec4 %s = %s;
+    
+    // Out
+    float %s = %s.r;
+    float %s = %s.g;
+    float %s = %s.b;
+    
+    // end""" 
+
+#
+# Vector
+#
+
+mappingMain = """#previousMain#
+    
+    // Mapping start
+
+    // In
+    vec4 %s = vec4(%s, 1.0);
+
+    %s = %s;
+    
+    // Out
+    vec3 %s = %s%s%s.xyz;
+    
+    // Mapping end"""
+
 normalMapMain = """#previousMain#
     
     // Normal map start
@@ -145,20 +214,70 @@ normalMapMain = """#previousMain#
     
     // Normal map end"""
 
+#
+# Color
+#
 
-texImageMain = """#previousMain#
+invertMain = """#previousMain#
     
-    // Image texture start
+    // Invert start
 
     // In
-    vec3 %s = %s;
+    float %s = %s;
+    vec4 %s = %s;
     
     // Out
-    vec4 %s = texture(u_texture%d, %s.st).rgba;
-    float %s = texture(u_texture%d, %s.st).a;
+    vec4 %s = mix(%s, vec4(1.0 - %s.r, 1.0 - %s.g, 1.0 - %s.b, 1.0 - %s.a), %s);
     
-    // Image texture end"""
+    // Invert end"""
 
+# Mix
+
+multiplyMain = """#previousMain#
+    
+    // Multiply start
+
+    // In
+    float %s = %s;
+    vec4 %s = %s;
+    vec4 %s = %s;
+    
+    // Out
+    vec4 %s = %s%s * (1.0 - %s) + %s * %s * %s%s;
+    
+    // Multiply end"""
+
+addMain = """#previousMain#
+    
+    // Add start
+
+    // In
+    float %s = %s;
+    vec4 %s = %s;
+    vec4 %s = %s;
+    
+    // Out
+    vec4 %s = %s%s + %s * %s%s;
+    
+    // Add end"""
+
+mixMain = """#previousMain#
+    
+    // Mix start
+
+    // In
+    float %s = %s;
+    vec4 %s = %s;
+    vec4 %s = %s;
+    
+    // Out
+    vec4 %s = %smix(%s, %s, %s)%s;
+    
+    // Mix end"""
+
+#
+# Texture
+#
 
 texCheckerMain = """#previousMain#
     
@@ -185,65 +304,22 @@ texCheckerMain = """#previousMain#
     
     // Checker texture end"""
 
-
-multiplyMain = """#previousMain#
+texImageMain = """#previousMain#
     
-    // Multiply start
-
-    // In
-    float %s = %s;
-    vec4 %s = %s;
-    vec4 %s = %s;
-    
-    // Out
-    vec4 %s = %s%s * (1.0 - %s) + %s * %s * %s%s;
-    
-    // Multiply end"""
-
-
-addMain = """#previousMain#
-    
-    // Add start
+    // Image texture start
 
     // In
-    float %s = %s;
-    vec4 %s = %s;
-    vec4 %s = %s;
+    vec3 %s = %s;
     
     // Out
-    vec4 %s = %s%s + %s * %s%s;
+    vec4 %s = texture(u_texture%d, %s.st).rgba;
+    float %s = texture(u_texture%d, %s.st).a;
     
-    // Add end"""
+    // Image texture end"""
 
-
-mixMain = """#previousMain#
-    
-    // Mix start
-
-    // In
-    float %s = %s;
-    vec4 %s = %s;
-    vec4 %s = %s;
-    
-    // Out
-    vec4 %s = %smix(%s, %s, %s)%s;
-    
-    // Mix end"""
-
-
-invertMain = """#previousMain#
-    
-    // Invert start
-
-    // In
-    float %s = %s;
-    vec4 %s = %s;
-    
-    // Out
-    vec4 %s = mix(%s, vec4(1.0 - %s.r, 1.0 - %s.g, 1.0 - %s.b, 1.0 - %s.a), %s);
-    
-    // Invert end"""
-
+#
+# Input
+#
 
 fresnelMain = """#previousMain#
     
@@ -258,34 +334,14 @@ fresnelMain = """#previousMain#
     
     // Fresnel end"""
 
-
-rgbToBwMain = """#previousMain#
+rgbMain = """#previousMain#
     
-    // RGB to BW start
+    // RGB start
 
-    // In
+    // Out
     vec4 %s = %s;
     
-    // Out
-    float %s = %s.r * 0.2126 + %s.g * 0.7152 + %s.g * 0.0722;
-    
-    // end"""
-
-
-mappingMain = """#previousMain#
-    
-    // Mapping start
-
-    // In
-    vec4 %s = vec4(%s, 1.0);
-
-    %s = %s;
-    
-    // Out
-    vec3 %s = %s%s%s.xyz;
-    
-    // Mapping end"""
-
+    // end""" 
 
 uvMapMain = """#previousMain#
     
@@ -296,20 +352,15 @@ uvMapMain = """#previousMain#
     
     // UV map end"""
 
-
-pbrMain = """#previousMain#
+valueMain = """#previousMain#
     
-    // PBR start
+    // Value start
 
-    // In
+    // Out
     float %s = %s;
-    float %s = %s;
-    float %s = %s;
-    vec3 %s = %s;
-    vec4 %s = %s;
     
-    // PBR end"""
-        
+    // end""" 
+
 #
 #
 #
@@ -858,6 +909,7 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
             alphaCounter = 0
             colorCounter = 0
             facCounter = 0
+            imageCounter = 0
             iorCounter = 0
             maskCounter = 0
             metallicCounter = 0
@@ -879,164 +931,62 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
             
                 currentNode = openNodes.pop(0)
 
-                if isinstance(currentNode, bpy.types.ShaderNodeNormalMap):
-                    # Normal map.
+                if isinstance(currentNode, bpy.types.ShaderNodeGroup) and currentNode.node_tree.name == 'PBR':
+                    # PBR
+
+                    roughnessInputName = "Roughness_%d" % roughnessCounter
+                    metallicInputName = "Metallic_%d" % metallicCounter
+                    maskInputName = "Mask_%d" % maskCounter
+                    normalInputName = "Normal_%d" % normalCounter
+                    colorInputName = "Color_%d" % colorCounter
+
+                    roughnessCounter += 1
+                    metallicCounter += 1
+                    maskCounter += 1
+                    normalCounter += 1
+                    colorCounter += 1
                     
+                    roughnessInputParameterName = "Roughness_Dummy"
+                    metallicInputParameterName = "Metallic_Dummy"
+                    maskInputParameterName =  "Mask_Dummy"
+                    normalInputParameterName =  "Normal_Dummy"
+                    colorInputParameterName = "Color_Dummy"
+
+                    # Outputs.
+                    
+                    # No outputs, as directly written.
+
+                    #                    
+
+                    currentMain = pbrMain % (roughnessInputName, roughnessInputParameterName, metallicInputName, metallicInputParameterName, maskInputName, maskInputParameterName, normalInputName, normalInputParameterName, colorInputName, colorInputParameterName)
+
+                    #
+
+                    currentMain = replaceParameters(currentNode, openNodes, processedNodes, currentMain)
+                    
+                    #
+                        
+                    currentFragmentGLSL = currentFragmentGLSL.replace("#previousMain#", currentMain)
+
+                elif isinstance(currentNode, bpy.types.ShaderNodeRGBToBW):
+                    # RGB to BW color.
+
                     # Inputs
                     
-                    strengthInputName = "Strength_%d" % (strengthCounter)
                     colorInputName = "Color_%d" % (colorCounter)
 
-                    strengthCounter += 1
                     colorCounter += 1
 
-                    strengthInputParameterName = "Strength_Dummy"
                     colorInputParameterName = "Color_Dummy"
                     
                     # Outputs
                     
-                    normalOutputName = friendlyNodeName(currentNode.name) + "_" + friendlyNodeName(currentNode.outputs["Normal"].name)
+                    valOutputName = friendlyNodeName(currentNode.name) + "_" + friendlyNodeName(currentNode.outputs["Val"].name) 
                     
                     #
                     
-                    currentMain = normalMapMain % (strengthInputName, strengthInputParameterName, colorInputName, colorInputParameterName, normalOutputName, colorInputName, strengthInputName) 
+                    currentMain = rgbToBwMain % (colorInputName, colorInputParameterName, valOutputName, colorInputName, colorInputName, colorInputName) 
                     
-                    #
-                    
-                    currentMain = replaceParameters(currentNode, openNodes, processedNodes, currentMain)
-                    
-                    #
-                    
-                    currentFragmentGLSL = currentFragmentGLSL.replace("#previousMain#", currentMain)
-                    
-                    #
-                
-                    normalMapUsed = True
-                    
-                    vertexAttributes = vertexAttributes | 0x00000004 | 0x00000008
-
-                elif isinstance(currentNode, bpy.types.ShaderNodeTexImage):
-                    # Image texture.
-                    
-                    if currentNode not in nodes:
-                        nodes.append(currentNode)
-
-                    textureIndex = nodes.index(currentNode)
-                        
-                    # Inputs.
-                    
-                    vectorInputName = "Vector_%d" % (vectorCounter)
-
-                    vectorCounter += 1
-                    
-                    vectorInputParameterName = "Vector_Dummy"
-                    
-                    # Outputs
-                    
-                    colorOutputName = friendlyNodeName(currentNode.name) + "_" + friendlyNodeName(currentNode.outputs["Color"].name) 
-                    alphaOutputName = friendlyNodeName(currentNode.name) + "_" + friendlyNodeName(currentNode.outputs["Alpha"].name)
-                    
-                    #
-                    
-                    currentMain = texImageMain % (vectorInputName, vectorInputParameterName, colorOutputName, textureIndex, vectorInputName, alphaOutputName, textureIndex, vectorInputName)
-                    
-                    #
-                    
-                    currentMain = replaceParameters(currentNode, openNodes, processedNodes, currentMain)
-                    
-                    #
-                    
-                    currentFragmentGLSL = currentFragmentGLSL.replace("#previousMain#", currentMain)
-
-                elif isinstance(currentNode, bpy.types.ShaderNodeTexChecker):
-                    # Checker texture.
-                    
-                    # Inputs.
-                    
-                    vectorInputName = "Vector_%d" % (vectorCounter)
-                    
-                    color1InputName = "Color1_%d" % (colorCounter)
-                    colorCounter += 1
-                    color2InputName = "Color2_%d" % (colorCounter)
-                    
-                    scaleInputName = "Scale_%d" % (scaleCounter)
-                    
-                    vectorCounter += 1
-                    colorCounter += 1
-                    scaleCounter += 1
-
-                    vectorInputParameterName = "Vector_Dummy"
-                    color1InputParameterName = "Color1_Dummy"
-                    color2InputParameterName = "Color2_Dummy"
-                    scaleInputParameterName = "Scale_Dummy"
-                    
-                    # Temporary
-
-                    bool1TempName = "TempBool_%d" % (tempCounter)
-                    
-                    tempCounter += 1;
-
-                    bool2TempName = "TempBool_%d" % (tempCounter)
-
-                    tempCounter += 1;
-                    
-                    # Outputs
-                    
-                    colorOutputName = friendlyNodeName(currentNode.name) + "_" + friendlyNodeName(currentNode.outputs["Color"].name) 
-                    facOutputName = friendlyNodeName(currentNode.name) + "_" + friendlyNodeName(currentNode.outputs["Fac"].name) 
-
-                    #
-                    
-                    currentMain = texCheckerMain % (vectorInputName, vectorInputParameterName, color1InputName, color1InputParameterName, color2InputName, color2InputParameterName, scaleInputName, scaleInputParameterName, bool1TempName, vectorInputName, scaleInputName, bool2TempName, vectorInputName, scaleInputName, colorOutputName, color2InputName, facOutputName, bool1TempName, bool2TempName, bool1TempName, bool2TempName, colorOutputName, color1InputName, facOutputName)
-                    
-                    # 
-                    
-                    currentMain = replaceParameters(currentNode, openNodes, processedNodes, currentMain)
-                     
-                    #
-                        
-                    currentFragmentGLSL = currentFragmentGLSL.replace("#previousMain#", currentMain)
-                
-                elif isinstance(currentNode, bpy.types.ShaderNodeMixRGB):
-                    # Mix color.
-                    
-                    # Inputs.
-                    
-                    facInputName = "Fac_%d" % (facCounter)
-                    color1InputName = "Color1_%d" % (colorCounter)
-                    colorCounter += 1
-                    color2InputName = "Color2_%d" % (colorCounter)
-                    
-                    facCounter += 1
-                    colorCounter += 1
-
-                    facInputParameterName = "Fac_Dummy"
-                    color1InputParameterName = "Color1_Dummy"
-                    color2InputParameterName = "Color2_Dummy"
-                    
-                    # Outputs
-                    
-                    colorOutputName = friendlyNodeName(currentNode.name) + "_" + friendlyNodeName(currentNode.outputs["Color"].name) 
-                    
-                    #
-                                        
-                    preClamp = ""
-                    postClamp = ""
-                    
-                    if currentNode.use_clamp:
-                        preClamp = "clamp("
-                        postClamp = ", vec4(0.0, 0.0, 0.0, 0.0), vec4(1.0, 1.0, 1.0, 1.0))"
-                    
-                    #
-                    
-                    if currentNode.blend_type == 'MIX':    
-                        currentMain = mixMain % (facInputName, facInputParameterName, color1InputName, color1InputParameterName, color2InputName, color2InputParameterName, colorOutputName, preClamp, color1InputName, color2InputName, facInputName, postClamp)
-                    elif currentNode.blend_type == 'ADD':
-                        currentMain = addMain % (facInputName, facInputParameterName, color1InputName, color1InputParameterName, color2InputName, color2InputParameterName, colorOutputName, preClamp, color1InputName, color2InputName, facInputName, postClamp)
-                    elif currentNode.blend_type == 'MULTIPLY':
-                        currentMain = multiplyMain % (facInputName, facInputParameterName, color1InputName, color1InputParameterName, color2InputName, color2InputParameterName, colorOutputName, preClamp, color1InputName, facInputName, color1InputName, color2InputName, facInputName, postClamp)
-                    else:
-                        currentMain = ""
                     #
                     
                     currentMain = replaceParameters(currentNode, openNodes, processedNodes, currentMain)
@@ -1044,7 +994,36 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
                     #
                         
                     currentFragmentGLSL = currentFragmentGLSL.replace("#previousMain#", currentMain)
+
+                elif isinstance(currentNode, bpy.types.ShaderNodeSeparateRGB):
+                    # Seperate color.
+
+                    # Inputs
                     
+                    imageInputName = "Image_%d" % (imageCounter)
+
+                    imageCounter += 1
+
+                    imageInputParameterName = "Image_Dummy"
+                    
+                    # Outputs
+                    
+                    redOutputName = friendlyNodeName(currentNode.name) + "_" + friendlyNodeName(currentNode.outputs["R"].name) 
+                    greenOutputName = friendlyNodeName(currentNode.name) + "_" + friendlyNodeName(currentNode.outputs["G"].name) 
+                    blueOutputName = friendlyNodeName(currentNode.name) + "_" + friendlyNodeName(currentNode.outputs["B"].name) 
+                    
+                    #
+                    
+                    currentMain = separateRgbMain % (imageInputName, imageInputParameterName, redOutputName, imageInputName, greenOutputName, imageInputName, blueOutputName, imageInputName) 
+                    
+                    #
+                    
+                    currentMain = replaceParameters(currentNode, openNodes, processedNodes, currentMain)
+                    
+                    #
+                        
+                    currentFragmentGLSL = currentFragmentGLSL.replace("#previousMain#", currentMain)
+
                 elif isinstance(currentNode, bpy.types.ShaderNodeMapping):
                     # Mapping.
                         
@@ -1099,25 +1078,42 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
                     #
                         
                     currentFragmentGLSL = currentFragmentGLSL.replace("#previousMain#", currentMain)
-                    
-                elif isinstance(currentNode, bpy.types.ShaderNodeUVMap):
-                    # UV map.
 
+                elif isinstance(currentNode, bpy.types.ShaderNodeNormalMap):
+                    # Normal map.
+                    
+                    # Inputs
+                    
+                    strengthInputName = "Strength_%d" % (strengthCounter)
+                    colorInputName = "Color_%d" % (colorCounter)
+
+                    strengthCounter += 1
+                    colorCounter += 1
+
+                    strengthInputParameterName = "Strength_Dummy"
+                    colorInputParameterName = "Color_Dummy"
+                    
                     # Outputs
                     
-                    uvOutputName = friendlyNodeName(currentNode.name) + "_" + friendlyNodeName(currentNode.outputs["UV"].name) 
+                    normalOutputName = friendlyNodeName(currentNode.name) + "_" + friendlyNodeName(currentNode.outputs["Normal"].name)
                     
                     #
                     
-                    currentMain = uvMapMain % (uvOutputName) 
+                    currentMain = normalMapMain % (strengthInputName, strengthInputParameterName, colorInputName, colorInputParameterName, normalOutputName, colorInputName, strengthInputName) 
                     
                     #
-                        
+                    
+                    currentMain = replaceParameters(currentNode, openNodes, processedNodes, currentMain)
+                    
+                    #
+                    
                     currentFragmentGLSL = currentFragmentGLSL.replace("#previousMain#", currentMain)
                     
-                    texCoordUsed = True
+                    #
+                
+                    normalMapUsed = True
                     
-                    vertexAttributes = vertexAttributes | 0x00000010 
+                    vertexAttributes = vertexAttributes | 0x00000004 | 0x00000008
 
                 elif isinstance(currentNode, bpy.types.ShaderNodeInvert):
                     # Invert color.
@@ -1148,6 +1144,137 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
                     #
                         
                     currentFragmentGLSL = currentFragmentGLSL.replace("#previousMain#", currentMain)
+
+                elif isinstance(currentNode, bpy.types.ShaderNodeMixRGB):
+                    # Mix color.
+                    
+                    # Inputs.
+                    
+                    facInputName = "Fac_%d" % (facCounter)
+                    color1InputName = "Color1_%d" % (colorCounter)
+                    colorCounter += 1
+                    color2InputName = "Color2_%d" % (colorCounter)
+                    
+                    facCounter += 1
+                    colorCounter += 1
+
+                    facInputParameterName = "Fac_Dummy"
+                    color1InputParameterName = "Color1_Dummy"
+                    color2InputParameterName = "Color2_Dummy"
+                    
+                    # Outputs
+                    
+                    colorOutputName = friendlyNodeName(currentNode.name) + "_" + friendlyNodeName(currentNode.outputs["Color"].name) 
+                    
+                    #
+                                        
+                    preClamp = ""
+                    postClamp = ""
+                    
+                    if currentNode.use_clamp:
+                        preClamp = "clamp("
+                        postClamp = ", vec4(0.0, 0.0, 0.0, 0.0), vec4(1.0, 1.0, 1.0, 1.0))"
+                    
+                    #
+                    
+                    if currentNode.blend_type == 'MIX':    
+                        currentMain = mixMain % (facInputName, facInputParameterName, color1InputName, color1InputParameterName, color2InputName, color2InputParameterName, colorOutputName, preClamp, color1InputName, color2InputName, facInputName, postClamp)
+                    elif currentNode.blend_type == 'ADD':
+                        currentMain = addMain % (facInputName, facInputParameterName, color1InputName, color1InputParameterName, color2InputName, color2InputParameterName, colorOutputName, preClamp, color1InputName, color2InputName, facInputName, postClamp)
+                    elif currentNode.blend_type == 'MULTIPLY':
+                        currentMain = multiplyMain % (facInputName, facInputParameterName, color1InputName, color1InputParameterName, color2InputName, color2InputParameterName, colorOutputName, preClamp, color1InputName, facInputName, color1InputName, color2InputName, facInputName, postClamp)
+                    else:
+                        currentMain = ""
+                    #
+                    
+                    currentMain = replaceParameters(currentNode, openNodes, processedNodes, currentMain)
+                    
+                    #
+                        
+                    currentFragmentGLSL = currentFragmentGLSL.replace("#previousMain#", currentMain)
+
+                elif isinstance(currentNode, bpy.types.ShaderNodeTexChecker):
+                    # Checker texture.
+                    
+                    # Inputs.
+                    
+                    vectorInputName = "Vector_%d" % (vectorCounter)
+                    
+                    color1InputName = "Color1_%d" % (colorCounter)
+                    colorCounter += 1
+                    color2InputName = "Color2_%d" % (colorCounter)
+                    
+                    scaleInputName = "Scale_%d" % (scaleCounter)
+                    
+                    vectorCounter += 1
+                    colorCounter += 1
+                    scaleCounter += 1
+
+                    vectorInputParameterName = "Vector_Dummy"
+                    color1InputParameterName = "Color1_Dummy"
+                    color2InputParameterName = "Color2_Dummy"
+                    scaleInputParameterName = "Scale_Dummy"
+                    
+                    # Temporary
+
+                    bool1TempName = "TempBool_%d" % (tempCounter)
+                    
+                    tempCounter += 1;
+
+                    bool2TempName = "TempBool_%d" % (tempCounter)
+
+                    tempCounter += 1;
+                    
+                    # Outputs
+                    
+                    colorOutputName = friendlyNodeName(currentNode.name) + "_" + friendlyNodeName(currentNode.outputs["Color"].name) 
+                    facOutputName = friendlyNodeName(currentNode.name) + "_" + friendlyNodeName(currentNode.outputs["Fac"].name) 
+
+                    #
+                    
+                    currentMain = texCheckerMain % (vectorInputName, vectorInputParameterName, color1InputName, color1InputParameterName, color2InputName, color2InputParameterName, scaleInputName, scaleInputParameterName, bool1TempName, vectorInputName, scaleInputName, bool2TempName, vectorInputName, scaleInputName, colorOutputName, color2InputName, facOutputName, bool1TempName, bool2TempName, bool1TempName, bool2TempName, colorOutputName, color1InputName, facOutputName)
+                    
+                    # 
+                    
+                    currentMain = replaceParameters(currentNode, openNodes, processedNodes, currentMain)
+                     
+                    #
+                        
+                    currentFragmentGLSL = currentFragmentGLSL.replace("#previousMain#", currentMain)
+                                                        
+                elif isinstance(currentNode, bpy.types.ShaderNodeTexImage):
+                    # Image texture.
+                    
+                    if currentNode not in nodes:
+                        nodes.append(currentNode)
+
+                    textureIndex = nodes.index(currentNode)
+                        
+                    # Inputs.
+                    
+                    vectorInputName = "Vector_%d" % (vectorCounter)
+
+                    vectorCounter += 1
+                    
+                    vectorInputParameterName = "Vector_Dummy"
+                    
+                    # Outputs
+                    
+                    colorOutputName = friendlyNodeName(currentNode.name) + "_" + friendlyNodeName(currentNode.outputs["Color"].name) 
+                    alphaOutputName = friendlyNodeName(currentNode.name) + "_" + friendlyNodeName(currentNode.outputs["Alpha"].name)
+                    
+                    #
+                    
+                    currentMain = texImageMain % (vectorInputName, vectorInputParameterName, colorOutputName, textureIndex, vectorInputName, alphaOutputName, textureIndex, vectorInputName)
+                    
+                    #
+                    
+                    currentMain = replaceParameters(currentNode, openNodes, processedNodes, currentMain)
+                    
+                    #
+                    
+                    currentFragmentGLSL = currentFragmentGLSL.replace("#previousMain#", currentMain)
+
                 elif isinstance(currentNode, bpy.types.ShaderNodeFresnel):
                     # Fresnel.
 
@@ -1177,24 +1304,17 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
                     #
                         
                     currentFragmentGLSL = currentFragmentGLSL.replace("#previousMain#", currentMain)
-                elif isinstance(currentNode, bpy.types.ShaderNodeRGBToBW):
-                    # RGB to BW color.
+                                        
+                elif isinstance(currentNode, bpy.types.ShaderNodeRGB):
+                    # RGB color.
 
-                    # Inputs
-                    
-                    colorInputName = "Color_%d" % (colorCounter)
-
-                    colorCounter += 1
-
-                    colorInputParameterName = "Color_Dummy"
-                    
                     # Outputs
                     
-                    valOutputName = friendlyNodeName(currentNode.name) + "_" + friendlyNodeName(currentNode.outputs["Val"].name) 
+                    colorOutputName = friendlyNodeName(currentNode.name) + "_" + friendlyNodeName(currentNode.outputs["Color"].name) 
                     
                     #
                     
-                    currentMain = rgbToBwMain % (colorInputName, colorInputParameterName, valOutputName, colorInputName, colorInputName, colorInputName) 
+                    currentMain = rgbMain % (colorOutputName, getVec4(currentNode.outputs[0].default_value)) 
                     
                     #
                     
@@ -1203,43 +1323,47 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
                     #
                         
                     currentFragmentGLSL = currentFragmentGLSL.replace("#previousMain#", currentMain)
-                                        
-                elif isinstance(currentNode, bpy.types.ShaderNodeGroup) and currentNode.node_tree.name == 'PBR':
 
-                    roughnessInputName = "Roughness_%d" % roughnessCounter
-                    metallicInputName = "Metallic_%d" % metallicCounter
-                    maskInputName = "Mask_%d" % maskCounter
-                    normalInputName = "Normal_%d" % normalCounter
-                    colorInputName = "Color_%d" % colorCounter
+                elif isinstance(currentNode, bpy.types.ShaderNodeUVMap):
+                    # UV map.
 
-                    roughnessCounter += 1
-                    metallicCounter += 1
-                    maskCounter += 1
-                    normalCounter += 1
-                    colorCounter += 1
+                    # Outputs
                     
-                    roughnessInputParameterName = "Roughness_Dummy"
-                    metallicInputParameterName = "Metallic_Dummy"
-                    maskInputParameterName =  "Mask_Dummy"
-                    normalInputParameterName =  "Normal_Dummy"
-                    colorInputParameterName = "Color_Dummy"
-
-                    # Outputs.
+                    uvOutputName = friendlyNodeName(currentNode.name) + "_" + friendlyNodeName(currentNode.outputs["UV"].name) 
                     
-                    # No outputs, as directly written.
-
-                    #                    
-
-                    currentMain = pbrMain % (roughnessInputName, roughnessInputParameterName, metallicInputName, metallicInputParameterName, maskInputName, maskInputParameterName, normalInputName, normalInputParameterName, colorInputName, colorInputParameterName)
-
                     #
-
-                    currentMain = replaceParameters(currentNode, openNodes, processedNodes, currentMain)
+                    
+                    currentMain = uvMapMain % (uvOutputName) 
                     
                     #
                         
                     currentFragmentGLSL = currentFragmentGLSL.replace("#previousMain#", currentMain)
                     
+                    texCoordUsed = True
+                    
+                    vertexAttributes = vertexAttributes | 0x00000010
+
+                elif isinstance(currentNode, bpy.types.ShaderNodeValue):
+                    # Value.
+
+                    # Outputs
+                    
+                    valueOutputName = friendlyNodeName(currentNode.name) + "_" + friendlyNodeName(currentNode.outputs["Value"].name) 
+                    
+                    #
+                    
+                    currentMain = valueMain % (valueOutputName, getFloat(currentNode.outputs[0].default_value)) 
+                    
+                    #
+                    
+                    currentMain = replaceParameters(currentNode, openNodes, processedNodes, currentMain)
+                    
+                    #
+                        
+                    currentFragmentGLSL = currentFragmentGLSL.replace("#previousMain#", currentMain)
+
+                # 
+                                                            
                 if currentNode not in processedNodes:
                     processedNodes.append(currentNode)
 
