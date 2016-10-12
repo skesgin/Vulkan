@@ -85,6 +85,10 @@ How to build:
 Changelog:
 ----------
 
+10/12/2016
+- Upgraded to glm 0.9.8.1.
+- Several fixes in examples, VKTS and Blender exporter.
+
 10/10/2016
 - Added enabling of debug report by command line.
 
