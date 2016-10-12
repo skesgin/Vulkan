@@ -27,21 +27,126 @@
 #include <vkts/vkts.hpp>
 
 #include "fn_visual_internal.hpp"
-
+#include "fn_visual_gamepad_internal.hpp"
 #include "fn_visual_wayland_internal.hpp"
 
 #define VKTS_WINDOWS_MAX_WINDOWS 64
+
+#include <linux/input-event-codes.h>
+#include <poll.h>
+
+//
+// TODO: Remove
+//
+#include <fcntl.h>
+#include <string.h>
+#include <unistd.h>
+#include <memory>
+#include <sys/mman.h>
+
+struct wl_shm* shm = nullptr;
+struct wl_buffer* buffer = nullptr;
+
+void* data = nullptr;
+
+class ScopedFD
+{
+
+public:
+
+	explicit ScopedFD(int fd) : fd_(fd)
+	{
+
+	}
+
+    ~ScopedFD()
+    {
+    	if (auto_close_)
+    		close(fd_);
+    }
+
+    int Get()
+    {
+    	return fd_;
+    }
+
+    int Release()
+    {
+    	auto_close_ = false;
+    	return fd_;
+    }
+
+private:
+
+    ScopedFD(const ScopedFD&) = delete;
+    void operator=(const ScopedFD&) = delete;
+
+    const int fd_;
+    bool auto_close_ = true;
+};
+
+int CreateAnonymousFile(off_t size)
+{
+    static const std::string file_name = "/weston-shared-XXXXXX";
+    const std::string path = getenv("XDG_RUNTIME_DIR");
+    if (path.empty())
+    {
+    	errno = ENOENT;
+    	return -1;
+    }
+
+    std::string name = path + file_name;
+    char* c_name = const_cast<char*>(name.data());
+    ScopedFD fd(mkstemp(c_name));
+    if (fd.Get() < 0)
+    	return -1;
+
+    long flags = fcntl(fd.Get(), F_GETFD);
+    if (flags == -1)
+    	return -1;
+    if (fcntl(fd.Get(), F_SETFD, flags | FD_CLOEXEC) == -1)
+    	return -1;
+    if (ftruncate(fd.Get(), size) < 0)
+    	return -1;
+
+    return fd.Release();
+}
+
+void* CreateBuffer(int32_t width, int32_t height)
+{
+    int stride = width * 4;
+    int size = stride * height;
+    ScopedFD fd(CreateAnonymousFile(size));
+    if (fd.Get() < 0)
+    {
+    	perror("Creating a buffer file failed");
+    	return nullptr;
+    }
+    data = mmap(nullptr, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd.Get(), 0);
+    if (data == MAP_FAILED)
+    {
+    	perror("mmap failed");
+    	return nullptr;
+    }
+
+    memset(data, 255, stride * height);
+
+    struct wl_shm_pool* pool = wl_shm_create_pool(shm, fd.Get(), size);
+    buffer = wl_shm_pool_create_buffer(pool, 0, width, height, stride, WL_SHM_FORMAT_XRGB8888);
+
+    wl_shm_pool_destroy(pool);
+
+    return data;
+}
+//
+//
+//
 
 namespace vkts
 {
 
 
 static VkBool32 g_running = VK_TRUE;
-
-void VKTS_APIENTRY _visualWaylandSetRunning(const VkBool32 running)
-{
-	g_running = running;
-}
 
 static struct wl_touch* g_nativeTouch = nullptr;
 
@@ -82,6 +187,19 @@ static NativeDisplaySP g_defaultDisplay;
 
 static std::map<int32_t, VKTS_NATIVE_DISPLAY_CONTAINER*> g_allDisplays;
 
+typedef struct _VKTS_NATIVE_WINDOW_CONTAINER
+{
+
+    int32_t index;
+
+    struct wl_surface* surface;
+    struct wl_shell_surface* shell_surface;
+    struct wl_region* region;
+
+    NativeWindowSP nativeWindow;
+
+} VKTS_NATIVE_WINDOW_CONTAINER;
+
 static std::map<struct wl_surface*, VKTS_NATIVE_WINDOW_CONTAINER*> g_allWindows;
 
 //
@@ -89,6 +207,309 @@ static std::map<struct wl_surface*, VKTS_NATIVE_WINDOW_CONTAINER*> g_allWindows;
 static int32_t g_numberWindows = 0;
 
 static uint64_t g_windowBits = 0;
+
+
+static struct wl_surface* g_currentKeySurface = nullptr;
+
+static struct wl_surface* g_currentPointerSurface = nullptr;
+
+static struct wl_surface* g_currentTouchSurface = nullptr;
+
+//
+
+void _visualWaylandKeymap(void *data, struct wl_keyboard *wl_keyboard, uint32_t format, int32_t fd, uint32_t size)
+{
+	// Nothing for now.
+}
+
+void _visualWaylandKeyEnter(void *data, struct wl_keyboard *wl_keyboard, uint32_t serial, struct wl_surface *surface, struct wl_array *keys)
+{
+	g_currentKeySurface = surface;
+}
+
+void _visualWaylandKeyLeave(void *data, struct wl_keyboard *wl_keyboard, uint32_t serial, struct wl_surface *surface)
+{
+	g_currentKeySurface = nullptr;
+}
+
+void _visualWaylandKey(void *data, struct wl_keyboard *wl_keyboard, uint32_t serial, uint32_t time, uint32_t key, uint32_t state)
+{
+    int32_t keyCode = _visualTranslateKey(key);
+
+    if (keyCode == VKTS_KEY_ESCAPE)
+    {
+    	g_running = VK_FALSE;
+
+        return;
+    }
+
+	if (!g_currentKeySurface)
+	{
+		return;
+	}
+
+	auto currentWindowContainer = g_allWindows.find(g_currentKeySurface);
+
+	if (currentWindowContainer == g_allWindows.end())
+	{
+		return;
+	}
+
+    if (keyCode != VKTS_KEY_UNKNOWN)
+    {
+    	currentWindowContainer->second->nativeWindow->getKeyInput().setKey(keyCode, state == WL_KEYBOARD_KEY_STATE_PRESSED);
+    }
+}
+
+void _visualWaylandModifiers(void *data, struct wl_keyboard *wl_keyboard, uint32_t serial, uint32_t mods_depressed, uint32_t mods_latched, uint32_t mods_locked, uint32_t group)
+{
+	// Nothing for now.
+}
+
+void _visualWaylandRepeat_info(void *data, struct wl_keyboard *wl_keyboard, int32_t rate, int32_t delay)
+{
+	// Nothing for now.
+}
+
+//
+
+void _visualWaylandEnter(void *data, struct wl_pointer *wl_pointer, uint32_t serial, struct wl_surface *surface, wl_fixed_t surface_x, wl_fixed_t surface_y)
+{
+	g_currentPointerSurface = surface;
+
+	//
+
+	if (!g_currentPointerSurface)
+	{
+		return;
+	}
+
+	auto currentWindowContainer = g_allWindows.find(g_currentPointerSurface);
+
+	if (currentWindowContainer == g_allWindows.end())
+	{
+		return;
+	}
+
+	if (currentWindowContainer->second->nativeWindow->isInvisibleCursor())
+	{
+		wl_pointer_set_cursor(wl_pointer, serial, nullptr, 0, 0);
+	}
+	else
+	{
+		// TODO: Set back to visible cursor.
+	}
+}
+
+void _visualWaylandLeave(void *data, struct wl_pointer *wl_pointer, uint32_t serial, struct wl_surface *surface)
+{
+	if (!g_currentPointerSurface)
+	{
+		return;
+	}
+
+	auto currentWindowContainer = g_allWindows.find(g_currentPointerSurface);
+
+	if (currentWindowContainer == g_allWindows.end())
+	{
+		return;
+	}
+
+	if (currentWindowContainer->second->nativeWindow->isInvisibleCursor())
+	{
+		// TODO: Set back to visible cursor.
+	}
+
+	//
+
+	g_currentPointerSurface = nullptr;
+}
+
+void _visualWaylandMotion(void *data, struct wl_pointer *wl_pointer, uint32_t time, wl_fixed_t surface_x, wl_fixed_t surface_y)
+{
+	if (!g_currentPointerSurface)
+	{
+		return;
+	}
+
+	auto currentWindowContainer = g_allWindows.find(g_currentPointerSurface);
+
+	if (currentWindowContainer == g_allWindows.end())
+	{
+		return;
+	}
+
+	currentWindowContainer->second->nativeWindow->getMouseInput().setLocation(glm::ivec2(wl_fixed_to_int(surface_x), wl_fixed_to_int(surface_y)));
+}
+
+void _visualWaylandButton(void *data, struct wl_pointer *wl_pointer, uint32_t serial, uint32_t time, uint32_t button, uint32_t state)
+{
+	if (!g_currentPointerSurface)
+	{
+		return;
+	}
+
+	auto currentWindowContainer = g_allWindows.find(g_currentPointerSurface);
+
+	if (currentWindowContainer == g_allWindows.end())
+	{
+		return;
+	}
+
+	currentWindowContainer->second->nativeWindow->getMouseInput().setButton(button - BTN_LEFT, state == WL_POINTER_BUTTON_STATE_PRESSED);
+}
+
+void _visualWaylandAxis(void *data, struct wl_pointer *wl_pointer, uint32_t time, uint32_t axis, wl_fixed_t value)
+{
+	if (!g_currentPointerSurface)
+	{
+		return;
+	}
+
+	auto currentWindowContainer = g_allWindows.find(g_currentPointerSurface);
+
+	if (currentWindowContainer == g_allWindows.end())
+	{
+		return;
+	}
+
+	if (axis == WL_POINTER_AXIS_VERTICAL_SCROLL)
+	{
+		// Division by ten to adapt to internal format.
+		currentWindowContainer->second->nativeWindow->getMouseInput().setMouseWheel(wl_fixed_to_int(value) / 10);
+	}
+}
+
+//
+
+typedef struct _TouchInfo {
+	VkBool32 pressed;
+	int32_t x;
+	int32_t y;
+
+	int32_t id;
+	VkBool32 valid;
+} TouchInfo;
+
+static TouchInfo touchInfo[VKTS_MAX_TOUCHPAD_SLOTS];
+
+VkBool32 VKTS_APIENTRY _visualInitTouchpad(const VkInstance instance, const VkPhysicalDevice physicalDevice)
+{
+	for (int32_t i = 0; i < VKTS_MAX_TOUCHPAD_SLOTS; i++)
+	{
+		touchInfo[i].pressed = VK_FALSE;
+		touchInfo[i].x = 0;
+		touchInfo[i].y = 0;
+
+		touchInfo[i].id = -1;
+		touchInfo[i].valid = VK_FALSE;
+	}
+
+	return VK_TRUE;
+}
+
+void  VKTS_APIENTRY _visualWaylandDown(void *data, struct wl_touch *wl_touch, uint32_t serial, uint32_t time, struct wl_surface *surface, int32_t id, wl_fixed_t x, wl_fixed_t y)
+{
+	g_currentTouchSurface = surface;
+
+	if (!g_currentTouchSurface)
+	{
+		return;
+	}
+
+	auto currentWindowContainer = g_allWindows.find(g_currentTouchSurface);
+
+	if (currentWindowContainer == g_allWindows.end())
+	{
+		return;
+	}
+
+	for (int32_t slot = 0; slot < VKTS_MAX_TOUCHPAD_SLOTS; slot++)
+	{
+		if (!touchInfo[slot].valid)
+		{
+			touchInfo[slot].valid = VK_TRUE;
+
+			touchInfo[slot].id = id;
+
+			touchInfo[slot].pressed = VK_TRUE;
+			touchInfo[slot].x = wl_fixed_to_int(x);
+			touchInfo[slot].y = wl_fixed_to_int(y);
+
+			currentWindowContainer->second->nativeWindow->getTouchpadInput().setLocation(slot, glm::ivec2(touchInfo[slot].x, touchInfo[slot].y));
+			currentWindowContainer->second->nativeWindow->getTouchpadInput().setPressed(slot, VK_TRUE);
+		}
+	}
+}
+
+void  VKTS_APIENTRY _visualWaylandUp(void *data, struct wl_touch *wl_touch, uint32_t serial, uint32_t time, int32_t id)
+{
+	if (!g_currentTouchSurface)
+	{
+		return;
+	}
+
+	auto currentWindowContainer = g_allWindows.find(g_currentTouchSurface);
+
+	if (currentWindowContainer == g_allWindows.end())
+	{
+		return;
+	}
+
+	for (int32_t slot = 0; slot < VKTS_MAX_TOUCHPAD_SLOTS; slot++)
+	{
+		if (touchInfo[slot].valid && touchInfo[slot].id == id)
+		{
+			touchInfo[slot].valid = VK_FALSE;
+
+			touchInfo[slot].id = -1;
+
+			touchInfo[slot].pressed = VK_FALSE;
+
+			currentWindowContainer->second->nativeWindow->getTouchpadInput().setPressed(slot, VK_FALSE);
+		}
+	}
+
+	//
+
+	g_currentTouchSurface = nullptr;
+}
+
+void  VKTS_APIENTRY _visualWaylandTouchMotion(void *data, struct wl_touch *wl_touch, uint32_t time, int32_t id, wl_fixed_t x, wl_fixed_t y)
+{
+	if (!g_currentTouchSurface)
+	{
+		return;
+	}
+
+	auto currentWindowContainer = g_allWindows.find(g_currentTouchSurface);
+
+	if (currentWindowContainer == g_allWindows.end())
+	{
+		return;
+	}
+
+	for (int32_t slot = 0; slot < VKTS_MAX_TOUCHPAD_SLOTS; slot++)
+	{
+		if (touchInfo[slot].valid && touchInfo[slot].id == id)
+		{
+			touchInfo[slot].x = wl_fixed_to_int(x);
+			touchInfo[slot].y = wl_fixed_to_int(y);
+
+			currentWindowContainer->second->nativeWindow->getTouchpadInput().setLocation(slot, glm::ivec2(touchInfo[slot].x, touchInfo[slot].y));
+		}
+	}
+}
+
+void  VKTS_APIENTRY _visualWaylandFrame(void *data, struct wl_touch *wl_touch)
+{
+	// Nothing for now.
+}
+
+void  VKTS_APIENTRY _visualWaylandCancel(void *data, struct wl_touch *wl_touch)
+{
+	// Nothing for now.
+}
 
 //
 
@@ -253,13 +674,23 @@ static const struct wl_output_listener g_output_listener = {
 
 static void _visualWaylandGlobal(void *data, struct wl_registry *registry, uint32_t name, const char *interface, uint32_t version)
 {
-    if (strcmp(interface, "wl_compositor") == 0)
+	//
+	// TODO: Remove
+	//
+	if (!strcmp(interface, wl_shm_interface.name))
+	{
+		shm = (struct wl_shm*)wl_registry_bind(registry, name, &wl_shm_interface, version);
+	}
+	//
+	//
+	//
+  	else if (strcmp(interface, "wl_compositor") == 0)
     {
-    	g_nativeCompositor = (struct wl_compositor*)wl_registry_bind(registry, name, &wl_compositor_interface, 3);
+    	g_nativeCompositor = (struct wl_compositor*)wl_registry_bind(registry, name, &wl_compositor_interface, version);
     }
 	else if (strcmp(interface, "wl_shell") == 0)
 	{
-        g_nativeShell = (struct wl_shell*)wl_registry_bind(registry, name, &wl_shell_interface, 1);
+        g_nativeShell = (struct wl_shell*)wl_registry_bind(registry, name, &wl_shell_interface, version);
     }
     else if (strcmp(interface, "wl_output") == 0)
     {
@@ -280,7 +711,7 @@ static void _visualWaylandGlobal(void *data, struct wl_registry *registry, uint3
 
     	currentDisplayContainer->defaultDisplay = VK_FALSE;
 
-    	currentDisplayContainer->output = (wl_output*)wl_registry_bind(registry, name, &wl_output_interface, 1);
+    	currentDisplayContainer->output = (wl_output*)wl_registry_bind(registry, name, &wl_output_interface, version);
 
     	currentDisplayContainer->display = NativeDisplaySP();
 
@@ -293,7 +724,7 @@ static void _visualWaylandGlobal(void *data, struct wl_registry *registry, uint3
     }
     else if (strcmp(interface, "wl_seat") == 0)
     {
-    	g_nativeSeat = (struct wl_seat *)wl_registry_bind(registry, name, &wl_seat_interface, 1);
+    	g_nativeSeat = (struct wl_seat *)wl_registry_bind(registry, name, &wl_seat_interface, version);
 
     	wl_seat_add_listener(g_nativeSeat, &seat_listener, nullptr);
     }
@@ -355,7 +786,30 @@ VkBool32 VKTS_APIENTRY _visualDispatchMessages()
 
 	if (g_nativeDisplay)
 	{
-		wl_display_dispatch_pending(g_nativeDisplay);
+		struct pollfd fds;
+
+		while (wl_display_prepare_read(g_nativeDisplay) < 0)
+		{
+			wl_display_dispatch_pending(g_nativeDisplay);
+		}
+		wl_display_flush(g_nativeDisplay);
+
+		fds.fd = wl_display_get_fd(g_nativeDisplay);
+		fds.events = POLLIN;
+
+		if (poll(&fds, 1, -1))
+		{
+			if (wl_display_read_events(g_nativeDisplay) < 0)
+			{
+				return VK_FALSE;
+			}
+		}
+		else
+		{
+			wl_display_cancel_read(g_nativeDisplay);
+
+			return VK_FALSE;
+		}
 	}
 
     _visualDispatchMessagesGamepad();
@@ -620,6 +1074,24 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
 	wl_region_add(region, 0, 0, width, height);
 	wl_surface_set_opaque_region(surface, region);
+
+	//
+	// TODO: Remove
+	//
+	if (!CreateBuffer(width, height))
+	{
+		return INativeWindowWP();
+	}
+
+    wl_surface_attach(surface, buffer, 0, 0);
+    wl_surface_damage(surface, 0, 0, width, height);
+    wl_surface_frame(surface);
+    wl_surface_commit(surface);
+    //
+    //
+    //
+
+    wl_display_dispatch(g_nativeDisplay);
 
     return nativeWindow;
 }
