@@ -63,6 +63,8 @@ private:
 
     SmartPointerVector<IMeshSP> allMeshes;
 
+    SmartPointerVector<ILightSP> allLights;
+
     SmartPointerVector<IAnimationSP> allAnimations;
 
     int32_t currentAnimation;
@@ -156,6 +158,14 @@ public:
     virtual size_t getNumberMeshes() const override;
 
     virtual const SmartPointerVector<IMeshSP>& getMeshes() const override;
+
+    virtual void addLight(const ILightSP& light) override;
+
+    virtual VkBool32 removeLight(const ILightSP& light) override;
+
+    virtual size_t getNumberLights() const override;
+
+    virtual const SmartPointerVector<ILightSP>& getLights() const override;
 
     virtual void addAnimation(const IAnimationSP& animation) override;
 

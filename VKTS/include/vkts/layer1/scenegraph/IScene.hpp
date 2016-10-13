@@ -52,6 +52,7 @@ public:
 
     virtual void setName(const std::string& name) = 0;
 
+
     virtual void addObject(const IObjectSP& object) = 0;
 
     virtual VkBool32 removeObject(const IObjectSP& object) = 0;
@@ -61,6 +62,18 @@ public:
     virtual size_t getNumberObjects() const = 0;
 
     virtual const SmartPointerVector<IObjectSP>& getObjects() const = 0;
+
+
+    virtual void addLight(const ILightSP& light) = 0;
+
+    virtual VkBool32 removeLight(const ILightSP& light) = 0;
+
+    virtual ILightSP findLight(const std::string& name) const = 0;
+
+    virtual size_t getNumberLights() const = 0;
+
+    virtual const SmartPointerVector<ILightSP>& getLights() const = 0;
+
 
     virtual void setEnvironment(const ITextureSP& environment) = 0;
 

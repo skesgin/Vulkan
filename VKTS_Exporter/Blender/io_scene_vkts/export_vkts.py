@@ -1559,6 +1559,48 @@ def saveParticleSystems(context, filepath):
 
     file.close()
 
+def saveLights(context, filepath):
+    
+    lights = {}
+
+    # Gather all particles.
+    for currentObject in context.scene.objects:
+        if currentObject.type == 'LAMP':
+            if currentObject.data.type == 'POINT' or currentObject.data.type == 'SUN' or currentObject.data.type == 'SPOT':
+                lights.setdefault(currentObject)
+
+    file = open(filepath, "w", encoding="utf8", newline="\n")
+    fw = file.write
+    fw("#\n")
+    fw("# VulKan ToolS lights.\n")
+    fw("#\n")
+    fw("\n")
+
+    for currentLight in lights:
+
+        lightType = 'Point'
+        if currentLight.data.type == 'SUN':
+            lightType = 'Directional'
+        elif currentLight.data.type == 'SPOT':
+            lightType = 'Spot'
+
+        fw("#\n")
+        fw("# Light.\n")
+        fw("#\n")
+        fw("\n")        
+        fw("name %s\n" % (currentLight.name))
+        fw("\n")
+        fw("type %s\n" % (lightType))
+        fw("\n")
+        if currentLight.data.type == 'SPOT':
+            fw("outer_angle %f\n" % (math.degrees(currentLight.data.spot_size)))
+            fw("inner_angle %f\n" % (math.degrees(currentLight.data.spot_size) - math.degrees(currentLight.data.spot_size) * currentLight.data.spot_blend * currentLight.data.spot_blend))
+            fw("\n")
+        fw("color %f %f %f\n" % (currentLight.data.color[0], currentLight.data.color[1], currentLight.data.color[2]))        
+        fw("\n")
+
+    file.close()
+
 def saveMeshes(context, filepath, materialsLibraryName, subMeshLibraryName):
     
     subMeshLibraryFilepath = os.path.dirname(filepath) + "/" + subMeshLibraryName
@@ -2094,6 +2136,10 @@ def saveNode(context, fw, fw_animation, fw_channel, currentObject):
         fw("mesh %s\n" % friendlyName(currentObject.data.name))
         fw("\n")
 
+    if currentObject.type == 'LAMP':
+        fw("light %s\n" % friendlyName(currentObject.data.name))
+        fw("\n")
+
     if currentObject.animation_data is not None:
         saveAnimation(context, fw, fw_animation, fw_channel, currentObject.name, currentObject.animation_data, None, False)
 
@@ -2111,7 +2157,7 @@ def saveNode(context, fw, fw_animation, fw_channel, currentObject):
     
     return
 
-def saveObjects(context, filepath, meshLibraryName, animationLibraryName, channelLibraryName, particleSystemLibraryName):
+def saveObjects(context, filepath, meshLibraryName, animationLibraryName, channelLibraryName, particleSystemLibraryName, lightLibraryName):
 
     channelLibraryFilepath = os.path.dirname(filepath) + "/" + channelLibraryName
 
@@ -2144,6 +2190,10 @@ def saveObjects(context, filepath, meshLibraryName, animationLibraryName, channe
     fw("#\n")
     fw("\n")
 
+    if lightLibraryName is not None:
+        fw("light_library %s\n" % friendlyName(lightLibraryName))
+        fw("\n")
+
     if particleSystemLibraryName is not None:
         fw("particle_system_library %s\n" % friendlyName(particleSystemLibraryName))
         fw("\n")
@@ -2165,9 +2215,6 @@ def saveObjects(context, filepath, meshLibraryName, animationLibraryName, channe
             continue
 
         if currentObject.type == 'FONT':
-            continue
-
-        if currentObject.type == 'LAMP':
             continue
 
         if currentObject.type == 'LATTICE':
@@ -2250,6 +2297,14 @@ def save(operator,
 
     #
 
+    lightsLibraryName = bpy.path.basename(sceneFilepath).replace(".vkts", "_lights.vkts")
+
+    lightsLibraryFilepath = os.path.dirname(sceneFilepath) + "/" + lightsLibraryName
+
+    saveLights(context, lightsLibraryFilepath)
+
+    #
+
     subMeshLibraryName = bpy.path.basename(sceneFilepath).replace(".vkts", "_submeshes.vkts")
 
     meshLibraryName = bpy.path.basename(sceneFilepath).replace(".vkts", "_meshes.vkts")
@@ -2273,7 +2328,7 @@ def save(operator,
     
     objectLibraryFilepath = os.path.dirname(sceneFilepath) + "/" + objectLibraryName
 
-    saveObjects(context, objectLibraryFilepath, meshLibraryName, animationLibraryName, channelLibraryName, particleSystemLibraryName)
+    saveObjects(context, objectLibraryFilepath, meshLibraryName, animationLibraryName, channelLibraryName, particleSystemLibraryName, lightsLibraryName)
 
     #
     

@@ -61,6 +61,8 @@ void Node::reset()
 
     allMeshes.clear();
 
+    allLights.clear();
+
     allAnimations.clear();
 
     currentAnimation = -1;
@@ -82,7 +84,7 @@ void Node::reset()
 }
 
 Node::Node() :
-    INode(), name(""), parentNode(), translate(0.0f, 0.0f, 0.0f), rotate(0.0f, 0.0f, 0.0f), scale(1.0f, 1.0f, 1.0f), transformMatrix(1.0f), transformMatrixDirty(VK_TRUE), jointIndex(-1), joints(0), bindTranslate(0.0f, 0.0f, 0.0f), bindRotate(0.0f, 0.0f,0.0f), bindScale(1.0f, 1.0f, 1.0f), bindMatrix(1.0f), inverseBindMatrix(1.0f), bindMatrixDirty(VK_FALSE), allChildNodes(), allMeshes(), allAnimations(), currentAnimation(-1), currentTime(0.0f), transformUniformBuffer(), jointsUniformBuffer(), box(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)), layers(0x01)
+    INode(), name(""), parentNode(), translate(0.0f, 0.0f, 0.0f), rotate(0.0f, 0.0f, 0.0f), scale(1.0f, 1.0f, 1.0f), transformMatrix(1.0f), transformMatrixDirty(VK_TRUE), jointIndex(-1), joints(0), bindTranslate(0.0f, 0.0f, 0.0f), bindRotate(0.0f, 0.0f,0.0f), bindScale(1.0f, 1.0f, 1.0f), bindMatrix(1.0f), inverseBindMatrix(1.0f), bindMatrixDirty(VK_FALSE), allChildNodes(), allMeshes(), allLights(), allAnimations(), currentAnimation(-1), currentTime(0.0f), transformUniformBuffer(), jointsUniformBuffer(), box(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)), layers(0x01)
 {
     reset();
 }
@@ -134,6 +136,29 @@ Node::Node(const Node& other) :
         }
 
         allMeshes.append(cloneMesh);
+    }
+
+    for (size_t i = 0; i < other.allLights.size(); i++)
+    {
+        const auto& currentLight = other.allLights[i];
+
+        if (!currentLight.get())
+        {
+            reset();
+
+            break;
+        }
+
+        ILightSP cloneLight = currentLight->clone();
+
+        if (!cloneLight.get())
+        {
+            reset();
+
+            break;
+        }
+
+        allLights.append(cloneLight);
     }
 
     for (size_t i = 0; i < other.allAnimations.size(); i++)
@@ -418,6 +443,26 @@ size_t Node::getNumberMeshes() const
 const SmartPointerVector<IMeshSP>& Node::getMeshes() const
 {
     return allMeshes;
+}
+
+void Node::addLight(const ILightSP& light)
+{
+    allLights.append(light);
+}
+
+VkBool32 Node::removeLight(const ILightSP& light)
+{
+    return allLights.remove(light);
+}
+
+size_t Node::getNumberLights() const
+{
+    return allLights.size();
+}
+
+const SmartPointerVector<ILightSP>& Node::getLights() const
+{
+    return allLights;
 }
 
 void Node::addAnimation(const IAnimationSP& animation)
@@ -746,6 +791,14 @@ void Node::updateRecursive(const IUpdateThreadContext& updateContext, const glm:
         	}
         }
 
+        if (allLights.size() > 0)
+        {
+        	for (size_t i = 0; i < allLights.size(); i++)
+        	{
+        		allLights[i]->updateDirection(this->transformMatrix);
+        	}
+        }
+
         // Update buffer.
         if (allMeshes.size() > 0)
         {
@@ -916,6 +969,8 @@ void Node::destroy()
         allMeshes[i]->destroy();
     }
     allMeshes.clear();
+
+    allLights.clear();
 
     for (size_t i = 0; i < allAnimations.size(); i++)
     {

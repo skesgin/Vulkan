@@ -104,6 +104,14 @@ public:
 
     virtual const SmartPointerVector<IMeshSP>& getMeshes() const = 0;
 
+    virtual void addLight(const ILightSP& light) = 0;
+
+    virtual VkBool32 removeLight(const ILightSP& light) = 0;
+
+    virtual size_t getNumberLights() const = 0;
+
+    virtual const SmartPointerVector<ILightSP>& getLights() const = 0;
+
     virtual void addAnimation(const IAnimationSP& animation) = 0;
 
     virtual VkBool32 removeAnimation(const IAnimationSP& animation) = 0;

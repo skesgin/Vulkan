@@ -52,6 +52,8 @@ private:
     SmartPointerMap<std::string, IObjectSP> allObjects;
     mutable std::vector<std::string> allUsedObjects;
 
+    SmartPointerMap<std::string, ILightSP> allLights;
+
     SmartPointerMap<std::string, IMeshSP> allMeshes;
 
     SmartPointerMap<std::string, ISubMeshSP> allSubMeshes;
@@ -157,6 +159,16 @@ public:
     virtual VkBool32 addObject(const IObjectSP& object) override;
 
     virtual VkBool32 removeObject(const IObjectSP& object) override;
+
+    //
+
+    virtual ILightSP useLight(const std::string& name) const override;
+
+    virtual VkBool32 addLight(const ILightSP& light) override;
+
+    virtual VkBool32 removeLight(const ILightSP& light) override;
+
+    virtual const SmartPointerMap<std::string, ILightSP>& getAllLights() const override;
 
     //
 

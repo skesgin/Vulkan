@@ -49,6 +49,8 @@
 
 #include "SubMesh.hpp"
 
+#include "Light.hpp"
+
 #include "Mesh.hpp"
 
 #include "Node.hpp"
@@ -3644,8 +3646,6 @@ static VkBool32 scenegraphLoadParticleSystems(const char* directory, const char*
 
     char buffer[VKTS_MAX_BUFFER_CHARS + 1];
 
-    auto animation = IAnimationSP();
-
     while (textBuffer->gets(buffer, VKTS_MAX_BUFFER_CHARS))
     {
         if (scenegraphSkipBuffer(buffer))
@@ -3654,6 +3654,162 @@ static VkBool32 scenegraphLoadParticleSystems(const char* directory, const char*
         }
 
         // TODO: Load particle systems and its data.
+    }
+
+    return VK_TRUE;
+}
+
+static VkBool32 scenegraphLoadLights(const char* directory, const char* filename, const IContextSP& context)
+{
+    if (!directory || !filename || !context.get())
+    {
+        return VK_FALSE;
+    }
+
+    std::string finalFilename = std::string(directory) + std::string(filename);
+
+    auto textBuffer = fileLoadText(finalFilename.c_str());
+
+    if (!textBuffer.get())
+    {
+        textBuffer = fileLoadText(filename);
+
+        if (!textBuffer.get())
+        {
+            return VK_FALSE;
+        }
+    }
+
+    char buffer[VKTS_MAX_BUFFER_CHARS + 1];
+    char sdata[VKTS_MAX_TOKEN_CHARS + 1];
+    float fdata[4];
+
+    auto light = ILightSP();
+
+    while (textBuffer->gets(buffer, VKTS_MAX_BUFFER_CHARS))
+    {
+        if (scenegraphSkipBuffer(buffer))
+        {
+            continue;
+        }
+
+        if (scenegraphIsToken(buffer, "name"))
+        {
+            if (!scenegraphParseString(buffer, sdata))
+            {
+                return VK_FALSE;
+            }
+
+            light = ILightSP(new Light());
+
+            if (!light.get())
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Light not created: '%s'", sdata);
+
+                return VK_FALSE;
+            }
+
+            light->setName(sdata);
+
+            context->addLight(light);
+        }
+        else if (scenegraphIsToken(buffer, "type"))
+        {
+            if (!scenegraphParseString(buffer, sdata))
+            {
+                return VK_FALSE;
+            }
+
+            if (light.get())
+            {
+                if (strcmp(sdata, "Point") == 0)
+                {
+                	light->setType(PointLight);
+                }
+                if (strcmp(sdata, "Directional") == 0)
+                {
+                	light->setType(DirectionalLight);
+                }
+                if (strcmp(sdata, "Spot") == 0)
+                {
+                	light->setType(SpotLight);
+                }
+                else
+                {
+                    logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Invalid  light type '%s'", sdata);
+
+                    return VK_FALSE;
+                }
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No light");
+
+                return VK_FALSE;
+            }
+        }
+        else if (scenegraphIsToken(buffer, "outer_angle"))
+        {
+            if (!scenegraphParseFloat(buffer, &fdata[0]))
+            {
+                return VK_FALSE;
+            }
+
+            if (light.get() && light->getType() == SpotLight)
+            {
+            	light->setOuterAngle(fdata[0]);
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No or invalid light");
+
+                return VK_FALSE;
+            }
+        }
+        else if (scenegraphIsToken(buffer, "inner_angle"))
+        {
+            if (!scenegraphParseFloat(buffer, &fdata[0]))
+            {
+                return VK_FALSE;
+            }
+
+            if (light.get() && light->getType() == SpotLight)
+            {
+            	light->setInnerAngle(fdata[0]);
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No or invalid light");
+
+                return VK_FALSE;
+            }
+        }
+        else if (scenegraphIsToken(buffer, "color"))
+        {
+            if (!scenegraphParseVec4(buffer, fdata))
+            {
+                return VK_FALSE;
+            }
+
+            if (light.get())
+            {
+            	light->setColor(glm::vec4(fdata[0], fdata[1], fdata[2], fdata[3]));
+
+            	//
+
+            	context->addLight(light);
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No light");
+
+                return VK_FALSE;
+            }
+        }
+        else
+        {
+            scenegraphUnknownBuffer(buffer);
+        }
     }
 
     return VK_TRUE;
@@ -3725,6 +3881,20 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
             if (!scenegraphLoadAnimations(directory, sdata0, context))
             {
                 logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load animations: '%s'", sdata0);
+
+                return VK_FALSE;
+            }
+        }
+        else if (scenegraphIsToken(buffer, "light_library"))
+        {
+            if (!scenegraphParseString(buffer, sdata0))
+            {
+                return VK_FALSE;
+            }
+
+            if (!scenegraphLoadLights(directory, sdata0, context))
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load lights: '%s'", sdata0);
 
                 return VK_FALSE;
             }
@@ -4081,6 +4251,33 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
                 return VK_FALSE;
             }
         }
+        else if (scenegraphIsToken(buffer, "light"))
+        {
+            if (!scenegraphParseString(buffer, sdata0))
+            {
+                return VK_FALSE;
+            }
+
+            if (node.get())
+            {
+                const auto& light = context->useLight(sdata0);
+
+                if (!light.get())
+                {
+                    logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Light not found: '%s'", sdata0);
+
+                    return VK_FALSE;
+                }
+
+                node->addLight(light);
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No node");
+
+                return VK_FALSE;
+            }
+        }
         else if (scenegraphIsToken(buffer, "animation"))
         {
             if (!scenegraphParseString(buffer, sdata0))
@@ -4333,6 +4530,13 @@ ISceneSP VKTS_APIENTRY scenegraphLoadScene(const char* filename, const IContextS
         {
             scenegraphUnknownBuffer(buffer);
         }
+    }
+
+    // Gather all lights and add too scene.
+
+    for (size_t i = 0; i < context->getAllLights().values().size(); i++)
+    {
+    	scene->addLight(context->getAllLights().valueAt(i));
     }
 
     return scene;

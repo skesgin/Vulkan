@@ -66,6 +66,16 @@ public:
 
     //
 
+    virtual ILightSP useLight(const std::string& name) const = 0;
+
+    virtual VkBool32 addLight(const ILightSP& light) = 0;
+
+    virtual VkBool32 removeLight(const ILightSP& light) = 0;
+
+    virtual const SmartPointerMap<std::string, ILightSP>& getAllLights() const = 0;
+
+    //
+
     virtual IMeshSP useMesh(const std::string& name) const = 0;
 
     virtual VkBool32 addMesh(const IMeshSP& mesh) = 0;

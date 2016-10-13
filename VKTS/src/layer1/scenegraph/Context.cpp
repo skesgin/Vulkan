@@ -121,6 +121,45 @@ VkBool32 Context::removeObject(const IObjectSP& object)
 
 //
 
+ILightSP Context::useLight(const std::string& name) const
+{
+	if (!contains(name, allLights))
+	{
+		return ILightSP();
+	}
+
+	//
+
+    return get(name, allLights);
+}
+
+VkBool32 Context::addLight(const ILightSP& light)
+{
+    if (!light.get())
+    {
+        return VK_FALSE;
+    }
+
+    return add(light->getName(), light, allLights);
+}
+
+VkBool32 Context::removeLight(const ILightSP& light)
+{
+    if (!light.get())
+    {
+        return VK_FALSE;
+    }
+
+    return remove(light->getName(), allLights);
+}
+
+const SmartPointerMap<std::string, ILightSP>& Context::getAllLights() const
+{
+	return allLights;
+}
+
+//
+
 IMeshSP Context::useMesh(const std::string& name) const
 {
 	if (!contains(name, allMeshes))

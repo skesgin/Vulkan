@@ -41,6 +41,8 @@ private:
 
     SmartPointerVector<IObjectSP> allObjects;
 
+    SmartPointerVector<ILightSP> allLights;
+
     ITextureSP environment;
 
     ITextureSP diffuseEnvironment;
@@ -68,6 +70,7 @@ public:
 
     virtual void setName(const std::string& name) override;
 
+
     virtual void addObject(const IObjectSP& object) override;
 
     virtual VkBool32 removeObject(const IObjectSP& object) override;
@@ -77,6 +80,18 @@ public:
     virtual size_t getNumberObjects() const override;
 
     virtual const SmartPointerVector<IObjectSP>& getObjects() const override;
+
+
+    virtual void addLight(const ILightSP& light) override;
+
+    virtual VkBool32 removeLight(const ILightSP& light) override;
+
+    virtual ILightSP findLight(const std::string& name) const override;
+
+    virtual size_t getNumberLights() const override;
+
+    virtual const SmartPointerVector<ILightSP>& getLights() const override;
+
 
     virtual void setEnvironment(const ITextureSP& environment) override;
 

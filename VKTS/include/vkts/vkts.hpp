@@ -27,7 +27,7 @@
 #ifndef VKTS_HPP_
 #define VKTS_HPP_
 
-// TODO: Export and import camera and light.
+// TODO: Export and import camera.
 // TODO: Finalize Wayland port.
 // TODO: Finalize export and import of particle system.
 // TODO: Mark, if functions are thread safe or not.
@@ -557,6 +557,8 @@
 #include <vkts/layer1/scenegraph/ISubMesh.hpp>
 
 #include <vkts/layer1/scenegraph/IAnimation.hpp>
+
+#include <vkts/layer1/scenegraph/ILight.hpp>
 
 #include <vkts/layer1/scenegraph/IMesh.hpp>
 

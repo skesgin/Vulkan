@@ -85,6 +85,9 @@ How to build:
 Changelog:
 ----------
 
+10/13/2016
+- Added light export and import.
+
 10/12/2016
 - Upgraded to glm 0.9.8.1.
 - Several fixes in examples, VKTS and Blender exporter.

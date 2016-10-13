@@ -32,7 +32,7 @@ namespace vkts
 {
 
 Scene::Scene() :
-    IScene(), name(""), allObjects(), environment(nullptr), diffuseEnvironment(nullptr), specularEnvironment(nullptr), lut(nullptr)
+    IScene(), name(""), allObjects(), allLights(), environment(nullptr), diffuseEnvironment(nullptr), specularEnvironment(nullptr), lut(nullptr)
 {
 }
 
@@ -66,6 +66,33 @@ Scene::Scene(const Scene& other) :
         allObjects.append(cloneObject);
     }
 
+    for (size_t i = 0; i < other.allLights.size(); i++)
+    {
+        const auto& currentLight = other.allLights[i];
+
+        if (!currentLight.get())
+        {
+            name = "";
+
+            allLights.clear();
+
+            break;
+        }
+
+        ILightSP cloneLight = currentLight->clone();
+
+        if (!cloneLight.get())
+        {
+            name = "";
+
+            allLights.clear();
+
+            break;
+        }
+
+        allLights.append(cloneLight);
+    }
+
     environment = other.environment;
     diffuseEnvironment = other.diffuseEnvironment;
     specularEnvironment = other.specularEnvironment;
@@ -90,6 +117,7 @@ void Scene::setName(const std::string& name)
 {
     this->name = name;
 }
+
 
 void Scene::addObject(const IObjectSP& object)
 {
@@ -122,6 +150,40 @@ size_t Scene::getNumberObjects() const
 const SmartPointerVector<IObjectSP>& Scene::getObjects() const
 {
     return allObjects;
+}
+
+
+void Scene::addLight(const ILightSP& light)
+{
+    allLights.append(light);
+}
+
+VkBool32 Scene::removeLight(const ILightSP& light)
+{
+    return allLights.remove(light);
+}
+
+ILightSP Scene::findLight(const std::string& name) const
+{
+    for (size_t i = 0; i < allLights.size(); i++)
+    {
+    	if (allLights[i]->getName() == name)
+    	{
+    		return allLights[i];
+    	}
+    }
+
+    return ILightSP();
+}
+
+size_t Scene::getNumberLights() const
+{
+    return allLights.size();
+}
+
+const SmartPointerVector<ILightSP>& Scene::getLights() const
+{
+    return allLights;
 }
 
 void Scene::setEnvironment(const ITextureSP& environment)
@@ -264,6 +326,8 @@ void Scene::destroy()
         allObjects[i]->destroy();
     }
     allObjects.clear();
+
+    allLights.clear();
 }
 
 } /* namespace vkts */
