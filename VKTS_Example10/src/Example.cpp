@@ -1433,18 +1433,11 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 		}
 	}
 
-	VkBool32 doUpdateDescriptorSets = VK_FALSE;
-
-	//if (!scene.get() && !environmentScene.get())
+	if (!buildScene(updateCmdBuffer))
 	{
-		if (!buildScene(updateCmdBuffer))
-		{
-			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not build scene.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not build scene.");
 
-			return VK_FALSE;
-		}
-
-		doUpdateDescriptorSets = VK_TRUE;
+		return VK_FALSE;
 	}
 
 	result = updateCmdBuffer->endCommandBuffer();
@@ -1517,22 +1510,19 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 
 	//
 
-	if (doUpdateDescriptorSets)
+	if (!updateDescriptorSets())
 	{
-		if (!updateDescriptorSets())
-		{
-			return VK_FALSE;
-		}
+		return VK_FALSE;
+	}
 
-		if (scene.get())
-		{
-			scene->updateDescriptorSetsRecursive(VKTS_BINDING_UNIFORM_BSDF_TOTAL_BINDING_COUNT, writeDescriptorSets);
-		}
+	if (scene.get())
+	{
+		scene->updateDescriptorSetsRecursive(VKTS_BINDING_UNIFORM_BSDF_TOTAL_BINDING_COUNT, writeDescriptorSets);
+	}
 
-		if (environmentScene.get())
-		{
-			environmentScene->updateDescriptorSetsRecursive(VKTS_ENVIRONMENT_DESCRIPTOR_SET_COUNT, environmentWriteDescriptorSets);
-		}
+	if (environmentScene.get())
+	{
+		environmentScene->updateDescriptorSetsRecursive(VKTS_ENVIRONMENT_DESCRIPTOR_SET_COUNT, environmentWriteDescriptorSets);
 	}
 
 	//

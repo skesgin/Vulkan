@@ -7,7 +7,7 @@ Authors:
 
 VKTS version: **0.9.3**
 
-Depending Vulkan API header version: **1.0.26**
+Depending Vulkan API header version: **1.0.30**
 
 Depending Vulkan extensions, when using a window system:
 
@@ -84,6 +84,11 @@ How to build:
 
 Changelog:
 ----------
+
+10/14/2016
+- Improved file loading abstraction on Android.
+- Improved scene graph cloning.
+- Updated to LunarG SDK 1.0.30.0.
 
 10/13/2016
 - Added light export and import.

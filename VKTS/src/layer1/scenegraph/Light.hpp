@@ -91,7 +91,7 @@ public:
 
     virtual const glm::vec4& getDirection() const override;
 
-    virtual void updateDirection(const glm::mat4& transform);
+    virtual void updateDirection(const glm::mat4& transform) override;
 
     //
     // ICloneable

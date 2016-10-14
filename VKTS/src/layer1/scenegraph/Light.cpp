@@ -35,7 +35,7 @@ Light::Light() :
 }
 
 Light::Light(const Light& other) :
-	ILight(), name(other.name), index(other.index), lightType(other.lightType), outerAngle(other.outerAngle), innerAngle(other.innerAngle), color(other.color), direction(other.direction)
+	ILight(), name(other.name + "_clone"), index(other.index), lightType(other.lightType), outerAngle(other.outerAngle), innerAngle(other.innerAngle), color(other.color), direction(other.direction)
 {
 }
 

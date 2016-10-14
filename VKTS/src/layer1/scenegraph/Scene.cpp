@@ -37,7 +37,7 @@ Scene::Scene() :
 }
 
 Scene::Scene(const Scene& other) :
-    IScene(), name(other.name)
+    IScene(), name(other.name + "_clone")
 {
     for (size_t i = 0; i < other.allObjects.size(); i++)
     {

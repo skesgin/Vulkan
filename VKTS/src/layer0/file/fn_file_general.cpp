@@ -28,6 +28,8 @@
 
 #include "fn_file_internal.hpp"
 
+#include "../binary_buffer/BinaryBuffer.hpp"
+
 namespace vkts
 {
 
@@ -67,11 +69,93 @@ VkBool32 VKTS_APIENTRY _fileInit()
 	return VK_TRUE;
 }
 
-VkBool32 VKTS_APIENTRY _filePrepareLoadBinary(const char* filename)
+IBinaryBufferSP VKTS_APIENTRY _fileLoadBinary(const char* filename)
 {
-	// Do nothing.
+    if (!filename)
+    {
+        return IBinaryBufferSP();
+    }
 
-	return VK_TRUE;
+    //
+
+    FILE* file;
+
+    std::string loadFilename = _fileGetBaseDirectory() + std::string(filename);
+
+    //
+
+    file = fopen(loadFilename.c_str(), "rb");
+
+    if (!file)
+    {
+        return IBinaryBufferSP();
+    }
+
+    if (fseek(file, 0, SEEK_END))
+    {
+        fclose(file);
+
+        return IBinaryBufferSP();
+    }
+
+    int64_t length = ftell(file);
+
+    if (length < 0)
+    {
+        fclose(file);
+
+        return IBinaryBufferSP();
+    }
+
+    size_t size = static_cast<size_t>(length);
+
+    if (size == 0)
+    {
+        fclose(file);
+
+        return IBinaryBufferSP();
+    }
+
+    auto data = new uint8_t[size];
+
+    if (!data)
+    {
+        fclose(file);
+
+        return IBinaryBufferSP();
+    }
+
+    memset(data, 0, size);
+
+    rewind(file);
+
+    auto elementsRead = fread(data, 1, size, file);
+
+    fclose(file);
+
+    //
+
+    if (elementsRead != size)
+    {
+        delete[] data;
+
+        return IBinaryBufferSP();
+    }
+
+    auto buffer = IBinaryBufferSP(new BinaryBuffer(data, size));
+
+    //
+
+	if (!buffer.get() || (buffer.get() && buffer->getSize() != size))
+	{
+	    delete[] data;
+
+	    return IBinaryBufferSP();
+	}
+
+	//
+
+    return buffer;
 }
 
 VkBool32 VKTS_APIENTRY _filePrepareSaveBinary(const char* filename)

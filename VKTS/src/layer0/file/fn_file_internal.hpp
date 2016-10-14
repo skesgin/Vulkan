@@ -34,11 +34,11 @@ namespace vkts
 
 VKTS_APICALL VkBool32 VKTS_APIENTRY _fileInit();
 
+VKTS_APICALL IBinaryBufferSP VKTS_APIENTRY _fileLoadBinary(const char* filename);
+
 VKTS_APICALL void VKTS_APIENTRY _fileSetBaseDirectory(const char* directory);
 
 VKTS_APICALL const char* VKTS_APIENTRY _fileGetBaseDirectory();
-
-VKTS_APICALL VkBool32 VKTS_APIENTRY _filePrepareLoadBinary(const char* filename);
 
 VKTS_APICALL VkBool32 VKTS_APIENTRY _filePrepareSaveBinary(const char* filename);
 

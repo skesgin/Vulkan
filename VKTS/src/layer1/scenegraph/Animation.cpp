@@ -35,7 +35,7 @@ Animation::Animation() :
 }
 
 Animation::Animation(const Animation& other) :
-    IAnimation(), name(other.name), start(other.start), stop(other.stop), allChannels()
+    IAnimation(), name(other.name + "_clone"), start(other.start), stop(other.stop), allChannels()
 {
     for (size_t i = 0; i < other.allChannels.size(); i++)
     {

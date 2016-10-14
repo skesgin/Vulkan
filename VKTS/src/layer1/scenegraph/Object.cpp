@@ -47,7 +47,7 @@ Object::Object() :
 }
 
 Object::Object(const Object& other) :
-    IObject(other), name(other.name), scale(other.scale), transformMatrix(other.transformMatrix), dirty(VK_TRUE), rootNode()
+    IObject(other), name(other.name + "_clone"), scale(other.scale), transformMatrix(other.transformMatrix), dirty(VK_TRUE), rootNode()
 {
     if (!other.rootNode.get())
     {

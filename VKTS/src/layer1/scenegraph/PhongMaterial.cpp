@@ -35,7 +35,7 @@ PhongMaterial::PhongMaterial() :
 }
 
 PhongMaterial::PhongMaterial(const PhongMaterial& other) :
-    IPhongMaterial(), Material(other), name(other.name), alpha(other.alpha), displacement(other.displacement), normal(other.normal), ambient(other.ambient), emissive(other.emissive), diffuse(other.diffuse), specular(other.specular), specularShininess(other.specularShininess), transparent(other.transparent)
+    IPhongMaterial(), Material(other), name(other.name + "_clone"), alpha(other.alpha), displacement(other.displacement), normal(other.normal), ambient(other.ambient), emissive(other.emissive), diffuse(other.diffuse), specular(other.specular), specularShininess(other.specularShininess), transparent(other.transparent)
 {
 
     // Textures cannot be cloned, just replaced.

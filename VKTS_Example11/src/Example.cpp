@@ -344,7 +344,6 @@ VkBool32 Example::updateDescriptorSets()
     descriptorImageInfos[0].imageView = shadowImageView->getImageView();
     descriptorImageInfos[0].imageLayout = shadowTexture->getImage()->getImageLayout();
 
-
 	memset(writeDescriptorSets, 0, sizeof(writeDescriptorSets));
 
 	writeDescriptorSets[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -1216,12 +1215,6 @@ VkBool32 Example::buildDescriptorSetLayout()
 		descriptorSetLayoutBinding[5 + i - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_EMISSIVE].pImmutableSamplers = nullptr;
     }
 
-    descriptorSetLayoutBinding[VKTS_DESCRIPTOR_SET_COUNT - 1].binding = VKTS_BINDING_UNIFORM_IMAGE_VOXEL;
-    descriptorSetLayoutBinding[VKTS_DESCRIPTOR_SET_COUNT - 1].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
-    descriptorSetLayoutBinding[VKTS_DESCRIPTOR_SET_COUNT - 1].descriptorCount = 1;
-    descriptorSetLayoutBinding[VKTS_DESCRIPTOR_SET_COUNT - 1].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-    descriptorSetLayoutBinding[VKTS_DESCRIPTOR_SET_COUNT - 1].pImmutableSamplers = nullptr;
-
     //
 
 	descriptorSetLayout = vkts::descriptorSetLayoutCreate(initialResources->getDevice()->getDevice(), 0, VKTS_DESCRIPTOR_SET_COUNT, descriptorSetLayoutBinding);
@@ -1648,6 +1641,19 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 	}
 
 	//
+
+	if (sceneLoaded)
+	{
+		if (!updateDescriptorSets())
+		{
+			return VK_FALSE;
+		}
+
+		if (scene.get())
+		{
+			scene->updateDescriptorSetsRecursive(VKTS_DESCRIPTOR_SET_COUNT, writeDescriptorSets);
+		}
+	}
 
 	for (int32_t i = 0; i < (int32_t)swapchainImagesCount; i++)
 	{

@@ -30,7 +30,7 @@ namespace vkts
 {
 
 Context::Context(const VkBool32 replace, const IInitialResourcesSP& initialResources, const ICommandBuffersSP& cmdBuffer, const VkSamplerCreateInfo& samplerCreateInfo, const VkImageViewCreateInfo& imageViewCreateInfo, const IDescriptorSetLayoutSP& descriptorSetLayout) :
-    IContext(), replace(replace), initialResources(initialResources), cmdBuffer(cmdBuffer), samplerCreateInfo(samplerCreateInfo), imageViewCreateInfo(imageViewCreateInfo), descriptorSetLayout(descriptorSetLayout), allObjects(), allUsedObjects(), allMeshes(), allSubMeshes(), allAnimations(), allChannels(), allBSDFMaterials(), allUsedBSDFMaterials(), allPhongMaterials(), allUsedPhongMaterials(), allTextures(), allImageDatas(), allVertexShaderModules(), allFragmentShaderModules(), renderPass()
+    IContext(), replace(replace), initialResources(initialResources), cmdBuffer(cmdBuffer), samplerCreateInfo(samplerCreateInfo), imageViewCreateInfo(imageViewCreateInfo), descriptorSetLayout(descriptorSetLayout), allObjects(), allMeshes(), allSubMeshes(), allAnimations(), allChannels(), allBSDFMaterials(), allUsedBSDFMaterials(), allPhongMaterials(), allUsedPhongMaterials(), allTextures(), allImageDatas(), allVertexShaderModules(), allFragmentShaderModules(), renderPass()
 {
 }
 
@@ -79,18 +79,7 @@ IObjectSP Context::useObject(const std::string& name) const
 
 	//
 
-	IObjectSP result = get(name, allObjects);
-
-	if (std::find(allUsedObjects.begin(), allUsedObjects.end(), name) != allUsedObjects.end())
-	{
-		result = result->clone();
-	}
-	else
-	{
-		allUsedObjects.push_back(name);
-	}
-
-    return result;
+    return get(name, allObjects);
 }
 
 VkBool32 Context::addObject(const IObjectSP& object)
@@ -108,12 +97,6 @@ VkBool32 Context::removeObject(const IObjectSP& object)
     if (!object.get())
     {
         return VK_FALSE;
-    }
-
-    auto removeElement = std::find(allUsedObjects.begin(), allUsedObjects.end(), object->getName());
-    if (removeElement != allUsedObjects.end())
-    {
-    	allUsedObjects.erase(removeElement);
     }
 
     return remove(object->getName(), allObjects);

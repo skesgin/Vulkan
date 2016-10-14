@@ -50,6 +50,9 @@ copy("../../VKTS_Binaries/shader/SPIR/V/voxelize.frag.spv", "./assets/shader/SPI
 copy("../../VKTS_Binaries/sponza/*.vkts", "./assets/sponza/")
 copy("../../VKTS_Binaries/sponza/*.tga", "./assets/sponza/")
 
+copy("../../VKTS_Binaries/cache/sponza/*.vkts", "./assets/cache/sponza/")
+copy("../../VKTS_Binaries/cache/sponza/*.tga", "./assets/cache/sponza/")
+
 print("Building project")
 
 os.chdir("jni")

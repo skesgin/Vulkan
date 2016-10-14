@@ -30,6 +30,8 @@
 
 #include "fn_file_internal.hpp"
 
+#include "../binary_buffer/BinaryBuffer.hpp"
+
 #include <sys/stat.h>
 
 namespace vkts
@@ -51,24 +53,14 @@ VkBool32 VKTS_APIENTRY _fileInit()
 	return VK_TRUE;
 }
 
-VkBool32 VKTS_APIENTRY _filePrepareLoadBinary(const char* filename)
+IBinaryBufferSP VKTS_APIENTRY _fileLoadBinary(const char* filename)
 {
-	std::string targetDirectory = std::string(_fileGetBaseDirectory());
+    if (!filename)
+    {
+        return IBinaryBufferSP();
+    }
 
-	std::string targetFile = targetDirectory + std::string(filename);
-
-	//
-
-	FILE* testAsset = fopen(targetFile.c_str(), "rb");
-
-	if (testAsset)
-	{
-		fclose(testAsset);
-
-		return VK_TRUE;
-	}
-
-	//
+    //
 
 	auto androidApp = _visualGetAndroidApp();
 
@@ -76,7 +68,7 @@ VkBool32 VKTS_APIENTRY _filePrepareLoadBinary(const char* filename)
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No android application.");
 
-		return VK_FALSE;
+		return IBinaryBufferSP();
 	}
 
 	AAssetManager* assetManager = androidApp->activity->assetManager;
@@ -85,74 +77,35 @@ VkBool32 VKTS_APIENTRY _filePrepareLoadBinary(const char* filename)
     {
 		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No asset manager.");
 
-		return VK_FALSE;
+		return IBinaryBufferSP();
     }
 
     AAsset* sourceAsset = AAssetManager_open(assetManager, filename, AASSET_MODE_BUFFER);
 
     if (!sourceAsset)
     {
-		// No output by purpose.
+    	vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Asset not found.");
 		
-		return VK_FALSE;
+		return IBinaryBufferSP();
     }
 
-    const void* sourceData = AAsset_getBuffer(sourceAsset);
+    const uint8_t* data = (const uint8_t*)AAsset_getBuffer(sourceAsset);
 
-	const off_t sourceLength = AAsset_getLength(sourceAsset);
-
-	//
-
-
-	std::string foldersToCreate = std::string(filename);
-
-	auto lastSlash = foldersToCreate.rfind('/');
-
-	if (lastSlash != foldersToCreate.npos)
-	{
-		foldersToCreate = foldersToCreate.substr(0, lastSlash);
-	}
-
-	if (!_fileCreateDirectory(foldersToCreate.c_str()))
-	{
-		return VK_FALSE;
-	}
+	const size_t size = (size_t)AAsset_getLength(sourceAsset);
 
 	//
 
-	FILE* targetAsset = fopen(targetFile.c_str(), "wb");
-
-	if (!targetAsset)
-	{
-		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No target asset.");
-
-		AAsset_close(sourceAsset);
-
-		return VK_FALSE;
-	}
-
-	auto targetLength = fwrite(sourceData, sizeof(char), (size_t)sourceLength, targetAsset);
-
-	if (sourceLength != targetLength)
-	{
-		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not copy '%s'.", filename);
-
-		fclose(targetAsset);
-
-		AAsset_close(sourceAsset);
-
-		return VK_FALSE;
-	}
-
-	fclose(targetAsset);
-
-	//
+    auto buffer = IBinaryBufferSP(new BinaryBuffer(data, size));
 
 	AAsset_close(sourceAsset);
 
-	return VK_TRUE;
-}
+	if (!buffer.get() || (buffer.get() && buffer->getSize() != size))
+	{
+	    return IBinaryBufferSP();
+	}
 
+	return buffer;
+}
 
 VkBool32 VKTS_APIENTRY _filePrepareSaveBinary(const char* filename)
 {

@@ -35,7 +35,7 @@ Mesh::Mesh() :
 }
 
 Mesh::Mesh(const Mesh& other) :
-    IMesh(), name(other.name), allSubMeshes(), displace(other.displace), box(other.box)
+    IMesh(), name(other.name + "_clone"), allSubMeshes(), displace(other.displace), box(other.box)
 {
     for (size_t i = 0; i < other.allSubMeshes.size(); i++)
     {

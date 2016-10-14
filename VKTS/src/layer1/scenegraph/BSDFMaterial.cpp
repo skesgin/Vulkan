@@ -35,7 +35,7 @@ BSDFMaterial::BSDFMaterial() :
 }
 
 BSDFMaterial::BSDFMaterial(const BSDFMaterial& other) :
-    IBSDFMaterial(), Material(other), name(other.name), fragmentShader(other.fragmentShader), attributes(other.attributes), allTextures()
+    IBSDFMaterial(), Material(other), name(other.name + "_clone"), fragmentShader(other.fragmentShader), attributes(other.attributes), allTextures()
 {
 	for (size_t i = 0; i < other.allTextures.size(); i++)
 	{

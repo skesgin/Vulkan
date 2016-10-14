@@ -50,7 +50,6 @@ private:
     const IDescriptorSetLayoutSP descriptorSetLayout;
 
     SmartPointerMap<std::string, IObjectSP> allObjects;
-    mutable std::vector<std::string> allUsedObjects;
 
     SmartPointerMap<std::string, ILightSP> allLights;
 

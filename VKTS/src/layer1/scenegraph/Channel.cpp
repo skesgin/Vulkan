@@ -35,7 +35,7 @@ Channel::Channel() :
 }
 
 Channel::Channel(const Channel& other) :
-    IChannel(), name(other.name), targetTransform(other.targetTransform), targetTransformElement(other.targetTransformElement), allKeys(other.allKeys), allValues(other.allValues), allHandles(other.allHandles), allInterpolators(other.allInterpolators)
+    IChannel(), name(other.name + "_clone"), targetTransform(other.targetTransform), targetTransformElement(other.targetTransformElement), allKeys(other.allKeys), allValues(other.allValues), allHandles(other.allHandles), allInterpolators(other.allInterpolators)
 {
 }
 
