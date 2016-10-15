@@ -182,6 +182,12 @@ The following commands allows to display the log output:
 4. Open another console execute following command in the `VKTS_Binaries` folder:  
     - `python android_log.py` 
 
+The following command uninstalls the Android project:
+
+5. Open console in `Android` project folder and execute following command:  
+    - `python uninstall_project.py`
+
+
 
 Setting up the Android device:
 ------------------------------

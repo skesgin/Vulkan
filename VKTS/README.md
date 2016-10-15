@@ -5,7 +5,7 @@ Authors:
 
 **Norbert Nopper** (norbert@nopper.tv)
 
-VKTS version: **0.9.3**
+VKTS version: **0.9.30**
 
 Depending Vulkan API header version: **1.0.30**
 
@@ -84,6 +84,9 @@ How to build:
 
 Changelog:
 ----------
+
+10/15/2016
+- Switched to VKTS version 0.9.30, as no validation warnings and errors are reported with LunarG SDK 1.0.30.0 
 
 10/14/2016
 - Improved file loading abstraction on Android.

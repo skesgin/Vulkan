@@ -19,3 +19,7 @@ If a key is not named in the above image (except space), the key can not be quer
 
 Mouse:  
 Left, middle and right buttons are supported. Also, the mouse wheel can be queried.
+
+
+Touch:  
+Two finger touch is supported.

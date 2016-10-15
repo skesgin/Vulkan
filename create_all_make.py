@@ -15,6 +15,11 @@ import sys
 #
 ####################
 
+#
+# Execute with: -DCMAKE_BUILD_TYPE=Release
+# for release build.
+# 
+
 print("Creating all make projects")
 
 noVisual = ["VKTS_Example08"]
