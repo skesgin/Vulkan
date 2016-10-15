@@ -597,7 +597,7 @@ VkBool32 Example::buildPipeline()
 	graphicsPipelineCreateInfo.pDynamicState = &pipelineDynamicStateCreateInfo;
 	graphicsPipelineCreateInfo.layout = pipelineLayout->getPipelineLayout();
 	graphicsPipelineCreateInfo.renderPass = renderPass->getRenderPass();
-	graphicsPipelineCreateInfo.subpass = 1;	// Graphics pipeline will be used in sub pass 0.
+	graphicsPipelineCreateInfo.subpass = 0;
 	graphicsPipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE;
 	graphicsPipelineCreateInfo.basePipelineIndex = 0;
 
