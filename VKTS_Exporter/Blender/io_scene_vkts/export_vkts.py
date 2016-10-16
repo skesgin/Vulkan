@@ -1596,6 +1596,28 @@ def saveLights(context, filepath):
             fw("outer_angle %f\n" % (math.degrees(currentLight.data.spot_size)))
             fw("inner_angle %f\n" % (math.degrees(currentLight.data.spot_size) - math.degrees(currentLight.data.spot_size) * currentLight.data.spot_blend * currentLight.data.spot_blend))
             fw("\n")
+        if currentLight.data.type == 'SPOT' or currentLight.data.type == 'POINT':
+            fallOff = 'Square'
+
+            if context.scene.render.engine == 'CYCLES':
+                for currentNode in currentLight.data.node_tree.nodes:
+                    if isinstance(currentNode, bpy.types.ShaderNodeEmission):
+                        for currentSocket in currentNode.inputs:
+                            if len(currentSocket.links) > 0 and currentSocket.name == 'Strength': 
+                                if currentSocket.links[0].from_socket.name == 'Linear':
+                                    fallOff = 'Linear'
+                                elif currentSocket.links[0].from_socket.name == 'Constant':
+                                    fallOff = 'Constant'
+                                break
+                    break
+            else:
+                if currentLight.data.falloff_type == 'CONSTANT':
+                   fallOff = 'Constant'
+                elif currentLight.data.falloff_type == 'INVERSE_LINEAR':
+                   fallOff = 'Linear' 
+                
+            fw("falloff %s\n" % (fallOff))
+            fw("\n")
         fw("color %f %f %f\n" % (currentLight.data.color[0], currentLight.data.color[1], currentLight.data.color[2]))        
         fw("\n")
 

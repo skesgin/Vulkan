@@ -3724,19 +3724,54 @@ static VkBool32 scenegraphLoadLights(const char* directory, const char* filename
             {
                 if (strcmp(sdata, "Point") == 0)
                 {
-                	light->setType(PointLight);
+                	light->setLightType(PointLight);
                 }
                 if (strcmp(sdata, "Directional") == 0)
                 {
-                	light->setType(DirectionalLight);
+                	light->setLightType(DirectionalLight);
                 }
                 if (strcmp(sdata, "Spot") == 0)
                 {
-                	light->setType(SpotLight);
+                	light->setLightType(SpotLight);
                 }
                 else
                 {
                     logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Invalid  light type '%s'", sdata);
+
+                    return VK_FALSE;
+                }
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No light");
+
+                return VK_FALSE;
+            }
+        }
+        else if (scenegraphIsToken(buffer, "falloff"))
+        {
+            if (!scenegraphParseString(buffer, sdata))
+            {
+                return VK_FALSE;
+            }
+
+            if (light.get())
+            {
+                if (strcmp(sdata, "Quadratic") == 0 && light->getLightType() != DirectionalLight)
+                {
+                	light->setFalloffType(QuadraticFalloff);
+                }
+                if (strcmp(sdata, "Linear") == 0 && light->getLightType() != DirectionalLight)
+                {
+                	light->setFalloffType(LinearFalloff);
+                }
+                if (strcmp(sdata, "Constant") == 0)
+                {
+                	light->setFalloffType(ConstantFalloff);
+                }
+                else
+                {
+                    logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Invalid fall off type '%s'", sdata);
 
                     return VK_FALSE;
                 }
@@ -3755,7 +3790,7 @@ static VkBool32 scenegraphLoadLights(const char* directory, const char* filename
                 return VK_FALSE;
             }
 
-            if (light.get() && light->getType() == SpotLight)
+            if (light.get() && light->getLightType() == SpotLight)
             {
             	light->setOuterAngle(fdata[0]);
             }
@@ -3773,7 +3808,7 @@ static VkBool32 scenegraphLoadLights(const char* directory, const char* filename
                 return VK_FALSE;
             }
 
-            if (light.get() && light->getType() == SpotLight)
+            if (light.get() && light->getLightType() == SpotLight)
             {
             	light->setInnerAngle(fdata[0]);
             }

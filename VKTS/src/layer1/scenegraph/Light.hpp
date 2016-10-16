@@ -43,6 +43,8 @@ private:
 
     enum LightType lightType;
 
+    enum FalloffType falloffType;
+
     float outerAngle;
 
     float innerAngle;
@@ -73,9 +75,13 @@ public:
 
     virtual void setIndex(const uint32_t index) override;
 
-    virtual enum LightType getType() const override;
+    virtual enum LightType getLightType() const override;
 
-    virtual void setType(const enum LightType lightType) override;
+    virtual void setLightType(const enum LightType lightType) override;
+
+    virtual enum FalloffType getFalloffType() const override;
+
+    virtual void setFalloffType(const enum FalloffType falloffType) override;
 
     virtual float getOuterAngle() const override;
 

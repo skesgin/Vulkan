@@ -34,6 +34,8 @@ namespace vkts
 
 enum LightType {PointLight, DirectionalLight, SpotLight};
 
+enum FalloffType {QuadraticFalloff, LinearFalloff, ConstantFalloff};
+
 class ILight : public ICloneable<ILight>
 {
 
@@ -56,9 +58,13 @@ public:
 
     virtual void setIndex(const uint32_t index) = 0;
 
-    virtual enum LightType getType() const = 0;
+    virtual enum LightType getLightType() const = 0;
 
-    virtual void setType(const enum LightType lightType) = 0;
+    virtual void setLightType(const enum LightType lightType) = 0;
+
+    virtual enum FalloffType getFalloffType() const = 0;
+
+    virtual void setFalloffType(const enum FalloffType falloffType) = 0;
 
     virtual float getOuterAngle() const = 0;
 

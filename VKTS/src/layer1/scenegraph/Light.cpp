@@ -30,12 +30,12 @@ namespace vkts
 {
 
 Light::Light() :
-    ILight(), name(""), index(0), lightType(PointLight), outerAngle(0.0f), innerAngle(0.0f), color(0.0f, 0.0f, 0.0f, 1.0f), direction(0.0f, -1.0f, 0.0f, 1.0f)
+    ILight(), name(""), index(0), lightType(PointLight), falloffType(QuadraticFalloff), outerAngle(0.0f), innerAngle(0.0f), color(0.0f, 0.0f, 0.0f, 1.0f), direction(0.0f, -1.0f, 0.0f, 1.0f)
 {
 }
 
 Light::Light(const Light& other) :
-	ILight(), name(other.name + "_clone"), index(other.index), lightType(other.lightType), outerAngle(other.outerAngle), innerAngle(other.innerAngle), color(other.color), direction(other.direction)
+	ILight(), name(other.name + "_clone"), index(other.index), lightType(other.lightType), falloffType(other.falloffType), outerAngle(other.outerAngle), innerAngle(other.innerAngle), color(other.color), direction(other.direction)
 {
 }
 
@@ -67,14 +67,34 @@ void Light::setIndex(const uint32_t index)
 	this->index = index;
 }
 
-enum LightType Light::getType() const
+enum LightType Light::getLightType() const
 {
 	return lightType;
 }
 
-void Light::setType(const enum LightType lightType)
+void Light::setLightType(const enum LightType lightType)
 {
 	this->lightType = lightType;
+
+	if (this->lightType == DirectionalLight)
+	{
+		this->falloffType = ConstantFalloff;
+	}
+}
+
+enum FalloffType Light::getFalloffType() const
+{
+	return falloffType;
+}
+
+void Light::setFalloffType(const enum FalloffType falloffType)
+{
+	this->falloffType = falloffType;
+
+	if (this->falloffType != ConstantFalloff && this->lightType == DirectionalLight)
+	{
+		throw std::invalid_argument("Invalid fall off and light type combination!");
+	}
 }
 
 float Light::getOuterAngle() const
