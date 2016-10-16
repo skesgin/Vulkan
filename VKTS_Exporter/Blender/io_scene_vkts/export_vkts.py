@@ -1519,6 +1519,9 @@ def saveParticleSystems(context, filepath):
         if currentParticleSystem.render_type != 'BILLBOARD' and currentParticleSystem.render_type != 'OBJECT':
             continue
 
+        if currentParticleSystem.render_type == 'OBJECT' and not currentParticleSystem.dupli_object:
+            continue
+
         emitFrom = 'Vertices'
         if currentParticleSystem.emit_from == 'FACE':
             emitFrom = 'Faces'
@@ -1534,16 +1537,31 @@ def saveParticleSystems(context, filepath):
         fw("emission_end %f\n" % (currentParticleSystem.frame_end / context.scene.render.fps))
         fw("emission_lifetime %f\n" % (currentParticleSystem.lifetime / context.scene.render.fps))
         fw("emission_random %f\n" % (currentParticleSystem.lifetime_random))
-        fw("\n")
         fw("emission_emit_from %s\n" % (emitFrom))
+        # Rest of emission parameters not exported.
         fw("\n")
-        # Other emission parameters not exported.
-
-        #TODO: Export velocity.
-
-        #TODO: Export physics of newtonian. 
-
-        #TODO: Export render.
+        fw("velocity_normal_factor %f\n" % (currentParticleSystem.normal_factor))
+        # Velocity tangent parameters not exported.
+        fw("velocity_object_align_factor %f %f %f\n" % (convertLocation(currentParticleSystem.object_align_factor)))
+        # Velocity object factor not exported.
+        fw("velocity_factor_random %f\n" % (currentParticleSystem.factor_random))
+        fw("\n")
+        fw("physics_particle_size %f\n" % (currentParticleSystem.particle_size))
+        fw("physics_size_random %f\n" % (currentParticleSystem.size_random))
+        fw("physics_mass %f\n" % (currentParticleSystem.mass))
+        multiplySizeMass = 0.0
+        if currentParticleSystem.use_multiply_size_mass:
+            multiplySizeMass = 1.0
+        fw("physics_multiply_size_mass %f\n" % (multiplySizeMass))
+        # Rest of physics parameters not exported.
+        fw("\n")
+        renderType = 'Billboard'
+        if currentParticleSystem.render_type == 'OBJECT':
+            renderType = 'Object'
+        fw("render_type %s\n" % (renderType))            
+        if currentParticleSystem.dupli_object and currentParticleSystem.render_type == 'OBJECT':
+            fw("render_object %s\n" % (friendlyName(currentParticleSystem.dupli_object.name)))
+        # Rest of render not exported.
 
         fw("\n")
 

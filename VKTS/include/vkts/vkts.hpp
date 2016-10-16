@@ -28,8 +28,8 @@
 #define VKTS_HPP_
 
 // TODO: Export and import camera.
+// TODO: Import particle system.
 // TODO: Finalize Wayland port.
-// TODO: Finalize export and import of particle system.
 // TODO: Mark, if functions are thread safe or not.
 // TODO: Add documentation.
 
