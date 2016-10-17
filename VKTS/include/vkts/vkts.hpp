@@ -566,6 +566,8 @@
 
 #include <vkts/layer1/scenegraph/IObject.hpp>
 
+#include <vkts/layer1/scenegraph/IParticleSystem.hpp>
+
 #include <vkts/layer1/scenegraph/IScene.hpp>
 
 #include <vkts/layer1/scenegraph/IContext.hpp>

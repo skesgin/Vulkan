@@ -57,6 +57,8 @@
 
 #include "Object.hpp"
 
+#include "ParticleSystem.hpp"
+
 #include "Context.hpp"
 
 #include "Scene.hpp"
@@ -4066,7 +4068,7 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
 
             if (node.get())
             {
-                // TODO: Add particle seed.
+                // TODO: Append particle system seed.
             }
             else
             {
