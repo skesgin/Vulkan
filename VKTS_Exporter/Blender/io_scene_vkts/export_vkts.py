@@ -156,6 +156,19 @@ pbrMain = """#previousMain#
 # Converter
 #
 
+mathMain = """#previousMain#
+    
+    // Math start
+
+    // In
+    float %s = %s;
+    float %s = %s;
+    
+    // Out
+    float %s = %s%s %s %s%s;
+    
+    // end"""
+
 rgbToBwMain = """#previousMain#
     
     // RGB to BW start
@@ -247,7 +260,7 @@ multiplyMain = """#previousMain#
     
     // Multiply end"""
 
-addMain = """#previousMain#
+addSubtractMain = """#previousMain#
     
     // Add start
 
@@ -257,7 +270,7 @@ addMain = """#previousMain#
     vec4 %s = %s;
     
     // Out
-    vec4 %s = %s%s + %s * %s%s;
+    vec4 %s = %s%s %s %s * %s%s;
     
     // Add end"""
 
@@ -805,8 +818,14 @@ def createOpenNodeList(openNodes, rootNode):
 
 
 def replaceParameters(currentNode, openNodes, processedNodes, currentMain):
+    socketIndex = 1
     for currentSocket in currentNode.inputs:
-        currentParameter = currentSocket.name + "_Dummy"
+        currentParameter = currentSocket.name
+        # Exceptions, as some nodes do not have unique socket names. 
+        if isinstance(currentNode, bpy.types.ShaderNodeMath):
+            currentParameter = currentParameter + str(socketIndex)
+        socketIndex += 1
+        currentParameter = currentParameter  + "_Dummy"
             
         if len(currentSocket.links) == 0:
             currentValue = ""
@@ -918,6 +937,7 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
             scaleCounter = 0
             strengthCounter = 0
             tempCounter = 0
+            valueCounter = 0
             vectorCounter = 0
             
             openNodes = []
@@ -962,6 +982,51 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
 
                     #
 
+                    currentMain = replaceParameters(currentNode, openNodes, processedNodes, currentMain)
+                    
+                    #
+                        
+                    currentFragmentGLSL = currentFragmentGLSL.replace("#previousMain#", currentMain)
+
+                elif isinstance(currentNode, bpy.types.ShaderNodeMath):
+                    # Math.
+                    
+                    # Inputs.
+                    
+                    value1InputName = "Value1_%d" % (valueCounter)
+                    valueCounter += 1
+                    value2InputName = "Value2_%d" % (valueCounter)
+                    
+                    valueCounter += 1
+
+                    value1InputParameterName = "Value1_Dummy"
+                    value2InputParameterName = "Value2_Dummy"
+                    
+                    # Outputs
+                    
+                    valueOutputName = friendlyNodeName(currentNode.name) + "_" + friendlyNodeName(currentNode.outputs["Value"].name) 
+                    
+                    #
+                                        
+                    preClamp = ""
+                    postClamp = ""
+                    
+                    if currentNode.use_clamp:
+                        preClamp = "clamp("
+                        postClamp = ", vec4(0.0, 0.0, 0.0, 0.0), vec4(1.0, 1.0, 1.0, 1.0))"
+                    
+                    #
+                    
+                    if currentNode.operation == 'ADD':
+                        currentMain = mathMain % (value1InputName, value1InputParameterName, value2InputName, value2InputParameterName, valueOutputName, preClamp, value1InputName, '+', value2InputName, postClamp)
+                    elif currentNode.operation == 'SUBTRACT':
+                        currentMain = mathMain % (value1InputName, value1InputParameterName, value2InputName, value2InputParameterName, valueOutputName, preClamp, value1InputName, '-', value2InputName, postClamp)
+                    elif currentNode.operation == 'MULTIPLY':
+                        currentMain = mathMain % (value1InputName, value1InputParameterName, value2InputName, value2InputParameterName, valueOutputName, preClamp, value1InputName, '*', value2InputName, postClamp)
+                    else:
+                        currentMain = ""
+                    #
+                    
                     currentMain = replaceParameters(currentNode, openNodes, processedNodes, currentMain)
                     
                     #
@@ -1180,9 +1245,11 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
                     if currentNode.blend_type == 'MIX':    
                         currentMain = mixMain % (facInputName, facInputParameterName, color1InputName, color1InputParameterName, color2InputName, color2InputParameterName, colorOutputName, preClamp, color1InputName, color2InputName, facInputName, postClamp)
                     elif currentNode.blend_type == 'ADD':
-                        currentMain = addMain % (facInputName, facInputParameterName, color1InputName, color1InputParameterName, color2InputName, color2InputParameterName, colorOutputName, preClamp, color1InputName, color2InputName, facInputName, postClamp)
+                        currentMain = addSubtractMain % (facInputName, facInputParameterName, color1InputName, color1InputParameterName, color2InputName, color2InputParameterName, colorOutputName, preClamp, color1InputName, '+', color2InputName, facInputName, postClamp)
                     elif currentNode.blend_type == 'MULTIPLY':
                         currentMain = multiplyMain % (facInputName, facInputParameterName, color1InputName, color1InputParameterName, color2InputName, color2InputParameterName, colorOutputName, preClamp, color1InputName, facInputName, color1InputName, color2InputName, facInputName, postClamp)
+                    elif currentNode.blend_type == 'SUBTRACT':
+                        currentMain = addSubtractMain % (facInputName, facInputParameterName, color1InputName, color1InputParameterName, color2InputName, color2InputParameterName, colorOutputName, preClamp, color1InputName, '-', color2InputName, facInputName, postClamp)
                     else:
                         currentMain = ""
                     #
