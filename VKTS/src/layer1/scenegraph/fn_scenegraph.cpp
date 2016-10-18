@@ -3684,7 +3684,7 @@ static VkBool32 scenegraphLoadLights(const char* directory, const char* filename
 
     char buffer[VKTS_MAX_BUFFER_CHARS + 1];
     char sdata[VKTS_MAX_TOKEN_CHARS + 1];
-    float fdata[4];
+    float fdata[3];
 
     auto light = ILightSP();
 
@@ -3728,11 +3728,11 @@ static VkBool32 scenegraphLoadLights(const char* directory, const char* filename
                 {
                 	light->setLightType(PointLight);
                 }
-                if (strcmp(sdata, "Directional") == 0)
+                else if (strcmp(sdata, "Directional") == 0)
                 {
                 	light->setLightType(DirectionalLight);
                 }
-                if (strcmp(sdata, "Spot") == 0)
+                else if (strcmp(sdata, "Spot") == 0)
                 {
                 	light->setLightType(SpotLight);
                 }
@@ -3785,6 +3785,24 @@ static VkBool32 scenegraphLoadLights(const char* directory, const char* filename
                 return VK_FALSE;
             }
         }
+        else if (scenegraphIsToken(buffer, "strength"))
+        {
+            if (!scenegraphParseFloat(buffer, &fdata[0]))
+            {
+                return VK_FALSE;
+            }
+
+            if (light.get())
+            {
+            	light->setStrength(fdata[0]);
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No light");
+
+                return VK_FALSE;
+            }
+        }
         else if (scenegraphIsToken(buffer, "outer_angle"))
         {
             if (!scenegraphParseFloat(buffer, &fdata[0]))
@@ -3823,14 +3841,14 @@ static VkBool32 scenegraphLoadLights(const char* directory, const char* filename
         }
         else if (scenegraphIsToken(buffer, "color"))
         {
-            if (!scenegraphParseVec4(buffer, fdata))
+            if (!scenegraphParseVec3(buffer, fdata))
             {
                 return VK_FALSE;
             }
 
             if (light.get())
             {
-            	light->setColor(glm::vec4(fdata[0], fdata[1], fdata[2], fdata[3]));
+            	light->setColor(glm::vec3(fdata[0], fdata[1], fdata[2]));
 
             	//
 

@@ -45,11 +45,13 @@ private:
 
     enum FalloffType falloffType;
 
+    float strength;
+
     float outerAngle;
 
     float innerAngle;
 
-    glm::vec4 color;
+    glm::vec3 color;
 
     glm::vec4 direction;
 
@@ -83,6 +85,10 @@ public:
 
     virtual void setFalloffType(const enum FalloffType falloffType) override;
 
+    virtual float getStrength() const override;
+
+    virtual void setStrength(const float stength) override;
+
     virtual float getOuterAngle() const override;
 
     virtual void setOuterAngle(const float angle) override;
@@ -91,9 +97,9 @@ public:
 
     virtual void setInnerAngle(const float angle) override;
 
-    virtual const glm::vec4& getColor() const override;
+    virtual const glm::vec3& getColor() const override;
 
-    virtual void setColor(const glm::vec4& color) override;
+    virtual void setColor(const glm::vec3& color) override;
 
     virtual const glm::vec4& getDirection() const override;
 

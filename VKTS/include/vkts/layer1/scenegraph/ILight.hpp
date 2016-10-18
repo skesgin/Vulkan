@@ -66,6 +66,10 @@ public:
 
     virtual void setFalloffType(const enum FalloffType falloffType) = 0;
 
+    virtual float getStrength() const = 0;
+
+    virtual void setStrength(const float stength) = 0;
+
     virtual float getOuterAngle() const = 0;
 
     virtual void setOuterAngle(const float angle) = 0;
@@ -74,9 +78,9 @@ public:
 
     virtual void setInnerAngle(const float angle) = 0;
 
-    virtual const glm::vec4& getColor() const = 0;
+    virtual const glm::vec3& getColor() const = 0;
 
-    virtual void setColor(const glm::vec4& color) = 0;
+    virtual void setColor(const glm::vec3& color) = 0;
 
     virtual const glm::vec4& getDirection() const = 0;
 

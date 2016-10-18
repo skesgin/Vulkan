@@ -30,12 +30,12 @@ namespace vkts
 {
 
 Light::Light() :
-    ILight(), name(""), index(0), lightType(PointLight), falloffType(QuadraticFalloff), outerAngle(0.0f), innerAngle(0.0f), color(0.0f, 0.0f, 0.0f, 1.0f), direction(0.0f, -1.0f, 0.0f, 1.0f)
+    ILight(), name(""), index(0), lightType(PointLight), falloffType(QuadraticFalloff), strength(1.0f), outerAngle(0.0f), innerAngle(0.0f), color(0.0f, 0.0f, 0.0f), direction(0.0f, -1.0f, 0.0f, 1.0f)
 {
 }
 
 Light::Light(const Light& other) :
-	ILight(), name(other.name + "_clone"), index(other.index), lightType(other.lightType), falloffType(other.falloffType), outerAngle(other.outerAngle), innerAngle(other.innerAngle), color(other.color), direction(other.direction)
+	ILight(), name(other.name + "_clone"), index(other.index), lightType(other.lightType), falloffType(other.falloffType), strength(other.strength), outerAngle(other.outerAngle), innerAngle(other.innerAngle), color(other.color), direction(other.direction)
 {
 }
 
@@ -97,6 +97,16 @@ void Light::setFalloffType(const enum FalloffType falloffType)
 	}
 }
 
+float Light::getStrength() const
+{
+	return strength;
+}
+
+void Light::setStrength(const float stength)
+{
+	this->strength = stength;
+}
+
 float Light::getOuterAngle() const
 {
 	return outerAngle;
@@ -117,12 +127,12 @@ void Light::setInnerAngle(const float angle)
 	this->innerAngle = angle;
 }
 
-const glm::vec4& Light::getColor() const
+const glm::vec3& Light::getColor() const
 {
 	return color;
 }
 
-void Light::setColor(const glm::vec4& color)
+void Light::setColor(const glm::vec3& color)
 {
 	this->color = color;
 }
