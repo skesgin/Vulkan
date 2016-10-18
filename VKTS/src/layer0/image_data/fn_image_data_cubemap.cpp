@@ -88,7 +88,7 @@ SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataCubemap(const IImageData
 
 				//
 
-				sampleLocation.s = 0.5f + 0.5f * atan2f(scanVector.x, -scanVector.z) / VKTS_PI;
+				sampleLocation.s = 0.5f + 0.5f * atan2f(scanVector.z, scanVector.x) / VKTS_PI;
 				sampleLocation.t = 1.0f - acosf(scanVector.y) / VKTS_PI;
 
 				//

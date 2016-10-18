@@ -27,7 +27,6 @@
 #ifndef VKTS_HPP_
 #define VKTS_HPP_
 
-// TODO: Fix environment export. Rotate 90 degrees clockwise on y-axis.
 // TODO: Add light structure to uniform buffer.
 // TODO: Render/resolve light.
 // TODO: Export and import camera.
