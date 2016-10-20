@@ -1019,6 +1019,8 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
                         currentMain = mathMain % (value1InputName, value1InputParameterName, value2InputName, value2InputParameterName, valueOutputName, preClamp, value1InputName, '-', value2InputName, postClamp)
                     elif currentNode.operation == 'MULTIPLY':
                         currentMain = mathMain % (value1InputName, value1InputParameterName, value2InputName, value2InputParameterName, valueOutputName, preClamp, value1InputName, '*', value2InputName, postClamp)
+                    elif currentNode.operation == 'POWER':
+                        currentMain = mathMain % (value1InputName, value1InputParameterName, value2InputName, value2InputParameterName, valueOutputName, preClamp, 'pow(' + value1InputName, ', ', value2InputName + ')', postClamp)
                     else:
                         currentMain = ""
                     #
@@ -1672,18 +1674,19 @@ def saveLights(context, filepath):
             strength = 1.0
 
             if context.scene.render.engine == 'CYCLES':
-
-                for currentNode in currentLight.data.node_tree.nodes:
-                    if isinstance(currentNode, bpy.types.ShaderNodeEmission):
-                        strength = currentNode.inputs[1].default_value
-                        for currentSocket in currentNode.inputs:
-                            if len(currentSocket.links) > 0 and currentSocket.name == 'Strength': 
-                                if currentSocket.links[0].from_socket.name == 'Linear':
-                                    fallOff = 'Linear'
-                                elif currentSocket.links[0].from_socket.name == 'Constant':
-                                    fallOff = 'Constant'
-                                strength = currentSocket.links[0].from_node.inputs[0].default_value
-                                break
+                if currentLight.data.node_tree:
+                    # Node tree
+                    for currentNode in currentLight.data.node_tree.nodes:
+                        if isinstance(currentNode, bpy.types.ShaderNodeEmission):
+                            strength = currentNode.inputs[1].default_value
+                            for currentSocket in currentNode.inputs:
+                                if len(currentSocket.links) > 0 and currentSocket.name == 'Strength': 
+                                    if currentSocket.links[0].from_socket.name == 'Linear':
+                                        fallOff = 'Linear'
+                                    elif currentSocket.links[0].from_socket.name == 'Constant':
+                                        fallOff = 'Constant'
+                                    strength = currentSocket.links[0].from_node.inputs[0].default_value
+                                    break
             else:
                 if currentLight.data.falloff_type == 'CONSTANT':
                    fallOff = 'Constant'
