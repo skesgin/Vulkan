@@ -36,14 +36,12 @@ VKTS_BINDING_UNIFORM_SAMPLER_BSDF_FIRST = 4
 
 fragmentGLSL = """#version 450 core
 
-layout (location = 0) in vec4 v_f_position;
-layout (location = 1) in vec3 v_f_normal;
+layout (location = 0) in vec3 v_f_normal;
 #nextAttribute#
-layout (location = 5) in vec3 v_f_incident;
+layout (location = 4) in vec3 v_f_incident;
 #nextTexture#
-layout (location = 2) out vec4 ob_positionMetallic; // Position as NDC and metallic.
 layout (location = 1) out vec4 ob_normalRoughness;  // Normal and roughness.
-layout (location = 0) out vec4 ob_color;            // Color and alpha.
+layout (location = 0) out vec4 ob_colorMetallic;    // Color and metallic.
 
 mat4 translate(vec3 t)
 {
@@ -94,8 +92,7 @@ float fresnel(float eta, float theta)
 }
 
 void main()
-{
-    vec4 position = v_f_position / v_f_position.w; 
+{ 
     vec3 normal = normalize(v_f_normal);
     vec3 incident = normalize(v_f_incident);
     #nextTangents#
@@ -106,9 +103,8 @@ void main()
         discard;
     }
 
-    ob_positionMetallic = vec4((position * 0.5 + 0.5).xyz, Metallic_0);
     ob_normalRoughness = vec4(Normal_0.xyz * 0.5 + 0.5, Roughness_0);
-    ob_color = Color_0;
+    ob_colorMetallic = vec4(Color_0.rgb, Metallic_0);
 }"""
 
 
@@ -118,12 +114,12 @@ nextTangents = """vec3 bitangent = normalize(v_f_bitangent);
     mat3 objectToWorldMatrix = mat3(tangent, bitangent, normal);"""
 
 
-normalMapAttribute = """layout (location = 2) in vec3 v_f_bitangent;
-layout (location = 3) in vec3 v_f_tangent;
+normalMapAttribute = """layout (location = 1) in vec3 v_f_bitangent;
+layout (location = 2) in vec3 v_f_tangent;
 #nextAttribute#"""
 
 
-texCoordAttribute = """layout (location = 4) in vec2 v_f_texCoord;
+texCoordAttribute = """layout (location = 3) in vec2 v_f_texCoord;
 #nextAttribute#"""
 
 
@@ -343,7 +339,7 @@ fresnelMain = """#previousMain#
     vec3 %s = %s;
     
     // Out
-    vec4 %s = fresnel(%s, dot(-incident, %s));
+    float %s = fresnel(%s, dot(-incident, %s));
     
     // Fresnel end"""
 

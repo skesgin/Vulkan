@@ -102,13 +102,6 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
     // Gbuffer pass.
     //
 
-	VkClearColorValue positionClearColorValue{};
-
-	positionClearColorValue.float32[0] = 0.5f;
-	positionClearColorValue.float32[1] = 0.5f;
-	positionClearColorValue.float32[2] = 0.5f;
-	positionClearColorValue.float32[3] = 0.0f;
-
 	VkClearColorValue clearColorValue{};
 
 	clearColorValue.float32[0] = 0.0f;
@@ -121,12 +114,11 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 	clearDepthStencilValue.depth = 1.0f;
 	clearDepthStencilValue.stencil = 0;
 
-	VkClearValue clearValues[4]{};
+	VkClearValue clearValues[3]{};
 
 	clearValues[0].color = clearColorValue;
 	clearValues[1].color = clearColorValue;
-	clearValues[2].color = positionClearColorValue;
-	clearValues[3].depthStencil = clearDepthStencilValue;
+	clearValues[2].depthStencil = clearDepthStencilValue;
 
 
 	VkRenderPassBeginInfo renderPassBeginInfo{};
@@ -138,7 +130,7 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 	renderPassBeginInfo.renderArea.offset.x = 0;
 	renderPassBeginInfo.renderArea.offset.y = 0;
 	renderPassBeginInfo.renderArea.extent = swapchain->getImageExtent();
-	renderPassBeginInfo.clearValueCount = 4;
+	renderPassBeginInfo.clearValueCount = 3;
 	renderPassBeginInfo.pClearValues = clearValues;
 
 	cmdBuffer[usedBuffer]->cmdBeginRenderPass(&renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
@@ -162,14 +154,14 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 
 	VkImageSubresourceRange colorSubresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
 
-	for (uint32_t i = 0; i < 3; i++)
+	for (uint32_t i = 0; i < 2; i++)
 	{
 		allGBufferTextures[i]->getImage()->cmdPipelineBarrier(cmdBuffer[usedBuffer]->getCommandBuffer(), VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, colorSubresourceRange);
 	}
 
 	VkImageSubresourceRange depthSubresourceRange = {VK_IMAGE_ASPECT_DEPTH_BIT, 0, 1, 0, 1};
 
-	allGBufferTextures[3]->getImage()->cmdPipelineBarrier(cmdBuffer[usedBuffer]->getCommandBuffer(), VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, depthSubresourceRange);
+	allGBufferTextures[2]->getImage()->cmdPipelineBarrier(cmdBuffer[usedBuffer]->getCommandBuffer(), VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, depthSubresourceRange);
 
     //
     // Default pass.
@@ -251,12 +243,12 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 	// Barrier, that GBuffer can be written.
 	//
 
-	for (uint32_t i = 0; i < 3; i++)
+	for (uint32_t i = 0; i < 2; i++)
 	{
 		allGBufferTextures[i]->getImage()->cmdPipelineBarrier(cmdBuffer[usedBuffer]->getCommandBuffer(), VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, colorSubresourceRange);
 	}
 
-	allGBufferTextures[3]->getImage()->cmdPipelineBarrier(cmdBuffer[usedBuffer]->getCommandBuffer(), VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, depthSubresourceRange);
+	allGBufferTextures[2]->getImage()->cmdPipelineBarrier(cmdBuffer[usedBuffer]->getCommandBuffer(), VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, depthSubresourceRange);
 
     //
 
@@ -392,7 +384,7 @@ VkBool32 Example::updateDescriptorSets()
 
 	memset(resolveWriteDescriptorSets, 0, sizeof(resolveWriteDescriptorSets));
 
-	for (uint32_t i = 0; i < 4; i++)
+	for (uint32_t i = 0; i < 3; i++)
 	{
 		resolveDescriptorImageInfos[i].sampler = gbufferSampler->getSampler();
 		resolveDescriptorImageInfos[i].imageView = allGBufferImageViews[i]->getImageView();
@@ -411,9 +403,25 @@ VkBool32 Example::updateDescriptorSets()
 	}
 
 	// Diffuse/lambert.
-	resolveDescriptorImageInfos[4].sampler = scene->getDiffuseEnvironment()->getSampler()->getSampler();
-	resolveDescriptorImageInfos[4].imageView = scene->getDiffuseEnvironment()->getImageView()->getImageView();
-	resolveDescriptorImageInfos[4].imageLayout = scene->getDiffuseEnvironment()->getMemoryImage()->getImage()->getImageLayout();
+	resolveDescriptorImageInfos[3].sampler = scene->getDiffuseEnvironment()->getSampler()->getSampler();
+	resolveDescriptorImageInfos[3].imageView = scene->getDiffuseEnvironment()->getImageView()->getImageView();
+	resolveDescriptorImageInfos[3].imageLayout = scene->getDiffuseEnvironment()->getMemoryImage()->getImage()->getImageLayout();
+
+	resolveWriteDescriptorSets[3].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+
+	resolveWriteDescriptorSets[3].dstSet = resolveDescriptorSet->getDescriptorSets()[0];
+	resolveWriteDescriptorSets[3].dstBinding = 3;
+	resolveWriteDescriptorSets[3].dstArrayElement = 0;
+	resolveWriteDescriptorSets[3].descriptorCount = 1;
+	resolveWriteDescriptorSets[3].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+	resolveWriteDescriptorSets[3].pImageInfo = &resolveDescriptorImageInfos[3];
+	resolveWriteDescriptorSets[3].pBufferInfo = nullptr;
+	resolveWriteDescriptorSets[3].pTexelBufferView = nullptr;
+
+	// Specular/Cook-Torrance.
+	resolveDescriptorImageInfos[4].sampler = scene->getSpecularEnvironment()->getSampler()->getSampler();
+	resolveDescriptorImageInfos[4].imageView = scene->getSpecularEnvironment()->getImageView()->getImageView();
+	resolveDescriptorImageInfos[4].imageLayout = scene->getSpecularEnvironment()->getMemoryImage()->getImage()->getImageLayout();
 
 	resolveWriteDescriptorSets[4].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 
@@ -426,10 +434,10 @@ VkBool32 Example::updateDescriptorSets()
 	resolveWriteDescriptorSets[4].pBufferInfo = nullptr;
 	resolveWriteDescriptorSets[4].pTexelBufferView = nullptr;
 
-	// Specular/Cook-Torrance.
-	resolveDescriptorImageInfos[5].sampler = scene->getSpecularEnvironment()->getSampler()->getSampler();
-	resolveDescriptorImageInfos[5].imageView = scene->getSpecularEnvironment()->getImageView()->getImageView();
-	resolveDescriptorImageInfos[5].imageLayout = scene->getSpecularEnvironment()->getMemoryImage()->getImage()->getImageLayout();
+	//Lut
+	resolveDescriptorImageInfos[5].sampler = scene->getLut()->getSampler()->getSampler();
+	resolveDescriptorImageInfos[5].imageView = scene->getLut()->getImageView()->getImageView();
+	resolveDescriptorImageInfos[5].imageLayout = scene->getLut()->getMemoryImage()->getImage()->getImageLayout();
 
 	resolveWriteDescriptorSets[5].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 
@@ -442,10 +450,10 @@ VkBool32 Example::updateDescriptorSets()
 	resolveWriteDescriptorSets[5].pBufferInfo = nullptr;
 	resolveWriteDescriptorSets[5].pTexelBufferView = nullptr;
 
-	//Lut
-	resolveDescriptorImageInfos[6].sampler = scene->getLut()->getSampler()->getSampler();
-	resolveDescriptorImageInfos[6].imageView = scene->getLut()->getImageView()->getImageView();
-	resolveDescriptorImageInfos[6].imageLayout = scene->getLut()->getMemoryImage()->getImage()->getImageLayout();
+	// Inverse matrix.
+	resolveDescriptorBufferInfos[0].buffer = resolveFragmentMatricesUniformBuffer->getBuffer()->getBuffer();
+	resolveDescriptorBufferInfos[0].offset = 0;
+	resolveDescriptorBufferInfos[0].range = resolveFragmentMatricesUniformBuffer->getBuffer()->getSize();
 
 	resolveWriteDescriptorSets[6].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 
@@ -453,26 +461,10 @@ VkBool32 Example::updateDescriptorSets()
 	resolveWriteDescriptorSets[6].dstBinding = 6;
 	resolveWriteDescriptorSets[6].dstArrayElement = 0;
 	resolveWriteDescriptorSets[6].descriptorCount = 1;
-	resolveWriteDescriptorSets[6].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	resolveWriteDescriptorSets[6].pImageInfo = &resolveDescriptorImageInfos[6];
-	resolveWriteDescriptorSets[6].pBufferInfo = nullptr;
+	resolveWriteDescriptorSets[6].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	resolveWriteDescriptorSets[6].pImageInfo = nullptr;
+	resolveWriteDescriptorSets[6].pBufferInfo = &resolveDescriptorBufferInfos[0];
 	resolveWriteDescriptorSets[6].pTexelBufferView = nullptr;
-
-	// Inverse matrix.
-	resolveDescriptorBufferInfos[0].buffer = resolveFragmentMatricesUniformBuffer->getBuffer()->getBuffer();
-	resolveDescriptorBufferInfos[0].offset = 0;
-	resolveDescriptorBufferInfos[0].range = resolveFragmentMatricesUniformBuffer->getBuffer()->getSize();
-
-	resolveWriteDescriptorSets[7].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-
-	resolveWriteDescriptorSets[7].dstSet = resolveDescriptorSet->getDescriptorSets()[0];
-	resolveWriteDescriptorSets[7].dstBinding = 7;
-	resolveWriteDescriptorSets[7].dstArrayElement = 0;
-	resolveWriteDescriptorSets[7].descriptorCount = 1;
-	resolveWriteDescriptorSets[7].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-	resolveWriteDescriptorSets[7].pImageInfo = nullptr;
-	resolveWriteDescriptorSets[7].pBufferInfo = &resolveDescriptorBufferInfos[0];
-	resolveWriteDescriptorSets[7].pTexelBufferView = nullptr;
 
 	//
 
@@ -660,7 +652,7 @@ VkBool32 Example::buildGBufferImageView()
 	VkComponentMapping componentMapping = { VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY };
 	VkImageSubresourceRange imageSubresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
 
-	for (uint32_t i = 0; i < 3; i++)
+	for (uint32_t i = 0; i < 2; i++)
 	{
 		auto currentImageView = vkts::imageViewCreate(initialResources->getDevice()->getDevice(), 0, allGBufferTextures[i]->getImage()->getImage(), VK_IMAGE_VIEW_TYPE_2D, allGBufferTextures[i]->getImage()->getFormat(), componentMapping, imageSubresourceRange);
 
@@ -678,7 +670,7 @@ VkBool32 Example::buildGBufferImageView()
 
 	imageSubresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
 
-	auto currentImageView = vkts::imageViewCreate(initialResources->getDevice()->getDevice(), 0, allGBufferTextures[3]->getImage()->getImage(), VK_IMAGE_VIEW_TYPE_2D, allGBufferTextures[3]->getImage()->getFormat(), componentMapping, imageSubresourceRange);
+	auto currentImageView = vkts::imageViewCreate(initialResources->getDevice()->getDevice(), 0, allGBufferTextures[2]->getImage()->getImage(), VK_IMAGE_VIEW_TYPE_2D, allGBufferTextures[2]->getImage()->getFormat(), componentMapping, imageSubresourceRange);
 
 	if (!currentImageView.get())
 	{
@@ -714,7 +706,7 @@ VkBool32 Example::buildGBufferTexture(const vkts::ICommandBuffersSP& cmdBuffer)
 
 	VkImageSubresourceRange subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
 
-	for (uint32_t i = 0; i < 3; i++)
+	for (uint32_t i = 0; i < 2; i++)
 	{
 		auto currentTexture = vkts::memoryImageCreate(initialResources, cmdBuffer, "GBuffer" + std::to_string(i), imageCreateInfo, 0, VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, subresourceRange, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
@@ -928,9 +920,9 @@ VkBool32 Example::buildRenderPass()
 
 	//Create G-Buffer render pass.
 
-	VkAttachmentDescription gbufferAttachmentDescription[4]{};
+	VkAttachmentDescription gbufferAttachmentDescription[3]{};
 
-	for (uint32_t i = 0; i < 3; i++)
+	for (uint32_t i = 0; i < 2; i++)
 	{
 		gbufferAttachmentDescription[i].flags = 0;
 		gbufferAttachmentDescription[i].format = VK_FORMAT_R8G8B8A8_UNORM;
@@ -943,19 +935,19 @@ VkBool32 Example::buildRenderPass()
 		gbufferAttachmentDescription[i].finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 	}
 
-	gbufferAttachmentDescription[3].flags = 0;
-	gbufferAttachmentDescription[3].format = VK_FORMAT_D16_UNORM;
-	gbufferAttachmentDescription[3].samples = VK_SAMPLE_COUNT_1_BIT;
-	gbufferAttachmentDescription[3].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-	gbufferAttachmentDescription[3].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-	gbufferAttachmentDescription[3].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-	gbufferAttachmentDescription[3].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-	gbufferAttachmentDescription[3].initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-	gbufferAttachmentDescription[3].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+	gbufferAttachmentDescription[2].flags = 0;
+	gbufferAttachmentDescription[2].format = VK_FORMAT_D16_UNORM;
+	gbufferAttachmentDescription[2].samples = VK_SAMPLE_COUNT_1_BIT;
+	gbufferAttachmentDescription[2].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+	gbufferAttachmentDescription[2].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+	gbufferAttachmentDescription[2].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+	gbufferAttachmentDescription[2].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+	gbufferAttachmentDescription[2].initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+	gbufferAttachmentDescription[2].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
-	VkAttachmentReference gbufferColorAttachmentReference[3];
+	VkAttachmentReference gbufferColorAttachmentReference[2];
 
-	for (uint32_t i = 0; i < 3; i++)
+	for (uint32_t i = 0; i < 2; i++)
 	{
 		gbufferColorAttachmentReference[i].attachment = i;
 		gbufferColorAttachmentReference[i].layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
@@ -963,7 +955,7 @@ VkBool32 Example::buildRenderPass()
 
 	VkAttachmentReference gbufferDeptStencilAttachmentReference;
 
-	gbufferDeptStencilAttachmentReference.attachment = 3;
+	gbufferDeptStencilAttachmentReference.attachment = 2;
 	gbufferDeptStencilAttachmentReference.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
 	VkSubpassDescription gbufferSubpassDescription{};
@@ -972,14 +964,14 @@ VkBool32 Example::buildRenderPass()
 	gbufferSubpassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
 	gbufferSubpassDescription.inputAttachmentCount = 0;
 	gbufferSubpassDescription.pInputAttachments = nullptr;
-	gbufferSubpassDescription.colorAttachmentCount = 3;
+	gbufferSubpassDescription.colorAttachmentCount = 2;
 	gbufferSubpassDescription.pColorAttachments = gbufferColorAttachmentReference;
 	gbufferSubpassDescription.pResolveAttachments = nullptr;
 	gbufferSubpassDescription.pDepthStencilAttachment = &gbufferDeptStencilAttachmentReference;
 	gbufferSubpassDescription.preserveAttachmentCount = 0;
 	gbufferSubpassDescription.pPreserveAttachments = nullptr;
 
-	gbufferRenderPass = vkts::renderPassCreate(initialResources->getDevice()->getDevice(), 0, 4, gbufferAttachmentDescription, 1, &gbufferSubpassDescription, 0, nullptr);
+	gbufferRenderPass = vkts::renderPassCreate(initialResources->getDevice()->getDevice(), 0, 3, gbufferAttachmentDescription, 1, &gbufferSubpassDescription, 0, nullptr);
 
 	if (!gbufferRenderPass.get())
 	{
@@ -987,7 +979,6 @@ VkBool32 Example::buildRenderPass()
 
 		return VK_FALSE;
 	}
-
 
 	return VK_TRUE;
 }
@@ -1044,7 +1035,7 @@ VkBool32 Example::buildDescriptorSetPool()
     VkDescriptorPoolSize descriptorPoolSize[2]{};
 
 	descriptorPoolSize[0].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	descriptorPoolSize[0].descriptorCount = 7;
+	descriptorPoolSize[0].descriptorCount = 6;
 
 	descriptorPoolSize[1].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 	descriptorPoolSize[1].descriptorCount = 1;
