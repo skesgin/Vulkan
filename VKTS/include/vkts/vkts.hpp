@@ -28,8 +28,10 @@
 #define VKTS_HPP_
 
 // TODO: Add light structure to uniform buffer.
-// TODO: Render/resolve light.
+// TODO: Render/resolve dynamic light.
+// TODO: Add "Copy Location" etc. constraint.
 // TODO: Export and import camera.
+// TODO: Allow multiple buffers in scene graph.
 // TODO: Import particle system.
 // TODO: Finalize Wayland port.
 // TODO: Mark, if functions are thread safe or not.
