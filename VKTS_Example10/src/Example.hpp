@@ -61,7 +61,7 @@
 
 #define VKTS_OUTPUT_BUFFER_SIZE 1024
 
-#define VKTS_BSDF_DESCRIPTOR_SET_COUNT 7
+#define VKTS_BSDF_DESCRIPTOR_SET_COUNT 8
 
 class Example: public vkts::IUpdateThread
 {

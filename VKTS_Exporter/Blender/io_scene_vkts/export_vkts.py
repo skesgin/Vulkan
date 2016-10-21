@@ -40,6 +40,7 @@ layout (location = 0) in vec3 v_f_normal;
 #nextAttribute#
 layout (location = 4) in vec3 v_f_incident;
 #nextTexture#
+layout (location = 2) out vec4 ob_ambientOcclusion; // Ambient occlusion. RGB not used.
 layout (location = 1) out vec4 ob_normalRoughness;  // Normal and roughness.
 layout (location = 0) out vec4 ob_colorMetallic;    // Color and metallic.
 
@@ -103,6 +104,7 @@ void main()
         discard;
     }
 
+    ob_ambientOcclusion = vec4(0.0, 0.0, 0.0, AmbientOcclusion_0);
     ob_normalRoughness = vec4(Normal_0.xyz * 0.5 + 0.5, Roughness_0);
     ob_colorMetallic = vec4(Color_0.rgb, Metallic_0);
 }"""
@@ -140,6 +142,7 @@ pbrMain = """#previousMain#
     // PBR start
 
     // In
+    float %s = %s;
     float %s = %s;
     float %s = %s;
     float %s = %s;
@@ -219,7 +222,7 @@ normalMapMain = """#previousMain#
     
     // Out
     
-    vec3 %s = mix(normal, %s, %s);
+    vec3 %s = normalize(mix(normal, %s, %s));
     
     // Normal map end"""
 
@@ -922,6 +925,7 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
             #
             
             alphaCounter = 0
+            ambientOcclusionCounter = 0
             colorCounter = 0
             facCounter = 0
             imageCounter = 0
@@ -950,18 +954,21 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
                 if isinstance(currentNode, bpy.types.ShaderNodeGroup) and currentNode.node_tree.name == 'PBR':
                     # PBR
 
+                    ambientOcclusionInputName = "AmbientOcclusion_%d" % ambientOcclusionCounter
                     roughnessInputName = "Roughness_%d" % roughnessCounter
                     metallicInputName = "Metallic_%d" % metallicCounter
                     maskInputName = "Mask_%d" % maskCounter
                     normalInputName = "Normal_%d" % normalCounter
                     colorInputName = "Color_%d" % colorCounter
 
+                    ambientOcclusionCounter += 1
                     roughnessCounter += 1
                     metallicCounter += 1
                     maskCounter += 1
                     normalCounter += 1
                     colorCounter += 1
                     
+                    ambientOcclusionInputParameterName = "AmbientOcclusion_Dummy"
                     roughnessInputParameterName = "Roughness_Dummy"
                     metallicInputParameterName = "Metallic_Dummy"
                     maskInputParameterName =  "Mask_Dummy"
@@ -974,7 +981,7 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
 
                     #                    
 
-                    currentMain = pbrMain % (roughnessInputName, roughnessInputParameterName, metallicInputName, metallicInputParameterName, maskInputName, maskInputParameterName, normalInputName, normalInputParameterName, colorInputName, colorInputParameterName)
+                    currentMain = pbrMain % (ambientOcclusionInputName, ambientOcclusionInputParameterName, roughnessInputName, roughnessInputParameterName, metallicInputName, metallicInputParameterName, maskInputName, maskInputParameterName, normalInputName, normalInputParameterName, colorInputName, colorInputParameterName)
 
                     #
 
@@ -1670,7 +1677,7 @@ def saveLights(context, filepath):
             fw("inner_angle %f\n" % (math.degrees(currentLight.data.spot_size) - math.degrees(currentLight.data.spot_size) * currentLight.data.spot_blend * currentLight.data.spot_blend))
             fw("\n")
         if currentLight.data.type == 'SPOT' or currentLight.data.type == 'POINT':
-            fallOff = 'Square'
+            fallOff = 'Quadratic'
             strength = 1.0
 
             if context.scene.render.engine == 'CYCLES':

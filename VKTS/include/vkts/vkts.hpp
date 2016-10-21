@@ -27,13 +27,21 @@
 #ifndef VKTS_HPP_
 #define VKTS_HPP_
 
-// TODO: Add light structure to uniform buffer.
+// TODO: Export from Blender Cycles shader node parameter displacement for parallax mapping.
+
+// TODO: Extend light structure of uniform buffer.
 // TODO: Render/resolve dynamic light.
+
 // TODO: Add "Copy Location" etc. constraint.
+
 // TODO: Export and import camera.
-// TODO: Allow multiple buffers in scene graph.
+
+// TODO: Allow multiple uniform buffers in scene graph.
+
 // TODO: Import particle system.
+
 // TODO: Finalize Wayland port.
+
 // TODO: Mark, if functions are thread safe or not.
 // TODO: Add documentation.
 

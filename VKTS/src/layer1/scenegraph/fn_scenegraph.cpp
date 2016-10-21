@@ -3093,7 +3093,7 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
 					gp.getPipelineDepthStencilStateCreateInfo().depthWriteEnable = VK_TRUE;
 					gp.getPipelineDepthStencilStateCreateInfo().depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
 
-					for (uint32_t i = 0; i < 2; i++)
+					for (uint32_t i = 0; i < 3; i++)
 					{
 						gp.getPipelineColorBlendAttachmentState(i).blendEnable = VK_FALSE;
 						gp.getPipelineColorBlendAttachmentState(i).colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
