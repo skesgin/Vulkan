@@ -92,11 +92,22 @@ float fresnel(float eta, float theta)
     return 1.0;
 }
 
+vec2 parallaxMapping(vec2 texCoord, vec3 view, float height)
+{
+    if (view.z == 0.0)
+    {
+        return texCoord;    
+    }
+
+    return texCoord - view.xy / view.z * height;
+}
+
 void main()
 { 
     vec3 normal = normalize(v_f_normal);
     vec3 incident = normalize(v_f_incident);
     #nextTangents#
+    #nextTexCoord#
     #previousMain#
 
     if (round(Mask_0) == 1.0)
@@ -108,6 +119,8 @@ void main()
     ob_normalRoughness = vec4(Normal_0.xyz * 0.5 + 0.5, Roughness_0);
     ob_colorMetallic = vec4(Color_0.rgb, Metallic_0);
 }"""
+
+nextTexCoord = """vec3 texCoord = vec3(v_f_texCoord, 0.0);"""
 
 
 nextTangents = """vec3 bitangent = normalize(v_f_bitangent);
@@ -128,6 +141,10 @@ texCoordAttribute = """layout (location = 3) in vec2 v_f_texCoord;
 texImageFunction = """layout (binding = %d) uniform sampler2D u_texture%d;
 #nextTexture#"""
 
+parallaxMain = """#previousMain#
+
+    mat3 worldToTangentMatrix = transpose(mat3(tangent, bitangent, normal));
+    texCoord = vec3(parallaxMapping(texCoord.xy, worldToTangentMatrix * incident, %s), 0.0);"""
 
 #########
 # Nodes #
@@ -360,7 +377,7 @@ uvMapMain = """#previousMain#
     // UV map start
 
     // Out
-    vec3 %s = vec3(v_f_texCoord, 0.0);
+    vec3 %s = texCoord;
     
     // UV map end"""
 
@@ -890,8 +907,13 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
         
         if material.use_nodes == True:
             
+            useParallax = False 
             normalMapUsed = False
             texCoordUsed = False
+
+            parallaxObject = None
+
+            parallaxInputName = ""
             
             vertexAttributes = 0x00000001 | 0x00000002 
 
@@ -951,6 +973,13 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
             
                 currentNode = openNodes.pop(0)
 
+                if currentNode == parallaxObject:
+                    parallaxObject = None
+
+                    currentParallaxMain = parallaxMain % (parallaxInputName)
+
+                    currentFragmentGLSL = currentFragmentGLSL.replace("#previousMain#", currentParallaxMain)
+
                 if isinstance(currentNode, bpy.types.ShaderNodeGroup) and currentNode.node_tree.name == 'PBR':
                     # PBR
 
@@ -984,6 +1013,19 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
                     currentMain = pbrMain % (ambientOcclusionInputName, ambientOcclusionInputParameterName, roughnessInputName, roughnessInputParameterName, metallicInputName, metallicInputParameterName, maskInputName, maskInputParameterName, normalInputName, normalInputParameterName, colorInputName, colorInputParameterName)
 
                     #
+
+                    if len(currentNode.inputs[0].links) > 0:
+                        useParallax = True
+                        
+                        parallaxObject = currentNode.inputs[0].links[0].from_node
+
+                        parallaxInputName = friendlyNodeName(currentNode.inputs[0].links[0].from_node.name) + "_" + friendlyNodeName(currentNode.inputs[0].links[0].from_socket.name)
+
+
+
+                        normalMapUsed = True
+                    
+                        vertexAttributes = vertexAttributes | 0x00000010 | 0x00000004 | 0x00000008
 
                     currentMain = replaceParameters(currentNode, openNodes, processedNodes, currentMain)
                     
@@ -1405,8 +1447,8 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
                     
                     #
                     
-                    currentMain = uvMapMain % (uvOutputName) 
-                    
+                    currentMain = uvMapMain % (uvOutputName)
+
                     #
                         
                     currentFragmentGLSL = currentFragmentGLSL.replace("#previousMain#", currentMain)
@@ -1434,6 +1476,7 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
                         
                     currentFragmentGLSL = currentFragmentGLSL.replace("#previousMain#", currentMain)
 
+
                 # 
                                                             
                 if currentNode not in processedNodes:
@@ -1445,6 +1488,7 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
                 
             if texCoordUsed:
                 currentFragmentGLSL = currentFragmentGLSL.replace("#nextAttribute#", texCoordAttribute)
+                currentFragmentGLSL = currentFragmentGLSL.replace("#nextTexCoord#", nextTexCoord)
             
             for binding in range (0, len(nodes)):
                 currentTexImage = texImageFunction % ((binding + VKTS_BINDING_UNIFORM_SAMPLER_BSDF_FIRST), binding)
@@ -1455,6 +1499,8 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
                 
             fw("attributes %x\n" % (vertexAttributes))
             fw("\n")
+
+            currentFragmentGLSL = currentFragmentGLSL.replace("#nextTexCoord#", "")
                 
             currentFragmentGLSL = currentFragmentGLSL.replace("#nextAttribute#", "")
 
