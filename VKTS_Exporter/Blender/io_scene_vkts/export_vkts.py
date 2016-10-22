@@ -36,6 +36,8 @@ VKTS_BINDING_UNIFORM_SAMPLER_BSDF_FIRST = 4
 
 fragmentGLSL = """#version 450 core
 
+#define VKTS_PARALLAX_SCALE 0.002
+
 layout (location = 0) in vec3 v_f_normal;
 #nextAttribute#
 layout (location = 4) in vec3 v_f_incident;
@@ -94,12 +96,7 @@ float fresnel(float eta, float theta)
 
 vec2 parallaxMapping(vec2 texCoord, vec3 view, float height)
 {
-    if (view.z == 0.0)
-    {
-        return texCoord;    
-    }
-
-    return texCoord - view.xy / view.z * height;
+    return texCoord - view.xy * height * VKTS_PARALLAX_SCALE;
 }
 
 void main()
