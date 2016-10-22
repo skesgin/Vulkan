@@ -208,6 +208,20 @@ separateRgbMain = """#previousMain#
     
     // end""" 
 
+separateXyzMain = """#previousMain#
+    
+    // Separate XYZ start
+
+    // In
+    vec3 %s = %s;
+    
+    // Out
+    float %s = %s.x;
+    float %s = %s.y;
+    float %s = %s.z;
+    
+    // end""" 
+
 #
 # Vector
 #
@@ -837,6 +851,8 @@ def replaceParameters(currentNode, openNodes, processedNodes, currentMain):
         # Exceptions, as some nodes do not have unique socket names. 
         if isinstance(currentNode, bpy.types.ShaderNodeMath):
             currentParameter = currentParameter + str(socketIndex)
+        if isinstance(currentNode, bpy.types.ShaderNodeVectorMath):
+            currentParameter = currentParameter + str(socketIndex)
         socketIndex += 1
         currentParameter = currentParameter  + "_Dummy"
             
@@ -1124,6 +1140,35 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
                     #
                     
                     currentMain = separateRgbMain % (imageInputName, imageInputParameterName, redOutputName, imageInputName, greenOutputName, imageInputName, blueOutputName, imageInputName) 
+                    
+                    #
+                    
+                    currentMain = replaceParameters(currentNode, openNodes, processedNodes, currentMain)
+                    
+                    #
+                        
+                    currentFragmentGLSL = currentFragmentGLSL.replace("#previousMain#", currentMain)
+
+                elif isinstance(currentNode, bpy.types.ShaderNodeSeparateXYZ):
+                    # Seperate vector.
+
+                    # Inputs
+                    
+                    vectorInputName = "Vector_%d" % (vectorCounter)
+
+                    vectorCounter += 1
+
+                    vectorInputParameterName = "Vector_Dummy"
+                    
+                    # Outputs
+                    
+                    xOutputName = friendlyNodeName(currentNode.name) + "_" + friendlyNodeName(currentNode.outputs["X"].name) 
+                    yOutputName = friendlyNodeName(currentNode.name) + "_" + friendlyNodeName(currentNode.outputs["Y"].name) 
+                    zOutputName = friendlyNodeName(currentNode.name) + "_" + friendlyNodeName(currentNode.outputs["Z"].name) 
+                    
+                    #
+                    
+                    currentMain = separateXyzMain % (vectorInputName, vectorInputParameterName, xOutputName, vectorInputName, yOutputName, vectorInputName, zOutputName, vectorInputName) 
                     
                     #
                     
