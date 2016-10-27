@@ -27,8 +27,6 @@
 #ifndef VKTS_HPP_
 #define VKTS_HPP_
 
-// TODO: Export from Blender Cycles shader node parameter displacement for parallax mapping.
-
 // TODO: Extend light structure of uniform buffer.
 // TODO: Render/resolve dynamic light.
 
