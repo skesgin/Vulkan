@@ -99,10 +99,12 @@ vec2 parallaxMapping(vec2 texCoord, vec3 view, float height)
     return texCoord - view.xy * height * VKTS_PARALLAX_SCALE;
 }
 
-vec3 bumpMapping(vec3 normal, float height, float distance)
+vec3 bumpMapping(vec3 normal, float height, float distance, float strength)
 {
-    vec3 x = normalize(vec3(1.0, 0.0, dFdx(height) * distance));
-    vec3 y = normalize(vec3(0.0, 1.0, dFdy(height) * distance));
+    float finalHeight = height * distance; 
+
+    vec3 x = normalize(vec3(1.0, 0.0, dFdx(finalHeight) * strength));
+    vec3 y = normalize(vec3(0.0, 1.0, dFdy(finalHeight) * strength));
     vec3 z = cross(x, y);
 
     return mat3(x, y, z) * normal;
@@ -246,7 +248,7 @@ bumpMain = """#previousMain#
     vec3 %s = %s;
 
     // Out
-    vec3 %s = bumpMapping(%s, %s, %s * %s) * %s;
+    vec3 %s = bumpMapping(%s, %s, %s * %s, %s);
     
     // Bump end"""
 
