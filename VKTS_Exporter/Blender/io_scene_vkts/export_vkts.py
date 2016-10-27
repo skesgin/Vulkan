@@ -99,6 +99,15 @@ vec2 parallaxMapping(vec2 texCoord, vec3 view, float height)
     return texCoord - view.xy * height * VKTS_PARALLAX_SCALE;
 }
 
+vec3 bumpMapping(vec3 normal, float height, float distance)
+{
+    vec3 x = normalize(vec3(1.0, 0.0, dFdx(height) * distance));
+    vec3 y = normalize(vec3(0.0, 1.0, dFdy(height) * distance));
+    vec3 z = cross(x, y);
+
+    return mat3(x, y, z) * normal;
+}
+
 void main()
 { 
     vec3 normal = normalize(v_f_normal);
@@ -225,6 +234,21 @@ separateXyzMain = """#previousMain#
 #
 # Vector
 #
+
+bumpMain = """#previousMain#
+    
+    // Bump start
+
+    // In
+    float %s = %s;
+    float %s = %s;
+    float %s = %s;
+    vec3 %s = %s;
+
+    // Out
+    vec3 %s = bumpMapping(%s, %s, %s * %s) * %s;
+    
+    // Bump end"""
 
 mappingMain = """#previousMain#
     
@@ -959,10 +983,13 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
 
             #
             
+                    
             alphaCounter = 0
             ambientOcclusionCounter = 0
             colorCounter = 0
+            distanceCounter = 0
             facCounter = 0
+            heightCounter = 0
             imageCounter = 0
             iorCounter = 0
             maskCounter = 0
@@ -1176,6 +1203,48 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
                     
                     #
                         
+                    currentFragmentGLSL = currentFragmentGLSL.replace("#previousMain#", currentMain)
+
+                elif isinstance(currentNode, bpy.types.ShaderNodeBump):
+                    # Bump map.
+                    
+                    # Inputs
+                    
+                    strengthInputName = "Strength_%d" % (strengthCounter)
+                    distanceInputName = "Distance_%d" % (distanceCounter)
+                    heightInputName = "Height_%d" % (heightCounter)
+                    normalInputName = "Normal_%d" % (normalCounter)
+
+                    strengthCounter += 1
+                    distanceCounter += 1
+                    heightCounter += 1
+                    normalCounter += 1
+
+                    strengthInputParameterName = "Strength_Dummy"
+                    distanceInputParameterName = "Distance_Dummy"
+                    heightInputParameterName = "Height_Dummy"
+                    normalInputParameterName = "Normal_Dummy"
+                    
+                    # Outputs
+                    
+                    normalOutputName = friendlyNodeName(currentNode.name) + "_" + friendlyNodeName(currentNode.outputs["Normal"].name)
+                    
+                    #
+
+                    invertFactor = "1.0"
+                    if currentNode.invert:
+                        invertFactor = "-1.0"
+
+                    #
+                    
+                    currentMain = bumpMain % (strengthInputName, strengthInputParameterName, distanceInputName, distanceInputParameterName, heightInputName, heightInputParameterName, normalInputName, normalInputParameterName, normalOutputName, normalInputName, heightInputName, distanceInputName, invertFactor, strengthInputName) 
+                    
+                    #
+                    
+                    currentMain = replaceParameters(currentNode, openNodes, processedNodes, currentMain)
+                    
+                    #
+                    
                     currentFragmentGLSL = currentFragmentGLSL.replace("#previousMain#", currentMain)
 
                 elif isinstance(currentNode, bpy.types.ShaderNodeMapping):
