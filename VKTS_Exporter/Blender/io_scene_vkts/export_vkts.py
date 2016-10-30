@@ -2400,6 +2400,29 @@ def saveNode(context, fw, fw_animation, fw_channel, currentObject):
         fw("seed %d\n" % (currentParticleSystem.seed))
         fw("\n")
 
+    if len(currentObject.constraints) > 0:
+        for currentConstraint in currentObject.constraints:
+            writeData = False
+            
+            if currentConstraint.type == 'COPY_LOCATION' and currentConstraint.target is not None:
+                writeData = True
+                fw("constraint %s\n" % ("COPY_LOCATION"))
+            if currentConstraint.type == 'COPY_ROTATION' and currentConstraint.target is not None:
+                writeData = True
+                fw("constraint %s\n" % ("COPY_ROTATION"))
+            if currentConstraint.type == 'COPY_SCALE' and currentConstraint.target is not None:
+                writeData = True
+                fw("constraint %s\n" % ("COPY_SCALE"))
+
+            if writeData:
+                fw("target %s\n" % (friendlyNodeName(currentConstraint.target.name)))
+                fw("use_x %s %s\n" % (friendlyBooleanName(currentConstraint.use_x), friendlyBooleanName(currentConstraint.invert_x)))
+                fw("use_y %s %s\n" % (friendlyBooleanName(currentConstraint.use_z), friendlyBooleanName(currentConstraint.invert_z)))
+                fw("use_z %s %s\n" % (friendlyBooleanName(currentConstraint.use_y), friendlyBooleanName(currentConstraint.invert_y)))
+                fw("use_offset %s\n" % (friendlyBooleanName(currentConstraint.use_offset)))                    
+                fw("influence %f\n" % (currentConstraint.influence))
+                fw("\n")
+
     fw("translate %f %f %f\n" % location)
     fw("rotate %f %f %f\n" % rotation)
     fw("scale %f %f %f\n" % scale)

@@ -27,7 +27,7 @@
 #ifndef VKTS_HPP_
 #define VKTS_HPP_
 
-// TODO: Add "Copy Location" etc. constraint.
+// TODO: Import and use exported constraints.
 
 // TODO: Export and import camera.
 
