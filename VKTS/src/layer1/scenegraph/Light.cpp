@@ -30,7 +30,7 @@ namespace vkts
 {
 
 Light::Light() :
-    ILight(), name(""), index(0), lightType(PointLight), falloffType(QuadraticFalloff), strength(1.0f), outerAngle(0.0f), innerAngle(0.0f), color(0.0f, 0.0f, 0.0f), direction(0.0f, -1.0f, 0.0f, 1.0f)
+    ILight(), name(""), index(0), lightType(PointLight), falloffType(QuadraticFalloff), strength(1.0f), outerAngle(0.0f), innerAngle(0.0f), color(0.0f, 0.0f, 0.0f), direction(0.0f, 0.0f, 0.0f, 1.0f)
 {
 }
 
@@ -146,11 +146,11 @@ void Light::updateDirection(const glm::mat4& transform)
 {
 	if (lightType == DirectionalLight)
 	{
-		direction = transform * glm::vec4(0.0f, -1.0f, 0.0f, 0.0f);
+		direction = transform * glm::vec4(0.0f, 1.0f, 0.0f, 0.0f);
 	}
 	else
 	{
-		direction = transform * glm::vec4(0.0f, -1.0f, 0.0f, 1.0f);
+		direction = transform * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 	}
 }
 

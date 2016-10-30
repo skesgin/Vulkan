@@ -121,6 +121,11 @@ VkBool32 BufferObject::upload(const size_t offset, const VkMemoryMapFlags flags,
     return upload(offset, flags, &scalar, sizeof(float));
 }
 
+VkBool32 BufferObject::upload(const size_t offset, const VkMemoryMapFlags flags, const int32_t scalar) const
+{
+    return upload(offset, flags, &scalar, sizeof(int32_t));
+}
+
 //
 // IDestroyable
 //

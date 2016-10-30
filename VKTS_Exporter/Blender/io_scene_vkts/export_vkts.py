@@ -42,9 +42,9 @@ layout (location = 0) in vec3 v_f_normal;
 #nextAttribute#
 layout (location = 4) in vec3 v_f_incident;
 #nextTexture#
-layout (location = 2) out vec4 ob_ambientOcclusion; // Ambient occlusion. RGB not used.
-layout (location = 1) out vec4 ob_normalRoughness;  // Normal and roughness.
-layout (location = 0) out vec4 ob_colorMetallic;    // Color and metallic.
+layout (location = 2) out vec4 ob_ambientOcclusionF0;   // Ambient occlusion and F0. GB not used.
+layout (location = 1) out vec4 ob_normalRoughness;      // Normal and roughness.
+layout (location = 0) out vec4 ob_colorMetallic;        // Color and metallic.
 
 mat4 translate(vec3 t)
 {
@@ -123,7 +123,7 @@ void main()
         discard;
     }
 
-    ob_ambientOcclusion = vec4(0.0, 0.0, 0.0, AmbientOcclusion_0);
+    ob_ambientOcclusionF0 = vec4(AmbientOcclusion_0, 0.0, 0.0, F0_0);
     ob_normalRoughness = vec4(Normal_0.xyz * 0.5 + 0.5, Roughness_0);
     ob_colorMetallic = vec4(Color_0.rgb, Metallic_0);
 }"""
@@ -167,6 +167,7 @@ pbrMain = """#previousMain#
     // PBR start
 
     // In
+    float %s = %s;
     float %s = %s;
     float %s = %s;
     float %s = %s;
@@ -990,6 +991,7 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
             ambientOcclusionCounter = 0
             colorCounter = 0
             distanceCounter = 0
+            F0Counter = 0
             facCounter = 0
             heightCounter = 0
             imageCounter = 0
@@ -1025,6 +1027,7 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
                 if isinstance(currentNode, bpy.types.ShaderNodeGroup) and currentNode.node_tree.name == 'PBR':
                     # PBR
 
+                    F0InputName = "F0_%d" % F0Counter
                     ambientOcclusionInputName = "AmbientOcclusion_%d" % ambientOcclusionCounter
                     roughnessInputName = "Roughness_%d" % roughnessCounter
                     metallicInputName = "Metallic_%d" % metallicCounter
@@ -1032,6 +1035,7 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
                     normalInputName = "Normal_%d" % normalCounter
                     colorInputName = "Color_%d" % colorCounter
 
+                    F0Counter += 1
                     ambientOcclusionCounter += 1
                     roughnessCounter += 1
                     metallicCounter += 1
@@ -1039,6 +1043,7 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
                     normalCounter += 1
                     colorCounter += 1
                     
+                    F0InputParameterName = "F0_Dummy"
                     ambientOcclusionInputParameterName = "AmbientOcclusion_Dummy"
                     roughnessInputParameterName = "Roughness_Dummy"
                     metallicInputParameterName = "Metallic_Dummy"
@@ -1052,7 +1057,7 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
 
                     #                    
 
-                    currentMain = pbrMain % (ambientOcclusionInputName, ambientOcclusionInputParameterName, roughnessInputName, roughnessInputParameterName, metallicInputName, metallicInputParameterName, maskInputName, maskInputParameterName, normalInputName, normalInputParameterName, colorInputName, colorInputParameterName)
+                    currentMain = pbrMain % (F0InputName, F0InputParameterName, ambientOcclusionInputName, ambientOcclusionInputParameterName, roughnessInputName, roughnessInputParameterName, metallicInputName, metallicInputParameterName, maskInputName, maskInputParameterName, normalInputName, normalInputParameterName, colorInputName, colorInputParameterName)
 
                     #
 
@@ -2609,9 +2614,6 @@ def save(operator,
             continue
 
         if currentObject.type == 'FONT':
-            continue
-
-        if currentObject.type == 'LAMP':
             continue
 
         if currentObject.type == 'LATTICE':

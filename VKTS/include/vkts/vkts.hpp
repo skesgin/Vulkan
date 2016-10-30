@@ -27,9 +27,6 @@
 #ifndef VKTS_HPP_
 #define VKTS_HPP_
 
-// TODO: Extend light structure of uniform buffer.
-// TODO: Render/resolve dynamic light.
-
 // TODO: Add "Copy Location" etc. constraint.
 
 // TODO: Export and import camera.

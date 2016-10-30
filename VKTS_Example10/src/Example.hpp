@@ -35,6 +35,8 @@
 
 #define VKTS_BINDING_VERTEX_BUFFER 0
 
+#define VKTS_MAX_LIGHTS 16
+
 #define VKTS_FONT_NAME "font/Arial_128.fnt"
 #define VKTS_FONT_SCALE 32.0f
 
@@ -55,13 +57,13 @@
 #define VKTS_SCENE_NAME "material_probes/material_probes.vkts"
 #define VKTS_ENVIRONMENT_SCENE_NAME "primitives/sphere.vkts"
 
-#define VKTS_ENVIRONMENT_DESCRIPTOR_SET_COUNT (VKTS_BINDING_UNIFORM_TRANSFORM_BINDING_COUNT + VKTS_BINDING_UNIFORM_ENVIRONMENT_COUNT)
+#define VKTS_ENVIRONMENT_DESCRIPTOR_SET_COUNT (VKTS_BINDING_UNIFORM_TRANSFORM_BINDING_COUNT + VKTS_BINDING_UNIFORM_ENVIRONMENT_COUNT + VKTS_BINDING_UNIFORM_LIGHTING_BINDING_COUNT)
 
 #define VKTS_MAX_CORES 32u
 
 #define VKTS_OUTPUT_BUFFER_SIZE 1024
 
-#define VKTS_BSDF_DESCRIPTOR_SET_COUNT 8
+#define VKTS_BSDF_DESCRIPTOR_SET_COUNT (7 + 1 + 1)
 
 class Example: public vkts::IUpdateThread
 {
@@ -95,7 +97,7 @@ private:
     VkDescriptorBufferInfo environmentDescriptorBufferInfos[1];
     VkDescriptorBufferInfo descriptorBufferInfos[1];
     VkDescriptorImageInfo environmentDescriptorImageInfos[1];
-    VkDescriptorBufferInfo resolveDescriptorBufferInfos[1];
+    VkDescriptorBufferInfo resolveDescriptorBufferInfos[1 + 1];
     VkDescriptorImageInfo resolveDescriptorImageInfos[VKTS_BSDF_DESCRIPTOR_SET_COUNT];
 
     VkWriteDescriptorSet writeDescriptorSets[VKTS_BINDING_UNIFORM_BSDF_TOTAL_BINDING_COUNT];
@@ -104,6 +106,7 @@ private:
 
     vkts::IBufferObjectSP vertexViewProjectionUniformBuffer;
 	vkts::IBufferObjectSP environmentVertexViewProjectionUniformBuffer;
+	vkts::IBufferObjectSP resolveFragmentLightsUniformBuffer;
 	vkts::IBufferObjectSP resolveFragmentMatricesUniformBuffer;
 
 	vkts::SmartPointerVector<vkts::IShaderModuleSP> allBSDFVertexShaderModules;

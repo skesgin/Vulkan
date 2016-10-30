@@ -70,6 +70,8 @@ public:
 
     virtual VkBool32 upload(const size_t offset, const VkMemoryMapFlags flags, const float scalar) const = 0;
 
+    virtual VkBool32 upload(const size_t offset, const VkMemoryMapFlags flags, const int32_t scalar) const = 0;
+
 };
 
 typedef std::shared_ptr<IBufferObject> IBufferObjectSP;

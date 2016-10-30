@@ -84,6 +84,8 @@ public:
 
     virtual VkBool32 upload(const size_t offset, const VkMemoryMapFlags flags, const float scalar) const override;
 
+    virtual VkBool32 upload(const size_t offset, const VkMemoryMapFlags flags, const int32_t scalar) const override;
+
     //
     // IDestroyable
     //
