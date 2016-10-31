@@ -203,6 +203,53 @@ static VkBool32 scenegraphParseBool(const char* buffer, VkBool32* scalar)
     return VK_TRUE;
 }
 
+static VkBool32 scenegraphParseBoolTuple(const char* buffer, VkBool32* scalar0, VkBool32* scalar1)
+{
+    if (!buffer)
+    {
+        return VK_FALSE;
+    }
+
+    char token[VKTS_MAX_TOKEN_CHARS + 1];
+
+    char value0[VKTS_MAX_TOKEN_CHARS + 1];
+    char value1[VKTS_MAX_TOKEN_CHARS + 1];
+
+    if (sscanf(buffer, "%s %s %s", token, value0, value1) != 3)
+    {
+        return VK_FALSE;
+    }
+
+    if (strcmp(value0, "true") == 0)
+    {
+    	*scalar0 = VK_TRUE;
+    }
+    else if (strcmp(value0, "false") == 0)
+    {
+    	*scalar0 = VK_FALSE;
+    }
+    else
+    {
+    	return VK_FALSE;
+    }
+
+    if (strcmp(value1, "true") == 0)
+    {
+    	*scalar1 = VK_TRUE;
+    }
+    else if (strcmp(value1, "false") == 0)
+    {
+    	*scalar1 = VK_FALSE;
+    }
+    else
+    {
+    	return VK_FALSE;
+    }
+
+    return VK_TRUE;
+}
+
+
 static VkBool32 scenegraphParseFloat(const char* buffer, float* scalar)
 {
     if (!buffer)
@@ -3895,6 +3942,7 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
     char sdata0[VKTS_MAX_TOKEN_CHARS + 1];
     char sdata1[VKTS_MAX_TOKEN_CHARS + 1];
     float fdata[3];
+    VkBool32 bdata[2];
     int32_t idata;
     uint32_t uidata;
     glm::mat4 mat4;
@@ -4087,6 +4135,149 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
             if (node.get())
             {
                 // TODO: Append particle system seed.
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No node");
+
+                return VK_FALSE;
+            }
+        }
+        else if (scenegraphIsToken(buffer, "constraint"))
+        {
+            if (!scenegraphParseString(buffer, sdata0))
+            {
+                return VK_FALSE;
+            }
+
+            if (node.get())
+            {
+            	if (strcmp(sdata0, "COPY_LOCATION") == 0)
+            	{
+                    // TODO: Create constraint.
+            	}
+            	else if (strcmp(sdata0, "COPY_ROTATION") == 0)
+            	{
+                    // TODO: Create constraint.
+            	}
+            	else if (strcmp(sdata0, "COPY_SCALE") == 0)
+            	{
+                    // TODO: Create constraint.
+            	}
+				else
+				{
+					logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Unsupported constraint");
+
+					return VK_FALSE;
+				}
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No node");
+
+                return VK_FALSE;
+            }
+        }
+        else if (scenegraphIsToken(buffer, "target"))
+        {
+            if (!scenegraphParseString(buffer, sdata0))
+            {
+                return VK_FALSE;
+            }
+
+            if (node.get())
+            {
+                // TODO: Get target etc.
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No node");
+
+                return VK_FALSE;
+            }
+        }
+        else if (scenegraphIsToken(buffer, "use_x"))
+        {
+            if (!scenegraphParseBoolTuple(buffer, &bdata[0], &bdata[1]))
+            {
+                return VK_FALSE;
+            }
+
+            if (node.get())
+            {
+                // TODO: Set use x.
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No node");
+
+                return VK_FALSE;
+            }
+        }
+        else if (scenegraphIsToken(buffer, "use_y"))
+        {
+            if (!scenegraphParseBoolTuple(buffer, &bdata[0], &bdata[1]))
+            {
+                return VK_FALSE;
+            }
+
+            if (node.get())
+            {
+                // TODO: Set use y.
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No node");
+
+                return VK_FALSE;
+            }
+        }
+        else if (scenegraphIsToken(buffer, "use_z"))
+        {
+            if (!scenegraphParseBoolTuple(buffer, &bdata[0], &bdata[1]))
+            {
+                return VK_FALSE;
+            }
+
+            if (node.get())
+            {
+                // TODO: Set use z.
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No node");
+
+                return VK_FALSE;
+            }
+        }
+        else if (scenegraphIsToken(buffer, "use_offset"))
+        {
+            if (!scenegraphParseBool(buffer, &bdata[0]))
+            {
+                return VK_FALSE;
+            }
+
+            if (node.get())
+            {
+                // TODO: Set use offset.
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No node");
+
+                return VK_FALSE;
+            }
+        }
+        else if (scenegraphIsToken(buffer, "influence"))
+        {
+            if (!scenegraphParseFloat(buffer, &fdata[0]))
+            {
+                return VK_FALSE;
+            }
+
+            if (node.get())
+            {
+                // TODO: Set influence.
             }
             else
             {
