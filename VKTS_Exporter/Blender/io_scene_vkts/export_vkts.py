@@ -575,7 +575,6 @@ def convertScaleNoAdjust(scale):
 
     return (scale[0], scale[1], scale[2])
 
-
 def saveTextures(context, filepath, imagesLibraryName, materials):
 
     imagesLibraryFilepath = os.path.dirname(filepath) + "/" + imagesLibraryName
@@ -1832,7 +1831,7 @@ def saveLights(context, filepath):
         fw("# Light.\n")
         fw("#\n")
         fw("\n")        
-        fw("name %s\n" % (currentLight.name))
+        fw("name %s\n" % (currentLight.data.name))
         fw("\n")
         fw("type %s\n" % (lightType))
         fw("\n")
@@ -1863,7 +1862,7 @@ def saveLights(context, filepath):
                    fallOff = 'Constant'
                 elif currentLight.data.falloff_type == 'INVERSE_LINEAR':
                    fallOff = 'Linear'
-                strength = currentNode.energy 
+                strength = currentLight.data.energy 
                 
             fw("falloff %s\n" % (fallOff))
             fw("strength %f\n" % (strength))
@@ -2400,6 +2399,11 @@ def saveNode(context, fw, fw_animation, fw_channel, currentObject):
         fw("seed %d\n" % (currentParticleSystem.seed))
         fw("\n")
 
+    fw("translate %f %f %f\n" % location)
+    fw("rotate %f %f %f\n" % rotation)
+    fw("scale %f %f %f\n" % scale)
+    fw("\n")
+
     if len(currentObject.constraints) > 0:
         for currentConstraint in currentObject.constraints:
             writeData = False
@@ -2416,25 +2420,21 @@ def saveNode(context, fw, fw_animation, fw_channel, currentObject):
 
             if writeData:
                 fw("target %s\n" % (friendlyNodeName(currentConstraint.target.name)))
+                fw("use_offset %s\n" % (friendlyBooleanName(currentConstraint.use_offset)))                    
+                fw("influence %f\n" % (currentConstraint.influence))
                 fw("use_x %s %s\n" % (friendlyBooleanName(currentConstraint.use_x), friendlyBooleanName(currentConstraint.invert_x)))
                 fw("use_y %s %s\n" % (friendlyBooleanName(currentConstraint.use_z), friendlyBooleanName(currentConstraint.invert_z)))
                 fw("use_z %s %s\n" % (friendlyBooleanName(currentConstraint.use_y), friendlyBooleanName(currentConstraint.invert_y)))
-                fw("use_offset %s\n" % (friendlyBooleanName(currentConstraint.use_offset)))                    
-                fw("influence %f\n" % (currentConstraint.influence))
                 fw("\n")
-
-    fw("translate %f %f %f\n" % location)
-    fw("rotate %f %f %f\n" % rotation)
-    fw("scale %f %f %f\n" % scale)
-    fw("\n")
 
     if currentObject.type == 'MESH':
         fw("mesh %s\n" % friendlyName(currentObject.data.name))
         fw("\n")
 
     if currentObject.type == 'LAMP':
-        fw("light %s\n" % friendlyName(currentObject.data.name))
-        fw("\n")
+        if currentObject.data.type == 'POINT' or currentObject.data.type == 'SUN' or currentObject.data.type == 'SPOT':
+            fw("light %s\n" % friendlyName(currentObject.data.name))
+            fw("\n")
 
     if currentObject.animation_data is not None:
         saveAnimation(context, fw, fw_animation, fw_channel, currentObject.name, currentObject.animation_data, None, False)
@@ -2554,6 +2554,16 @@ def save(operator,
          filepath="",
          global_matrix=None
          ):
+
+    # Mute all constraints.
+    for currentObject in context.selected_objects:
+        context.scene.objects.active = currentObject
+        for currentConstraint in currentObject.constraints:
+            # Hack, that scene gets upodated.
+            influence = currentConstraint.influence
+            currentConstraint.influence = influence
+            currentConstraint.mute = True
+    context.scene.update()
 
     if global_matrix is None:
         from mathutils import Matrix
@@ -2683,5 +2693,15 @@ def save(operator,
         fw("\n")
     
     file.close()
+
+    # Unmute all constraints.
+    for currentObject in context.selected_objects:
+        context.scene.objects.active = currentObject
+        for currentConstraint in currentObject.constraints:
+            # Hack, that scene gets upodated.
+            influence = currentConstraint.influence
+            currentConstraint.influence = influence
+            currentConstraint.mute = False
+    context.scene.update()
 
     return {'FINISHED'}

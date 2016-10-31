@@ -3763,11 +3763,11 @@ static VkBool32 scenegraphLoadLights(const char* directory, const char* filename
                 {
                 	light->setFalloffType(QuadraticFalloff);
                 }
-                if (strcmp(sdata, "Linear") == 0 && light->getLightType() != DirectionalLight)
+                else if (strcmp(sdata, "Linear") == 0 && light->getLightType() != DirectionalLight)
                 {
                 	light->setFalloffType(LinearFalloff);
                 }
-                if (strcmp(sdata, "Constant") == 0)
+                else if (strcmp(sdata, "Constant") == 0)
                 {
                 	light->setFalloffType(ConstantFalloff);
                 }
