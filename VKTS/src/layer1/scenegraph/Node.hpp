@@ -45,6 +45,10 @@ private:
     glm::vec3 rotate;
     glm::vec3 scale;
 
+    glm::vec3 finalTranslate;
+    glm::vec3 finalRotate;
+    glm::vec3 finalScale;
+
     glm::mat4 transformMatrix;
     VkBool32 transformMatrixDirty;
 
@@ -124,6 +128,18 @@ public:
     virtual const glm::vec3& getScale() const override;
 
     virtual void setScale(const glm::vec3& scale) override;
+
+    virtual const glm::vec3& getFinalTranslate() const override;
+
+    virtual void setFinalTranslate(const glm::vec3& translate) override;
+
+    virtual const glm::vec3& getFinalRotate() const override;
+
+    virtual void setFinalRotate(const glm::vec3& rotate) override;
+
+    virtual const glm::vec3& getFinalScale() const override;
+
+    virtual void setFinalScale(const glm::vec3& scale) override;
 
     virtual int32_t getJointIndex() const override;
 

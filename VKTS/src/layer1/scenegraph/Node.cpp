@@ -42,6 +42,10 @@ void Node::reset()
     rotate = glm::vec3(0.0f, 0.0f, 0.0f);
     scale = glm::vec3(1.0f, 1.0f, 1.0f);
 
+    finalTranslate = translate;
+    finalRotate = rotate;
+    finalScale = scale;
+
     transformMatrix = glm::mat4(1.0f);
     transformMatrixDirty = VK_TRUE;
 
@@ -84,13 +88,13 @@ void Node::reset()
 }
 
 Node::Node() :
-    INode(), name(""), parentNode(), translate(0.0f, 0.0f, 0.0f), rotate(0.0f, 0.0f, 0.0f), scale(1.0f, 1.0f, 1.0f), transformMatrix(1.0f), transformMatrixDirty(VK_TRUE), jointIndex(-1), joints(0), bindTranslate(0.0f, 0.0f, 0.0f), bindRotate(0.0f, 0.0f,0.0f), bindScale(1.0f, 1.0f, 1.0f), bindMatrix(1.0f), inverseBindMatrix(1.0f), bindMatrixDirty(VK_FALSE), allChildNodes(), allMeshes(), allLights(), allAnimations(), currentAnimation(-1), currentTime(0.0f), transformUniformBuffer(), jointsUniformBuffer(), box(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)), layers(0x01)
+    INode(), name(""), parentNode(), translate(0.0f, 0.0f, 0.0f), rotate(0.0f, 0.0f, 0.0f), scale(1.0f, 1.0f, 1.0f), finalTranslate(0.0f, 0.0f, 0.0f), finalRotate(0.0f, 0.0f, 0.0f), finalScale(1.0f, 1.0f, 1.0f), transformMatrix(1.0f), transformMatrixDirty(VK_TRUE), jointIndex(-1), joints(0), bindTranslate(0.0f, 0.0f, 0.0f), bindRotate(0.0f, 0.0f,0.0f), bindScale(1.0f, 1.0f, 1.0f), bindMatrix(1.0f), inverseBindMatrix(1.0f), bindMatrixDirty(VK_FALSE), allChildNodes(), allMeshes(), allLights(), allAnimations(), currentAnimation(-1), currentTime(0.0f), transformUniformBuffer(), jointsUniformBuffer(), box(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)), layers(0x01)
 {
     reset();
 }
 
 Node::Node(const Node& other) :
-    INode(), name(other.name + "_clone"), parentNode(other.parentNode), translate(other.translate), rotate(other.rotate), scale(other.scale), transformMatrix(other.transformMatrix), transformMatrixDirty(other.transformMatrixDirty), jointIndex(-1), joints(0), bindTranslate(other.bindTranslate), bindRotate(other.bindRotate), bindScale(other.bindScale), bindMatrix(other.bindMatrix), inverseBindMatrix(other.inverseBindMatrix), bindMatrixDirty(other.bindMatrixDirty), box(other.box), layers(other.layers)
+    INode(), name(other.name + "_clone"), parentNode(other.parentNode), translate(other.translate), rotate(other.rotate), scale(other.scale), finalTranslate(other.finalTranslate), finalRotate(other.finalRotate), finalScale(other.finalScale), transformMatrix(other.transformMatrix), transformMatrixDirty(other.transformMatrixDirty), jointIndex(-1), joints(0), bindTranslate(other.bindTranslate), bindRotate(other.bindRotate), bindScale(other.bindScale), bindMatrix(other.bindMatrix), inverseBindMatrix(other.inverseBindMatrix), bindMatrixDirty(other.bindMatrixDirty), box(other.box), layers(other.layers)
 {
     for (size_t i = 0; i < other.allChildNodes.size(); i++)
     {
@@ -330,6 +334,36 @@ void Node::setScale(const glm::vec3& scale)
     this->scale = scale;
 
     setDirty();
+}
+
+const glm::vec3& Node::getFinalTranslate() const
+{
+    return finalTranslate;
+}
+
+void Node::setFinalTranslate(const glm::vec3& translate)
+{
+    this->finalTranslate = translate;
+}
+
+const glm::vec3& Node::getFinalRotate() const
+{
+    return finalRotate;
+}
+
+void Node::setFinalRotate(const glm::vec3& rotate)
+{
+    this->finalRotate = rotate;
+}
+
+const glm::vec3& Node::getFinalScale() const
+{
+    return finalScale;
+}
+
+void Node::setFinalScale(const glm::vec3& scale)
+{
+    this->finalScale = scale;
 }
 
 int32_t Node::getJointIndex() const
@@ -662,6 +696,14 @@ void Node::updateRecursive(const IUpdateThreadContext& updateContext, const glm:
 
     auto newArmatureNode = (joints != 0) ? INode::shared_from_this() : armatureNode;
 
+    //
+
+    finalTranslate = translate;
+    finalRotate = rotate;
+    finalScale = scale;
+
+    //
+
     if (currentAnimation >= 0 && currentAnimation < (int32_t) allAnimations.size())
     {
         currentTime += (float) updateContext.getDeltaTime();
@@ -689,11 +731,11 @@ void Node::updateRecursive(const IUpdateThreadContext& updateContext, const glm:
 
             if (currentChannels[i]->getTargetTransform() == VKTS_TARGET_TRANSFORM_TRANSLATE)
             {
-                translate[currentChannels[i]->getTargetTransformElement()] = value;
+                finalTranslate[currentChannels[i]->getTargetTransformElement()] = value;
             }
             else if (currentChannels[i]->getTargetTransform() == VKTS_TARGET_TRANSFORM_ROTATE)
             {
-                rotate[currentChannels[i]->getTargetTransformElement()] = value;
+            	finalRotate[currentChannels[i]->getTargetTransformElement()] = value;
             }
             else if (currentChannels[i]->getTargetTransform() == VKTS_TARGET_TRANSFORM_QUATERNION_ROTATE)
             {
@@ -717,13 +759,13 @@ void Node::updateRecursive(const IUpdateThreadContext& updateContext, const glm:
             }
             else if (currentChannels[i]->getTargetTransform() == VKTS_TARGET_TRANSFORM_SCALE)
             {
-                scale[currentChannels[i]->getTargetTransformElement()] = value;
+            	finalScale[currentChannels[i]->getTargetTransformElement()] = value;
             }
         }
 
         if (quaternionDirty)
         {
-        	rotate = quaternion.rotation();
+        	finalRotate = quaternion.rotation();
         }
 
         //
@@ -752,7 +794,7 @@ void Node::updateRecursive(const IUpdateThreadContext& updateContext, const glm:
     	{
     		// Armature has no bind values, but transform is taken into account.
 
-    		localBindMatrix = translateMat4(translate.x, translate.y, translate.z) * rotateRzRyRxMat4(rotate.z, rotate.y, rotate.x) * scaleMat4(scale.x, scale.y, scale.z);
+    		localBindMatrix = translateMat4(finalTranslate.x, finalTranslate.y, finalTranslate.z) * rotateRzRyRxMat4(finalRotate.z, finalRotate.y, finalRotate.x) * scaleMat4(finalScale.x, finalScale.y, finalScale.z);
     	}
 
 		this->bindMatrix = parentBindMatrix * localBindMatrix;
@@ -770,7 +812,7 @@ void Node::updateRecursive(const IUpdateThreadContext& updateContext, const glm:
     {
         if (jointIndex == -1)
         {
-        	this->transformMatrix = translateMat4(translate.x, translate.y, translate.z) * rotateRzRyRxMat4(rotate.z, rotate.y, rotate.x) * scaleMat4(scale.x, scale.y, scale.z);
+        	this->transformMatrix = translateMat4(finalTranslate.x, finalTranslate.y, finalTranslate.z) * rotateRzRyRxMat4(finalRotate.z, finalRotate.y, finalRotate.x) * scaleMat4(finalScale.x, finalScale.y, finalScale.z);
 
         	// Only use parent transform, if this is not an armature.
         	if (joints == 0)
@@ -782,7 +824,7 @@ void Node::updateRecursive(const IUpdateThreadContext& updateContext, const glm:
         {
         	// Processing joints.
 
-        	this->transformMatrix = bindMatrix * translateMat4(translate.x, translate.y, translate.z) * rotateRzRyRxMat4(rotate.z, rotate.y, rotate.x) * scaleMat4(scale.x, scale.y, scale.z) * this->inverseBindMatrix;
+        	this->transformMatrix = bindMatrix * translateMat4(finalTranslate.x, finalTranslate.y, finalTranslate.z) * rotateRzRyRxMat4(finalRotate.z, finalRotate.y, finalRotate.x) * scaleMat4(finalScale.x, finalScale.y, finalScale.z) * this->inverseBindMatrix;
 
         	// Only use parent transform, if parent is not an armature.
         	if (parentNode.get() && parentNode->getNumberJoints() == 0)

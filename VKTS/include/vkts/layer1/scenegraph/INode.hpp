@@ -70,6 +70,18 @@ public:
 
     virtual void setScale(const glm::vec3& scale) = 0;
 
+    virtual const glm::vec3& getFinalTranslate() const = 0;
+
+    virtual void setFinalTranslate(const glm::vec3& translate) = 0;
+
+    virtual const glm::vec3& getFinalRotate() const = 0;
+
+    virtual void setFinalRotate(const glm::vec3& rotate) = 0;
+
+    virtual const glm::vec3& getFinalScale() const = 0;
+
+    virtual void setFinalScale(const glm::vec3& scale) = 0;
+
     virtual int32_t getJointIndex() const = 0;
 
     virtual void setJointIndex(const int32_t jointIndex) = 0;
