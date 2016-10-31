@@ -67,6 +67,8 @@ void Node::reset()
 
     allLights.clear();
 
+    allConstraints.clear();
+
     allAnimations.clear();
 
     currentAnimation = -1;
@@ -88,7 +90,7 @@ void Node::reset()
 }
 
 Node::Node() :
-    INode(), name(""), parentNode(), translate(0.0f, 0.0f, 0.0f), rotate(0.0f, 0.0f, 0.0f), scale(1.0f, 1.0f, 1.0f), finalTranslate(0.0f, 0.0f, 0.0f), finalRotate(0.0f, 0.0f, 0.0f), finalScale(1.0f, 1.0f, 1.0f), transformMatrix(1.0f), transformMatrixDirty(VK_TRUE), jointIndex(-1), joints(0), bindTranslate(0.0f, 0.0f, 0.0f), bindRotate(0.0f, 0.0f,0.0f), bindScale(1.0f, 1.0f, 1.0f), bindMatrix(1.0f), inverseBindMatrix(1.0f), bindMatrixDirty(VK_FALSE), allChildNodes(), allMeshes(), allLights(), allAnimations(), currentAnimation(-1), currentTime(0.0f), transformUniformBuffer(), jointsUniformBuffer(), box(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)), layers(0x01)
+    INode(), name(""), parentNode(), translate(0.0f, 0.0f, 0.0f), rotate(0.0f, 0.0f, 0.0f), scale(1.0f, 1.0f, 1.0f), finalTranslate(0.0f, 0.0f, 0.0f), finalRotate(0.0f, 0.0f, 0.0f), finalScale(1.0f, 1.0f, 1.0f), transformMatrix(1.0f), transformMatrixDirty(VK_TRUE), jointIndex(-1), joints(0), bindTranslate(0.0f, 0.0f, 0.0f), bindRotate(0.0f, 0.0f,0.0f), bindScale(1.0f, 1.0f, 1.0f), bindMatrix(1.0f), inverseBindMatrix(1.0f), bindMatrixDirty(VK_FALSE), allChildNodes(), allMeshes(), allLights(), allConstraints(), allAnimations(), currentAnimation(-1), currentTime(0.0f), transformUniformBuffer(), jointsUniformBuffer(), box(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)), layers(0x01)
 {
     reset();
 }
@@ -163,6 +165,29 @@ Node::Node(const Node& other) :
         }
 
         allLights.append(cloneLight);
+    }
+
+    for (size_t i = 0; i < other.allConstraints.size(); i++)
+    {
+        const auto& currentConstraint = other.allConstraints[i];
+
+        if (!currentConstraint.get())
+        {
+            reset();
+
+            break;
+        }
+
+        IConstraintSP cloneConstraint = currentConstraint->clone();
+
+        if (!cloneConstraint.get())
+        {
+            reset();
+
+            break;
+        }
+
+        allConstraints.append(cloneConstraint);
     }
 
     for (size_t i = 0; i < other.allAnimations.size(); i++)
@@ -499,6 +524,26 @@ const SmartPointerVector<ILightSP>& Node::getLights() const
     return allLights;
 }
 
+void Node::addConstraint(const IConstraintSP& constraint)
+{
+    allConstraints.append(constraint);
+}
+
+VkBool32 Node::removeConstraint(const IConstraintSP& constraint)
+{
+    return allConstraints.remove(constraint);
+}
+
+size_t Node::getNumberConstraints() const
+{
+    return allConstraints.size();
+}
+
+const SmartPointerVector<IConstraintSP>& Node::getConstraints() const
+{
+    return allConstraints;
+}
+
 void Node::addAnimation(const IAnimationSP& animation)
 {
     allAnimations.append(animation);
@@ -780,6 +825,28 @@ void Node::updateRecursive(const IUpdateThreadContext& updateContext, const glm:
 
     //
 
+    if (allConstraints.size() > 0)
+    {
+    	for (size_t i = 0; i < allConstraints.size(); i++)
+    	{
+    		if (!allConstraints[i]->applyConstraint(*this))
+    		{
+    			return;
+    		}
+    	}
+
+        //
+
+        transformMatrixDirty = VK_TRUE;
+
+        if (joints != 0)
+        {
+        	bindMatrixDirty = VK_TRUE;
+        }
+    }
+
+    //
+
     if (bindMatrixDirty)
     {
     	// Only armature, having joints not zero and joints can enter here.
@@ -1013,6 +1080,8 @@ void Node::destroy()
     allMeshes.clear();
 
     allLights.clear();
+
+    allConstraints.clear();
 
     for (size_t i = 0; i < allAnimations.size(); i++)
     {

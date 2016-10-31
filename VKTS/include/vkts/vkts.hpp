@@ -565,6 +565,8 @@
 
 #include <vkts/layer1/scenegraph/IAnimation.hpp>
 
+#include <vkts/layer1/scenegraph/IConstraint.hpp>
+
 #include <vkts/layer1/scenegraph/ILight.hpp>
 
 #include <vkts/layer1/scenegraph/IMesh.hpp>

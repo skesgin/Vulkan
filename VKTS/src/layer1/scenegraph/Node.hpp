@@ -69,6 +69,8 @@ private:
 
     SmartPointerVector<ILightSP> allLights;
 
+    SmartPointerVector<IConstraintSP> allConstraints;
+
     SmartPointerVector<IAnimationSP> allAnimations;
 
     int32_t currentAnimation;
@@ -182,6 +184,14 @@ public:
     virtual size_t getNumberLights() const override;
 
     virtual const SmartPointerVector<ILightSP>& getLights() const override;
+
+    virtual void addConstraint(const IConstraintSP& constraint) override;
+
+    virtual VkBool32 removeConstraint(const IConstraintSP& constraint) override;
+
+    virtual size_t getNumberConstraints() const override;
+
+    virtual const SmartPointerVector<IConstraintSP>& getConstraints() const override;
 
     virtual void addAnimation(const IAnimationSP& animation) override;
 

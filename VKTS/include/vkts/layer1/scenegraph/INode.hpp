@@ -124,6 +124,14 @@ public:
 
     virtual const SmartPointerVector<ILightSP>& getLights() const = 0;
 
+    virtual void addConstraint(const IConstraintSP& constraint) = 0;
+
+    virtual VkBool32 removeConstraint(const IConstraintSP& constraint) = 0;
+
+    virtual size_t getNumberConstraints() const = 0;
+
+    virtual const SmartPointerVector<IConstraintSP>& getConstraints() const = 0;
+
     virtual void addAnimation(const IAnimationSP& animation) = 0;
 
     virtual VkBool32 removeAnimation(const IAnimationSP& animation) = 0;
