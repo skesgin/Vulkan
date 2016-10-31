@@ -944,7 +944,7 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
         
         material = materials[materialName]
         
-        if material.use_nodes == True:
+        if material.use_nodes == True and context.scene.render.engine == 'CYCLES':
             
             useParallax = False 
             normalMapUsed = False
@@ -2399,11 +2399,6 @@ def saveNode(context, fw, fw_animation, fw_channel, currentObject):
         fw("seed %d\n" % (currentParticleSystem.seed))
         fw("\n")
 
-    fw("translate %f %f %f\n" % location)
-    fw("rotate %f %f %f\n" % rotation)
-    fw("scale %f %f %f\n" % scale)
-    fw("\n")
-
     if len(currentObject.constraints) > 0:
         for currentConstraint in currentObject.constraints:
             writeData = False
@@ -2420,12 +2415,17 @@ def saveNode(context, fw, fw_animation, fw_channel, currentObject):
 
             if writeData:
                 fw("target %s\n" % (friendlyNodeName(currentConstraint.target.name)))
-                fw("use_offset %s\n" % (friendlyBooleanName(currentConstraint.use_offset)))                    
-                fw("influence %f\n" % (currentConstraint.influence))
                 fw("use_x %s %s\n" % (friendlyBooleanName(currentConstraint.use_x), friendlyBooleanName(currentConstraint.invert_x)))
                 fw("use_y %s %s\n" % (friendlyBooleanName(currentConstraint.use_z), friendlyBooleanName(currentConstraint.invert_z)))
                 fw("use_z %s %s\n" % (friendlyBooleanName(currentConstraint.use_y), friendlyBooleanName(currentConstraint.invert_y)))
+                fw("use_offset %s\n" % (friendlyBooleanName(currentConstraint.use_offset)))                    
+                fw("influence %f\n" % (currentConstraint.influence))
                 fw("\n")
+
+    fw("translate %f %f %f\n" % location)
+    fw("rotate %f %f %f\n" % rotation)
+    fw("scale %f %f %f\n" % scale)
+    fw("\n")
 
     if currentObject.type == 'MESH':
         fw("mesh %s\n" % friendlyName(currentObject.data.name))
@@ -2556,12 +2556,14 @@ def save(operator,
          ):
 
     # Mute all constraints.
+    muteList = []
     for currentObject in context.selected_objects:
         context.scene.objects.active = currentObject
         for currentConstraint in currentObject.constraints:
             # Hack, that scene gets upodated.
             influence = currentConstraint.influence
             currentConstraint.influence = influence
+            muteList.append(currentConstraint.mute)
             currentConstraint.mute = True
     context.scene.update()
 
@@ -2695,13 +2697,15 @@ def save(operator,
     file.close()
 
     # Unmute all constraints.
+    muteIndex = 0
     for currentObject in context.selected_objects:
         context.scene.objects.active = currentObject
         for currentConstraint in currentObject.constraints:
             # Hack, that scene gets upodated.
             influence = currentConstraint.influence
             currentConstraint.influence = influence
-            currentConstraint.mute = False
+            currentConstraint.mute = muteList[muteIndex]
+            muteIndex += 1
     context.scene.update()
 
     return {'FINISHED'}
