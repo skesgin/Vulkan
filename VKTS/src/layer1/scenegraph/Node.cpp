@@ -1025,6 +1025,59 @@ void Node::removeFromLayer(const uint8_t layer)
 	layers &= ~(1 << (uint32_t)layer) & 0x000FFFFF;
 }
 
+const glm::mat4& Node::getTransformMatrix() const
+{
+	return transformMatrix;
+}
+
+INodeSP Node::findNodeRecursive(const std::string& searchName)
+{
+	if (name == searchName)
+	{
+		return INode::shared_from_this();
+	}
+
+    for (size_t i = 0; i < allChildNodes.size(); i++)
+    {
+    	auto result = allChildNodes[i]->findNodeRecursive(searchName);
+
+    	if (result.get())
+    	{
+    		return result;
+    	}
+    }
+
+    return INodeSP(nullptr);
+}
+
+INodeSP Node::findNodeRecursiveFromRoot(const std::string& searchName)
+{
+	auto currentNode = INode::shared_from_this();
+
+	// Search, until parent node is hit.
+	while (currentNode.get())
+	{
+		if (currentNode->getName() == searchName)
+		{
+			return currentNode;
+		}
+
+		if (currentNode->getParentNode().get())
+		{
+			currentNode = currentNode->getParentNode();
+		}
+		else
+		{
+			break;
+		}
+	}
+
+	//
+
+	// Now, search complete tree.
+	return findNodeRecursive(searchName);
+}
+
 //
 // ICloneable
 //

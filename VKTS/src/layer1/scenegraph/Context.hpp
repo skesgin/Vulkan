@@ -159,6 +159,8 @@ public:
 
     virtual VkBool32 removeObject(const IObjectSP& object) override;
 
+    virtual const SmartPointerMap<std::string, IObjectSP>& getAllObjects() const override;
+
     //
 
     virtual ILightSP useLight(const std::string& name) const override;

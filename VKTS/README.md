@@ -85,6 +85,9 @@ How to build:
 Changelog:
 ----------
 
+11/01/2016
+- Added copy location, rotation and scale constraints.
+
 10/21/2016
 - Changes and improvements to deferred PBR renderer.
 

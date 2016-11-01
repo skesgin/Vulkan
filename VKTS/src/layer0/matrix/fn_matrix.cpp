@@ -407,4 +407,143 @@ glm::mat2 VKTS_APIENTRY shearMat2(const float shx, const float shy)
     return matrix;
 }
 
+//
+
+glm::vec3 VKTS_APIENTRY decomposeTranslate(const glm::mat4& matrix)
+{
+	return glm::vec3(matrix[3][0], matrix[3][1], matrix[3][2]);
+}
+
+glm::vec2 VKTS_APIENTRY decomposeTranslate(const glm::mat3& matrix)
+{
+	return glm::vec2(matrix[2][0], matrix[2][1]);
+}
+
+glm::vec3 VKTS_APIENTRY decomposeRotateRzRxRy(const glm::mat4& matrix)
+{
+	return decomposeRotateRzRxRy(glm::mat3(matrix));
+}
+
+glm::vec3 VKTS_APIENTRY decomposeRotateRzRxRy(const glm::mat3& matrix)
+{
+	glm::vec3 rotation;
+
+	glm::vec3 scale = decomposeScale(matrix);
+
+	rotation[0] = glm::degrees(asinf(matrix[1][2] / scale[1]));
+	rotation[1] = glm::degrees(atan2f(-matrix[0][2] / scale[0], matrix[3][3] / scale[2]));
+	rotation[2] = glm::degrees(atan2f(-matrix[1][0] / scale[1], matrix[1][1] / scale[1]));
+
+	// Bring between [-180.0;180.0[
+	if ((rotation[1] <= -90.0f || rotation[1] > 90.0f) && (rotation[2] <= -90.0f || rotation[2] > 90.0f))
+	{
+		if (rotation[0] >= 0.0f)
+		{
+			rotation[0] = 180.0f - rotation[0];
+		}
+		else
+		{
+			rotation[0] = -180.0f - rotation[0];
+		}
+
+		rotation[1] -= 180.0f;
+		if (rotation[1] < -180.0f)
+		{
+			rotation[1] += 360.0f;
+		}
+
+		rotation[2] -= 180.0f;
+		if (rotation[2] < -180.0f)
+		{
+			rotation[2] += 360.0f;
+		}
+	}
+
+	return rotation;
+}
+
+glm::vec3 VKTS_APIENTRY decomposeRotateRzRyRx(const glm::mat4& matrix)
+{
+	return decomposeRotateRzRyRx(glm::mat3(matrix));
+}
+
+glm::vec3 VKTS_APIENTRY decomposeRotateRzRyRx(const glm::mat3& matrix)
+{
+	glm::vec3 rotation;
+
+	glm::vec3 scale = decomposeScale(matrix);
+
+	rotation[0] = glm::degrees(atan2f(matrix[1][2] / scale[1], matrix[2][2] / scale[2]));
+	rotation[1] = glm::degrees(asinf(-matrix[0][2] / scale[0]));
+	rotation[2] = glm::degrees(atan2f(matrix[0][1] / scale[0], matrix[0][0] / scale[0]));
+
+	// Bring between [-180.0;180.0[
+	if ((rotation[0] <= -90.0f || rotation[0] > 90.0f) && (rotation[2] <= -90.0f || rotation[2] > 90.0f))
+	{
+		rotation[0] -= 180.0f;
+		if (rotation[0] < -180.0f)
+		{
+			rotation[0] += 360.0f;
+		}
+
+		if (rotation[1] >= 0.0f)
+		{
+			rotation[1] = 180.0f - rotation[1];
+		}
+		else
+		{
+			rotation[1] = -180.0f - rotation[1];
+		}
+
+		rotation[2] -= 180.0f;
+		if (rotation[2] < -180.0f)
+		{
+			rotation[2] += 360.0f;
+		}
+	}
+
+	return rotation;
+}
+
+float VKTS_APIENTRY decomposeRotate(const glm::mat3& matrix)
+{
+	float scale = sqrtf(matrix[0][0] * matrix[0][0] + matrix[1][1] * matrix[1][1]);
+
+	if (scale != 0.0f)
+	{
+		return glm::degrees(acosf(matrix[0][0] / scale));
+	}
+
+	return 0.0f;
+}
+
+glm::vec3 VKTS_APIENTRY decomposeScale(const glm::mat4& matrix)
+{
+	return decomposeScale(glm::mat3(matrix));
+}
+
+glm::vec3 VKTS_APIENTRY decomposeScale(const glm::mat3& matrix)
+{
+	glm::vec3 scale;
+
+	for (int32_t i = 0; i < 3; i++)
+	{
+		scale[i] = sqrtf(matrix[i][0] * matrix[i][0] + matrix[i][1] * matrix[i][1] + matrix[i][2] * matrix[i][2]);
+	}
+
+	return scale;
+}
+
+glm::vec2 VKTS_APIENTRY decomposeScale(const glm::mat2& matrix)
+{
+	glm::vec2 scale;
+
+	for (int32_t i = 0; i < 2; i++)
+	{
+		scale[i] = sqrtf(matrix[i][0] * matrix[i][0] + matrix[i][1] * matrix[i][1]);
+	}
+
+	return scale;
+}
+
 }

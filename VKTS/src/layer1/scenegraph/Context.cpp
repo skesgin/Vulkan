@@ -102,6 +102,11 @@ VkBool32 Context::removeObject(const IObjectSP& object)
     return remove(object->getName(), allObjects);
 }
 
+const SmartPointerMap<std::string, IObjectSP>& Context::getAllObjects() const
+{
+	return allObjects;
+}
+
 //
 
 ILightSP Context::useLight(const std::string& name) const

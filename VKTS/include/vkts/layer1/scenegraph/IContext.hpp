@@ -64,6 +64,8 @@ public:
 
     virtual VkBool32 removeObject(const IObjectSP& object) = 0;
 
+    virtual const SmartPointerMap<std::string, IObjectSP>& getAllObjects() const = 0;
+
     //
 
     virtual ILightSP useLight(const std::string& name) const = 0;

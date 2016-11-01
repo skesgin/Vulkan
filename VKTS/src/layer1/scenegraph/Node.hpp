@@ -243,6 +243,12 @@ public:
 
     virtual void removeFromLayer(const uint8_t layer) override;
 
+    virtual const glm::mat4& getTransformMatrix() const override;
+
+    virtual INodeSP findNodeRecursive(const std::string& searchName) override;
+
+    virtual INodeSP findNodeRecursiveFromRoot(const std::string& searchName) override;
+
     //
     // ICloneable
     //

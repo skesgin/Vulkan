@@ -57,6 +57,8 @@
 
 #include "Object.hpp"
 
+#include "CopyConstraint.hpp"
+
 #include "ParticleSystem.hpp"
 
 #include "Context.hpp"
@@ -203,7 +205,7 @@ static VkBool32 scenegraphParseBool(const char* buffer, VkBool32* scalar)
     return VK_TRUE;
 }
 
-static VkBool32 scenegraphParseBoolTuple(const char* buffer, VkBool32* scalar0, VkBool32* scalar1)
+static VkBool32 scenegraphParseBoolTriple(const char* buffer, VkBool32* scalar0, VkBool32* scalar1, VkBool32* scalar2)
 {
     if (!buffer)
     {
@@ -214,8 +216,9 @@ static VkBool32 scenegraphParseBoolTuple(const char* buffer, VkBool32* scalar0, 
 
     char value0[VKTS_MAX_TOKEN_CHARS + 1];
     char value1[VKTS_MAX_TOKEN_CHARS + 1];
+    char value2[VKTS_MAX_TOKEN_CHARS + 1];
 
-    if (sscanf(buffer, "%s %s %s", token, value0, value1) != 3)
+    if (sscanf(buffer, "%s %s %s %s", token, value0, value1, value2) != 4)
     {
         return VK_FALSE;
     }
@@ -246,9 +249,21 @@ static VkBool32 scenegraphParseBoolTuple(const char* buffer, VkBool32* scalar0, 
     	return VK_FALSE;
     }
 
+    if (strcmp(value2, "true") == 0)
+    {
+    	*scalar2 = VK_TRUE;
+    }
+    else if (strcmp(value2, "false") == 0)
+    {
+    	*scalar2 = VK_FALSE;
+    }
+    else
+    {
+    	return VK_FALSE;
+    }
+
     return VK_TRUE;
 }
-
 
 static VkBool32 scenegraphParseFloat(const char* buffer, float* scalar)
 {
@@ -3942,7 +3957,7 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
     char sdata0[VKTS_MAX_TOKEN_CHARS + 1];
     char sdata1[VKTS_MAX_TOKEN_CHARS + 1];
     float fdata[3];
-    VkBool32 bdata[2];
+    VkBool32 bdata[3];
     int32_t idata;
     uint32_t uidata;
     glm::mat4 mat4;
@@ -3950,6 +3965,9 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
     auto object = IObjectSP();
 
     auto node = INodeSP();
+
+    auto constraint = IConstraintSP();
+    CopyConstraint* copyConstraint = nullptr;
 
     SmartPointerMap<std::string, INodeSP> allNodes;
 
@@ -4152,17 +4170,19 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
 
             if (node.get())
             {
+            	enum CopyConstraintType type;
+
             	if (strcmp(sdata0, "COPY_LOCATION") == 0)
             	{
-                    // TODO: Create constraint.
+            		type = COPY_LOCATION;
             	}
             	else if (strcmp(sdata0, "COPY_ROTATION") == 0)
             	{
-                    // TODO: Create constraint.
+            		type = COPY_ROTATION;
             	}
             	else if (strcmp(sdata0, "COPY_SCALE") == 0)
             	{
-                    // TODO: Create constraint.
+            		type = COPY_SCALE;
             	}
 				else
 				{
@@ -4170,6 +4190,15 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
 
 					return VK_FALSE;
 				}
+
+                copyConstraint = new CopyConstraint(type);
+
+                if (!copyConstraint)
+                {
+                	return VK_FALSE;
+                }
+
+                node->addConstraint(IConstraintSP(copyConstraint));
             }
             else
             {
@@ -4185,67 +4214,73 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
                 return VK_FALSE;
             }
 
-            if (node.get())
+            if (node.get() && copyConstraint)
             {
-                // TODO: Get target etc.
+            	INodeSP targetNode;
+
+            	for (size_t i = 0; i < context->getAllObjects().values().size(); i++)
+            	{
+            		if (!context->getAllObjects().values()[i]->getRootNode().get())
+            		{
+            			continue;
+            		}
+
+            		targetNode = context->getAllObjects().values()[i]->getRootNode()->findNodeRecursiveFromRoot(sdata0);
+
+            		if (targetNode.get())
+            		{
+            			break;
+            		}
+            	}
+
+                if (!targetNode.get())
+                {
+                    logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No target node found");
+
+                    return VK_FALSE;
+                }
+
+                copyConstraint->setTarget(targetNode);
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No node");
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No node or copy constraint");
 
                 return VK_FALSE;
             }
         }
-        else if (scenegraphIsToken(buffer, "use_x"))
+        else if (scenegraphIsToken(buffer, "use"))
         {
-            if (!scenegraphParseBoolTuple(buffer, &bdata[0], &bdata[1]))
+            if (!scenegraphParseBoolTriple(buffer, &bdata[0], &bdata[1], &bdata[2]))
             {
                 return VK_FALSE;
             }
 
-            if (node.get())
+            if (node.get() && copyConstraint)
             {
-                // TODO: Set use x.
+            	copyConstraint->setUse(glm::bvec3(bdata[0], bdata[1], bdata[2]));
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No node");
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No node or copy constraint");
 
                 return VK_FALSE;
             }
         }
-        else if (scenegraphIsToken(buffer, "use_y"))
+        else if (scenegraphIsToken(buffer, "invert"))
         {
-            if (!scenegraphParseBoolTuple(buffer, &bdata[0], &bdata[1]))
+            if (!scenegraphParseBoolTriple(buffer, &bdata[0], &bdata[1], &bdata[2]))
             {
                 return VK_FALSE;
             }
 
-            if (node.get())
+            if (node.get() && copyConstraint)
             {
-                // TODO: Set use y.
+            	copyConstraint->setInvert(glm::bvec3(bdata[0], bdata[1], bdata[2]));
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No node");
-
-                return VK_FALSE;
-            }
-        }
-        else if (scenegraphIsToken(buffer, "use_z"))
-        {
-            if (!scenegraphParseBoolTuple(buffer, &bdata[0], &bdata[1]))
-            {
-                return VK_FALSE;
-            }
-
-            if (node.get())
-            {
-                // TODO: Set use z.
-            }
-            else
-            {
-                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No node");
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No node or copy constraint");
 
                 return VK_FALSE;
             }
@@ -4257,13 +4292,13 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
                 return VK_FALSE;
             }
 
-            if (node.get())
+            if (node.get() && copyConstraint)
             {
-                // TODO: Set use offset.
+            	copyConstraint->setOffset(bdata[0]);
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No node");
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No node or copy constraint");
 
                 return VK_FALSE;
             }
@@ -4275,13 +4310,13 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
                 return VK_FALSE;
             }
 
-            if (node.get())
+            if (node.get() && copyConstraint)
             {
-                // TODO: Set influence.
+            	copyConstraint->setInfluence(fdata[0]);
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No node");
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No node or copy constraint");
 
                 return VK_FALSE;
             }

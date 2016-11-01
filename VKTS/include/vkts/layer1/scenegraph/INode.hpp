@@ -182,6 +182,12 @@ public:
 
     virtual void removeFromLayer(const uint8_t layer) = 0;
 
+    virtual const glm::mat4& getTransformMatrix() const = 0;
+
+	virtual std::shared_ptr<INode> findNodeRecursive(const std::string& searchName) = 0;
+
+	virtual std::shared_ptr<INode> findNodeRecursiveFromRoot(const std::string& searchName) = 0;
+
 };
 
 typedef std::shared_ptr<INode> INodeSP;

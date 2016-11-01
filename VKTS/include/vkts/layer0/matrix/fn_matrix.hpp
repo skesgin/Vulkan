@@ -158,6 +158,68 @@ VKTS_APICALL glm::mat3 VKTS_APIENTRY shearMat3(const float shxy, const float shx
  */
 VKTS_APICALL glm::mat2 VKTS_APIENTRY shearMat2(const float shx, const float shy);
 
+//
+
+/**
+ *
+ * @ThreadSafe
+ */
+VKTS_APICALL glm::vec3 VKTS_APIENTRY decomposeTranslate(const glm::mat4& matrix);
+
+/**
+ *
+ * @ThreadSafe
+ */
+VKTS_APICALL glm::vec2 VKTS_APIENTRY decomposeTranslate(const glm::mat3& matrix);
+
+/**
+ *
+ * @ThreadSafe
+ */
+VKTS_APICALL glm::vec3 VKTS_APIENTRY decomposeRotateRzRxRy(const glm::mat4& matrix);
+
+/**
+ *
+ * @ThreadSafe
+ */
+VKTS_APICALL glm::vec3 VKTS_APIENTRY decomposeRotateRzRxRy(const glm::mat3& matrix);
+
+/**
+ *
+ * @ThreadSafe
+ */
+VKTS_APICALL glm::vec3 VKTS_APIENTRY decomposeRotateRzRyRx(const glm::mat4& matrix);
+
+/**
+ *
+ * @ThreadSafe
+ */
+VKTS_APICALL glm::vec3 VKTS_APIENTRY decomposeRotateRzRyRx(const glm::mat3& matrix);
+
+/**
+ *
+ * @ThreadSafe
+ */
+VKTS_APICALL float VKTS_APIENTRY decomposeRotate(const glm::mat3& matrix);
+
+/**
+ *
+ * @ThreadSafe
+ */
+VKTS_APICALL glm::vec3 VKTS_APIENTRY decomposeScale(const glm::mat4& matrix);
+
+/**
+ *
+ * @ThreadSafe
+ */
+VKTS_APICALL glm::vec3 VKTS_APIENTRY decomposeScale(const glm::mat3& matrix);
+
+/**
+ *
+ * @ThreadSafe
+ */
+VKTS_APICALL glm::vec2 VKTS_APIENTRY decomposeScale(const glm::mat2& matrix);
+
 }
 
 #endif /* VKTS_FN_MATRIX_HPP_ */

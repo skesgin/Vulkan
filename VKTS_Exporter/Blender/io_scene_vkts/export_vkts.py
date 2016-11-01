@@ -2415,9 +2415,8 @@ def saveNode(context, fw, fw_animation, fw_channel, currentObject):
 
             if writeData:
                 fw("target %s\n" % (friendlyNodeName(currentConstraint.target.name)))
-                fw("use_x %s %s\n" % (friendlyBooleanName(currentConstraint.use_x), friendlyBooleanName(currentConstraint.invert_x)))
-                fw("use_y %s %s\n" % (friendlyBooleanName(currentConstraint.use_z), friendlyBooleanName(currentConstraint.invert_z)))
-                fw("use_z %s %s\n" % (friendlyBooleanName(currentConstraint.use_y), friendlyBooleanName(currentConstraint.invert_y)))
+                fw("use %s %s %s\n" % (friendlyBooleanName(currentConstraint.use_x), friendlyBooleanName(currentConstraint.use_z), friendlyBooleanName(currentConstraint.use_y)))
+                fw("invert %s %s %s\n" % (friendlyBooleanName(currentConstraint.invert_x), friendlyBooleanName(currentConstraint.invert_z), friendlyBooleanName(currentConstraint.invert_y)))
                 fw("use_offset %s\n" % (friendlyBooleanName(currentConstraint.use_offset)))                    
                 fw("influence %f\n" % (currentConstraint.influence))
                 fw("\n")
