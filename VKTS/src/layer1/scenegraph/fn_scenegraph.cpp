@@ -58,6 +58,7 @@
 #include "Object.hpp"
 
 #include "CopyConstraint.hpp"
+#include "LimitConstraint.hpp"
 
 #include "ParticleSystem.hpp"
 
@@ -3968,6 +3969,7 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
 
     auto constraint = IConstraintSP();
     CopyConstraint* copyConstraint = nullptr;
+    LimitConstraint* limitConstraint = nullptr;
 
     SmartPointerMap<std::string, INodeSP> allNodes;
 
@@ -4170,19 +4172,35 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
 
             if (node.get())
             {
-            	enum CopyConstraintType type;
-
             	if (strcmp(sdata0, "COPY_LOCATION") == 0)
             	{
-            		type = COPY_LOCATION;
+            		copyConstraint = new CopyConstraint(COPY_LOCATION);
+                    node->addConstraint(IConstraintSP(copyConstraint));
             	}
             	else if (strcmp(sdata0, "COPY_ROTATION") == 0)
             	{
-            		type = COPY_ROTATION;
+            		copyConstraint = new CopyConstraint(COPY_ROTATION);
+                    node->addConstraint(IConstraintSP(copyConstraint));
             	}
             	else if (strcmp(sdata0, "COPY_SCALE") == 0)
             	{
-            		type = COPY_SCALE;
+            		copyConstraint = new CopyConstraint(COPY_SCALE);
+                    node->addConstraint(IConstraintSP(copyConstraint));
+            	}
+            	else if (strcmp(sdata0, "LIMIT_LOCATION") == 0)
+            	{
+            		limitConstraint = new LimitConstraint(LIMIT_LOCATION);
+                    node->addConstraint(IConstraintSP(limitConstraint));
+            	}
+            	else if (strcmp(sdata0, "LIMIT_ROTATION") == 0)
+            	{
+            		limitConstraint = new LimitConstraint(LIMIT_ROTATION);
+                    node->addConstraint(IConstraintSP(limitConstraint));
+            	}
+            	else if (strcmp(sdata0, "LIMIT_SCALE") == 0)
+            	{
+            		limitConstraint = new LimitConstraint(LIMIT_SCALE);
+                    node->addConstraint(IConstraintSP(limitConstraint));
             	}
 				else
 				{
@@ -4190,15 +4208,6 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
 
 					return VK_FALSE;
 				}
-
-                copyConstraint = new CopyConstraint(type);
-
-                if (!copyConstraint)
-                {
-                	return VK_FALSE;
-                }
-
-                node->addConstraint(IConstraintSP(copyConstraint));
             }
             else
             {
@@ -4303,6 +4312,78 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
                 return VK_FALSE;
             }
         }
+        else if (scenegraphIsToken(buffer, "use_min"))
+        {
+            if (!scenegraphParseBoolTriple(buffer, &bdata[0], &bdata[1], &bdata[2]))
+            {
+                return VK_FALSE;
+            }
+
+            if (node.get() && limitConstraint)
+            {
+            	limitConstraint->setUseMin(std::array<VkBool32, 3>{bdata[0], bdata[1], bdata[2]});
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No node or limit constraint");
+
+                return VK_FALSE;
+            }
+        }
+        else if (scenegraphIsToken(buffer, "use_max"))
+        {
+            if (!scenegraphParseBoolTriple(buffer, &bdata[0], &bdata[1], &bdata[2]))
+            {
+                return VK_FALSE;
+            }
+
+            if (node.get() && limitConstraint)
+            {
+            	limitConstraint->setUseMax(std::array<VkBool32, 3>{bdata[0], bdata[1], bdata[2]});
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No node or limit constraint");
+
+                return VK_FALSE;
+            }
+        }
+        else if (scenegraphIsToken(buffer, "min"))
+        {
+            if (!scenegraphParseVec3(buffer, fdata))
+            {
+                return VK_FALSE;
+            }
+
+            if (node.get() && limitConstraint)
+            {
+            	limitConstraint->setMin(glm::vec3(fdata[0], fdata[1], fdata[2]));
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No node or limit constraint");
+
+                return VK_FALSE;
+            }
+        }
+        else if (scenegraphIsToken(buffer, "max"))
+        {
+            if (!scenegraphParseVec3(buffer, fdata))
+            {
+                return VK_FALSE;
+            }
+
+            if (node.get() && limitConstraint)
+            {
+            	limitConstraint->setMax(glm::vec3(fdata[0], fdata[1], fdata[2]));
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No node or limit constraint");
+
+                return VK_FALSE;
+            }
+        }
         else if (scenegraphIsToken(buffer, "influence"))
         {
             if (!scenegraphParseFloat(buffer, &fdata[0]))
@@ -4314,9 +4395,13 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
             {
             	copyConstraint->setInfluence(fdata[0]);
             }
+            else if (node.get() && limitConstraint)
+            {
+            	limitConstraint->setInfluence(fdata[0]);
+            }
             else
             {
-                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No node or copy constraint");
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No node or constraint");
 
                 return VK_FALSE;
             }

@@ -60,7 +60,7 @@ Features:
 - Basic multi threaded engine including synchronization, time and CPU querying.   
 - Basic native display handling including multi display support.
 - Basic native window handling including fullscreen support.
-- Basic input handling: Gamepad, keyboard and mouse.
+- Basic input handling: Gamepad, keyboard, mouse and touch.
 - None visual configuration for console/compute only applications.
 - Loading and saving of text, binary and image files (TGA and HDR).
 - VKTS scene file format:  
@@ -69,11 +69,15 @@ Features:
     * Materials (Phong and BSDF)  
     * Textures (TGA and HDR)  
     * Animations (incl. node and armature) 
-- Blender Python exporter for the VKTS scene file format.
+    * Lights (Point, Spot and Directional)    
+- Blender Python exporter for the VKTS scene file format:
+    * Blender Render  
+    * Cycles Render plus GLSL code generation  
 - Input controller for cameras and 3D objects. 
 - Bitmap font rendering.
 - GLSL to SPIR-V build script.
 - Interpolator and converter for constant, linear and bezier key frame data.
+- Constraints for copying and limiting data.
 
 
 How to build:
@@ -87,6 +91,7 @@ Changelog:
 
 11/01/2016
 - Added copy location, rotation and scale constraints.
+- Added limit location, rotation and scale constraints.
 - Updated to GLM 0.9.2.
 
 10/21/2016

@@ -2402,22 +2402,50 @@ def saveNode(context, fw, fw_animation, fw_channel, currentObject):
     if len(currentObject.constraints) > 0:
         for currentConstraint in currentObject.constraints:
             writeData = False
+            writeDataCopy = False
+            writeDataLimit = False
             
             if currentConstraint.type == 'COPY_LOCATION' and currentConstraint.target is not None:
                 writeData = True
+                writeDataCopy = True
                 fw("constraint %s\n" % ("COPY_LOCATION"))
             if currentConstraint.type == 'COPY_ROTATION' and currentConstraint.target is not None:
                 writeData = True
+                writeDataCopy = True
                 fw("constraint %s\n" % ("COPY_ROTATION"))
             if currentConstraint.type == 'COPY_SCALE' and currentConstraint.target is not None:
                 writeData = True
+                writeDataCopy = True
                 fw("constraint %s\n" % ("COPY_SCALE"))
 
-            if writeData:
+            limitFactor = -1.0
+            if currentConstraint.type == 'LIMIT_LOCATION':
+                writeData = True
+                writeDataLimit = True
+                fw("constraint %s\n" % ("LIMIT_LOCATION"))
+            if currentConstraint.type == 'LIMIT_ROTATION':
+                writeData = True
+                writeDataLimit = True
+                fw("constraint %s\n" % ("LIMIT_ROTATION"))
+            if currentConstraint.type == 'LIMIT_SCALE':
+                writeData = True
+                writeDataLimit = True
+                fw("constraint %s\n" % ("LIMIT_SCALE"))
+                limitFactor = 1.0
+
+            if writeDataCopy:
                 fw("target %s\n" % (friendlyNodeName(currentConstraint.target.name)))
                 fw("use %s %s %s\n" % (friendlyBooleanName(currentConstraint.use_x), friendlyBooleanName(currentConstraint.use_z), friendlyBooleanName(currentConstraint.use_y)))
                 fw("invert %s %s %s\n" % (friendlyBooleanName(currentConstraint.invert_x), friendlyBooleanName(currentConstraint.invert_z), friendlyBooleanName(currentConstraint.invert_y)))
                 fw("use_offset %s\n" % (friendlyBooleanName(currentConstraint.use_offset)))                    
+
+            if writeDataLimit:
+                fw("use_min %s %s %s\n" % (friendlyBooleanName(currentConstraint.use_min_x), friendlyBooleanName(currentConstraint.use_min_z), friendlyBooleanName(currentConstraint.use_min_y)))
+                fw("use_max %s %s %s\n" % (friendlyBooleanName(currentConstraint.use_max_x), friendlyBooleanName(currentConstraint.use_max_z), friendlyBooleanName(currentConstraint.use_max_y)))
+                fw("min %f %f %f\n" % (currentConstraint.min_x, currentConstraint.min_z, currentConstraint.min_y * limitFactor))
+                fw("max %f %f %f\n" % (currentConstraint.max_x, currentConstraint.max_z, currentConstraint.max_y * limitFactor))
+
+            if writeData:
                 fw("influence %f\n" % (currentConstraint.influence))
                 fw("\n")
 
