@@ -145,11 +145,6 @@ VkBool32 CopyConstraint::applyConstraint(INode& node)
 		{
 			float value = targetTransform[i];
 
-			if (getInvert()[i])
-			{
-				value = -value;
-			}
-
 			if (getOffset())
 			{
 				constraintTransform[i] += value;
@@ -157,6 +152,11 @@ VkBool32 CopyConstraint::applyConstraint(INode& node)
 			else
 			{
 				constraintTransform[i] = value;
+			}
+
+			if (getInvert()[i])
+			{
+				constraintTransform[i] = -constraintTransform[i];
 			}
 		}
 	}
