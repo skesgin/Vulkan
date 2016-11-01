@@ -116,32 +116,34 @@ VkBool32 CopyConstraint::applyConstraint(INode& node)
 
 	//
 
-	glm::vec3 transform;
+	glm::vec3 currentTransform;
 	glm::vec3 targetTransform;
 
 	switch (type)
 	{
 		case COPY_LOCATION:
-			transform = node.getFinalTranslate();
+			currentTransform = node.getFinalTranslate();
 			targetTransform  = decomposeTranslate(target->getTransformMatrix());
 			break;
 		case COPY_ROTATION:
-			transform = node.getFinalRotate();
+			currentTransform = node.getFinalRotate();
 			targetTransform  = decomposeRotateRzRyRx(target->getTransformMatrix());
 			break;
 		case COPY_SCALE:
-			transform = node.getFinalScale();
+			currentTransform = node.getFinalScale();
 			targetTransform  = decomposeScale(target->getTransformMatrix());
 			break;
 	}
 
 	//
 
+	glm::vec3 constraintTransform = currentTransform;
+
 	for (int32_t i = 0; i < 3; i++)
 	{
 		if (getUse()[i])
 		{
-			float value = targetTransform[i] * getInfluence();
+			float value = targetTransform[i];
 
 			if (getInvert()[i])
 			{
@@ -150,11 +152,11 @@ VkBool32 CopyConstraint::applyConstraint(INode& node)
 
 			if (getOffset())
 			{
-				transform[i] += value;
+				constraintTransform[i] += value;
 			}
 			else
 			{
-				transform[i] = value;
+				constraintTransform[i] = value;
 			}
 		}
 	}
@@ -164,13 +166,13 @@ VkBool32 CopyConstraint::applyConstraint(INode& node)
 	switch (type)
 	{
 		case COPY_LOCATION:
-			node.setFinalTranslate(transform);
+			node.setFinalTranslate(glm::mix(currentTransform, constraintTransform, influence));
 			break;
 		case COPY_ROTATION:
-			node.setFinalRotate(transform);
+			node.setFinalRotate(glm::mix(currentTransform, constraintTransform, influence));
 			break;
 		case COPY_SCALE:
-			node.setFinalScale(transform);
+			node.setFinalScale(glm::mix(currentTransform, constraintTransform, influence));
 			break;
 	}
 

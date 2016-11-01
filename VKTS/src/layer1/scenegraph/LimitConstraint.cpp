@@ -111,34 +111,34 @@ VkBool32 LimitConstraint::applyConstraint(INode& node)
 
 	//
 
-	glm::vec3 transform;
+	glm::vec3 currentTransform;
 
 	switch (type)
 	{
 		case LIMIT_LOCATION:
-			transform = node.getFinalTranslate();
+			currentTransform = node.getFinalTranslate();
 			break;
 		case LIMIT_ROTATION:
-			transform = node.getFinalRotate();
+			currentTransform = node.getFinalRotate();
 			break;
 		case LIMIT_SCALE:
-			transform = node.getFinalScale();
+			currentTransform = node.getFinalScale();
 			break;
 	}
 
 	//
 
-	glm::vec3 finaleTransform = transform;
+	glm::vec3 constraintTransform = currentTransform;
 
 	for (int32_t i = 0; i < 3; i++)
 	{
 		if (getUseMin()[i])
 		{
-			finaleTransform[i] = glm::min(transform[i], min[i]);
+			constraintTransform[i] = glm::min(currentTransform[i], min[i]);
 		}
 		if (getUseMax()[i])
 		{
-			finaleTransform[i] = glm::max(transform[i], max[i]);
+			constraintTransform[i] = glm::max(currentTransform[i], max[i]);
 		}
 	}
 
@@ -147,13 +147,13 @@ VkBool32 LimitConstraint::applyConstraint(INode& node)
 	switch (type)
 	{
 		case LIMIT_LOCATION:
-			node.setFinalTranslate(glm::mix(transform, finaleTransform, influence));
+			node.setFinalTranslate(glm::mix(currentTransform, constraintTransform, influence));
 			break;
 		case LIMIT_ROTATION:
-			node.setFinalRotate(glm::mix(transform, finaleTransform, influence));
+			node.setFinalRotate(glm::mix(currentTransform, constraintTransform, influence));
 			break;
 		case LIMIT_SCALE:
-			node.setFinalScale(glm::mix(transform, finaleTransform, influence));
+			node.setFinalScale(glm::mix(currentTransform, constraintTransform, influence));
 			break;
 	}
 
