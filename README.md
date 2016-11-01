@@ -14,8 +14,10 @@ Then, please read the following document:
 [VulKan ToolS (VKTS) Documentation](VKTS_Documentation/README.md)
   
   
-Pre-build binaries and assets can be downloaded here (last update 10/13/2016):
+Pre-build executables can be downloaded here (last update 11/01/2016):
   
-[http://nopper.tv/Vulkan/VKTS_Binaries_Android.zip](http://nopper.tv/Vulkan/VKTS_Binaries_Android.zip) (Android ARM 32/64 bit Intel 32 bit)  
-[http://nopper.tv/Vulkan/VKTS_Binaries_Linux64.zip](http://nopper.tv/Vulkan/VKTS_Binaries_Linux64.zip) (Linux 64 bit)  
-[http://nopper.tv/Vulkan/VKTS_Binaries_Win64.zip](http://nopper.tv/Vulkan/VKTS_Binaries_Win64.zip) (Windows 64 bit)  
+[http://nopper.tv/Vulkan/VKTS_Executables_Android.zip](http://nopper.tv/Vulkan/VKTS_Executables_Android.zip) (Android ARM 32/64 bit Intel 32 bit)  
+[http://nopper.tv/Vulkan/VKTS_Executables_Linux64.zip](http://nopper.tv/Vulkan/VKTS_Executables_Linux64.zip) (Linux 64 bit)  
+[http://nopper.tv/Vulkan/VKTS_Executables_Windows64.zip](http://nopper.tv/Vulkan/VKTS_Executables_Win64.zip) (Windows 64 bit)  
+  
+For Linux and Windows, please extract and copy the executables to the [VKTS_Binaries](VKTS_Binaries) folder.  
