@@ -42,8 +42,8 @@ private:
 	enum CopyConstraintType type;
 
 	INodeSP target;
-	glm::bvec3 use;
-	glm::bvec3 invert;
+	std::array<VkBool32, 3> use;
+	std::array<VkBool32, 3> invert;
 	VkBool32 offset;
 	float influence;
 
@@ -63,11 +63,11 @@ public:
 	const INodeSP& getTarget() const;
 	void setTarget(const INodeSP& target);
 
-	const glm::bvec3& getUse() const;
-	void setUse(const glm::bvec3& use);
+	const std::array<VkBool32, 3>& getUse() const;
+	void setUse(const std::array<VkBool32, 3>& use);
 
-	const glm::bvec3& getInvert() const;
-	void setInvert(const glm::bvec3& invert);
+	const std::array<VkBool32, 3>& getInvert() const;
+	void setInvert(const std::array<VkBool32, 3>& invert);
 
 	VkBool32 getOffset() const;
 	void setOffset(const VkBool32 offset);

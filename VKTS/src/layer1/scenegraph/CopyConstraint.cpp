@@ -30,7 +30,7 @@ namespace vkts
 {
 
 CopyConstraint::CopyConstraint(const enum CopyConstraintType type) :
-	IConstraint(), type(type), target(nullptr), use(VK_FALSE, VK_FALSE, VK_FALSE), invert(VK_FALSE, VK_FALSE, VK_FALSE), offset(VK_FALSE), influence(0.0f)
+	IConstraint(), type(type), target(nullptr), use{VK_FALSE, VK_FALSE, VK_FALSE}, invert{VK_FALSE, VK_FALSE, VK_FALSE}, offset(VK_FALSE), influence(0.0f)
 {
 }
 
@@ -58,12 +58,12 @@ void CopyConstraint::setTarget(const INodeSP& target)
 	this->target = target;
 }
 
-const glm::bvec3& CopyConstraint::getUse() const
+const std::array<VkBool32, 3>& CopyConstraint::getUse() const
 {
 	return use;
 }
 
-void CopyConstraint::setUse(const glm::bvec3& use)
+void CopyConstraint::setUse(const std::array<VkBool32, 3>& use)
 {
 	this->use = use;
 }
@@ -78,12 +78,12 @@ void CopyConstraint::setOffset(const VkBool32 offset)
 	this->offset = offset;
 }
 
-const glm::bvec3& CopyConstraint::getInvert() const
+const std::array<VkBool32, 3>& CopyConstraint::getInvert() const
 {
 	return invert;
 }
 
-void CopyConstraint::setInvert(const glm::bvec3& invert)
+void CopyConstraint::setInvert(const std::array<VkBool32, 3>& invert)
 {
 	this->invert = invert;
 }

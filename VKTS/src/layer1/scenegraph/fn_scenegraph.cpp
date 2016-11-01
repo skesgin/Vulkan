@@ -4258,7 +4258,7 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
 
             if (node.get() && copyConstraint)
             {
-            	copyConstraint->setUse(glm::bvec3(bdata[0], bdata[1], bdata[2]));
+            	copyConstraint->setUse(std::array<VkBool32, 3>{bdata[0], bdata[1], bdata[2]});
             }
             else
             {
@@ -4276,7 +4276,7 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
 
             if (node.get() && copyConstraint)
             {
-            	copyConstraint->setInvert(glm::bvec3(bdata[0], bdata[1], bdata[2]));
+            	copyConstraint->setInvert(std::array<VkBool32, 3>{bdata[0], bdata[1], bdata[2]});
             }
             else
             {
