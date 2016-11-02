@@ -2236,6 +2236,13 @@ def saveAnimation(context, fw, fw_animation, fw_channel, name, currentAnimation,
     fw_animation("stop %f\n" % (context.scene.frame_end / context.scene.render.fps))
     fw_animation("\n")
 
+    if len(currentAnimation.action.pose_markers) > 0:
+        sortedMarkers = sorted(currentAnimation.action.pose_markers, key = lambda x : x.frame)
+
+        for currentMarker in sortedMarkers:
+            fw_animation("marker %s %f\n" % (currentMarker.name, currentMarker.frame / context.scene.render.fps))
+    fw_animation("\n")
+
     # Loop over curves several times to achieve sorting.
     for usedTransform in ["TRANSLATE", "ROTATE", "QUATERNION_ROTATE", "SCALE"]:
 

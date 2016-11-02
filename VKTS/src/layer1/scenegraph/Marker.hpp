@@ -24,85 +24,54 @@
  * THE SOFTWARE.
  */
 
-#ifndef VKTS_ANIMATION_HPP_
-#define VKTS_ANIMATION_HPP_
+#ifndef VKTS_MARKER_HPP_
+#define VKTS_MARKER_HPP_
 
 #include <vkts/vkts.hpp>
 
 namespace vkts
 {
 
-class Animation: public IAnimation
+class Marker: public IMarker
 {
 
 private:
 
     std::string name;
 
-    float start;
-
-    float stop;
-
-    SmartPointerVector<IMarkerSP> allMarkers;
-
-    SmartPointerVector<IChannelSP> allChannels;
+    float t;
 
 public:
 
-    Animation();
-    Animation(const Animation& other);
-    Animation(Animation&& other) = delete;
-    virtual ~Animation();
+    Marker();
+    Marker(const Marker& other);
+    Marker(Marker&& other) = delete;
+    virtual ~Marker();
 
-    Animation& operator =(const Animation& other) = delete;
-    Animation& operator =(Animation && other) = delete;
+    Marker& operator =(const Marker& other) = delete;
+
+    Marker& operator =(Marker && other) = delete;
 
     //
-    // IAnimation
+    // IMarker
     //
 
     virtual const std::string& getName() const override;
 
     virtual void setName(const std::string& name) override;
 
-    virtual float getStart() const override;
+    virtual float getTime() const override;
 
-    virtual void setStart(const float start) override;
-
-    virtual float getStop() const override;
-
-    virtual void setStop(const float stop) override;
-
-    virtual void addMarker(const IMarkerSP& marker) override;
-
-    virtual VkBool32 removeMarker(const IMarkerSP& marker) override;
-
-    virtual size_t getNumberMarkers() const override;
-
-    virtual const SmartPointerVector<IMarkerSP>& getMarkers() const override;
-
-    virtual void addChannel(const IChannelSP& channel) override;
-
-    virtual VkBool32 removeChannel(const IChannelSP& channel) override;
-
-    virtual size_t getNumberChannels() const override;
-
-    virtual const SmartPointerVector<IChannelSP>& getChannels() const override;
+    virtual void setTime(const float t) override;
 
     //
     // ICloneable
     //
 
-    virtual IAnimationSP clone() const override;
-
-    //
-    // IDestroyable
-    //
-
-    virtual void destroy() override;
+    virtual IMarkerSP clone() const override;
 
 };
 
 } /* namespace vkts */
 
-#endif /* VKTS_ANIMATION_HPP_ */
+#endif /* VKTS_MARKER_HPP_ */

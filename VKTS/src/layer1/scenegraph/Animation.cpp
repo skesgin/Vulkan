@@ -30,13 +30,18 @@ namespace vkts
 {
 
 Animation::Animation() :
-    IAnimation(), name(""), start(0.0f), stop(0.0f), allChannels()
+    IAnimation(), name(""), start(0.0f), stop(0.0f), allMarkers(), allChannels()
 {
 }
 
 Animation::Animation(const Animation& other) :
     IAnimation(), name(other.name + "_clone"), start(other.start), stop(other.stop), allChannels()
 {
+    for (size_t i = 0; i < other.allMarkers.size(); i++)
+    {
+        allMarkers.append(other.allMarkers[i]->clone());
+    }
+
     for (size_t i = 0; i < other.allChannels.size(); i++)
     {
         allChannels.append(other.allChannels[i]->clone());
@@ -82,6 +87,26 @@ void Animation::setStop(const float stop)
     this->stop = stop;
 }
 
+void Animation::addMarker(const IMarkerSP& marker)
+{
+	allMarkers.append(marker);
+}
+
+VkBool32 Animation::removeMarker(const IMarkerSP& marker)
+{
+    return allMarkers.remove(marker);
+}
+
+size_t Animation::getNumberMarkers() const
+{
+    return allMarkers.size();
+}
+
+const SmartPointerVector<IMarkerSP>& Animation::getMarkers() const
+{
+    return allMarkers;
+}
+
 void Animation::addChannel(const IChannelSP& channel)
 {
     allChannels.append(channel);
@@ -111,6 +136,11 @@ IAnimationSP Animation::clone() const
 	auto result = IAnimationSP(new Animation(*this));
 
 	if (result.get() && result->getNumberChannels() != getNumberChannels())
+	{
+		return IAnimationSP();
+	}
+
+	if (result.get() && result->getNumberMarkers() != getNumberMarkers())
 	{
 		return IAnimationSP();
 	}

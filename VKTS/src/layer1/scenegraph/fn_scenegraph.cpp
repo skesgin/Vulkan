@@ -40,6 +40,8 @@
 
 #include "../texture/Texture.hpp"
 
+#include "Marker.hpp"
+
 #include "Animation.hpp"
 #include "BSDFMaterial.hpp"
 
@@ -167,6 +169,23 @@ static VkBool32 scenegraphParseStringTuple(const char* buffer, char* string0, ch
     char token[VKTS_MAX_TOKEN_CHARS + 1];
 
     if (sscanf(buffer, "%s %s %s", token, string0, string1) != 3)
+    {
+        return VK_FALSE;
+    }
+
+    return VK_TRUE;
+}
+
+static VkBool32 scenegraphParseStringFloat(const char* buffer, char* string, float* scalar)
+{
+    if (!buffer)
+    {
+        return VK_FALSE;
+    }
+
+    char token[VKTS_MAX_TOKEN_CHARS + 1];
+
+    if (sscanf(buffer, "%s %s %f", token, string, scalar) != 3)
     {
         return VK_FALSE;
     }
@@ -3644,6 +3663,34 @@ static VkBool32 scenegraphLoadAnimations(const char* directory, const char* file
             if (animation.get())
             {
                 animation->setStop(fdata[0]);
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No animation");
+
+                return VK_FALSE;
+            }
+        }
+        else if (scenegraphIsToken(buffer, "marker"))
+        {
+            if (!scenegraphParseStringFloat(buffer, sdata, fdata))
+            {
+                return VK_FALSE;
+            }
+
+            if (animation.get())
+            {
+                auto currentMarker = IMarkerSP(new Marker());
+
+                if (!currentMarker.get())
+                {
+                	return VK_FALSE;
+                }
+
+                currentMarker->setName(sdata);
+                currentMarker->setTime(fdata[0]);
+
+                animation->addMarker(currentMarker);
             }
             else
             {

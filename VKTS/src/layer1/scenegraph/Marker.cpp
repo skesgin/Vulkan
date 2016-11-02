@@ -24,60 +24,56 @@
  * THE SOFTWARE.
  */
 
-#ifndef VKTS_IANIMATION_HPP_
-#define VKTS_IANIMATION_HPP_
-
-#include <vkts/vkts.hpp>
+#include "Marker.hpp"
 
 namespace vkts
 {
 
-class IAnimation: public ICloneable<IAnimation>, public IDestroyable
+Marker::Marker() :
+    IMarker(), name(""), t(0.0f)
 {
+}
 
-public:
+Marker::Marker(const Marker& other) :
+    IMarker(), name(other.name + "_clone"), t(other.t)
+{
+}
 
-    IAnimation() :
-        ICloneable<IAnimation>(), IDestroyable()
-    {
-    }
+Marker::~Marker()
+{
+}
 
-    virtual ~IAnimation()
-    {
-    }
+//
+// IMarker
+//
 
-    virtual const std::string& getName() const = 0;
+const std::string& Marker::getName() const
+{
+    return name;
+}
 
-    virtual void setName(const std::string& name) = 0;
+void Marker::setName(const std::string& name)
+{
+    this->name = name;
+}
 
-    virtual float getStart() const = 0;
+float Marker::getTime() const
+{
+    return t;
+}
 
-    virtual void setStart(const float start) = 0;
+void Marker::setTime(const float t)
+{
+    this->t = t;
+}
 
-    virtual float getStop() const = 0;
+//
+// ICloneable
+//
 
-    virtual void setStop(const float stop) = 0;
-
-    virtual void addMarker(const IMarkerSP& marker) = 0;
-
-    virtual VkBool32 removeMarker(const IMarkerSP& marker) = 0;
-
-    virtual size_t getNumberMarkers() const = 0;
-
-    virtual const SmartPointerVector<IMarkerSP>& getMarkers() const = 0;
-
-    virtual void addChannel(const IChannelSP& channel) = 0;
-
-    virtual VkBool32 removeChannel(const IChannelSP& channel) = 0;
-
-    virtual size_t getNumberChannels() const = 0;
-
-    virtual const SmartPointerVector<IChannelSP>& getChannels() const = 0;
-
-};
-
-typedef std::shared_ptr<IAnimation> IAnimationSP;
+IMarkerSP Marker::clone() const
+{
+    return IMarkerSP(new Marker(*this));
+}
 
 } /* namespace vkts */
-
-#endif /* VKTS_IANIMATION_HPP_ */

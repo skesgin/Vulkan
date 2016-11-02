@@ -556,6 +556,8 @@
 
 #include <vkts/layer1/scenegraph/IChannel.hpp>
 
+#include <vkts/layer1/scenegraph/IMarker.hpp>
+
 #include <vkts/layer1/scenegraph/IBSDFMaterial.hpp>
 
 #include <vkts/layer1/scenegraph/IPhongMaterial.hpp>
