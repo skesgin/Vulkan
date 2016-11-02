@@ -110,9 +110,7 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
         add_definitions(-DVKTS_DISPLAY_VISUAL)
 
-        list(APPEND IGNORE_CPP_FILES    ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_linux_gamepad.cpp
-                                        ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_linux_touchpad.cpp
-                                        ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_xlib.cpp
+        list(APPEND IGNORE_CPP_FILES    ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_xlib.cpp
                                         ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_xlib_key.cpp
                                         ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_wayland.cpp
                                         ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_wayland_key.cpp
