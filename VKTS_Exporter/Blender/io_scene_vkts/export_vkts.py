@@ -1802,11 +1802,57 @@ def saveParticleSystems(context, filepath):
 
     file.close()
 
+def saveCameras(context, filepath):
+    
+    cameras = {}
+
+    # Gather all cameras.
+    for currentObject in context.scene.objects:
+        if currentObject.type == 'CAMERA':
+            if currentObject.data.type == 'PERSP' or currentObject.data.type == 'ORTHO':
+                cameras.setdefault(currentObject)
+
+    file = open(filepath, "w", encoding="utf8", newline="\n")
+    fw = file.write
+    fw("#\n")
+    fw("# VulKan ToolS cameras.\n")
+    fw("#\n")
+    fw("\n")
+
+    for currentCamera in cameras:
+
+        cameraType = 'Perspective'
+        if currentCamera.data.type == 'ORTHO':
+            cameraType = 'Orthogonal'
+
+        fw("#\n")
+        fw("# Camera.\n")
+        fw("#\n")
+        fw("\n")        
+        fw("name %s\n" % (currentCamera.data.name))
+        fw("\n")
+        fw("type %s\n" % (cameraType))
+        fw("\n")
+        fw("znear %f\n" % (currentCamera.data.clip_start))
+        fw("zfar %f\n" % (currentCamera.data.clip_end))
+        fw("\n")
+        aspect = context.scene.render.resolution_x / context.scene.render.resolution_y
+        if cameraType == 'Perspective':
+            fw("aspect %f\n" % (aspect))
+            fw("fovy %f\n" % (math.degrees(currentCamera.data.angle) * 1.0 / aspect))
+        else:
+            fw("left %f\n" % (-currentCamera.data.ortho_scale * 0.5))
+            fw("right %f\n" % (currentCamera.data.ortho_scale * 0.5))
+            fw("bottom %f\n" % (-1.0 / aspect * currentCamera.data.ortho_scale * 0.5))
+            fw("top %f\n" % (1.0 / aspect * currentCamera.data.ortho_scale * 0.5))
+
+    file.close()
+
 def saveLights(context, filepath):
     
     lights = {}
 
-    # Gather all particles.
+    # Gather all lights.
     for currentObject in context.scene.objects:
         if currentObject.type == 'LAMP':
             if currentObject.data.type == 'POINT' or currentObject.data.type == 'SUN' or currentObject.data.type == 'SPOT':
@@ -2487,7 +2533,7 @@ def saveNode(context, fw, fw_animation, fw_channel, currentObject):
     
     return
 
-def saveObjects(context, filepath, meshLibraryName, animationLibraryName, channelLibraryName, particleSystemLibraryName, lightLibraryName):
+def saveObjects(context, filepath, meshLibraryName, animationLibraryName, channelLibraryName, particleSystemLibraryName, lightLibraryName, cameraLibraryName):
 
     channelLibraryFilepath = os.path.dirname(filepath) + "/" + channelLibraryName
 
@@ -2520,6 +2566,10 @@ def saveObjects(context, filepath, meshLibraryName, animationLibraryName, channe
     fw("#\n")
     fw("\n")
 
+    if cameraLibraryName is not None:
+        fw("camera_library %s\n" % friendlyName(cameraLibraryName))
+        fw("\n")
+
     if lightLibraryName is not None:
         fw("light_library %s\n" % friendlyName(lightLibraryName))
         fw("\n")
@@ -2537,9 +2587,6 @@ def saveObjects(context, filepath, meshLibraryName, animationLibraryName, channe
         fw("\n")
 
     for currentObject in context.scene.objects:
-
-        if currentObject.type == 'CAMERA':
-            continue
 
         if currentObject.type == 'CURVE':
             continue
@@ -2639,6 +2686,14 @@ def save(operator,
 
     #
 
+    camerasLibraryName = bpy.path.basename(sceneFilepath).replace(".vkts", "_cameras.vkts")
+
+    camerasLibraryFilepath = os.path.dirname(sceneFilepath) + "/" + camerasLibraryName
+
+    saveCameras(context, camerasLibraryFilepath)
+
+    #
+
     lightsLibraryName = bpy.path.basename(sceneFilepath).replace(".vkts", "_lights.vkts")
 
     lightsLibraryFilepath = os.path.dirname(sceneFilepath) + "/" + lightsLibraryName
@@ -2670,14 +2725,11 @@ def save(operator,
     
     objectLibraryFilepath = os.path.dirname(sceneFilepath) + "/" + objectLibraryName
 
-    saveObjects(context, objectLibraryFilepath, meshLibraryName, animationLibraryName, channelLibraryName, particleSystemLibraryName, lightsLibraryName)
+    saveObjects(context, objectLibraryFilepath, meshLibraryName, animationLibraryName, channelLibraryName, particleSystemLibraryName, lightsLibraryName, camerasLibraryName)
 
     #
     
     for currentObject in context.scene.objects:
-
-        if currentObject.type == 'CAMERA':
-            continue
 
         if currentObject.type == 'CURVE':
             continue

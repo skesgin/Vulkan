@@ -27,7 +27,7 @@
 #ifndef VKTS_HPP_
 #define VKTS_HPP_
 
-// TODO: Export and import camera.
+// TODO: Import camera.
 
 // TODO: Allow multiple uniform buffers in scene graph.
 

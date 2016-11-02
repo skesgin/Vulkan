@@ -3771,6 +3771,43 @@ static VkBool32 scenegraphLoadParticleSystems(const char* directory, const char*
     return VK_TRUE;
 }
 
+static VkBool32 scenegraphLoadCameras(const char* directory, const char* filename, const IContextSP& context)
+{
+    if (!directory || !filename || !context.get())
+    {
+        return VK_FALSE;
+    }
+
+    std::string finalFilename = std::string(directory) + std::string(filename);
+
+    auto textBuffer = fileLoadText(finalFilename.c_str());
+
+    if (!textBuffer.get())
+    {
+        textBuffer = fileLoadText(filename);
+
+        if (!textBuffer.get())
+        {
+            return VK_FALSE;
+        }
+    }
+
+    char buffer[VKTS_MAX_BUFFER_CHARS + 1];
+
+    while (textBuffer->gets(buffer, VKTS_MAX_BUFFER_CHARS))
+    {
+        if (scenegraphSkipBuffer(buffer))
+        {
+            continue;
+        }
+
+        // TODO: Load cameras.
+    }
+
+    return VK_TRUE;
+}
+
+
 static VkBool32 scenegraphLoadLights(const char* directory, const char* filename, const IContextSP& context)
 {
     if (!directory || !filename || !context.get())
@@ -4051,6 +4088,20 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
             if (!scenegraphLoadAnimations(directory, sdata0, context))
             {
                 logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load animations: '%s'", sdata0);
+
+                return VK_FALSE;
+            }
+        }
+        else if (scenegraphIsToken(buffer, "camera_library"))
+        {
+            if (!scenegraphParseString(buffer, sdata0))
+            {
+                return VK_FALSE;
+            }
+
+            if (!scenegraphLoadCameras(directory, sdata0, context))
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load cameras: '%s'", sdata0);
 
                 return VK_FALSE;
             }
