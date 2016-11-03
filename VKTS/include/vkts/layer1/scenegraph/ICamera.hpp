@@ -65,30 +65,19 @@ public:
     virtual void setZFar(const float zfar) = 0;
 
 
-    virtual float getAspect() const = 0;
-
-    virtual void setAspect(const float aspect) = 0;
-
     virtual float getFovY() const = 0;
 
     virtual void setFovY(const float fovy) = 0;
 
 
-    virtual float getLeft() const = 0;
+    virtual float getOrthoScale() const = 0;
 
-    virtual void setLeft(const float left) = 0;
+    virtual void setOrthoScale(const float orthoScale) = 0;
 
-    virtual float getRight() const = 0;
 
-    virtual void setRight(const float right) = 0;
+    virtual const glm::ivec2& getWindowDimension() const = 0;
 
-    virtual float getBottom() const = 0;
-
-    virtual void setBottom(const float bottom) = 0;
-
-    virtual float getTop() const = 0;
-
-    virtual void setTop(const float top) = 0;
+    virtual void setWindowDimension(const glm::ivec2& windowDimension) = 0;
 
 
     virtual const glm::mat4& getViewMatrix() const = 0;

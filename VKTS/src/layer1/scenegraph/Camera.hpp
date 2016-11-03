@@ -44,10 +44,11 @@ private:
     float zNear;
     float zFar;
 
-    float aspect;
     float fovy;
 
-    glm::vec4 ortho;
+    float orthoScale;
+
+    glm::ivec2 windowDimension;
 
     glm::mat4 view;
 
@@ -86,30 +87,19 @@ public:
     virtual void setZFar(const float zfar) override;
 
 
-    virtual float getAspect() const override;
-
-    virtual void setAspect(const float aspect) override;
-
     virtual float getFovY() const override;
 
     virtual void setFovY(const float fovy) override;
 
 
-    virtual float getLeft() const override;
+    virtual float getOrthoScale() const override;
 
-    virtual void setLeft(const float left) override;
+    virtual void setOrthoScale(const float orthoScale) override;
 
-    virtual float getRight() const override;
 
-    virtual void setRight(const float right) override;
+    virtual const glm::ivec2& getWindowDimension() const override;
 
-    virtual float getBottom() const override;
-
-    virtual void setBottom(const float bottom) override;
-
-    virtual float getTop() const override;
-
-    virtual void setTop(const float top) override;
+    virtual void setWindowDimension(const glm::ivec2& windowDimension) override;
 
 
     virtual const glm::mat4& getViewMatrix() const override;

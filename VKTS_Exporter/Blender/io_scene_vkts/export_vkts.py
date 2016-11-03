@@ -1836,15 +1836,11 @@ def saveCameras(context, filepath):
         fw("znear %f\n" % (currentCamera.data.clip_start))
         fw("zfar %f\n" % (currentCamera.data.clip_end))
         fw("\n")
-        aspect = context.scene.render.resolution_x / context.scene.render.resolution_y
         if cameraType == 'Perspective':
-            fw("aspect %f\n" % (aspect))
+            aspect = context.scene.render.resolution_x / context.scene.render.resolution_y
             fw("fovy %f\n" % (math.degrees(currentCamera.data.angle) * 1.0 / aspect))
         else:
-            fw("left %f\n" % (-currentCamera.data.ortho_scale * 0.5))
-            fw("right %f\n" % (currentCamera.data.ortho_scale * 0.5))
-            fw("bottom %f\n" % (-1.0 / aspect * currentCamera.data.ortho_scale * 0.5))
-            fw("top %f\n" % (1.0 / aspect * currentCamera.data.ortho_scale * 0.5))
+            fw("ortho_scale %f\n" % (currentCamera.data.ortho_scale))
 
     file.close()
 

@@ -33,22 +33,22 @@ void Camera::updateProjectionMatrix()
 {
 	if (cameraType == PerspectiveCamera)
 	{
-		projection = perspectiveMat4(fovy, aspect, zNear, zFar);
+		projection = perspectiveMat4(fovy, (float)windowDimension.x / (float)windowDimension.y, zNear, zFar);
 	}
 	else
 	{
-		projection = orthoMat4(ortho.x, ortho.y, ortho.z, ortho.w, zNear, zFar);
+		projection = orthoMat4(-(float)windowDimension.x * 0.5f, (float)windowDimension.x * 0.5f, -(float)windowDimension.y * 0.5f, (float)windowDimension.y * 0.5f, zNear, zFar);
 	}
 }
 
 Camera::Camera() :
-    ICamera(), name(""), cameraType(PerspectiveCamera), zNear(0.1f), zFar(100.0f), aspect(1.0f), fovy(45.0f), ortho(-1.0f, 1.0f, -1.0f, 1.0f)
+    ICamera(), name(""), cameraType(PerspectiveCamera), zNear(0.1f), zFar(100.0f), fovy(45.0f), orthoScale(1.0f), windowDimension(1, 1)
 {
 	updateProjectionMatrix();
 }
 
 Camera::Camera(const Camera& other) :
-	ICamera(), name(other.name + "_clone"), cameraType(other.cameraType), zNear(other.zNear), zFar(other.zFar), aspect(other.aspect), fovy(other.fovy), ortho(other.ortho), view(other.view), projection(other.projection)
+	ICamera(), name(other.name + "_clone"), cameraType(other.cameraType), zNear(other.zNear), zFar(other.zFar), fovy(other.fovy), orthoScale(other.orthoScale), windowDimension(other.windowDimension), view(other.view), projection(other.projection)
 {
 }
 
@@ -106,17 +106,6 @@ void Camera::setZFar(const float zfar)
 }
 
 
-float Camera::getAspect() const
-{
-	return aspect;
-}
-
-void Camera::setAspect(const float aspect)
-{
-	this->aspect = aspect;
-	updateProjectionMatrix();
-}
-
 float Camera::getFovY() const
 {
 	return fovy;
@@ -129,47 +118,26 @@ void Camera::setFovY(const float fovy)
 }
 
 
-float Camera::getLeft() const
+float Camera::getOrthoScale() const
 {
-	return ortho.x;
+	return orthoScale;
 }
 
-void Camera::setLeft(const float left)
+void Camera::setOrthoScale(const float orthoScale)
 {
-	this->ortho.x = left;
+	this->orthoScale = orthoScale;
 	updateProjectionMatrix();
 }
 
-float Camera::getRight() const
+
+const glm::ivec2& Camera::getWindowDimension() const
 {
-	return ortho.y;
+	return windowDimension;
 }
 
-void Camera::setRight(const float right)
+void Camera::setWindowDimension(const glm::ivec2& windowDimension)
 {
-	this->ortho.y = right;
-	updateProjectionMatrix();
-}
-
-float Camera::getBottom() const
-{
-	return ortho.z;
-}
-
-void Camera::setBottom(const float bottom)
-{
-	this->ortho.z = bottom;
-	updateProjectionMatrix();
-}
-
-float Camera::getTop() const
-{
-	return this->ortho.w;
-}
-
-void Camera::setTop(const float top)
-{
-	this->ortho.w = top;
+	this->windowDimension = windowDimension;
 	updateProjectionMatrix();
 }
 

@@ -3895,24 +3895,6 @@ static VkBool32 scenegraphLoadCameras(const char* directory, const char* filenam
                 return VK_FALSE;
             }
         }
-        else if (scenegraphIsToken(buffer, "aspect"))
-        {
-            if (!scenegraphParseFloat(buffer, &fdata))
-            {
-                return VK_FALSE;
-            }
-
-            if (camera.get() && camera->getCameraType() == PerspectiveCamera)
-            {
-            	camera->setAspect(fdata);
-            }
-            else
-            {
-                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No camera or invalid type");
-
-                return VK_FALSE;
-            }
-        }
         else if (scenegraphIsToken(buffer, "fovy"))
         {
             if (!scenegraphParseFloat(buffer, &fdata))
@@ -3931,7 +3913,7 @@ static VkBool32 scenegraphLoadCameras(const char* directory, const char* filenam
                 return VK_FALSE;
             }
         }
-        else if (scenegraphIsToken(buffer, "left"))
+        else if (scenegraphIsToken(buffer, "ortho_scale"))
         {
             if (!scenegraphParseFloat(buffer, &fdata))
             {
@@ -3940,61 +3922,7 @@ static VkBool32 scenegraphLoadCameras(const char* directory, const char* filenam
 
             if (camera.get() && camera->getCameraType() == OrthogonalCamera)
             {
-            	camera->setLeft(fdata);
-            }
-            else
-            {
-                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No camera or invalid type");
-
-                return VK_FALSE;
-            }
-        }
-        else if (scenegraphIsToken(buffer, "right"))
-        {
-            if (!scenegraphParseFloat(buffer, &fdata))
-            {
-                return VK_FALSE;
-            }
-
-            if (camera.get() && camera->getCameraType() == OrthogonalCamera)
-            {
-            	camera->setRight(fdata);
-            }
-            else
-            {
-                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No camera or invalid type");
-
-                return VK_FALSE;
-            }
-        }
-        else if (scenegraphIsToken(buffer, "bottom"))
-        {
-            if (!scenegraphParseFloat(buffer, &fdata))
-            {
-                return VK_FALSE;
-            }
-
-            if (camera.get() && camera->getCameraType() == OrthogonalCamera)
-            {
-            	camera->setBottom(fdata);
-            }
-            else
-            {
-                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No camera or invalid type");
-
-                return VK_FALSE;
-            }
-        }
-        else if (scenegraphIsToken(buffer, "top"))
-        {
-            if (!scenegraphParseFloat(buffer, &fdata))
-            {
-                return VK_FALSE;
-            }
-
-            if (camera.get() && camera->getCameraType() == OrthogonalCamera)
-            {
-            	camera->setTop(fdata);
+            	camera->setOrthoScale(fdata);
             }
             else
             {
