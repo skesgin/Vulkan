@@ -80,11 +80,11 @@ public:
 
     virtual float getZNear() const override;
 
-    virtual void setZNear(const float znear) override;
+    virtual void setZNear(const float zNear) override;
 
     virtual float getZFar() const override;
 
-    virtual void setZFar(const float zfar) override;
+    virtual void setZFar(const float zFar) override;
 
 
     virtual float getFovY() const override;

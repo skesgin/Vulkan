@@ -88,7 +88,7 @@ float Camera::getZNear() const
 	return zNear;
 }
 
-void Camera::setZNear(const float znear)
+void Camera::setZNear(const float zNear)
 {
 	this->zNear = zNear;
 	updateProjectionMatrix();
@@ -99,7 +99,7 @@ float Camera::getZFar() const
 	return zFar;
 }
 
-void Camera::setZFar(const float zfar)
+void Camera::setZFar(const float zFar)
 {
 	this->zFar = zFar;
 	updateProjectionMatrix();

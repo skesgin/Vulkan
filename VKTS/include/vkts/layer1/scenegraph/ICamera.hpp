@@ -58,11 +58,11 @@ public:
 
     virtual float getZNear() const = 0;
 
-    virtual void setZNear(const float znear) = 0;
+    virtual void setZNear(const float zNear) = 0;
 
     virtual float getZFar() const = 0;
 
-    virtual void setZFar(const float zfar) = 0;
+    virtual void setZFar(const float zFar) = 0;
 
 
     virtual float getFovY() const = 0;
