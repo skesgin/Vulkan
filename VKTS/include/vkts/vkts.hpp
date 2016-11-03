@@ -33,8 +33,20 @@
 
 // TODO: Finalize Wayland port.
 
+// TODO: Split VKTS into "core" library, which is no visual configuration right now.
+//		 Split WSI part into own library.
+//		 Split window, display and window handling into own library, having no Vulkan dependencies.
+
+// TODO: Add window buffer and/or cleaning for windows.
+
+// TODO: General refactoring.
+
 // TODO: Mark, if functions are thread safe or not.
-// TODO: Add documentation.
+// TODO: Add documentation in code.
+
+// TODO: Add documentation on GitHub.
+
+// TODO: Release version 1.0.x.
 
 /**
  *
