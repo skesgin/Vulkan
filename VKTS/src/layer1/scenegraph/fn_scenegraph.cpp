@@ -51,6 +51,7 @@
 
 #include "SubMesh.hpp"
 
+#include "Camera.hpp"
 #include "Light.hpp"
 
 #include "Mesh.hpp"
@@ -3793,6 +3794,10 @@ static VkBool32 scenegraphLoadCameras(const char* directory, const char* filenam
     }
 
     char buffer[VKTS_MAX_BUFFER_CHARS + 1];
+    char sdata[VKTS_MAX_TOKEN_CHARS + 1];
+    float fdata;
+
+    auto camera = ICameraSP();
 
     while (textBuffer->gets(buffer, VKTS_MAX_BUFFER_CHARS))
     {
@@ -3801,7 +3806,207 @@ static VkBool32 scenegraphLoadCameras(const char* directory, const char* filenam
             continue;
         }
 
-        // TODO: Load cameras.
+        if (scenegraphIsToken(buffer, "name"))
+        {
+            if (!scenegraphParseString(buffer, sdata))
+            {
+                return VK_FALSE;
+            }
+
+            camera = ICameraSP(new Camera());
+
+            if (!camera.get())
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Camera not created: '%s'", sdata);
+
+                return VK_FALSE;
+            }
+
+            camera->setName(sdata);
+
+            //
+
+            context->addCamera(camera);
+        }
+        else if (scenegraphIsToken(buffer, "type"))
+        {
+            if (!scenegraphParseString(buffer, sdata))
+            {
+                return VK_FALSE;
+            }
+
+            if (camera.get())
+            {
+                if (strcmp(sdata, "Perspective") == 0)
+                {
+                	camera->setCameraType(PerspectiveCamera);
+                }
+                else if (strcmp(sdata, "Orhtogonal") == 0)
+                {
+                	camera->setCameraType(OrthogonalCamera);
+                }
+                else
+                {
+                    logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Invalid camera type '%s'", sdata);
+
+                    return VK_FALSE;
+                }
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No Camera");
+
+                return VK_FALSE;
+            }
+        }
+        else if (scenegraphIsToken(buffer, "znear"))
+        {
+            if (!scenegraphParseFloat(buffer, &fdata))
+            {
+                return VK_FALSE;
+            }
+
+            if (camera.get())
+            {
+            	camera->setZNear(fdata);
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No camera");
+
+                return VK_FALSE;
+            }
+        }
+        else if (scenegraphIsToken(buffer, "zfar"))
+        {
+            if (!scenegraphParseFloat(buffer, &fdata))
+            {
+                return VK_FALSE;
+            }
+
+            if (camera.get())
+            {
+            	camera->setZFar(fdata);
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No camera");
+
+                return VK_FALSE;
+            }
+        }
+        else if (scenegraphIsToken(buffer, "aspect"))
+        {
+            if (!scenegraphParseFloat(buffer, &fdata))
+            {
+                return VK_FALSE;
+            }
+
+            if (camera.get() && camera->getCameraType() == PerspectiveCamera)
+            {
+            	camera->setAspect(fdata);
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No camera or invalid type");
+
+                return VK_FALSE;
+            }
+        }
+        else if (scenegraphIsToken(buffer, "fovy"))
+        {
+            if (!scenegraphParseFloat(buffer, &fdata))
+            {
+                return VK_FALSE;
+            }
+
+            if (camera.get() && camera->getCameraType() == PerspectiveCamera)
+            {
+            	camera->setFovY(fdata);
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No camera or invalid type");
+
+                return VK_FALSE;
+            }
+        }
+        else if (scenegraphIsToken(buffer, "left"))
+        {
+            if (!scenegraphParseFloat(buffer, &fdata))
+            {
+                return VK_FALSE;
+            }
+
+            if (camera.get() && camera->getCameraType() == OrthogonalCamera)
+            {
+            	camera->setLeft(fdata);
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No camera or invalid type");
+
+                return VK_FALSE;
+            }
+        }
+        else if (scenegraphIsToken(buffer, "right"))
+        {
+            if (!scenegraphParseFloat(buffer, &fdata))
+            {
+                return VK_FALSE;
+            }
+
+            if (camera.get() && camera->getCameraType() == OrthogonalCamera)
+            {
+            	camera->setRight(fdata);
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No camera or invalid type");
+
+                return VK_FALSE;
+            }
+        }
+        else if (scenegraphIsToken(buffer, "bottom"))
+        {
+            if (!scenegraphParseFloat(buffer, &fdata))
+            {
+                return VK_FALSE;
+            }
+
+            if (camera.get() && camera->getCameraType() == OrthogonalCamera)
+            {
+            	camera->setBottom(fdata);
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No camera or invalid type");
+
+                return VK_FALSE;
+            }
+        }
+        else if (scenegraphIsToken(buffer, "top"))
+        {
+            if (!scenegraphParseFloat(buffer, &fdata))
+            {
+                return VK_FALSE;
+            }
+
+            if (camera.get() && camera->getCameraType() == OrthogonalCamera)
+            {
+            	camera->setTop(fdata);
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No camera or invalid type");
+
+                return VK_FALSE;
+            }
+        }
+        else
+        {
+            scenegraphUnknownBuffer(buffer);
+        }
     }
 
     return VK_TRUE;
@@ -4715,6 +4920,33 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
                 return VK_FALSE;
             }
         }
+        else if (scenegraphIsToken(buffer, "camera"))
+        {
+            if (!scenegraphParseString(buffer, sdata0))
+            {
+                return VK_FALSE;
+            }
+
+            if (node.get())
+            {
+                const auto& camera = context->useCamera(sdata0);
+
+                if (!camera.get())
+                {
+                    logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Camera not found: '%s'", sdata0);
+
+                    return VK_FALSE;
+                }
+
+                node->addCamera(camera);
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No node");
+
+                return VK_FALSE;
+            }
+        }
         else if (scenegraphIsToken(buffer, "light"))
         {
             if (!scenegraphParseString(buffer, sdata0))
@@ -4994,6 +5226,13 @@ ISceneSP VKTS_APIENTRY scenegraphLoadScene(const char* filename, const IContextS
         {
             scenegraphUnknownBuffer(buffer);
         }
+    }
+
+    // Gather all cameras and add too scene.
+
+    for (size_t i = 0; i < context->getAllCameras().values().size(); i++)
+    {
+    	scene->addCamera(context->getAllCameras().valueAt(i));
     }
 
     // Gather all lights and add too scene.

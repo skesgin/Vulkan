@@ -41,6 +41,8 @@ private:
 
     SmartPointerVector<IObjectSP> allObjects;
 
+    SmartPointerVector<ICameraSP> allCameras;
+
     SmartPointerVector<ILightSP> allLights;
 
     ITextureSP environment;
@@ -80,6 +82,17 @@ public:
     virtual size_t getNumberObjects() const override;
 
     virtual const SmartPointerVector<IObjectSP>& getObjects() const override;
+
+
+    virtual void addCamera(const ICameraSP& camera) override;
+
+    virtual VkBool32 removeCamera(const ICameraSP& camera) override;
+
+    virtual ICameraSP findCamera(const std::string& name) const override;
+
+    virtual size_t getNumberCameras() const override;
+
+    virtual const SmartPointerVector<ICameraSP>& getCameras() const override;
 
 
     virtual void addLight(const ILightSP& light) override;

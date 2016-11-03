@@ -24,49 +24,49 @@
  * THE SOFTWARE.
  */
 
-#include "Camera.hpp"
+#include "UserUserCamera.hpp"
 
 namespace vkts
 {
 
-void Camera::updateViewMatrix()
+void UserCamera::updateViewMatrix()
 {
     viewMatrix = lookAtMat4(glm::vec4(translate, 1.0f), glm::vec4(translate + forward, 1.0f), up);
 }
 
-void Camera::update()
+void UserCamera::update()
 {
     updateViewMatrix();
 }
 
-Camera::Camera() :
-    ICamera()
+UserCamera::UserCamera() :
+    IUserCamera()
 {
     updateViewMatrix();
 }
 
-Camera::Camera(const glm::vec4& eye, const glm::vec3& rotation) :
-    ICamera()
+UserCamera::UserCamera(const glm::vec4& eye, const glm::vec3& rotation) :
+    IUserCamera()
 {
     setTranslateRotate(glm::vec3(eye), rotation);
 }
 
-Camera::Camera(const glm::vec4& eye, const Quat& rotationZ, const Quat& rotationY, const Quat& rotationX) :
-    ICamera()
+UserCamera::UserCamera(const glm::vec4& eye, const Quat& rotationZ, const Quat& rotationY, const Quat& rotationX) :
+    IUserCamera()
 {
     setTranslateRotate(glm::vec3(eye), rotationZ, rotationY, rotationX);
 }
 
-Camera::Camera(const Camera& other) :
-    ICamera(), viewMatrix(other.viewMatrix)
+UserCamera::UserCamera(const UserCamera& other) :
+    IUserCamera(), viewMatrix(other.viewMatrix)
 {
 }
 
-Camera::~Camera()
+UserCamera::~UserCamera()
 {
 }
 
-Camera& Camera::operator =(const Camera& other)
+UserCamera& UserCamera::operator =(const UserCamera& other)
 {
     this->translate = other.translate;
     this->rotateZ = other.rotateZ;
@@ -87,7 +87,7 @@ Camera& Camera::operator =(const Camera& other)
     return *this;
 }
 
-const glm::mat4& Camera::getViewMatrix() const
+const glm::mat4& UserCamera::getViewMatrix() const
 {
     return viewMatrix;
 }
@@ -96,9 +96,9 @@ const glm::mat4& Camera::getViewMatrix() const
 // ICloneable
 //
 
-ICameraSP Camera::clone() const
+IUserCameraSP UserCamera::clone() const
 {
-    return ICameraSP(new Camera(*this));
+    return IUserCameraSP(new UserCamera(*this));
 }
 
 } /* namespace vkts */

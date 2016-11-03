@@ -24,25 +24,25 @@
  * THE SOFTWARE.
  */
 
-#ifndef VKTS_ICAMERA_HPP_
-#define VKTS_ICAMERA_HPP_
+#ifndef VKTS_IUSERCAMERA_HPP_
+#define VKTS_IUSERCAMERA_HPP_
 
 #include <vkts/vkts.hpp>
 
 namespace vkts
 {
 
-class ICamera: public IMoveable, public ICloneable<ICamera>
+class IUserCamera: public IMoveable, public ICloneable<IUserCamera>
 {
 
 public:
 
-    ICamera() :
+    IUserCamera() :
         IMoveable(), ICloneable()
     {
     }
 
-    virtual ~ICamera()
+    virtual ~IUserCamera()
     {
     }
 
@@ -52,8 +52,8 @@ public:
 
 };
 
-typedef std::shared_ptr<ICamera> ICameraSP;
+typedef std::shared_ptr<IUserCamera> IUserCameraSP;
 
 } /* namespace vkts */
 
-#endif /* VKTS_ICAMERA_HPP_ */
+#endif /* VKTS_IUSERCAMERA_HPP_ */

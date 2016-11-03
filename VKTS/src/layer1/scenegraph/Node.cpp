@@ -65,6 +65,8 @@ void Node::reset()
 
     allMeshes.clear();
 
+    allCameras.clear();
+
     allLights.clear();
 
     allConstraints.clear();
@@ -90,7 +92,7 @@ void Node::reset()
 }
 
 Node::Node() :
-    INode(), name(""), parentNode(), translate(0.0f, 0.0f, 0.0f), rotate(0.0f, 0.0f, 0.0f), scale(1.0f, 1.0f, 1.0f), finalTranslate(0.0f, 0.0f, 0.0f), finalRotate(0.0f, 0.0f, 0.0f), finalScale(1.0f, 1.0f, 1.0f), transformMatrix(1.0f), transformMatrixDirty(VK_TRUE), jointIndex(-1), joints(0), bindTranslate(0.0f, 0.0f, 0.0f), bindRotate(0.0f, 0.0f,0.0f), bindScale(1.0f, 1.0f, 1.0f), bindMatrix(1.0f), inverseBindMatrix(1.0f), bindMatrixDirty(VK_FALSE), allChildNodes(), allMeshes(), allLights(), allConstraints(), allAnimations(), currentAnimation(-1), currentTime(0.0f), transformUniformBuffer(), jointsUniformBuffer(), box(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)), layers(0x01)
+    INode(), name(""), parentNode(), translate(0.0f, 0.0f, 0.0f), rotate(0.0f, 0.0f, 0.0f), scale(1.0f, 1.0f, 1.0f), finalTranslate(0.0f, 0.0f, 0.0f), finalRotate(0.0f, 0.0f, 0.0f), finalScale(1.0f, 1.0f, 1.0f), transformMatrix(1.0f), transformMatrixDirty(VK_TRUE), jointIndex(-1), joints(0), bindTranslate(0.0f, 0.0f, 0.0f), bindRotate(0.0f, 0.0f,0.0f), bindScale(1.0f, 1.0f, 1.0f), bindMatrix(1.0f), inverseBindMatrix(1.0f), bindMatrixDirty(VK_FALSE), allChildNodes(), allMeshes(), allCameras(), allLights(), allConstraints(), allAnimations(), currentAnimation(-1), currentTime(0.0f), transformUniformBuffer(), jointsUniformBuffer(), box(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)), layers(0x01)
 {
     reset();
 }
@@ -142,6 +144,29 @@ Node::Node(const Node& other) :
         }
 
         allMeshes.append(cloneMesh);
+    }
+
+    for (size_t i = 0; i < other.allCameras.size(); i++)
+    {
+        const auto& currentCamera = other.allCameras[i];
+
+        if (!currentCamera.get())
+        {
+            reset();
+
+            break;
+        }
+
+        ICameraSP cloneCamera = currentCamera->clone();
+
+        if (!cloneCamera.get())
+        {
+            reset();
+
+            break;
+        }
+
+        allCameras.append(cloneCamera);
     }
 
     for (size_t i = 0; i < other.allLights.size(); i++)
@@ -502,6 +527,26 @@ size_t Node::getNumberMeshes() const
 const SmartPointerVector<IMeshSP>& Node::getMeshes() const
 {
     return allMeshes;
+}
+
+void Node::addCamera(const ICameraSP& camera)
+{
+    allCameras.append(camera);
+}
+
+VkBool32 Node::removeCamera(const ICameraSP& camera)
+{
+    return allCameras.remove(camera);
+}
+
+size_t Node::getNumberCameras() const
+{
+    return allCameras.size();
+}
+
+const SmartPointerVector<ICameraSP>& Node::getCameras() const
+{
+    return allCameras;
 }
 
 void Node::addLight(const ILightSP& light)
@@ -900,6 +945,14 @@ void Node::updateRecursive(const IUpdateThreadContext& updateContext, const glm:
         	}
         }
 
+        if (allCameras.size() > 0)
+        {
+        	for (size_t i = 0; i < allCameras.size(); i++)
+        	{
+        		allCameras[i]->updateViewMatrix(this->transformMatrix);
+        	}
+        }
+
         if (allLights.size() > 0)
         {
         	for (size_t i = 0; i < allLights.size(); i++)
@@ -1085,6 +1138,16 @@ INodeSP Node::findNodeRecursiveFromRoot(const std::string& searchName)
 INodeSP Node::clone() const
 {
 	auto result = INodeSP(new Node(*this));
+
+	if (result.get() && result->getNumberCameras() != getNumberCameras())
+	{
+		return INodeSP();
+	}
+
+	if (result.get() && result->getNumberLights() != getNumberLights())
+	{
+		return INodeSP();
+	}
 
 	if (result.get() && result->getNumberChildNodes() != getNumberChildNodes())
 	{

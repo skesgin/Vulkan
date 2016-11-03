@@ -67,6 +67,7 @@ private:
 
     SmartPointerVector<IMeshSP> allMeshes;
 
+    SmartPointerVector<ICameraSP> allCameras;
     SmartPointerVector<ILightSP> allLights;
 
     SmartPointerVector<IConstraintSP> allConstraints;
@@ -176,6 +177,14 @@ public:
     virtual size_t getNumberMeshes() const override;
 
     virtual const SmartPointerVector<IMeshSP>& getMeshes() const override;
+
+    virtual void addCamera(const ICameraSP& camera) override;
+
+    virtual VkBool32 removeCamera(const ICameraSP& camera) override;
+
+    virtual size_t getNumberCameras() const override;
+
+    virtual const SmartPointerVector<ICameraSP>& getCameras() const override;
 
     virtual void addLight(const ILightSP& light) override;
 

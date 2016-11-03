@@ -24,15 +24,15 @@
  * THE SOFTWARE.
  */
 
-#ifndef VKTS_CAMERA_HPP_
-#define VKTS_CAMERA_HPP_
+#ifndef VKTS_USERCAMERA_HPP_
+#define VKTS_USERCAMERA_HPP_
 
 #include <vkts/vkts.hpp>
 
 namespace vkts
 {
 
-class Camera: public ICamera
+class UserCamera: public IUserCamera
 {
 
 private:
@@ -47,15 +47,15 @@ protected:
 
 public:
 
-    Camera();
-    Camera(const glm::vec4& eye, const glm::vec3& rotation);
-    Camera(const glm::vec4& eye, const Quat& rotationZ, const Quat& rotationY, const Quat& rotationX);
-    Camera(const Camera& other);
-    Camera(Camera&& other) = delete;
-    virtual ~Camera();
+    UserCamera();
+    UserCamera(const glm::vec4& eye, const glm::vec3& rotation);
+    UserCamera(const glm::vec4& eye, const Quat& rotationZ, const Quat& rotationY, const Quat& rotationX);
+    UserCamera(const UserCamera& other);
+    UserCamera(UserCamera&& other) = delete;
+    virtual ~UserCamera();
 
-    Camera& operator =(const Camera& other);
-    Camera& operator =(Camera && other) = delete;
+    UserCamera& operator =(const UserCamera& other);
+    UserCamera& operator =(UserCamera && other) = delete;
 
     //
     // ICamera
@@ -67,10 +67,10 @@ public:
     // ICloneable
     //
 
-    virtual ICameraSP clone() const override;
+    virtual IUserCameraSP clone() const override;
 
 };
 
 } /* namespace vkts */
 
-#endif /* VKTS_CAMERA_HPP_ */
+#endif /* VKTS_USERCAMERA_HPP_ */

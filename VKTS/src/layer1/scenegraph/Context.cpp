@@ -30,7 +30,7 @@ namespace vkts
 {
 
 Context::Context(const VkBool32 replace, const IInitialResourcesSP& initialResources, const ICommandBuffersSP& cmdBuffer, const VkSamplerCreateInfo& samplerCreateInfo, const VkImageViewCreateInfo& imageViewCreateInfo, const IDescriptorSetLayoutSP& descriptorSetLayout) :
-    IContext(), replace(replace), initialResources(initialResources), cmdBuffer(cmdBuffer), samplerCreateInfo(samplerCreateInfo), imageViewCreateInfo(imageViewCreateInfo), descriptorSetLayout(descriptorSetLayout), allObjects(), allMeshes(), allSubMeshes(), allAnimations(), allChannels(), allBSDFMaterials(), allUsedBSDFMaterials(), allPhongMaterials(), allUsedPhongMaterials(), allTextures(), allImageDatas(), allVertexShaderModules(), allFragmentShaderModules(), renderPass()
+    IContext(), replace(replace), initialResources(initialResources), cmdBuffer(cmdBuffer), samplerCreateInfo(samplerCreateInfo), imageViewCreateInfo(imageViewCreateInfo), descriptorSetLayout(descriptorSetLayout), allObjects(), allCameras(), allLights(), allMeshes(), allSubMeshes(), allAnimations(), allChannels(), allBSDFMaterials(), allUsedBSDFMaterials(), allPhongMaterials(), allUsedPhongMaterials(), allTextures(), allImageDatas(), allVertexShaderModules(), allFragmentShaderModules(), renderPass()
 {
 }
 
@@ -105,6 +105,45 @@ VkBool32 Context::removeObject(const IObjectSP& object)
 const SmartPointerMap<std::string, IObjectSP>& Context::getAllObjects() const
 {
 	return allObjects;
+}
+
+//
+
+ICameraSP Context::useCamera(const std::string& name) const
+{
+	if (!contains(name, allCameras))
+	{
+		return ICameraSP();
+	}
+
+	//
+
+    return get(name, allCameras);
+}
+
+VkBool32 Context::addCamera(const ICameraSP& camera)
+{
+    if (!camera.get())
+    {
+        return VK_FALSE;
+    }
+
+    return add(camera->getName(), camera, allCameras);
+}
+
+VkBool32 Context::removeCamera(const ICameraSP& camera)
+{
+    if (!camera.get())
+    {
+        return VK_FALSE;
+    }
+
+    return remove(camera->getName(), allCameras);
+}
+
+const SmartPointerMap<std::string, ICameraSP>& Context::getAllCameras() const
+{
+	return allCameras;
 }
 
 //
@@ -594,6 +633,10 @@ void Context::destroy()
     // Only free resources, but do not destroy them.
 
     allObjects.clear();
+
+    allCameras.clear();
+
+    allLights.clear();
 
     allMeshes.clear();
 

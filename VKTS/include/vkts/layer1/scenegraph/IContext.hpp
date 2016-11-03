@@ -68,6 +68,16 @@ public:
 
     //
 
+    virtual ICameraSP useCamera(const std::string& name) const = 0;
+
+    virtual VkBool32 addCamera(const ICameraSP& camera) = 0;
+
+    virtual VkBool32 removeCamera(const ICameraSP& camera) = 0;
+
+    virtual const SmartPointerMap<std::string, ICameraSP>& getAllCameras() const = 0;
+
+    //
+
     virtual ILightSP useLight(const std::string& name) const = 0;
 
     virtual VkBool32 addLight(const ILightSP& light) = 0;

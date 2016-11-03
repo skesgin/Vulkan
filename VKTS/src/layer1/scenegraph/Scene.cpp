@@ -32,7 +32,7 @@ namespace vkts
 {
 
 Scene::Scene() :
-    IScene(), name(""), allObjects(), allLights(), environment(nullptr), diffuseEnvironment(nullptr), specularEnvironment(nullptr), lut(nullptr)
+    IScene(), name(""), allObjects(), allCameras(), allLights(), environment(nullptr), diffuseEnvironment(nullptr), specularEnvironment(nullptr), lut(nullptr)
 {
 }
 
@@ -64,6 +64,33 @@ Scene::Scene(const Scene& other) :
         }
 
         allObjects.append(cloneObject);
+    }
+
+    for (size_t i = 0; i < other.allCameras.size(); i++)
+    {
+        const auto& currentCamera = other.allCameras[i];
+
+        if (!currentCamera.get())
+        {
+            name = "";
+
+            allCameras.clear();
+
+            break;
+        }
+
+        ICameraSP cloneCamera = currentCamera->clone();
+
+        if (!cloneCamera.get())
+        {
+            name = "";
+
+            allCameras.clear();
+
+            break;
+        }
+
+        allCameras.append(cloneCamera);
     }
 
     for (size_t i = 0; i < other.allLights.size(); i++)
@@ -150,6 +177,40 @@ size_t Scene::getNumberObjects() const
 const SmartPointerVector<IObjectSP>& Scene::getObjects() const
 {
     return allObjects;
+}
+
+
+void Scene::addCamera(const ICameraSP& camera)
+{
+    allCameras.append(camera);
+}
+
+VkBool32 Scene::removeCamera(const ICameraSP& camera)
+{
+    return allCameras.remove(camera);
+}
+
+ICameraSP Scene::findCamera(const std::string& name) const
+{
+    for (size_t i = 0; i < allCameras.size(); i++)
+    {
+    	if (allCameras[i]->getName() == name)
+    	{
+    		return allCameras[i];
+    	}
+    }
+
+    return ICameraSP();
+}
+
+size_t Scene::getNumberCameras() const
+{
+    return allCameras.size();
+}
+
+const SmartPointerVector<ICameraSP>& Scene::getCameras() const
+{
+    return allCameras;
 }
 
 
@@ -284,6 +345,17 @@ ISceneSP Scene::clone() const
 		return ISceneSP();
 	}
 
+	if (result.get() && result->getNumberCameras() != getNumberCameras())
+	{
+		return ISceneSP();
+	}
+
+
+	if (result.get() && result->getNumberLights() != getNumberLights())
+	{
+		return ISceneSP();
+	}
+
     return result;
 }
 
@@ -326,6 +398,8 @@ void Scene::destroy()
         allObjects[i]->destroy();
     }
     allObjects.clear();
+
+    allCameras.clear();
 
     allLights.clear();
 }

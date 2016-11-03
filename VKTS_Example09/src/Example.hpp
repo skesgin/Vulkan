@@ -68,7 +68,7 @@ private:
 
 	const vkts::ISurfaceSP surface;
 
-	vkts::ICameraSP camera;
+	vkts::IUserCameraSP camera;
 	vkts::IInputControllerSP inputController;
 
 	vkts::SmartPointerVector<vkts::IUpdateableSP> allUpdateables;

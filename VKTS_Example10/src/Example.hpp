@@ -78,7 +78,7 @@ private:
 
 	VkBool32 showStats;
 
-	vkts::ICameraSP camera;
+	vkts::IUserCameraSP camera;
 	vkts::IInputControllerSP inputController;
 
 	vkts::SmartPointerVector<vkts::IUpdateableSP> allUpdateables;

@@ -26,47 +26,47 @@
 
 #include <vkts/vkts.hpp>
 
-#include "Camera.hpp"
+#include "UserUserCamera.hpp"
 
 namespace vkts
 {
 
-ICameraSP VKTS_APIENTRY cameraCreate(const glm::vec4& position, const glm::vec3& rotation)
+IUserCameraSP VKTS_APIENTRY userCameraCreate(const glm::vec4& position, const glm::vec3& rotation)
 {
-    auto newInstance = new Camera(position, rotation);
+    auto newInstance = new UserCamera(position, rotation);
 
     if (!newInstance)
     {
-        return ICameraSP();
+        return IUserCameraSP();
     }
 
-    return ICameraSP(newInstance);
+    return IUserCameraSP(newInstance);
 }
 
-ICameraSP VKTS_APIENTRY cameraCreate(const glm::vec4& position, const Quat& rotationZ, const Quat& rotationY, const Quat& rotationX)
+IUserCameraSP VKTS_APIENTRY userCameraCreate(const glm::vec4& position, const Quat& rotationZ, const Quat& rotationY, const Quat& rotationX)
 {
-    auto newInstance = new Camera(position, rotationZ, rotationY, rotationX);
+    auto newInstance = new UserCamera(position, rotationZ, rotationY, rotationX);
 
     if (!newInstance)
     {
-        return ICameraSP();
+        return IUserCameraSP();
     }
 
-    return ICameraSP(newInstance);
+    return IUserCameraSP(newInstance);
 }
 
-ICameraSP VKTS_APIENTRY cameraCreate(const glm::vec4& position, const glm::vec4& center)
+IUserCameraSP VKTS_APIENTRY userCameraCreate(const glm::vec4& position, const glm::vec4& center)
 {
-    auto newInstance = new Camera(position, glm::vec3(0.0f, 0.0f, 0.0f));
+    auto newInstance = new UserCamera(position, glm::vec3(0.0f, 0.0f, 0.0f));
 
     if (!newInstance)
     {
-        return ICameraSP();
+        return IUserCameraSP();
     }
 
     newInstance->setForwardUp(glm::vec3(center - position), glm::vec3(0.0f, 1.0f, 0.0f));
 
-    return ICameraSP(newInstance);
+    return IUserCameraSP(newInstance);
 }
 
 }

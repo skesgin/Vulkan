@@ -116,6 +116,14 @@ public:
 
     virtual const SmartPointerVector<IMeshSP>& getMeshes() const = 0;
 
+    virtual void addCamera(const ICameraSP& camera) = 0;
+
+    virtual VkBool32 removeCamera(const ICameraSP& camera) = 0;
+
+    virtual size_t getNumberCameras() const = 0;
+
+    virtual const SmartPointerVector<ICameraSP>& getCameras() const = 0;
+
     virtual void addLight(const ILightSP& light) = 0;
 
     virtual VkBool32 removeLight(const ILightSP& light) = 0;

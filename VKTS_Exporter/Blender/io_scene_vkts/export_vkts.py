@@ -2511,6 +2511,11 @@ def saveNode(context, fw, fw_animation, fw_channel, currentObject):
         fw("mesh %s\n" % friendlyName(currentObject.data.name))
         fw("\n")
 
+    if currentObject.type == 'CAMERA':
+        if currentObject.data.type == 'PERSP' or currentObject.data.type == 'ORTHO':
+            fw("camera %s\n" % friendlyName(currentObject.data.name))
+            fw("\n")
+
     if currentObject.type == 'LAMP':
         if currentObject.data.type == 'POINT' or currentObject.data.type == 'SUN' or currentObject.data.type == 'SPOT':
             fw("light %s\n" % friendlyName(currentObject.data.name))

@@ -51,6 +51,8 @@ private:
 
     SmartPointerMap<std::string, IObjectSP> allObjects;
 
+    SmartPointerMap<std::string, ICameraSP> allCameras;
+
     SmartPointerMap<std::string, ILightSP> allLights;
 
     SmartPointerMap<std::string, IMeshSP> allMeshes;
@@ -160,6 +162,16 @@ public:
     virtual VkBool32 removeObject(const IObjectSP& object) override;
 
     virtual const SmartPointerMap<std::string, IObjectSP>& getAllObjects() const override;
+
+    //
+
+    virtual ICameraSP useCamera(const std::string& name) const override;
+
+    virtual VkBool32 addCamera(const ICameraSP& camera) override;
+
+    virtual VkBool32 removeCamera(const ICameraSP& camera) override;
+
+    virtual const SmartPointerMap<std::string, ICameraSP>& getAllCameras() const override;
 
     //
 

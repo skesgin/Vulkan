@@ -27,8 +27,6 @@
 #ifndef VKTS_HPP_
 #define VKTS_HPP_
 
-// TODO: Import camera.
-
 // TODO: Allow multiple uniform buffers in scene graph.
 
 // TODO: Import particle system.
@@ -522,9 +520,9 @@
  * Camera.
  */
 
-#include <vkts/layer1/camera/ICamera.hpp>
+#include <vkts/layer1/user/IUserCamera.hpp>
 
-#include <vkts/layer1/camera/fn_camera.hpp>
+#include <vkts/layer1/user/fn_user_camera.hpp>
 
 /**
  * Input controller.
@@ -567,6 +565,8 @@
 #include <vkts/layer1/scenegraph/IAnimation.hpp>
 
 #include <vkts/layer1/scenegraph/IConstraint.hpp>
+
+#include <vkts/layer1/scenegraph/ICamera.hpp>
 
 #include <vkts/layer1/scenegraph/ILight.hpp>
 

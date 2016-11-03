@@ -1787,7 +1787,7 @@ VkBool32 Example::init(const vkts::IUpdateThreadContext& updateContext)
 
 	//
 
-	camera = vkts::cameraCreate(glm::vec4(-16.0f, 16.0f, -8.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+	camera = vkts::userCameraCreate(glm::vec4(-16.0f, 16.0f, -8.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 
 	if (!camera.get())
 	{

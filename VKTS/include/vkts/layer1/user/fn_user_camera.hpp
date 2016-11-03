@@ -36,19 +36,19 @@ namespace vkts
  *
  * @ThreadSafe
  */
-VKTS_APICALL ICameraSP VKTS_APIENTRY cameraCreate(const glm::vec4& position, const glm::vec3& rotation);
+VKTS_APICALL IUserCameraSP VKTS_APIENTRY userCameraCreate(const glm::vec4& position, const glm::vec3& rotation);
 
 /**
  *
  * @ThreadSafe
  */
-VKTS_APICALL ICameraSP VKTS_APIENTRY cameraCreate(const glm::vec4& position, const Quat& rotationZ, const Quat& rotationY, const Quat& rotationX);
+VKTS_APICALL IUserCameraSP VKTS_APIENTRY userCameraCreate(const glm::vec4& position, const Quat& rotationZ, const Quat& rotationY, const Quat& rotationX);
 
 /**
  *
  * @ThreadSafe
  */
-VKTS_APICALL ICameraSP VKTS_APIENTRY cameraCreate(const glm::vec4& position, const glm::vec4& center);
+VKTS_APICALL IUserCameraSP VKTS_APIENTRY userCameraCreate(const glm::vec4& position, const glm::vec4& center);
 
 }
 
