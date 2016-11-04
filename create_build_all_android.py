@@ -13,7 +13,7 @@ import os
 #
 ####################
 
-print("Building all Android projects")
+print("Creating and building all Android projects")
 
 os.chdir("VKTS/Android/jni")
 
@@ -33,6 +33,7 @@ for example in allExamples:
         os.chdir(example)
         os.chdir("Android")
 
+        exec(open("create_project.py").read())
         exec(open("build_project.py").read())
 
         os.chdir("../..")
@@ -47,6 +48,7 @@ for example in allExamples:
         os.chdir(example)
         os.chdir("Android")
 
+        exec(open("create_project.py").read())
         exec(open("build_project.py").read())
 
         os.chdir("../..")        
