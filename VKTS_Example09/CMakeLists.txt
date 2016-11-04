@@ -92,7 +92,7 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
 		set(VKTS_WINDOW "Wayland")
 
-		set(VKTS_ADDITIONAL_LIBS vulkan pthread wayland-client)
+		set(VKTS_ADDITIONAL_LIBS vulkan pthread wayland-client wayland-cursor)
 	else ()
 		set(VKTS_WINDOW "Xlib")
 		

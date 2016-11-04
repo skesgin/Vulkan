@@ -115,6 +115,7 @@
 #define VK_USE_PLATFORM_WAYLAND_KHR
 
 #include <wayland-client.h>
+#include <wayland-cursor.h>
 
 #else
 

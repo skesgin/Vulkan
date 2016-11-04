@@ -468,6 +468,7 @@
 									<listOptionValue builtIn="false" value="VKTS"/>
 									<listOptionValue builtIn="false" value="vulkan"/>
 									<listOptionValue builtIn="false" value="wayland-client"/>
+									<listOptionValue builtIn="false" value="wayland-cursor"/>
 									<listOptionValue builtIn="false" value="pthread"/>
 								</option>
 								<option id="gnu.cpp.link.option.paths.1941034074" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" useByScannerDiscovery="false" valueType="libPaths">
@@ -535,6 +536,7 @@
 									<listOptionValue builtIn="false" value="VKTS"/>
 									<listOptionValue builtIn="false" value="vulkan"/>
 									<listOptionValue builtIn="false" value="wayland-client"/>
+									<listOptionValue builtIn="false" value="wayland-cursor"/>
 									<listOptionValue builtIn="false" value="pthread"/>
 								</option>
 								<option id="gnu.cpp.link.option.paths.1116530402" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" useByScannerDiscovery="false" valueType="libPaths">

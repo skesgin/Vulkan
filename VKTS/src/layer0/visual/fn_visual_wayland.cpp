@@ -44,7 +44,6 @@
 #include <memory>
 #include <sys/mman.h>
 
-struct wl_shm* shm = nullptr;
 struct wl_buffer* buffer = nullptr;
 
 void* data = nullptr;
@@ -112,7 +111,7 @@ int CreateAnonymousFile(off_t size)
     return fd.Release();
 }
 
-void* CreateBuffer(int32_t width, int32_t height)
+void* CreateBuffer(struct wl_shm* shm, int32_t width, int32_t height)
 {
     int stride = width * 4;
     int size = stride * height;
@@ -145,6 +144,16 @@ void* CreateBuffer(int32_t width, int32_t height)
 namespace vkts
 {
 
+static struct wl_cursor_theme* g_nativeCursorTheme = nullptr;
+
+static struct wl_cursor* g_nativeCursor = nullptr;
+
+static struct wl_surface* g_nativeCursorSurface = nullptr;
+
+static struct wl_buffer* g_nativeCursorBuffer = nullptr;
+
+
+//
 
 static VkBool32 g_running = VK_TRUE;
 
@@ -157,6 +166,8 @@ static struct wl_pointer* g_nativePointer = nullptr;
 static struct wl_seat* g_nativeSeat = nullptr;
 
 static struct wl_shell* g_nativeShell = nullptr;
+
+static struct wl_shm* g_nativeShm = nullptr;
 
 static struct wl_compositor* g_nativeCompositor = nullptr;
 
@@ -297,11 +308,15 @@ void _visualWaylandEnter(void *data, struct wl_pointer *wl_pointer, uint32_t ser
 	}
 	else
 	{
-		// TODO: Set back to visible cursor.
+		wl_surface_attach(g_nativeCursorSurface, g_nativeCursorBuffer, 0, 0);
+		wl_surface_damage(g_nativeCursorSurface, 0, 0, g_nativeCursor->images[0]->width, g_nativeCursor->images[0]->height);
+		wl_surface_commit(g_nativeCursorSurface);
+
+		wl_pointer_set_cursor(wl_pointer, serial, g_nativeCursorSurface, g_nativeCursor->images[0]->hotspot_x, g_nativeCursor->images[0]->hotspot_y);
 	}
 }
 
-void _visualWaylandLeave(void *data, struct wl_pointer *wl_pointer, uint32_t serial, struct wl_surface *surface)
+void _visualWaylandLeave(void *data, struct wl_pointer* wl_pointer, uint32_t serial, struct wl_surface *surface)
 {
 	if (!g_currentPointerSurface)
 	{
@@ -317,7 +332,11 @@ void _visualWaylandLeave(void *data, struct wl_pointer *wl_pointer, uint32_t ser
 
 	if (currentWindowContainer->second->nativeWindow->isInvisibleCursor())
 	{
-		// TODO: Set back to visible cursor.
+		wl_surface_attach(g_nativeCursorSurface, g_nativeCursorBuffer, 0, 0);
+		wl_surface_damage(g_nativeCursorSurface, 0, 0, g_nativeCursor->images[0]->width, g_nativeCursor->images[0]->height);
+		wl_surface_commit(g_nativeCursorSurface);
+
+		wl_pointer_set_cursor(wl_pointer, serial, g_nativeCursorSurface, g_nativeCursor->images[0]->hotspot_x, g_nativeCursor->images[0]->hotspot_y);
 	}
 
 	//
@@ -674,16 +693,44 @@ static const struct wl_output_listener g_output_listener = {
 
 static void _visualWaylandGlobal(void *data, struct wl_registry *registry, uint32_t name, const char *interface, uint32_t version)
 {
-	//
-	// TODO: Remove
-	//
-	if (!strcmp(interface, wl_shm_interface.name))
+	if (strcmp(interface, "wl_shm") == 0)
 	{
-		shm = (struct wl_shm*)wl_registry_bind(registry, name, &wl_shm_interface, version);
+		g_nativeShm = (struct wl_shm*)wl_registry_bind(registry, name, &wl_shm_interface, version);
+
+		//
+
+		g_nativeCursorTheme = wl_cursor_theme_load(nullptr, 32, g_nativeShm);
+
+		if (!g_nativeCursorTheme)
+		{
+			return;
+		}
+
+		g_nativeCursor = wl_cursor_theme_get_cursor(g_nativeCursorTheme, "left_ptr");
+
+		if (!g_nativeCursor)
+		{
+			return;
+		}
+
+		g_nativeCursorSurface = wl_compositor_create_surface(g_nativeCompositor);
+
+		if (!g_nativeCursorSurface)
+		{
+			return;
+		}
+
+		g_nativeCursorBuffer = wl_cursor_image_get_buffer(g_nativeCursor->images[0]);
+
+		if (!g_nativeCursorBuffer)
+		{
+			return;
+		}
+
+		wl_surface_attach(g_nativeCursorSurface, g_nativeCursorBuffer, 0, 0);
+		wl_surface_damage(g_nativeCursorSurface, 0, 0, g_nativeCursor->images[0]->width, g_nativeCursor->images[0]->height);
+		wl_surface_commit(g_nativeCursorSurface);
 	}
-	//
-	//
-	//
   	else if (strcmp(interface, "wl_compositor") == 0)
     {
     	g_nativeCompositor = (struct wl_compositor*)wl_registry_bind(registry, name, &wl_compositor_interface, version);
@@ -991,7 +1038,7 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
     //
 
     // TODO: Implement no resize window.
-    // TODO: Implement hidden and game mode cursor.
+    // TODO: Implement game mode cursor.
 
 	auto surface = wl_compositor_create_surface(g_nativeCompositor);
 
@@ -1078,7 +1125,7 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 	//
 	// TODO: Remove
 	//
-	if (!CreateBuffer(width, height))
+	if (!CreateBuffer(g_nativeShm, width, height))
 	{
 		return INativeWindowWP();
 	}
@@ -1147,7 +1194,7 @@ void VKTS_APIENTRY _visualDestroyWindow(const NativeWindowSP& window)
 
         if (window->isInvisibleCursor())
         {
-        	// TODO: Revert hidden cursor.
+    		// Automatically reverted.
         }
 
         wl_region_destroy(foundWindowContainerWalker->second->region);
@@ -1228,6 +1275,29 @@ void VKTS_APIENTRY _visualTerminate()
     	g_nativeSeat = nullptr;
     }
 
+    g_nativeCursor = nullptr;
+
+    if (g_nativeCursorTheme)
+    {
+    	wl_cursor_theme_destroy(g_nativeCursorTheme);
+
+    	g_nativeCursorTheme = nullptr;
+    }
+
+    if (g_nativeCursorSurface)
+    {
+    	wl_surface_destroy(g_nativeCursorSurface);
+
+    	g_nativeCursorSurface = nullptr;
+    }
+
+    if (g_nativeCursorBuffer)
+    {
+    	wl_buffer_destroy(g_nativeCursorBuffer);
+
+    	g_nativeCursorBuffer = nullptr;
+    }
+
     if (g_nativeShell)
     {
     	wl_shell_destroy(g_nativeShell);
@@ -1240,6 +1310,13 @@ void VKTS_APIENTRY _visualTerminate()
     	wl_compositor_destroy(g_nativeCompositor);
 
     	g_nativeCompositor = nullptr;
+    }
+
+    if (g_nativeShm)
+    {
+    	wl_shm_destroy(g_nativeShm);
+
+    	g_nativeShm = nullptr;
     }
 
     if (g_nativeRegistry)
