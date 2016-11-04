@@ -87,6 +87,12 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 		set(VKTS_WINDOW "Display")
 
 		set(VKTS_ADDITIONAL_LIBS vulkan pthread)
+	elseif (${VKTS_WSI} MATCHES "VKTS_WAYLAND_VISUAL")
+		add_definitions(-DVKTS_WAYLAND_VISUAL)
+
+		set(VKTS_WINDOW "Wayland")
+
+		set(VKTS_ADDITIONAL_LIBS vulkan pthread wayland-client)
 	else ()
 		set(VKTS_WINDOW "Xlib")
 		

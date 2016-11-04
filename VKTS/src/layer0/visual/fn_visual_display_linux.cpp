@@ -89,7 +89,10 @@ VkBool32 VKTS_APIENTRY _visualInitDisplay(const VkInstance instance, const VkPhy
 		{
 	        logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Found keyboard");
 
-            system("stty -echo");
+            if (system("stty -echo") == -1)
+            {
+            	logPrint(VKTS_LOG_WARNING, __FILE__, __LINE__, "Could not disable keyboard echo");
+            }
 
             g_keyFileDescriptor = fileDescriptor;
 		}
@@ -297,7 +300,10 @@ void VKTS_APIENTRY _visualTerminateDisplay()
         
         g_keyFileDescriptor = -1; 
         
-        system("stty echo");   
+        if (system("stty echo") == -1)
+        {
+        	logPrint(VKTS_LOG_WARNING, __FILE__, __LINE__, "Could not enable keyboard echo");
+        }
     }
 }
 
