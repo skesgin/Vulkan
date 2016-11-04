@@ -1035,9 +1035,6 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
     // TODO: Implement move to correct display.
 
-    //
-
-    // TODO: Implement no resize window.
     // TODO: Implement game mode cursor.
 
 	auto surface = wl_compositor_create_surface(g_nativeCompositor);
@@ -1137,6 +1134,8 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
     //
     //
     //
+
+    _visualWaylandConfigure(windowContainer, shell_surface, 0, width, height);
 
     wl_display_dispatch(g_nativeDisplay);
 
@@ -1291,12 +1290,7 @@ void VKTS_APIENTRY _visualTerminate()
     	g_nativeCursorSurface = nullptr;
     }
 
-    if (g_nativeCursorBuffer)
-    {
-    	wl_buffer_destroy(g_nativeCursorBuffer);
-
-    	g_nativeCursorBuffer = nullptr;
-    }
+    g_nativeCursorBuffer = nullptr;
 
     if (g_nativeShell)
     {
