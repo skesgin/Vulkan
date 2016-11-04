@@ -76,8 +76,6 @@ private:
 
     int32_t currentAnimation;
 
-    float currentTime;
-
     IBufferObjectSP transformUniformBuffer;
 
     VkDescriptorBufferInfo transformDescriptorBufferInfo;
@@ -213,10 +211,6 @@ public:
     virtual int32_t getCurrentAnimation() const override;
 
     virtual void setCurrentAnimation(const int32_t currentAnimation) override;
-
-    virtual float getCurrentTime() const override;
-
-    virtual void setCurrentTime(const float currentTime) override;
 
     virtual VkBool32 getDirty() const override;
 

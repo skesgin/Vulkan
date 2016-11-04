@@ -30,12 +30,12 @@ namespace vkts
 {
 
 Animation::Animation() :
-    IAnimation(), name(""), start(0.0f), stop(0.0f), currentSection(-1), allMarkers(), allChannels()
+    IAnimation(), name(""), start(0.0f), stop(0.0f), currentSection(-1), animationType(AnimationLoop), animationScale(1.0f), currentTime(0.0f), allMarkers(), allChannels()
 {
 }
 
 Animation::Animation(const Animation& other) :
-    IAnimation(), name(other.name + "_clone"), start(other.start), stop(other.stop), currentSection(other.currentSection), allChannels()
+    IAnimation(), name(other.name + "_clone"), start(other.start), stop(other.stop), currentSection(other.currentSection), animationType(other.animationType), animationScale(other.animationScale), currentTime(other.currentTime), allChannels()
 {
     for (size_t i = 0; i < other.allMarkers.size(); i++)
     {
@@ -111,6 +111,8 @@ void Animation::setCurrentSection(const int32_t currentSection)
 	{
 		this->currentSection = currentSection;
 	}
+
+	currentTime = getStart();
 }
 
 int32_t Animation::getCurrentSection() const
@@ -118,11 +120,101 @@ int32_t Animation::getCurrentSection() const
 	return currentSection;
 }
 
+enum AnimationType Animation::getAnimationType() const
+{
+	return animationType;
+}
+
+void Animation::setAnimationType(const enum AnimationType animationType)
+{
+	this->animationType = animationType;
+}
+
+float Animation::getAnimationScale() const
+{
+	return animationScale;
+}
+
+void Animation::setAnimationScale(const float animationScale)
+{
+	this->animationScale = animationScale;
+}
+
+
+float Animation::getCurrentTime() const
+{
+	return currentTime;
+}
+
+void Animation::setCurrentTime(const float currentTime)
+{
+	if (currentTime < getStart())
+	{
+		this->currentTime = getStart();
+	}
+	else if (currentTime > getStop())
+	{
+		this->currentTime = getStop();
+	}
+	else
+	{
+		this->currentTime = currentTime;
+	}
+}
+
+float Animation::update(const float deltaTime)
+{
+	if (getAnimationType() == AnimationStop)
+	{
+		return currentTime;
+	}
+
+	currentTime += getAnimationScale() * deltaTime;
+
+	if (currentTime < getStart())
+	{
+		if (getAnimationType() == AnimationLoop)
+		{
+			currentTime = getStop() - (getStart() - currentTime);
+		}
+		else if (getAnimationType() == AnimationReverse)
+		{
+			currentTime = getStart() + (getStart() - currentTime);
+
+			setAnimationScale(-getAnimationScale());
+		}
+		else if (getAnimationType() == AnimationOnce)
+		{
+			currentTime = getStart();
+		}
+	}
+
+	if (currentTime > getStop())
+	{
+		if (getAnimationType() == AnimationLoop)
+		{
+			currentTime = getStart() + (currentTime - getStop());
+		}
+		else if (getAnimationType() == AnimationReverse)
+		{
+			currentTime = getStop() - (currentTime - getStop());
+
+			setAnimationScale(-getAnimationScale());
+		}
+		else if (getAnimationType() == AnimationOnce)
+		{
+			currentTime = getStop();
+		}
+	}
+
+	return currentTime;
+}
+
 void Animation::addMarker(const IMarkerSP& marker)
 {
 	if (allMarkers.size() == 0)
 	{
-		currentSection = 0;
+		setCurrentSection(0);
 	}
 
 	allMarkers.append(marker);
@@ -134,7 +226,7 @@ VkBool32 Animation::removeMarker(const IMarkerSP& marker)
 
 	if (allMarkers.size() == 0)
 	{
-		currentSection = -1;
+		setCurrentSection(-1);
 	}
 
     return result;

@@ -152,10 +152,6 @@ public:
 
     virtual void setCurrentAnimation(const int32_t currentAnimation) = 0;
 
-    virtual float getCurrentTime() const = 0;
-
-    virtual void setCurrentTime(const float currentTime) = 0;
-
     virtual VkBool32 getDirty() const = 0;
 
     virtual void setDirty() = 0;

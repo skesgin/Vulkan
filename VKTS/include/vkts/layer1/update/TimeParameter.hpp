@@ -57,7 +57,10 @@ public:
 
     virtual void setNodeParameter(INode& node) const
     {
-    	node.setCurrentTime(currentTime);
+    	for (size_t i = 0; i < node.getAnimations().size(); i++)
+    	{
+    		node.getAnimations()[i]->setCurrentTime(currentTime);
+    	}
     }
 
 	float getCurrentTime() const

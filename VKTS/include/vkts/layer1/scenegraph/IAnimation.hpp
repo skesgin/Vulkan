@@ -32,6 +32,8 @@
 namespace vkts
 {
 
+enum AnimationType {AnimationLoop, AnimationReverse, AnimationOnce, AnimationStop};
+
 class IAnimation: public ICloneable<IAnimation>, public IDestroyable
 {
 
@@ -61,6 +63,20 @@ public:
     virtual void setCurrentSection(const int32_t currentMarker) = 0;
 
     virtual int32_t getCurrentSection() const = 0;
+
+    virtual enum AnimationType getAnimationType() const = 0;
+
+    virtual void setAnimationType(const enum AnimationType animationType) = 0;
+
+    virtual float getAnimationScale() const = 0;
+
+    virtual void setAnimationScale(const float animationScale) = 0;
+
+    virtual float getCurrentTime() const = 0;
+
+    virtual void setCurrentTime(const float currentTime) = 0;
+
+    virtual float update(const float deltaTime) = 0;
 
     virtual void addMarker(const IMarkerSP& marker) = 0;
 

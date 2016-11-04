@@ -45,6 +45,12 @@ private:
 
     int32_t currentSection;
 
+    enum AnimationType animationType;
+
+    float animationScale;
+
+    float currentTime;
+
     SmartPointerVector<IMarkerSP> allMarkers;
 
     SmartPointerVector<IChannelSP> allChannels;
@@ -78,6 +84,20 @@ public:
     virtual void setCurrentSection(const int32_t currentSection) override;
 
     virtual int32_t getCurrentSection() const override;
+
+    virtual enum AnimationType getAnimationType() const override;
+
+    virtual void setAnimationType(const enum AnimationType animationType) override;
+
+    virtual float getAnimationScale() const override;
+
+    virtual void setAnimationScale(const float animationScale) override;
+
+    virtual float getCurrentTime() const override;
+
+    virtual void setCurrentTime(const float currentTime) override;
+
+    virtual float update(const float deltaTime) override;
 
     virtual void addMarker(const IMarkerSP& marker) override;
 

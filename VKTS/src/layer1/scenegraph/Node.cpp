@@ -75,8 +75,6 @@ void Node::reset()
 
     currentAnimation = -1;
 
-    currentTime = 0.0f;
-
     transformUniformBuffer = IBufferObjectSP();
 
     memset(&transformDescriptorBufferInfo, 0, sizeof(VkDescriptorBufferInfo));
@@ -92,7 +90,7 @@ void Node::reset()
 }
 
 Node::Node() :
-    INode(), name(""), parentNode(), translate(0.0f, 0.0f, 0.0f), rotate(0.0f, 0.0f, 0.0f), scale(1.0f, 1.0f, 1.0f), finalTranslate(0.0f, 0.0f, 0.0f), finalRotate(0.0f, 0.0f, 0.0f), finalScale(1.0f, 1.0f, 1.0f), transformMatrix(1.0f), transformMatrixDirty(VK_TRUE), jointIndex(-1), joints(0), bindTranslate(0.0f, 0.0f, 0.0f), bindRotate(0.0f, 0.0f,0.0f), bindScale(1.0f, 1.0f, 1.0f), bindMatrix(1.0f), inverseBindMatrix(1.0f), bindMatrixDirty(VK_FALSE), allChildNodes(), allMeshes(), allCameras(), allLights(), allConstraints(), allAnimations(), currentAnimation(-1), currentTime(0.0f), transformUniformBuffer(), jointsUniformBuffer(), box(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)), layers(0x01)
+    INode(), name(""), parentNode(), translate(0.0f, 0.0f, 0.0f), rotate(0.0f, 0.0f, 0.0f), scale(1.0f, 1.0f, 1.0f), finalTranslate(0.0f, 0.0f, 0.0f), finalRotate(0.0f, 0.0f, 0.0f), finalScale(1.0f, 1.0f, 1.0f), transformMatrix(1.0f), transformMatrixDirty(VK_TRUE), jointIndex(-1), joints(0), bindTranslate(0.0f, 0.0f, 0.0f), bindRotate(0.0f, 0.0f,0.0f), bindScale(1.0f, 1.0f, 1.0f), bindMatrix(1.0f), inverseBindMatrix(1.0f), bindMatrixDirty(VK_FALSE), allChildNodes(), allMeshes(), allCameras(), allLights(), allConstraints(), allAnimations(), currentAnimation(-1), transformUniformBuffer(), jointsUniformBuffer(), box(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)), layers(0x01)
 {
     reset();
 }
@@ -239,8 +237,6 @@ Node::Node(const Node& other) :
     }
 
     currentAnimation = other.currentAnimation;
-
-    currentTime = other.currentTime;
 
     //
 
@@ -638,30 +634,6 @@ void Node::setCurrentAnimation(const int32_t currentAnimation)
 	}
 }
 
-float Node::getCurrentTime() const
-{
-	return currentTime;
-}
-
-void Node::setCurrentTime(const float currentTime)
-{
-	if (currentAnimation >= 0)
-	{
-        if (currentTime < allAnimations[currentAnimation]->getStart() || currentTime > allAnimations[currentAnimation]->getStop())
-        {
-            this->currentTime = allAnimations[currentAnimation]->getStart();
-        }
-        else
-        {
-        	this->currentTime = currentTime;
-        }
-	}
-	else
-	{
-		this->currentTime = 0.0f;
-	}
-}
-
 VkBool32 Node::getDirty() const
 {
     return transformMatrixDirty;
@@ -796,12 +768,7 @@ void Node::updateRecursive(const IUpdateThreadContext& updateContext, const glm:
 
     if (currentAnimation >= 0 && currentAnimation < (int32_t) allAnimations.size())
     {
-        currentTime += (float) updateContext.getDeltaTime();
-
-        if (currentTime < allAnimations[currentAnimation]->getStart() || currentTime > allAnimations[currentAnimation]->getStop())
-        {
-            currentTime = allAnimations[currentAnimation]->getStart();
-        }
+    	float currentTime = allAnimations[currentAnimation]->update((float) updateContext.getDeltaTime());
 
         const auto& currentChannels = allAnimations[currentAnimation]->getChannels();
 
