@@ -123,26 +123,10 @@ Installing Intel Linux Vulkan Driver:
   
 Execute the following command to add the repository with the Intel Vulkan driver:  
   
-`sudo apt-add-repository ppa:canonical-x/vulkan`  
+`sudo apt-add-repository ppa:paulo-miguel-dias/mesa`  
 `sudo apt update`  
-  
-Execute the following command to install the driver:  
-  
-`sudo apt install mesa-vulkan-drivers`  
-  
-After this, create the following file if it does not exist:  
-  
-`/etc/X11/xorg.conf`  
-  
-Append/insert following lines to the above file to enable DRI3:  
-  
-`Section "Device"`  
-`    Identifier  "Intel Graphics"`  
-`    Driver      "intel"`  
-`    Option      "SwapBuffersWait" "0"`  
-`    Option      "DRI" "3"`  
-`EndSection`  
-  
+`sudo apt dist-upgrade`
+
 
 ---
 
