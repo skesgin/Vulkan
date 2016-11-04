@@ -43,6 +43,8 @@ private:
 
     float stop;
 
+    int32_t currentSection;
+
     SmartPointerVector<IMarkerSP> allMarkers;
 
     SmartPointerVector<IChannelSP> allChannels;
@@ -72,6 +74,10 @@ public:
     virtual float getStop() const override;
 
     virtual void setStop(const float stop) override;
+
+    virtual void setCurrentSection(const int32_t currentSection) override;
+
+    virtual int32_t getCurrentSection() const override;
 
     virtual void addMarker(const IMarkerSP& marker) override;
 

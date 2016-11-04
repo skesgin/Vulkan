@@ -30,12 +30,12 @@ namespace vkts
 {
 
 Animation::Animation() :
-    IAnimation(), name(""), start(0.0f), stop(0.0f), allMarkers(), allChannels()
+    IAnimation(), name(""), start(0.0f), stop(0.0f), currentSection(-1), allMarkers(), allChannels()
 {
 }
 
 Animation::Animation(const Animation& other) :
-    IAnimation(), name(other.name + "_clone"), start(other.start), stop(other.stop), allChannels()
+    IAnimation(), name(other.name + "_clone"), start(other.start), stop(other.stop), currentSection(other.currentSection), allChannels()
 {
     for (size_t i = 0; i < other.allMarkers.size(); i++)
     {
@@ -69,7 +69,12 @@ void Animation::setName(const std::string& name)
 
 float Animation::getStart() const
 {
-    return start;
+	if (currentSection == -1 || currentSection == 0)
+	{
+		return start;
+	}
+
+	return allMarkers[currentSection - 1]->getTime();
 }
 
 void Animation::setStart(const float start)
@@ -79,7 +84,12 @@ void Animation::setStart(const float start)
 
 float Animation::getStop() const
 {
-    return stop;
+	if (currentSection == -1 || currentSection == (int32_t)allMarkers.size())
+	{
+		return stop;
+	}
+
+	return allMarkers[currentSection]->getTime();
 }
 
 void Animation::setStop(const float stop)
@@ -87,14 +97,47 @@ void Animation::setStop(const float stop)
     this->stop = stop;
 }
 
+void Animation::setCurrentSection(const int32_t currentSection)
+{
+	if (currentSection < -1 || allMarkers.size() == 0)
+	{
+		this->currentSection = -1;
+	}
+	else if (currentSection > (int32_t)allMarkers.size())
+	{
+		this->currentSection = (int32_t)allMarkers.size();
+	}
+	else
+	{
+		this->currentSection = currentSection;
+	}
+}
+
+int32_t Animation::getCurrentSection() const
+{
+	return currentSection;
+}
+
 void Animation::addMarker(const IMarkerSP& marker)
 {
+	if (allMarkers.size() == 0)
+	{
+		currentSection = 0;
+	}
+
 	allMarkers.append(marker);
 }
 
 VkBool32 Animation::removeMarker(const IMarkerSP& marker)
 {
-    return allMarkers.remove(marker);
+	auto result = allMarkers.remove(marker);
+
+	if (allMarkers.size() == 0)
+	{
+		currentSection = -1;
+	}
+
+    return result;
 }
 
 size_t Animation::getNumberMarkers() const

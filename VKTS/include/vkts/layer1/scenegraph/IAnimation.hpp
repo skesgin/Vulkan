@@ -58,6 +58,10 @@ public:
 
     virtual void setStop(const float stop) = 0;
 
+    virtual void setCurrentSection(const int32_t currentMarker) = 0;
+
+    virtual int32_t getCurrentSection() const = 0;
+
     virtual void addMarker(const IMarkerSP& marker) = 0;
 
     virtual VkBool32 removeMarker(const IMarkerSP& marker) = 0;
