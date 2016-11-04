@@ -108,6 +108,12 @@ VKTS_APICALL VkBool32 VKTS_APIENTRY commonGetUInt32Parameter(uint32_t& out, cons
  *
  * @ThreadSafe
  */
+VKTS_APICALL VkBool32 VKTS_APIENTRY commonGetFloatParameter(float& out, const std::string& parameter, int argc, char *argv[]);
+
+/**
+ *
+ * @ThreadSafe
+ */
 VKTS_APICALL VkBool32 VKTS_APIENTRY commonGetStringParameter(std::string& out, const std::string& parameter, int argc, char *argv[]);
 
 }

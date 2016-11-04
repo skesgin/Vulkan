@@ -543,6 +543,20 @@ VkBool32 VKTS_APIENTRY commonGetUInt32Parameter(uint32_t& out, const std::string
 	return VK_TRUE;
 }
 
+VkBool32 VKTS_APIENTRY commonGetFloatParameter(float& out, const std::string& parameter, int argc, char *argv[])
+{
+	auto index = commonGetParameterIndex(parameter, argc, argv);
+
+	if (index < 0)
+	{
+		return VK_FALSE;
+	}
+
+	out = (float)atof(argv[index]);
+
+	return VK_TRUE;
+}
+
 VkBool32 VKTS_APIENTRY commonGetStringParameter(std::string& out, const std::string& parameter, int argc, char *argv[])
 {
 	auto index = commonGetParameterIndex(parameter, argc, argv);
