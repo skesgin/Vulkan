@@ -39,9 +39,9 @@ VKTS_APICALL VkBool32 VKTS_APIENTRY _visualDispatchMessagesTouchpad();
 VKTS_APICALL void VKTS_APIENTRY _visualTerminateTouchpad();
 
 
-VKTS_APICALL void VKTS_APIENTRY _visualTouchpadSetLocationX(const int32_t slotIndex, const int32_t x);
+VKTS_APICALL void VKTS_APIENTRY _visualTouchpadSetLocationX(const int32_t slotIndex, const int32_t x, const int32_t rangeX, const int32_t rangeY);
 
-VKTS_APICALL void VKTS_APIENTRY _visualTouchpadSetLocationY(const int32_t slotIndex, const int32_t y);
+VKTS_APICALL void VKTS_APIENTRY _visualTouchpadSetLocationY(const int32_t slotIndex, const int32_t y, const int32_t rangeX, const int32_t rangeY);
 
 VKTS_APICALL void VKTS_APIENTRY _visualTouchpadSetPressed(const int32_t slotIndex, const VkBool32 pressed);
 

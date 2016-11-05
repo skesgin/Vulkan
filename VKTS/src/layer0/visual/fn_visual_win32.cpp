@@ -321,7 +321,7 @@ static LRESULT CALLBACK _visualProcessMessages(HWND hWnd, UINT uiMsg, WPARAM wPa
 
 						if (input[inputIndex].dwFlags & TOUCHEVENTF_MOVE)
 						{
-							currentWindow->getTouchpadInput().setLocation(slotIndex, glm::ivec2((int32_t)input[inputIndex].x, (int32_t)input[inputIndex].y));
+							currentWindow->getTouchpadInput().setLocation(slotIndex, glm::ivec2((int32_t)input[inputIndex].x / 100, (int32_t)input[inputIndex].y / 100));
 						}
 					}
 					else

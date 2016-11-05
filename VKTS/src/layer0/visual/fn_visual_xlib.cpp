@@ -1221,19 +1221,33 @@ void VKTS_APIENTRY _visualGamepadSetAxis(const int32_t gamepadIndex, const int32
 
 //
 
-void VKTS_APIENTRY _visualTouchpadSetLocationX(const int32_t slotIndex, const int32_t x)
+void VKTS_APIENTRY _visualTouchpadSetLocationX(const int32_t slotIndex, const int32_t x, const int32_t rangeX, const int32_t rangeY)
 {
     for (size_t index = 0; index < g_allWindows.size(); index++)
     {
-    	g_allWindows.valueAt(index)->getTouchpadInput().setLocationX(slotIndex, x);
+    	if (g_allWindows.valueAt(index)->getNativeDisplay().lock()->getWidth() > g_allWindows.valueAt(index)->getNativeDisplay().lock()->getHeight() && rangeX > rangeY)
+    	{
+    		g_allWindows.valueAt(index)->getTouchpadInput().setLocationX(slotIndex, x * g_allWindows.valueAt(index)->getNativeDisplay().lock()->getWidth() / rangeX);
+    	}
+    	else
+    	{
+    		g_allWindows.valueAt(index)->getTouchpadInput().setLocationY(slotIndex, x * g_allWindows.valueAt(index)->getNativeDisplay().lock()->getHeight() / rangeX);
+    	}
     }
 }
 
-void VKTS_APIENTRY _visualTouchpadSetLocationY(const int32_t slotIndex, const int32_t y)
+void VKTS_APIENTRY _visualTouchpadSetLocationY(const int32_t slotIndex, const int32_t y, const int32_t rangeX, const int32_t rangeY)
 {
     for (size_t index = 0; index < g_allWindows.size(); index++)
     {
-        g_allWindows.valueAt(index)->getTouchpadInput().setLocationX(slotIndex, y);
+    	if (g_allWindows.valueAt(index)->getNativeDisplay().lock()->getWidth() > g_allWindows.valueAt(index)->getNativeDisplay().lock()->getHeight() && rangeX > rangeY)
+    	{
+    		g_allWindows.valueAt(index)->getTouchpadInput().setLocationY(slotIndex, y * g_allWindows.valueAt(index)->getNativeDisplay().lock()->getHeight() / rangeY);
+    	}
+    	else
+    	{
+    		g_allWindows.valueAt(index)->getTouchpadInput().setLocationX(slotIndex, y * g_allWindows.valueAt(index)->getNativeDisplay().lock()->getWidth() / rangeY);
+    	}
     }
 }
 

@@ -52,6 +52,9 @@ static int touchpadFile = -1;
 
 static TouchInfo touchInfo[VKTS_MAX_TOUCHPAD_SLOTS];
 
+static int32_t rangeX;
+static int32_t rangeY;
+
 //
 
 VkBool32 VKTS_APIENTRY _visualInitTouchpad(const VkInstance instance, const VkPhysicalDevice physicalDevice)
@@ -97,11 +100,23 @@ VkBool32 VKTS_APIENTRY _visualInitTouchpad(const VkInstance instance, const VkPh
 			continue;
 		}
 
-		if (eventBits == 0x2b)
+		if (eventBits == 0xb)
 		{
 			logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Found touch pad");
 
 			touchpadFile = fileDescriptor;
+
+			//
+
+			struct input_absinfo absinfo;
+
+			ioctl(fileDescriptor, EVIOCGABS(ABS_X), &absinfo);
+			rangeX = absinfo.maximum - absinfo.minimum;
+
+			ioctl(fileDescriptor, EVIOCGABS(ABS_Y), &absinfo);
+			rangeY = absinfo.maximum - absinfo.minimum;
+
+			break;
 		}
         else
         {
@@ -153,13 +168,13 @@ VkBool32 VKTS_APIENTRY _visualDispatchMessagesTouchpad()
 					case ABS_X:
 						if (currentSlot >= 0 && currentSlot < VKTS_MAX_TOUCHPAD_SLOTS)
 						{
-							_visualTouchpadSetLocationX(currentSlot, (int32_t)touchpadEvent.value);
+							_visualTouchpadSetLocationX(currentSlot, (int32_t)touchpadEvent.value, rangeX, rangeY);
 						}
 						break;
 					case ABS_Y:
 						if (currentSlot >= 0 && currentSlot < VKTS_MAX_TOUCHPAD_SLOTS)
 						{
-							_visualTouchpadSetLocationY(currentSlot, (int32_t)touchpadEvent.value);
+							_visualTouchpadSetLocationY(currentSlot, (int32_t)touchpadEvent.value, rangeX, rangeY);
 						}
 						break;
 					case ABS_MT_SLOT:
@@ -168,13 +183,13 @@ VkBool32 VKTS_APIENTRY _visualDispatchMessagesTouchpad()
 					case ABS_MT_POSITION_X:
 						if (currentSlot >= 0 && currentSlot < VKTS_MAX_TOUCHPAD_SLOTS)
 						{
-							_visualTouchpadSetLocationX(currentSlot, (int32_t)touchpadEvent.value);
+							_visualTouchpadSetLocationX(currentSlot, (int32_t)touchpadEvent.value, rangeX, rangeY);
 						}
 						break;
 					case ABS_MT_POSITION_Y:
 						if (currentSlot >= 0 && currentSlot < VKTS_MAX_TOUCHPAD_SLOTS)
 						{
-							_visualTouchpadSetLocationY(currentSlot, (int32_t)touchpadEvent.value);
+							_visualTouchpadSetLocationY(currentSlot, (int32_t)touchpadEvent.value, rangeX, rangeY);
 						}
 						break;
 					case ABS_MT_TRACKING_ID:
