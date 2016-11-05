@@ -27,17 +27,18 @@
 #ifndef VKTS_HPP_
 #define VKTS_HPP_
 
+// TODO: Add game mode cursor to Display and Wayland.
+
 // TODO: Allow multiple uniform buffers in scene graph.
 
 // TODO: Import particle system.
-
-// TODO: Finalize Wayland port.
 
 // TODO: Split VKTS into "core" library, which is no visual configuration right now.
 //		 Split WSI part into own library.
 //		 Split window, display and window handling into own library, having no Vulkan dependencies.
 
 // TODO: Add window buffer and/or cleaning for windows.
+// TODO: Add query, which windowing features are supported.
 
 // TODO: General refactoring.
 

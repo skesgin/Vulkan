@@ -642,7 +642,9 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
     g_windowBits |= currentWindowBit;
 
-    return INativeWindowWP();
+    logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Using Display, title is not shown, resize is false and invisibleCursor is true");
+
+    return currentNativeWindow;
 }
 
 NativeWindowSP VKTS_APIENTRY _visualGetWindow(const int32_t windowIndex)

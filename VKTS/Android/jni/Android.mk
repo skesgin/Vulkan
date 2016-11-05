@@ -31,6 +31,7 @@ IGNORE_FILES += $(LOCAL_PATH)/../../src/layer0/visual/fn_visual_display.cpp
 IGNORE_FILES += $(LOCAL_PATH)/../../src/layer0/visual/fn_visual_display_linux.cpp
 IGNORE_FILES += $(LOCAL_PATH)/../../src/layer0/visual/fn_visual_display_linux_key.cpp
 IGNORE_FILES += $(LOCAL_PATH)/../../src/layer0/visual/fn_visual_wayland.cpp
+IGNORE_FILES += $(LOCAL_PATH)/../../src/layer0/visual/fn_visual_wayland_test.cpp
 IGNORE_FILES += $(LOCAL_PATH)/../../src/layer0/visual/fn_visual_wayland_key.cpp
 IGNORE_FILES += $(LOCAL_PATH)/../../src/layer0/wsi/fn_wsi_xlib.cpp
 IGNORE_FILES += $(LOCAL_PATH)/../../src/layer0/wsi/fn_wsi_win32.cpp

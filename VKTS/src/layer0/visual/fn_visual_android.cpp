@@ -57,6 +57,7 @@ static int32_t g_height = -1;
 static vkts::NativeDisplaySP g_defaultDisplay;
 
 static vkts::NativeWindowSP g_defaultWindow;
+static VkBool32 g_defaultWindowUsed = VK_FALSE;
 
 //
 
@@ -596,14 +597,24 @@ void VKTS_APIENTRY _visualDestroyDisplay(const NativeDisplaySP& display)
 
 INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& display, const char* title, const int32_t width, const int32_t height, const VkBool32 fullscreen, const VkBool32 resize, const VkBool32 invisibleCursor)
 {
-    // Note: On Android, a window cannot be created and the existing one has to be used.
+	if (g_defaultWindowUsed)
+	{
+		return INativeWindowWP();
+	}
 
-    return INativeWindowWP();
+    logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "On Android, all parameters for creating a window are ignored.");
+    logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Full screen is true, resize false and invisibleCursor false");
+
+    //
+
+	g_defaultWindowUsed = VK_TRUE;
+
+	return ::g_defaultWindow;
 }
 
 NativeWindowSP VKTS_APIENTRY _visualGetWindow(const int32_t windowIndex)
 {
-    if (windowIndex < 0 || windowIndex >= VKTS_WINDOWS_MAX_WINDOWS)
+    if (windowIndex < 0 || windowIndex >= VKTS_WINDOWS_MAX_WINDOWS || !::g_defaultWindowUsed)
     {
         return NativeWindowSP();
     }
@@ -617,7 +628,7 @@ const SmartPointerVector<NativeWindowSP>& VKTS_APIENTRY _visualGetActiveWindows(
 
     windowList.clear();
 
-    if (::g_defaultWindow.get())
+    if (::g_defaultWindow.get() && ::g_defaultWindowUsed)
     {
         windowList.append(::g_defaultWindow);
     }
@@ -627,7 +638,10 @@ const SmartPointerVector<NativeWindowSP>& VKTS_APIENTRY _visualGetActiveWindows(
 
 void VKTS_APIENTRY _visualDestroyWindow(const NativeWindowSP& window)
 {
-    // Note: On Android, a window will be destroyed at the end.
+    if (window == ::g_defaultWindow && ::g_defaultWindowUsed)
+    {
+    	::g_defaultWindowUsed = VK_FALSE;
+    }
 }
 
 //

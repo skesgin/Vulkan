@@ -35,114 +35,17 @@
 #include <linux/input-event-codes.h>
 #include <poll.h>
 
-//
-// TODO: Remove
-//
-#include <fcntl.h>
-#include <string.h>
-#include <unistd.h>
-#include <memory>
-#include <sys/mman.h>
-
-struct wl_buffer* buffer = nullptr;
-
-void* data = nullptr;
-
-class ScopedFD
-{
-
-public:
-
-	explicit ScopedFD(int fd) : fd_(fd)
-	{
-
-	}
-
-    ~ScopedFD()
-    {
-    	if (auto_close_)
-    		close(fd_);
-    }
-
-    int Get()
-    {
-    	return fd_;
-    }
-
-    int Release()
-    {
-    	auto_close_ = false;
-    	return fd_;
-    }
-
-private:
-
-    ScopedFD(const ScopedFD&) = delete;
-    void operator=(const ScopedFD&) = delete;
-
-    const int fd_;
-    bool auto_close_ = true;
-};
-
-int CreateAnonymousFile(off_t size)
-{
-    static const std::string file_name = "/weston-shared-XXXXXX";
-    const std::string path = getenv("XDG_RUNTIME_DIR");
-    if (path.empty())
-    {
-    	errno = ENOENT;
-    	return -1;
-    }
-
-    std::string name = path + file_name;
-    char* c_name = const_cast<char*>(name.data());
-    ScopedFD fd(mkstemp(c_name));
-    if (fd.Get() < 0)
-    	return -1;
-
-    long flags = fcntl(fd.Get(), F_GETFD);
-    if (flags == -1)
-    	return -1;
-    if (fcntl(fd.Get(), F_SETFD, flags | FD_CLOEXEC) == -1)
-    	return -1;
-    if (ftruncate(fd.Get(), size) < 0)
-    	return -1;
-
-    return fd.Release();
-}
-
-void* CreateBuffer(struct wl_shm* shm, int32_t width, int32_t height)
-{
-    int stride = width * 4;
-    int size = stride * height;
-    ScopedFD fd(CreateAnonymousFile(size));
-    if (fd.Get() < 0)
-    {
-    	perror("Creating a buffer file failed");
-    	return nullptr;
-    }
-    data = mmap(nullptr, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd.Get(), 0);
-    if (data == MAP_FAILED)
-    {
-    	perror("mmap failed");
-    	return nullptr;
-    }
-
-    memset(data, 255, stride * height);
-
-    struct wl_shm_pool* pool = wl_shm_create_pool(shm, fd.Get(), size);
-    buffer = wl_shm_pool_create_buffer(pool, 0, width, height, stride, WL_SHM_FORMAT_XRGB8888);
-
-    wl_shm_pool_destroy(pool);
-
-    return data;
-}
-//
-//
-//
+#ifdef VKTS_TEST
+#include "fn_visual_wayland_test_internal.hpp"
+#endif
 
 namespace vkts
 {
+
+#ifdef VKTS_TEST
+// For testing, only one window can be created.
+struct wl_buffer* surfaceBuffer = nullptr;
+#endif
 
 static struct wl_cursor_theme* g_nativeCursorTheme = nullptr;
 
@@ -228,22 +131,22 @@ static struct wl_surface* g_currentTouchSurface = nullptr;
 
 //
 
-void _visualWaylandKeymap(void *data, struct wl_keyboard *wl_keyboard, uint32_t format, int32_t fd, uint32_t size)
+void VKTS_APIENTRY _visualWaylandKeymap(void *data, struct wl_keyboard *wl_keyboard, uint32_t format, int32_t fd, uint32_t size)
 {
 	// Nothing for now.
 }
 
-void _visualWaylandKeyEnter(void *data, struct wl_keyboard *wl_keyboard, uint32_t serial, struct wl_surface *surface, struct wl_array *keys)
+void VKTS_APIENTRY _visualWaylandKeyEnter(void *data, struct wl_keyboard *wl_keyboard, uint32_t serial, struct wl_surface *surface, struct wl_array *keys)
 {
 	g_currentKeySurface = surface;
 }
 
-void _visualWaylandKeyLeave(void *data, struct wl_keyboard *wl_keyboard, uint32_t serial, struct wl_surface *surface)
+void VKTS_APIENTRY _visualWaylandKeyLeave(void *data, struct wl_keyboard *wl_keyboard, uint32_t serial, struct wl_surface *surface)
 {
 	g_currentKeySurface = nullptr;
 }
 
-void _visualWaylandKey(void *data, struct wl_keyboard *wl_keyboard, uint32_t serial, uint32_t time, uint32_t key, uint32_t state)
+void VKTS_APIENTRY _visualWaylandKey(void *data, struct wl_keyboard *wl_keyboard, uint32_t serial, uint32_t time, uint32_t key, uint32_t state)
 {
     int32_t keyCode = _visualTranslateKey(key);
 
@@ -272,19 +175,19 @@ void _visualWaylandKey(void *data, struct wl_keyboard *wl_keyboard, uint32_t ser
     }
 }
 
-void _visualWaylandModifiers(void *data, struct wl_keyboard *wl_keyboard, uint32_t serial, uint32_t mods_depressed, uint32_t mods_latched, uint32_t mods_locked, uint32_t group)
+void VKTS_APIENTRY _visualWaylandModifiers(void *data, struct wl_keyboard *wl_keyboard, uint32_t serial, uint32_t mods_depressed, uint32_t mods_latched, uint32_t mods_locked, uint32_t group)
 {
 	// Nothing for now.
 }
 
-void _visualWaylandRepeat_info(void *data, struct wl_keyboard *wl_keyboard, int32_t rate, int32_t delay)
+void VKTS_APIENTRY _visualWaylandRepeat_info(void *data, struct wl_keyboard *wl_keyboard, int32_t rate, int32_t delay)
 {
 	// Nothing for now.
 }
 
 //
 
-void _visualWaylandEnter(void *data, struct wl_pointer *wl_pointer, uint32_t serial, struct wl_surface *surface, wl_fixed_t surface_x, wl_fixed_t surface_y)
+void VKTS_APIENTRY _visualWaylandEnter(void *data, struct wl_pointer *wl_pointer, uint32_t serial, struct wl_surface *surface, wl_fixed_t surface_x, wl_fixed_t surface_y)
 {
 	g_currentPointerSurface = surface;
 
@@ -316,7 +219,7 @@ void _visualWaylandEnter(void *data, struct wl_pointer *wl_pointer, uint32_t ser
 	}
 }
 
-void _visualWaylandLeave(void *data, struct wl_pointer* wl_pointer, uint32_t serial, struct wl_surface *surface)
+void VKTS_APIENTRY _visualWaylandLeave(void *data, struct wl_pointer* wl_pointer, uint32_t serial, struct wl_surface *surface)
 {
 	if (!g_currentPointerSurface)
 	{
@@ -344,7 +247,7 @@ void _visualWaylandLeave(void *data, struct wl_pointer* wl_pointer, uint32_t ser
 	g_currentPointerSurface = nullptr;
 }
 
-void _visualWaylandMotion(void *data, struct wl_pointer *wl_pointer, uint32_t time, wl_fixed_t surface_x, wl_fixed_t surface_y)
+void VKTS_APIENTRY _visualWaylandMotion(void *data, struct wl_pointer *wl_pointer, uint32_t time, wl_fixed_t surface_x, wl_fixed_t surface_y)
 {
 	if (!g_currentPointerSurface)
 	{
@@ -361,7 +264,7 @@ void _visualWaylandMotion(void *data, struct wl_pointer *wl_pointer, uint32_t ti
 	currentWindowContainer->second->nativeWindow->getMouseInput().setLocation(glm::ivec2(wl_fixed_to_int(surface_x), wl_fixed_to_int(surface_y)));
 }
 
-void _visualWaylandButton(void *data, struct wl_pointer *wl_pointer, uint32_t serial, uint32_t time, uint32_t button, uint32_t state)
+void VKTS_APIENTRY _visualWaylandButton(void *data, struct wl_pointer *wl_pointer, uint32_t serial, uint32_t time, uint32_t button, uint32_t state)
 {
 	if (!g_currentPointerSurface)
 	{
@@ -378,7 +281,7 @@ void _visualWaylandButton(void *data, struct wl_pointer *wl_pointer, uint32_t se
 	currentWindowContainer->second->nativeWindow->getMouseInput().setButton(button - BTN_LEFT, state == WL_POINTER_BUTTON_STATE_PRESSED);
 }
 
-void _visualWaylandAxis(void *data, struct wl_pointer *wl_pointer, uint32_t time, uint32_t axis, wl_fixed_t value)
+void VKTS_APIENTRY _visualWaylandAxis(void *data, struct wl_pointer *wl_pointer, uint32_t time, uint32_t axis, wl_fixed_t value)
 {
 	if (!g_currentPointerSurface)
 	{
@@ -461,7 +364,7 @@ void  VKTS_APIENTRY _visualWaylandDown(void *data, struct wl_touch *wl_touch, ui
 	}
 }
 
-void  VKTS_APIENTRY _visualWaylandUp(void *data, struct wl_touch *wl_touch, uint32_t serial, uint32_t time, int32_t id)
+void VKTS_APIENTRY _visualWaylandUp(void *data, struct wl_touch *wl_touch, uint32_t serial, uint32_t time, int32_t id)
 {
 	if (!g_currentTouchSurface)
 	{
@@ -1033,8 +936,6 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
     //
 
-    // TODO: Implement move to correct display.
-
     // TODO: Implement game mode cursor.
 
 	auto surface = wl_compositor_create_surface(g_nativeCompositor);
@@ -1119,25 +1020,25 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 	wl_region_add(region, 0, 0, width, height);
 	wl_surface_set_opaque_region(surface, region);
 
-	//
-	// TODO: Remove
-	//
-	if (!CreateBuffer(g_nativeShm, width, height))
+#ifdef VKTS_TEST
+	surfaceBuffer = _waylandTestCreateBuffer(g_nativeShm, width, height);
+
+	if (!surfaceBuffer)
 	{
 		return INativeWindowWP();
 	}
 
-    wl_surface_attach(surface, buffer, 0, 0);
+    wl_surface_attach(surface, surfaceBuffer, 0, 0);
     wl_surface_damage(surface, 0, 0, width, height);
     wl_surface_frame(surface);
     wl_surface_commit(surface);
-    //
-    //
-    //
+#endif
 
     _visualWaylandConfigure(windowContainer, shell_surface, 0, width, height);
 
     wl_display_dispatch(g_nativeDisplay);
+
+    logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Using Wayland, title is not shown and resize is false");
 
     return nativeWindow;
 }
@@ -1201,6 +1102,15 @@ void VKTS_APIENTRY _visualDestroyWindow(const NativeWindowSP& window)
         wl_surface_destroy(foundWindowContainerWalker->second->surface);
 
         delete foundWindowContainerWalker->second;
+
+#ifdef VKTS_TEST
+        if (surfaceBuffer)
+        {
+        	wl_buffer_destroy(surfaceBuffer);
+
+        	surfaceBuffer = nullptr;
+        }
+#endif
     }
 
     uint32_t currentNegativeWindowBit = ~(1 << window->getIndex());

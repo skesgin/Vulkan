@@ -44,6 +44,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
                                     ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_xlib.cpp
                                     ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_xlib_key.cpp
                                     ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_wayland.cpp
+                                    ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_wayland_test.cpp
                                     ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_wayland_key.cpp
                                     ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/wsi/fn_wsi_android.cpp
                                     ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/wsi/fn_wsi_display.cpp
@@ -97,6 +98,7 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
                                             ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_xlib.cpp
                                             ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_xlib_key.cpp
                                             ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_wayland.cpp
+                                            ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_wayland_test.cpp
                                             ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_wayland_key.cpp
                                             ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/wsi/fn_wsi.cpp
                                             ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/wsi/fn_wsi_display.cpp
@@ -113,6 +115,7 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
         list(APPEND IGNORE_CPP_FILES    ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_xlib.cpp
                                         ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_xlib_key.cpp
                                         ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_wayland.cpp
+                                        ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_wayland_test.cpp
                                         ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_wayland_key.cpp
                                         ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_none.cpp
                                         ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/wsi/fn_wsi_xlib.cpp
@@ -127,6 +130,7 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
                                         ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_display_linux.cpp
                                         ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_display_linux_key.cpp
                                         ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_linux_touchpad.cpp
+                                        ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_wayland_test.cpp
                                         ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_xlib.cpp
                                         ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_xlib_key.cpp
                                         ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_none.cpp
@@ -140,6 +144,7 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
                                         ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_display_linux.cpp
                                         ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_display_linux_key.cpp
                                         ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_wayland.cpp
+                                        ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_wayland_test.cpp
                                         ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_wayland_key.cpp
                                         ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/visual/fn_visual_none.cpp
                                         ${CMAKE_CURRENT_SOURCE_DIR}/src/layer0/wsi/fn_wsi_display.cpp
