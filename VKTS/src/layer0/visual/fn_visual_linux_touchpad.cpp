@@ -100,7 +100,7 @@ VkBool32 VKTS_APIENTRY _visualInitTouchpad(const VkInstance instance, const VkPh
 			continue;
 		}
 
-		if (eventBits == 0xb)
+		if ((eventBits & EV_ABS) == EV_ABS)
 		{
 			logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Found touch pad");
 
