@@ -32,9 +32,7 @@ layout (location = 0) in vec3 v_f_normal;
 #nextAttribute#
 layout (location = 4) in vec3 v_f_incident;
 #nextTexture#
-layout (location = 2) out vec4 ob_ambientOcclusionF0;   // Ambient occlusion and F0. GB not used.
-layout (location = 1) out vec4 ob_normalRoughness;      // Normal and roughness.
-layout (location = 0) out vec4 ob_colorMetallic;        // Color and metallic.
+#outDeclare#
 
 mat4 translate(vec3 t)
 {
@@ -113,9 +111,7 @@ void main()
         discard;
     }
 
-    ob_ambientOcclusionF0 = vec4(AmbientOcclusion_0, 0.0, 0.0, F0_0);
-    ob_normalRoughness = vec4(Normal_0.xyz * 0.5 + 0.5, Roughness_0);
-    ob_colorMetallic = vec4(Color_0.rgb, Metallic_0);
+    #outAssign#
 }"""
 
 nextTexCoord = """vec3 texCoord = vec3(v_f_texCoord, 0.0);"""

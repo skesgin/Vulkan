@@ -29,6 +29,7 @@ import mathutils
 import bmesh
 
 from .nodes import *
+from .deferred import *
 
 #
 #
@@ -569,6 +570,9 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
             #
         
             currentFragmentGLSL = fragmentGLSL
+
+            currentFragmentGLSL = currentFragmentGLSL.replace("#outDeclare#", deferredOutDeclareGLSL)
+            currentFragmentGLSL = currentFragmentGLSL.replace("#outAssign#", deferredOutAssignGLSL)
 
             #            
         
