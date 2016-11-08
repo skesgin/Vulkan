@@ -33,6 +33,8 @@
 
 // TODO: Import particle system.
 
+// TODO: Implement forward renderer for PBR.
+
 // TODO: Split VKTS into "core" library, which is no visual configuration right now.
 //		 Split WSI part into own library.
 //		 Split window, display and window handling into own library, having no Vulkan dependencies.
