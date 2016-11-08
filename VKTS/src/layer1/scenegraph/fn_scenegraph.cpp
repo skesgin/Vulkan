@@ -1689,13 +1689,13 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
                 VkDescriptorPoolSize descriptorPoolSize[3]{};
 
 				descriptorPoolSize[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-				descriptorPoolSize[0].descriptorCount = 5;
+				descriptorPoolSize[0].descriptorCount = VKTS_BINDING_UNIFORM_BUFFER_COUNT;
 
 				descriptorPoolSize[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-				descriptorPoolSize[1].descriptorCount = 9;
+				descriptorPoolSize[1].descriptorCount = VKTS_BINDING_UNIFORM_PHONG_BINDING_COUNT + 2;
 
 				descriptorPoolSize[2].type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
-				descriptorPoolSize[2].descriptorCount = 1;
+				descriptorPoolSize[2].descriptorCount = VKTS_BINDING_UNIFORM_VOXEL_COUNT;
 
                 auto descriptorPool = descriptorPoolCreate(context->getInitialResources()->getDevice()->getDevice(), VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT, 1, 3, descriptorPoolSize);
 
@@ -2070,6 +2070,56 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
                 return VK_FALSE;
             }
         }
+        else if (scenegraphIsToken(buffer, "phong_mirror_color"))
+        {
+            if (!scenegraphParseVec3(buffer, fdata))
+            {
+                return VK_FALSE;
+            }
+
+            texture = scenegraphCreateTexture(fdata[0], fdata[1], fdata[2], VK_FORMAT_R8G8B8_UNORM, context);
+
+            if (!texture.get())
+            {
+                return VK_FALSE;
+            }
+
+            if (phongMaterial.get())
+            {
+                phongMaterial->setMirror(texture);
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No material");
+
+                return VK_FALSE;
+            }
+        }
+        else if (scenegraphIsToken(buffer, "phong_mirror_reflectivity_value"))
+        {
+            if (!scenegraphParseFloat(buffer, fdata))
+            {
+                return VK_FALSE;
+            }
+
+            texture = scenegraphCreateTexture(fdata[0], 0.0f, 0.0f, VK_FORMAT_R8_UNORM, context);
+
+            if (!texture.get())
+            {
+                return VK_FALSE;
+            }
+
+            if (phongMaterial.get())
+            {
+                phongMaterial->setMirrorReflectivity(texture);
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No material");
+
+                return VK_FALSE;
+            }
+        }
         else if (scenegraphIsToken(buffer, "phong_ambient_texture"))
         {
             if (!scenegraphParseString(buffer, sdata))
@@ -2162,6 +2212,56 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
             if (phongMaterial.get())
             {
                 phongMaterial->setSpecularShininess(texture);
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No material");
+
+                return VK_FALSE;
+            }
+        }
+        else if (scenegraphIsToken(buffer, "phong_mirror_texture"))
+        {
+            if (!scenegraphParseString(buffer, sdata))
+            {
+                return VK_FALSE;
+            }
+
+            texture = context->useTexture(sdata);
+
+            if (!texture.get())
+            {
+                return VK_FALSE;
+            }
+
+            if (phongMaterial.get())
+            {
+                phongMaterial->setMirror(texture);
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No material");
+
+                return VK_FALSE;
+            }
+        }
+        else if (scenegraphIsToken(buffer, "phong_mirror_reflectivity_texture"))
+        {
+            if (!scenegraphParseString(buffer, sdata))
+            {
+                return VK_FALSE;
+            }
+
+            texture = context->useTexture(sdata);
+
+            if (!texture.get())
+            {
+                return VK_FALSE;
+            }
+
+            if (phongMaterial.get())
+            {
+                phongMaterial->setMirrorReflectivity(texture);
             }
             else
             {

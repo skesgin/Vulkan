@@ -39,6 +39,9 @@
 #include <unistd.h>
 #include <linux/joystick.h>
 
+// Event numbering from evtest.
+#define HAS_EVENT(eventNumber, events) ((1 << eventNumber) & events)
+
 namespace vkts
 {
 
@@ -100,10 +103,8 @@ VkBool32 VKTS_APIENTRY _visualInitTouchpad(const VkInstance instance, const VkPh
 			continue;
 		}
 
-		if ((eventBits & EV_ABS) == EV_ABS)
+		if (HAS_EVENT(3, eventBits))
 		{
-			logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Found touch pad");
-
 			touchpadFile = fileDescriptor;
 
 			//

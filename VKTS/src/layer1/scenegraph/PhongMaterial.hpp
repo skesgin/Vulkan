@@ -57,6 +57,10 @@ protected:
 
     ITextureSP specularShininess;
 
+    ITextureSP mirror;
+
+    ITextureSP mirrorReflectivity;
+
     VkBool32 transparent;
 
 public:
@@ -114,6 +118,14 @@ public:
     virtual const ITextureSP& getSpecularShininess() const override;
 
     virtual void setSpecularShininess(const ITextureSP& specularShininess) override;
+
+    virtual const ITextureSP& getMirror() const override;
+
+    virtual void setMirror(const ITextureSP& mirror) override;
+
+    virtual const ITextureSP& getMirrorReflectivity() const override;
+
+    virtual void setMirrorReflectivity(const ITextureSP& mirrorReflectivity) override;
 
     //
 

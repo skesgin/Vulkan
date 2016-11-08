@@ -139,7 +139,7 @@ void BSDFMaterial::updateDescriptorSetsRecursive(const std::string& nodeName, co
 
     //
 
-    VkWriteDescriptorSet finalWriteDescriptorSets[VKTS_BINDING_UNIFORM_BSDF_BINDING_COUNT];
+    VkWriteDescriptorSet finalWriteDescriptorSets[VKTS_BINDING_UNIFORM_BSDF_TOTAL_BINDING_COUNT];
     uint32_t finalWriteDescriptorSetsCount = 0;
 
     uint32_t currentTexture = 0;

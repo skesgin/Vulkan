@@ -669,6 +669,12 @@ def saveTextures(context, filepath, imagesLibraryName, materials):
                     if currentTextureSlot.use_map_hardness:
                         images.setdefault(friendlyImageName(image.filepath), image)
                         storeTexture = True
+                    if currentTextureSlot.use_map_mirror:
+                        images.setdefault(friendlyImageName(image.filepath), image)
+                        storeTexture = True
+                    if currentTextureSlot.use_map_raymir:
+                        images.setdefault(friendlyImageName(image.filepath), image)
+                        storeTexture = True
 
                     if storeTexture:    
                         textures.setdefault(friendlyTextureName(currentTextureSlot.texture.name), currentTextureSlot.texture)
@@ -1683,6 +1689,8 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
             phongDiffuseWritten = False
             phongSpecularWritten = False
             phongSpecularShininessWritten = False
+            phongMirrorWritten = False
+            phongMirrorReflectivityWritten = False
 
             for currentTextureSlot in material.texture_slots:
                 if currentTextureSlot and currentTextureSlot.texture and currentTextureSlot.texture.type == 'IMAGE':
@@ -1700,6 +1708,12 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
                         if currentTextureSlot.use_map_hardness:
                             fw("phong_specular_shininess_texture %s\n" % (friendlyTextureName(currentTextureSlot.texture.name) + "_texture"))
                             phongSpecularShininessWritten = True
+                        if currentTextureSlot.use_map_mirror:
+                            fw("phong_mirror_texture %s\n" % (friendlyTextureName(currentTextureSlot.texture.name) + "_texture"))
+                            phongMirrorWritten = True
+                        if currentTextureSlot.use_map_raymir:
+                            fw("phong_mirror_reflectivity_texture %s\n" % (friendlyTextureName(currentTextureSlot.texture.name) + "_texture"))
+                            phongMirrorWritten = True
 
             if not phongAmbientWritten:
                 fw("phong_ambient_color %f %f %f\n" % (material.ambient * context.scene.world.ambient_color[0], material.ambient * context.scene.world.ambient_color[1], material.ambient * context.scene.world.ambient_color[2]))
@@ -1709,6 +1723,10 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
                 fw("phong_specular_color %f %f %f\n" % (material.specular_intensity * material.specular_color[0], material.specular_intensity * material.specular_color[1], material.specular_intensity * material.specular_color[2]))
             if not phongSpecularShininessWritten:
                 fw("phong_specular_shininess_value %f\n" % ((float(material.specular_hardness) - 1.0) / 510.0))
+            if not phongMirrorWritten:
+                fw("phong_mirror_color %f %f %f\n" % (material.mirror_color[0], material.mirror_color[1], material.mirror_color[2]))
+            if not phongMirrorReflectivityWritten:
+                fw("phong_mirror_reflectivity_value %f\n" % (material.raytrace_mirror.reflect_factor))
                 
             if material.use_transparency:
                 fw("\n")    

@@ -88,6 +88,14 @@ public:
 
     virtual void setSpecularShininess(const ITextureSP& specularShininess) = 0;
 
+    virtual const ITextureSP& getMirror() const = 0;
+
+    virtual void setMirror(const ITextureSP& mirror) = 0;
+
+    virtual const ITextureSP& getMirrorReflectivity() const = 0;
+
+    virtual void setMirrorReflectivity(const ITextureSP& mirrorReflectivity) = 0;
+
     //
 
     virtual VkBool32 isTransparent() const = 0;

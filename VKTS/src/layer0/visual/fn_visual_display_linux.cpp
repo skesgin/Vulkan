@@ -33,6 +33,9 @@
 #include <unistd.h>
 #include <linux/input.h>
 
+// Event numbering from evtest.
+#define HAS_EVENT(eventNumber, events) ((1 << eventNumber) & events)
+
 namespace vkts
 {
     
@@ -85,7 +88,7 @@ VkBool32 VKTS_APIENTRY _visualInitDisplay(const VkInstance instance, const VkPhy
 			continue;
 		}
 
-		if (eventBits == 0x120013)
+		if (HAS_EVENT(1, eventBits) && HAS_EVENT(17, eventBits))
 		{
 	        logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Found keyboard");
 
@@ -96,7 +99,7 @@ VkBool32 VKTS_APIENTRY _visualInitDisplay(const VkInstance instance, const VkPhy
 
             g_keyFileDescriptor = fileDescriptor;
 		}
-        else if (eventBits == 0x17)
+        else if (HAS_EVENT(1, eventBits) && HAS_EVENT(2, eventBits))
         {
 	        logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Found mouse");
 
