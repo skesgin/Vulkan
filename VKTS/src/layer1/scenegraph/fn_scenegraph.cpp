@@ -194,6 +194,38 @@ static VkBool32 scenegraphParseStringFloat(const char* buffer, char* string, flo
     return VK_TRUE;
 }
 
+static VkBool32 scenegraphParseStringBool(const char* buffer, char* string, VkBool32* scalar)
+{
+    if (!buffer)
+    {
+        return VK_FALSE;
+    }
+
+    char token[VKTS_MAX_TOKEN_CHARS + 1];
+
+    char value[VKTS_MAX_TOKEN_CHARS + 1];
+
+    if (sscanf(buffer, "%s %s %s", token, string, value) != 3)
+    {
+        return VK_FALSE;
+    }
+
+    if (strcmp(value, "true") == 0)
+    {
+    	*scalar = VK_TRUE;
+    }
+    else if (strcmp(value, "false") == 0)
+    {
+    	*scalar = VK_FALSE;
+    }
+    else
+    {
+    	return VK_FALSE;
+    }
+
+    return VK_TRUE;
+}
+
 static VkBool32 scenegraphParseBool(const char* buffer, VkBool32* scalar)
 {
     if (!buffer)
@@ -1669,20 +1701,20 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
         }
         else if (scenegraphIsToken(buffer, "shading"))
         {
-            if (!scenegraphParseString(buffer, sdata))
+            if (!scenegraphParseStringBool(buffer, sdata, &bdata))
             {
                 return VK_FALSE;
             }
 
             if (strncmp(sdata, "BSDF", 4) == 0)
             {
-                bsdfMaterial = IBSDFMaterialSP(new BSDFMaterial());
+                bsdfMaterial = IBSDFMaterialSP(new BSDFMaterial(bdata));
                 phongMaterial = IPhongMaterialSP();
             }
             else if (strncmp(sdata, "Phong", 5) == 0)
             {
                 bsdfMaterial = IBSDFMaterialSP();
-                phongMaterial = IPhongMaterialSP(new PhongMaterial());
+                phongMaterial = IPhongMaterialSP(new PhongMaterial(bdata));
 
                 // Create all possibilities, even when not used.
 
@@ -3037,8 +3069,9 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
 
                     for (size_t i = 0; i < subMesh->getBSDFMaterial()->getNumberTextures(); i++)
                     {
-                    	// TODO: Switch betwenn forward and deferred.
-                		descriptorSetLayoutBinding[bindingCount].binding = VKTS_BINDING_UNIFORM_SAMPLER_BSDF_DEFERRED_FIRST + (uint32_t)i;
+                    	uint32_t bindingStart = subMesh->getBSDFMaterial()->getForwardRendering() ? VKTS_BINDING_UNIFORM_SAMPLER_BSDF_FORWARD_FIRST : VKTS_BINDING_UNIFORM_SAMPLER_BSDF_DEFERRED_FIRST;
+
+                		descriptorSetLayoutBinding[bindingCount].binding = bindingStart + (uint32_t)i;
                 		descriptorSetLayoutBinding[bindingCount].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
                 		descriptorSetLayoutBinding[bindingCount].descriptorCount = 1;
                 		descriptorSetLayoutBinding[bindingCount].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;

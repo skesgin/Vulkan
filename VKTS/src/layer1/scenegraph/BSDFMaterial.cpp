@@ -29,13 +29,13 @@
 namespace vkts
 {
 
-BSDFMaterial::BSDFMaterial() :
-    IBSDFMaterial(), Material(), name(), fragmentShader(nullptr), attributes(VKTS_VERTEX_BUFFER_TYPE_VERTEX | VKTS_VERTEX_BUFFER_TYPE_NORMAL), allTextures()
+BSDFMaterial::BSDFMaterial(const bool forwardRendering) :
+    IBSDFMaterial(), Material(), forwardRendering(forwardRendering), name(), fragmentShader(nullptr), attributes(VKTS_VERTEX_BUFFER_TYPE_VERTEX | VKTS_VERTEX_BUFFER_TYPE_NORMAL), allTextures()
 {
 }
 
 BSDFMaterial::BSDFMaterial(const BSDFMaterial& other) :
-    IBSDFMaterial(), Material(other), name(other.name + "_clone"), fragmentShader(other.fragmentShader), attributes(other.attributes), allTextures()
+    IBSDFMaterial(), Material(other), forwardRendering(other.forwardRendering), name(other.name + "_clone"), fragmentShader(other.fragmentShader), attributes(other.attributes), allTextures()
 {
 	for (size_t i = 0; i < other.allTextures.size(); i++)
 	{
@@ -51,6 +51,11 @@ BSDFMaterial::~BSDFMaterial()
 //
 // IBSDFMaterial
 //
+
+VkBool32 BSDFMaterial::getForwardRendering() const
+{
+    return forwardRendering;
+}
 
 const std::string& BSDFMaterial::getName() const
 {
@@ -87,8 +92,8 @@ void BSDFMaterial::addTexture(const ITextureSP& texture)
 {
     if (texture.get())
     {
-		// TODO: Switch betwenn forward and deferred.
-        updateDescriptorImageInfo((uint32_t)allTextures.size(), VKTS_BINDING_UNIFORM_SAMPLER_BSDF_DEFERRED_FIRST, texture->getSampler()->getSampler(), texture->getImageView()->getImageView(), texture->getMemoryImage()->getImage()->getImageLayout());
+    	uint32_t offset = forwardRendering ? VKTS_BINDING_UNIFORM_SAMPLER_BSDF_FORWARD_FIRST : VKTS_BINDING_UNIFORM_SAMPLER_BSDF_DEFERRED_FIRST;
+        updateDescriptorImageInfo((uint32_t)allTextures.size(), offset, texture->getSampler()->getSampler(), texture->getImageView()->getImageView(), texture->getMemoryImage()->getImage()->getImageLayout());
     }
 
     allTextures.append(texture);

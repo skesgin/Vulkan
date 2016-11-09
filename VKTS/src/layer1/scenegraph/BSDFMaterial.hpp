@@ -39,6 +39,8 @@ class BSDFMaterial : public IBSDFMaterial, Material
 
 protected:
 
+	const VkBool32 forwardRendering;
+
     std::string name;
 
     IShaderModuleSP fragmentShader;
@@ -49,7 +51,7 @@ protected:
 
 public:
 
-    BSDFMaterial();
+    BSDFMaterial(const bool forwardRendering);
     BSDFMaterial(const BSDFMaterial& other);
     BSDFMaterial(BSDFMaterial&& other) = delete;
     virtual ~BSDFMaterial();
@@ -60,6 +62,8 @@ public:
     //
     // IBSDFMaterial
     //
+
+    virtual VkBool32 getForwardRendering() const override;
 
     virtual const std::string& getName() const override;
 

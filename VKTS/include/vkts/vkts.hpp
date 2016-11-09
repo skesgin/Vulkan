@@ -27,13 +27,13 @@
 #ifndef VKTS_HPP_
 #define VKTS_HPP_
 
+// TODO: Implement forward renderer for PBR.
+
 // TODO: Add game mode cursor to Display and Wayland.
 
 // TODO: Allow multiple uniform buffers in scene graph.
 
 // TODO: Import particle system.
-
-// TODO: Implement forward renderer for PBR.
 
 // TODO: Split VKTS into "core" library, which is no visual configuration right now.
 //		 Split WSI part into own library.

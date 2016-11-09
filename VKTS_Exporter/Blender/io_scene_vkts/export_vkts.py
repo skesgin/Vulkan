@@ -517,7 +517,7 @@ def replaceParameters(currentNode, openNodes, processedNodes, currentMain):
     return currentMain
 
 
-def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
+def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName, use_forward):
     
     file = open(filepath, "w", encoding="utf8", newline="\n")
     fw = file.write
@@ -572,13 +572,22 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
         
             currentFragmentGLSL = fragmentGLSL
 
-            currentFragmentGLSL = currentFragmentGLSL.replace("#generalTexture#", deferredGeneralTextureGLSL)
-            currentFragmentGLSL = currentFragmentGLSL.replace("#outDeclare#", deferredOutDeclareGLSL)
-            currentFragmentGLSL = currentFragmentGLSL.replace("#outAssign#", deferredOutAssignGLSL)
+            if use_forward:
+                currentFragmentGLSL = currentFragmentGLSL.replace("#generalDefine#", forwardGeneralDefineGLSL)
+                currentFragmentGLSL = currentFragmentGLSL.replace("#generalTexture#", forwardGeneralTextureGLSL)
+                currentFragmentGLSL = currentFragmentGLSL.replace("#generalFunctions#", forwardGeneralFunctionsGLSL)
+                currentFragmentGLSL = currentFragmentGLSL.replace("#outDeclare#", forwardOutDeclareGLSL)
+                currentFragmentGLSL = currentFragmentGLSL.replace("#outAssign#", forwardOutAssignGLSL)
+            else:
+                currentFragmentGLSL = currentFragmentGLSL.replace("#generalDefine#", deferredGeneralDefineGLSL)
+                currentFragmentGLSL = currentFragmentGLSL.replace("#generalTexture#", deferredGeneralTextureGLSL)
+                currentFragmentGLSL = currentFragmentGLSL.replace("#generalFunctions#", deferredGeneralFunctionsGLSL)
+                currentFragmentGLSL = currentFragmentGLSL.replace("#outDeclare#", deferredOutDeclareGLSL)
+                currentFragmentGLSL = currentFragmentGLSL.replace("#outAssign#", deferredOutAssignGLSL)
 
             #            
         
-            fw("shading BSDF\n")
+            fw("shading BSDF %s\n" % friendlyBooleanName(use_forward))
             fw("\n")        
             fw("name %s\n" % friendlyName(materialName))
             fw("\n")
@@ -1257,7 +1266,7 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
             # Blender internal material.
             #
         
-            fw("shading Phong\n")
+            fw("shading Phong true\n")
             fw("\n")        
             fw("name %s\n" % friendlyName(materialName))
             fw("\n")
@@ -2260,7 +2269,7 @@ def saveObjects(context, filepath, meshLibraryName, animationLibraryName, channe
 def save(operator,
          context,
          filepath="",
-         global_matrix=None
+         use_forward=False
          ):
 
     # Mute all constraints.
@@ -2274,10 +2283,6 @@ def save(operator,
             muteList.append(currentConstraint.mute)
             currentConstraint.mute = True
     context.scene.update()
-
-    if global_matrix is None:
-        from mathutils import Matrix
-        global_matrix = Matrix()
 
     sceneFilepath = filepath
         
@@ -2301,7 +2306,7 @@ def save(operator,
 
     materialsLibraryFilepath = os.path.dirname(sceneFilepath) + "/" + materialsLibraryName
 
-    allEnvironmentTextures = saveMaterials(context, materialsLibraryFilepath, texturesLibraryName, imagesLibraryName)
+    allEnvironmentTextures = saveMaterials(context, materialsLibraryFilepath, texturesLibraryName, imagesLibraryName, use_forward)
 
     #
 

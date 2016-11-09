@@ -24,7 +24,11 @@
 
 VKTS_BINDING_UNIFORM_SAMPLER_BSDF_DEFERRED_FIRST = 4
 
+deferredGeneralDefineGLSL = """"""
+
 deferredGeneralTextureGLSL = """"""
+
+deferredGeneralFunctionsGLSL = """"""
 
 deferredOutDeclareGLSL = """layout (location = 2) out vec4 ob_ambientOcclusionF0;   // Ambient occlusion and F0. GB not used.
 layout (location = 1) out vec4 ob_normalRoughness;      // Normal and roughness.

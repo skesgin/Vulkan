@@ -25,12 +25,14 @@
 fragmentGLSL = """#version 450 core
 
 #define VKTS_PARALLAX_SCALE 0.002
+#generalDefine#
 
 layout (location = 0) in vec3 v_f_normal;
 #nextAttribute#
 layout (location = 4) in vec3 v_f_incident;
 #generalTexture#
 #nextTexture#
+#generalFunctions#
 #outDeclare#
 
 mat4 translate(vec3 t)
@@ -63,7 +65,7 @@ mat4 scale(vec3 s)
     return mat4(s.x, 0.0, 0.0, 0.0, 0.0, s.y, 0.0, 0.0, 0.0, 0.0, s.z, 0.0, 0.0, 0.0, 0.0, 1.0);
 }
 
-float fresnel(float eta, float theta)
+float fresnelNode(float eta, float theta)
 {
     float c = abs(theta);
     float g = eta * eta - 1 + c * c;
@@ -81,12 +83,12 @@ float fresnel(float eta, float theta)
     return 1.0;
 }
 
-vec2 parallaxMapping(vec2 texCoord, vec3 view, float height)
+vec2 parallaxMappingNode(vec2 texCoord, vec3 view, float height)
 {
     return texCoord - view.xy * height * VKTS_PARALLAX_SCALE;
 }
 
-vec3 bumpMapping(vec3 normal, float height, float distance, float strength)
+vec3 bumpMappingNode(vec3 normal, float height, float distance, float strength)
 {
     float finalHeight = height * distance; 
 
@@ -137,7 +139,7 @@ texImageFunction = """layout (binding = %d) uniform sampler2D u_texture%d;
 parallaxMain = """#previousMain#
 
     mat3 worldToTangentMatrix = transpose(mat3(tangent, bitangent, normal));
-    texCoord = vec3(parallaxMapping(texCoord.xy, worldToTangentMatrix * incident, %s), 0.0);"""
+    texCoord = vec3(parallaxMappingNode(texCoord.xy, worldToTangentMatrix * incident, %s), 0.0);"""
 
 #########
 # Nodes #
@@ -234,7 +236,7 @@ bumpMain = """#previousMain#
     vec3 %s = %s;
 
     // Out
-    vec3 %s = bumpMapping(%s, %s, %s * %s, %s);
+    vec3 %s = bumpMappingNode(%s, %s, %s * %s, %s);
     
     // Bump end"""
 
@@ -382,7 +384,7 @@ fresnelMain = """#previousMain#
     vec3 %s = %s;
     
     // Out
-    float %s = fresnel(%s, dot(-incident, %s));
+    float %s = fresnelNode(%s, dot(-incident, %s));
     
     // Fresnel end"""
 

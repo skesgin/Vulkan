@@ -48,9 +48,7 @@ from bpy.props import (CollectionProperty,
                        EnumProperty,
                        FloatProperty,
                        )
-from bpy_extras.io_utils import (ExportHelper,
-                                 axis_conversion,
-                                 )
+from bpy_extras.io_utils import (ExportHelper)
 
 
 class ExportVKTS(bpy.types.Operator, ExportHelper):
@@ -61,27 +59,10 @@ class ExportVKTS(bpy.types.Operator, ExportHelper):
     filename_ext = ".vkts"
     filter_glob = StringProperty(default="*.vkts", options={'HIDDEN'})
 
-    axis_forward = EnumProperty(
-            name="Forward",
-            items=(('X', "X Forward", ""),
-                   ('Y', "Y Forward", ""),
-                   ('Z', "Z Forward", ""),
-                   ('-X', "-X Forward", ""),
-                   ('-Y', "-Y Forward", ""),
-                   ('-Z', "-Z Forward", ""),
-                   ),
-            default='-Z',
-            )
-    axis_up = EnumProperty(
-            name="Up",
-            items=(('X', "X Up", ""),
-                   ('Y', "Y Up", ""),
-                   ('Z', "Z Up", ""),
-                   ('-X', "-X Up", ""),
-                   ('-Y', "-Y Up", ""),
-                   ('-Z', "-Z Up", ""),
-                   ),
-            default='Y',
+    use_forward = BoolProperty(
+            name="Use Forward",
+            description="Export Cycles materials for forward rendering",
+            default=False,
             )
 
     @classmethod
@@ -91,17 +72,7 @@ class ExportVKTS(bpy.types.Operator, ExportHelper):
     def execute(self, context):
         from . import export_vkts
 
-        keywords = self.as_keywords(ignore=("axis_forward",
-                                            "axis_up",
-                                            "global_scale",
-                                            "check_existing",
-                                            "filter_glob",
-                                            ))
-
-        global_matrix = axis_conversion(to_forward=self.axis_forward,
-                                        to_up=self.axis_up,
-                                        ).to_4x4()
-        keywords["global_matrix"] = global_matrix
+        keywords = self.as_keywords(ignore=("check_existing", "filter_glob"))
         
         filepath = self.filepath
         filepath = bpy.path.ensure_ext(filepath, self.filename_ext)
@@ -111,8 +82,7 @@ class ExportVKTS(bpy.types.Operator, ExportHelper):
     def draw(self, context):
         layout = self.layout
 
-        layout.prop(self, "axis_forward")
-        layout.prop(self, "axis_up")
+        layout.prop(self, "use_forward")
 
 
 def menu_func_export(self, context):

@@ -29,13 +29,13 @@
 namespace vkts
 {
 
-PhongMaterial::PhongMaterial() :
-    IPhongMaterial(), Material(), name(), alpha(), displacement(), normal(), ambient(), emissive(), diffuse(), specular(), specularShininess(), mirror(), mirrorReflectivity(), transparent(VK_FALSE)
+PhongMaterial::PhongMaterial(const bool forwardRendering) :
+    IPhongMaterial(), Material(), forwardRendering(forwardRendering), name(), alpha(), displacement(), normal(), ambient(), emissive(), diffuse(), specular(), specularShininess(), mirror(), mirrorReflectivity(), transparent(VK_FALSE)
 {
 }
 
 PhongMaterial::PhongMaterial(const PhongMaterial& other) :
-    IPhongMaterial(), Material(other), name(other.name + "_clone"), alpha(other.alpha), displacement(other.displacement), normal(other.normal), ambient(other.ambient), emissive(other.emissive), diffuse(other.diffuse), specular(other.specular), specularShininess(other.specularShininess), mirror(other.mirror), mirrorReflectivity(other.mirrorReflectivity), transparent(other.transparent)
+    IPhongMaterial(), Material(other), forwardRendering(other.forwardRendering), name(other.name + "_clone"), alpha(other.alpha), displacement(other.displacement), normal(other.normal), ambient(other.ambient), emissive(other.emissive), diffuse(other.diffuse), specular(other.specular), specularShininess(other.specularShininess), mirror(other.mirror), mirrorReflectivity(other.mirrorReflectivity), transparent(other.transparent)
 {
 
     // Textures cannot be cloned, just replaced.
@@ -134,6 +134,12 @@ PhongMaterial::~PhongMaterial()
 //
 // IPhongMaterial
 //
+
+VkBool32 PhongMaterial::getForwardRendering() const
+{
+    return forwardRendering;
+}
+
 
 const std::string& PhongMaterial::getName() const
 {

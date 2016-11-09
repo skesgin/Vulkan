@@ -39,6 +39,8 @@ class PhongMaterial: public IPhongMaterial, Material
 
 protected:
 
+	const VkBool32 forwardRendering;
+
     std::string name;
 
     ITextureSP alpha;
@@ -65,7 +67,7 @@ protected:
 
 public:
 
-    PhongMaterial();
+    PhongMaterial(const bool forwardRendering);
     PhongMaterial(const PhongMaterial& other);
     PhongMaterial(PhongMaterial&& other) = delete;
     virtual ~PhongMaterial();
@@ -78,6 +80,8 @@ public:
     //
     // IPhongMaterial
     //
+
+    virtual VkBool32 getForwardRendering() const override;
 
     virtual const std::string& getName() const override;
 
