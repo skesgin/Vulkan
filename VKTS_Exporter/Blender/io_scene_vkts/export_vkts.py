@@ -30,6 +30,7 @@ import bmesh
 
 from .nodes import *
 from .deferred import *
+from .forward import *
 
 #
 #
@@ -571,6 +572,7 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
         
             currentFragmentGLSL = fragmentGLSL
 
+            currentFragmentGLSL = currentFragmentGLSL.replace("#generalTexture#", deferredGeneralTextureGLSL)
             currentFragmentGLSL = currentFragmentGLSL.replace("#outDeclare#", deferredOutDeclareGLSL)
             currentFragmentGLSL = currentFragmentGLSL.replace("#outAssign#", deferredOutAssignGLSL)
 
@@ -1220,7 +1222,7 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName):
                 currentFragmentGLSL = currentFragmentGLSL.replace("#nextTexCoord#", nextTexCoord)
             
             for binding in range (0, len(nodes)):
-                currentTexImage = texImageFunction % ((binding + VKTS_BINDING_UNIFORM_SAMPLER_BSDF_FIRST), binding)
+                currentTexImage = texImageFunction % ((binding + VKTS_BINDING_UNIFORM_SAMPLER_BSDF_DEFERRED_FIRST), binding)
                 currentFragmentGLSL = currentFragmentGLSL.replace("#nextTexture#", currentTexImage)
                 
                 fw("add_texture %s\n" % (friendlyName(material.name) + "_" + friendlyNodeName(nodes[binding].name) + "_texture" ))    

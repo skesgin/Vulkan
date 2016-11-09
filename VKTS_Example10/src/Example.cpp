@@ -1543,7 +1543,7 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 
 	if (scene.get())
 	{
-		scene->updateDescriptorSetsRecursive(VKTS_BINDING_UNIFORM_BSDF_TOTAL_BINDING_COUNT, writeDescriptorSets);
+		scene->updateDescriptorSetsRecursive(VKTS_BINDING_UNIFORM_BSDF_DEFERRED_TOTAL_BINDING_COUNT, writeDescriptorSets);
 	}
 
 	if (environmentScene.get())

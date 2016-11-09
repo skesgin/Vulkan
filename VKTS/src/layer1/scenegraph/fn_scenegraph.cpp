@@ -2997,7 +2997,7 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
 
                 if (subMesh->getBSDFMaterial().get())
                 {
-                	VkDescriptorSetLayoutBinding descriptorSetLayoutBinding[VKTS_BINDING_UNIFORM_BSDF_TOTAL_BINDING_COUNT]{};
+                	VkDescriptorSetLayoutBinding descriptorSetLayoutBinding[VKTS_BINDING_UNIFORM_MATERIAL_TOTAL_BINDING_COUNT]{};
 
                 	uint32_t bindingCount = 0;
 
@@ -3037,7 +3037,8 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
 
                     for (size_t i = 0; i < subMesh->getBSDFMaterial()->getNumberTextures(); i++)
                     {
-                		descriptorSetLayoutBinding[bindingCount].binding = VKTS_BINDING_UNIFORM_SAMPLER_BSDF_FIRST + (uint32_t)i;
+                    	// TODO: Switch betwenn forward and deferred.
+                		descriptorSetLayoutBinding[bindingCount].binding = VKTS_BINDING_UNIFORM_SAMPLER_BSDF_DEFERRED_FIRST + (uint32_t)i;
                 		descriptorSetLayoutBinding[bindingCount].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
                 		descriptorSetLayoutBinding[bindingCount].descriptorCount = 1;
                 		descriptorSetLayoutBinding[bindingCount].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;

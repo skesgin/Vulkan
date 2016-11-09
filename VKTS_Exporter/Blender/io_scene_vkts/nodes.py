@@ -22,8 +22,6 @@
 # Cycles materials.
 #
 
-VKTS_BINDING_UNIFORM_SAMPLER_BSDF_FIRST = 4
-
 fragmentGLSL = """#version 450 core
 
 #define VKTS_PARALLAX_SCALE 0.002
@@ -31,6 +29,7 @@ fragmentGLSL = """#version 450 core
 layout (location = 0) in vec3 v_f_normal;
 #nextAttribute#
 layout (location = 4) in vec3 v_f_incident;
+#generalTexture#
 #nextTexture#
 #outDeclare#
 

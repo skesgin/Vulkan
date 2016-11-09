@@ -87,7 +87,8 @@ void BSDFMaterial::addTexture(const ITextureSP& texture)
 {
     if (texture.get())
     {
-        updateDescriptorImageInfo((uint32_t)allTextures.size(), VKTS_BINDING_UNIFORM_SAMPLER_BSDF_FIRST, texture->getSampler()->getSampler(), texture->getImageView()->getImageView(), texture->getMemoryImage()->getImage()->getImageLayout());
+		// TODO: Switch betwenn forward and deferred.
+        updateDescriptorImageInfo((uint32_t)allTextures.size(), VKTS_BINDING_UNIFORM_SAMPLER_BSDF_DEFERRED_FIRST, texture->getSampler()->getSampler(), texture->getImageView()->getImageView(), texture->getMemoryImage()->getImage()->getImageLayout());
     }
 
     allTextures.append(texture);
@@ -139,7 +140,7 @@ void BSDFMaterial::updateDescriptorSetsRecursive(const std::string& nodeName, co
 
     //
 
-    VkWriteDescriptorSet finalWriteDescriptorSets[VKTS_BINDING_UNIFORM_BSDF_TOTAL_BINDING_COUNT];
+    VkWriteDescriptorSet finalWriteDescriptorSets[VKTS_BINDING_UNIFORM_MATERIAL_TOTAL_BINDING_COUNT];
     uint32_t finalWriteDescriptorSetsCount = 0;
 
     uint32_t currentTexture = 0;

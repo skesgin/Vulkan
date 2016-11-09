@@ -100,7 +100,7 @@ private:
     VkDescriptorBufferInfo resolveDescriptorBufferInfos[1 + 1];
     VkDescriptorImageInfo resolveDescriptorImageInfos[VKTS_BSDF_DESCRIPTOR_SET_COUNT];
 
-    VkWriteDescriptorSet writeDescriptorSets[VKTS_BINDING_UNIFORM_BSDF_TOTAL_BINDING_COUNT];
+    VkWriteDescriptorSet writeDescriptorSets[VKTS_BINDING_UNIFORM_BSDF_DEFERRED_TOTAL_BINDING_COUNT];
     VkWriteDescriptorSet environmentWriteDescriptorSets[VKTS_ENVIRONMENT_DESCRIPTOR_SET_COUNT];
     VkWriteDescriptorSet resolveWriteDescriptorSets[VKTS_BSDF_DESCRIPTOR_SET_COUNT];
 
