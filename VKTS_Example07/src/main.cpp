@@ -220,6 +220,11 @@ int main(int argc, char* argv[])
 		return VK_FALSE;
 	}
 
+	// Only enable needed features.
+	memset(&physicalDeviceFeatures, 0, sizeof(physicalDeviceFeatures));
+	physicalDeviceFeatures.geometryShader = VK_TRUE;
+	physicalDeviceFeatures.tessellationShader = VK_TRUE;
+
 	//
 
 	if (!vkts::wsiGatherNeededDeviceExtensions(physicalDevice->getPhysicalDevice()))
