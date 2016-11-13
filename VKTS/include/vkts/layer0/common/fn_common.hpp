@@ -57,24 +57,35 @@ VKTS_APICALL int32_t VKTS_APIENTRY commonGetOffsetInBytes(const VkTsVertexBuffer
 VKTS_APICALL uint32_t VKTS_APIENTRY commonGetStrideInBytes(const VkTsVertexBufferType allElements);
 
 /**
+ * Only supported BLOCKs are returned as true.
+ *
+ * @ThreadSafe
+ */
+VKTS_APICALL VkBool32 VKTS_APIENTRY commonIsBLOCK(const VkFormat format);
+
+/**
+ * Only supported UNORMs and non compressed formats are returned as true.
  *
  * @ThreadSafe
  */
 VKTS_APICALL VkBool32 VKTS_APIENTRY commonIsUNORM(const VkFormat format);
 
 /**
+ * Only supported SFLOATs and non compressed formats are returned as true.
  *
  * @ThreadSafe
  */
 VKTS_APICALL VkBool32 VKTS_APIENTRY commonIsSFLOAT(const VkFormat format);
 
 /**
+ * Only for supported and non compressed formats the bytes per channel is returned.
  *
  * @ThreadSafe
  */
 VKTS_APICALL int32_t VKTS_APIENTRY commonGetBytesPerChannel(const VkFormat format);
 
 /**
+ * Only for supported and non compressed formats the number of channels is returned.
  *
  * @ThreadSafe
  */

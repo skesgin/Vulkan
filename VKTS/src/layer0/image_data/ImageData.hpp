@@ -49,12 +49,13 @@ private:
 
     IBinaryBufferSP buffer;
 
+    VkBool32 BLOCK;
     VkBool32 UNORM;
     VkBool32 SFLOAT;
     int32_t bytesPerChannel;
     int32_t numberChannels;
 
-    mutable std::vector<size_t> allOffsets;
+    std::vector<size_t> allOffsets;
 
     void reset();
 
@@ -65,8 +66,8 @@ private:
 public:
 
     ImageData() = delete;
-    ImageData(const std::string& name, const VkImageType imageType, const VkFormat& format, const VkExtent3D& extent, const uint32_t mipLevels, const uint32_t arrayLayers, const uint8_t* data, const size_t size);
-    ImageData(const std::string& name, const VkImageType imageType, const VkFormat& format, const VkExtent3D& extent, const uint32_t mipLevels, const uint32_t arrayLayers, const IBinaryBufferSP& buffer);
+    ImageData(const std::string& name, const VkImageType imageType, const VkFormat& format, const VkExtent3D& extent, const uint32_t mipLevels, const uint32_t arrayLayers, const std::vector<size_t>& allOffsets, const uint8_t* data, const size_t size);
+    ImageData(const std::string& name, const VkImageType imageType, const VkFormat& format, const VkExtent3D& extent, const uint32_t mipLevels, const uint32_t arrayLayers, const std::vector<size_t>& allOffsets, const IBinaryBufferSP& buffer);
     ImageData(const ImageData& other) = delete;
     ImageData(ImageData&& other) = delete;
     virtual ~ImageData();
@@ -107,6 +108,8 @@ public:
 
     virtual VkBool32 upload(const void* data, const uint32_t mipLevel, const uint32_t arrayLayer, const VkSubresourceLayout& subresourceLayout) const override;
 
+    virtual VkBool32 isBLOCK() const override;
+
     virtual VkBool32 isUNORM() const override;
 
     virtual VkBool32 isSFLOAT() const override;
@@ -114,6 +117,8 @@ public:
     virtual int32_t getBytesPerChannel() const override;
 
     virtual int32_t getNumberChannels() const override;
+
+    virtual const std::vector<size_t>& getAllOffsets() const override;
 
     virtual void setTexel(const glm::vec4& rgba, const uint32_t x, const uint32_t y, const uint32_t z, const uint32_t mipLevel, const uint32_t arrayLayer) override;
 

@@ -79,6 +79,8 @@ public:
      */
     virtual VkBool32 upload(const void* data, const uint32_t mipLevel, const uint32_t arrayLayer, const VkSubresourceLayout& subresourceLayout) const = 0;
 
+    virtual VkBool32 isBLOCK() const = 0;
+
     virtual VkBool32 isUNORM() const = 0;
 
     virtual VkBool32 isSFLOAT() const = 0;
@@ -86,6 +88,8 @@ public:
     virtual int32_t getBytesPerChannel() const = 0;
 
     virtual int32_t getNumberChannels() const = 0;
+
+    virtual const std::vector<size_t>& getAllOffsets() const = 0;
 
     virtual void setTexel(const glm::vec4& rgba, const uint32_t x, const uint32_t y, const uint32_t z, const uint32_t mipLevel, const uint32_t arrayLayer) = 0;
 

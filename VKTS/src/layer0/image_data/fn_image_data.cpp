@@ -359,7 +359,9 @@ static IImageDataSP imageDataLoadTga(const std::string& name, const IBinaryBuffe
         format = VK_FORMAT_R8G8B8A8_UNORM;
     }
 
-    return IImageDataSP(new ImageData(name, VK_IMAGE_TYPE_2D, format, { width, height, depth }, 1, 1, data.get(), width * height * depth * numberChannels));
+    std::vector<size_t> allOffsets{0};
+
+    return IImageDataSP(new ImageData(name, VK_IMAGE_TYPE_2D, format, { width, height, depth }, 1, 1, allOffsets, data.get(), width * height * depth * numberChannels));
 }
 
 static IImageDataSP imageDataLoadHdr(const std::string& name, const IBinaryBufferSP& buffer)
@@ -576,7 +578,9 @@ static IImageDataSP imageDataLoadHdr(const std::string& name, const IBinaryBuffe
         y--;
     }
 
-    return IImageDataSP(new ImageData(name, VK_IMAGE_TYPE_2D, VK_FORMAT_R32G32B32_SFLOAT, { (uint32_t)width, (uint32_t)height, (uint32_t)depth }, 1, 1, reinterpret_cast<const uint8_t*>(&data[0]), width * height * depth * numberChannels * sizeof(float)));
+    std::vector<size_t> allOffsets{0};
+
+    return IImageDataSP(new ImageData(name, VK_IMAGE_TYPE_2D, VK_FORMAT_R32G32B32_SFLOAT, { (uint32_t)width, (uint32_t)height, (uint32_t)depth }, 1, 1, allOffsets, reinterpret_cast<const uint8_t*>(&data[0]), width * height * depth * numberChannels * sizeof(float)));
 }
 
 IImageDataSP VKTS_APIENTRY imageDataLoad(const char* filename)
@@ -642,7 +646,9 @@ IImageDataSP VKTS_APIENTRY imageDataLoadRaw(const char* filename, const uint32_t
         return IImageDataSP();
     }
 
-    return IImageDataSP(new ImageData(filename, VK_IMAGE_TYPE_2D, format, { width, height, 1 }, 1, 1, buffer->getByteData(), expectedSize));
+    std::vector<size_t> allOffsets{0};
+
+    return IImageDataSP(new ImageData(filename, VK_IMAGE_TYPE_2D, format, { width, height, 1 }, 1, 1, allOffsets, buffer->getByteData(), expectedSize));
 }
 
 static IBinaryBufferSP imageDataSaveTga(const IImageDataSP& imageData, const uint32_t mipLevel, const uint32_t arrayLayer)
@@ -997,7 +1003,9 @@ IImageDataSP VKTS_APIENTRY imageDataCreate(const std::string& name, const uint32
 
     memset(&data[0], 0, (width * height * depth * numberChannels * bytesPerChannel));
 
-    return IImageDataSP(new ImageData(name, imageType, format, { width, height, depth }, 1, 1, &data[0], width * height * depth * numberChannels * bytesPerChannel));
+    std::vector<size_t> allOffsets{0};
+
+    return IImageDataSP(new ImageData(name, imageType, format, { width, height, depth }, 1, 1, allOffsets, &data[0], width * height * depth * numberChannels * bytesPerChannel));
 }
 
 IImageDataSP VKTS_APIENTRY imageDataCreate(const std::string& name, const uint32_t width, const uint32_t height, const uint32_t depth, const float red, const float green, const float blue, const float alpha, const VkImageType imageType, const VkFormat& format)
@@ -1200,7 +1208,9 @@ IImageDataSP VKTS_APIENTRY imageDataCreate(const std::string& name, const uint32
         }
     }
 
-    return IImageDataSP(new ImageData(name, imageType, format, { width, height, depth }, 1, 1, &data[0], width * height * depth * numberChannels * bytesPerChannel));
+    std::vector<size_t> allOffsets{0};
+
+    return IImageDataSP(new ImageData(name, imageType, format, { width, height, depth }, 1, 1, allOffsets, &data[0], width * height * depth * numberChannels * bytesPerChannel));
 }
 
 IImageDataSP VKTS_APIENTRY imageDataConvert(const IImageDataSP& sourceImage, const VkFormat targetFormat, const std::string& name)
@@ -1526,7 +1536,9 @@ IImageDataSP VKTS_APIENTRY imageDataConvert(const IImageDataSP& sourceImage, con
         }
     }
 
-    return IImageDataSP(new ImageData(name, sourceImage->getImageType(), targetFormat, sourceImage->getExtent3D(), 1, 1, &targetData[0], sourceImage->getWidth() * sourceImage->getHeight() * sourceImage->getDepth() * targetNumberChannels * targetBytesPerChannel));
+    std::vector<size_t> allOffsets{0};
+
+    return IImageDataSP(new ImageData(name, sourceImage->getImageType(), targetFormat, sourceImage->getExtent3D(), 1, 1, allOffsets, &targetData[0], sourceImage->getWidth() * sourceImage->getHeight() * sourceImage->getDepth() * targetNumberChannels * targetBytesPerChannel));
 }
 
 IImageDataSP VKTS_APIENTRY imageDataCopy(const IImageDataSP& sourceImage, const std::string& name)
@@ -1536,7 +1548,7 @@ IImageDataSP VKTS_APIENTRY imageDataCopy(const IImageDataSP& sourceImage, const 
         return IImageDataSP();
     }
 
-    return IImageDataSP(new ImageData(name, sourceImage->getImageType(), sourceImage->getFormat(), sourceImage->getExtent3D(), sourceImage->getMipLevels(), sourceImage->getArrayLayers(), (const uint8_t*) sourceImage->getData(), sourceImage->getSize()));
+    return IImageDataSP(new ImageData(name, sourceImage->getImageType(), sourceImage->getFormat(), sourceImage->getExtent3D(), sourceImage->getMipLevels(), sourceImage->getArrayLayers(), sourceImage->getAllOffsets(), (const uint8_t*) sourceImage->getData(), sourceImage->getSize()));
 }
 
 IImageDataSP VKTS_APIENTRY imageDataMerge(const SmartPointerVector<IImageDataSP>& sourceImages, const std::string& name, const uint32_t mipLevels, const uint32_t arrayLayers)
@@ -1587,16 +1599,22 @@ IImageDataSP VKTS_APIENTRY imageDataMerge(const SmartPointerVector<IImageDataSP>
         return IImageDataSP();
     }
 
+    //
+
+    std::vector<size_t> allOffsets;
+
     size_t offset = 0;
 
     for (size_t i = 0; i < sourceImages.size(); i++)
     {
+    	allOffsets.push_back(offset);
+
         mergedImageData->write(sourceImages[i]->getData(), 1, sourceImages[i]->getSize());
 
         offset += sourceImages[i]->getSize();
     }
 
-    return IImageDataSP(new ImageData(name, imageType, format, extent, mipLevels, arrayLayers, mergedImageData));
+    return IImageDataSP(new ImageData(name, imageType, format, extent, mipLevels, arrayLayers, allOffsets, mergedImageData));
 }
 
 }

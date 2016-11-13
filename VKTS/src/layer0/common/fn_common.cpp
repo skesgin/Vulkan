@@ -231,6 +231,16 @@ uint32_t VKTS_APIENTRY commonGetStrideInBytes(const VkTsVertexBufferType allElem
     return result;
 }
 
+VkBool32 VKTS_APIENTRY commonIsBLOCK(const VkFormat format)
+{
+	if (format >= VK_FORMAT_BC1_RGB_UNORM_BLOCK && format <= VK_FORMAT_ASTC_12x12_SRGB_BLOCK)
+	{
+        return VK_TRUE;
+	}
+
+    return VK_FALSE;
+}
+
 VkBool32 VKTS_APIENTRY commonIsUNORM(const VkFormat format)
 {
     switch (format)
