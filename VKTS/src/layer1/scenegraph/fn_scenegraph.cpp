@@ -804,7 +804,7 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
                         }
                     }
 
-                    if (mipMap && (imageData->getExtent3D().width > 1 || imageData->getExtent3D().height > 1 || imageData->getExtent3D().depth > 1))
+                    if (mipMap && imageData->getMipLevels() == 1 && (imageData->getExtent3D().width > 1 || imageData->getExtent3D().height > 1 || imageData->getExtent3D().depth > 1))
                     {
                         // Mipmaping image creation.
 
@@ -899,77 +899,80 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
                     }
                     else if (environment)
                     {
-                    	// Cube map image creation.
+                		// Cube map image creation.
 
-                        auto dotIndex = finalImageDataFilename.rfind(".");
+						auto dotIndex = finalImageDataFilename.rfind(".");
 
-                        if (dotIndex == finalImageDataFilename.npos)
-                        {
-                        	logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No valid image filename '%s'", finalImageDataFilename.c_str());
+						if (dotIndex == finalImageDataFilename.npos)
+						{
+							logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No valid image filename '%s'", finalImageDataFilename.c_str());
 
-                            return VK_FALSE;
-                        }
+							return VK_FALSE;
+						}
 
-                        auto sourceImageName = finalImageDataFilename.substr(0, dotIndex);
-                        auto sourceImageExtension = finalImageDataFilename.substr(dotIndex);
+						auto sourceImageName = finalImageDataFilename.substr(0, dotIndex);
+						auto sourceImageExtension = finalImageDataFilename.substr(dotIndex);
 
-                        SmartPointerVector<IImageDataSP> allCubeMaps;
+                    	if (imageData->getArrayLayers() != 6)
+                    	{
+							SmartPointerVector<IImageDataSP> allCubeMaps;
 
-                        if (cacheGetEnabled())
-                        {
-                            for (uint32_t layer = 0; layer < 6; layer++)
+							if (cacheGetEnabled())
 							{
-								auto targetImageFilename = sourceImageName + "_LAYER" + std::to_string(layer) + sourceImageExtension;
-
-								auto targetImage = cacheLoadImageData(targetImageFilename.c_str());
-
-								if (!targetImage.get())
+								for (uint32_t layer = 0; layer < 6; layer++)
 								{
-									allCubeMaps.clear();
+									auto targetImageFilename = sourceImageName + "_LAYER" + std::to_string(layer) + sourceImageExtension;
 
-									break;
+									auto targetImage = cacheLoadImageData(targetImageFilename.c_str());
+
+									if (!targetImage.get())
+									{
+										allCubeMaps.clear();
+
+										break;
+									}
+
+									allCubeMaps.append(targetImage);
 								}
-
-								allCubeMaps.append(targetImage);
 							}
-                        }
 
-                        //
+							//
 
-                        if (allCubeMaps.size() == 0)
-                        {
-                        	allCubeMaps = imageDataCubemap(imageData, (uint32_t)imageData->getHeight() / 2, finalImageDataFilename);
+							if (allCubeMaps.size() == 0)
+							{
+								allCubeMaps = imageDataCubemap(imageData, (uint32_t)imageData->getHeight() / 2, finalImageDataFilename);
 
-                            if (allCubeMaps.size() == 0)
-                            {
-                            	logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create cube maps for '%s'", finalImageDataFilename.c_str());
-
-                                return VK_FALSE;
-                            }
-
-                            if (cacheGetEnabled())
-                            {
-								logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Storing cached data for '%s'", finalImageDataFilename.c_str());
-
-								for (size_t i = 0; i < allCubeMaps.size(); i++)
+								if (allCubeMaps.size() == 0)
 								{
-									cacheSaveImageData(allCubeMaps[i]);
+									logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create cube maps for '%s'", finalImageDataFilename.c_str());
+
+									return VK_FALSE;
 								}
-                            }
-                        }
-                        else
-                        {
-                        	logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Using cached data for '%s'", finalImageDataFilename.c_str());
-                        }
 
-                        imageData = imageDataMerge(allCubeMaps, finalImageDataFilename, 1, (uint32_t)allCubeMaps.size());
+								if (cacheGetEnabled())
+								{
+									logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Storing cached data for '%s'", finalImageDataFilename.c_str());
 
-                        if (!imageData.get())
-                        {
-                        	logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No merged image for '%s'", finalImageDataFilename.c_str());
+									for (size_t i = 0; i < allCubeMaps.size(); i++)
+									{
+										cacheSaveImageData(allCubeMaps[i]);
+									}
+								}
+							}
+							else
+							{
+								logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Using cached data for '%s'", finalImageDataFilename.c_str());
+							}
 
-                            return VK_FALSE;
-                        }
+							imageData = imageDataMerge(allCubeMaps, finalImageDataFilename, 1, (uint32_t)allCubeMaps.size());
+
+							if (!imageData.get())
+							{
+								logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No merged image for '%s'", finalImageDataFilename.c_str());
+
+								return VK_FALSE;
+							}
+                    	}
 
                         if (preFiltered)
                         {

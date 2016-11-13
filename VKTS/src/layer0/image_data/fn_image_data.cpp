@@ -30,6 +30,8 @@
 
 #include "ImageData.hpp"
 
+#include "fn_image_data_internal.hpp"
+
 #define VKTS_HDR_HEADER_SIZE 52
 
 namespace vkts
@@ -616,6 +618,10 @@ IImageDataSP VKTS_APIENTRY imageDataLoad(const char* filename)
     {
         return imageDataLoadHdr(filename, buffer);
     }
+    else if (lowerCaseExtension == ".dds" || lowerCaseExtension == ".ktx")
+    {
+        return imageDataLoadGli(filename, buffer);
+    }
 
     return IImageDataSP();
 }
@@ -903,6 +909,10 @@ VkBool32 VKTS_APIENTRY imageDataSave(const char* filename, const IImageDataSP& i
     	size_t currentSize = (size_t)currentExtent.width * (size_t)currentExtent.height * (size_t)imageData->getNumberChannels() * (size_t)imageData->getBytesPerChannel();
 
         return fileSaveBinaryData(filename, &imageData->getByteData()[offset], currentSize);
+    }
+    else if (lowerCaseExtension == ".dds" || lowerCaseExtension == ".ktx" )
+    {
+    	return imageDataSaveGli(filename, imageData, mipLevel, arrayLayer);
     }
 
     return VK_FALSE;
