@@ -304,6 +304,70 @@ VkBool32 VKTS_APIENTRY commonIsSFLOAT(const VkFormat format)
     return VK_FALSE;
 }
 
+int32_t VKTS_APIENTRY commonGetBytesPerTexel(const VkFormat format)
+{
+    switch (format)
+    {
+        case VK_FORMAT_R8_UNORM:
+        case VK_FORMAT_R8G8_UNORM:
+        case VK_FORMAT_R8G8B8_UNORM:
+        case VK_FORMAT_B8G8R8_UNORM:
+        case VK_FORMAT_R8G8B8A8_UNORM:
+        case VK_FORMAT_B8G8R8A8_UNORM:
+        case VK_FORMAT_R32_SFLOAT:
+        case VK_FORMAT_R32G32_SFLOAT:
+        case VK_FORMAT_R32G32B32_SFLOAT:
+        case VK_FORMAT_R32G32B32A32_SFLOAT:
+            return commonGetBytesPerChannel(format) * commonGetNumberChannels(format);
+        //
+		case VK_FORMAT_BC1_RGB_UNORM_BLOCK:
+			return 8;
+		case VK_FORMAT_BC1_RGBA_UNORM_BLOCK:
+			return 8;
+		case VK_FORMAT_BC2_UNORM_BLOCK:
+			return 16;
+		case VK_FORMAT_BC3_UNORM_BLOCK:
+			return 16;
+		case VK_FORMAT_BC4_UNORM_BLOCK:
+			return 8;
+		case VK_FORMAT_BC5_UNORM_BLOCK:
+			return 16;
+		case VK_FORMAT_BC6H_SFLOAT_BLOCK:
+			return 16;
+		case VK_FORMAT_BC7_UNORM_BLOCK:
+			return 16;
+		case VK_FORMAT_ETC2_R8G8B8_UNORM_BLOCK:
+			return 8;
+		case VK_FORMAT_ETC2_R8G8B8A1_UNORM_BLOCK:
+			return 8;
+		case VK_FORMAT_ETC2_R8G8B8A8_UNORM_BLOCK:
+			return 16;
+		case VK_FORMAT_EAC_R11_UNORM_BLOCK:
+			return 8;
+		case VK_FORMAT_EAC_R11G11_UNORM_BLOCK:
+			return 16;
+		case VK_FORMAT_ASTC_4x4_UNORM_BLOCK:
+		case VK_FORMAT_ASTC_5x4_UNORM_BLOCK:
+		case VK_FORMAT_ASTC_5x5_UNORM_BLOCK:
+		case VK_FORMAT_ASTC_6x5_UNORM_BLOCK:
+		case VK_FORMAT_ASTC_6x6_UNORM_BLOCK:
+		case VK_FORMAT_ASTC_8x5_UNORM_BLOCK:
+		case VK_FORMAT_ASTC_8x6_UNORM_BLOCK:
+		case VK_FORMAT_ASTC_8x8_UNORM_BLOCK:
+		case VK_FORMAT_ASTC_10x5_UNORM_BLOCK:
+		case VK_FORMAT_ASTC_10x6_UNORM_BLOCK:
+		case VK_FORMAT_ASTC_10x8_UNORM_BLOCK:
+		case VK_FORMAT_ASTC_10x10_UNORM_BLOCK:
+		case VK_FORMAT_ASTC_12x10_UNORM_BLOCK:
+		case VK_FORMAT_ASTC_12x12_UNORM_BLOCK:
+			return 16;
+        default:
+            return 0;
+    }
+
+    return 0;
+}
+
 int32_t VKTS_APIENTRY commonGetBytesPerChannel(const VkFormat format)
 {
     switch (format)

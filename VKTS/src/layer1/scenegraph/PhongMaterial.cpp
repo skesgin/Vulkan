@@ -29,7 +29,7 @@
 namespace vkts
 {
 
-PhongMaterial::PhongMaterial(const bool forwardRendering) :
+PhongMaterial::PhongMaterial(const VkBool32 forwardRendering) :
     IPhongMaterial(), Material(), forwardRendering(forwardRendering), name(), alpha(), displacement(), normal(), ambient(), emissive(), diffuse(), specular(), specularShininess(), mirror(), mirrorReflectivity(), transparent(VK_FALSE)
 {
 }

@@ -85,6 +85,8 @@ public:
 
     virtual VkBool32 isSFLOAT() const = 0;
 
+    virtual int32_t getBytesPerTexel() const = 0;
+
     virtual int32_t getBytesPerChannel() const = 0;
 
     virtual int32_t getNumberChannels() const = 0;

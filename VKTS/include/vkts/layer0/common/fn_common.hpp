@@ -77,6 +77,14 @@ VKTS_APICALL VkBool32 VKTS_APIENTRY commonIsUNORM(const VkFormat format);
  */
 VKTS_APICALL VkBool32 VKTS_APIENTRY commonIsSFLOAT(const VkFormat format);
 
+
+/**
+ * Only for supported formats the bytes per texel is returned.
+ *
+ * @ThreadSafe
+ */
+VKTS_APICALL int32_t VKTS_APIENTRY commonGetBytesPerTexel(const VkFormat format);
+
 /**
  * Only for supported and non compressed formats the bytes per channel is returned.
  *

@@ -29,7 +29,7 @@
 namespace vkts
 {
 
-BSDFMaterial::BSDFMaterial(const bool forwardRendering) :
+BSDFMaterial::BSDFMaterial(const VkBool32 forwardRendering) :
     IBSDFMaterial(), Material(), forwardRendering(forwardRendering), name(), fragmentShader(nullptr), attributes(VKTS_VERTEX_BUFFER_TYPE_VERTEX | VKTS_VERTEX_BUFFER_TYPE_NORMAL), allTextures()
 {
 }

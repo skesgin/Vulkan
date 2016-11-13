@@ -114,6 +114,8 @@ public:
 
     virtual VkBool32 isSFLOAT() const override;
 
+    virtual int32_t getBytesPerTexel() const override;
+
     virtual int32_t getBytesPerChannel() const override;
 
     virtual int32_t getNumberChannels() const override;

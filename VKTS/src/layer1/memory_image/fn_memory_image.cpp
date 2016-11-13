@@ -315,26 +315,27 @@ IMemoryImageSP VKTS_APIENTRY memoryImageCreate(IImageSP& stageImage, IBufferSP& 
 
             // Upload from buffer into image.
 
-            VkDeviceSize bufferOffset = 0;
-
             for (uint32_t arrayLayer = 0; arrayLayer < imageData->getArrayLayers(); arrayLayer++)
             {
 				for (uint32_t mipLevel = 0; mipLevel < imageData->getMipLevels(); mipLevel++)
 				{
+					VkExtent3D currentExtent;
+					size_t currentOffset;
+					if (!imageData->getExtentAndOffset(currentExtent, currentOffset, mipLevel, arrayLayer))
+					{
+						return IMemoryImageSP();
+					}
+
 					VkBufferImageCopy bufferImageCopy;
 
-					bufferImageCopy.bufferOffset = bufferOffset;
-					bufferImageCopy.bufferRowLength = glm::max(imageData->getWidth() >> mipLevel, 1u);
-					bufferImageCopy.bufferImageHeight = glm::max(imageData->getHeight() >> mipLevel, 1u);
+					bufferImageCopy.bufferOffset = currentOffset;
+					bufferImageCopy.bufferRowLength = 0;	// Zero means tightly packed.
+					bufferImageCopy.bufferImageHeight = 0;
 					bufferImageCopy.imageSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, mipLevel, arrayLayer, 1};
 					bufferImageCopy.imageOffset = {0, 0, 0};
 					bufferImageCopy.imageExtent = {glm::max(imageData->getWidth() >> mipLevel, 1u), glm::max(imageData->getHeight() >> mipLevel, 1u), glm::max(imageData->getDepth() >> mipLevel, 1u)};
 
 					stageBuffer->copyBufferToImage(cmdBuffer->getCommandBuffer(), image, bufferImageCopy);
-
-					//
-
-					bufferOffset += (VkDeviceSize)(bufferImageCopy.imageExtent.width * bufferImageCopy.imageExtent.height * bufferImageCopy.imageExtent.depth) * (VkDeviceSize)(imageData->getBytesPerChannel() * imageData->getNumberChannels());
 				}
             }
         }

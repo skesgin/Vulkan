@@ -67,7 +67,7 @@ protected:
 
 public:
 
-    PhongMaterial(const bool forwardRendering);
+    PhongMaterial(const VkBool32 forwardRendering);
     PhongMaterial(const PhongMaterial& other);
     PhongMaterial(PhongMaterial&& other) = delete;
     virtual ~PhongMaterial();

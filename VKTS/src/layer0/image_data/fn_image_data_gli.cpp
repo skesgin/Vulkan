@@ -254,11 +254,11 @@ IImageDataSP VKTS_APIENTRY imageDataLoadGli(const std::string& name, const IBina
     std::vector<size_t> allOffsets;
 
     size_t offset = 0;
-	for (size_t arrayLayer = texture.base_layer(); arrayLayer < texture.max_layer(); arrayLayer++)
+	for (size_t arrayLayer = texture.base_layer(); arrayLayer <= texture.max_layer(); arrayLayer++)
 	{
-		for (size_t face = texture.base_face(); face < texture.max_face(); face++)
+		for (size_t face = texture.base_face(); face <= texture.max_face(); face++)
 		{
-			for (size_t mipLevel = texture.base_level(); mipLevel < texture.max_level(); mipLevel++)
+			for (size_t mipLevel = texture.base_level(); mipLevel <= texture.max_level(); mipLevel++)
 			{
 				allOffsets.push_back(offset);
 
@@ -271,11 +271,11 @@ IImageDataSP VKTS_APIENTRY imageDataLoadGli(const std::string& name, const IBina
     std::vector<uint8_t> data(totalSize);
 
     offset = 0;
-	for (size_t arrayLayer = texture.base_layer(); arrayLayer < texture.max_layer(); arrayLayer++)
+	for (size_t arrayLayer = texture.base_layer(); arrayLayer <= texture.max_layer(); arrayLayer++)
 	{
-		for (size_t face = texture.base_face(); face < texture.max_face(); face++)
+		for (size_t face = texture.base_face(); face <= texture.max_face(); face++)
 		{
-			for (size_t mipLevel = texture.base_level(); mipLevel < texture.max_level(); mipLevel++)
+			for (size_t mipLevel = texture.base_level(); mipLevel <= texture.max_level(); mipLevel++)
 			{
 				memcpy(&data[offset], texture.data(arrayLayer, face, mipLevel), texture.size(mipLevel));
 

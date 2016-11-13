@@ -458,6 +458,11 @@ VkBool32 ImageData::isSFLOAT() const
     return SFLOAT;
 }
 
+int32_t ImageData::getBytesPerTexel() const
+{
+	return commonGetBytesPerTexel(format);
+}
+
 int32_t ImageData::getBytesPerChannel() const
 {
     return bytesPerChannel;
