@@ -26,10 +26,12 @@ fragmentGLSL = """#version 450 core
 
 #define VKTS_PARALLAX_SCALE 0.002
 #generalDefine#
+#generalBuffer#
 
 layout (location = 0) in vec3 v_f_normal;
 #nextAttribute#
 layout (location = 4) in vec3 v_f_incident;
+layout (location = 5) in vec4 v_f_vertex;
 #generalTexture#
 #nextTexture#
 #generalFunctions#

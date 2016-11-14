@@ -544,8 +544,8 @@ glm::vec4 ImageData::getTexel(const uint32_t x, const uint32_t y, const uint32_t
         return glm::vec4(NAN, NAN, NAN, NAN);
     }
 
-	VkExtent3D currentExtent;
-	size_t offset;
+	VkExtent3D currentExtent{0, 0, 0};
+	size_t offset = 0;
 
     getExtentAndOffset(currentExtent, offset, mipLevel, arrayLayer);
 

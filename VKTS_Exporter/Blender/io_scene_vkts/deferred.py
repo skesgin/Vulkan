@@ -26,6 +26,8 @@ VKTS_BINDING_UNIFORM_SAMPLER_BSDF_DEFERRED_FIRST = 4
 
 deferredGeneralDefineGLSL = """"""
 
+deferredGeneralBufferGLSL = """"""
+
 deferredGeneralTextureGLSL = """"""
 
 deferredGeneralFunctionsGLSL = """"""

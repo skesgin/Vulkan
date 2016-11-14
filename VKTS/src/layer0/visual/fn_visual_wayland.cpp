@@ -32,7 +32,7 @@
 
 #define VKTS_WINDOWS_MAX_WINDOWS 64
 
-#include <linux/input-event-codes.h>
+#include <linux/input.h>
 #include <poll.h>
 
 #ifdef VKTS_TEST

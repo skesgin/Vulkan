@@ -34,6 +34,17 @@ forwardGeneralDefineGLSL = """#define VKTS_MAX_LIGHTS 16
 
 #define VKTS_NORMAL_VALID_BIAS 0.1"""
 
+forwardGeneralBufferGLSL = """layout (binding = 7, std140) uniform _u_bufferLights {
+        vec4 L[VKTS_MAX_LIGHTS];
+        vec4 color[VKTS_MAX_LIGHTS];
+        int count;
+} u_bufferLights;
+
+layout (binding = 8, std140) uniform _u_bufferMatrices {
+        mat4 inverseProjectionMatrix;
+        mat4 inverseViewMatrix;
+} u_bufferMatrices;"""
+
 forwardGeneralTextureGLSL = """layout (binding = 6) uniform sampler2D u_lut;
 layout (binding = 5) uniform samplerCube u_specularCubemap;
 layout (binding = 4) uniform samplerCube u_diffuseCubemap;"""
@@ -149,4 +160,116 @@ vec3 iblCookTorrance(vec3 N, vec3 V, float roughness, vec3 baseColor, float F0)
 
 forwardOutDeclareGLSL = """layout (location = 0) out vec4 ob_fragColor;"""
 
-forwardOutAssignGLSL = """// TODO: Add code based on resolve"""
+forwardOutAssignGLSL = """
+    vec3 color = vec3(0.0, 0.0, 0.0);
+    
+    float normalLength = length(Normal_0);
+    
+    if (normalLength > VKTS_NORMAL_VALID_BIAS)
+    {
+        vec3 N = mat3(u_bufferMatrices.inverseViewMatrix) * normalize(Normal_0);
+
+        vec4 vertex = u_bufferMatrices.inverseProjectionMatrix * (v_f_vertex / v_f_vertex.w);
+        
+        vec3 V = mat3(u_bufferMatrices.inverseViewMatrix) * -normalize(vertex.xyz);
+
+
+        float NdotV = dot(N, V);
+        
+        if (NdotV < 0.0)
+        {
+            N = -N;
+            
+            NdotV = dot(N, V);
+        }
+        
+        
+        float roughness = Roughness_0;
+
+        float metallic = Metallic_0;
+        
+        vec3 baseColor = Color_0.rgb;
+        
+        float ambientOcclusion = AmbientOcclusion_0;
+        
+        float F0 = F0_0;
+        
+        //
+        // Dielectric
+        //
+        
+        vec3 colorLambert = vec3(0.0, 0.0, 0.0);
+
+        if (metallic < 1.0)
+        {
+            // FIXME: Use for roughness > 0.0 Oren-Nayar.
+            colorLambert = iblLambert(N, baseColor) * ambientOcclusion;
+
+            //
+            
+            vec3 colorReflective = iblCookTorrance(N, V, roughness, vec3(1.0, 1.0, 1.0), F0 * VKTS_FO_LINEAR_RANGE);
+            
+            //
+
+            colorLambert = mix(colorLambert, colorReflective, fresnel(NdotV, F0 * VKTS_FO_LINEAR_RANGE));
+        }
+
+        //
+        // Metallic
+        //
+        
+        vec3 colorCookTorrance = vec3(0.0, 0.0, 0.0);
+
+        if (metallic > 0.0)
+        {
+            colorCookTorrance = iblCookTorrance(N, V, roughness, baseColor, F0);
+        }
+        
+        // Dynamic lights.
+        
+        vec3 dynamicLight = vec3(0.0, 0.0, 0.0);
+        
+        // Bring vertex to world space.
+        vertex = u_bufferMatrices.inverseViewMatrix * vertex; 
+        
+        for (int i = 0; i < min(u_bufferLights.count, VKTS_MAX_LIGHTS); i++)
+        {
+            vec3 light;
+            
+            if (u_bufferLights.L[i].w > 0.0)
+            {
+                light = normalize((u_bufferLights.L[i] - vertex).xyz);
+            }
+            else
+            {
+                light = u_bufferLights.L[i].xyz;
+            }
+        
+            if (metallic < 1.0)
+            {
+                dynamicLight += lambert(light, u_bufferLights.color[i].xyz, N, baseColor) * (1.0 - metallic);
+                
+                dynamicLight += cookTorrance(light, u_bufferLights.color[i].xyz, N, V, roughness, F0 * VKTS_FO_LINEAR_RANGE);
+            }
+
+            if (metallic > 0.0)
+            {
+                dynamicLight += cookTorrance(light, u_bufferLights.color[i].xyz, N, V, roughness, F0);
+            }
+        }                
+        
+        //
+        
+        color = mix(colorLambert, colorCookTorrance, metallic);
+        
+        color += dynamicLight;
+    }
+    else
+    {
+        discard;
+    }
+    
+    //
+
+	ob_fragColor = vec4(color, 1.0);
+"""

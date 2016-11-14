@@ -574,12 +574,14 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName, use
 
             if use_forward:
                 currentFragmentGLSL = currentFragmentGLSL.replace("#generalDefine#", forwardGeneralDefineGLSL)
+                currentFragmentGLSL = currentFragmentGLSL.replace("#generalBuffer#", forwardGeneralBufferGLSL)
                 currentFragmentGLSL = currentFragmentGLSL.replace("#generalTexture#", forwardGeneralTextureGLSL)
                 currentFragmentGLSL = currentFragmentGLSL.replace("#generalFunctions#", forwardGeneralFunctionsGLSL)
                 currentFragmentGLSL = currentFragmentGLSL.replace("#outDeclare#", forwardOutDeclareGLSL)
                 currentFragmentGLSL = currentFragmentGLSL.replace("#outAssign#", forwardOutAssignGLSL)
             else:
                 currentFragmentGLSL = currentFragmentGLSL.replace("#generalDefine#", deferredGeneralDefineGLSL)
+                currentFragmentGLSL = currentFragmentGLSL.replace("#generalBuffer#", deferredGeneralBufferGLSL)
                 currentFragmentGLSL = currentFragmentGLSL.replace("#generalTexture#", deferredGeneralTextureGLSL)
                 currentFragmentGLSL = currentFragmentGLSL.replace("#generalFunctions#", deferredGeneralFunctionsGLSL)
                 currentFragmentGLSL = currentFragmentGLSL.replace("#outDeclare#", deferredOutDeclareGLSL)
