@@ -572,6 +572,8 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName, use
         
             currentFragmentGLSL = fragmentGLSL
 
+            currentTextureOffset = 0
+
             if use_forward:
                 currentFragmentGLSL = currentFragmentGLSL.replace("#generalDefine#", forwardGeneralDefineGLSL)
                 currentFragmentGLSL = currentFragmentGLSL.replace("#generalBuffer#", forwardGeneralBufferGLSL)
@@ -579,6 +581,8 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName, use
                 currentFragmentGLSL = currentFragmentGLSL.replace("#generalFunctions#", forwardGeneralFunctionsGLSL)
                 currentFragmentGLSL = currentFragmentGLSL.replace("#outDeclare#", forwardOutDeclareGLSL)
                 currentFragmentGLSL = currentFragmentGLSL.replace("#outAssign#", forwardOutAssignGLSL)
+
+                currentTextureOffset = VKTS_BINDING_UNIFORM_SAMPLER_BSDF_FORWARD_FIRST
             else:
                 currentFragmentGLSL = currentFragmentGLSL.replace("#generalDefine#", deferredGeneralDefineGLSL)
                 currentFragmentGLSL = currentFragmentGLSL.replace("#generalBuffer#", deferredGeneralBufferGLSL)
@@ -586,6 +590,8 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName, use
                 currentFragmentGLSL = currentFragmentGLSL.replace("#generalFunctions#", deferredGeneralFunctionsGLSL)
                 currentFragmentGLSL = currentFragmentGLSL.replace("#outDeclare#", deferredOutDeclareGLSL)
                 currentFragmentGLSL = currentFragmentGLSL.replace("#outAssign#", deferredOutAssignGLSL)
+
+                currentTextureOffset = VKTS_BINDING_UNIFORM_SAMPLER_BSDF_DEFERRED_FIRST
 
             #            
         
@@ -1233,7 +1239,7 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName, use
                 currentFragmentGLSL = currentFragmentGLSL.replace("#nextTexCoord#", nextTexCoord)
             
             for binding in range (0, len(nodes)):
-                currentTexImage = texImageFunction % ((binding + VKTS_BINDING_UNIFORM_SAMPLER_BSDF_DEFERRED_FIRST), binding)
+                currentTexImage = texImageFunction % ((binding + currentTextureOffset), binding)
                 currentFragmentGLSL = currentFragmentGLSL.replace("#nextTexture#", currentTexImage)
                 
                 fw("add_texture %s\n" % (friendlyName(material.name) + "_" + friendlyNodeName(nodes[binding].name) + "_texture" ))    

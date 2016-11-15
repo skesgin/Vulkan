@@ -3063,6 +3063,53 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
                     	bindingCount++;
                 	}
 
+
+                	// For forward rendering, add more buffers and textures.
+                	if (subMesh->getBSDFMaterial()->getForwardRendering())
+                	{
+                    	descriptorSetLayoutBinding[bindingCount].binding = VKTS_BINDING_UNIFORM_BUFFER_LIGHT;
+                    	descriptorSetLayoutBinding[bindingCount].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+                    	descriptorSetLayoutBinding[bindingCount].descriptorCount = 1;
+                    	descriptorSetLayoutBinding[bindingCount].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+                    	descriptorSetLayoutBinding[bindingCount].pImmutableSamplers = nullptr;
+
+                    	bindingCount++;
+
+                    	descriptorSetLayoutBinding[bindingCount].binding = VKTS_BINDING_UNIFORM_BUFFER_BSDF_INVERSE;
+                    	descriptorSetLayoutBinding[bindingCount].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+                    	descriptorSetLayoutBinding[bindingCount].descriptorCount = 1;
+                    	descriptorSetLayoutBinding[bindingCount].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+                    	descriptorSetLayoutBinding[bindingCount].pImmutableSamplers = nullptr;
+
+                    	bindingCount++;
+
+                    	//
+
+                		descriptorSetLayoutBinding[bindingCount].binding = VKTS_BINDING_UNIFORM_SAMPLER_BSDF_DIFFUSE;
+                		descriptorSetLayoutBinding[bindingCount].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+                		descriptorSetLayoutBinding[bindingCount].descriptorCount = 1;
+                		descriptorSetLayoutBinding[bindingCount].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+                		descriptorSetLayoutBinding[bindingCount].pImmutableSamplers = nullptr;
+
+                		bindingCount++;
+
+                		descriptorSetLayoutBinding[bindingCount].binding = VKTS_BINDING_UNIFORM_SAMPLER_BSDF_SPECULAR;
+                		descriptorSetLayoutBinding[bindingCount].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+                		descriptorSetLayoutBinding[bindingCount].descriptorCount = 1;
+                		descriptorSetLayoutBinding[bindingCount].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+                		descriptorSetLayoutBinding[bindingCount].pImmutableSamplers = nullptr;
+
+                		bindingCount++;
+
+                		descriptorSetLayoutBinding[bindingCount].binding = VKTS_BINDING_UNIFORM_SAMPLER_BSDF_LUT;
+                		descriptorSetLayoutBinding[bindingCount].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+                		descriptorSetLayoutBinding[bindingCount].descriptorCount = 1;
+                		descriptorSetLayoutBinding[bindingCount].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+                		descriptorSetLayoutBinding[bindingCount].pImmutableSamplers = nullptr;
+
+                		bindingCount++;
+                	}
+
                 	if (subMesh->getBSDFMaterial()->getNumberTextures() > VKTS_BINDING_UNIFORM_BSDF_BINDING_COUNT)
                 	{
                 		logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Too many textures.");
@@ -3317,6 +3364,12 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
 					{
 						gp.getPipelineColorBlendAttachmentState(i).blendEnable = VK_FALSE;
 						gp.getPipelineColorBlendAttachmentState(i).colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+
+	                	// For forward rendering, only one color buffer is attached.
+	                	if (subMesh->getBSDFMaterial()->getForwardRendering())
+	                	{
+	                		break;
+	                	}
 					}
 
 					gp.getDynamicState(0) = VK_DYNAMIC_STATE_VIEWPORT;

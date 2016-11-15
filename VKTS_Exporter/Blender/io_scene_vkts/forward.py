@@ -22,7 +22,7 @@
 # Cycles deferred code.
 #
 
-VKTS_BINDING_UNIFORM_SAMPLER_BSDF_FORWARD_FIRST = 7
+VKTS_BINDING_UNIFORM_SAMPLER_BSDF_FORWARD_FIRST = 10
 
 forwardGeneralDefineGLSL = """#define VKTS_MAX_LIGHTS 16
 
@@ -34,20 +34,20 @@ forwardGeneralDefineGLSL = """#define VKTS_MAX_LIGHTS 16
 
 #define VKTS_NORMAL_VALID_BIAS 0.1"""
 
-forwardGeneralBufferGLSL = """layout (binding = 7, std140) uniform _u_bufferLights {
+forwardGeneralBufferGLSL = """layout (binding = 2, std140) uniform _u_bufferLights {
         vec4 L[VKTS_MAX_LIGHTS];
         vec4 color[VKTS_MAX_LIGHTS];
         int count;
 } u_bufferLights;
 
-layout (binding = 8, std140) uniform _u_bufferMatrices {
+layout (binding = 6, std140) uniform _u_bufferMatrices {
         mat4 inverseProjectionMatrix;
         mat4 inverseViewMatrix;
 } u_bufferMatrices;"""
 
-forwardGeneralTextureGLSL = """layout (binding = 6) uniform sampler2D u_lut;
-layout (binding = 5) uniform samplerCube u_specularCubemap;
-layout (binding = 4) uniform samplerCube u_diffuseCubemap;"""
+forwardGeneralTextureGLSL = """layout (binding = 9) uniform sampler2D u_lut;
+layout (binding = 8) uniform samplerCube u_specularCubemap;
+layout (binding = 7) uniform samplerCube u_diffuseCubemap;"""
 
 forwardGeneralFunctionsGLSL = """float pow_5(float x)
 {
