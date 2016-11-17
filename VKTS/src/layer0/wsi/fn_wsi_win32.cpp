@@ -41,7 +41,7 @@ VkBool32 VKTS_APIENTRY _wsiGatherNeededInstanceExtensions(const std::vector<VkEx
     {
         if (strcmp(VK_KHR_WIN32_SURFACE_EXTENSION_NAME, allInstanceExtensionProperties[i].extensionName) == 0)
         {
-        	if (!_extensionAddInstanceExtensions(VK_KHR_WIN32_SURFACE_EXTENSION_NAME))
+        	if (!extensionAddInstanceExtensions(VK_KHR_WIN32_SURFACE_EXTENSION_NAME))
         	{
         		return VK_FALSE;
         	}

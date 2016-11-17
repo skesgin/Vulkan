@@ -69,7 +69,7 @@ VkBool32 VKTS_APIENTRY debugGatherNeededInstanceExtensions()
     {
         if (strcmp(VK_EXT_DEBUG_REPORT_EXTENSION_NAME, allInstanceExtensionProperties[i].extensionName) == 0)
         {
-        	if (!_extensionAddInstanceExtensions(VK_EXT_DEBUG_REPORT_EXTENSION_NAME))
+        	if (!extensionAddInstanceExtensions(VK_EXT_DEBUG_REPORT_EXTENSION_NAME))
         	{
         		return VK_FALSE;
         	}

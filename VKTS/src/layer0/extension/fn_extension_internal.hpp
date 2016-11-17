@@ -50,10 +50,6 @@ namespace vkts
     }                                                                                       \
 }
 
-VKTS_APICALL VkBool32 VKTS_APIENTRY _extensionAddInstanceExtensions(const char* extension);
-
-VKTS_APICALL VkBool32 VKTS_APIENTRY _extensionAddDeviceExtensions(const char* extension);
-
 }
 
 #endif /* VKTS_FN_EXTENSION_INTERNAL_HPP_ */

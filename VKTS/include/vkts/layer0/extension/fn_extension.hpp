@@ -32,15 +32,20 @@
 namespace vkts
 {
 
+
 VKTS_APICALL uint32_t VKTS_APIENTRY extensionGetNeededInstanceExtensionCount();
 
 VKTS_APICALL const char** VKTS_APIENTRY extensionGetNeededInstanceExtensionNames();
+
+VKTS_APICALL VkBool32 VKTS_APIENTRY extensionAddInstanceExtensions(const char* extension);
 
 //
 
 VKTS_APICALL uint32_t VKTS_APIENTRY extensionGetNeededDeviceExtensionCount();
 
 VKTS_APICALL const char** VKTS_APIENTRY extensionGetNeededDeviceExtensionNames();
+
+VKTS_APICALL VkBool32 VKTS_APIENTRY extensionAddDeviceExtensions(const char* extension);
 
 }
 

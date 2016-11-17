@@ -66,7 +66,7 @@ VkBool32 VKTS_APIENTRY wsiGatherNeededInstanceExtensions()
     {
         if (strcmp(VK_KHR_SURFACE_EXTENSION_NAME, allInstanceExtensionProperties[i].extensionName) == 0)
         {
-        	if (!_extensionAddInstanceExtensions(VK_KHR_SURFACE_EXTENSION_NAME))
+        	if (!extensionAddInstanceExtensions(VK_KHR_SURFACE_EXTENSION_NAME))
         	{
         		return VK_FALSE;
         	}
@@ -126,7 +126,7 @@ VkBool32 VKTS_APIENTRY wsiGatherNeededDeviceExtensions(const VkPhysicalDevice ph
     {
         if (strcmp(VK_KHR_SWAPCHAIN_EXTENSION_NAME, allDeviceExtensionProperties[i].extensionName) == 0)
         {
-        	if (!_extensionAddDeviceExtensions(VK_KHR_SWAPCHAIN_EXTENSION_NAME))
+        	if (!extensionAddDeviceExtensions(VK_KHR_SWAPCHAIN_EXTENSION_NAME))
         	{
         		return VK_FALSE;
         	}

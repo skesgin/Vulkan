@@ -24,7 +24,7 @@
  * THE SOFTWARE.
  */
 
-#include "UserUserCamera.hpp"
+#include "UserCamera.hpp"
 
 namespace vkts
 {

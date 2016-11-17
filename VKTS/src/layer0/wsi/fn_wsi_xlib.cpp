@@ -28,8 +28,6 @@
 
 #include "fn_wsi_internal.hpp"
 
-#include <X11/Xlib-xcb.h>
-
 namespace vkts
 {
 
@@ -44,7 +42,7 @@ VkBool32 VKTS_APIENTRY _wsiGatherNeededInstanceExtensions(const std::vector<VkEx
     {
         if (strcmp(VK_KHR_XCB_SURFACE_EXTENSION_NAME, allInstanceExtensionProperties[i].extensionName) == 0)
         {
-        	if (!_extensionAddInstanceExtensions(VK_KHR_XCB_SURFACE_EXTENSION_NAME))
+        	if (!extensionAddInstanceExtensions(VK_KHR_XCB_SURFACE_EXTENSION_NAME))
         	{
         		return VK_FALSE;
         	}
@@ -63,7 +61,7 @@ VkBool32 VKTS_APIENTRY _wsiGatherNeededInstanceExtensions(const std::vector<VkEx
         {
             if (strcmp(VK_KHR_XLIB_SURFACE_EXTENSION_NAME, allInstanceExtensionProperties[i].extensionName) == 0)
             {
-            	if (!_extensionAddInstanceExtensions(VK_KHR_XLIB_SURFACE_EXTENSION_NAME))
+            	if (!extensionAddInstanceExtensions(VK_KHR_XLIB_SURFACE_EXTENSION_NAME))
             	{
             		return VK_FALSE;
             	}

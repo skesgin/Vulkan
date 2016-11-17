@@ -45,7 +45,7 @@ const char** VKTS_APIENTRY extensionGetNeededInstanceExtensionNames()
     return g_instanceExtensionNames;
 }
 
-VkBool32 VKTS_APIENTRY _extensionAddInstanceExtensions(const char* extension)
+VkBool32 VKTS_APIENTRY extensionAddInstanceExtensions(const char* extension)
 {
 	if (g_instanceExtensionCount < VKTS_MAX_EXTENSIONS)
 	{
@@ -73,7 +73,7 @@ const char** VKTS_APIENTRY extensionGetNeededDeviceExtensionNames()
     return g_deviceExtensionNames;
 }
 
-VkBool32 VKTS_APIENTRY _extensionAddDeviceExtensions(const char* extension)
+VkBool32 VKTS_APIENTRY extensionAddDeviceExtensions(const char* extension)
 {
 	if (g_deviceExtensionCount < VKTS_MAX_EXTENSIONS)
 	{

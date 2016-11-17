@@ -26,7 +26,7 @@
 
 #include <vkts/vkts.hpp>
 
-#include "UserUserCamera.hpp"
+#include "UserCamera.hpp"
 
 namespace vkts
 {
