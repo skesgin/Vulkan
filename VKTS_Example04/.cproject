@@ -302,7 +302,7 @@
 					<folderInfo id="cdt.managedbuild.config.gnu.mingw.exe.debug.287540475.1741753231.1284422543.2074678226.928277847." name="/" resourcePath="">
 						<toolChain id="cdt.managedbuild.toolchain.gnu.cross.base.881945674" name="Cross GCC" superClass="cdt.managedbuild.toolchain.gnu.cross.base">
 							<option id="cdt.managedbuild.option.gnu.cross.prefix.1279274152" name="Prefix" superClass="cdt.managedbuild.option.gnu.cross.prefix" useByScannerDiscovery="false" value="aarch64-poky-linux-" valueType="string"/>
-							<option id="cdt.managedbuild.option.gnu.cross.path.411791190" name="Path" superClass="cdt.managedbuild.option.gnu.cross.path" useByScannerDiscovery="false" value="/opt/fsl-imx-internal-fb/4.1.15-2.0.0/sysroots/x86_64-pokysdk-linux/usr/bin/aarch64-poky-linux" valueType="string"/>
+							<option id="cdt.managedbuild.option.gnu.cross.path.411791190" name="Path" superClass="cdt.managedbuild.option.gnu.cross.path" useByScannerDiscovery="false" value="/opt/fsl-imx-fb/4.1.30-3.0.0/sysroots/x86_64-pokysdk-linux/usr/bin/aarch64-poky-linux" valueType="string"/>
 							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="cdt.managedbuild.targetPlatform.gnu.cross.949939946" isAbstract="false" osList="all" superClass="cdt.managedbuild.targetPlatform.gnu.cross"/>
 							<builder buildPath="${workspace_loc:/VKTS_Example01}/arm64_Linux_Display.iMX8_GNU_Debug" id="cdt.managedbuild.builder.gnu.cross.590646415" keepEnvironmentInBuildfile="false" name="Gnu Make Builder" superClass="cdt.managedbuild.builder.gnu.cross"/>
 							<tool id="cdt.managedbuild.tool.gnu.cross.c.compiler.1556802867" name="Cross GCC Compiler" superClass="cdt.managedbuild.tool.gnu.cross.c.compiler">
@@ -321,7 +321,7 @@
 								<option id="gnu.cpp.compiler.option.preprocessor.def.4528562" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="VKTS_DISPLAY_VISUAL"/>
 								</option>
-								<option id="gnu.cpp.compiler.option.other.other.802492631" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" useByScannerDiscovery="false" value="-c -fmessage-length=0  -std=c++11 --sysroot=/opt/fsl-imx-internal-fb/4.1.15-2.0.0/sysroots/aarch64-poky-linux" valueType="string"/>
+								<option id="gnu.cpp.compiler.option.other.other.802492631" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" useByScannerDiscovery="false" value="-c -fmessage-length=0  -std=c++11 --sysroot=/opt/fsl-imx-fb/4.1.30-3.0.0/sysroots/aarch64-poky-linux" valueType="string"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.611178438" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.cross.c.linker.1466462347" name="Cross GCC Linker" superClass="cdt.managedbuild.tool.gnu.cross.c.linker"/>
@@ -334,7 +334,7 @@
 								<option id="gnu.cpp.link.option.paths.535991664" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" useByScannerDiscovery="false" valueType="libPaths">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS/arm64_Linux_Display.iMX8_GNU_Debug}&quot;"/>
 								</option>
-								<option id="gnu.cpp.link.option.flags.1350151180" name="Linker flags" superClass="gnu.cpp.link.option.flags" useByScannerDiscovery="false" value=" --sysroot=/opt/fsl-imx-internal-fb/4.1.15-2.0.0/sysroots/aarch64-poky-linux" valueType="string"/>
+								<option id="gnu.cpp.link.option.flags.1350151180" name="Linker flags" superClass="gnu.cpp.link.option.flags" useByScannerDiscovery="false" value=" --sysroot=/opt/fsl-imx-fb/4.1.30-3.0.0/sysroots/aarch64-poky-linux" valueType="string"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1322434893" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
@@ -371,7 +371,7 @@
 					<folderInfo id="cdt.managedbuild.config.gnu.mingw.exe.debug.287540475.1741753231.1284422543.2074678226.797023077.484953865." name="/" resourcePath="">
 						<toolChain id="cdt.managedbuild.toolchain.gnu.cross.base.167607510" name="Cross GCC" superClass="cdt.managedbuild.toolchain.gnu.cross.base">
 							<option id="cdt.managedbuild.option.gnu.cross.prefix.1667275260" name="Prefix" superClass="cdt.managedbuild.option.gnu.cross.prefix" useByScannerDiscovery="false" value="aarch64-poky-linux-" valueType="string"/>
-							<option id="cdt.managedbuild.option.gnu.cross.path.26272932" name="Path" superClass="cdt.managedbuild.option.gnu.cross.path" useByScannerDiscovery="false" value="/opt/fsl-imx-internal-fb/4.1.15-2.0.0/sysroots/x86_64-pokysdk-linux/usr/bin/aarch64-poky-linux" valueType="string"/>
+							<option id="cdt.managedbuild.option.gnu.cross.path.26272932" name="Path" superClass="cdt.managedbuild.option.gnu.cross.path" useByScannerDiscovery="false" value="/opt/fsl-imx-fb/4.1.30-3.0.0/sysroots/x86_64-pokysdk-linux/usr/bin/aarch64-poky-linux" valueType="string"/>
 							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="cdt.managedbuild.targetPlatform.gnu.cross.400106905" isAbstract="false" osList="all" superClass="cdt.managedbuild.targetPlatform.gnu.cross"/>
 							<builder buildPath="${workspace_loc:/VKTS_Example01}/arm64_Linux_Display.iMX8_GNU_Debug" id="cdt.managedbuild.builder.gnu.cross.1132482336" keepEnvironmentInBuildfile="false" name="Gnu Make Builder" superClass="cdt.managedbuild.builder.gnu.cross"/>
 							<tool id="cdt.managedbuild.tool.gnu.cross.c.compiler.939690318" name="Cross GCC Compiler" superClass="cdt.managedbuild.tool.gnu.cross.c.compiler">
@@ -390,7 +390,7 @@
 								<option id="gnu.cpp.compiler.option.preprocessor.def.1467987383" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="VKTS_DISPLAY_VISUAL"/>
 								</option>
-								<option id="gnu.cpp.compiler.option.other.other.1203094497" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" useByScannerDiscovery="false" value="-c -fmessage-length=0  -std=c++11 --sysroot=/opt/fsl-imx-internal-fb/4.1.15-2.0.0/sysroots/aarch64-poky-linux" valueType="string"/>
+								<option id="gnu.cpp.compiler.option.other.other.1203094497" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" useByScannerDiscovery="false" value="-c -fmessage-length=0  -std=c++11 --sysroot=/opt/fsl-imx-fb/4.1.30-3.0.0/sysroots/aarch64-poky-linux" valueType="string"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1677997418" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.cross.c.linker.1062877096" name="Cross GCC Linker" superClass="cdt.managedbuild.tool.gnu.cross.c.linker"/>
@@ -403,7 +403,7 @@
 								<option id="gnu.cpp.link.option.paths.482605679" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" useByScannerDiscovery="false" valueType="libPaths">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS/arm64_Linux_Display.iMX8_GNU_Release}&quot;"/>
 								</option>
-								<option id="gnu.cpp.link.option.flags.1026980507" name="Linker flags" superClass="gnu.cpp.link.option.flags" useByScannerDiscovery="false" value=" --sysroot=/opt/fsl-imx-internal-fb/4.1.15-2.0.0/sysroots/aarch64-poky-linux" valueType="string"/>
+								<option id="gnu.cpp.link.option.flags.1026980507" name="Linker flags" superClass="gnu.cpp.link.option.flags" useByScannerDiscovery="false" value=" --sysroot=/opt/fsl-imx-fb/4.1.30-3.0.0/sysroots/aarch64-poky-linux" valueType="string"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1780585808" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
