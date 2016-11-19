@@ -169,6 +169,34 @@ VkBool32 VKTS_APIENTRY fileCreateDirectory(const char* directory)
 	return _fileCreateDirectory(directory);
 }
 
+VkBool32 VKTS_APIENTRY fileGetDirectory(char* directory, const char* filename)
+{
+    if (!directory || !filename)
+    {
+        return VK_FALSE;
+    }
+
+    auto position = strrchr(filename, '/');
+
+    if (position)
+    {
+        strncpy(directory, filename, (position - filename) + 1);
+
+        return VK_TRUE;
+    }
+
+    position = strrchr(filename, '\\');
+
+    if (position)
+    {
+        strncpy(directory, filename, (position - filename) + 1);
+
+        return VK_TRUE;
+    }
+
+    return VK_FALSE;
+}
+
 void VKTS_APIENTRY fileTerminate()
 {
     // Nothing for now.

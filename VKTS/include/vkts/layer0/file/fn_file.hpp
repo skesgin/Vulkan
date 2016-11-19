@@ -68,6 +68,12 @@ VKTS_APICALL VkBool32 VKTS_APIENTRY fileSaveText(const char* filename, const ITe
  */
 VKTS_APICALL VkBool32 VKTS_APIENTRY fileCreateDirectory(const char* directory);
 
+/**
+ *
+ * @ThreadSafe
+ */
+VKTS_APICALL VkBool32 VKTS_APIENTRY fileGetDirectory(char* directory, const char* filename);
+
 }
 
 #endif /* VKTS_FN_FILE_HPP_ */
