@@ -93,7 +93,21 @@ IPhysicalDeviceSP VKTS_APIENTRY physicalDeviceCreate(const VkInstance instance, 
         return IPhysicalDeviceSP();
     }
 
-    return IPhysicalDeviceSP(new PhysicalDevice(physicalDevices[index], index, instance));
+
+    auto currentPhysicalDevice = IPhysicalDeviceSP(new PhysicalDevice(physicalDevices[index], index, instance));
+
+    if (!currentPhysicalDevice.get())
+    {
+    	return IPhysicalDeviceSP();
+    }
+
+    VkPhysicalDeviceProperties physicalDeviceProperties{};
+
+    currentPhysicalDevice->getPhysicalDeviceProperties(physicalDeviceProperties);
+
+    logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Created physical device '%s'", physicalDeviceProperties.deviceName);
+
+    return currentPhysicalDevice;
 }
 
 }
