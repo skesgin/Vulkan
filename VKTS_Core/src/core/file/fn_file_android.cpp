@@ -32,21 +32,21 @@
 
 #include <sys/stat.h>
 
+extern struct android_app* g_app;
+
 namespace vkts
 {
 
-extern struct android_app* g_androidApp;
-
 VkBool32 VKTS_APIENTRY _fileInit()
 {
-	if (!g_androidApp)
+	if (!::g_app)
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No android application.");
 
 		return VK_FALSE;
 	}
 
-    _fileSetBaseDirectory(g_androidApp->activity->externalDataPath);
+    _fileSetBaseDirectory(::g_app->activity->externalDataPath);
 
 	return VK_TRUE;
 }
@@ -60,14 +60,14 @@ IBinaryBufferSP VKTS_APIENTRY _fileLoadBinary(const char* filename)
 
     //
 
-    if (!g_androidApp)
+    if (!::g_app)
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No android application.");
 
 		return IBinaryBufferSP();
 	}
 
-	AAssetManager* assetManager = g_androidApp->activity->assetManager;
+	AAssetManager* assetManager = ::g_app->activity->assetManager;
 
     if (!assetManager)
     {
@@ -105,7 +105,7 @@ IBinaryBufferSP VKTS_APIENTRY _fileLoadBinary(const char* filename)
 
 VkBool32 VKTS_APIENTRY _filePrepareSaveBinary(const char* filename)
 {
-	if (!g_androidApp)
+	if (!::g_app)
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No android application.");
 

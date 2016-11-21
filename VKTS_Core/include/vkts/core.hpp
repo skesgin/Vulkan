@@ -65,6 +65,12 @@
 #include <glm/gtc/type_ptr.hpp>
 
 /**
+ * OS platform.
+ */
+
+#include <vkts/fn_os_platform.hpp>
+
+/**
  *
  * Vulkan Library.
  * https://www.khronos.org/vulkan
@@ -80,12 +86,6 @@
  */
 
 /**
- * OS platform.
- */
-
-#include <vkts/fn_os_platform.hpp>
-
-/**
  * API platform.
  */
 
@@ -98,6 +98,9 @@
  */
 
 #define VKTS_MAX_LOG_CHARS 2048
+
+#define VKTS_MAX_BUFFER_CHARS 2048
+#define VKTS_MAX_TOKEN_CHARS 256
 
 /**
  * Types.
@@ -130,6 +133,12 @@ typedef enum VkTsSearch_
  */
 
 #include <vkts/core/log/fn_log.hpp>
+
+/**
+ * Parameter.
+ */
+
+#include <vkts/core/parameter/fn_parameter.hpp>
 
 /**
  * Time.

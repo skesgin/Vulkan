@@ -31,6 +31,23 @@
 namespace vkts
 {
 
+IBinaryBufferSP VKTS_APIENTRY binaryBufferCreate(const size_t size)
+{
+    if (size == 0)
+    {
+        return IBinaryBufferSP();
+    }
+
+    auto result = IBinaryBufferSP(new BinaryBuffer(size));
+
+	if (result.get() && result->getSize() != size)
+	{
+		return IBinaryBufferSP();
+	}
+
+    return result;
+}
+
 IBinaryBufferSP VKTS_APIENTRY binaryBufferCreate(const uint8_t* data, const size_t size)
 {
     if (!data || size == 0)

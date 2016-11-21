@@ -14,6 +14,19 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_External/include ${CMAKE
 
 file(GLOB_RECURSE CPP_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 
+if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+
+    find_path(Vulkan_INCLUDE_DIR NAMES vulkan/vulkan.h PATHS "$ENV{VULKAN_SDK}/Include")
+    include_directories(AFTER ${Vulkan_INCLUDE_DIR})
+    
+    if (${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
+
+        add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+        
+    endif ()        
+
+endif ()
+
 add_library(VKTS_Math ${CPP_FILES})
 
 set_property(TARGET VKTS_Math PROPERTY CXX_STANDARD 11)

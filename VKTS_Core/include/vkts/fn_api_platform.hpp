@@ -27,8 +27,6 @@
 #ifndef VKTS_API_PLATFORM_HPP_
 #define VKTS_API_PLATFORM_HPP_
 
-#include <vkts/core.hpp>
-
 #ifndef VKTS_APICALL_INLINE
 #ifdef _MSC_VER
 #define VKTS_APICALL_INLINE static __forceinline
