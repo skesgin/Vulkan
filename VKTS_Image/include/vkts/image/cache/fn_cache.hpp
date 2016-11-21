@@ -24,43 +24,36 @@
  * THE SOFTWARE.
  */
 
-#ifndef VKTS_IMAGE_HPP_
-#define VKTS_IMAGE_HPP_
+#ifndef VKTS_FN_CACHE_HPP_
+#define VKTS_FN_CACHE_HPP_
+
+#include <vkts/image.hpp>
+
+namespace vkts
+{
+
+VKTS_APICALL VkBool32 VKTS_APIENTRY cacheGetEnabled();
+
+VKTS_APICALL void VKTS_APIENTRY cacheSetEnabled(const VkBool32 enabled);
 
 /**
  *
- * Depends on VKTS core and math.
- *
+ * @ThreadSafe
  */
-
-#include <vkts/core.hpp>
-
-#include <vkts/math.hpp>
+VKTS_APICALL VkBool32 VKTS_APIENTRY cacheSaveImageData(const IImageDataSP& imageData);
 
 /**
  *
- * VKTS Start.
+ * @ThreadSafe
+ */
+VKTS_APICALL IImageDataSP VKTS_APIENTRY cacheLoadImageData(const char* filename);
+
+/**
  *
+ * @ThreadSafe
  */
+VKTS_APICALL IImageDataSP VKTS_APIENTRY cacheLoadRawImageData(const char* filename, const uint32_t width, const uint32_t height, const VkFormat format);
 
-/**
- * Image data.
- */
+}
 
-#include <vkts/image/image_data/IImageData.hpp>
-
-#include <vkts/image/image_data/fn_image_data.hpp>
-
-/**
- * Render.
- */
-
-#include <vkts/image/render/fn_render.hpp>
-
-/**
- * Cache.
- */
-
-#include <vkts/image/cache/fn_cache.hpp>
-
-#endif /* VKTS_IMAGE_HPP_ */
+#endif /* VKTS_FN_CACHE_HPP_ */
