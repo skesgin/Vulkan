@@ -24,8 +24,8 @@
  * THE SOFTWARE.
  */
 
-#ifndef VKTS_OBJECT_HPP_
-#define VKTS_OBJECT_HPP_
+#ifndef VKTS_VK_OBJECT_HPP_
+#define VKTS_VK_OBJECT_HPP_
 
 /**
  *
@@ -75,4 +75,4 @@
 
 #include <vkts/vk_object/texture_object/fn_texture_object.hpp>
 
-#endif /* VKTS_OBJECT_HPP_ */
+#endif /* VKTS_VK_OBJECT_HPP_ */
