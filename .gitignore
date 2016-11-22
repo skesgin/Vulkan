@@ -1,4 +1,5 @@
 *.blend1
+*.zip
 *.prefs
 intel64_Windows_Win32_GNU_Debug/
 intel64_Windows_Win32_GNU_Release/
