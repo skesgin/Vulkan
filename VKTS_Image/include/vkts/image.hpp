@@ -29,11 +29,9 @@
 
 /**
  *
- * Depends on VKTS core and math.
+ * Depends on VKTS math.
  *
  */
-
-#include <vkts/core.hpp>
 
 #include <vkts/math.hpp>
 

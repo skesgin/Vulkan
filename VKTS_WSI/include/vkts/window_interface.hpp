@@ -35,11 +35,9 @@
 
 /**
  *
- * Depends on VKTS core and Vulkan.
+ * Depends on VKTS Vulkan.
  *
  */
-
-#include <vkts/core.hpp>
 
 #include <vkts/vk.hpp>
 

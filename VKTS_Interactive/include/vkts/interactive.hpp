@@ -29,19 +29,15 @@
 
 /**
  *
- * Depends on VKTS core, math, runtime and window.
+ * Depends on VKTS window, entity and runtime.
  *
  */
-
-#include <vkts/core.hpp>
-
-#include <vkts/math.hpp>
-
-#include <vkts/runtime.hpp>
 
 #include <vkts/window.hpp>
 
 #include <vkts/entity.hpp>
+
+#include <vkts/runtime.hpp>
 
 /**
  *
