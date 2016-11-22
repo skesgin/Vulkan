@@ -81,6 +81,12 @@ typedef struct VkTsStructureTypeHeader_
 } VkTsStructureTypeHeader;
 
 /**
+ * Alignment.
+ */
+
+#include <vkts/vk/alignment/fn_alignment.hpp>
+
+/**
  * Serialize.
  */
 
