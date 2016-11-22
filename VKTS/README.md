@@ -86,7 +86,7 @@ Features:
 How to build:
 -------------
 
-- [System requirements and step by step tutorial](../VKTS_Documentation/BUILD.md)
+- [System requirements and step by step tutorial](../VKTS_Documentation/README.md)
 
 
 Changelog:
