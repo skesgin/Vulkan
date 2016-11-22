@@ -68,6 +68,8 @@ private:
 
 	const vkts::ISurfaceSP surface;
 
+	VkFormat depthFormat;
+
 	vkts::IUserCameraSP camera;
 	vkts::IInputControllerSP inputController;
 

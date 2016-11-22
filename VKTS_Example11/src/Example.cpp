@@ -27,7 +27,7 @@
 #include "Example.hpp"
 
 Example::Example(const vkts::IInitialResourcesSP& initialResources, const int32_t windowIndex, const vkts::ISurfaceSP& surface) :
-		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), descriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), fragmentUniformBuffer(nullptr), shadowUniformBuffer(nullptr), voxelizeViewProjectionUniformBuffer(nullptr), voxelizeModelNormalUniformBuffer(nullptr), standardVertexShaderModule(nullptr), standardFragmentShaderModule(nullptr), standardShadowFragmentShaderModule(nullptr), voxelizeVertexShaderModule(nullptr), voxelizeGeometryShaderModule(nullptr), voxelizeFragmentShaderModule(nullptr), pipelineLayout(nullptr), loadTask(), sceneLoaded(VK_FALSE), sceneContext(nullptr), scene(nullptr), swapchain(nullptr), renderPass(nullptr), shadowRenderPass(nullptr), voxelRenderPass(nullptr), allOpaqueGraphicsPipelines(), allBlendGraphicsPipelines(), allBlendCwGraphicsPipelines(), allShadowGraphicsPipelines(), shadowTexture(nullptr), msaaColorTexture(nullptr), msaaDepthTexture(nullptr), depthTexture(nullptr), voxelTexture{nullptr, nullptr, nullptr}, shadowImageView(nullptr), msaaColorImageView(nullptr), msaaDepthStencilImageView(nullptr), depthStencilImageView(nullptr), shadowSampler(nullptr), swapchainImagesCount(0), swapchainImageView(), framebuffer(), shadowFramebuffer(), fences(), cmdBuffer(), shadowCmdBuffer()
+		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), depthFormat(VK_FORMAT_D32_SFLOAT), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), descriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), fragmentUniformBuffer(nullptr), shadowUniformBuffer(nullptr), voxelizeViewProjectionUniformBuffer(nullptr), voxelizeModelNormalUniformBuffer(nullptr), standardVertexShaderModule(nullptr), standardFragmentShaderModule(nullptr), standardShadowFragmentShaderModule(nullptr), voxelizeVertexShaderModule(nullptr), voxelizeGeometryShaderModule(nullptr), voxelizeFragmentShaderModule(nullptr), pipelineLayout(nullptr), loadTask(), sceneLoaded(VK_FALSE), sceneContext(nullptr), scene(nullptr), swapchain(nullptr), renderPass(nullptr), shadowRenderPass(nullptr), voxelRenderPass(nullptr), allOpaqueGraphicsPipelines(), allBlendGraphicsPipelines(), allBlendCwGraphicsPipelines(), allShadowGraphicsPipelines(), shadowTexture(nullptr), msaaColorTexture(nullptr), msaaDepthTexture(nullptr), depthTexture(nullptr), voxelTexture{nullptr, nullptr, nullptr}, shadowImageView(nullptr), msaaColorImageView(nullptr), msaaDepthStencilImageView(nullptr), depthStencilImageView(nullptr), shadowSampler(nullptr), swapchainImagesCount(0), swapchainImageView(), framebuffer(), shadowFramebuffer(), fences(), cmdBuffer(), shadowCmdBuffer()
 {
 }
 
@@ -643,7 +643,7 @@ VkBool32 Example::buildShadowTexture(const vkts::ICommandBuffersSP& cmdBuffer)
 
 	imageCreateInfo.flags = 0;
 	imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
-	imageCreateInfo.format = VK_FORMAT_D32_SFLOAT;
+	imageCreateInfo.format = depthFormat;
 	imageCreateInfo.extent = {VKTS_SHADOW_MAP_SIZE, VKTS_SHADOW_MAP_SIZE, 1};
 	imageCreateInfo.mipLevels = 1;
 	imageCreateInfo.arrayLayers = 1;
@@ -1102,7 +1102,7 @@ VkBool32 Example::buildRenderPass()
 	// Create shadow render pass.
 	//
 
-	attachmentDescription[0].format = VK_FORMAT_D32_SFLOAT;
+	attachmentDescription[0].format = depthFormat;
 	attachmentDescription[0].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 	attachmentDescription[0].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 	attachmentDescription[0].initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
@@ -1818,6 +1818,17 @@ VkBool32 Example::init(const vkts::IUpdateThreadContext& updateContext)
 	if (!updateContext.isWindowAttached(windowIndex))
 	{
 		return VK_FALSE;
+	}
+
+	//
+
+	VkFormatProperties formatProperties{};
+
+	initialResources->getPhysicalDevice()->getGetPhysicalDeviceFormatProperties(formatProperties, depthFormat);
+
+	if (!(formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT))
+	{
+		depthFormat = VK_FORMAT_D16_UNORM;
 	}
 
 	//
