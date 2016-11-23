@@ -1039,12 +1039,12 @@ void Node::visitRecursive(SceneVisitor* sceneVisitor)
 
 	for (size_t i = 0; i < allMeshes.size(); i++)
 	{
-		allMeshes[i]->visitRecursive(sceneVisitor);
+		static_cast<Mesh*>(allMeshes[i].get())->visitRecursive(sceneVisitor);
 	}
 
 	for (size_t i = 0; i < allChildNodes.size(); i++)
 	{
-		allChildNodes[i]->visitRecursive(sceneVisitor);
+		static_cast<Node*>(allChildNodes[i].get())->visitRecursive(sceneVisitor);
 	}
 }
 

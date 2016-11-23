@@ -32,8 +32,6 @@
 namespace vkts
 {
 
-class SceneVisitor;
-
 class INode: public ICloneable<INode>, public IDestroyable, public std::enable_shared_from_this<INode>
 {
 
@@ -183,10 +181,6 @@ public:
 	virtual std::shared_ptr<INode> findNodeRecursiveFromRoot(const std::string& searchName) = 0;
 
     virtual void updateTransformRecursive(const double deltaTime, const uint64_t deltaTicks, const double tickTime, const glm::mat4& parentTransformMatrix, const VkBool32 parentTransformMatrixDirty, const glm::mat4& parentBindMatrix, const VkBool32 parentBindMatrixDirty, const std::shared_ptr<INode>& armatureNode) = 0;
-
-    //
-
-    virtual void visitRecursive(SceneVisitor* sceneVisitor) = 0;
 
 };
 

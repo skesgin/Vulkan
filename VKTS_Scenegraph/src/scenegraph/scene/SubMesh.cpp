@@ -297,60 +297,6 @@ VkBool32 SubMesh::hasBones() const
     return numberBonesOffset >= 0;
 }
 
-void SubMesh::bindIndexBuffer(const ICommandBuffersSP& cmdBuffer, const uint32_t bufferIndex) const
-{
-    if (!indicesVertexBuffer.get())
-    {
-        return;
-    }
-
-    if (!indicesVertexBuffer->getBuffer().get())
-    {
-        return;
-    }
-
-    if (!cmdBuffer.get())
-    {
-        return;
-    }
-
-    vkCmdBindIndexBuffer(cmdBuffer->getCommandBuffer(bufferIndex), indicesVertexBuffer->getBuffer()->getBuffer(), 0, VK_INDEX_TYPE_UINT32);
-}
-
-void SubMesh::bindVertexBuffers(const ICommandBuffersSP& cmdBuffer, const uint32_t bufferIndex) const
-{
-    if (!vertexBuffer.get())
-    {
-        return;
-    }
-
-    if (!vertexBuffer->getBuffer().get())
-    {
-        return;
-    }
-
-    if (!cmdBuffer.get())
-    {
-        return;
-    }
-
-    VkDeviceSize offsets[1] = {0};
-
-    VkBuffer buffers[1] = {vertexBuffer->getBuffer()->getBuffer()};
-
-    vkCmdBindVertexBuffers(cmdBuffer->getCommandBuffer(bufferIndex), 0, 1, buffers, offsets);
-}
-
-void SubMesh::drawIndexed(const ICommandBuffersSP& cmdBuffer, const uint32_t bufferIndex) const
-{
-    if (!cmdBuffer.get())
-    {
-        return;
-    }
-
-    vkCmdDrawIndexed(cmdBuffer->getCommandBuffer(bufferIndex), getNumberIndices(), 1, 0, 0, 0);
-}
-
 const Aabb& SubMesh::getAABB() const
 {
 	return box;
@@ -372,12 +318,12 @@ void SubMesh::visitRecursive(SceneVisitor* sceneVisitor)
 
     if (bsdfMaterial.get())
     {
-    	bsdfMaterial->visitRecursive(sceneVisitor);
+    	static_cast<BSDFMaterial*>(bsdfMaterial.get())->visitRecursive(sceneVisitor);
     }
 
     if (phongMaterial.get())
     {
-        phongMaterial->visitRecursive(sceneVisitor);
+    	static_cast<PhongMaterial*>(phongMaterial.get())->visitRecursive(sceneVisitor);
     }
 }
 

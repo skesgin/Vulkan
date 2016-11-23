@@ -254,7 +254,7 @@ public:
 
     //
 
-    virtual void visitRecursive(SceneVisitor* sceneVisitor) override;
+    void visitRecursive(SceneVisitor* sceneVisitor);
 
     //
     // ICloneable

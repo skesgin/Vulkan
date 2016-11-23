@@ -32,8 +32,6 @@
 namespace vkts
 {
 
-class SceneVisitor;
-
 class ISubMesh: public IDestroyable, public ICloneable<ISubMesh>
 {
 
@@ -143,10 +141,6 @@ public:
     virtual VkBool32 hasBones() const = 0;
 
     virtual const Aabb& getAABB() const = 0;
-
-    //
-
-    virtual void visitRecursive(SceneVisitor* sceneVisitor) = 0;
 
 };
 

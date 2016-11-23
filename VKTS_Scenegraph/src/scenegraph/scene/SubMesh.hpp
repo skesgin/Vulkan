@@ -95,12 +95,6 @@ public:
 
     SubMesh& operator =(SubMesh && other) = delete;
 
-    void bindIndexBuffer(const ICommandBuffersSP& cmdBuffer, const uint32_t bufferIndex = 0) const;
-
-    void bindVertexBuffers(const ICommandBuffersSP& cmdBuffer, const uint32_t bufferIndex = 0) const;
-
-    void drawIndexed(const ICommandBuffersSP& cmdBuffer, const uint32_t bufferIndex = 0) const;
-
     //
     // ISubMesh
     //
@@ -203,7 +197,7 @@ public:
 
     //
 
-    virtual void visitRecursive(SceneVisitor* sceneVisitor) override;
+    void visitRecursive(SceneVisitor* sceneVisitor);
 
     //
     // ICloneable

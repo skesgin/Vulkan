@@ -155,7 +155,7 @@ void Object::visitRecursive(SceneVisitor* sceneVisitor)
 
     if (rootNode.get())
     {
-        rootNode->visitRecursive(sceneVisitor);
+        static_cast<Node*>(rootNode.get())->visitRecursive(sceneVisitor);
     }
 }
 

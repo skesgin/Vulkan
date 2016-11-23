@@ -45,110 +45,23 @@ private:
 
 	std::string nodeName;
 
-	void updateMaterial(Material& material)
-	{
-        auto currentDescriptorSets = material.createDescriptorSetsByName(nodeName);
-
-        if (!currentDescriptorSets.get())
-        {
-            return;
-        }
-
-        //
-
-        VkWriteDescriptorSet finalWriteDescriptorSets[VKTS_BINDING_UNIFORM_MATERIAL_TOTAL_BINDING_COUNT];
-        uint32_t finalWriteDescriptorSetsCount = 0;
-
-        for (uint32_t i = 0; i < allWriteDescriptorSetsCount; i++)
-        {
-            for (uint32_t k = 0; k < VKTS_BINDING_UNIFORM_PHONG_BINDING_COUNT; k++)
-            {
-            	// Assign used descriptor set.
-    			if (allWriteDescriptorSets[i].dstBinding == material.writeDescriptorSets[k].dstBinding && material.writeDescriptorSets[k].sType == VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET)
-    			{
-    				allWriteDescriptorSets[i] = material.writeDescriptorSets[k];
-    			}
-            }
-
-            // Gather valid descriptor sets.
-        	if (allWriteDescriptorSets[i].sType == VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET)
-        	{
-        		finalWriteDescriptorSets[finalWriteDescriptorSetsCount] = allWriteDescriptorSets[i];
-
-        		finalWriteDescriptorSets[finalWriteDescriptorSetsCount].dstSet = currentDescriptorSets->getDescriptorSets()[0];
-
-    			finalWriteDescriptorSetsCount++;
-        	}
-        }
-
-        currentDescriptorSets->updateDescriptorSets(finalWriteDescriptorSetsCount, finalWriteDescriptorSets, 0, nullptr);
-	}
+	void updateMaterial(Material& material);
 
 public:
 
 	UpdateDescriptorSets() = delete;
 
-	UpdateDescriptorSets(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets) :
-		SceneVisitor(), allWriteDescriptorSetsCount(allWriteDescriptorSetsCount), allWriteDescriptorSets(allWriteDescriptorSets), nodeName("")
-    {
-    }
+	UpdateDescriptorSets(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets);
 
-    virtual ~UpdateDescriptorSets()
-    {
-    }
+    virtual ~UpdateDescriptorSets();
 
     //
 
-    virtual VkBool32 visit(Node& node)
-    {
-    	for (uint32_t i = 0; i < allWriteDescriptorSetsCount; i++)
-    	{
-    		if (node.transformWriteDescriptorSet.dstBinding == VKTS_BINDING_UNIFORM_BUFFER_TRANSFORM && node.transformWriteDescriptorSet.sType == VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET)
-    		{
-    			if (allWriteDescriptorSets[i].dstBinding == VKTS_BINDING_UNIFORM_BUFFER_TRANSFORM)
-    			{
-    				allWriteDescriptorSets[i] = node.transformWriteDescriptorSet;
-    			}
-    		}
+    virtual VkBool32 visit(Node& node) override;
 
-    		if (node.jointWriteDescriptorSet.dstBinding == VKTS_BINDING_UNIFORM_BUFFER_BONE_TRANSFORM && node.jointWriteDescriptorSet.sType == VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET)
-    		{
-    			if (allWriteDescriptorSets[i].dstBinding == VKTS_BINDING_UNIFORM_BUFFER_BONE_TRANSFORM)
-    			{
-    				allWriteDescriptorSets[i] = node.jointWriteDescriptorSet;
-    			}
+    virtual VkBool32 visit(PhongMaterial& material) override;
 
-    		}
-    	}
-
-    	nodeName = node.name;
-
-		for (size_t i = 0; i < node.allMeshes.size(); i++)
-		{
-			node.allMeshes[i]->visitRecursive(this);
-		}
-
-        for (size_t i = 0; i < node.allChildNodes.size(); i++)
-        {
-        	node.allChildNodes[i]->visitRecursive(this);
-        }
-
-    	return VK_FALSE;
-    }
-
-    virtual VkBool32 visit(PhongMaterial& material)
-    {
-    	updateMaterial(material);
-
-    	return VK_TRUE;
-    }
-
-    virtual VkBool32 visit(BSDFMaterial& material)
-    {
-    	updateMaterial(material);
-
-    	return VK_TRUE;
-    }
+    virtual VkBool32 visit(BSDFMaterial& material) override;
 };
 
 } /* namespace vkts */

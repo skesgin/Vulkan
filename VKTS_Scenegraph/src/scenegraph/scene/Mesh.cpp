@@ -136,7 +136,7 @@ void Mesh::visitRecursive(SceneVisitor* sceneVisitor)
 
     for (size_t i = 0; i < allSubMeshes.size(); i++)
     {
-        allSubMeshes[i]->visitRecursive(sceneVisitor);
+        static_cast<SubMesh*>(allSubMeshes[i].get())->visitRecursive(sceneVisitor);
     }
 }
 

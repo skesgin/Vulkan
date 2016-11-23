@@ -24,37 +24,32 @@
  * THE SOFTWARE.
  */
 
-#ifndef VKTS_UPDATEPARAMETER_HPP_
-#define VKTS_UPDATEPARAMETER_HPP_
-
-#include <vkts/scenegraph.hpp>
-
-#include "SceneVisitor.hpp"
+#include "UpdateParameter.hpp"
 
 namespace vkts
 {
 
-class UpdateParameter : public SceneVisitor
+UpdateParameter::UpdateParameter(const Parameter* parameter) :
+	SceneVisitor(), parameter(parameter)
 {
+}
 
-private:
+UpdateParameter::~UpdateParameter()
+{
+}
 
-	const Parameter* parameter;
+//
 
-public:
+VkBool32 UpdateParameter::visit(Node& node)
+{
+	if (!parameter)
+	{
+		return VK_TRUE;
+	}
 
-	UpdateParameter() = delete;
+	parameter->visit(node);
 
-	UpdateParameter(const Parameter* parameter);
-
-    virtual ~UpdateParameter();
-
-    //
-
-    virtual VkBool32 visit(Node& node) override;
-
-};
+	return VK_TRUE;
+}
 
 } /* namespace vkts */
-
-#endif /* VKTS_UPDATEPARAMETER_HPP_ */

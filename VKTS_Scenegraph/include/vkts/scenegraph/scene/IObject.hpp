@@ -32,8 +32,6 @@
 namespace vkts
 {
 
-class SceneVisitor;
-
 class IObject: public ICloneable<IObject>, public IDestroyable, public IMoveable
 {
 
@@ -63,10 +61,6 @@ public:
     virtual void setDirty() = 0;
 
     virtual void updateTransformRecursive(const double deltaTime, const uint64_t deltaTicks, const double tickTime) = 0;
-
-    //
-
-    virtual void visitRecursive(SceneVisitor* sceneVisitor) = 0;
 
 };
 

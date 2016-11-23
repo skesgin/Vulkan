@@ -140,7 +140,7 @@ public:
 
     //
 
-    virtual void visitRecursive(SceneVisitor* sceneVisitor, const uint32_t objectOffset, const uint32_t objectStep, const size_t objectLimit) override;
+    void visitRecursive(SceneVisitor* sceneVisitor, const uint32_t objectOffset, const uint32_t objectStep, const size_t objectLimit);
 
     //
     // ICloneable

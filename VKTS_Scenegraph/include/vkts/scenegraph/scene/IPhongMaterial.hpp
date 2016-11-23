@@ -32,8 +32,6 @@
 namespace vkts
 {
 
-class SceneVisitor;
-
 class IPhongMaterial : public ICloneable<IPhongMaterial>, public IDestroyable
 {
 
@@ -113,10 +111,6 @@ public:
     virtual IDescriptorSetsSP getDescriptorSets() const = 0;
 
     virtual void setDescriptorSets(const IDescriptorSetsSP& descriptorSets) = 0;
-
-    //
-
-    virtual void visitRecursive(SceneVisitor* sceneVisitor) = 0;
 
 };
 

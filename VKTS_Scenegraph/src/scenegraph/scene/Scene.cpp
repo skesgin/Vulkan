@@ -348,7 +348,7 @@ void Scene::visitRecursive(SceneVisitor* sceneVisitor, const uint32_t objectOffs
 
     for (size_t i = (size_t) objectOffset; i < glm::min(allObjects.size(), objectLimit); i += (size_t) objectStep)
     {
-        allObjects[i]->visitRecursive(sceneVisitor);
+        static_cast<Object*>(allObjects[i].get())->visitRecursive(sceneVisitor);
     }
 }
 
