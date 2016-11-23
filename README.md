@@ -16,7 +16,7 @@ For building, please read the following document:
   
 ---
   
-Pre-build executables can be downloaded here (last update 11/14/2016):
+Pre-build executables can be downloaded here (last update 11/23/2016):
   
 [http://nopper.tv/Vulkan/VKTS_Executables_Android.zip](http://nopper.tv/Vulkan/VKTS_Executables_Android.zip) (Android ARM 32/64 bit Intel 32 bit)  
 [http://nopper.tv/Vulkan/VKTS_Executables_Linux64.zip](http://nopper.tv/Vulkan/VKTS_Executables_Linux64.zip) (Linux 64 bit)  
