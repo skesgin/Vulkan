@@ -32,8 +32,6 @@
 namespace vkts
 {
 
-class Overwrite;
-
 class SceneVisitor;
 
 class IMesh: public ICloneable<IMesh>, public IDestroyable
@@ -61,10 +59,6 @@ public:
     virtual size_t getNumberSubMeshes() const = 0;
 
     virtual const SmartPointerVector<ISubMeshSP>& getSubMeshes() const = 0;
-
-    virtual void updateDescriptorSetsRecursive(const std::string& nodeName, const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets) = 0;
-
-    virtual void bindDrawIndexedRecursive(const std::string& nodeName, const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const Overwrite* renderOverwrite = nullptr, const uint32_t bufferIndex = 0) const = 0;
 
     virtual void setDisplace(const glm::vec2& displace) = 0;
 

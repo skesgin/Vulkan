@@ -674,67 +674,7 @@ void Node::setJointsUniformBuffer(const int32_t joints, const IBufferObjectSP& j
     this->bindMatrixDirty = VK_TRUE;
 }
 
-void Node::updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets)
-{
-	for (uint32_t i = 0; i < allWriteDescriptorSetsCount; i++)
-	{
-		if (transformWriteDescriptorSet.dstBinding == VKTS_BINDING_UNIFORM_BUFFER_TRANSFORM && transformWriteDescriptorSet.sType == VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET)
-		{
-			if (allWriteDescriptorSets[i].dstBinding == VKTS_BINDING_UNIFORM_BUFFER_TRANSFORM)
-			{
-				allWriteDescriptorSets[i] = transformWriteDescriptorSet;
-			}
-		}
-
-		if (jointWriteDescriptorSet.dstBinding == VKTS_BINDING_UNIFORM_BUFFER_BONE_TRANSFORM && jointWriteDescriptorSet.sType == VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET)
-		{
-			if (allWriteDescriptorSets[i].dstBinding == VKTS_BINDING_UNIFORM_BUFFER_BONE_TRANSFORM)
-			{
-				allWriteDescriptorSets[i] = jointWriteDescriptorSet;
-			}
-
-		}
-	}
-
-    if (allMeshes.size() > 0)
-    {
-        for (size_t i = 0; i < allMeshes.size(); i++)
-        {
-            allMeshes[i]->updateDescriptorSetsRecursive(name, allWriteDescriptorSetsCount, allWriteDescriptorSets);
-        }
-    }
-
-    for (size_t i = 0; i < allChildNodes.size(); i++)
-    {
-        allChildNodes[i]->updateDescriptorSetsRecursive(allWriteDescriptorSetsCount, allWriteDescriptorSets);
-    }
-}
-
-void Node::bindDrawIndexedRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const Overwrite* renderOverwrite, const uint32_t bufferIndex) const
-{
-    const Overwrite* currentOverwrite = renderOverwrite;
-    while (currentOverwrite)
-    {
-    	if (!currentOverwrite->nodeBindDrawIndexedRecursive(*this, cmdBuffer, allGraphicsPipelines, bufferIndex))
-    	{
-    		return;
-    	}
-
-    	currentOverwrite = currentOverwrite->getNextOverwrite();
-    }
-
-    for (size_t i = 0; i < allMeshes.size(); i++)
-    {
-        allMeshes[i]->bindDrawIndexedRecursive(name, cmdBuffer, allGraphicsPipelines, renderOverwrite, bufferIndex);
-    }
-
-    for (size_t i = 0; i < allChildNodes.size(); i++)
-    {
-        allChildNodes[i]->bindDrawIndexedRecursive(cmdBuffer, allGraphicsPipelines, renderOverwrite, bufferIndex);
-    }
-}
-
-void Node::updateRecursive(const IUpdateThreadContext& updateContext, const glm::mat4& parentTransformMatrix, const VkBool32 parentTransformMatrixDirty, const glm::mat4& parentBindMatrix, const VkBool32 parentBindMatrixDirty, const INodeSP& armatureNode)
+void Node::updateTransformRecursive(const double deltaTime, const uint64_t deltaTicks, const double tickTime, const glm::mat4& parentTransformMatrix, const VkBool32 parentTransformMatrixDirty, const glm::mat4& parentBindMatrix, const VkBool32 parentBindMatrixDirty, const INodeSP& armatureNode)
 {
     transformMatrixDirty = transformMatrixDirty || parentTransformMatrixDirty;
 
@@ -752,7 +692,7 @@ void Node::updateRecursive(const IUpdateThreadContext& updateContext, const glm:
 
     if (currentAnimation >= 0 && currentAnimation < (int32_t) allAnimations.size())
     {
-    	float currentTime = allAnimations[currentAnimation]->update((float) updateContext.getDeltaTime());
+    	float currentTime = allAnimations[currentAnimation]->update((float)deltaTime);
 
         const auto& currentChannels = allAnimations[currentAnimation]->getChannels();
 
@@ -962,7 +902,7 @@ void Node::updateRecursive(const IUpdateThreadContext& updateContext, const glm:
 
     for (size_t i = 0; i < allChildNodes.size(); i++)
     {
-        allChildNodes[i]->updateRecursive(updateContext, this->transformMatrix, this->transformMatrixDirty, this->bindMatrix, this->bindMatrixDirty, newArmatureNode);
+        allChildNodes[i]->updateTransformRecursive(deltaTime, deltaTicks, tickTime, this->transformMatrix, this->transformMatrixDirty, this->bindMatrix, this->bindMatrixDirty, newArmatureNode);
     }
 
     //

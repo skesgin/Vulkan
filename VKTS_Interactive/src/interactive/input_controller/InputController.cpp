@@ -217,7 +217,7 @@ void InputController::setForwardOnly(const VkBool32 forwardOnly)
 // IUpdateable
 //
 
-VkBool32 InputController::update(const double deltaTime, const uint64_t deltaTicks)
+VkBool32 InputController::update(const double deltaTime, const uint64_t deltaTicks, const double tickTime)
 {
 	if (!enabled)
 	{

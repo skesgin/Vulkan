@@ -296,7 +296,7 @@ void IMoveable::moveTranslateRotate(const float forwardFactor, const float straf
 // IUpdateable
 //
 
-VkBool32 IMoveable::update(const double deltaTime, const uint64_t deltaTicks)
+VkBool32 IMoveable::update(const double deltaTime, const uint64_t deltaTicks, const double tickTime)
 {
     if (targetTranslate != translate || targetRotateZ != rotateZ || targetRotateY != rotateY || targetRotateX != rotateX)
     {

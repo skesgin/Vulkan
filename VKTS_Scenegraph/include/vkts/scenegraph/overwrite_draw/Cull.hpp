@@ -24,33 +24,67 @@
  * THE SOFTWARE.
  */
 
-#ifndef VKTS_IUPDATEABLE_HPP_
-#define VKTS_IUPDATEABLE_HPP_
+#ifndef VKTS_CULL_HPP_
+#define VKTS_CULL_HPP_
 
-#include <vkts/core.hpp>
+#include <vkts/scenegraph.hpp>
 
 namespace vkts
 {
 
-class IUpdateable
+class Cull : public OverwriteDraw
 {
+
+private:
+
+	const Frustum* viewFrustum;
 
 public:
 
-    IUpdateable()
+	Cull() :
+		OverwriteDraw(), viewFrustum(nullptr)
     {
     }
 
-    virtual ~IUpdateable()
+	Cull(const Frustum* viewFrustum) :
+		OverwriteDraw(), viewFrustum(viewFrustum)
     {
     }
 
-    virtual VkBool32 update(const double deltaTime, const uint64_t deltaTicks, const double tickTime) = 0;
+    virtual ~Cull()
+    {
+    }
 
+    //
+
+	const Frustum* getViewFrustum() const
+	{
+		return viewFrustum;
+	}
+
+	void setViewFrustum(const Frustum* viewFrustum)
+	{
+		this->viewFrustum = viewFrustum;
+	}
+
+    //
+
+    virtual VkBool32 visit(const IObject& object, const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const uint32_t bufferIndex) const
+    {
+    	if (viewFrustum)
+    	{
+    		if (viewFrustum->isVisible(object.getRootNode()->getBoundingSphere()))
+    		{
+    			return VK_TRUE;
+    		}
+
+    		return VK_FALSE;
+    	}
+
+    	return VK_TRUE;
+    }
 };
-
-typedef std::shared_ptr<IUpdateable> IUpdateableSP;
 
 } /* namespace vkts */
 
-#endif /* VKTS_IUPDATEABLE_HPP_ */
+#endif /* VKTS_CULL_HPP_ */

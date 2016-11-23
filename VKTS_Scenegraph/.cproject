@@ -40,7 +40,6 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Core/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Math/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Entity/include}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Runtime/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Image/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Vulkan/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Vulkan_Object/include}&quot;"/>
@@ -121,7 +120,6 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Core/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Math/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Entity/include}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Runtime/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Image/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Vulkan/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Vulkan_Object/include}&quot;"/>
@@ -193,7 +191,6 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Core/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Math/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Entity/include}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Runtime/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Image/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Vulkan/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Vulkan_Object/include}&quot;"/>
@@ -261,7 +258,6 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Core/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Math/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Entity/include}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Runtime/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Image/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Vulkan/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Vulkan_Object/include}&quot;"/>
@@ -328,7 +324,6 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Core/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Math/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Entity/include}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Runtime/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Image/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Vulkan/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Vulkan_Object/include}&quot;"/>
@@ -397,7 +392,6 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Core/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Math/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Entity/include}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Runtime/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Image/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Vulkan/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Vulkan_Object/include}&quot;"/>
@@ -470,7 +464,6 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Core/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Math/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Entity/include}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Runtime/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Image/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Vulkan/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Vulkan_Object/include}&quot;"/>
@@ -553,7 +546,6 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Core/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Math/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Entity/include}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Runtime/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Image/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Vulkan/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Vulkan_Object/include}&quot;"/>
@@ -634,7 +626,6 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Core/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Math/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Entity/include}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Runtime/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Image/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Vulkan/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Vulkan_Object/include}&quot;"/>
@@ -706,7 +697,6 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Core/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Math/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Entity/include}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Runtime/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Image/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Vulkan/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Vulkan_Object/include}&quot;"/>
@@ -777,7 +767,6 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Core/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Math/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Entity/include}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Runtime/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Image/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Vulkan/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Vulkan_Object/include}&quot;"/>
@@ -847,7 +836,6 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Core/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Math/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Entity/include}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Runtime/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Image/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Vulkan/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Vulkan_Object/include}&quot;"/>
@@ -911,7 +899,6 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Core/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Math/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Entity/include}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Runtime/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Image/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Vulkan/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Vulkan_Object/include}&quot;"/>
@@ -981,7 +968,6 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Core/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Math/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Entity/include}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Runtime/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Image/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Vulkan/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_Vulkan_Object/include}&quot;"/>

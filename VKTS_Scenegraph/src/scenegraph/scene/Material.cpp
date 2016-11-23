@@ -89,6 +89,23 @@ IDescriptorSetsSP Material::getDescriptorSetsByName(const std::string& nodeName)
 	return IDescriptorSetsSP();
 }
 
+void Material::bindDescriptorSets(const std::string& nodeName, const ICommandBuffersSP& cmdBuffer, const VkPipelineLayout layout, const uint32_t bufferIndex) const
+{
+    if (!cmdBuffer.get())
+    {
+        return;
+    }
+
+    auto currentDescriptorSets = getDescriptorSetsByName(nodeName);
+
+    if (!currentDescriptorSets.get())
+    {
+        return;
+    }
+
+    vkCmdBindDescriptorSets(cmdBuffer->getCommandBuffer(bufferIndex), VK_PIPELINE_BIND_POINT_GRAPHICS, layout, 0, 1, &currentDescriptorSets->getDescriptorSets()[0], 0, nullptr);
+}
+
 void Material::updateDescriptorImageInfo(const uint32_t colorIndex, const uint32_t dstBindingOffset, const VkSampler sampler, const VkImageView imageView, const VkImageLayout imageLayout)
 {
     if (colorIndex >= VKTS_BINDING_UNIFORM_MATERIAL_TOTAL_BINDING_COUNT)

@@ -32,8 +32,14 @@
 namespace vkts
 {
 
+class SceneVisitor;
+
 class Object: public IObject
 {
+
+friend class Draw;
+friend class Parameter;
+friend class UpdateDescriptorSets;
 
 private:
 
@@ -83,11 +89,7 @@ public:
 
     virtual void setDirty() override;
 
-    virtual void updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets) override;
-
-    virtual void bindDrawIndexedRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const Overwrite* renderOverwrite = nullptr, const uint32_t bufferIndex = 0) const override;
-
-    virtual void updateRecursive(const IUpdateThreadContext& updateContext) override;
+    virtual void updateTransformRecursive(const double deltaTime, const uint64_t deltaTicks, const double tickTime) override;
 
     //
 

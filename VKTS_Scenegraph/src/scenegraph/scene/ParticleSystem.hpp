@@ -32,8 +32,14 @@
 namespace vkts
 {
 
+class SceneVisitor;
+
 class ParticleSystem : public IParticleSystem
 {
+
+friend class Draw;
+friend class Parameter;
+friend class UpdateDescriptorSets;
 
 private:
 

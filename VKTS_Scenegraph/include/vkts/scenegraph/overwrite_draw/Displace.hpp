@@ -24,33 +24,57 @@
  * THE SOFTWARE.
  */
 
-#ifndef VKTS_IUPDATEABLE_HPP_
-#define VKTS_IUPDATEABLE_HPP_
+#ifndef VKTS_DISPLACE_HPP_
+#define VKTS_DISPLACE_HPP_
 
-#include <vkts/core.hpp>
+#include <vkts/scenegraph.hpp>
 
 namespace vkts
 {
 
-class IUpdateable
+class Displace : public OverwriteDraw
 {
 
 public:
 
-    IUpdateable()
+	Displace() :
+		OverwriteDraw()
     {
     }
 
-    virtual ~IUpdateable()
+    virtual ~Displace()
     {
     }
 
-    virtual VkBool32 update(const double deltaTime, const uint64_t deltaTicks, const double tickTime) = 0;
+    virtual VkBool32 visit(const IMesh& mesh, const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const uint32_t bufferIndex) const
+    {
+    	IGraphicsPipelineSP graphicsPipeline;
 
+    	for (size_t i = 0; i < allGraphicsPipelines.size(); i++)
+    	{
+    		if (allGraphicsPipelines[i]->getTessellationState())
+    		{
+    			graphicsPipeline = allGraphicsPipelines[i];
+
+    			break;
+    		}
+    	}
+
+    	if (!graphicsPipeline.get())
+    	{
+            logPrint(VKTS_LOG_WARNING, __FILE__, __LINE__, "No tessellation state found");
+
+            return VK_FALSE;
+    	}
+
+    	const auto& displace = mesh.getDisplace();
+
+    	vkCmdPushConstants(cmdBuffer->getCommandBuffer(bufferIndex), graphicsPipeline->getLayout(), VK_SHADER_STAGE_GEOMETRY_BIT, 0, sizeof(float) * 2, glm::value_ptr(displace));
+
+    	return VK_TRUE;
+    }
 };
-
-typedef std::shared_ptr<IUpdateable> IUpdateableSP;
 
 } /* namespace vkts */
 
-#endif /* VKTS_IUPDATEABLE_HPP_ */
+#endif /* VKTS_DISPLACE_HPP_ */

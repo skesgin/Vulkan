@@ -32,8 +32,6 @@
 namespace vkts
 {
 
-class Overwrite;
-
 class SceneVisitor;
 
 class IBSDFMaterial : public ICloneable<IBSDFMaterial>, public IDestroyable
@@ -79,12 +77,6 @@ public:
     virtual IDescriptorSetsSP getDescriptorSets() const = 0;
 
     virtual void setDescriptorSets(const IDescriptorSetsSP& descriptorSets) = 0;
-
-    virtual void updateDescriptorSetsRecursive(const std::string& nodeName, const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets) = 0;
-
-    virtual void bindDescriptorSets(const std::string& nodeName, const ICommandBuffersSP& cmdBuffer, const VkPipelineLayout layout, const uint32_t bufferIndex = 0) const = 0;
-
-    virtual void bindDrawIndexedRecursive(const std::string& nodeName, const ICommandBuffersSP& cmdBuffer, const IGraphicsPipelineSP& graphicsPipeline, const Overwrite* renderOverwrite = nullptr, const uint32_t bufferIndex = 0) const = 0;
 
     //
 

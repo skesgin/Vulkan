@@ -167,7 +167,7 @@ public:
     // IUpdateable
     //
 
-    virtual VkBool32 update(const double deltaTime, const uint64_t deltaTicks) override;
+    virtual VkBool32 update(const double deltaTime, const uint64_t deltaTicks, const double tickTime) override;
 
     //
     // ICloneable

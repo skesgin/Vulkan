@@ -32,8 +32,14 @@
 namespace vkts
 {
 
+class SceneVisitor;
+
 class SubMesh: public ISubMesh
 {
+
+friend class Draw;
+friend class Parameter;
+friend class UpdateDescriptorSets;
 
 private:
 
@@ -88,6 +94,12 @@ public:
     SubMesh& operator =(const SubMesh& other) = delete;
 
     SubMesh& operator =(SubMesh && other) = delete;
+
+    void bindIndexBuffer(const ICommandBuffersSP& cmdBuffer, const uint32_t bufferIndex = 0) const;
+
+    void bindVertexBuffers(const ICommandBuffersSP& cmdBuffer, const uint32_t bufferIndex = 0) const;
+
+    void drawIndexed(const ICommandBuffersSP& cmdBuffer, const uint32_t bufferIndex = 0) const;
 
     //
     // ISubMesh
@@ -186,16 +198,6 @@ public:
     virtual void setStrideInBytes(const uint32_t strideInBytes) override;
 
     virtual VkBool32 hasBones() const override;
-
-    virtual void updateDescriptorSetsRecursive(const std::string& nodeName, const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets) override;
-
-    virtual void bindIndexBuffer(const ICommandBuffersSP& cmdBuffer, const uint32_t bufferIndex = 0) const override;
-
-    virtual void bindVertexBuffers(const ICommandBuffersSP& cmdBuffer, const uint32_t bufferIndex = 0) const override;
-
-    virtual void drawIndexed(const ICommandBuffersSP& cmdBuffer, const uint32_t bufferIndex = 0) const override;
-
-    virtual void bindDrawIndexedRecursive(const std::string& nodeName, const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const Overwrite* renderOverwrite = nullptr, const uint32_t bufferIndex = 0) const override;
 
     virtual const Aabb& getAABB() const override;
 

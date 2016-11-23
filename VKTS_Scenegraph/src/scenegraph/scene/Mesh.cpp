@@ -99,34 +99,6 @@ const SmartPointerVector<ISubMeshSP>& Mesh::getSubMeshes() const
     return allSubMeshes;
 }
 
-void Mesh::updateDescriptorSetsRecursive(const std::string& nodeName, const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets)
-{
-    for (size_t i = 0; i < allSubMeshes.size(); i++)
-    {
-        allSubMeshes[i]->updateDescriptorSetsRecursive(nodeName, allWriteDescriptorSetsCount, allWriteDescriptorSets);
-    }
-}
-
-void Mesh::bindDrawIndexedRecursive(const std::string& nodeName, const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const Overwrite* renderOverwrite, const uint32_t bufferIndex) const
-{
-    const Overwrite* currentOverwrite = renderOverwrite;
-    while (currentOverwrite)
-    {
-    	if (!currentOverwrite->meshBindDrawIndexedRecursive(*this, cmdBuffer, allGraphicsPipelines, bufferIndex))
-    	{
-    		return;
-    	}
-
-    	currentOverwrite = currentOverwrite->getNextOverwrite();
-    }
-
-    for (size_t i = 0; i < allSubMeshes.size(); i++)
-    {
-        allSubMeshes[i]->bindDrawIndexedRecursive(nodeName, cmdBuffer, allGraphicsPipelines, renderOverwrite, bufferIndex);
-    }
-}
-
-
 void Mesh::setDisplace(const glm::vec2& displace)
 {
 	this->displace = displace;

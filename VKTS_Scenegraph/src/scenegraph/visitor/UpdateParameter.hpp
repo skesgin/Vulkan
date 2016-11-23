@@ -24,55 +24,51 @@
  * THE SOFTWARE.
  */
 
-#ifndef VKTS_BLEND_HPP_
-#define VKTS_BLEND_HPP_
+#ifndef VKTS_UPDATEPARAMETER_HPP_
+#define VKTS_UPDATEPARAMETER_HPP_
 
 #include <vkts/scenegraph.hpp>
+
+#include "SceneVisitor.hpp"
 
 namespace vkts
 {
 
-class Blend : public Overwrite
+class UpdateParameter : public SceneVisitor
 {
 
 private:
 
-	VkBool32 passTransparent;
+	const Parameter* parameter;
 
 public:
 
-	Blend() :
-		Overwrite(), passTransparent(VK_FALSE)
+	UpdateParameter() = delete;
+
+	UpdateParameter(const Parameter* parameter) :
+		SceneVisitor(), parameter(parameter)
     {
     }
 
-    virtual ~Blend()
+    virtual ~UpdateParameter()
     {
     }
 
-    virtual VkBool32 submeshBindDrawIndexedRecursive(const ISubMesh& subMesh, const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const uint32_t bufferIndex) const
+    //
+
+    virtual VkBool32 visit(Node& node)
     {
-    	VkBool32 transparent = VK_FALSE;
+    	if (!parameter)
+    	{
+    		return VK_TRUE;
+    	}
 
-        if (subMesh.getPhongMaterial().get())
-        {
-        	transparent = subMesh.getPhongMaterial()->isTransparent();
-        }
+    	parameter->visit(node);
 
-    	return (transparent && passTransparent) || (!transparent && !passTransparent);
+    	return VK_TRUE;
     }
-
-	VkBool32 getPassTransparent() const
-	{
-		return passTransparent;
-	}
-
-	void setPassTransparent(const VkBool32 passTransparent)
-	{
-		this->passTransparent = passTransparent;
-	}
 };
 
 } /* namespace vkts */
 
-#endif /* VKTS_BLEND_HPP_ */
+#endif /* VKTS_UPDATEPARAMETER_HPP_ */

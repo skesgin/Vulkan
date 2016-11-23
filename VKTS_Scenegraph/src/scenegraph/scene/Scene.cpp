@@ -27,7 +27,10 @@
 #include "Scene.hpp"
 
 #include "Object.hpp"
-#include "../visitor/SceneVisitor.hpp"
+
+#include "../visitor/Draw.hpp"
+#include "../visitor/UpdateDescriptorSets.hpp"
+#include "../visitor/UpdateParameter.hpp"
 
 namespace vkts
 {
@@ -288,39 +291,21 @@ ITextureObjectSP Scene::getLut() const
     return lut;
 }
 
-void Scene::updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets)
+void Scene::updateParameterRecursive(const Parameter* parameter, const uint32_t objectOffset, const uint32_t objectStep, const size_t objectLimit)
 {
-    for (size_t i = 0; i < allObjects.size(); i++)
-    {
-        allObjects[i]->updateDescriptorSetsRecursive(allWriteDescriptorSetsCount, allWriteDescriptorSets);
-    }
+	UpdateParameter sceneVisitor(parameter);
+
+	visitRecursive(&sceneVisitor, objectOffset, objectStep, objectLimit);
 }
 
-void Scene::bindDrawIndexedRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const Overwrite* renderOverwrite, const uint32_t bufferIndex, const uint32_t objectOffset, const uint32_t objectStep, const size_t objectLimit) const
+void Scene::updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets, const uint32_t objectOffset, const uint32_t objectStep, const size_t objectLimit)
 {
-    if (objectStep == 0)
-    {
-        return;
-    }
+	UpdateDescriptorSets sceneVisitor(allWriteDescriptorSetsCount, allWriteDescriptorSets);
 
-    const Overwrite* currentOverwrite = renderOverwrite;
-    while (currentOverwrite)
-    {
-    	if (!currentOverwrite->sceneBindDrawIndexedRecursive(*this, cmdBuffer, allGraphicsPipelines, bufferIndex, objectOffset, objectStep, objectLimit))
-    	{
-    		return;
-    	}
-
-    	currentOverwrite = currentOverwrite->getNextOverwrite();
-    }
-
-    for (size_t i = (size_t) objectOffset; i < glm::min(allObjects.size(), objectLimit); i += (size_t) objectStep)
-    {
-        allObjects[i]->bindDrawIndexedRecursive(cmdBuffer, allGraphicsPipelines, renderOverwrite, bufferIndex);
-    }
+	visitRecursive(&sceneVisitor, objectOffset, objectStep, objectLimit);
 }
 
-void Scene::updateRecursive(const IUpdateThreadContext& updateContext, const uint32_t objectOffset, const uint32_t objectStep, const size_t objectLimit)
+void Scene::updateTransformRecursive(const double deltaTime, const uint64_t deltaTicks, const double tickTime, const uint32_t objectOffset, const uint32_t objectStep, const size_t objectLimit)
 {
     if (objectStep == 0)
     {
@@ -329,8 +314,15 @@ void Scene::updateRecursive(const IUpdateThreadContext& updateContext, const uin
 
     for (size_t i = (size_t) objectOffset; i < glm::min(allObjects.size(), objectLimit); i += (size_t) objectStep)
     {
-        allObjects[i]->updateRecursive(updateContext);
+        allObjects[i]->updateTransformRecursive(deltaTime, deltaTicks, tickTime);
     }
+}
+
+void Scene::drawRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const OverwriteDraw* renderOverwrite, const uint32_t bufferIndex, const uint32_t objectOffset, const uint32_t objectStep, const size_t objectLimit)
+{
+	Draw sceneVisitor(cmdBuffer, allGraphicsPipelines, renderOverwrite, bufferIndex);
+
+	visitRecursive(&sceneVisitor, objectOffset, objectStep, objectLimit);
 }
 
 void Scene::visitRecursive(SceneVisitor* sceneVisitor, const uint32_t objectOffset, const uint32_t objectStep, const size_t objectLimit)

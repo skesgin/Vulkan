@@ -27,7 +27,6 @@ LOCAL_C_INCLUDES := $(LOCAL_PATH)/../../include
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/../../../VKTS_Vulkan_Object/include
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/../../../VKTS_Vulkan/include
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/../../../VKTS_Entity/include
-LOCAL_C_INCLUDES += $(LOCAL_PATH)/../../../VKTS_Runtime/include
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/../../../VKTS_Image/include
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/../../../VKTS_Math/include
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/../../../VKTS_Core/include

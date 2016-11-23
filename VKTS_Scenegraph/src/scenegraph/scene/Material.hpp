@@ -35,6 +35,10 @@ namespace vkts
 class Material
 {
 
+friend class Draw;
+friend class Parameter;
+friend class UpdateDescriptorSets;
+
 protected:
 
     IDescriptorPoolSP descriptorPool;
@@ -48,6 +52,8 @@ protected:
 
     IDescriptorSetsSP createDescriptorSetsByName(const std::string& nodeName);
     IDescriptorSetsSP getDescriptorSetsByName(const std::string& nodeName) const;
+
+    void bindDescriptorSets(const std::string& nodeName, const ICommandBuffersSP& cmdBuffer, const VkPipelineLayout layout, const uint32_t bufferIndex) const;
 
     void updateDescriptorImageInfo(const uint32_t colorIndex, const uint32_t dstBindingOffset, const VkSampler sampler, const VkImageView imageView, const VkImageLayout imageLayout);
 

@@ -29,15 +29,13 @@
 
 /**
  *
- * Depends on VKTS runtime, entity and Vulkan object.
+ * Depends on VKTS entity and Vulkan object.
  *
  */
 
 #include <vkts/vk_object.hpp>
 
 #include <vkts/entity.hpp>
-
-#include <vkts/runtime.hpp>
 
 /**
  *
@@ -119,14 +117,22 @@ typedef enum VkTsInterpolator_
 #include <vkts/scenegraph/scene/fn_scenegraph.hpp>
 
 /**
- * Render overwrites.
+ * Overwrite draw.
  */
 
-#include <vkts/scenegraph/overwrite/Overwrite.hpp>
+#include <vkts/scenegraph/overwrite_draw/OverwriteDraw.hpp>
 
-#include <vkts/scenegraph/overwrite/Blend.hpp>
-#include <vkts/scenegraph/overwrite/Cull.hpp>
-#include <vkts/scenegraph/overwrite/Displace.hpp>
+#include <vkts/scenegraph/overwrite_draw/Blend.hpp>
+#include <vkts/scenegraph/overwrite_draw/Cull.hpp>
+#include <vkts/scenegraph/overwrite_draw/Displace.hpp>
+
+/**
+ * Parameter set.
+ */
+
+#include <vkts/scenegraph/parameter_set/Parameter.hpp>
+
+#include <vkts/scenegraph/parameter_set/TimeParameter.hpp>
 
 /**
  * Interpolator.

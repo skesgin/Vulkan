@@ -24,17 +24,15 @@
  * THE SOFTWARE.
  */
 
-#ifndef VKTS_ANIMATIONTIME_HPP_
-#define VKTS_ANIMATIONTIME_HPP_
+#ifndef VKTS_TIMEPARAMETER_HPP_
+#define VKTS_TIMEPARAMETER_HPP_
 
 #include <vkts/scenegraph.hpp>
-
-#include "SceneVisitor.hpp"
 
 namespace vkts
 {
 
-class AnimationTime : public SceneVisitor
+class TimeParameter : public Parameter
 {
 
 private:
@@ -43,17 +41,17 @@ private:
 
 public:
 
-	AnimationTime() :
-		SceneVisitor(), currentTime(0.0f)
+	TimeParameter() :
+		Parameter(), currentTime(0.0f)
     {
     }
 
-	AnimationTime(const float currentTime) :
-		SceneVisitor(), currentTime(currentTime)
+	TimeParameter(const float currentTime) :
+		Parameter(), currentTime(currentTime)
     {
     }
 
-    virtual ~AnimationTime()
+    virtual ~TimeParameter()
     {
     }
 
@@ -71,17 +69,15 @@ public:
 
     //
 
-    virtual VkBool32 visit(Node& node)
+    virtual void visit(INode& node) const
     {
     	for (size_t i = 0; i < node.getAnimations().size(); i++)
     	{
     		node.getAnimations()[i]->setCurrentTime(currentTime);
     	}
-
-    	return VK_TRUE;
     }
 };
 
 } /* namespace vkts */
 
-#endif /* VKTS_ANIMATIONTIME_HPP_ */
+#endif /* VKTS_TIMEPARAMETER_HPP_ */

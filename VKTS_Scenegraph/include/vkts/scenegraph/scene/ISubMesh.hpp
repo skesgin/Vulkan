@@ -32,8 +32,6 @@
 namespace vkts
 {
 
-class Overwrite;
-
 class SceneVisitor;
 
 class ISubMesh: public IDestroyable, public ICloneable<ISubMesh>
@@ -143,16 +141,6 @@ public:
     virtual void setStrideInBytes(const uint32_t strideInBytes) = 0;
 
     virtual VkBool32 hasBones() const = 0;
-
-    virtual void updateDescriptorSetsRecursive(const std::string& nodeName, const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets) = 0;
-
-    virtual void bindIndexBuffer(const ICommandBuffersSP& cmdBuffer, const uint32_t bufferIndex = 0) const = 0;
-
-    virtual void bindVertexBuffers(const ICommandBuffersSP& cmdBuffer, const uint32_t bufferIndex = 0) const = 0;
-
-    virtual void drawIndexed(const ICommandBuffersSP& cmdBuffer, const uint32_t bufferIndex = 0) const = 0;
-
-    virtual void bindDrawIndexedRecursive(const std::string& nodeName, const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const Overwrite* renderOverwrite = nullptr, const uint32_t bufferIndex = 0) const = 0;
 
     virtual const Aabb& getAABB() const = 0;
 

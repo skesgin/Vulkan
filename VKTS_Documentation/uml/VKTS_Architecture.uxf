@@ -335,33 +335,22 @@ layer=-1</panel_attributes>
     <coordinates>
       <x>650</x>
       <y>90</y>
-      <w>210</w>
+      <w>170</w>
       <h>250</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;-</panel_attributes>
-    <additional_attributes>10.0;230.0;10.0;70.0;190.0;70.0;190.0;10.0</additional_attributes>
+    <additional_attributes>10.0;230.0;10.0;70.0;150.0;70.0;150.0;10.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
       <x>430</x>
       <y>90</y>
-      <w>410</w>
-      <h>390</h>
-    </coordinates>
-    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
-    <additional_attributes>10.0;370.0;10.0;350.0;50.0;350.0;50.0;50.0;390.0;50.0;390.0;10.0</additional_attributes>
-  </element>
-  <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>430</x>
-      <y>90</y>
-      <w>390</w>
+      <w>370</w>
       <h>250</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;-</panel_attributes>
-    <additional_attributes>10.0;230.0;10.0;30.0;370.0;30.0;370.0;10.0</additional_attributes>
+    <additional_attributes>10.0;230.0;10.0;30.0;350.0;30.0;350.0;10.0</additional_attributes>
   </element>
   <element>
     <id>UMLNote</id>

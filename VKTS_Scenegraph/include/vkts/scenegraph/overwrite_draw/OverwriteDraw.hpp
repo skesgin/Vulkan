@@ -32,74 +32,74 @@
 namespace vkts
 {
 
-class Overwrite
+class OverwriteDraw
 {
 
 private:
 
-	const Overwrite* nextOverwrite;
+	const OverwriteDraw* nextOverwrite;
 
 public:
 
-	Overwrite() :
+	OverwriteDraw() :
 		nextOverwrite(nullptr)
     {
     }
 
-	Overwrite(const Overwrite* nextOverwrite) :
+	OverwriteDraw(const OverwriteDraw* nextOverwrite) :
 		nextOverwrite(nextOverwrite)
     {
     }
 
-    virtual ~Overwrite()
+    virtual ~OverwriteDraw()
     {
     }
 
     //
 
-	const Overwrite* getNextOverwrite() const
+	const OverwriteDraw* getNextOverwrite() const
 	{
 		return nextOverwrite;
 	}
 
-	void setNextOverwrite(const Overwrite* nextOverwrite)
+	void setNextOverwrite(const OverwriteDraw* nextOverwrite)
 	{
 		this->nextOverwrite = nextOverwrite;
 	}
 
     //
 
-    virtual VkBool32 sceneBindDrawIndexedRecursive(const IScene& scene, const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const uint32_t bufferIndex, const uint32_t objectOffset, const uint32_t objectStep, const size_t objectLimit) const
+    virtual VkBool32 visit(const IScene& scene, const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const uint32_t bufferIndex, const uint32_t objectOffset, const uint32_t objectStep, const size_t objectLimit) const
     {
     	return VK_TRUE;
     }
 
-    virtual VkBool32 objectBindDrawIndexedRecursive(const IObject& object, const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const uint32_t bufferIndex) const
+    virtual VkBool32 visit(const IObject& object, const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const uint32_t bufferIndex) const
     {
     	return VK_TRUE;
     }
 
-    virtual VkBool32 nodeBindDrawIndexedRecursive(const INode& node, const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const uint32_t bufferIndex) const
+    virtual VkBool32 visit(const INode& node, const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const uint32_t bufferIndex) const
     {
     	return VK_TRUE;
     }
 
-    virtual VkBool32 meshBindDrawIndexedRecursive(const IMesh& mesh, const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const uint32_t bufferIndex) const
+    virtual VkBool32 visit(const IMesh& mesh, const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const uint32_t bufferIndex) const
     {
     	return VK_TRUE;
     }
 
-    virtual VkBool32 submeshBindDrawIndexedRecursive(const ISubMesh& subMesh, const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const uint32_t bufferIndex) const
+    virtual VkBool32 visit(const ISubMesh& subMesh, const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const uint32_t bufferIndex) const
     {
     	return VK_TRUE;
     }
 
-    virtual VkBool32 materialBindDrawIndexedRecursive(const IPhongMaterial& material, const ICommandBuffersSP& cmdBuffer, const IGraphicsPipelineSP& graphicsPipeline, const uint32_t bufferIndex) const
+    virtual VkBool32 visit(const IPhongMaterial& material, const ICommandBuffersSP& cmdBuffer, const IGraphicsPipelineSP& graphicsPipeline, const uint32_t bufferIndex) const
     {
     	return VK_TRUE;
     }
 
-    virtual VkBool32 materialBindDrawIndexedRecursive(const IBSDFMaterial& material, const ICommandBuffersSP& cmdBuffer, const IGraphicsPipelineSP& graphicsPipeline, const uint32_t bufferIndex) const
+    virtual VkBool32 visit(const IBSDFMaterial& material, const ICommandBuffersSP& cmdBuffer, const IGraphicsPipelineSP& graphicsPipeline, const uint32_t bufferIndex) const
     {
     	return VK_TRUE;
     }

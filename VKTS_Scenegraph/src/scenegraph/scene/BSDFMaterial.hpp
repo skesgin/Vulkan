@@ -34,8 +34,14 @@
 namespace vkts
 {
 
+class SceneVisitor;
+
 class BSDFMaterial : public IBSDFMaterial, Material
 {
+
+friend class Draw;
+friend class Parameter;
+friend class UpdateDescriptorSets;
 
 protected:
 
@@ -92,12 +98,6 @@ public:
     virtual IDescriptorSetsSP getDescriptorSets() const override;
 
     virtual void setDescriptorSets(const IDescriptorSetsSP& descriptorSets) override;
-
-    virtual void updateDescriptorSetsRecursive(const std::string& nodeName, const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets) override;
-
-    virtual void bindDescriptorSets(const std::string& nodeName, const ICommandBuffersSP& cmdBuffer, const VkPipelineLayout layout, const uint32_t bufferIndex = 0) const override;
-
-    virtual void bindDrawIndexedRecursive(const std::string& nodeName, const ICommandBuffersSP& cmdBuffer, const IGraphicsPipelineSP& graphicsPipeline, const Overwrite* renderOverwrite = nullptr, const uint32_t bufferIndex = 0) const override;
 
     //
 

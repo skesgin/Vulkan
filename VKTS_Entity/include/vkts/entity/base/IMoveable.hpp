@@ -102,7 +102,7 @@ public:
 
     void moveTranslateRotate(const float forwardFactor, const float strafeFactor, const float upFactor, const Quat& rotateZ, const Quat& rotateY, const Quat& rotateX);
 
-    virtual VkBool32 update(const double deltaTime, const uint64_t deltaTicks) override;
+    virtual VkBool32 update(const double deltaTime, const uint64_t deltaTicks, const double tickTime) override;
 
 };
 

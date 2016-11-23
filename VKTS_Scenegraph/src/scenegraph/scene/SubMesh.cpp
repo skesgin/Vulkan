@@ -297,18 +297,6 @@ VkBool32 SubMesh::hasBones() const
     return numberBonesOffset >= 0;
 }
 
-void SubMesh::updateDescriptorSetsRecursive(const std::string& nodeName, const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets)
-{
-    if (bsdfMaterial.get())
-    {
-    	bsdfMaterial->updateDescriptorSetsRecursive(nodeName, allWriteDescriptorSetsCount, allWriteDescriptorSets);
-    }
-    else if (phongMaterial.get())
-    {
-        phongMaterial->updateDescriptorSetsRecursive(nodeName, allWriteDescriptorSetsCount, allWriteDescriptorSets);
-    }
-}
-
 void SubMesh::bindIndexBuffer(const ICommandBuffersSP& cmdBuffer, const uint32_t bufferIndex) const
 {
     if (!indicesVertexBuffer.get())
@@ -361,61 +349,6 @@ void SubMesh::drawIndexed(const ICommandBuffersSP& cmdBuffer, const uint32_t buf
     }
 
     vkCmdDrawIndexed(cmdBuffer->getCommandBuffer(bufferIndex), getNumberIndices(), 1, 0, 0, 0);
-}
-
-void SubMesh::bindDrawIndexedRecursive(const std::string& nodeName, const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const Overwrite* renderOverwrite, const uint32_t bufferIndex) const
-{
-    const Overwrite* currentOverwrite = renderOverwrite;
-    while (currentOverwrite)
-    {
-    	if (!currentOverwrite->submeshBindDrawIndexedRecursive(*this, cmdBuffer, allGraphicsPipelines, bufferIndex))
-    	{
-    		return;
-    	}
-
-    	currentOverwrite = currentOverwrite->getNextOverwrite();
-    }
-
-    if (bsdfMaterial.get())
-    {
-    	// Pipeline is bound inside the material.
-    	bsdfMaterial->bindDrawIndexedRecursive(nodeName,cmdBuffer, graphicsPipeline, renderOverwrite, bufferIndex);
-    }
-    else if (phongMaterial.get())
-    {
-		IGraphicsPipelineSP graphicsPipeline;
-
-		for (size_t i = 0; i < allGraphicsPipelines.size(); i++)
-		{
-			if (allGraphicsPipelines[i]->getVertexBufferType() == vertexBufferType)
-			{
-				graphicsPipeline = allGraphicsPipelines[i];
-
-				break;
-			}
-		}
-
-		if (!graphicsPipeline.get())
-		{
-	        logPrint(VKTS_LOG_SEVERE, __FILE__, __LINE__, "Vertex buffer type not found %x", vertexBufferType);
-
-	        return;
-		}
-
-		vkCmdBindPipeline(cmdBuffer->getCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline->getPipeline());
-
-		phongMaterial->bindDrawIndexedRecursive(nodeName,cmdBuffer, graphicsPipeline, renderOverwrite, bufferIndex);
-    }
-    else
-    {
-        logPrint(VKTS_LOG_SEVERE, __FILE__, __LINE__, "No material");
-
-        return;
-    }
-
-    bindIndexBuffer(cmdBuffer, bufferIndex);
-    bindVertexBuffers(cmdBuffer, bufferIndex);
-    drawIndexed(cmdBuffer, bufferIndex);
 }
 
 const Aabb& SubMesh::getAABB() const

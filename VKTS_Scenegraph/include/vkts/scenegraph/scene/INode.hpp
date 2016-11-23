@@ -32,8 +32,6 @@
 namespace vkts
 {
 
-class Overwrite;
-
 class SceneVisitor;
 
 class INode: public ICloneable<INode>, public IDestroyable, public std::enable_shared_from_this<INode>
@@ -164,12 +162,6 @@ public:
 
     virtual void setJointsUniformBuffer(const int32_t joints, const IBufferObjectSP& jointsUniformBuffer) = 0;
 
-    virtual void updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets) = 0;
-
-    virtual void bindDrawIndexedRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const Overwrite* renderOverwrite = nullptr, const uint32_t bufferIndex = 0) const = 0;
-
-    virtual void updateRecursive(const IUpdateThreadContext& updateContext, const glm::mat4& parentTransformMatrix, const VkBool32 parentTransformMatrixDirty, const glm::mat4& parentBindMatrix, const VkBool32 parentBindMatrixDirty, const std::shared_ptr<INode>& armatureNode) = 0;
-
     virtual const Aabb& getAABB() const = 0;
 
     virtual Sphere getBoundingSphere() const = 0;
@@ -189,6 +181,8 @@ public:
 	virtual std::shared_ptr<INode> findNodeRecursive(const std::string& searchName) = 0;
 
 	virtual std::shared_ptr<INode> findNodeRecursiveFromRoot(const std::string& searchName) = 0;
+
+    virtual void updateTransformRecursive(const double deltaTime, const uint64_t deltaTicks, const double tickTime, const glm::mat4& parentTransformMatrix, const VkBool32 parentTransformMatrixDirty, const glm::mat4& parentBindMatrix, const VkBool32 parentBindMatrixDirty, const std::shared_ptr<INode>& armatureNode) = 0;
 
     //
 

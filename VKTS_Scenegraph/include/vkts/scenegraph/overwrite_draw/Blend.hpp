@@ -24,67 +24,55 @@
  * THE SOFTWARE.
  */
 
-#ifndef VKTS_CULL_HPP_
-#define VKTS_CULL_HPP_
+#ifndef VKTS_BLEND_HPP_
+#define VKTS_BLEND_HPP_
 
 #include <vkts/scenegraph.hpp>
 
 namespace vkts
 {
 
-class Cull : public Overwrite
+class Blend : public OverwriteDraw
 {
 
 private:
 
-	const Frustum* viewFrustum;
+	VkBool32 passTransparent;
 
 public:
 
-	Cull() :
-		Overwrite(), viewFrustum(nullptr)
+	Blend() :
+		OverwriteDraw(), passTransparent(VK_FALSE)
     {
     }
 
-	Cull(const Frustum* viewFrustum) :
-		Overwrite(), viewFrustum(viewFrustum)
+    virtual ~Blend()
     {
     }
 
-    virtual ~Cull()
+    virtual VkBool32 visit(const ISubMesh& subMesh, const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const uint32_t bufferIndex) const
     {
+    	VkBool32 transparent = VK_FALSE;
+
+        if (subMesh.getPhongMaterial().get())
+        {
+        	transparent = subMesh.getPhongMaterial()->isTransparent();
+        }
+
+    	return (transparent && passTransparent) || (!transparent && !passTransparent);
     }
 
-    //
-
-	const Frustum* getViewFrustum() const
+	VkBool32 getPassTransparent() const
 	{
-		return viewFrustum;
+		return passTransparent;
 	}
 
-	void setViewFrustum(const Frustum* viewFrustum)
+	void setPassTransparent(const VkBool32 passTransparent)
 	{
-		this->viewFrustum = viewFrustum;
+		this->passTransparent = passTransparent;
 	}
-
-    //
-
-    virtual VkBool32 objectBindDrawIndexedRecursive(const IObject& object, const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const uint32_t bufferIndex) const
-    {
-    	if (viewFrustum)
-    	{
-    		if (viewFrustum->isVisible(object.getRootNode()->getBoundingSphere()))
-    		{
-    			return VK_TRUE;
-    		}
-
-    		return VK_FALSE;
-    	}
-
-    	return VK_TRUE;
-    }
 };
 
 } /* namespace vkts */
 
-#endif /* VKTS_CULL_HPP_ */
+#endif /* VKTS_BLEND_HPP_ */

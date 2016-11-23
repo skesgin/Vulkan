@@ -119,36 +119,9 @@ void Object::setDirty()
     dirty = VK_TRUE;
 }
 
-void Object::updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets)
+void Object::updateTransformRecursive(const double deltaTime, const uint64_t deltaTicks, const double tickTime)
 {
-    if (rootNode.get())
-    {
-        rootNode->updateDescriptorSetsRecursive(allWriteDescriptorSetsCount, allWriteDescriptorSets);
-    }
-}
-
-void Object::bindDrawIndexedRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const Overwrite* renderOverwrite, const uint32_t bufferIndex) const
-{
-    const Overwrite* currentOverwrite = renderOverwrite;
-    while (currentOverwrite)
-    {
-    	if (!currentOverwrite->objectBindDrawIndexedRecursive(*this, cmdBuffer, allGraphicsPipelines, bufferIndex))
-    	{
-    		return;
-    	}
-
-    	currentOverwrite = currentOverwrite->getNextOverwrite();
-    }
-
-    if (rootNode.get())
-    {
-        rootNode->bindDrawIndexedRecursive(cmdBuffer, allGraphicsPipelines, renderOverwrite, bufferIndex);
-    }
-}
-
-void Object::updateRecursive(const IUpdateThreadContext& updateContext)
-{
-	if (!IMoveable::update(updateContext.getDeltaTime(), updateContext.getDeltaTicks()))
+	if (!IMoveable::update(deltaTime, deltaTicks, tickTime))
 	{
 		return;
 	}
@@ -160,7 +133,7 @@ void Object::updateRecursive(const IUpdateThreadContext& updateContext)
 
     if (rootNode.get())
     {
-        rootNode->updateRecursive(updateContext, transformMatrix, dirty, glm::mat4(1.0f), VK_FALSE, INodeSP());
+        rootNode->updateTransformRecursive(deltaTime, deltaTicks, tickTime, transformMatrix, dirty, glm::mat4(1.0f), VK_FALSE, INodeSP());
     }
 
     dirty = VK_FALSE;

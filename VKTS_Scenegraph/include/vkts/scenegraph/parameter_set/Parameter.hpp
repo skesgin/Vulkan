@@ -24,57 +24,35 @@
  * THE SOFTWARE.
  */
 
-#ifndef VKTS_DISPLACE_HPP_
-#define VKTS_DISPLACE_HPP_
+#ifndef VKTS_PARAMETER_HPP_
+#define VKTS_PARAMETER_HPP_
 
 #include <vkts/scenegraph.hpp>
 
 namespace vkts
 {
 
-class Displace : public Overwrite
+class Parameter
 {
 
 public:
 
-	Displace() :
-		Overwrite()
+	Parameter()
     {
     }
 
-    virtual ~Displace()
+    virtual ~Parameter()
     {
     }
 
-    virtual VkBool32 meshBindDrawIndexedRecursive(const IMesh& mesh, const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const uint32_t bufferIndex) const
+    //
+
+    virtual void visit(INode& node) const
     {
-    	IGraphicsPipelineSP graphicsPipeline;
-
-    	for (size_t i = 0; i < allGraphicsPipelines.size(); i++)
-    	{
-    		if (allGraphicsPipelines[i]->getTessellationState())
-    		{
-    			graphicsPipeline = allGraphicsPipelines[i];
-
-    			break;
-    		}
-    	}
-
-    	if (!graphicsPipeline.get())
-    	{
-            logPrint(VKTS_LOG_WARNING, __FILE__, __LINE__, "No tessellation state found");
-
-            return VK_FALSE;
-    	}
-
-    	const auto& displace = mesh.getDisplace();
-
-    	vkCmdPushConstants(cmdBuffer->getCommandBuffer(bufferIndex), graphicsPipeline->getLayout(), VK_SHADER_STAGE_GEOMETRY_BIT, 0, sizeof(float) * 2, glm::value_ptr(displace));
-
-    	return VK_TRUE;
+    	// Do nothing.
     }
 };
 
 } /* namespace vkts */
 
-#endif /* VKTS_DISPLACE_HPP_ */
+#endif /* VKTS_PARAMETER_HPP_ */
