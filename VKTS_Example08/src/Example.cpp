@@ -58,7 +58,7 @@ vkts::IImageDataSP Example::gatherImageData() const
 		vkts::IImageSP stageImage;
 		vkts::IDeviceMemorySP stageDeviceMemory;
 
-		if (!createTexture(stageImage, stageDeviceMemory, VK_IMAGE_TILING_LINEAR, VK_IMAGE_USAGE_TRANSFER_DST_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, 0))
+		if (!createTexture(stageImage, stageDeviceMemory, VK_IMAGE_TILING_LINEAR, VK_IMAGE_USAGE_TRANSFER_DST_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, 0))
 		{
 			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create stage image and device memory.");
 
@@ -154,7 +154,7 @@ vkts::IImageDataSP Example::gatherImageData() const
 
 		//
 
-		result = stageDeviceMemory->mapMemory(0, stageDeviceMemory->getAllocationSize(), 0);
+		result = stageDeviceMemory->mapMemory(0, VK_WHOLE_SIZE, 0);
 
 		if (result != VK_SUCCESS)
 		{
@@ -167,7 +167,7 @@ vkts::IImageDataSP Example::gatherImageData() const
 
 		if (!(stageDeviceMemory->getMemoryPropertyFlags() & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT))
 		{
-			result = stageDeviceMemory->invalidateMappedMemoryRanges(0, stageDeviceMemory->getAllocationSize());
+			result = stageDeviceMemory->invalidateMappedMemoryRanges(0, VK_WHOLE_SIZE);
 
 			if (result != VK_SUCCESS)
 			{
@@ -198,7 +198,7 @@ vkts::IImageDataSP Example::gatherImageData() const
         bufferCreateInfo.queueFamilyIndexCount = 0;
         bufferCreateInfo.pQueueFamilyIndices = nullptr;
 
-        if (!createBuffer(stageBuffer, stageDeviceMemory, bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT))
+        if (!createBuffer(stageBuffer, stageDeviceMemory, bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT))
         {
     		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create buffer.");
 
@@ -285,7 +285,7 @@ vkts::IImageDataSP Example::gatherImageData() const
 		subresourceLayout.arrayPitch = VKTS_IMAGE_LENGTH * VKTS_IMAGE_LENGTH * 4 * sizeof(uint8_t);
 		subresourceLayout.depthPitch = VKTS_IMAGE_LENGTH * VKTS_IMAGE_LENGTH * 4 * sizeof(uint8_t);
 
-		result = stageDeviceMemory->mapMemory(subresourceLayout.offset, subresourceLayout.size, 0);
+		result = stageDeviceMemory->mapMemory(0, VK_WHOLE_SIZE, 0);
 
 		if (result != VK_SUCCESS)
 		{
@@ -298,7 +298,7 @@ vkts::IImageDataSP Example::gatherImageData() const
 
 		if (!(stageDeviceMemory->getMemoryPropertyFlags() & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT))
 		{
-			result = stageDeviceMemory->invalidateMappedMemoryRanges(0, stageDeviceMemory->getAllocationSize());
+			result = stageDeviceMemory->invalidateMappedMemoryRanges(0, VK_WHOLE_SIZE);
 
 			if (result != VK_SUCCESS)
 			{

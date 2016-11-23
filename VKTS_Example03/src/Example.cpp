@@ -95,7 +95,7 @@ VkBool32 Example::createTexture(vkts::IImageSP& currentImage, vkts::IDeviceMemor
 
 		currentImage->getImageSubresourceLayout(subresourceLayout, imageSubresource);
 
-		result = currentDeviceMemoryImage->mapMemory(0, currentDeviceMemoryImage->getAllocationSize(), 0);
+		result = currentDeviceMemoryImage->mapMemory(0, VK_WHOLE_SIZE, 0);
 
 		if (result != VK_SUCCESS)
 		{
@@ -108,7 +108,7 @@ VkBool32 Example::createTexture(vkts::IImageSP& currentImage, vkts::IDeviceMemor
 
 		if (!(currentDeviceMemoryImage->getMemoryPropertyFlags() & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT))
 		{
-			result = currentDeviceMemoryImage->flushMappedMemoryRanges(0, currentDeviceMemoryImage->getAllocationSize());
+			result = currentDeviceMemoryImage->flushMappedMemoryRanges(0, VK_WHOLE_SIZE);
 
 			if (result != VK_SUCCESS)
 			{
@@ -315,7 +315,7 @@ VkBool32 Example::buildTexture(const vkts::ICommandBuffersSP& cmdBuffer, vkts::I
 	vkGetPhysicalDeviceFormatProperties(physicalDevice->getPhysicalDevice(), imageData->getFormat(), &formatProperties);
 
 	VkImageTiling imageTiling = VK_IMAGE_TILING_LINEAR;
-	VkMemoryPropertyFlagBits memoryPropertyFlagBits = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
+	VkMemoryPropertyFlags memoryPropertyFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
 	VkImageLayout initialLayout = VK_IMAGE_LAYOUT_PREINITIALIZED;
 	VkAccessFlags accessMask = VK_ACCESS_HOST_WRITE_BIT;
 
@@ -330,14 +330,14 @@ VkBool32 Example::buildTexture(const vkts::ICommandBuffersSP& cmdBuffer, vkts::I
 		}
 
 		imageTiling = VK_IMAGE_TILING_OPTIMAL;
-		memoryPropertyFlagBits = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+		memoryPropertyFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 		initialLayout = VK_IMAGE_LAYOUT_GENERAL;
 		accessMask = 0;
 	}
 
 	//
 
-	if (!createTexture(image, deviceMemoryImage, imageData, imageTiling, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, initialLayout, memoryPropertyFlagBits, accessMask))
+	if (!createTexture(image, deviceMemoryImage, imageData, imageTiling, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, initialLayout, memoryPropertyFlags, accessMask))
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create image.");
 
@@ -370,10 +370,10 @@ VkBool32 Example::buildTexture(const vkts::ICommandBuffersSP& cmdBuffer, vkts::I
 	//
 
 	// If the image is only accessible by the device ...
-	if (memoryPropertyFlagBits == VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)
+	if (memoryPropertyFlags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)
 	{
 		// ... create texture with host visibility. This texture contains the pixel data.
-		if (!createTexture(stageImage, stageDeviceMemoryImage, imageData, VK_IMAGE_TILING_LINEAR, VK_IMAGE_USAGE_TRANSFER_SRC_BIT, VK_IMAGE_LAYOUT_PREINITIALIZED, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, VK_ACCESS_HOST_WRITE_BIT))
+		if (!createTexture(stageImage, stageDeviceMemoryImage, imageData, VK_IMAGE_TILING_LINEAR, VK_IMAGE_USAGE_TRANSFER_SRC_BIT, VK_IMAGE_LAYOUT_PREINITIALIZED, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, VK_ACCESS_HOST_WRITE_BIT))
 		{
 			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create image.");
 
@@ -858,7 +858,7 @@ VkBool32 Example::buildVertexBuffer()
 
 	physicalDevice->getPhysicalDeviceMemoryProperties(physicalDeviceMemoryProperties);
 
-	deviceMemoryVertexBuffer = vkts::deviceMemoryCreate(device->getDevice(), memoryRequirements, VK_MAX_MEMORY_TYPES, physicalDeviceMemoryProperties.memoryTypes, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+	deviceMemoryVertexBuffer = vkts::deviceMemoryCreate(device->getDevice(), memoryRequirements, VK_MAX_MEMORY_TYPES, physicalDeviceMemoryProperties.memoryTypes, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
 	if (!deviceMemoryVertexBuffer.get())
 	{

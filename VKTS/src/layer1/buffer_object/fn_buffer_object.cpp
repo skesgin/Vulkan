@@ -111,7 +111,7 @@ IBufferObjectSP VKTS_APIENTRY bufferObjectCreate(IBufferSP& stageBuffer, IDevice
     }
     else
     {
-        if (!bufferObjectPrepare(stageBuffer, stageDeviceMemory, initialResources, bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT))
+        if (!bufferObjectPrepare(stageBuffer, stageDeviceMemory, initialResources, bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT))
         {
             logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create vertex buffer.");
 

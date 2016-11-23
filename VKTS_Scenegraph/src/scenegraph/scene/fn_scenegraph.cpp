@@ -4474,7 +4474,7 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
                 bufferCreateInfo.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
                 bufferCreateInfo.flags = 0;
 
-                auto jointsUniformBuffer = bufferObjectCreate(context->getContextObject(), bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+                auto jointsUniformBuffer = bufferObjectCreate(context->getContextObject(), bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
                 if (!jointsUniformBuffer.get())
                 {
@@ -4563,7 +4563,7 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
                 bufferCreateInfo.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
                 bufferCreateInfo.flags = 0;
 
-                auto transformUniformBuffer = bufferObjectCreate(context->getContextObject(), bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+                auto transformUniformBuffer = bufferObjectCreate(context->getContextObject(), bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
                 if (!transformUniformBuffer.get())
                 {

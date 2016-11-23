@@ -148,7 +148,7 @@ VkBool32 PhysicalDevice::getGetImageTilingAndMemoryProperty(VkImageTiling& image
                 break;
             case 1:
                 imageTiling = VK_IMAGE_TILING_LINEAR;
-                memoryPropertyFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
+                memoryPropertyFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
                 break;
         }
 

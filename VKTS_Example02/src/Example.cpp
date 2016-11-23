@@ -537,7 +537,7 @@ VkBool32 Example::buildVertexBuffer()
 	VkPhysicalDeviceMemoryProperties physicalDeviceMemoryProperties;
 	physicalDevice->getPhysicalDeviceMemoryProperties(physicalDeviceMemoryProperties);
 
-	if (!vkts::commonGetMemoryTypeIndex(VK_MAX_MEMORY_TYPES, physicalDeviceMemoryProperties.memoryTypes, memoryRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, memoryAllocInfo.memoryTypeIndex))
+	if (!vkts::commonGetMemoryTypeIndex(VK_MAX_MEMORY_TYPES, physicalDeviceMemoryProperties.memoryTypes, memoryRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, memoryAllocInfo.memoryTypeIndex))
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not get memory type index.");
 

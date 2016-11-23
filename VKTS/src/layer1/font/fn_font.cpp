@@ -540,7 +540,7 @@ IFontSP VKTS_APIENTRY fontCreate(const char* filename, const IInitialResourcesSP
     IDeviceMemorySP stageDeviceMemory;
     IBufferSP stageBuffer;
 
-    auto vertexBuffer = bufferObjectCreate(stageBuffer, stageDeviceMemory, initialResources, commandBuffer, binaryBuffer, bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+    auto vertexBuffer = bufferObjectCreate(stageBuffer, stageDeviceMemory, initialResources, commandBuffer, binaryBuffer, bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
     if (stageDeviceMemory.get())
     {

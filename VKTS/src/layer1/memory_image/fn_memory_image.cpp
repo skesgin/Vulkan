@@ -42,7 +42,7 @@ static VkBool32 memoryImageUpload(const IDeviceMemorySP& deviceMemory, const IIm
 
     if (deviceMemory->getMemoryPropertyFlags() & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)
     {
-        result = deviceMemory->mapMemory(0, deviceMemory->getAllocationSize(), 0);
+        result = deviceMemory->mapMemory(0, VK_WHOLE_SIZE, 0);
 
         if (result != VK_SUCCESS)
         {
@@ -55,7 +55,7 @@ static VkBool32 memoryImageUpload(const IDeviceMemorySP& deviceMemory, const IIm
 
 		if (!(deviceMemory->getMemoryPropertyFlags() & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT))
 		{
-			result = deviceMemory->flushMappedMemoryRanges(0, deviceMemory->getAllocationSize());
+			result = deviceMemory->flushMappedMemoryRanges(0, VK_WHOLE_SIZE);
 
 			if (result != VK_SUCCESS)
 			{
@@ -244,7 +244,7 @@ IMemoryImageSP VKTS_APIENTRY memoryImageCreate(IImageSP& stageImage, IBufferSP& 
             stageImageCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
             stageImageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_PREINITIALIZED;
 
-            if (!memoryImagePrepare(stageImage, stageDeviceMemory, initialResources, cmdBuffer, stageImageCreateInfo, VK_ACCESS_HOST_WRITE_BIT, VK_ACCESS_TRANSFER_READ_BIT, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, subresourceRange, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT))
+            if (!memoryImagePrepare(stageImage, stageDeviceMemory, initialResources, cmdBuffer, stageImageCreateInfo, VK_ACCESS_HOST_WRITE_BIT, VK_ACCESS_TRANSFER_READ_BIT, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, subresourceRange, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT))
             {
                 logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not prepare staging image.");
 
@@ -295,7 +295,7 @@ IMemoryImageSP VKTS_APIENTRY memoryImageCreate(IImageSP& stageImage, IBufferSP& 
             bufferCreateInfo.queueFamilyIndexCount = 0;
             bufferCreateInfo.pQueueFamilyIndices = nullptr;
 
-            if (!memoryImagePrepare(stageBuffer, stageDeviceMemory, initialResources, bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT))
+            if (!memoryImagePrepare(stageBuffer, stageDeviceMemory, initialResources, bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT))
             {
                 logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not prepare staging buffer.");
 

@@ -5,9 +5,9 @@ Authors:
 
 **Norbert Nopper** (norbert@nopper.tv)
 
-VKTS version: **0.9.30**
+VKTS version: **0.9.33**
 
-Depending Vulkan API header version: **1.0.30**
+Depending Vulkan API header version: **1.0.33**
 
 Depending Vulkan extensions, when using a window system:
 
@@ -91,6 +91,9 @@ How to build:
 
 Changelog:
 ----------
+
+11/23/2016
+- Updated to LuanrG SDK 1.0.33.0.
 
 11/22/2016
 - Updated documentation.

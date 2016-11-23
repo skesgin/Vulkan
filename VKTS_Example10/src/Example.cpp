@@ -618,7 +618,7 @@ VkBool32 Example::buildScene(const vkts::ICommandBuffersSP& cmdBuffer)
 	    vkts::IDeviceMemorySP stageDeviceMemory;
 	    vkts::IBufferSP stageBuffer;
 
-	    screenPlaneVertexBuffer = vkts::bufferObjectCreate(stageBuffer, stageDeviceMemory, initialResources, cmdBuffer, vertexBinaryBuffer, bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+	    screenPlaneVertexBuffer = vkts::bufferObjectCreate(stageBuffer, stageDeviceMemory, initialResources, cmdBuffer, vertexBinaryBuffer, bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
 	    // Using this scene context to manage the staging objects.
 	    environmentSceneContext->addStageBuffer(stageBuffer);
@@ -1315,7 +1315,7 @@ VkBool32 Example::buildUniformBuffers()
 	bufferCreateInfo.pQueueFamilyIndices = nullptr;
 
 
-	vertexViewProjectionUniformBuffer = vkts::bufferObjectCreate(initialResources, bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+	vertexViewProjectionUniformBuffer = vkts::bufferObjectCreate(initialResources, bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
 	if (!vertexViewProjectionUniformBuffer.get())
 	{
@@ -1324,7 +1324,7 @@ VkBool32 Example::buildUniformBuffers()
 		return VK_FALSE;
 	}
 
-	environmentVertexViewProjectionUniformBuffer = vkts::bufferObjectCreate(initialResources, bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+	environmentVertexViewProjectionUniformBuffer = vkts::bufferObjectCreate(initialResources, bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
 	if (!environmentVertexViewProjectionUniformBuffer.get())
 	{
@@ -1336,7 +1336,7 @@ VkBool32 Example::buildUniformBuffers()
 
 	bufferCreateInfo.size = vkts::commonGetDeviceSize(VKTS_MAX_LIGHTS * 4 * sizeof(float) * 2 + sizeof(int32_t), 16);
 
-	resolveFragmentLightsUniformBuffer = vkts::bufferObjectCreate(initialResources, bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+	resolveFragmentLightsUniformBuffer = vkts::bufferObjectCreate(initialResources, bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
 	if (!resolveFragmentLightsUniformBuffer.get())
 	{
@@ -1348,7 +1348,7 @@ VkBool32 Example::buildUniformBuffers()
 
 	bufferCreateInfo.size = vkts::commonGetDeviceSize(16 * sizeof(float) * 2, 16);
 
-	resolveFragmentMatricesUniformBuffer = vkts::bufferObjectCreate(initialResources, bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+	resolveFragmentMatricesUniformBuffer = vkts::bufferObjectCreate(initialResources, bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
 	if (!resolveFragmentMatricesUniformBuffer.get())
 	{
