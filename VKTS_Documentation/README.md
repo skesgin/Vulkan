@@ -100,7 +100,7 @@ Append the following lines to your `.profile` file in your home directory:
 `# Vulkan development setup.`  
 `#`  
   
-`export VULKAN_SDK=~/Development/VulkanSDK/1.0.30.0/x86_64`  
+`export VULKAN_SDK=~/Development/VulkanSDK/1.0.33.0/x86_64`  
   
 `export PATH=$PATH:$VULKAN_SDK/bin`  
 `export LD_LIBRARY_PATH=$VULKAN_SDK/lib`  
