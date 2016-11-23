@@ -24,7 +24,7 @@
  * THE SOFTWARE.
  */
 
-#include "../scene/Camera.hpp"
+#include "Camera.hpp"
 
 namespace vkts
 {

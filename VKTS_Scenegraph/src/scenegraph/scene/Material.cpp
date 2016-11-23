@@ -24,7 +24,7 @@
  * THE SOFTWARE.
  */
 
-#include "../scene/Material.hpp"
+#include "Material.hpp"
 
 namespace vkts
 {

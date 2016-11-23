@@ -24,7 +24,7 @@
  * THE SOFTWARE.
  */
 
-#include "../scene/Animation.hpp"
+#include "Animation.hpp"
 
 namespace vkts
 {

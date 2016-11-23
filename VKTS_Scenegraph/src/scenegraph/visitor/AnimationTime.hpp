@@ -24,60 +24,64 @@
  * THE SOFTWARE.
  */
 
-#ifndef VKTS_IOBJECT_HPP_
-#define VKTS_IOBJECT_HPP_
+#ifndef VKTS_ANIMATIONTIME_HPP_
+#define VKTS_ANIMATIONTIME_HPP_
 
 #include <vkts/scenegraph.hpp>
+
+#include "SceneVisitor.hpp"
 
 namespace vkts
 {
 
-class Overwrite;
-
-class SceneVisitor;
-
-class IObject: public ICloneable<IObject>, public IDestroyable, public IMoveable
+class AnimationTime : public SceneVisitor
 {
+
+private:
+
+	float currentTime;
 
 public:
 
-    IObject() :
-        ICloneable<IObject>(), IDestroyable(), IMoveable()
+	AnimationTime() :
+		SceneVisitor(), currentTime(0.0f)
     {
     }
 
-    virtual ~IObject()
+	AnimationTime(const float currentTime) :
+		SceneVisitor(), currentTime(currentTime)
     {
     }
 
-    virtual const std::string& getName() const = 0;
-
-    virtual void setName(const std::string& name) = 0;
-
-    virtual const glm::vec3& getScale() const = 0;
-
-    virtual void setScale(const glm::vec3& scale) = 0;
-
-    virtual const INodeSP& getRootNode() const = 0;
-
-    virtual void setRootNode(const INodeSP& rootNode) = 0;
-
-    virtual void setDirty() = 0;
-
-    virtual void updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets) = 0;
-
-    virtual void bindDrawIndexedRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const Overwrite* renderOverwrite = nullptr, const uint32_t bufferIndex = 0) const = 0;
-
-    virtual void updateRecursive(const IUpdateThreadContext& updateContext) = 0;
+    virtual ~AnimationTime()
+    {
+    }
 
     //
 
-    virtual void visitRecursive(SceneVisitor* sceneVisitor) = 0;
+	float getCurrentTime() const
+	{
+		return currentTime;
+	}
 
+	void setCurrentTime(const float currentTime)
+	{
+		this->currentTime = currentTime;
+	}
+
+    //
+
+    virtual VkBool32 visit(Node& node)
+    {
+    	for (size_t i = 0; i < node.getAnimations().size(); i++)
+    	{
+    		node.getAnimations()[i]->setCurrentTime(currentTime);
+    	}
+
+    	return VK_TRUE;
+    }
 };
-
-typedef std::shared_ptr<IObject> IObjectSP;
 
 } /* namespace vkts */
 
-#endif /* VKTS_IOBJECT_HPP_ */
+#endif /* VKTS_ANIMATIONTIME_HPP_ */

@@ -129,14 +129,6 @@ typedef enum VkTsInterpolator_
 #include <vkts/scenegraph/overwrite/Displace.hpp>
 
 /**
- * Parameter updater.
- */
-
-#include <vkts/scenegraph/update/Parameter.hpp>
-
-#include <vkts/scenegraph/update/TimeParameter.hpp>
-
-/**
  * Interpolator.
  */
 

@@ -200,6 +200,10 @@ public:
     virtual const Aabb& getAABB() const override;
 
     //
+
+    virtual void visitRecursive(SceneVisitor* sceneVisitor) override;
+
+    //
     // ICloneable
     //
 

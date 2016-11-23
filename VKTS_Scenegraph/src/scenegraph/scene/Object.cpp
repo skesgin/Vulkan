@@ -24,9 +24,10 @@
  * THE SOFTWARE.
  */
 
-#include "../scene/Object.hpp"
+#include "Object.hpp"
 
-#include "../scene/Node.hpp"
+#include "Node.hpp"
+#include "../visitor/SceneVisitor.hpp"
 
 namespace vkts
 {
@@ -163,6 +164,26 @@ void Object::updateRecursive(const IUpdateThreadContext& updateContext)
     }
 
     dirty = VK_FALSE;
+}
+
+void Object::visitRecursive(SceneVisitor* sceneVisitor)
+{
+	SceneVisitor* currentSceneVisitor = sceneVisitor;
+
+	while (currentSceneVisitor)
+	{
+		if (!currentSceneVisitor->visit(*this))
+		{
+			return;
+		}
+
+		currentSceneVisitor = currentSceneVisitor->getNextSceneVisitor();
+	}
+
+    if (rootNode.get())
+    {
+        rootNode->visitRecursive(sceneVisitor);
+    }
 }
 
 //

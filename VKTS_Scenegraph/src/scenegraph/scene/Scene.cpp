@@ -24,9 +24,10 @@
  * THE SOFTWARE.
  */
 
-#include "../scene/Scene.hpp"
+#include "Scene.hpp"
 
-#include "../scene/Object.hpp"
+#include "Object.hpp"
+#include "../visitor/SceneVisitor.hpp"
 
 namespace vkts
 {
@@ -329,6 +330,33 @@ void Scene::updateRecursive(const IUpdateThreadContext& updateContext, const uin
     for (size_t i = (size_t) objectOffset; i < glm::min(allObjects.size(), objectLimit); i += (size_t) objectStep)
     {
         allObjects[i]->updateRecursive(updateContext);
+    }
+}
+
+void Scene::visitRecursive(SceneVisitor* sceneVisitor, const uint32_t objectOffset, const uint32_t objectStep, const size_t objectLimit)
+{
+	SceneVisitor* currentSceneVisitor = sceneVisitor;
+
+	while (currentSceneVisitor)
+	{
+		if (!currentSceneVisitor->visit(*this, objectOffset, objectStep, objectLimit))
+		{
+			return;
+		}
+
+		currentSceneVisitor = currentSceneVisitor->getNextSceneVisitor();
+	}
+
+	//
+
+    if (objectStep == 0)
+    {
+        return;
+    }
+
+    for (size_t i = (size_t) objectOffset; i < glm::min(allObjects.size(), objectLimit); i += (size_t) objectStep)
+    {
+        allObjects[i]->visitRecursive(sceneVisitor);
     }
 }
 

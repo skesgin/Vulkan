@@ -34,6 +34,8 @@ namespace vkts
 
 class Overwrite;
 
+class SceneVisitor;
+
 class IMesh: public ICloneable<IMesh>, public IDestroyable
 {
 
@@ -71,6 +73,10 @@ public:
     virtual void setAABB(const Aabb& box) = 0;
 
     virtual const Aabb& getAABB() const = 0;
+
+    //
+
+    virtual void visitRecursive(SceneVisitor* sceneVisitor) = 0;
 
 };
 

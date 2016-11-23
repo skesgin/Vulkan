@@ -24,7 +24,8 @@
  * THE SOFTWARE.
  */
 
-#include "../scene/SubMesh.hpp"
+#include "SubMesh.hpp"
+#include "../visitor/SceneVisitor.hpp"
 
 namespace vkts
 {
@@ -420,6 +421,31 @@ void SubMesh::bindDrawIndexedRecursive(const std::string& nodeName, const IComma
 const Aabb& SubMesh::getAABB() const
 {
 	return box;
+}
+
+void SubMesh::visitRecursive(SceneVisitor* sceneVisitor)
+{
+	SceneVisitor* currentSceneVisitor = sceneVisitor;
+
+	while (currentSceneVisitor)
+	{
+		if (!currentSceneVisitor->visit(*this))
+		{
+			return;
+		}
+
+		currentSceneVisitor = currentSceneVisitor->getNextSceneVisitor();
+	}
+
+    if (bsdfMaterial.get())
+    {
+    	bsdfMaterial->visitRecursive(sceneVisitor);
+    }
+
+    if (phongMaterial.get())
+    {
+        phongMaterial->visitRecursive(sceneVisitor);
+    }
 }
 
 //

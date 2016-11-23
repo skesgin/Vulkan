@@ -24,7 +24,8 @@
  * THE SOFTWARE.
  */
 
-#include "../scene/Mesh.hpp"
+#include "Mesh.hpp"
+#include "../visitor/SceneVisitor.hpp"
 
 namespace vkts
 {
@@ -144,6 +145,27 @@ void Mesh::setAABB(const Aabb& box)
 const Aabb& Mesh::getAABB() const
 {
 	return box;
+}
+
+
+void Mesh::visitRecursive(SceneVisitor* sceneVisitor)
+{
+	SceneVisitor* currentSceneVisitor = sceneVisitor;
+
+	while (currentSceneVisitor)
+	{
+		if (!currentSceneVisitor->visit(*this))
+		{
+			return;
+		}
+
+		currentSceneVisitor = currentSceneVisitor->getNextSceneVisitor();
+	}
+
+    for (size_t i = 0; i < allSubMeshes.size(); i++)
+    {
+        allSubMeshes[i]->visitRecursive(sceneVisitor);
+    }
 }
 
 //

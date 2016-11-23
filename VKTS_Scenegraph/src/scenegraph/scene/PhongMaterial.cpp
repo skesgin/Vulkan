@@ -24,7 +24,8 @@
  * THE SOFTWARE.
  */
 
-#include "../scene/PhongMaterial.hpp"
+#include "PhongMaterial.hpp"
+#include "../visitor/SceneVisitor.hpp"
 
 namespace vkts
 {
@@ -409,6 +410,21 @@ void PhongMaterial::bindDrawIndexedRecursive(const std::string& nodeName, const 
     }
 
     bindDescriptorSets(nodeName, cmdBuffer, graphicsPipeline->getLayout(), bufferIndex);
+}
+
+void PhongMaterial::visitRecursive(SceneVisitor* sceneVisitor)
+{
+	SceneVisitor* currentSceneVisitor = sceneVisitor;
+
+	while (currentSceneVisitor)
+	{
+		if (!currentSceneVisitor->visit(*this))
+		{
+			return;
+		}
+
+		currentSceneVisitor = currentSceneVisitor->getNextSceneVisitor();
+	}
 }
 
 //

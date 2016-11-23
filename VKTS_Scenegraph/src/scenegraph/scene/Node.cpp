@@ -24,10 +24,11 @@
  * THE SOFTWARE.
  */
 
-#include "../scene/Node.hpp"
+#include "Node.hpp"
 
-#include "../scene/Animation.hpp"
-#include "../scene/Mesh.hpp"
+#include "Animation.hpp"
+#include "Mesh.hpp"
+#include "../visitor/SceneVisitor.hpp"
 
 namespace vkts
 {
@@ -673,23 +674,6 @@ void Node::setJointsUniformBuffer(const int32_t joints, const IBufferObjectSP& j
     this->bindMatrixDirty = VK_TRUE;
 }
 
-void Node::setNodeParameterRecursive(const Parameter* p)
-{
-	if (!p)
-	{
-		return;
-	}
-	else
-	{
-		p->setNodeParameter(*this);
-	}
-
-    for (size_t i = 0; i < allChildNodes.size(); i++)
-    {
-        allChildNodes[i]->setNodeParameterRecursive(p);
-    }
-}
-
 void Node::updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets)
 {
 	for (uint32_t i = 0; i < allWriteDescriptorSetsCount; i++)
@@ -1096,6 +1080,32 @@ INodeSP Node::findNodeRecursiveFromRoot(const std::string& searchName)
 
 	// Now, search complete tree.
 	return findNodeRecursive(searchName);
+}
+
+
+void Node::visitRecursive(SceneVisitor* sceneVisitor)
+{
+	SceneVisitor* currentSceneVisitor = sceneVisitor;
+
+	while (currentSceneVisitor)
+	{
+		if (!currentSceneVisitor->visit(*this))
+		{
+			return;
+		}
+
+		currentSceneVisitor = currentSceneVisitor->getNextSceneVisitor();
+	}
+
+	for (size_t i = 0; i < allMeshes.size(); i++)
+	{
+		allMeshes[i]->visitRecursive(sceneVisitor);
+	}
+
+	for (size_t i = 0; i < allChildNodes.size(); i++)
+	{
+		allChildNodes[i]->visitRecursive(sceneVisitor);
+	}
 }
 
 //

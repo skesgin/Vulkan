@@ -34,7 +34,7 @@ namespace vkts
 
 class Overwrite;
 
-class Parameter;
+class SceneVisitor;
 
 class INode: public ICloneable<INode>, public IDestroyable, public std::enable_shared_from_this<INode>
 {
@@ -164,8 +164,6 @@ public:
 
     virtual void setJointsUniformBuffer(const int32_t joints, const IBufferObjectSP& jointsUniformBuffer) = 0;
 
-    virtual void setNodeParameterRecursive(const Parameter* p) = 0;
-
     virtual void updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets) = 0;
 
     virtual void bindDrawIndexedRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const Overwrite* renderOverwrite = nullptr, const uint32_t bufferIndex = 0) const = 0;
@@ -191,6 +189,10 @@ public:
 	virtual std::shared_ptr<INode> findNodeRecursive(const std::string& searchName) = 0;
 
 	virtual std::shared_ptr<INode> findNodeRecursiveFromRoot(const std::string& searchName) = 0;
+
+    //
+
+    virtual void visitRecursive(SceneVisitor* sceneVisitor) = 0;
 
 };
 

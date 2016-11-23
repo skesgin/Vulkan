@@ -24,7 +24,8 @@
  * THE SOFTWARE.
  */
 
-#include "../scene/ParticleSystem.hpp"
+#include "ParticleSystem.hpp"
+#include "../visitor/SceneVisitor.hpp"
 
 namespace vkts
 {
@@ -225,6 +226,21 @@ void ParticleSystem::setRenderObject(const IObjectSP& object)
 	else
 	{
 		renderObjectName = "";
+	}
+}
+
+void ParticleSystem::visitRecursive(SceneVisitor* sceneVisitor)
+{
+	SceneVisitor* currentSceneVisitor = sceneVisitor;
+
+	while (currentSceneVisitor)
+	{
+		if (!currentSceneVisitor->visit(*this))
+		{
+			return;
+		}
+
+		currentSceneVisitor = currentSceneVisitor->getNextSceneVisitor();
 	}
 }
 

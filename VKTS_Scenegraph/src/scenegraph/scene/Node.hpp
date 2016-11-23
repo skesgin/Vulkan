@@ -224,8 +224,6 @@ public:
 
     virtual void setJointsUniformBuffer(const int32_t joints, const IBufferObjectSP& jointsUniformBuffer) override;
 
-    virtual void setNodeParameterRecursive(const Parameter* p) override;
-
     virtual void updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets) override;
 
     virtual void bindDrawIndexedRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const Overwrite* renderOverwrite = nullptr, const uint32_t bufferIndex = 0) const override;
@@ -251,6 +249,10 @@ public:
     virtual INodeSP findNodeRecursive(const std::string& searchName) override;
 
     virtual INodeSP findNodeRecursiveFromRoot(const std::string& searchName) override;
+
+    //
+
+    virtual void visitRecursive(SceneVisitor* sceneVisitor) override;
 
     //
     // ICloneable

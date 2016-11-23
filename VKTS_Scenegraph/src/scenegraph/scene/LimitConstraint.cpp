@@ -24,7 +24,7 @@
  * THE SOFTWARE.
  */
 
-#include "../scene/LimitConstraint.hpp"
+#include "LimitConstraint.hpp"
 
 namespace vkts
 {

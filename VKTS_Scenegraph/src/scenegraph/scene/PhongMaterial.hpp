@@ -29,7 +29,7 @@
 
 #include <vkts/scenegraph.hpp>
 
-#include "../scene/Material.hpp"
+#include "Material.hpp"
 
 namespace vkts
 {
@@ -152,6 +152,10 @@ public:
     virtual void bindDescriptorSets(const std::string& nodeName, const ICommandBuffersSP& cmdBuffer, const VkPipelineLayout layout, const uint32_t bufferIndex = 0) const override;
 
     virtual void bindDrawIndexedRecursive(const std::string& nodeName, const ICommandBuffersSP& cmdBuffer, const IGraphicsPipelineSP& graphicsPipeline, const Overwrite* renderOverwrite = nullptr, const uint32_t bufferIndex = 0) const override;
+
+    //
+
+    virtual void visitRecursive(SceneVisitor* sceneVisitor) override;
 
     //
     // ICloneable

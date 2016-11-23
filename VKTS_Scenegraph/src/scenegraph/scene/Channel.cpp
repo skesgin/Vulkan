@@ -24,7 +24,7 @@
  * THE SOFTWARE.
  */
 
-#include "../scene/Channel.hpp"
+#include "Channel.hpp"
 
 namespace vkts
 {

@@ -34,6 +34,8 @@ namespace vkts
 
 class Overwrite;
 
+class SceneVisitor;
+
 class IScene: public ICloneable<IScene>, public IDestroyable
 {
 
@@ -107,6 +109,10 @@ public:
     virtual void bindDrawIndexedRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const Overwrite* renderOverwrite = nullptr, const uint32_t bufferIndex = 0, const uint32_t objectOffset = 0, const uint32_t objectStep = 1, const size_t objectLimit = SIZE_MAX) const = 0;
 
     virtual void updateRecursive(const IUpdateThreadContext& updateContext, const uint32_t objectOffset = 0, const uint32_t objectStep = 1, const size_t objectLimit = SIZE_MAX) = 0;
+
+    //
+
+    virtual void visitRecursive(SceneVisitor* sceneVisitor, const uint32_t objectOffset = 0, const uint32_t objectStep = 1, const size_t objectLimit = SIZE_MAX) = 0;
 
 };
 

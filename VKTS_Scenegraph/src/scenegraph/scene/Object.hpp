@@ -90,6 +90,10 @@ public:
     virtual void updateRecursive(const IUpdateThreadContext& updateContext) override;
 
     //
+
+    virtual void visitRecursive(SceneVisitor* sceneVisitor) override;
+
+    //
     // ICloneable
     //
 

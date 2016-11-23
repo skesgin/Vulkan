@@ -24,7 +24,7 @@
  * THE SOFTWARE.
  */
 
-#include "../scene/CopyConstraint.hpp"
+#include "CopyConstraint.hpp"
 
 namespace vkts
 {

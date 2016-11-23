@@ -129,6 +129,10 @@ public:
     virtual void updateRecursive(const IUpdateThreadContext& updateContext, const uint32_t objectOffset = 0, const uint32_t objectStep = 1, const size_t objectLimit = SIZE_MAX) override;
 
     //
+
+    virtual void visitRecursive(SceneVisitor* sceneVisitor, const uint32_t objectOffset, const uint32_t objectStep, const size_t objectLimit) override;
+
+    //
     // ICloneable
     //
 

@@ -125,6 +125,10 @@ public:
     virtual void setRenderObject(const IObjectSP& object) override;
 
     //
+
+    virtual void visitRecursive(SceneVisitor* sceneVisitor) override;
+
+    //
     // ICloneable
     //
 

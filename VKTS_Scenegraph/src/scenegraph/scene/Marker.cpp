@@ -24,7 +24,7 @@
  * THE SOFTWARE.
  */
 
-#include "../scene/Marker.hpp"
+#include "Marker.hpp"
 
 namespace vkts
 {

@@ -24,7 +24,7 @@
  * THE SOFTWARE.
  */
 
-#include "../scene/Light.hpp"
+#include "Light.hpp"
 
 namespace vkts
 {

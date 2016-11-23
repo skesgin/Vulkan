@@ -24,7 +24,8 @@
  * THE SOFTWARE.
  */
 
-#include "../scene/BSDFMaterial.hpp"
+#include "BSDFMaterial.hpp"
+#include "../visitor/SceneVisitor.hpp"
 
 namespace vkts
 {
@@ -218,6 +219,22 @@ void BSDFMaterial::bindDrawIndexedRecursive(const std::string& nodeName, const I
 
     bindDescriptorSets(nodeName, cmdBuffer, graphicsPipeline->getLayout(), bufferIndex);
 }
+
+void BSDFMaterial::visitRecursive(SceneVisitor* sceneVisitor)
+{
+	SceneVisitor* currentSceneVisitor = sceneVisitor;
+
+	while (currentSceneVisitor)
+	{
+		if (!currentSceneVisitor->visit(*this))
+		{
+			return;
+		}
+
+		currentSceneVisitor = currentSceneVisitor->getNextSceneVisitor();
+	}
+}
+
 
 //
 // ICloneable

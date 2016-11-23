@@ -24,7 +24,7 @@
  * THE SOFTWARE.
  */
 
-#include "../scene/Context.hpp"
+#include "Context.hpp"
 
 namespace vkts
 {

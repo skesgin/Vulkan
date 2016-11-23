@@ -34,6 +34,8 @@ namespace vkts
 
 class Overwrite;
 
+class SceneVisitor;
+
 class ISubMesh: public IDestroyable, public ICloneable<ISubMesh>
 {
 
@@ -153,6 +155,10 @@ public:
     virtual void bindDrawIndexedRecursive(const std::string& nodeName, const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const Overwrite* renderOverwrite = nullptr, const uint32_t bufferIndex = 0) const = 0;
 
     virtual const Aabb& getAABB() const = 0;
+
+    //
+
+    virtual void visitRecursive(SceneVisitor* sceneVisitor) = 0;
 
 };
 

@@ -34,6 +34,8 @@ namespace vkts
 
 class Overwrite;
 
+class SceneVisitor;
+
 class IPhongMaterial : public ICloneable<IPhongMaterial>, public IDestroyable
 {
 
@@ -119,6 +121,10 @@ public:
     virtual void bindDescriptorSets(const std::string& nodeName, const ICommandBuffersSP& cmdBuffer, const VkPipelineLayout layout, const uint32_t bufferIndex = 0) const = 0;
 
     virtual void bindDrawIndexedRecursive(const std::string& nodeName, const ICommandBuffersSP& cmdBuffer, const IGraphicsPipelineSP& graphicsPipeline, const Overwrite* renderOverwrite = nullptr, const uint32_t bufferIndex = 0) const = 0;
+
+    //
+
+    virtual void visitRecursive(SceneVisitor* sceneVisitor) = 0;
 
 };
 

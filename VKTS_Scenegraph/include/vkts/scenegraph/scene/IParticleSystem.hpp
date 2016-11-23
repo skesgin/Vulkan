@@ -32,6 +32,8 @@
 namespace vkts
 {
 
+class SceneVisitor;
+
 enum RenderType {BillboardRenderType, ObjectRenderType};
 
 class IParticleSystem : public ICloneable<IParticleSystem>
@@ -98,6 +100,10 @@ public:
 
     virtual const IObjectSP& getRenderObject() const = 0;
     virtual void setRenderObject(const IObjectSP& object) = 0;
+
+    //
+
+    virtual void visitRecursive(SceneVisitor* sceneVisitor) = 0;
 
 };
 
