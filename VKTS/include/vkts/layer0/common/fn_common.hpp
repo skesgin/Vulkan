@@ -42,7 +42,7 @@ VKTS_APICALL VkBool32 VKTS_APIENTRY commonGetMemoryTypeIndex(const uint32_t memo
  *
  * @ThreadSafe
  */
-VKTS_APICALL VkDeviceSize VKTS_APIENTRY commonGetDeviceSize(const size_t currentSize, const size_t stride);
+VKTS_APICALL VkDeviceSize VKTS_APIENTRY commonGetDeviceSize(const size_t currentSize, const size_t alignment);
 
 /**
  *

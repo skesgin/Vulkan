@@ -36,7 +36,7 @@ namespace vkts
  *
  * @ThreadSafe
  */
-VKTS_APICALL VkDeviceSize VKTS_APIENTRY alignmentGetSizeInBytes(const size_t currentSize, const size_t stride);
+VKTS_APICALL VkDeviceSize VKTS_APIENTRY alignmentGetSizeInBytes(const size_t currentSize, const size_t alignment);
 
 /**
  *

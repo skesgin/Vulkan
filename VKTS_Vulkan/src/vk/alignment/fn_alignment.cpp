@@ -29,14 +29,14 @@
 namespace vkts
 {
 
-VkDeviceSize VKTS_APIENTRY alignmentGetSizeInBytes(const size_t currentSize, const size_t stride)
+VkDeviceSize VKTS_APIENTRY alignmentGetSizeInBytes(const size_t currentSize, const size_t alignment)
 {
-    if (currentSize == 0 || stride == 0)
+    if (currentSize == 0 || alignment == 0)
     {
         return 0;
     }
 
-    return VkDeviceSize((currentSize / stride) * stride + ((currentSize % stride) > 0 ? stride : 0));
+    return VkDeviceSize((currentSize / alignment) * alignment + ((currentSize % alignment) > 0 ? alignment : 0));
 }
 
 int32_t VKTS_APIENTRY alignmentGetOffsetInBytes(const VkTsVertexBufferType element, const VkTsVertexBufferType allElements)
