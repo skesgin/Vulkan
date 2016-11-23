@@ -82,6 +82,15 @@ void PhysicalDevice::getGetPhysicalDeviceImageFormatProperties(VkImageFormatProp
     vkGetPhysicalDeviceImageFormatProperties(physicalDevice, format, type, tiling, usage, flags, &imageFormatProperties);
 }
 
+VkDeviceSize PhysicalDevice::getNonCoherentAlignmentSizeInBytes(const size_t currentSize) const
+{
+	VkPhysicalDeviceProperties physicalDeviceProperties;
+
+	vkGetPhysicalDeviceProperties(physicalDevice, &physicalDeviceProperties);
+
+	return alignmentGetSizeInBytes(currentSize, (const size_t)physicalDeviceProperties.limits.nonCoherentAtomSize);
+}
+
 VkBool32 PhysicalDevice::isImageTilingAvailable(const VkImageTiling imageTiling, const VkFormat format, const VkImageType type, const VkImageCreateFlags flags, const VkExtent3D& extent, const uint32_t mipLevels, const uint32_t arrayLayers, const VkSampleCountFlags sampleCounts, const VkDeviceSize resourceSize)
 {
     VkFormatProperties formatProperties;
