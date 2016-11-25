@@ -75,6 +75,13 @@ VKTS_APICALL int32_t VKTS_APIENTRY imageDataGetBytesPerChannel(const VkFormat fo
  */
 VKTS_APICALL int32_t VKTS_APIENTRY imageDataGetNumberChannels(const VkFormat format);
 
+/**
+ * Only for supported and non compressed formats the number of channels is returned.
+ *
+ * @ThreadSafe
+ */
+VKTS_APICALL std::string VKTS_APIENTRY imageDataGetColorName(const VkFormat format, const glm::vec4& color);
+
 //
 
 /**
