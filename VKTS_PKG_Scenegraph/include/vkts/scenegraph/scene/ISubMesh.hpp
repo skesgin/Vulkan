@@ -60,9 +60,9 @@ public:
 
     virtual void setNumberVertices(const int32_t numberVertices) = 0;
 
-    virtual const IBufferObjectSP& getIndicesVertexBuffer() const = 0;
+    virtual const IBufferObjectSP& getIndexBuffer() const = 0;
 
-    virtual void setIndicesVertexBuffer(const IBufferObjectSP& indicesVertexBuffer) = 0;
+    virtual void setIndexBuffer(const IBufferObjectSP& indicesVertexBuffer) = 0;
 
     virtual int32_t getNumberIndices() const = 0;
 

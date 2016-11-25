@@ -2335,24 +2335,7 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
 
                     //
 
-                    VkBufferCreateInfo bufferCreateInfo{};
-
-                    bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-
-                    bufferCreateInfo.size = (size_t) totalSize;
-                    bufferCreateInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-                    bufferCreateInfo.flags = 0;
-                    bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-                    bufferCreateInfo.queueFamilyIndexCount = 0;
-                    bufferCreateInfo.pQueueFamilyIndices = nullptr;
-
-                    IDeviceMemorySP stageDeviceMemory;
-                    IBufferSP stageBuffer;
-
-                    auto vertexBuffer = bufferObjectCreate(stageBuffer, stageDeviceMemory, context->getContextObject(), context->getCommandBuffer(), vertexBinaryBuffer, bufferCreateInfo, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-
-                    context->addStageBuffer(stageBuffer);
-                    context->addStageDeviceMemory(stageDeviceMemory);
+                    auto vertexBuffer = scenegraphCreateVertexBufferObject(context, vertexBinaryBuffer);
 
                     if (!vertexBuffer.get())
                     {
@@ -2387,22 +2370,9 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
 
                     //
 
-                    VkBufferCreateInfo bufferCreateInfo{};
+                    auto indexVertexBuffer = scenegraphCreateIndexBufferObject(context, indicesBinaryBuffer);
 
-                    bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-                    bufferCreateInfo.size = indicesBinaryBuffer->getSize();
-                    bufferCreateInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
-                    bufferCreateInfo.flags = 0;
-
-                    IDeviceMemorySP stageDeviceMemory;
-                    IBufferSP stageBuffer;
-
-                    auto indicesVertexBuffer = bufferObjectCreate(stageBuffer, stageDeviceMemory, context->getContextObject(), context->getCommandBuffer(), indicesBinaryBuffer, bufferCreateInfo, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-
-                    context->addStageBuffer(stageBuffer);
-                    context->addStageDeviceMemory(stageDeviceMemory);
-
-                    if (!indicesVertexBuffer.get())
+                    if (!indexVertexBuffer.get())
                     {
                         logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create indices vertex buffer");
 
@@ -2411,7 +2381,7 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
 
                     //
 
-                    subMesh->setIndicesVertexBuffer(indicesVertexBuffer);
+                    subMesh->setIndexBuffer(indexVertexBuffer);
                 }
                 else
                 {

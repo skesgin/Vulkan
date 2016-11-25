@@ -74,6 +74,10 @@ VKTS_APICALL ITextureObjectSP VKTS_APIENTRY scenegraphCreateTextureObject(const 
 
 VKTS_APICALL IBufferObjectSP VKTS_APIENTRY scenegraphCreateUniformBufferObject(const IContextSP& context, const VkDeviceSize size);
 
+VKTS_APICALL IBufferObjectSP VKTS_APIENTRY scenegraphCreateIndexBufferObject(const IContextSP& context, const IBinaryBufferSP& binaryBuffer);
+
+VKTS_APICALL IBufferObjectSP VKTS_APIENTRY scenegraphCreateVertexBufferObject(const IContextSP& context, const IBinaryBufferSP& binaryBuffer);
+
 }
 
 #endif /* VKTS_FN_SCENEGRAPH_INTERNAL_HPP_ */

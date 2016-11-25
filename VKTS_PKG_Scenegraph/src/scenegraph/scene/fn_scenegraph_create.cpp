@@ -197,11 +197,63 @@ IBufferObjectSP VKTS_APIENTRY scenegraphCreateUniformBufferObject(const IContext
     VkBufferCreateInfo bufferCreateInfo{};
 
     bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+
+    bufferCreateInfo.flags = 0;
     bufferCreateInfo.size = size;
     bufferCreateInfo.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
-    bufferCreateInfo.flags = 0;
+    bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    bufferCreateInfo.queueFamilyIndexCount = 0;
+    bufferCreateInfo.pQueueFamilyIndices = nullptr;
 
     return bufferObjectCreate(context->getContextObject(), bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+}
+
+IBufferObjectSP VKTS_APIENTRY scenegraphCreateIndexBufferObject(const IContextSP& context, const IBinaryBufferSP& binaryBuffer)
+{
+    VkBufferCreateInfo bufferCreateInfo{};
+
+    bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+
+    bufferCreateInfo.flags = 0;
+    bufferCreateInfo.size = (VkDeviceSize)binaryBuffer->getSize();
+    bufferCreateInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
+    bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    bufferCreateInfo.queueFamilyIndexCount = 0;
+    bufferCreateInfo.pQueueFamilyIndices = nullptr;
+
+    IDeviceMemorySP stageDeviceMemory;
+    IBufferSP stageBuffer;
+
+    auto indexBufferObject = bufferObjectCreate(stageBuffer, stageDeviceMemory, context->getContextObject(), context->getCommandBuffer(), binaryBuffer, bufferCreateInfo, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+    context->addStageBuffer(stageBuffer);
+    context->addStageDeviceMemory(stageDeviceMemory);
+
+    return indexBufferObject;
+}
+
+IBufferObjectSP VKTS_APIENTRY scenegraphCreateVertexBufferObject(const IContextSP& context, const IBinaryBufferSP& binaryBuffer)
+{
+    VkBufferCreateInfo bufferCreateInfo{};
+
+    bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+
+    bufferCreateInfo.flags = 0;
+    bufferCreateInfo.size = (VkDeviceSize)binaryBuffer->getSize();
+    bufferCreateInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+    bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    bufferCreateInfo.queueFamilyIndexCount = 0;
+    bufferCreateInfo.pQueueFamilyIndices = nullptr;
+
+    IDeviceMemorySP stageDeviceMemory;
+    IBufferSP stageBuffer;
+
+    auto vertexBufferObject = bufferObjectCreate(stageBuffer, stageDeviceMemory, context->getContextObject(), context->getCommandBuffer(), binaryBuffer, bufferCreateInfo, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+    context->addStageBuffer(stageBuffer);
+    context->addStageDeviceMemory(stageDeviceMemory);
+
+    return vertexBufferObject;
 }
 
 }

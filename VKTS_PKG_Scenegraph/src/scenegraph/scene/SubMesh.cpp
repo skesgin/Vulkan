@@ -97,12 +97,12 @@ void SubMesh::setNumberVertices(const int32_t numberVertices)
     this->numberVertices = numberVertices;
 }
 
-const IBufferObjectSP& SubMesh::getIndicesVertexBuffer() const
+const IBufferObjectSP& SubMesh::getIndexBuffer() const
 {
     return indicesVertexBuffer;
 }
 
-void SubMesh::setIndicesVertexBuffer(const IBufferObjectSP& indicesVertexBuffer)
+void SubMesh::setIndexBuffer(const IBufferObjectSP& indicesVertexBuffer)
 {
     this->indicesVertexBuffer = indicesVertexBuffer;
 }

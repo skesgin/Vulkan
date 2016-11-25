@@ -113,9 +113,9 @@ public:
 
     virtual void setNumberVertices(const int32_t numberVertices) override;
 
-    virtual const IBufferObjectSP& getIndicesVertexBuffer() const override;
+    virtual const IBufferObjectSP& getIndexBuffer() const override;
 
-    virtual void setIndicesVertexBuffer(const IBufferObjectSP& indicesVertexBuffer) override;
+    virtual void setIndexBuffer(const IBufferObjectSP& indicesVertexBuffer) override;
 
     virtual int32_t getNumberIndices() const override;
 
