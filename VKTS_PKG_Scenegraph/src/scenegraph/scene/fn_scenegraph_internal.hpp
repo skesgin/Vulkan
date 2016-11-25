@@ -72,6 +72,8 @@ VKTS_APICALL VkBool32 VKTS_APIENTRY scenegraphParseUIntHex(const char* buffer, u
 
 VKTS_APICALL ITextureObjectSP VKTS_APIENTRY scenegraphCreateTextureObject(const float red, const float green, const float blue, const VkFormat format, const IContextSP& context);
 
+VKTS_APICALL IBufferObjectSP VKTS_APIENTRY scenegraphCreateUniformBufferObject(const IContextSP& context, const VkDeviceSize size);
+
 }
 
 #endif /* VKTS_FN_SCENEGRAPH_INTERNAL_HPP_ */

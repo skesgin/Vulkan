@@ -4300,15 +4300,10 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
 
             if (node.get())
             {
-                VkBufferCreateInfo bufferCreateInfo{};
-
-                bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
                 // mat3 in std140 consumes three vec4 columns.
-                bufferCreateInfo.size = alignmentGetSizeInBytes(16 * sizeof(float) * (VKTS_MAX_JOINTS + 1) + 12 * sizeof(float) * (VKTS_MAX_JOINTS + 1), 16);
-                bufferCreateInfo.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
-                bufferCreateInfo.flags = 0;
+            	VkDeviceSize size = alignmentGetSizeInBytes(16 * sizeof(float) * (VKTS_MAX_JOINTS + 1) + 12 * sizeof(float) * (VKTS_MAX_JOINTS + 1), 16);
 
-                auto jointsUniformBuffer = bufferObjectCreate(context->getContextObject(), bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+                auto jointsUniformBuffer = scenegraphCreateUniformBufferObject(context, size);
 
                 if (!jointsUniformBuffer.get())
                 {
@@ -4389,15 +4384,10 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
 
             if (node.get())
             {
-                VkBufferCreateInfo bufferCreateInfo{};
+            	// mat3 in std140 consumes three vec4 columns.
+            	VkDeviceSize size = alignmentGetSizeInBytes(16 * sizeof(float) + 12 * sizeof(float), 16);
 
-                bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-                // mat3 in std140 consumes three vec4 columns.
-                bufferCreateInfo.size = alignmentGetSizeInBytes(16 * sizeof(float) + 12 * sizeof(float), 16);
-                bufferCreateInfo.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
-                bufferCreateInfo.flags = 0;
-
-                auto transformUniformBuffer = bufferObjectCreate(context->getContextObject(), bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+                auto transformUniformBuffer = scenegraphCreateUniformBufferObject(context, size);
 
                 if (!transformUniformBuffer.get())
                 {

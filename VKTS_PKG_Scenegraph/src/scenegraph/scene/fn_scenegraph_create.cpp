@@ -192,4 +192,16 @@ ITextureObjectSP VKTS_APIENTRY scenegraphCreateTextureObject(const float red, co
     return textureObject;
 }
 
+IBufferObjectSP VKTS_APIENTRY scenegraphCreateUniformBufferObject(const IContextSP& context, const VkDeviceSize size)
+{
+    VkBufferCreateInfo bufferCreateInfo{};
+
+    bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    bufferCreateInfo.size = size;
+    bufferCreateInfo.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+    bufferCreateInfo.flags = 0;
+
+    return bufferObjectCreate(context->getContextObject(), bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+}
+
 }
