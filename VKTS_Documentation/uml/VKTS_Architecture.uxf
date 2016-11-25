@@ -214,18 +214,6 @@ layer=-2</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>1190</x>
-      <y>400</y>
-      <w>330</w>
-      <h>140</h>
-    </coordinates>
-    <panel_attributes>lt=.&gt;
-&lt;&lt;access&gt;&gt;</panel_attributes>
-    <additional_attributes>310.0;20.0;10.0;20.0;10.0;120.0</additional_attributes>
-  </element>
-  <element>
-    <id>Relation</id>
-    <coordinates>
       <x>860</x>
       <y>150</y>
       <w>80</w>
