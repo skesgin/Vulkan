@@ -5,7 +5,7 @@ This folder and sub folders contains all executables, shaders and assets. The ex
 into this folder after the build. Generated mip maps, cube maps and BSDF look up textures are stored in the `cache` folder.
 By default, this content is already generated.
 
-VKTS is trying to locate [vk_layer_settings.txt](../VKTS_Binaries/vk_layer_settings.txt) and uses this folder as the working directory.     
+VKTS is trying to locate `vk_layer_settings.txt` and uses this folder as the working directory.     
   
 __This folder has to be the working directory, otherwise shaders and assets are not found__.  
   
