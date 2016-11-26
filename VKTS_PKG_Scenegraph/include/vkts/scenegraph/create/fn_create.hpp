@@ -32,6 +32,10 @@
 namespace vkts
 {
 
+VKTS_APICALL IImageDataSP VKTS_APIENTRY createDeviceImageData(const IAssetManagerSP& assetManager, IImageDataSP& imageData);
+
+VKTS_APICALL IImageObjectSP VKTS_APIENTRY createImageObject(const IAssetManagerSP& assetManager, const std::string& imageObjectName, const IImageDataSP& imageData, const VkBool32 environment);
+
 VKTS_APICALL ITextureObjectSP VKTS_APIENTRY createTextureObject(const IAssetManagerSP& assetManager, const glm::vec4& color, const VkFormat format);
 
 VKTS_APICALL IBufferObjectSP VKTS_APIENTRY createUniformBufferObject(const IAssetManagerSP& assetManager, const VkDeviceSize size);
@@ -39,6 +43,16 @@ VKTS_APICALL IBufferObjectSP VKTS_APIENTRY createUniformBufferObject(const IAsse
 VKTS_APICALL IBufferObjectSP VKTS_APIENTRY createIndexBufferObject(const IAssetManagerSP& assetManager, const IBinaryBufferSP& binaryBuffer);
 
 VKTS_APICALL IBufferObjectSP VKTS_APIENTRY createVertexBufferObject(const IAssetManagerSP& assetManager, const IBinaryBufferSP& binaryBuffer);
+
+VKTS_APICALL IShaderModuleSP VKTS_APIENTRY createShaderModule(const IAssetManagerSP& assetManager, const std::string& shaderModuleName, const IBinaryBufferSP& binaryBuffer);
+
+VKTS_APICALL VkBool32 VKTS_APIENTRY createSubMeshDescriptorSetLayout(const IAssetManagerSP& assetManager, const ISubMeshSP& subMesh);
+
+VKTS_APICALL VkBool32 VKTS_APIENTRY createPhongMaterialDescriptorSets(const IAssetManagerSP& assetManager, const IPhongMaterialSP& phongMaterial);
+
+VKTS_APICALL VkBool32 VKTS_APIENTRY createBSDFMaterialDescriptorSets(const IAssetManagerSP& assetManager, const IBSDFMaterialSP& bsdfMaterial, const IDescriptorSetLayoutSP& descriptorSetLayout);
+
+VKTS_APICALL VkBool32 VKTS_APIENTRY createSubMeshGraphicsPipeline(const IAssetManagerSP& assetManager, const ISubMeshSP& subMesh);
 
 }
 

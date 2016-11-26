@@ -45,7 +45,7 @@
 namespace vkts
 {
 
-static VkBool32 scenegraphLoadImages(const char* directory, const char* filename, const IAssetManagerSP& assetManager)
+static VkBool32 scenegraphLoadImageObjects(const char* directory, const char* filename, const IAssetManagerSP& assetManager)
 {
     if (!directory || !filename || !assetManager.get())
     {
@@ -131,97 +131,92 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
                 return VK_FALSE;
             }
 
-            if (mipMap && environment)
-            {
-            	return VK_FALSE;
-            }
+            auto imageDataFilename = std::string(sdata);
 
-            if (preFiltered && !environment)
-            {
-            	return VK_FALSE;
-            }
+			// Check, if combination is supported.
 
-            //
+			if (mipMap && environment)
+			{
+				return VK_FALSE;
+			}
 
-            std::string finalImageDataFilename = std::string(directory) + std::string(sdata);
+			if (preFiltered && !environment)
+			{
+				return VK_FALSE;
+			}
 
-            imageData = assetManager->useImageData(finalImageDataFilename.c_str());
+			// Check, if image object name is valid.
 
-            if (!imageData.get())
-            {
-                imageData = assetManager->useImageData(sdata);
+			if (imageObjectName == "")
+			{
+				return VK_FALSE;
+			}
 
-                if (!imageData.get())
-                {
-                    imageData = imageDataLoad(finalImageDataFilename.c_str());
+			//
 
-                    if (!imageData.get())
-                    {
-                        imageData = imageDataLoad(sdata);
+			std::string finalImageDataFilename = directory + imageDataFilename;
 
-                        if (!imageData.get())
-                        {
-                        	logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load image data '%s'", finalImageDataFilename.c_str());
+			auto imageData = assetManager->useImageData(finalImageDataFilename.c_str());
 
-                            return VK_FALSE;
-                        }
-                    }
+			if (!imageData.get())
+			{
+				imageData = assetManager->useImageData(imageDataFilename.c_str());
 
-                    //
+				if (!imageData.get())
+				{
+					// Load image data.
 
-                    VkImageTiling imageTiling;
-                    VkMemoryPropertyFlags memoryPropertyFlags;
+					imageData = imageDataLoad(finalImageDataFilename.c_str());
 
-                    if (!assetManager->getContextObject()->getPhysicalDevice()->getGetImageTilingAndMemoryProperty(imageTiling, memoryPropertyFlags, imageData->getFormat(), imageData->getImageType(), 0, imageData->getExtent3D(), imageData->getMipLevels(), 1, VK_SAMPLE_COUNT_1_BIT, imageData->getSize()))
-                    {
-                        if (imageData->getFormat() == VK_FORMAT_R8G8B8_UNORM)
-                        {
-                            imageData = imageDataConvert(imageData, VK_FORMAT_R8G8B8A8_UNORM, imageData->getName());
+					if (!imageData.get())
+					{
+						imageData = imageDataLoad(imageDataFilename.c_str());
 
-                            if (!assetManager->getContextObject()->getPhysicalDevice()->getGetImageTilingAndMemoryProperty(imageTiling, memoryPropertyFlags, imageData->getFormat(), imageData->getImageType(), 0, imageData->getExtent3D(), imageData->getMipLevels(), 1, VK_SAMPLE_COUNT_1_BIT, imageData->getSize()))
-                            {
-                                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Format not supported.");
+						if (!imageData.get())
+						{
+							logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load image data '%s'", finalImageDataFilename.c_str());
 
-                                return VK_FALSE;
-                            }
-                        }
-                        else
-                        {
-                            logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Format not supported.");
+							return VK_FALSE;
+						}
+					}
 
-                            return VK_FALSE;
-                        }
-                    }
+					//
 
-                    if (mipMap && imageData->getMipLevels() == 1 && (imageData->getExtent3D().width > 1 || imageData->getExtent3D().height > 1 || imageData->getExtent3D().depth > 1))
-                    {
-                        // Mipmaping image creation.
+					imageData = createDeviceImageData(assetManager, imageData);
 
-                        auto dotIndex = finalImageDataFilename.rfind(".");
+					//
 
-                        if (dotIndex == finalImageDataFilename.npos)
-                        {
-                        	logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No valid image filename '%s'", finalImageDataFilename.c_str());
+					if (mipMap && imageData->getMipLevels() == 1 && (imageData->getExtent3D().width > 1 || imageData->getExtent3D().height > 1 || imageData->getExtent3D().depth > 1))
+					{
+						//
+						// Mip map image creation.
+						//
 
-                            return VK_FALSE;
-                        }
+						auto dotIndex = finalImageDataFilename.rfind(".");
 
-                        auto sourceImageName = finalImageDataFilename.substr(0, dotIndex);
-                        auto sourceImageExtension = finalImageDataFilename.substr(dotIndex);
+						if (dotIndex == finalImageDataFilename.npos)
+						{
+							logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No valid image filename '%s'", finalImageDataFilename.c_str());
 
-                        int32_t width = imageData->getWidth();
-                        int32_t height = imageData->getHeight();
-                        int32_t depth = imageData->getDepth();
+							return VK_FALSE;
+						}
 
-                        SmartPointerVector<IImageDataSP> allMipMaps;
+						auto sourceImageName = finalImageDataFilename.substr(0, dotIndex);
+						auto sourceImageExtension = finalImageDataFilename.substr(dotIndex);
 
-                        if (cacheGetEnabled())
-                        {
-                            allMipMaps.append(imageData);
+						int32_t width = imageData->getWidth();
+						int32_t height = imageData->getHeight();
+						int32_t depth = imageData->getDepth();
 
-                            int32_t level = 1;
+						SmartPointerVector<IImageDataSP> allMipMaps;
 
-                            while (width > 1 || height > 1 || depth > 1)
+						if (cacheGetEnabled())
+						{
+							allMipMaps.append(imageData);
+
+							int32_t level = 1;
+
+							while (width > 1 || height > 1 || depth > 1)
 							{
 								width = glm::max(width / 2, 1);
 								height = glm::max(height / 2, 1);
@@ -246,23 +241,23 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
 								height = targetImage->getHeight();
 								depth = targetImage->getDepth();
 							}
-                        }
+						}
 
-                        //
+						//
 
-                        if (allMipMaps.size() == 0)
-                        {
-                        	allMipMaps = imageDataMipmap(imageData, VK_FALSE, finalImageDataFilename);
+						if (allMipMaps.size() == 0)
+						{
+							allMipMaps = imageDataMipmap(imageData, VK_FALSE, finalImageDataFilename);
 
-                            if (allMipMaps.size() == 0)
-                            {
-                            	logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create mip maps for '%s'", finalImageDataFilename.c_str());
+							if (allMipMaps.size() == 0)
+							{
+								logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create mip maps for '%s'", finalImageDataFilename.c_str());
 
-                                return VK_FALSE;
-                            }
+								return VK_FALSE;
+							}
 
-                            if (cacheGetEnabled())
-                            {
+							if (cacheGetEnabled())
+							{
 								logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Storing cached data for '%s'", finalImageDataFilename.c_str());
 
 								// Only cache mip maps sub levels.
@@ -270,25 +265,27 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
 								{
 									cacheSaveImageData(allMipMaps[i]);
 								}
-                            }
-                        }
-                        else
-                        {
-                        	logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Using cached data for '%s'", finalImageDataFilename.c_str());
-                        }
+							}
+						}
+						else
+						{
+							logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Using cached data for '%s'", finalImageDataFilename.c_str());
+						}
 
-                        imageData = imageDataMerge(allMipMaps, finalImageDataFilename, (uint32_t)allMipMaps.size(), 1);
+						imageData = imageDataMerge(allMipMaps, finalImageDataFilename, (uint32_t)allMipMaps.size(), 1);
 
-                        if (!imageData.get())
-                        {
-                        	logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No merged image for '%s'", finalImageDataFilename.c_str());
+						if (!imageData.get())
+						{
+							logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No merged image for '%s'", finalImageDataFilename.c_str());
 
-                            return VK_FALSE;
-                        }
-                    }
-                    else if (environment)
-                    {
-                		// Cube map image creation.
+							return VK_FALSE;
+						}
+					}
+					else if (environment)
+					{
+						//
+						// Cube map image creation.
+						//
 
 						auto dotIndex = finalImageDataFilename.rfind(".");
 
@@ -302,8 +299,8 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
 						auto sourceImageName = finalImageDataFilename.substr(0, dotIndex);
 						auto sourceImageExtension = finalImageDataFilename.substr(dotIndex);
 
-                    	if (imageData->getArrayLayers() != 6)
-                    	{
+						if (imageData->getArrayLayers() != 6)
+						{
 							SmartPointerVector<IImageDataSP> allCubeMaps;
 
 							if (cacheGetEnabled())
@@ -361,158 +358,102 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
 
 								return VK_FALSE;
 							}
-                    	}
+						}
 
-                        if (preFiltered)
-                        {
-                            if (imageObjectName == "")
-                            {
-                                return VK_FALSE;
-                            }
+						if (preFiltered)
+						{
+							//
+							// Pre-filtered diffuse cube map creation.
+							//
 
-                        	// Pre-filtered diffuse cube map.
+							SmartPointerVector<IImageDataSP> allDiffuseCubeMaps;
 
-                        	SmartPointerVector<IImageDataSP> allDiffuseCubeMaps;
+							if (cacheGetEnabled())
+							{
+								for (uint32_t layer = 0; layer < 6; layer++)
+								{
+									auto targetImageFilename = sourceImageName + "_LEVEL0_LAYER" + std::to_string(layer) + "_LAMBERT" + sourceImageExtension;
 
-                            if (cacheGetEnabled())
-                            {
-                                for (uint32_t layer = 0; layer < 6; layer++)
-    							{
-    								auto targetImageFilename = sourceImageName + "_LEVEL0_LAYER" + std::to_string(layer) + "_LAMBERT" + sourceImageExtension;
+									auto targetImage = cacheLoadImageData(targetImageFilename.c_str());
 
-    								auto targetImage = cacheLoadImageData(targetImageFilename.c_str());
+									if (!targetImage.get())
+									{
+										allDiffuseCubeMaps.clear();
 
-    								if (!targetImage.get())
-    								{
-    									allDiffuseCubeMaps.clear();
+										break;
+									}
 
-    									break;
-    								}
+									allDiffuseCubeMaps.append(targetImage);
+								}
+							}
 
-    								allDiffuseCubeMaps.append(targetImage);
-    							}
-                            }
+							if (allDiffuseCubeMaps.size() == 0)
+							{
+								allDiffuseCubeMaps = imageDataPrefilterLambert(imageData, VKTS_BSDF_M_CUBE_MAP, finalImageDataFilename);
 
-                            if (allDiffuseCubeMaps.size() == 0)
-                            {
-                            	allDiffuseCubeMaps = imageDataPrefilterLambert(imageData, VKTS_BSDF_M_CUBE_MAP, finalImageDataFilename);
+								if (allDiffuseCubeMaps.size() == 0)
+								{
+									logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create diffuse cube maps for '%s'", finalImageDataFilename.c_str());
 
-                                if (allDiffuseCubeMaps.size() == 0)
-                                {
-                                	logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create diffuse cube maps for '%s'", finalImageDataFilename.c_str());
+									return VK_FALSE;
+								}
 
-                                    return VK_FALSE;
-                                }
+								if (cacheGetEnabled())
+								{
+									logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Storing cached data for '%s'", finalImageDataFilename.c_str());
 
-                                if (cacheGetEnabled())
-                                {
-    								logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Storing cached data for '%s'", finalImageDataFilename.c_str());
+									for (size_t i = 0; i < allDiffuseCubeMaps.size(); i++)
+									{
+										cacheSaveImageData(allDiffuseCubeMaps[i]);
+									}
+								}
+							}
+							else
+							{
+								logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Using cached data for '%s'", finalImageDataFilename.c_str());
+							}
 
-    								for (size_t i = 0; i < allDiffuseCubeMaps.size(); i++)
-    								{
-    									cacheSaveImageData(allDiffuseCubeMaps[i]);
-    								}
-                                }
-                            }
-                            else
-                            {
-                            	logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Using cached data for '%s'", finalImageDataFilename.c_str());
-                            }
+							auto diffuseImageData = imageDataMerge(allDiffuseCubeMaps, finalImageDataFilename, 1, (uint32_t)allDiffuseCubeMaps.size());
 
-                            auto diffuseImageData = imageDataMerge(allDiffuseCubeMaps, finalImageDataFilename, 1, (uint32_t)allDiffuseCubeMaps.size());
+							if (!diffuseImageData.get())
+							{
+								logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No merged image for '%s'", finalImageDataFilename.c_str());
 
-                            if (!diffuseImageData.get())
-                            {
-                            	logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No merged image for '%s'", finalImageDataFilename.c_str());
+								return VK_FALSE;
+							}
 
-                                return VK_FALSE;
-                            }
+							assetManager->addImageData(diffuseImageData);
 
-                            assetManager->addImageData(diffuseImageData);
+							//
 
-                            //
+							auto imageObject = createImageObject(assetManager, imageObjectName + "_LAMBERT", diffuseImageData, environment);
 
-                            VkImageTiling imageTiling;
-                            VkMemoryPropertyFlags memoryPropertyFlags;
+							if (!imageObject.get())
+							{
+								return VK_FALSE;
+							}
 
-                            if (!assetManager->getContextObject()->getPhysicalDevice()->getGetImageTilingAndMemoryProperty(imageTiling, memoryPropertyFlags, diffuseImageData->getFormat(), diffuseImageData->getImageType(), 0, diffuseImageData->getExtent3D(), diffuseImageData->getMipLevels(), 1, VK_SAMPLE_COUNT_1_BIT, diffuseImageData->getSize()))
-                            {
-                                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Format not supported.");
+							assetManager->addImageObject(imageObject);
 
-                                return VK_FALSE;
-                            }
+							//
+							// Pre-filtered cook torrance cube map creation.
+							//
 
+							SmartPointerVector<IImageDataSP> allCookTorranceCubeMaps;
 
-                            VkImageLayout initialLayout = VK_IMAGE_LAYOUT_PREINITIALIZED;
-                            VkAccessFlags srcAccessMask = VK_ACCESS_HOST_WRITE_BIT;
+							uint32_t levelCount = 1;
 
-                            if (imageTiling == VK_IMAGE_TILING_OPTIMAL)
-                            {
-                            	initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-                            	srcAccessMask = 0;
-                            }
-
-                            //
-
-                            VkImageCreateInfo imageCreateInfo{};
-
-                            imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-
-                            imageCreateInfo.flags = environment ? VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT : 0;
-                            imageCreateInfo.imageType = diffuseImageData->getImageType();
-                            imageCreateInfo.format = diffuseImageData->getFormat();
-                            imageCreateInfo.extent = diffuseImageData->getExtent3D();
-                            imageCreateInfo.mipLevels = diffuseImageData->getMipLevels();
-                            imageCreateInfo.arrayLayers = diffuseImageData->getArrayLayers();
-                            imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-                            imageCreateInfo.tiling = imageTiling;
-                            imageCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-                            imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-                            imageCreateInfo.queueFamilyIndexCount = 0;
-                            imageCreateInfo.pQueueFamilyIndices = nullptr;
-                            imageCreateInfo.initialLayout = initialLayout;
-
-                            VkImageSubresourceRange subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, diffuseImageData->getMipLevels(), 0, diffuseImageData->getArrayLayers()};
-
-                            IDeviceMemorySP stageDeviceMemory;
-                            IImageSP stageImage;
-                            IBufferSP stageBuffer;
-
-                            auto imageObject = imageObjectCreate(stageImage, stageBuffer, stageDeviceMemory, assetManager->getContextObject(), assetManager->getCommandBuffer(), imageObjectName + "_LAMBERT", diffuseImageData, imageCreateInfo, srcAccessMask, VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, subresourceRange, memoryPropertyFlags);
-
-                            assetManager->addStageImage(stageImage);
-                            assetManager->addStageBuffer(stageBuffer);
-                            assetManager->addStageDeviceMemory(stageDeviceMemory);
-
-                            if (!imageObject.get())
-                            {
-                            	logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No memory image for '%s'", finalImageDataFilename.c_str());
-
-                                return VK_FALSE;
-                            }
-
-                            assetManager->addImageObject(imageObject);
-
-                            //
-                            //
-
-                        	// Pre-filtered cook torrance cube map.
-
-                        	SmartPointerVector<IImageDataSP> allCookTorranceCubeMaps;
-
-                        	uint32_t levelCount = 1;
-
-                            if (cacheGetEnabled())
-                            {
-                                for (uint32_t layer = 0; layer < 6; layer++)
-    							{
-                                    for (uint32_t level = 0; level < levelCount; level++)
-        							{
+							if (cacheGetEnabled())
+							{
+								for (uint32_t layer = 0; layer < 6; layer++)
+								{
+									for (uint32_t level = 0; level < levelCount; level++)
+									{
 										auto targetImageFilename = sourceImageName + "_LEVEL" + std::to_string(level) + "_LAYER" + std::to_string(layer) + "_COOKTORRANCE" + sourceImageExtension;
 
-										auto targetImage = cacheLoadImageData(targetImageFilename.c_str());
+										auto targetImageData = cacheLoadImageData(targetImageFilename.c_str());
 
-										if (!targetImage.get())
+										if (!targetImageData.get())
 										{
 											allCookTorranceCubeMaps.clear();
 
@@ -522,7 +463,7 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
 										// Gather level count iterations by first image.
 										if (layer == 0 && level == 0)
 										{
-											uint32_t testWidth = targetImage->getWidth();
+											uint32_t testWidth = targetImageData->getWidth();
 
 											while (testWidth > 1)
 											{
@@ -532,265 +473,120 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
 											}
 										}
 
-										allCookTorranceCubeMaps.append(targetImage);
-    								}
-    							}
-                            }
+										allCookTorranceCubeMaps.append(targetImageData);
+									}
+								}
+							}
 
-                            if (allCookTorranceCubeMaps.size() == 0)
-                            {
-                            	allCookTorranceCubeMaps = imageDataPrefilterCookTorrance(imageData, VKTS_BSDF_M_CUBE_MAP, finalImageDataFilename);
+							if (allCookTorranceCubeMaps.size() == 0)
+							{
+								allCookTorranceCubeMaps = imageDataPrefilterCookTorrance(imageData, VKTS_BSDF_M_CUBE_MAP, finalImageDataFilename);
 
-                                if (allCookTorranceCubeMaps.size() == 0)
-                                {
-                                	logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create cook torrance cube maps for '%s'", finalImageDataFilename.c_str());
+								if (allCookTorranceCubeMaps.size() == 0)
+								{
+									logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create cook torrance cube maps for '%s'", finalImageDataFilename.c_str());
 
-                                    return VK_FALSE;
-                                }
+									return VK_FALSE;
+								}
 
-                                levelCount = (uint32_t)allCookTorranceCubeMaps.size() / 6;
+								levelCount = (uint32_t)allCookTorranceCubeMaps.size() / 6;
 
-                                if (cacheGetEnabled())
-                                {
-    								logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Storing cached data for '%s'", finalImageDataFilename.c_str());
+								if (cacheGetEnabled())
+								{
+									logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Storing cached data for '%s'", finalImageDataFilename.c_str());
 
-    								for (size_t i = 0; i < allCookTorranceCubeMaps.size(); i++)
-    								{
-    									cacheSaveImageData(allCookTorranceCubeMaps[i]);
-    								}
-                                }
-                            }
-                            else
-                            {
-                            	logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Using cached data for '%s'", finalImageDataFilename.c_str());
-                            }
+									for (size_t i = 0; i < allCookTorranceCubeMaps.size(); i++)
+									{
+										cacheSaveImageData(allCookTorranceCubeMaps[i]);
+									}
+								}
+							}
+							else
+							{
+								logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Using cached data for '%s'", finalImageDataFilename.c_str());
+							}
 
-                            auto cookTorranceImageData = imageDataMerge(allCookTorranceCubeMaps, finalImageDataFilename, levelCount, 6);
+							auto cookTorranceImageData = imageDataMerge(allCookTorranceCubeMaps, finalImageDataFilename, levelCount, 6);
 
-                            if (!cookTorranceImageData.get())
-                            {
-                            	logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No merged image for '%s'", finalImageDataFilename.c_str());
+							if (!cookTorranceImageData.get())
+							{
+								logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No merged image for '%s'", finalImageDataFilename.c_str());
 
-                                return VK_FALSE;
-                            }
+								return VK_FALSE;
+							}
 
-                            assetManager->addImageData(cookTorranceImageData);
+							assetManager->addImageData(cookTorranceImageData);
 
-                            //
+							//
 
-                            if (!assetManager->getContextObject()->getPhysicalDevice()->getGetImageTilingAndMemoryProperty(imageTiling, memoryPropertyFlags, cookTorranceImageData->getFormat(), cookTorranceImageData->getImageType(), 0, cookTorranceImageData->getExtent3D(), cookTorranceImageData->getMipLevels(), 1, VK_SAMPLE_COUNT_1_BIT, cookTorranceImageData->getSize()))
-                            {
-                                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Format not supported.");
+							imageObject = createImageObject(assetManager, imageObjectName + "_COOKTORRANCE", cookTorranceImageData, environment);
 
-                                return VK_FALSE;
-                            }
+							if (!imageObject.get())
+							{
+								return VK_FALSE;
+							}
 
+							assetManager->addImageObject(imageObject);
 
-                            initialLayout = VK_IMAGE_LAYOUT_PREINITIALIZED;
-                            srcAccessMask = VK_ACCESS_HOST_WRITE_BIT;
+							//
+							// BSDF environment look up table generation.
+							//
 
-                            if (imageTiling == VK_IMAGE_TILING_OPTIMAL)
-                            {
-                            	initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-                            	srcAccessMask = 0;
-                            }
+							auto lutImageObjectName = "BSDF_LUT_" + std::to_string(VKTS_BSDF_LENGTH) + "_" + std::to_string(VKTS_BSDF_M);
 
-                            //
+							auto lutImageFilename = "texture/" + lutImageObjectName + ".data";
 
-                            memset(&imageCreateInfo, 0, sizeof(VkImageCreateInfo));
+							IImageDataSP lutImageData = imageDataLoadRaw(lutImageFilename.c_str(), VKTS_BSDF_LENGTH, VKTS_BSDF_LENGTH, VK_FORMAT_R32G32_SFLOAT);
 
-                            imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+							if (!lutImageData.get())
+							{
+								lutImageData = imageDataEnvironmentBRDF(VKTS_BSDF_LENGTH, VKTS_BSDF_M, "BSDF_LUT.data");
 
-                            imageCreateInfo.flags = environment ? VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT : 0;
-                            imageCreateInfo.imageType = cookTorranceImageData->getImageType();
-                            imageCreateInfo.format = cookTorranceImageData->getFormat();
-                            imageCreateInfo.extent = cookTorranceImageData->getExtent3D();
-                            imageCreateInfo.mipLevels = cookTorranceImageData->getMipLevels();
-                            imageCreateInfo.arrayLayers = cookTorranceImageData->getArrayLayers();
-                            imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-                            imageCreateInfo.tiling = imageTiling;
-                            imageCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-                            imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-                            imageCreateInfo.queueFamilyIndexCount = 0;
-                            imageCreateInfo.pQueueFamilyIndices = nullptr;
-                            imageCreateInfo.initialLayout = initialLayout;
+								if (!lutImageData.get())
+								{
+									logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not generate BSDF lut");
 
-                            subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, cookTorranceImageData->getMipLevels(), 0, cookTorranceImageData->getArrayLayers()};
+									return VK_FALSE;
+								}
 
-                            imageObject = imageObjectCreate(stageImage, stageBuffer, stageDeviceMemory, assetManager->getContextObject(), assetManager->getCommandBuffer(), imageObjectName + "_COOKTORRANCE", cookTorranceImageData, imageCreateInfo, srcAccessMask, VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, subresourceRange, memoryPropertyFlags);
-
-                            assetManager->addStageImage(stageImage);
-                            assetManager->addStageBuffer(stageBuffer);
-                            assetManager->addStageDeviceMemory(stageDeviceMemory);
-
-                            if (!imageObject.get())
-                            {
-                            	logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No memory image for '%s'", finalImageDataFilename.c_str());
-
-                                return VK_FALSE;
-                            }
-
-                            assetManager->addImageObject(imageObject);
-
-                            //
-                            //
-
-                        	// Generate BSDF environment look up table.
-
-                            auto lutName = "BSDF_LUT_" + std::to_string(VKTS_BSDF_LENGTH) + "_" + std::to_string(VKTS_BSDF_M);
-
-                        	auto targetImageFilename = "textureObject/" + lutName + ".data";
-
-                        	IImageDataSP lut = imageDataLoadRaw(targetImageFilename.c_str(), VKTS_BSDF_LENGTH, VKTS_BSDF_LENGTH, VK_FORMAT_R32G32_SFLOAT);
-
-                            if (!lut.get())
-                            {
-                            	lut = imageDataEnvironmentBRDF(VKTS_BSDF_LENGTH, VKTS_BSDF_M, "BSDF_LUT.data");
-
-                                if (!lut.get())
-                                {
-                                	logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not generate BSDF lut");
-
-                                    return VK_FALSE;
-                                }
-
-                            	if (!imageDataSave(targetImageFilename.c_str(), lut))
-                            	{
+								if (!imageDataSave(lutImageFilename.c_str(), lutImageData))
+								{
 									logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not save BSDF lut");
 
 									return VK_FALSE;
-                                }
+								}
 
-                                assetManager->addImageData(lut);
-                            }
+								assetManager->addImageData(lutImageData);
+							}
 
-                            if (!assetManager->getContextObject()->getPhysicalDevice()->getGetImageTilingAndMemoryProperty(imageTiling, memoryPropertyFlags, lut->getFormat(), lut->getImageType(), 0, lut->getExtent3D(), lut->getMipLevels(), 1, VK_SAMPLE_COUNT_1_BIT, lut->getSize()))
-                            {
-                                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Format not supported.");
+							//
 
-                                return VK_FALSE;
-                            }
+							imageObject = createImageObject(assetManager, lutImageObjectName, lutImageData, VK_FALSE);
 
-                            initialLayout = VK_IMAGE_LAYOUT_PREINITIALIZED;
-                            srcAccessMask = VK_ACCESS_HOST_WRITE_BIT;
+							if (!imageObject.get())
+							{
+								return VK_FALSE;
+							}
 
-                            if (imageTiling == VK_IMAGE_TILING_OPTIMAL)
-                            {
-                            	initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-                            	srcAccessMask = 0;
-                            }
+							assetManager->addImageObject(imageObject);
+						}
+					}
 
-                            //
+					//
 
-                            memset(&imageCreateInfo, 0, sizeof(VkImageCreateInfo));
+					assetManager->addImageData(imageData);
+				}
+			}
 
-                            imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+			//
+			// ImageObject creation.
+			//
 
-                            imageCreateInfo.flags = 0;
-                            imageCreateInfo.imageType = lut->getImageType();
-                            imageCreateInfo.format = lut->getFormat();
-                            imageCreateInfo.extent = lut->getExtent3D();
-                            imageCreateInfo.mipLevels = lut->getMipLevels();
-                            imageCreateInfo.arrayLayers = lut->getArrayLayers();
-                            imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-                            imageCreateInfo.tiling = imageTiling;
-                            imageCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-                            imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-                            imageCreateInfo.queueFamilyIndexCount = 0;
-                            imageCreateInfo.pQueueFamilyIndices = nullptr;
-                            imageCreateInfo.initialLayout = initialLayout;
-
-                            subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, lut->getMipLevels(), 0, lut->getArrayLayers()};
-
-                            imageObject = imageObjectCreate(stageImage, stageBuffer, stageDeviceMemory, assetManager->getContextObject(), assetManager->getCommandBuffer(), lutName, lut, imageCreateInfo, srcAccessMask, VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, subresourceRange, memoryPropertyFlags);
-
-                            assetManager->addStageImage(stageImage);
-                            assetManager->addStageBuffer(stageBuffer);
-                            assetManager->addStageDeviceMemory(stageDeviceMemory);
-
-                            if (!imageObject.get())
-                            {
-                                return VK_FALSE;
-                            }
-
-                            assetManager->addImageObject(imageObject);
-                        }
-                    }
-
-                    //
-
-                    assetManager->addImageData(imageData);
-                }
-            }
-
-            //
-            // TextureObject creation.
-            //
-
-            if (imageObjectName == "" || !imageData.get())
-            {
-            	logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No memory image name or image data for '%s'", finalImageDataFilename.c_str());
-
-                return VK_FALSE;
-            }
-
-            //
-
-            VkImageTiling imageTiling;
-            VkMemoryPropertyFlags memoryPropertyFlags;
-
-            if (!assetManager->getContextObject()->getPhysicalDevice()->getGetImageTilingAndMemoryProperty(imageTiling, memoryPropertyFlags, imageData->getFormat(), imageData->getImageType(), 0, imageData->getExtent3D(), imageData->getMipLevels(), 1, VK_SAMPLE_COUNT_1_BIT, imageData->getSize()))
-            {
-                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Format not supported.");
-
-                return VK_FALSE;
-            }
-
-
-            VkImageLayout initialLayout = VK_IMAGE_LAYOUT_PREINITIALIZED;
-            VkAccessFlags srcAccessMask = VK_ACCESS_HOST_WRITE_BIT;
-
-            if (imageTiling == VK_IMAGE_TILING_OPTIMAL)
-            {
-            	initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-            	srcAccessMask = 0;
-            }
-
-            //
-
-            VkImageCreateInfo imageCreateInfo{};
-
-            imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-
-            imageCreateInfo.flags = environment ? VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT : 0;
-            imageCreateInfo.imageType = imageData->getImageType();
-            imageCreateInfo.format = imageData->getFormat();
-            imageCreateInfo.extent = imageData->getExtent3D();
-            imageCreateInfo.mipLevels = imageData->getMipLevels();
-            imageCreateInfo.arrayLayers = imageData->getArrayLayers();
-            imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-            imageCreateInfo.tiling = imageTiling;
-            imageCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-            imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-            imageCreateInfo.queueFamilyIndexCount = 0;
-            imageCreateInfo.pQueueFamilyIndices = nullptr;
-            imageCreateInfo.initialLayout = initialLayout;
-
-            VkImageSubresourceRange subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, imageData->getMipLevels(), 0, imageData->getArrayLayers()};
-
-            IDeviceMemorySP stageDeviceMemory;
-            IImageSP stageImage;
-            IBufferSP stageBuffer;
-
-            auto imageObject = imageObjectCreate(stageImage, stageBuffer, stageDeviceMemory, assetManager->getContextObject(), assetManager->getCommandBuffer(), imageObjectName, imageData, imageCreateInfo, srcAccessMask, VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, subresourceRange, memoryPropertyFlags);
-
-            assetManager->addStageImage(stageImage);
-            assetManager->addStageBuffer(stageBuffer);
-            assetManager->addStageDeviceMemory(stageDeviceMemory);
+			auto imageObject = createImageObject(assetManager, imageObjectName, imageData, environment);
 
             if (!imageObject.get())
             {
-            	logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No memory image for '%s'", finalImageDataFilename.c_str());
+            	logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No memory image for '%s'", sdata);
 
                 return VK_FALSE;
             }
@@ -853,7 +649,7 @@ static VkBool32 scenegraphLoadTextureObjects(const char* directory, const char* 
                 return VK_FALSE;
             }
 
-            if (!scenegraphLoadImages(directory, sdata, assetManager))
+            if (!scenegraphLoadImageObjects(directory, sdata, assetManager))
             {
                 logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load images: '%s'", sdata);
 
@@ -1102,46 +898,27 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
             {
                 bsdfMaterial = IBSDFMaterialSP(new BSDFMaterial(bdata));
                 phongMaterial = IPhongMaterialSP();
+
+                if (!bsdfMaterial.get())
+                {
+                	return VK_FALSE;
+                }
             }
             else if (strncmp(sdata, "Phong", 5) == 0)
             {
                 bsdfMaterial = IBSDFMaterialSP();
+
                 phongMaterial = IPhongMaterialSP(new PhongMaterial(bdata));
 
-                // Create all possibilities, even when not used.
-
-                VkDescriptorPoolSize descriptorPoolSize[3]{};
-
-				descriptorPoolSize[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-				descriptorPoolSize[0].descriptorCount = VKTS_BINDING_UNIFORM_BUFFER_COUNT;
-
-				descriptorPoolSize[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-				descriptorPoolSize[1].descriptorCount = VKTS_BINDING_UNIFORM_PHONG_BINDING_COUNT + 2;
-
-				descriptorPoolSize[2].type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
-				descriptorPoolSize[2].descriptorCount = VKTS_BINDING_UNIFORM_VOXEL_COUNT;
-
-                auto descriptorPool = descriptorPoolCreate(assetManager->getContextObject()->getDevice()->getDevice(), VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT, 1, 3, descriptorPoolSize);
-
-                if (!descriptorPool.get())
+                if (!phongMaterial.get())
                 {
-                    return VK_FALSE;
+                	return VK_FALSE;
                 }
 
-                phongMaterial->setDescriptorPool(descriptorPool);
-
-                //
-
-                auto allDescriptorSetLayouts = assetManager->getDescriptorSetLayout()->getDescriptorSetLayout();
-
-                auto descriptorSets = descriptorSetsCreate(assetManager->getContextObject()->getDevice()->getDevice(), descriptorPool->getDescriptorPool(), 1, &allDescriptorSetLayouts);
-
-                if (!descriptorSets.get())
+                if (!createPhongMaterialDescriptorSets(assetManager, phongMaterial))
                 {
-                    return VK_FALSE;
+                	return VK_FALSE;
                 }
-
-                phongMaterial->setDescriptorSets(descriptorSets);
             }
             else
             {
@@ -1723,7 +1500,7 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
 
 				//
 
-				shaderModule = shaderModuleCreate(sdata, assetManager->getContextObject()->getDevice()->getDevice(), 0, shaderBinary->getSize(), (uint32_t*)shaderBinary->getData());
+				shaderModule = createShaderModule(assetManager, sdata, shaderBinary);
 
 				if (!shaderModule.get())
 				{
@@ -2391,364 +2168,24 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
 
                 if (subMesh->getBSDFMaterial().get())
                 {
-                	VkDescriptorSetLayoutBinding descriptorSetLayoutBinding[VKTS_BINDING_UNIFORM_MATERIAL_TOTAL_BINDING_COUNT]{};
-
-                	uint32_t bindingCount = 0;
-
-                	descriptorSetLayoutBinding[bindingCount].binding = VKTS_BINDING_UNIFORM_BUFFER_VIEWPROJECTION;
-                	descriptorSetLayoutBinding[bindingCount].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-                	descriptorSetLayoutBinding[bindingCount].descriptorCount = 1;
-                	descriptorSetLayoutBinding[bindingCount].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-                	descriptorSetLayoutBinding[bindingCount].pImmutableSamplers = nullptr;
-
-                	bindingCount++;
-
-                	descriptorSetLayoutBinding[bindingCount].binding = VKTS_BINDING_UNIFORM_BUFFER_TRANSFORM;
-                	descriptorSetLayoutBinding[bindingCount].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-                	descriptorSetLayoutBinding[bindingCount].descriptorCount = 1;
-                	descriptorSetLayoutBinding[bindingCount].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-                	descriptorSetLayoutBinding[bindingCount].pImmutableSamplers = nullptr;
-
-                	bindingCount++;
-
-                	if ((subMesh->getVertexBufferType() & VKTS_VERTEX_BUFFER_TYPE_BONES) == VKTS_VERTEX_BUFFER_TYPE_BONES)
+                	if (!createSubMeshDescriptorSetLayout(assetManager, subMesh))
                 	{
-                    	descriptorSetLayoutBinding[bindingCount].binding = VKTS_BINDING_UNIFORM_BUFFER_BONE_TRANSFORM;
-                    	descriptorSetLayoutBinding[bindingCount].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-                    	descriptorSetLayoutBinding[bindingCount].descriptorCount = 1;
-                    	descriptorSetLayoutBinding[bindingCount].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-                    	descriptorSetLayoutBinding[bindingCount].pImmutableSamplers = nullptr;
-
-                    	bindingCount++;
-                	}
-
-
-                	// For forward rendering, add more buffers and textureObjects.
-                	if (subMesh->getBSDFMaterial()->getForwardRendering())
-                	{
-                    	descriptorSetLayoutBinding[bindingCount].binding = VKTS_BINDING_UNIFORM_BUFFER_LIGHT;
-                    	descriptorSetLayoutBinding[bindingCount].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-                    	descriptorSetLayoutBinding[bindingCount].descriptorCount = 1;
-                    	descriptorSetLayoutBinding[bindingCount].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-                    	descriptorSetLayoutBinding[bindingCount].pImmutableSamplers = nullptr;
-
-                    	bindingCount++;
-
-                    	descriptorSetLayoutBinding[bindingCount].binding = VKTS_BINDING_UNIFORM_BUFFER_BSDF_INVERSE;
-                    	descriptorSetLayoutBinding[bindingCount].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-                    	descriptorSetLayoutBinding[bindingCount].descriptorCount = 1;
-                    	descriptorSetLayoutBinding[bindingCount].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-                    	descriptorSetLayoutBinding[bindingCount].pImmutableSamplers = nullptr;
-
-                    	bindingCount++;
-
-                    	//
-
-                		descriptorSetLayoutBinding[bindingCount].binding = VKTS_BINDING_UNIFORM_SAMPLER_BSDF_DIFFUSE;
-                		descriptorSetLayoutBinding[bindingCount].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-                		descriptorSetLayoutBinding[bindingCount].descriptorCount = 1;
-                		descriptorSetLayoutBinding[bindingCount].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-                		descriptorSetLayoutBinding[bindingCount].pImmutableSamplers = nullptr;
-
-                		bindingCount++;
-
-                		descriptorSetLayoutBinding[bindingCount].binding = VKTS_BINDING_UNIFORM_SAMPLER_BSDF_SPECULAR;
-                		descriptorSetLayoutBinding[bindingCount].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-                		descriptorSetLayoutBinding[bindingCount].descriptorCount = 1;
-                		descriptorSetLayoutBinding[bindingCount].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-                		descriptorSetLayoutBinding[bindingCount].pImmutableSamplers = nullptr;
-
-                		bindingCount++;
-
-                		descriptorSetLayoutBinding[bindingCount].binding = VKTS_BINDING_UNIFORM_SAMPLER_BSDF_LUT;
-                		descriptorSetLayoutBinding[bindingCount].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-                		descriptorSetLayoutBinding[bindingCount].descriptorCount = 1;
-                		descriptorSetLayoutBinding[bindingCount].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-                		descriptorSetLayoutBinding[bindingCount].pImmutableSamplers = nullptr;
-
-                		bindingCount++;
-                	}
-
-                	if (subMesh->getBSDFMaterial()->getNumberTextureObjects() > VKTS_BINDING_UNIFORM_BSDF_BINDING_COUNT)
-                	{
-                		logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Too many textureObjects.");
-
                 		return VK_FALSE;
                 	}
-
-                    for (size_t i = 0; i < subMesh->getBSDFMaterial()->getNumberTextureObjects(); i++)
-                    {
-                    	uint32_t bindingStart = subMesh->getBSDFMaterial()->getForwardRendering() ? VKTS_BINDING_UNIFORM_SAMPLER_BSDF_FORWARD_FIRST : VKTS_BINDING_UNIFORM_SAMPLER_BSDF_DEFERRED_FIRST;
-
-                		descriptorSetLayoutBinding[bindingCount].binding = bindingStart + (uint32_t)i;
-                		descriptorSetLayoutBinding[bindingCount].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-                		descriptorSetLayoutBinding[bindingCount].descriptorCount = 1;
-                		descriptorSetLayoutBinding[bindingCount].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-                		descriptorSetLayoutBinding[bindingCount].pImmutableSamplers = nullptr;
-
-                		bindingCount++;
-                    }
-
-                    //
-
-                    auto descriptorSetLayout = descriptorSetLayoutCreate(assetManager->getContextObject()->getDevice()->getDevice(), 0, bindingCount, descriptorSetLayoutBinding);
-
-                	if (!descriptorSetLayout.get())
-                	{
-                		logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create descriptor set layout.");
-
-                		return VK_FALSE;
-                	}
-
-                	subMesh->setDescriptorSetLayout(descriptorSetLayout);
-
-                    // Create all possibilities, even when not used.
-
-                    VkDescriptorPoolSize descriptorPoolSize[2]{};
-
-    				descriptorPoolSize[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    				descriptorPoolSize[0].descriptorCount = 5;
-
-    				descriptorPoolSize[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    				descriptorPoolSize[1].descriptorCount = 18;
-
-                    auto descriptorPool = descriptorPoolCreate(assetManager->getContextObject()->getDevice()->getDevice(), VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT, 1, 2, descriptorPoolSize);
-
-                    if (!descriptorPool.get())
-                    {
-                		logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create descriptor pool.");
-
-                        return VK_FALSE;
-                    }
-
-            		subMesh->getBSDFMaterial()->setDescriptorPool(descriptorPool);
 
                 	//
 
-                	const auto allDescriptorSetLayouts = descriptorSetLayout->getDescriptorSetLayout();
-
-                    auto descriptorSets = descriptorSetsCreate(assetManager->getContextObject()->getDevice()->getDevice(), subMesh->getBSDFMaterial()->getDescriptorPool()->getDescriptorPool(), 1, &allDescriptorSetLayouts);
-
-                    if (!descriptorSets.get())
-                    {
-                    	logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create descriptor sets.");
-
-                        return VK_FALSE;
-                    }
-
-                    subMesh->getBSDFMaterial()->setDescriptorSets(descriptorSets);
-
-                    //
-
-                	VkDescriptorSetLayout setLayouts[1];
-
-                	setLayouts[0] = descriptorSetLayout->getDescriptorSetLayout();
-
-                	auto pipelineLayout = pipelineCreateLayout(assetManager->getContextObject()->getDevice()->getDevice(), 0, 1, setLayouts, 0, nullptr);
-
-                	if (!pipelineLayout.get())
+                	if (!createBSDFMaterialDescriptorSets(assetManager, subMesh->getBSDFMaterial(), subMesh->getDescriptorSetLayout()))
                 	{
-                		logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create pipeline layout.");
-
                 		return VK_FALSE;
                 	}
 
-                	subMesh->setPipelineLayout(pipelineLayout);
+                    //
 
-					// Create graphics pipeline for this sub mesh.
-
-                	auto currentRenderPass = assetManager->getRenderPass();
-
-					if (!currentRenderPass.get())
-					{
-	                    logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No renderpass found");
-
-	                    return VK_FALSE;
-					}
-
-					auto currentPipelineLayout = subMesh->getPipelineLayout();
-
-					if (!currentPipelineLayout.get())
-					{
-	                    logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No pipeline layout found");
-
-	                    return VK_FALSE;
-					}
-
-
-					vertexBufferType = subMesh->getVertexBufferType() & subMesh->getBSDFMaterial()->getAttributes();
-
-					if (vertexBufferType != subMesh->getBSDFMaterial()->getAttributes())
-					{
-	                    logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Sub mesh vertex buffer type does not match with material");
-
-	                    return VK_FALSE;
-					}
-
-					if ((subMesh->getVertexBufferType() & VKTS_VERTEX_BUFFER_TYPE_BONES) == VKTS_VERTEX_BUFFER_TYPE_BONES)
-					{
-						vertexBufferType |= VKTS_VERTEX_BUFFER_TYPE_BONES;
-					}
-
-					auto currentVertexShaderModule = assetManager->useVertexShaderModule(vertexBufferType);
-
-					if (!currentVertexShaderModule.get())
-					{
-	                    logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No shader module found");
-
-						return VK_FALSE;
-					}
-
-					DefaultGraphicsPipeline gp;
-
-					gp.getPipelineShaderStageCreateInfo(0).stage = VK_SHADER_STAGE_VERTEX_BIT;
-					gp.getPipelineShaderStageCreateInfo(0).module = currentVertexShaderModule->getShaderModule();
-
-					gp.getPipelineShaderStageCreateInfo(1).stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-					gp.getPipelineShaderStageCreateInfo(1).module = subMesh->getBSDFMaterial()->getFragmentShader()->getShaderModule();
-
-
-					gp.getVertexInputBindingDescription(0).binding = 0;
-					gp.getVertexInputBindingDescription(0).stride = alignmentGetStrideInBytes(subMesh->getVertexBufferType());
-					gp.getVertexInputBindingDescription(0).inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-
-
-					uint32_t location = 0;
-
-					gp.getVertexInputAttributeDescription(location).location = location;
-					gp.getVertexInputAttributeDescription(location).binding = 0;
-					gp.getVertexInputAttributeDescription(location).format = VK_FORMAT_R32G32B32A32_SFLOAT;
-					gp.getVertexInputAttributeDescription(location).offset = alignmentGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_VERTEX, subMesh->getVertexBufferType());
-
-					if ((vertexBufferType & VKTS_VERTEX_BUFFER_TYPE_NORMAL) == VKTS_VERTEX_BUFFER_TYPE_NORMAL)
-					{
-						location++;
-
-						gp.getVertexInputAttributeDescription(location).location = location;
-						gp.getVertexInputAttributeDescription(location).binding = 0;
-						gp.getVertexInputAttributeDescription(location).format = VK_FORMAT_R32G32B32_SFLOAT;
-						gp.getVertexInputAttributeDescription(location).offset = alignmentGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_NORMAL, subMesh->getVertexBufferType());
-
-						if ((vertexBufferType & VKTS_VERTEX_BUFFER_TYPE_TANGENTS) == VKTS_VERTEX_BUFFER_TYPE_TANGENTS)
-						{
-							location++;
-
-							gp.getVertexInputAttributeDescription(location).location = location;
-							gp.getVertexInputAttributeDescription(location).binding = 0;
-							gp.getVertexInputAttributeDescription(location).format = VK_FORMAT_R32G32B32_SFLOAT;
-							gp.getVertexInputAttributeDescription(location).offset = alignmentGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_BITANGENT, subMesh->getVertexBufferType());
-
-							location++;
-
-							gp.getVertexInputAttributeDescription(location).location = location;
-							gp.getVertexInputAttributeDescription(location).binding = 0;
-							gp.getVertexInputAttributeDescription(location).format = VK_FORMAT_R32G32B32_SFLOAT;
-							gp.getVertexInputAttributeDescription(location).offset = alignmentGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_TANGENT, subMesh->getVertexBufferType());
-						}
-					}
-
-					if ((vertexBufferType & VKTS_VERTEX_BUFFER_TYPE_TEXCOORD) == VKTS_VERTEX_BUFFER_TYPE_TEXCOORD)
-					{
-						location++;
-
-						gp.getVertexInputAttributeDescription(location).location = location;
-						gp.getVertexInputAttributeDescription(location).binding = 0;
-						gp.getVertexInputAttributeDescription(location).format = VK_FORMAT_R32G32_SFLOAT;
-						gp.getVertexInputAttributeDescription(location).offset = alignmentGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_TEXCOORD, subMesh->getVertexBufferType());
-					}
-
-
-					if ((vertexBufferType & VKTS_VERTEX_BUFFER_TYPE_BONES) == VKTS_VERTEX_BUFFER_TYPE_BONES)
-					{
-						location++;
-
-						gp.getVertexInputAttributeDescription(location).location = location;
-						gp.getVertexInputAttributeDescription(location).binding = 0;
-						gp.getVertexInputAttributeDescription(location).format = VK_FORMAT_R32G32B32A32_SFLOAT;
-						gp.getVertexInputAttributeDescription(location).offset = alignmentGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_BONE_INDICES0, subMesh->getVertexBufferType());
-
-						location++;
-
-						gp.getVertexInputAttributeDescription(location).location = location;
-						gp.getVertexInputAttributeDescription(location).binding = 0;
-						gp.getVertexInputAttributeDescription(location).format = VK_FORMAT_R32G32B32A32_SFLOAT;
-						gp.getVertexInputAttributeDescription(location).offset = alignmentGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_BONE_INDICES1, subMesh->getVertexBufferType());
-
-						location++;
-
-						gp.getVertexInputAttributeDescription(location).location = location;
-						gp.getVertexInputAttributeDescription(location).binding = 0;
-						gp.getVertexInputAttributeDescription(location).format = VK_FORMAT_R32G32B32A32_SFLOAT;
-						gp.getVertexInputAttributeDescription(location).offset = alignmentGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_BONE_WEIGHTS0, subMesh->getVertexBufferType());
-
-						location++;
-
-						gp.getVertexInputAttributeDescription(location).location = location;
-						gp.getVertexInputAttributeDescription(location).binding = 0;
-						gp.getVertexInputAttributeDescription(location).format = VK_FORMAT_R32G32B32A32_SFLOAT;
-						gp.getVertexInputAttributeDescription(location).offset = alignmentGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_BONE_WEIGHTS1, subMesh->getVertexBufferType());
-
-						location++;
-
-						gp.getVertexInputAttributeDescription(location).location = location;
-						gp.getVertexInputAttributeDescription(location).binding = 0;
-						gp.getVertexInputAttributeDescription(location).format = VK_FORMAT_R32_SFLOAT;
-						gp.getVertexInputAttributeDescription(location).offset = alignmentGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_BONE_NUMBERS, subMesh->getVertexBufferType());
-					}
-
-					//
-
-					gp.getPipelineInputAssemblyStateCreateInfo().topology = subMesh->getPrimitiveTopology();
-
-					gp.getViewports(0).x = 0.0f;
-					gp.getViewports(0).y = 0.0f;
-					gp.getViewports(0).width = 1.0f;
-					gp.getViewports(0).height = 1.0f;
-					gp.getViewports(0).minDepth = 0.0f;
-					gp.getViewports(0).maxDepth = 1.0f;
-
-
-					gp.getScissors(0).offset.x = 0;
-					gp.getScissors(0).offset.y = 0;
-					gp.getScissors(0).extent = {1, 1};
-
-
-					gp.getPipelineMultisampleStateCreateInfo();
-
-					gp.getPipelineDepthStencilStateCreateInfo().depthTestEnable = VK_TRUE;
-					gp.getPipelineDepthStencilStateCreateInfo().depthWriteEnable = VK_TRUE;
-					gp.getPipelineDepthStencilStateCreateInfo().depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
-
-					for (uint32_t i = 0; i < 3; i++)
-					{
-						gp.getPipelineColorBlendAttachmentState(i).blendEnable = VK_FALSE;
-						gp.getPipelineColorBlendAttachmentState(i).colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-
-	                	// For forward rendering, only one color buffer is attached.
-	                	if (subMesh->getBSDFMaterial()->getForwardRendering())
-	                	{
-	                		break;
-	                	}
-					}
-
-					gp.getDynamicState(0) = VK_DYNAMIC_STATE_VIEWPORT;
-					gp.getDynamicState(1) = VK_DYNAMIC_STATE_SCISSOR;
-
-
-					gp.getGraphicsPipelineCreateInfo().layout = currentPipelineLayout->getPipelineLayout();
-					gp.getGraphicsPipelineCreateInfo().renderPass = currentRenderPass->getRenderPass();
-
-
-					auto pipeline = pipelineCreateGraphics(assetManager->getContextObject()->getDevice()->getDevice(), VK_NULL_HANDLE, gp.getGraphicsPipelineCreateInfo(), vertexBufferType);
-
-					if (!pipeline.get())
-					{
-						logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create graphics pipeline.");
-
-						return VK_FALSE;
-					}
-
-					subMesh->setGraphicsPipeline(pipeline);
+                	if (!createSubMeshGraphicsPipeline(assetManager, subMesh))
+                	{
+                		return VK_FALSE;
+                	}
                 }
 
                 //
@@ -4695,14 +4132,14 @@ ISceneSP VKTS_APIENTRY scenegraphLoadScene(const char* filename, const IAssetMan
         }
     }
 
-    // Gather all cameras and add too scene.
+    // Gather all cameras and add to scene.
 
     for (size_t i = 0; i < assetManager->getAllCameras().values().size(); i++)
     {
     	scene->addCamera(assetManager->getAllCameras().valueAt(i));
     }
 
-    // Gather all lights and add too scene.
+    // Gather all lights and add to scene.
 
     for (size_t i = 0; i < assetManager->getAllLights().values().size(); i++)
     {
