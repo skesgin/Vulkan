@@ -1204,7 +1204,7 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
                 return VK_FALSE;
             }
 
-            textureObject = scenegraphCreateTextureObject(fdata[0], fdata[1], fdata[2], VK_FORMAT_R8G8B8_UNORM, context);
+            textureObject = scenegraphCreateTextureObject(context, glm::vec4(fdata[0], fdata[1], fdata[2], 1.0f), VK_FORMAT_R8G8B8_UNORM);
 
             if (!textureObject.get())
             {
@@ -1229,7 +1229,7 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
                 return VK_FALSE;
             }
 
-            textureObject = scenegraphCreateTextureObject(fdata[0], 0.0f, 0.0f, VK_FORMAT_R8_UNORM, context);
+            textureObject = scenegraphCreateTextureObject(context, glm::vec4(fdata[0], 0.0f, 0.0f, 1.0f), VK_FORMAT_R8_UNORM);
 
             if (!textureObject.get())
             {
@@ -1254,7 +1254,7 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
                 return VK_FALSE;
             }
 
-            textureObject = scenegraphCreateTextureObject(fdata[0], 0.0f, 0.0f, VK_FORMAT_R8_UNORM, context);
+            textureObject = scenegraphCreateTextureObject(context, glm::vec4(fdata[0], 0.0f, 0.0f, 1.0f), VK_FORMAT_R8_UNORM);
 
             if (!textureObject.get())
             {
@@ -1279,7 +1279,7 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
                 return VK_FALSE;
             }
 
-            textureObject = scenegraphCreateTextureObject(fdata[0] * 0.5f + 0.5f, fdata[1] * 0.5f + 0.5f, fdata[2] * 0.5f + 0.5f, VK_FORMAT_R8G8B8_UNORM, context);
+            textureObject = scenegraphCreateTextureObject(context, glm::vec4(fdata[0] * 0.5f + 0.5f, fdata[1] * 0.5f + 0.5f, fdata[2] * 0.5f + 0.5f, 0.5f), VK_FORMAT_R8G8B8_UNORM);
 
             if (!textureObject.get())
             {
@@ -1404,7 +1404,7 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
                 return VK_FALSE;
             }
 
-            textureObject = scenegraphCreateTextureObject(fdata[0], fdata[1], fdata[2], VK_FORMAT_R8G8B8_UNORM, context);
+            textureObject = scenegraphCreateTextureObject(context, glm::vec4(fdata[0], fdata[1], fdata[2], 1.0f), VK_FORMAT_R8G8B8_UNORM);
 
             if (!textureObject.get())
             {
@@ -1429,7 +1429,7 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
                 return VK_FALSE;
             }
 
-            textureObject = scenegraphCreateTextureObject(fdata[0], fdata[1], fdata[2], VK_FORMAT_R8G8B8_UNORM, context);
+            textureObject = scenegraphCreateTextureObject(context, glm::vec4(fdata[0], fdata[1], fdata[2], 1.0f), VK_FORMAT_R8G8B8_UNORM);
 
             if (!textureObject.get())
             {
@@ -1454,7 +1454,7 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
                 return VK_FALSE;
             }
 
-            textureObject = scenegraphCreateTextureObject(fdata[0], fdata[1], fdata[2], VK_FORMAT_R8G8B8_UNORM, context);
+            textureObject = scenegraphCreateTextureObject(context, glm::vec4(fdata[0], fdata[1], fdata[2], 1.0f), VK_FORMAT_R8G8B8_UNORM);
 
             if (!textureObject.get())
             {
@@ -1479,7 +1479,7 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
                 return VK_FALSE;
             }
 
-            textureObject = scenegraphCreateTextureObject(fdata[0], 0.0f, 0.0f, VK_FORMAT_R8_UNORM, context);
+            textureObject = scenegraphCreateTextureObject(context, glm::vec4(fdata[0], 0.0f, 0.0f, 1.0f), VK_FORMAT_R8_UNORM);
 
             if (!textureObject.get())
             {
@@ -1504,7 +1504,7 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
                 return VK_FALSE;
             }
 
-            textureObject = scenegraphCreateTextureObject(fdata[0], fdata[1], fdata[2], VK_FORMAT_R8G8B8_UNORM, context);
+            textureObject = scenegraphCreateTextureObject(context, glm::vec4(fdata[0], fdata[1], fdata[2], 1.0f), VK_FORMAT_R8G8B8_UNORM);
 
             if (!textureObject.get())
             {
@@ -1529,7 +1529,7 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
                 return VK_FALSE;
             }
 
-            textureObject = scenegraphCreateTextureObject(fdata[0], 0.0f, 0.0f, VK_FORMAT_R8_UNORM, context);
+            textureObject = scenegraphCreateTextureObject(context, glm::vec4(fdata[0], 0.0f, 0.0f, 1.0f), VK_FORMAT_R8_UNORM);
 
             if (!textureObject.get())
             {

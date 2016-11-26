@@ -1015,180 +1015,14 @@ IImageDataSP VKTS_APIENTRY imageDataCreate(const std::string& name, const uint32
     return IImageDataSP(new ImageData(name, imageType, format, { width, height, depth }, 1, 1, allOffsets, &data[0], width * height * depth * numberChannels * bytesPerChannel));
 }
 
-IImageDataSP VKTS_APIENTRY imageDataCreate(const std::string& name, const uint32_t width, const uint32_t height, const uint32_t depth, const float red, const float green, const float blue, const float alpha, const VkImageType imageType, const VkFormat& format)
+IImageDataSP VKTS_APIENTRY imageDataCreate(const std::string& name, const uint32_t width, const uint32_t height, const uint32_t depth, const glm::vec4& color, const VkImageType imageType, const VkFormat& format)
 {
-    if (width < 1 || height < 1 || depth < 1)
-    {
+	auto currentImageData = imageDataCreate(name, width, height, depth, imageType, format);
+
+	if (!currentImageData.get())
+	{
         return IImageDataSP();
     }
-
-    if (imageType == VK_IMAGE_TYPE_1D && height != 1 && depth != 1)
-    {
-        return IImageDataSP();
-    }
-    else if (imageType == VK_IMAGE_TYPE_2D && depth != 1)
-    {
-        return IImageDataSP();
-    }
-
-    int32_t bytesPerChannel;
-    uint32_t numberChannels;
-
-    std::unique_ptr<uint8_t[]> data;
-
-    uint8_t rgbaUINT8[4];
-    float rgbaFLOAT[4];
-
-    VkBool32 isUNORM = VK_FALSE;
-    VkBool32 isSFLOAT = VK_FALSE;
-
-    if (format == VK_FORMAT_R8_UNORM)
-    {
-        bytesPerChannel = 1;
-
-        numberChannels = 1;
-
-        rgbaUINT8[0] = static_cast<uint8_t>(glm::clamp(red, 0.0f, 1.0f) * 255.0f);
-
-        isUNORM = VK_TRUE;
-    }
-    else if (format == VK_FORMAT_R8G8_UNORM)
-    {
-        bytesPerChannel = 1;
-
-        numberChannels = 2;
-
-        rgbaUINT8[0] = static_cast<uint8_t>(glm::clamp(red, 0.0f, 1.0f) * 255.0f);
-
-        rgbaUINT8[1] = static_cast<uint8_t>(glm::clamp(green, 0.0f, 1.0f) * 255.0f);
-
-        isUNORM = VK_TRUE;
-    }
-    else if (format == VK_FORMAT_R8G8B8_UNORM)
-    {
-        bytesPerChannel = 1;
-
-        numberChannels = 3;
-
-        rgbaUINT8[0] = static_cast<uint8_t>(glm::clamp(red, 0.0f, 1.0f) * 255.0f);
-
-        rgbaUINT8[1] = static_cast<uint8_t>(glm::clamp(green, 0.0f, 1.0f) * 255.0f);
-        rgbaUINT8[2] = static_cast<uint8_t>(glm::clamp(blue, 0.0f, 1.0f) * 255.0f);
-
-        isUNORM = VK_TRUE;
-    }
-    else if (format == VK_FORMAT_B8G8R8_UNORM)
-    {
-        bytesPerChannel = 1;
-
-        numberChannels = 3;
-
-        rgbaUINT8[2] = static_cast<uint8_t>(glm::clamp(red, 0.0f, 1.0f) * 255.0f);
-
-        rgbaUINT8[1] = static_cast<uint8_t>(glm::clamp(green, 0.0f, 1.0f) * 255.0f);
-
-        rgbaUINT8[0] = static_cast<uint8_t>(glm::clamp(blue, 0.0f, 1.0f) * 255.0f);
-
-        isUNORM = VK_TRUE;
-    }
-    else if (format == VK_FORMAT_R8G8B8A8_UNORM)
-    {
-        bytesPerChannel = 1;
-
-        numberChannels = 4;
-
-        rgbaUINT8[0] = static_cast<uint8_t>(glm::clamp(red, 0.0f, 1.0f) * 255.0f);
-
-        rgbaUINT8[1] = static_cast<uint8_t>(glm::clamp(green, 0.0f, 1.0f) * 255.0f);
-
-        rgbaUINT8[2] = static_cast<uint8_t>(glm::clamp(blue, 0.0f, 1.0f) * 255.0f);
-
-        rgbaUINT8[3] = static_cast<uint8_t>(glm::clamp(alpha, 0.0f, 1.0f) * 255.0f);
-
-        isUNORM = VK_TRUE;
-    }
-    else if (format == VK_FORMAT_B8G8R8A8_UNORM)
-    {
-        bytesPerChannel = 1;
-
-        numberChannels = 4;
-
-        rgbaUINT8[2] = static_cast<uint8_t>(glm::clamp(red, 0.0f, 1.0f) * 255.0f);
-
-        rgbaUINT8[1] = static_cast<uint8_t>(glm::clamp(green, 0.0f, 1.0f) * 255.0f);
-
-        rgbaUINT8[0] = static_cast<uint8_t>(glm::clamp(blue, 0.0f, 1.0f) * 255.0f);
-
-        rgbaUINT8[3] = static_cast<uint8_t>(glm::clamp(alpha, 0.0f, 1.0f) * 255.0f);
-
-        isUNORM = VK_TRUE;
-    }
-    else if (format == VK_FORMAT_R32_SFLOAT)
-    {
-        bytesPerChannel = 4;
-
-        numberChannels = 1;
-
-        rgbaFLOAT[0] = red;
-
-        isSFLOAT = VK_TRUE;
-    }
-    else if (format == VK_FORMAT_R32G32_SFLOAT)
-    {
-        bytesPerChannel = 4;
-
-        numberChannels = 2;
-
-        rgbaFLOAT[0] = red;
-
-        rgbaFLOAT[1] = green;
-
-        isSFLOAT = VK_TRUE;
-    }
-    else if (format == VK_FORMAT_R32G32B32_SFLOAT)
-    {
-        bytesPerChannel = 4;
-
-        numberChannels = 3;
-
-        rgbaFLOAT[0] = red;
-
-        rgbaFLOAT[1] = green;
-
-        rgbaFLOAT[2] = blue;
-
-        isSFLOAT = VK_TRUE;
-    }
-    else if (format == VK_FORMAT_R32G32B32A32_SFLOAT)
-    {
-        bytesPerChannel = 4;
-
-        numberChannels = 4;
-
-        rgbaFLOAT[0] = red;
-
-        rgbaFLOAT[1] = green;
-
-        rgbaFLOAT[2] = blue;
-
-        rgbaFLOAT[3] = alpha;
-
-        isSFLOAT = VK_TRUE;
-    }
-    else
-    {
-        return IImageDataSP();
-    }
-
-    data = std::unique_ptr<uint8_t[]>(new uint8_t[width * height * depth * numberChannels * bytesPerChannel]);
-
-    if (!data.get())
-    {
-        return IImageDataSP();
-    }
-
-    uint8_t* currentChannel = nullptr;
-    float* currentChannelFLOAT = nullptr;
 
     for (uint32_t z = 0; z < depth; z++)
     {
@@ -1196,28 +1030,17 @@ IImageDataSP VKTS_APIENTRY imageDataCreate(const std::string& name, const uint32
         {
             for (uint32_t x = 0; x < width; x++)
             {
-                for (uint32_t channel = 0; channel < numberChannels; channel++)
-                {
-                    currentChannel = &data[channel * bytesPerChannel + x * numberChannels * bytesPerChannel + y * width * numberChannels * bytesPerChannel + z * height * width * numberChannels * bytesPerChannel];
-
-                    if (isUNORM)
-                    {
-                        *currentChannel = rgbaUINT8[channel];
-                    }
-                    else if (isSFLOAT)
-                    {
-                        currentChannelFLOAT = reinterpret_cast<float*>(currentChannel);
-
-                        *currentChannelFLOAT = rgbaFLOAT[channel];
-                    }
-                }
+            	currentImageData->setTexel(color, x, y, z, 0, 0);
             }
         }
     }
 
-    std::vector<size_t> allOffsets{0};
+    return currentImageData;
+}
 
-    return IImageDataSP(new ImageData(name, imageType, format, { width, height, depth }, 1, 1, allOffsets, &data[0], width * height * depth * numberChannels * bytesPerChannel));
+IImageDataSP VKTS_APIENTRY imageDataCreate(const std::string& name, const uint32_t width, const uint32_t height, const uint32_t depth, const float red, const float green, const float blue, const float alpha, const VkImageType imageType, const VkFormat& format)
+{
+	return imageDataCreate(name, width, height, depth, glm::vec4(red, green, blue, alpha), imageType, format);
 }
 
 IImageDataSP VKTS_APIENTRY imageDataConvert(const IImageDataSP& sourceImage, const VkFormat targetFormat, const std::string& name)

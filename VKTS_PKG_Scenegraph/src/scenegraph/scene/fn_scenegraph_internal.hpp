@@ -70,7 +70,7 @@ VKTS_APICALL VkBool32 VKTS_APIENTRY scenegraphParseUIntHex(const char* buffer, u
 
 //
 
-VKTS_APICALL ITextureObjectSP VKTS_APIENTRY scenegraphCreateTextureObject(const float red, const float green, const float blue, const VkFormat format, const IContextSP& context);
+VKTS_APICALL ITextureObjectSP VKTS_APIENTRY scenegraphCreateTextureObject(const IContextSP& context, const glm::vec4& color, const VkFormat format);
 
 VKTS_APICALL IBufferObjectSP VKTS_APIENTRY scenegraphCreateUniformBufferObject(const IContextSP& context, const VkDeviceSize size);
 

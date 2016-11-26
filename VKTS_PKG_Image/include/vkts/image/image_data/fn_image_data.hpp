@@ -112,6 +112,12 @@ VKTS_APICALL IImageDataSP VKTS_APIENTRY imageDataCreate(const std::string& name,
  *
  * @ThreadSafe
  */
+VKTS_APICALL IImageDataSP VKTS_APIENTRY imageDataCreate(const std::string& name, const uint32_t width, const uint32_t height, const uint32_t depth, const glm::vec4& color, const VkImageType imageType, const VkFormat& format);
+
+/**
+ *
+ * @ThreadSafe
+ */
 VKTS_APICALL IImageDataSP VKTS_APIENTRY imageDataCreate(const std::string& name, const uint32_t width, const uint32_t height, const uint32_t depth, const float red, const float green, const float blue, const float alpha, const VkImageType imageType, const VkFormat& format);
 
 /**

@@ -31,9 +31,9 @@
 namespace vkts
 {
 
-ITextureObjectSP VKTS_APIENTRY scenegraphCreateTextureObject(const float red, const float green, const float blue, const VkFormat format, const IContextSP& context)
+ITextureObjectSP VKTS_APIENTRY scenegraphCreateTextureObject(const IContextSP& context, const glm::vec4& color, const VkFormat format)
 {
-	std::string colorName = imageDataGetColorName(format, glm::vec4(red, green, blue, 0.0f));
+	std::string colorName = imageDataGetColorName(format, color);
 
     if (colorName == "")
     {
@@ -57,7 +57,7 @@ ITextureObjectSP VKTS_APIENTRY scenegraphCreateTextureObject(const float red, co
 
     if (!imageData.get())
     {
-        imageData = imageDataCreate(imageDataName, 1, 1, 1, red, green, blue, 0.0f, VK_IMAGE_TYPE_2D, format);
+        imageData = imageDataCreate(imageDataName, 1, 1, 1, color, VK_IMAGE_TYPE_2D, format);
 
         logPrint(VKTS_LOG_DEBUG, __FILE__, __LINE__, "Create image '%s'", imageDataName);
 
@@ -82,7 +82,7 @@ ITextureObjectSP VKTS_APIENTRY scenegraphCreateTextureObject(const float red, co
 
             //
 
-        	colorName = imageDataGetColorName(format, glm::vec4(red, green, blue, 0.0f));
+        	colorName = imageDataGetColorName(format, color);
 
             if (colorName == "")
             {
