@@ -26,31 +26,28 @@
 
 #include <vkts/scenegraph.hpp>
 
-#include "Animation.hpp"
-#include "BSDFMaterial.hpp"
-#include "Camera.hpp"
-#include "Channel.hpp"
-#include "Context.hpp"
-#include "CopyConstraint.hpp"
-#include "Light.hpp"
-#include "LimitConstraint.hpp"
-#include "Marker.hpp"
-#include "Mesh.hpp"
-#include "Node.hpp"
-#include "Object.hpp"
-#include "ParticleSystem.hpp"
-#include "PhongMaterial.hpp"
-#include "Scene.hpp"
-#include "SubMesh.hpp"
-
-#include "fn_scenegraph_internal.hpp"
+#include "../scene/Animation.hpp"
+#include "../scene/BSDFMaterial.hpp"
+#include "../scene/Camera.hpp"
+#include "../scene/Channel.hpp"
+#include "../scene/CopyConstraint.hpp"
+#include "../scene/Light.hpp"
+#include "../scene/LimitConstraint.hpp"
+#include "../scene/Marker.hpp"
+#include "../scene/Mesh.hpp"
+#include "../scene/Node.hpp"
+#include "../scene/Object.hpp"
+#include "../scene/ParticleSystem.hpp"
+#include "../scene/PhongMaterial.hpp"
+#include "../scene/Scene.hpp"
+#include "../scene/SubMesh.hpp"
 
 namespace vkts
 {
 
-static VkBool32 scenegraphLoadImages(const char* directory, const char* filename, const IContextSP& context)
+static VkBool32 scenegraphLoadImages(const char* directory, const char* filename, const IAssetManagerSP& assetManager)
 {
-    if (!directory || !filename || !context.get())
+    if (!directory || !filename || !assetManager.get())
     {
         return VK_FALSE;
     }
@@ -81,13 +78,13 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
 
     while (textBuffer->gets(buffer, VKTS_MAX_BUFFER_CHARS))
     {
-        if (scenegraphParseSkipBuffer(buffer))
+        if (parseSkipBuffer(buffer))
         {
             continue;
         }
-        if (scenegraphParseIsToken(buffer, "name"))
+        if (parseIsToken(buffer, "name"))
         {
-            if (!scenegraphParseString(buffer, sdata))
+            if (!parseString(buffer, sdata))
             {
             	logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Invalid name");
 
@@ -100,36 +97,36 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
             environment = VK_FALSE;
             preFiltered = VK_FALSE;
         }
-        else if (scenegraphParseIsToken(buffer, "mipmap"))
+        else if (parseIsToken(buffer, "mipmap"))
         {
-            if (!scenegraphParseBool(buffer, &bdata))
+            if (!parseBool(buffer, &bdata))
             {
                 return VK_FALSE;
             }
 
             mipMap = bdata;
         }
-        else if (scenegraphParseIsToken(buffer, "environment"))
+        else if (parseIsToken(buffer, "environment"))
         {
-            if (!scenegraphParseBool(buffer, &bdata))
+            if (!parseBool(buffer, &bdata))
             {
                 return VK_FALSE;
             }
 
             environment = bdata;
         }
-        else if (scenegraphParseIsToken(buffer, "pre_filtered"))
+        else if (parseIsToken(buffer, "pre_filtered"))
         {
-            if (!scenegraphParseBool(buffer, &bdata))
+            if (!parseBool(buffer, &bdata))
             {
                 return VK_FALSE;
             }
 
             preFiltered = bdata;
         }
-        else if (scenegraphParseIsToken(buffer, "image_data"))
+        else if (parseIsToken(buffer, "image_data"))
         {
-            if (!scenegraphParseString(buffer, sdata))
+            if (!parseString(buffer, sdata))
             {
                 return VK_FALSE;
             }
@@ -148,11 +145,11 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
 
             std::string finalImageDataFilename = std::string(directory) + std::string(sdata);
 
-            imageData = context->useImageData(finalImageDataFilename.c_str());
+            imageData = assetManager->useImageData(finalImageDataFilename.c_str());
 
             if (!imageData.get())
             {
-                imageData = context->useImageData(sdata);
+                imageData = assetManager->useImageData(sdata);
 
                 if (!imageData.get())
                 {
@@ -175,13 +172,13 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
                     VkImageTiling imageTiling;
                     VkMemoryPropertyFlags memoryPropertyFlags;
 
-                    if (!context->getContextObject()->getPhysicalDevice()->getGetImageTilingAndMemoryProperty(imageTiling, memoryPropertyFlags, imageData->getFormat(), imageData->getImageType(), 0, imageData->getExtent3D(), imageData->getMipLevels(), 1, VK_SAMPLE_COUNT_1_BIT, imageData->getSize()))
+                    if (!assetManager->getContextObject()->getPhysicalDevice()->getGetImageTilingAndMemoryProperty(imageTiling, memoryPropertyFlags, imageData->getFormat(), imageData->getImageType(), 0, imageData->getExtent3D(), imageData->getMipLevels(), 1, VK_SAMPLE_COUNT_1_BIT, imageData->getSize()))
                     {
                         if (imageData->getFormat() == VK_FORMAT_R8G8B8_UNORM)
                         {
                             imageData = imageDataConvert(imageData, VK_FORMAT_R8G8B8A8_UNORM, imageData->getName());
 
-                            if (!context->getContextObject()->getPhysicalDevice()->getGetImageTilingAndMemoryProperty(imageTiling, memoryPropertyFlags, imageData->getFormat(), imageData->getImageType(), 0, imageData->getExtent3D(), imageData->getMipLevels(), 1, VK_SAMPLE_COUNT_1_BIT, imageData->getSize()))
+                            if (!assetManager->getContextObject()->getPhysicalDevice()->getGetImageTilingAndMemoryProperty(imageTiling, memoryPropertyFlags, imageData->getFormat(), imageData->getImageType(), 0, imageData->getExtent3D(), imageData->getMipLevels(), 1, VK_SAMPLE_COUNT_1_BIT, imageData->getSize()))
                             {
                                 logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Format not supported.");
 
@@ -431,14 +428,14 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
                                 return VK_FALSE;
                             }
 
-                            context->addImageData(diffuseImageData);
+                            assetManager->addImageData(diffuseImageData);
 
                             //
 
                             VkImageTiling imageTiling;
                             VkMemoryPropertyFlags memoryPropertyFlags;
 
-                            if (!context->getContextObject()->getPhysicalDevice()->getGetImageTilingAndMemoryProperty(imageTiling, memoryPropertyFlags, diffuseImageData->getFormat(), diffuseImageData->getImageType(), 0, diffuseImageData->getExtent3D(), diffuseImageData->getMipLevels(), 1, VK_SAMPLE_COUNT_1_BIT, diffuseImageData->getSize()))
+                            if (!assetManager->getContextObject()->getPhysicalDevice()->getGetImageTilingAndMemoryProperty(imageTiling, memoryPropertyFlags, diffuseImageData->getFormat(), diffuseImageData->getImageType(), 0, diffuseImageData->getExtent3D(), diffuseImageData->getMipLevels(), 1, VK_SAMPLE_COUNT_1_BIT, diffuseImageData->getSize()))
                             {
                                 logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Format not supported.");
 
@@ -481,11 +478,11 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
                             IImageSP stageImage;
                             IBufferSP stageBuffer;
 
-                            auto imageObject = imageObjectCreate(stageImage, stageBuffer, stageDeviceMemory, context->getContextObject(), context->getCommandBuffer(), imageObjectName + "_LAMBERT", diffuseImageData, imageCreateInfo, srcAccessMask, VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, subresourceRange, memoryPropertyFlags);
+                            auto imageObject = imageObjectCreate(stageImage, stageBuffer, stageDeviceMemory, assetManager->getContextObject(), assetManager->getCommandBuffer(), imageObjectName + "_LAMBERT", diffuseImageData, imageCreateInfo, srcAccessMask, VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, subresourceRange, memoryPropertyFlags);
 
-                            context->addStageImage(stageImage);
-                            context->addStageBuffer(stageBuffer);
-                            context->addStageDeviceMemory(stageDeviceMemory);
+                            assetManager->addStageImage(stageImage);
+                            assetManager->addStageBuffer(stageBuffer);
+                            assetManager->addStageDeviceMemory(stageDeviceMemory);
 
                             if (!imageObject.get())
                             {
@@ -494,7 +491,7 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
                                 return VK_FALSE;
                             }
 
-                            context->addImageObject(imageObject);
+                            assetManager->addImageObject(imageObject);
 
                             //
                             //
@@ -577,11 +574,11 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
                                 return VK_FALSE;
                             }
 
-                            context->addImageData(cookTorranceImageData);
+                            assetManager->addImageData(cookTorranceImageData);
 
                             //
 
-                            if (!context->getContextObject()->getPhysicalDevice()->getGetImageTilingAndMemoryProperty(imageTiling, memoryPropertyFlags, cookTorranceImageData->getFormat(), cookTorranceImageData->getImageType(), 0, cookTorranceImageData->getExtent3D(), cookTorranceImageData->getMipLevels(), 1, VK_SAMPLE_COUNT_1_BIT, cookTorranceImageData->getSize()))
+                            if (!assetManager->getContextObject()->getPhysicalDevice()->getGetImageTilingAndMemoryProperty(imageTiling, memoryPropertyFlags, cookTorranceImageData->getFormat(), cookTorranceImageData->getImageType(), 0, cookTorranceImageData->getExtent3D(), cookTorranceImageData->getMipLevels(), 1, VK_SAMPLE_COUNT_1_BIT, cookTorranceImageData->getSize()))
                             {
                                 logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Format not supported.");
 
@@ -620,11 +617,11 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
 
                             subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, cookTorranceImageData->getMipLevels(), 0, cookTorranceImageData->getArrayLayers()};
 
-                            imageObject = imageObjectCreate(stageImage, stageBuffer, stageDeviceMemory, context->getContextObject(), context->getCommandBuffer(), imageObjectName + "_COOKTORRANCE", cookTorranceImageData, imageCreateInfo, srcAccessMask, VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, subresourceRange, memoryPropertyFlags);
+                            imageObject = imageObjectCreate(stageImage, stageBuffer, stageDeviceMemory, assetManager->getContextObject(), assetManager->getCommandBuffer(), imageObjectName + "_COOKTORRANCE", cookTorranceImageData, imageCreateInfo, srcAccessMask, VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, subresourceRange, memoryPropertyFlags);
 
-                            context->addStageImage(stageImage);
-                            context->addStageBuffer(stageBuffer);
-                            context->addStageDeviceMemory(stageDeviceMemory);
+                            assetManager->addStageImage(stageImage);
+                            assetManager->addStageBuffer(stageBuffer);
+                            assetManager->addStageDeviceMemory(stageDeviceMemory);
 
                             if (!imageObject.get())
                             {
@@ -633,7 +630,7 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
                                 return VK_FALSE;
                             }
 
-                            context->addImageObject(imageObject);
+                            assetManager->addImageObject(imageObject);
 
                             //
                             //
@@ -664,10 +661,10 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
 									return VK_FALSE;
                                 }
 
-                                context->addImageData(lut);
+                                assetManager->addImageData(lut);
                             }
 
-                            if (!context->getContextObject()->getPhysicalDevice()->getGetImageTilingAndMemoryProperty(imageTiling, memoryPropertyFlags, lut->getFormat(), lut->getImageType(), 0, lut->getExtent3D(), lut->getMipLevels(), 1, VK_SAMPLE_COUNT_1_BIT, lut->getSize()))
+                            if (!assetManager->getContextObject()->getPhysicalDevice()->getGetImageTilingAndMemoryProperty(imageTiling, memoryPropertyFlags, lut->getFormat(), lut->getImageType(), 0, lut->getExtent3D(), lut->getMipLevels(), 1, VK_SAMPLE_COUNT_1_BIT, lut->getSize()))
                             {
                                 logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Format not supported.");
 
@@ -705,24 +702,24 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
 
                             subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, lut->getMipLevels(), 0, lut->getArrayLayers()};
 
-                            imageObject = imageObjectCreate(stageImage, stageBuffer, stageDeviceMemory, context->getContextObject(), context->getCommandBuffer(), lutName, lut, imageCreateInfo, srcAccessMask, VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, subresourceRange, memoryPropertyFlags);
+                            imageObject = imageObjectCreate(stageImage, stageBuffer, stageDeviceMemory, assetManager->getContextObject(), assetManager->getCommandBuffer(), lutName, lut, imageCreateInfo, srcAccessMask, VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, subresourceRange, memoryPropertyFlags);
 
-                            context->addStageImage(stageImage);
-                            context->addStageBuffer(stageBuffer);
-                            context->addStageDeviceMemory(stageDeviceMemory);
+                            assetManager->addStageImage(stageImage);
+                            assetManager->addStageBuffer(stageBuffer);
+                            assetManager->addStageDeviceMemory(stageDeviceMemory);
 
                             if (!imageObject.get())
                             {
                                 return VK_FALSE;
                             }
 
-                            context->addImageObject(imageObject);
+                            assetManager->addImageObject(imageObject);
                         }
                     }
 
                     //
 
-                    context->addImageData(imageData);
+                    assetManager->addImageData(imageData);
                 }
             }
 
@@ -742,7 +739,7 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
             VkImageTiling imageTiling;
             VkMemoryPropertyFlags memoryPropertyFlags;
 
-            if (!context->getContextObject()->getPhysicalDevice()->getGetImageTilingAndMemoryProperty(imageTiling, memoryPropertyFlags, imageData->getFormat(), imageData->getImageType(), 0, imageData->getExtent3D(), imageData->getMipLevels(), 1, VK_SAMPLE_COUNT_1_BIT, imageData->getSize()))
+            if (!assetManager->getContextObject()->getPhysicalDevice()->getGetImageTilingAndMemoryProperty(imageTiling, memoryPropertyFlags, imageData->getFormat(), imageData->getImageType(), 0, imageData->getExtent3D(), imageData->getMipLevels(), 1, VK_SAMPLE_COUNT_1_BIT, imageData->getSize()))
             {
                 logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Format not supported.");
 
@@ -785,11 +782,11 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
             IImageSP stageImage;
             IBufferSP stageBuffer;
 
-            auto imageObject = imageObjectCreate(stageImage, stageBuffer, stageDeviceMemory, context->getContextObject(), context->getCommandBuffer(), imageObjectName, imageData, imageCreateInfo, srcAccessMask, VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, subresourceRange, memoryPropertyFlags);
+            auto imageObject = imageObjectCreate(stageImage, stageBuffer, stageDeviceMemory, assetManager->getContextObject(), assetManager->getCommandBuffer(), imageObjectName, imageData, imageCreateInfo, srcAccessMask, VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, subresourceRange, memoryPropertyFlags);
 
-            context->addStageImage(stageImage);
-            context->addStageBuffer(stageBuffer);
-            context->addStageDeviceMemory(stageDeviceMemory);
+            assetManager->addStageImage(stageImage);
+            assetManager->addStageBuffer(stageBuffer);
+            assetManager->addStageDeviceMemory(stageDeviceMemory);
 
             if (!imageObject.get())
             {
@@ -798,20 +795,20 @@ static VkBool32 scenegraphLoadImages(const char* directory, const char* filename
                 return VK_FALSE;
             }
 
-            context->addImageObject(imageObject);
+            assetManager->addImageObject(imageObject);
         }
         else
         {
-            scenegraphParseUnknownBuffer(buffer);
+            parseUnknownBuffer(buffer);
         }
     }
 
     return VK_TRUE;
 }
 
-static VkBool32 scenegraphLoadTextureObjects(const char* directory, const char* filename, const IContextSP& context)
+static VkBool32 scenegraphLoadTextureObjects(const char* directory, const char* filename, const IAssetManagerSP& assetManager)
 {
-    if (!directory || !filename || !context.get())
+    if (!directory || !filename || !assetManager.get())
     {
         return VK_FALSE;
     }
@@ -844,28 +841,28 @@ static VkBool32 scenegraphLoadTextureObjects(const char* directory, const char* 
 
     while (textBuffer->gets(buffer, VKTS_MAX_BUFFER_CHARS))
     {
-        if (scenegraphParseSkipBuffer(buffer))
+        if (parseSkipBuffer(buffer))
         {
             continue;
         }
 
-        if (scenegraphParseIsToken(buffer, "image_library"))
+        if (parseIsToken(buffer, "image_library"))
         {
-            if (!scenegraphParseString(buffer, sdata))
+            if (!parseString(buffer, sdata))
             {
                 return VK_FALSE;
             }
 
-            if (!scenegraphLoadImages(directory, sdata, context))
+            if (!scenegraphLoadImages(directory, sdata, assetManager))
             {
                 logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load images: '%s'", sdata);
 
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "name"))
+        else if (parseIsToken(buffer, "name"))
         {
-            if (!scenegraphParseString(buffer, sdata))
+            if (!parseString(buffer, sdata))
             {
                 return VK_FALSE;
             }
@@ -876,36 +873,36 @@ static VkBool32 scenegraphLoadTextureObjects(const char* directory, const char* 
             environment = VK_FALSE;
             preFiltered = VK_FALSE;
         }
-        else if (scenegraphParseIsToken(buffer, "mipmap"))
+        else if (parseIsToken(buffer, "mipmap"))
         {
-            if (!scenegraphParseBool(buffer, &bdata))
+            if (!parseBool(buffer, &bdata))
             {
                 return VK_FALSE;
             }
 
             mipMap = bdata;
         }
-        else if (scenegraphParseIsToken(buffer, "environment"))
+        else if (parseIsToken(buffer, "environment"))
         {
-            if (!scenegraphParseBool(buffer, &bdata))
+            if (!parseBool(buffer, &bdata))
             {
                 return VK_FALSE;
             }
 
             environment = bdata;
         }
-        else if (scenegraphParseIsToken(buffer, "pre_filtered"))
+        else if (parseIsToken(buffer, "pre_filtered"))
         {
-            if (!scenegraphParseBool(buffer, &bdata))
+            if (!parseBool(buffer, &bdata))
             {
                 return VK_FALSE;
             }
 
             preFiltered = bdata;
         }
-        else if (scenegraphParseIsToken(buffer, "image"))
+        else if (parseIsToken(buffer, "image"))
         {
-            if (!scenegraphParseString(buffer, sdata))
+            if (!parseString(buffer, sdata))
             {
                 return VK_FALSE;
             }
@@ -929,7 +926,7 @@ static VkBool32 scenegraphLoadTextureObjects(const char* directory, const char* 
             	mipMap = VK_TRUE;
             }
 
-            imageObject = context->useImageObject(sdata);
+            imageObject = assetManager->useImageObject(sdata);
 
 			if (!imageObject.get())
 			{
@@ -945,14 +942,14 @@ static VkBool32 scenegraphLoadTextureObjects(const char* directory, const char* 
                 return VK_FALSE;
             }
 
-            auto textureObject = textureObjectCreate(context->getContextObject(), textureObjectName, mipMap, imageObject, context->getSamplerCreateInfo());
+            auto textureObject = textureObjectCreate(assetManager->getContextObject(), textureObjectName, mipMap, imageObject, assetManager->getSamplerCreateInfo());
 
             if (!textureObject.get())
             {
                 return VK_FALSE;
             }
 
-            context->addTextureObject(textureObject);
+            assetManager->addTextureObject(textureObject);
 
             //
 
@@ -960,7 +957,7 @@ static VkBool32 scenegraphLoadTextureObjects(const char* directory, const char* 
             {
             	auto lambertName = std::string(sdata) + "_LAMBERT";
 
-                imageObject = context->useImageObject(lambertName);
+                imageObject = assetManager->useImageObject(lambertName);
 
     			if (!imageObject.get())
     			{
@@ -969,20 +966,20 @@ static VkBool32 scenegraphLoadTextureObjects(const char* directory, const char* 
     				return VK_FALSE;
     			}
 
-                textureObject = textureObjectCreate(context->getContextObject(), textureObjectName + "_LAMBERT", mipMap, imageObject, context->getSamplerCreateInfo());
+                textureObject = textureObjectCreate(assetManager->getContextObject(), textureObjectName + "_LAMBERT", mipMap, imageObject, assetManager->getSamplerCreateInfo());
 
                 if (!textureObject.get())
                 {
                     return VK_FALSE;
                 }
 
-                context->addTextureObject(textureObject);
+                assetManager->addTextureObject(textureObject);
 
                 //
 
             	auto cookTorranceName = std::string(sdata) + "_COOKTORRANCE";
 
-                imageObject = context->useImageObject(cookTorranceName);
+                imageObject = assetManager->useImageObject(cookTorranceName);
 
     			if (!imageObject.get())
     			{
@@ -991,20 +988,20 @@ static VkBool32 scenegraphLoadTextureObjects(const char* directory, const char* 
     				return VK_FALSE;
     			}
 
-                textureObject = textureObjectCreate(context->getContextObject(), textureObjectName + "_COOKTORRANCE", mipMap, imageObject, context->getSamplerCreateInfo());
+                textureObject = textureObjectCreate(assetManager->getContextObject(), textureObjectName + "_COOKTORRANCE", mipMap, imageObject, assetManager->getSamplerCreateInfo());
 
                 if (!textureObject.get())
                 {
                     return VK_FALSE;
                 }
 
-                context->addTextureObject(textureObject);
+                assetManager->addTextureObject(textureObject);
 
                 //
 
             	auto lutName = "BSDF_LUT_" + std::to_string(VKTS_BSDF_LENGTH) + "_" + std::to_string(VKTS_BSDF_M);
 
-                imageObject = context->useImageObject(lutName);
+                imageObject = assetManager->useImageObject(lutName);
 
     			if (!imageObject.get())
     			{
@@ -1015,35 +1012,35 @@ static VkBool32 scenegraphLoadTextureObjects(const char* directory, const char* 
 
     			//
 
-    			VkSamplerCreateInfo lutSamplerCreateInfo = context->getSamplerCreateInfo();
+    			VkSamplerCreateInfo lutSamplerCreateInfo = assetManager->getSamplerCreateInfo();
 
     			lutSamplerCreateInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_NEAREST;
     			lutSamplerCreateInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
     			lutSamplerCreateInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
     			lutSamplerCreateInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
 
-                textureObject = textureObjectCreate(context->getContextObject(), lutName, VK_FALSE, imageObject, lutSamplerCreateInfo);
+                textureObject = textureObjectCreate(assetManager->getContextObject(), lutName, VK_FALSE, imageObject, lutSamplerCreateInfo);
 
                 if (!textureObject.get())
                 {
                     return VK_FALSE;
                 }
 
-                context->addTextureObject(textureObject);
+                assetManager->addTextureObject(textureObject);
             }
         }
         else
         {
-            scenegraphParseUnknownBuffer(buffer);
+            parseUnknownBuffer(buffer);
         }
     }
 
     return VK_TRUE;
 }
 
-static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filename, const IContextSP& context)
+static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filename, const IAssetManagerSP& assetManager)
 {
-    if (!directory || !filename || !context.get())
+    if (!directory || !filename || !assetManager.get())
     {
         return VK_FALSE;
     }
@@ -1075,28 +1072,28 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
 
     while (textBuffer->gets(buffer, VKTS_MAX_BUFFER_CHARS))
     {
-        if (scenegraphParseSkipBuffer(buffer))
+        if (parseSkipBuffer(buffer))
         {
             continue;
         }
 
-        if (scenegraphParseIsToken(buffer, "textureObject_library"))
+        if (parseIsToken(buffer, "textureObject_library"))
         {
-            if (!scenegraphParseString(buffer, sdata))
+            if (!parseString(buffer, sdata))
             {
                 return VK_FALSE;
             }
 
-            if (!scenegraphLoadTextureObjects(directory, sdata, context))
+            if (!scenegraphLoadTextureObjects(directory, sdata, assetManager))
             {
                 logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load textureObjects: '%s'", sdata);
 
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "shading"))
+        else if (parseIsToken(buffer, "shading"))
         {
-            if (!scenegraphParseStringBool(buffer, sdata, &bdata))
+            if (!parseStringBool(buffer, sdata, &bdata))
             {
                 return VK_FALSE;
             }
@@ -1124,7 +1121,7 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
 				descriptorPoolSize[2].type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
 				descriptorPoolSize[2].descriptorCount = VKTS_BINDING_UNIFORM_VOXEL_COUNT;
 
-                auto descriptorPool = descriptorPoolCreate(context->getContextObject()->getDevice()->getDevice(), VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT, 1, 3, descriptorPoolSize);
+                auto descriptorPool = descriptorPoolCreate(assetManager->getContextObject()->getDevice()->getDevice(), VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT, 1, 3, descriptorPoolSize);
 
                 if (!descriptorPool.get())
                 {
@@ -1135,9 +1132,9 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
 
                 //
 
-                auto allDescriptorSetLayouts = context->getDescriptorSetLayout()->getDescriptorSetLayout();
+                auto allDescriptorSetLayouts = assetManager->getDescriptorSetLayout()->getDescriptorSetLayout();
 
-                auto descriptorSets = descriptorSetsCreate(context->getContextObject()->getDevice()->getDevice(), descriptorPool->getDescriptorPool(), 1, &allDescriptorSetLayouts);
+                auto descriptorSets = descriptorSetsCreate(assetManager->getContextObject()->getDevice()->getDevice(), descriptorPool->getDescriptorPool(), 1, &allDescriptorSetLayouts);
 
                 if (!descriptorSets.get())
                 {
@@ -1153,9 +1150,9 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "name"))
+        else if (parseIsToken(buffer, "name"))
         {
-            if (!scenegraphParseString(buffer, sdata))
+            if (!parseString(buffer, sdata))
             {
                 return VK_FALSE;
             }
@@ -1164,13 +1161,13 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
             {
             	bsdfMaterial->setName(sdata);
 
-                context->addBSDFMaterial(bsdfMaterial);
+                assetManager->addBSDFMaterial(bsdfMaterial);
             }
             else if (phongMaterial.get())
             {
                 phongMaterial->setName(sdata);
 
-                context->addPhongMaterial(phongMaterial);
+                assetManager->addPhongMaterial(phongMaterial);
             }
             else
             {
@@ -1179,9 +1176,9 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "transparent"))
+        else if (parseIsToken(buffer, "transparent"))
         {
-            if (!scenegraphParseBool(buffer, &bdata))
+            if (!parseBool(buffer, &bdata))
             {
                 return VK_FALSE;
             }
@@ -1197,14 +1194,14 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "emissive_color"))
+        else if (parseIsToken(buffer, "emissive_color"))
         {
-            if (!scenegraphParseVec3(buffer, fdata))
+            if (!parseVec3(buffer, fdata))
             {
                 return VK_FALSE;
             }
 
-            textureObject = scenegraphCreateTextureObject(context, glm::vec4(fdata[0], fdata[1], fdata[2], 1.0f), VK_FORMAT_R8G8B8_UNORM);
+            textureObject = createTextureObject(assetManager, glm::vec4(fdata[0], fdata[1], fdata[2], 1.0f), VK_FORMAT_R8G8B8_UNORM);
 
             if (!textureObject.get())
             {
@@ -1222,14 +1219,14 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "alpha_value"))
+        else if (parseIsToken(buffer, "alpha_value"))
         {
-            if (!scenegraphParseFloat(buffer, fdata))
+            if (!parseFloat(buffer, fdata))
             {
                 return VK_FALSE;
             }
 
-            textureObject = scenegraphCreateTextureObject(context, glm::vec4(fdata[0], 0.0f, 0.0f, 1.0f), VK_FORMAT_R8_UNORM);
+            textureObject = createTextureObject(assetManager, glm::vec4(fdata[0], 0.0f, 0.0f, 1.0f), VK_FORMAT_R8_UNORM);
 
             if (!textureObject.get())
             {
@@ -1247,14 +1244,14 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "displacement_value"))
+        else if (parseIsToken(buffer, "displacement_value"))
         {
-            if (!scenegraphParseFloat(buffer, fdata))
+            if (!parseFloat(buffer, fdata))
             {
                 return VK_FALSE;
             }
 
-            textureObject = scenegraphCreateTextureObject(context, glm::vec4(fdata[0], 0.0f, 0.0f, 1.0f), VK_FORMAT_R8_UNORM);
+            textureObject = createTextureObject(assetManager, glm::vec4(fdata[0], 0.0f, 0.0f, 1.0f), VK_FORMAT_R8_UNORM);
 
             if (!textureObject.get())
             {
@@ -1272,14 +1269,14 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "normal_vector"))
+        else if (parseIsToken(buffer, "normal_vector"))
         {
-            if (!scenegraphParseVec3(buffer, fdata))
+            if (!parseVec3(buffer, fdata))
             {
                 return VK_FALSE;
             }
 
-            textureObject = scenegraphCreateTextureObject(context, glm::vec4(fdata[0] * 0.5f + 0.5f, fdata[1] * 0.5f + 0.5f, fdata[2] * 0.5f + 0.5f, 0.5f), VK_FORMAT_R8G8B8_UNORM);
+            textureObject = createTextureObject(assetManager, glm::vec4(fdata[0] * 0.5f + 0.5f, fdata[1] * 0.5f + 0.5f, fdata[2] * 0.5f + 0.5f, 0.5f), VK_FORMAT_R8G8B8_UNORM);
 
             if (!textureObject.get())
             {
@@ -1297,14 +1294,14 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "emissive_textureObject"))
+        else if (parseIsToken(buffer, "emissive_textureObject"))
         {
-            if (!scenegraphParseString(buffer, sdata))
+            if (!parseString(buffer, sdata))
             {
                 return VK_FALSE;
             }
 
-            textureObject = context->useTextureObject(sdata);
+            textureObject = assetManager->useTextureObject(sdata);
 
             if (!textureObject.get())
             {
@@ -1322,14 +1319,14 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "alpha_textureObject"))
+        else if (parseIsToken(buffer, "alpha_textureObject"))
         {
-            if (!scenegraphParseString(buffer, sdata))
+            if (!parseString(buffer, sdata))
             {
                 return VK_FALSE;
             }
 
-            textureObject = context->useTextureObject(sdata);
+            textureObject = assetManager->useTextureObject(sdata);
 
             if (!textureObject.get())
             {
@@ -1347,14 +1344,14 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "displacement_textureObject"))
+        else if (parseIsToken(buffer, "displacement_textureObject"))
         {
-            if (!scenegraphParseString(buffer, sdata))
+            if (!parseString(buffer, sdata))
             {
                 return VK_FALSE;
             }
 
-            textureObject = context->useTextureObject(sdata);
+            textureObject = assetManager->useTextureObject(sdata);
 
             if (!textureObject.get())
             {
@@ -1372,14 +1369,14 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "normal_textureObject"))
+        else if (parseIsToken(buffer, "normal_textureObject"))
         {
-            if (!scenegraphParseString(buffer, sdata))
+            if (!parseString(buffer, sdata))
             {
                 return VK_FALSE;
             }
 
-            textureObject = context->useTextureObject(sdata);
+            textureObject = assetManager->useTextureObject(sdata);
 
             if (!textureObject.get())
             {
@@ -1397,14 +1394,14 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "phong_ambient_color"))
+        else if (parseIsToken(buffer, "phong_ambient_color"))
         {
-            if (!scenegraphParseVec3(buffer, fdata))
+            if (!parseVec3(buffer, fdata))
             {
                 return VK_FALSE;
             }
 
-            textureObject = scenegraphCreateTextureObject(context, glm::vec4(fdata[0], fdata[1], fdata[2], 1.0f), VK_FORMAT_R8G8B8_UNORM);
+            textureObject = createTextureObject(assetManager, glm::vec4(fdata[0], fdata[1], fdata[2], 1.0f), VK_FORMAT_R8G8B8_UNORM);
 
             if (!textureObject.get())
             {
@@ -1422,14 +1419,14 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "phong_diffuse_color"))
+        else if (parseIsToken(buffer, "phong_diffuse_color"))
         {
-            if (!scenegraphParseVec3(buffer, fdata))
+            if (!parseVec3(buffer, fdata))
             {
                 return VK_FALSE;
             }
 
-            textureObject = scenegraphCreateTextureObject(context, glm::vec4(fdata[0], fdata[1], fdata[2], 1.0f), VK_FORMAT_R8G8B8_UNORM);
+            textureObject = createTextureObject(assetManager, glm::vec4(fdata[0], fdata[1], fdata[2], 1.0f), VK_FORMAT_R8G8B8_UNORM);
 
             if (!textureObject.get())
             {
@@ -1447,14 +1444,14 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "phong_specular_color"))
+        else if (parseIsToken(buffer, "phong_specular_color"))
         {
-            if (!scenegraphParseVec3(buffer, fdata))
+            if (!parseVec3(buffer, fdata))
             {
                 return VK_FALSE;
             }
 
-            textureObject = scenegraphCreateTextureObject(context, glm::vec4(fdata[0], fdata[1], fdata[2], 1.0f), VK_FORMAT_R8G8B8_UNORM);
+            textureObject = createTextureObject(assetManager, glm::vec4(fdata[0], fdata[1], fdata[2], 1.0f), VK_FORMAT_R8G8B8_UNORM);
 
             if (!textureObject.get())
             {
@@ -1472,14 +1469,14 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "phong_specular_shininess_value"))
+        else if (parseIsToken(buffer, "phong_specular_shininess_value"))
         {
-            if (!scenegraphParseFloat(buffer, fdata))
+            if (!parseFloat(buffer, fdata))
             {
                 return VK_FALSE;
             }
 
-            textureObject = scenegraphCreateTextureObject(context, glm::vec4(fdata[0], 0.0f, 0.0f, 1.0f), VK_FORMAT_R8_UNORM);
+            textureObject = createTextureObject(assetManager, glm::vec4(fdata[0], 0.0f, 0.0f, 1.0f), VK_FORMAT_R8_UNORM);
 
             if (!textureObject.get())
             {
@@ -1497,14 +1494,14 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "phong_mirror_color"))
+        else if (parseIsToken(buffer, "phong_mirror_color"))
         {
-            if (!scenegraphParseVec3(buffer, fdata))
+            if (!parseVec3(buffer, fdata))
             {
                 return VK_FALSE;
             }
 
-            textureObject = scenegraphCreateTextureObject(context, glm::vec4(fdata[0], fdata[1], fdata[2], 1.0f), VK_FORMAT_R8G8B8_UNORM);
+            textureObject = createTextureObject(assetManager, glm::vec4(fdata[0], fdata[1], fdata[2], 1.0f), VK_FORMAT_R8G8B8_UNORM);
 
             if (!textureObject.get())
             {
@@ -1522,14 +1519,14 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "phong_mirror_reflectivity_value"))
+        else if (parseIsToken(buffer, "phong_mirror_reflectivity_value"))
         {
-            if (!scenegraphParseFloat(buffer, fdata))
+            if (!parseFloat(buffer, fdata))
             {
                 return VK_FALSE;
             }
 
-            textureObject = scenegraphCreateTextureObject(context, glm::vec4(fdata[0], 0.0f, 0.0f, 1.0f), VK_FORMAT_R8_UNORM);
+            textureObject = createTextureObject(assetManager, glm::vec4(fdata[0], 0.0f, 0.0f, 1.0f), VK_FORMAT_R8_UNORM);
 
             if (!textureObject.get())
             {
@@ -1547,14 +1544,14 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "phong_ambient_textureObject"))
+        else if (parseIsToken(buffer, "phong_ambient_textureObject"))
         {
-            if (!scenegraphParseString(buffer, sdata))
+            if (!parseString(buffer, sdata))
             {
                 return VK_FALSE;
             }
 
-            textureObject = context->useTextureObject(sdata);
+            textureObject = assetManager->useTextureObject(sdata);
 
             if (!textureObject.get())
             {
@@ -1572,14 +1569,14 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "phong_diffuse_textureObject"))
+        else if (parseIsToken(buffer, "phong_diffuse_textureObject"))
         {
-            if (!scenegraphParseString(buffer, sdata))
+            if (!parseString(buffer, sdata))
             {
                 return VK_FALSE;
             }
 
-            textureObject = context->useTextureObject(sdata);
+            textureObject = assetManager->useTextureObject(sdata);
 
             if (!textureObject.get())
             {
@@ -1597,14 +1594,14 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "phong_specular_textureObject"))
+        else if (parseIsToken(buffer, "phong_specular_textureObject"))
         {
-            if (!scenegraphParseString(buffer, sdata))
+            if (!parseString(buffer, sdata))
             {
                 return VK_FALSE;
             }
 
-            textureObject = context->useTextureObject(sdata);
+            textureObject = assetManager->useTextureObject(sdata);
 
             if (!textureObject.get())
             {
@@ -1622,14 +1619,14 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "phong_specular_shininess_textureObject"))
+        else if (parseIsToken(buffer, "phong_specular_shininess_textureObject"))
         {
-            if (!scenegraphParseString(buffer, sdata))
+            if (!parseString(buffer, sdata))
             {
                 return VK_FALSE;
             }
 
-            textureObject = context->useTextureObject(sdata);
+            textureObject = assetManager->useTextureObject(sdata);
 
             if (!textureObject.get())
             {
@@ -1647,14 +1644,14 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "phong_mirror_textureObject"))
+        else if (parseIsToken(buffer, "phong_mirror_textureObject"))
         {
-            if (!scenegraphParseString(buffer, sdata))
+            if (!parseString(buffer, sdata))
             {
                 return VK_FALSE;
             }
 
-            textureObject = context->useTextureObject(sdata);
+            textureObject = assetManager->useTextureObject(sdata);
 
             if (!textureObject.get())
             {
@@ -1672,14 +1669,14 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "phong_mirror_reflectivity_textureObject"))
+        else if (parseIsToken(buffer, "phong_mirror_reflectivity_textureObject"))
         {
-            if (!scenegraphParseString(buffer, sdata))
+            if (!parseString(buffer, sdata))
             {
                 return VK_FALSE;
             }
 
-            textureObject = context->useTextureObject(sdata);
+            textureObject = assetManager->useTextureObject(sdata);
 
             if (!textureObject.get())
             {
@@ -1697,14 +1694,14 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "fragment_shader"))
+        else if (parseIsToken(buffer, "fragment_shader"))
         {
-            if (!scenegraphParseString(buffer, sdata))
+            if (!parseString(buffer, sdata))
             {
                 return VK_FALSE;
             }
 
-            auto shaderModule = context->useFragmentShaderModule(sdata);
+            auto shaderModule = assetManager->useFragmentShaderModule(sdata);
 
             if (!shaderModule.get())
             {
@@ -1726,7 +1723,7 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
 
 				//
 
-				shaderModule = shaderModuleCreate(sdata, context->getContextObject()->getDevice()->getDevice(), 0, shaderBinary->getSize(), (uint32_t*)shaderBinary->getData());
+				shaderModule = shaderModuleCreate(sdata, assetManager->getContextObject()->getDevice()->getDevice(), 0, shaderBinary->getSize(), (uint32_t*)shaderBinary->getData());
 
 				if (!shaderModule.get())
 				{
@@ -1735,7 +1732,7 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
 					return VK_FALSE;
 				}
 
-				context->addFragmentShaderModule(shaderModule);
+				assetManager->addFragmentShaderModule(shaderModule);
             }
 
             if (bsdfMaterial.get())
@@ -1749,9 +1746,9 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "attributes"))
+        else if (parseIsToken(buffer, "attributes"))
         {
-            if (!scenegraphParseUIntHex(buffer, &uidata))
+            if (!parseUIntHex(buffer, &uidata))
             {
                 return VK_FALSE;
             }
@@ -1767,14 +1764,14 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "add_textureObject"))
+        else if (parseIsToken(buffer, "add_textureObject"))
         {
-            if (!scenegraphParseString(buffer, sdata))
+            if (!parseString(buffer, sdata))
             {
                 return VK_FALSE;
             }
 
-            textureObject = context->useTextureObject(sdata);
+            textureObject = assetManager->useTextureObject(sdata);
 
             if (!textureObject.get())
             {
@@ -1794,16 +1791,16 @@ static VkBool32 scenegraphLoadMaterials(const char* directory, const char* filen
         }
         else
         {
-            scenegraphParseUnknownBuffer(buffer);
+            parseUnknownBuffer(buffer);
         }
     }
 
     return VK_TRUE;
 }
 
-static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filename, const IContextSP& context)
+static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filename, const IAssetManagerSP& assetManager)
 {
-    if (!directory || !filename || !context.get())
+    if (!directory || !filename || !assetManager.get())
     {
         return VK_FALSE;
     }
@@ -1845,28 +1842,28 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
 
     while (textBuffer->gets(buffer, VKTS_MAX_BUFFER_CHARS))
     {
-        if (scenegraphParseSkipBuffer(buffer))
+        if (parseSkipBuffer(buffer))
         {
             continue;
         }
 
-        if (scenegraphParseIsToken(buffer, "material_library"))
+        if (parseIsToken(buffer, "material_library"))
         {
-            if (!scenegraphParseString(buffer, sdata))
+            if (!parseString(buffer, sdata))
             {
                 return VK_FALSE;
             }
 
-            if (!scenegraphLoadMaterials(directory, sdata, context))
+            if (!scenegraphLoadMaterials(directory, sdata, assetManager))
             {
                 logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load materials: '%s'", sdata);
 
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "name"))
+        else if (parseIsToken(buffer, "name"))
         {
-            if (!scenegraphParseString(buffer, sdata))
+            if (!parseString(buffer, sdata))
             {
                 return VK_FALSE;
             }
@@ -1882,9 +1879,9 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
 
             subMesh->setName(sdata);
         }
-        else if (scenegraphParseIsToken(buffer, "vertex"))
+        else if (parseIsToken(buffer, "vertex"))
         {
-            if (!scenegraphParseVec4(buffer, fdata))
+            if (!parseVec4(buffer, fdata))
             {
                 return VK_FALSE;
             }
@@ -1903,9 +1900,9 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "normal"))
+        else if (parseIsToken(buffer, "normal"))
         {
-            if (!scenegraphParseVec3(buffer, fdata))
+            if (!parseVec3(buffer, fdata))
             {
                 return VK_FALSE;
             }
@@ -1924,9 +1921,9 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "bitangent"))
+        else if (parseIsToken(buffer, "bitangent"))
         {
-            if (!scenegraphParseVec3(buffer, fdata))
+            if (!parseVec3(buffer, fdata))
             {
                 return VK_FALSE;
             }
@@ -1945,9 +1942,9 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "tangent"))
+        else if (parseIsToken(buffer, "tangent"))
         {
-            if (!scenegraphParseVec3(buffer, fdata))
+            if (!parseVec3(buffer, fdata))
             {
                 return VK_FALSE;
             }
@@ -1966,9 +1963,9 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "texcoord"))
+        else if (parseIsToken(buffer, "texcoord"))
         {
-            if (!scenegraphParseVec2(buffer, fdata))
+            if (!parseVec2(buffer, fdata))
             {
                 return VK_FALSE;
             }
@@ -1987,9 +1984,9 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "boneIndex"))
+        else if (parseIsToken(buffer, "boneIndex"))
         {
-            if (!scenegraphParseVec8(buffer, fdata))
+            if (!parseVec8(buffer, fdata))
             {
                 return VK_FALSE;
             }
@@ -2015,9 +2012,9 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "boneWeight"))
+        else if (parseIsToken(buffer, "boneWeight"))
         {
-            if (!scenegraphParseVec8(buffer, fdata))
+            if (!parseVec8(buffer, fdata))
             {
                 return VK_FALSE;
             }
@@ -2043,9 +2040,9 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "numberBones"))
+        else if (parseIsToken(buffer, "numberBones"))
         {
-            if (!scenegraphParseFloat(buffer, fdata))
+            if (!parseFloat(buffer, fdata))
             {
                 return VK_FALSE;
             }
@@ -2061,9 +2058,9 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "face"))
+        else if (parseIsToken(buffer, "face"))
         {
-            if (!scenegraphParseIVec3(buffer, idata))
+            if (!parseIVec3(buffer, idata))
             {
                 return VK_FALSE;
             }
@@ -2082,16 +2079,16 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "material"))
+        else if (parseIsToken(buffer, "material"))
         {
-            if (!scenegraphParseString(buffer, sdata))
+            if (!parseString(buffer, sdata))
             {
                 return VK_FALSE;
             }
 
             if (subMesh.get())
             {
-                const auto phongMaterial = context->usePhongMaterial(sdata);
+                const auto phongMaterial = assetManager->usePhongMaterial(sdata);
 
                 if (phongMaterial.get())
                 {
@@ -2099,7 +2096,7 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
                 }
                 else
                 {
-                    const auto bsdfMaterial = context->useBSDFMaterial(sdata);
+                    const auto bsdfMaterial = assetManager->useBSDFMaterial(sdata);
 
                     if (bsdfMaterial.get())
                     {
@@ -2335,7 +2332,7 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
 
                     //
 
-                    auto vertexBuffer = scenegraphCreateVertexBufferObject(context, vertexBinaryBuffer);
+                    auto vertexBuffer = createVertexBufferObject(assetManager, vertexBinaryBuffer);
 
                     if (!vertexBuffer.get())
                     {
@@ -2370,7 +2367,7 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
 
                     //
 
-                    auto indexVertexBuffer = scenegraphCreateIndexBufferObject(context, indicesBinaryBuffer);
+                    auto indexVertexBuffer = createIndexBufferObject(assetManager, indicesBinaryBuffer);
 
                     if (!indexVertexBuffer.get())
                     {
@@ -2494,7 +2491,7 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
 
                     //
 
-                    auto descriptorSetLayout = descriptorSetLayoutCreate(context->getContextObject()->getDevice()->getDevice(), 0, bindingCount, descriptorSetLayoutBinding);
+                    auto descriptorSetLayout = descriptorSetLayoutCreate(assetManager->getContextObject()->getDevice()->getDevice(), 0, bindingCount, descriptorSetLayoutBinding);
 
                 	if (!descriptorSetLayout.get())
                 	{
@@ -2515,7 +2512,7 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
     				descriptorPoolSize[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     				descriptorPoolSize[1].descriptorCount = 18;
 
-                    auto descriptorPool = descriptorPoolCreate(context->getContextObject()->getDevice()->getDevice(), VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT, 1, 2, descriptorPoolSize);
+                    auto descriptorPool = descriptorPoolCreate(assetManager->getContextObject()->getDevice()->getDevice(), VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT, 1, 2, descriptorPoolSize);
 
                     if (!descriptorPool.get())
                     {
@@ -2530,7 +2527,7 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
 
                 	const auto allDescriptorSetLayouts = descriptorSetLayout->getDescriptorSetLayout();
 
-                    auto descriptorSets = descriptorSetsCreate(context->getContextObject()->getDevice()->getDevice(), subMesh->getBSDFMaterial()->getDescriptorPool()->getDescriptorPool(), 1, &allDescriptorSetLayouts);
+                    auto descriptorSets = descriptorSetsCreate(assetManager->getContextObject()->getDevice()->getDevice(), subMesh->getBSDFMaterial()->getDescriptorPool()->getDescriptorPool(), 1, &allDescriptorSetLayouts);
 
                     if (!descriptorSets.get())
                     {
@@ -2547,7 +2544,7 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
 
                 	setLayouts[0] = descriptorSetLayout->getDescriptorSetLayout();
 
-                	auto pipelineLayout = pipelineCreateLayout(context->getContextObject()->getDevice()->getDevice(), 0, 1, setLayouts, 0, nullptr);
+                	auto pipelineLayout = pipelineCreateLayout(assetManager->getContextObject()->getDevice()->getDevice(), 0, 1, setLayouts, 0, nullptr);
 
                 	if (!pipelineLayout.get())
                 	{
@@ -2560,7 +2557,7 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
 
 					// Create graphics pipeline for this sub mesh.
 
-                	auto currentRenderPass = context->getRenderPass();
+                	auto currentRenderPass = assetManager->getRenderPass();
 
 					if (!currentRenderPass.get())
 					{
@@ -2593,7 +2590,7 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
 						vertexBufferType |= VKTS_VERTEX_BUFFER_TYPE_BONES;
 					}
 
-					auto currentVertexShaderModule = context->useVertexShaderModule(vertexBufferType);
+					auto currentVertexShaderModule = assetManager->useVertexShaderModule(vertexBufferType);
 
 					if (!currentVertexShaderModule.get())
 					{
@@ -2742,7 +2739,7 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
 					gp.getGraphicsPipelineCreateInfo().renderPass = currentRenderPass->getRenderPass();
 
 
-					auto pipeline = pipelineCreateGraphics(context->getContextObject()->getDevice()->getDevice(), VK_NULL_HANDLE, gp.getGraphicsPipelineCreateInfo(), vertexBufferType);
+					auto pipeline = pipelineCreateGraphics(assetManager->getContextObject()->getDevice()->getDevice(), VK_NULL_HANDLE, gp.getGraphicsPipelineCreateInfo(), vertexBufferType);
 
 					if (!pipeline.get())
 					{
@@ -2756,7 +2753,7 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
 
                 //
 
-                context->addSubMesh(subMesh);
+                assetManager->addSubMesh(subMesh);
             }
             else
             {
@@ -2781,16 +2778,16 @@ static VkBool32 scenegraphLoadSubMeshes(const char* directory, const char* filen
         }
         else
         {
-            scenegraphParseUnknownBuffer(buffer);
+            parseUnknownBuffer(buffer);
         }
     }
 
     return VK_TRUE;
 }
 
-static VkBool32 scenegraphLoadMeshes(const char* directory, const char* filename, const IContextSP& context)
+static VkBool32 scenegraphLoadMeshes(const char* directory, const char* filename, const IAssetManagerSP& assetManager)
 {
-    if (!directory || !filename || !context.get())
+    if (!directory || !filename || !assetManager.get())
     {
         return VK_FALSE;
     }
@@ -2817,28 +2814,28 @@ static VkBool32 scenegraphLoadMeshes(const char* directory, const char* filename
 
     while (textBuffer->gets(buffer, VKTS_MAX_BUFFER_CHARS))
     {
-        if (scenegraphParseSkipBuffer(buffer))
+        if (parseSkipBuffer(buffer))
         {
             continue;
         }
 
-        if (scenegraphParseIsToken(buffer, "submesh_library"))
+        if (parseIsToken(buffer, "submesh_library"))
         {
-            if (!scenegraphParseString(buffer, sdata))
+            if (!parseString(buffer, sdata))
             {
                 return VK_FALSE;
             }
 
-            if (!scenegraphLoadSubMeshes(directory, sdata, context))
+            if (!scenegraphLoadSubMeshes(directory, sdata, assetManager))
             {
                 logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load sub meshes: '%s'", sdata);
 
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "name"))
+        else if (parseIsToken(buffer, "name"))
         {
-            if (!scenegraphParseString(buffer, sdata))
+            if (!parseString(buffer, sdata))
             {
                 return VK_FALSE;
             }
@@ -2854,18 +2851,18 @@ static VkBool32 scenegraphLoadMeshes(const char* directory, const char* filename
 
             mesh->setName(sdata);
 
-            context->addMesh(mesh);
+            assetManager->addMesh(mesh);
         }
-        else if (scenegraphParseIsToken(buffer, "submesh"))
+        else if (parseIsToken(buffer, "submesh"))
         {
-            if (!scenegraphParseString(buffer, sdata))
+            if (!parseString(buffer, sdata))
             {
                 return VK_FALSE;
             }
 
             if (mesh.get())
             {
-                const auto& subMesh = context->useSubMesh(sdata);
+                const auto& subMesh = assetManager->useSubMesh(sdata);
 
                 if (!subMesh.get())
                 {
@@ -2883,9 +2880,9 @@ static VkBool32 scenegraphLoadMeshes(const char* directory, const char* filename
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "displace"))
+        else if (parseIsToken(buffer, "displace"))
         {
-            if (!scenegraphParseVec2(buffer, fdata))
+            if (!parseVec2(buffer, fdata))
             {
                 return VK_FALSE;
             }
@@ -2901,9 +2898,9 @@ static VkBool32 scenegraphLoadMeshes(const char* directory, const char* filename
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "aabb"))
+        else if (parseIsToken(buffer, "aabb"))
         {
-            if (!scenegraphParseVec6(buffer, fdata))
+            if (!parseVec6(buffer, fdata))
             {
                 return VK_FALSE;
             }
@@ -2921,16 +2918,16 @@ static VkBool32 scenegraphLoadMeshes(const char* directory, const char* filename
         }
         else
         {
-            scenegraphParseUnknownBuffer(buffer);
+            parseUnknownBuffer(buffer);
         }
     }
 
     return VK_TRUE;
 }
 
-static VkBool32 scenegraphLoadChannels(const char* directory, const char* filename, const IContextSP& context)
+static VkBool32 scenegraphLoadChannels(const char* directory, const char* filename, const IAssetManagerSP& assetManager)
 {
-    if (!directory || !filename || !context.get())
+    if (!directory || !filename || !assetManager.get())
     {
         return VK_FALSE;
     }
@@ -2957,14 +2954,14 @@ static VkBool32 scenegraphLoadChannels(const char* directory, const char* filena
 
     while (textBuffer->gets(buffer, VKTS_MAX_BUFFER_CHARS))
     {
-        if (scenegraphParseSkipBuffer(buffer))
+        if (parseSkipBuffer(buffer))
         {
             continue;
         }
 
-        if (scenegraphParseIsToken(buffer, "name"))
+        if (parseIsToken(buffer, "name"))
         {
-            if (!scenegraphParseString(buffer, sdata))
+            if (!parseString(buffer, sdata))
             {
                 return VK_FALSE;
             }
@@ -2980,11 +2977,11 @@ static VkBool32 scenegraphLoadChannels(const char* directory, const char* filena
 
             channel->setName(sdata);
 
-            context->addChannel(channel);
+            assetManager->addChannel(channel);
         }
-        else if (scenegraphParseIsToken(buffer, "target_transform"))
+        else if (parseIsToken(buffer, "target_transform"))
         {
-            if (!scenegraphParseString(buffer, sdata))
+            if (!parseString(buffer, sdata))
             {
                 return VK_FALSE;
             }
@@ -3021,9 +3018,9 @@ static VkBool32 scenegraphLoadChannels(const char* directory, const char* filena
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "target_element"))
+        else if (parseIsToken(buffer, "target_element"))
         {
-            if (!scenegraphParseString(buffer, sdata))
+            if (!parseString(buffer, sdata))
             {
                 return VK_FALSE;
             }
@@ -3060,7 +3057,7 @@ static VkBool32 scenegraphLoadChannels(const char* directory, const char* filena
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "keyframe"))
+        else if (parseIsToken(buffer, "keyframe"))
         {
             char token[VKTS_MAX_TOKEN_CHARS + 1];
 
@@ -3113,16 +3110,16 @@ static VkBool32 scenegraphLoadChannels(const char* directory, const char* filena
         }
         else
         {
-            scenegraphParseUnknownBuffer(buffer);
+            parseUnknownBuffer(buffer);
         }
     }
 
     return VK_TRUE;
 }
 
-static VkBool32 scenegraphLoadAnimations(const char* directory, const char* filename, const IContextSP& context)
+static VkBool32 scenegraphLoadAnimations(const char* directory, const char* filename, const IAssetManagerSP& assetManager)
 {
-    if (!directory || !filename || !context.get())
+    if (!directory || !filename || !assetManager.get())
     {
         return VK_FALSE;
     }
@@ -3149,28 +3146,28 @@ static VkBool32 scenegraphLoadAnimations(const char* directory, const char* file
 
     while (textBuffer->gets(buffer, VKTS_MAX_BUFFER_CHARS))
     {
-        if (scenegraphParseSkipBuffer(buffer))
+        if (parseSkipBuffer(buffer))
         {
             continue;
         }
 
-        if (scenegraphParseIsToken(buffer, "channel_library"))
+        if (parseIsToken(buffer, "channel_library"))
         {
-            if (!scenegraphParseString(buffer, sdata))
+            if (!parseString(buffer, sdata))
             {
                 return VK_FALSE;
             }
 
-            if (!scenegraphLoadChannels(directory, sdata, context))
+            if (!scenegraphLoadChannels(directory, sdata, assetManager))
             {
                 logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load channels: '%s'", sdata);
 
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "name"))
+        else if (parseIsToken(buffer, "name"))
         {
-            if (!scenegraphParseString(buffer, sdata))
+            if (!parseString(buffer, sdata))
             {
                 return VK_FALSE;
             }
@@ -3186,11 +3183,11 @@ static VkBool32 scenegraphLoadAnimations(const char* directory, const char* file
 
             animation->setName(sdata);
 
-            context->addAnimation(animation);
+            assetManager->addAnimation(animation);
         }
-        else if (scenegraphParseIsToken(buffer, "start"))
+        else if (parseIsToken(buffer, "start"))
         {
-            if (!scenegraphParseFloat(buffer, fdata))
+            if (!parseFloat(buffer, fdata))
             {
                 return VK_FALSE;
             }
@@ -3206,9 +3203,9 @@ static VkBool32 scenegraphLoadAnimations(const char* directory, const char* file
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "stop"))
+        else if (parseIsToken(buffer, "stop"))
         {
-            if (!scenegraphParseFloat(buffer, fdata))
+            if (!parseFloat(buffer, fdata))
             {
                 return VK_FALSE;
             }
@@ -3224,9 +3221,9 @@ static VkBool32 scenegraphLoadAnimations(const char* directory, const char* file
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "marker"))
+        else if (parseIsToken(buffer, "marker"))
         {
-            if (!scenegraphParseStringFloat(buffer, sdata, fdata))
+            if (!parseStringFloat(buffer, sdata, fdata))
             {
                 return VK_FALSE;
             }
@@ -3252,16 +3249,16 @@ static VkBool32 scenegraphLoadAnimations(const char* directory, const char* file
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "channel"))
+        else if (parseIsToken(buffer, "channel"))
         {
-            if (!scenegraphParseString(buffer, sdata))
+            if (!parseString(buffer, sdata))
             {
                 return VK_FALSE;
             }
 
             if (animation.get())
             {
-                const auto& channel = context->useChannel(sdata);
+                const auto& channel = assetManager->useChannel(sdata);
 
                 if (!channel.get())
                 {
@@ -3281,16 +3278,16 @@ static VkBool32 scenegraphLoadAnimations(const char* directory, const char* file
         }
         else
         {
-            scenegraphParseUnknownBuffer(buffer);
+            parseUnknownBuffer(buffer);
         }
     }
 
     return VK_TRUE;
 }
 
-static VkBool32 scenegraphLoadParticleSystems(const char* directory, const char* filename, const IContextSP& context)
+static VkBool32 scenegraphLoadParticleSystems(const char* directory, const char* filename, const IAssetManagerSP& assetManager)
 {
-    if (!directory || !filename || !context.get())
+    if (!directory || !filename || !assetManager.get())
     {
         return VK_FALSE;
     }
@@ -3313,7 +3310,7 @@ static VkBool32 scenegraphLoadParticleSystems(const char* directory, const char*
 
     while (textBuffer->gets(buffer, VKTS_MAX_BUFFER_CHARS))
     {
-        if (scenegraphParseSkipBuffer(buffer))
+        if (parseSkipBuffer(buffer))
         {
             continue;
         }
@@ -3324,9 +3321,9 @@ static VkBool32 scenegraphLoadParticleSystems(const char* directory, const char*
     return VK_TRUE;
 }
 
-static VkBool32 scenegraphLoadCameras(const char* directory, const char* filename, const IContextSP& context)
+static VkBool32 scenegraphLoadCameras(const char* directory, const char* filename, const IAssetManagerSP& assetManager)
 {
-    if (!directory || !filename || !context.get())
+    if (!directory || !filename || !assetManager.get())
     {
         return VK_FALSE;
     }
@@ -3353,14 +3350,14 @@ static VkBool32 scenegraphLoadCameras(const char* directory, const char* filenam
 
     while (textBuffer->gets(buffer, VKTS_MAX_BUFFER_CHARS))
     {
-        if (scenegraphParseSkipBuffer(buffer))
+        if (parseSkipBuffer(buffer))
         {
             continue;
         }
 
-        if (scenegraphParseIsToken(buffer, "name"))
+        if (parseIsToken(buffer, "name"))
         {
-            if (!scenegraphParseString(buffer, sdata))
+            if (!parseString(buffer, sdata))
             {
                 return VK_FALSE;
             }
@@ -3378,11 +3375,11 @@ static VkBool32 scenegraphLoadCameras(const char* directory, const char* filenam
 
             //
 
-            context->addCamera(camera);
+            assetManager->addCamera(camera);
         }
-        else if (scenegraphParseIsToken(buffer, "type"))
+        else if (parseIsToken(buffer, "type"))
         {
-            if (!scenegraphParseString(buffer, sdata))
+            if (!parseString(buffer, sdata))
             {
                 return VK_FALSE;
             }
@@ -3411,9 +3408,9 @@ static VkBool32 scenegraphLoadCameras(const char* directory, const char* filenam
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "znear"))
+        else if (parseIsToken(buffer, "znear"))
         {
-            if (!scenegraphParseFloat(buffer, &fdata))
+            if (!parseFloat(buffer, &fdata))
             {
                 return VK_FALSE;
             }
@@ -3429,9 +3426,9 @@ static VkBool32 scenegraphLoadCameras(const char* directory, const char* filenam
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "zfar"))
+        else if (parseIsToken(buffer, "zfar"))
         {
-            if (!scenegraphParseFloat(buffer, &fdata))
+            if (!parseFloat(buffer, &fdata))
             {
                 return VK_FALSE;
             }
@@ -3447,9 +3444,9 @@ static VkBool32 scenegraphLoadCameras(const char* directory, const char* filenam
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "fovy"))
+        else if (parseIsToken(buffer, "fovy"))
         {
-            if (!scenegraphParseFloat(buffer, &fdata))
+            if (!parseFloat(buffer, &fdata))
             {
                 return VK_FALSE;
             }
@@ -3465,9 +3462,9 @@ static VkBool32 scenegraphLoadCameras(const char* directory, const char* filenam
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "ortho_scale"))
+        else if (parseIsToken(buffer, "ortho_scale"))
         {
-            if (!scenegraphParseFloat(buffer, &fdata))
+            if (!parseFloat(buffer, &fdata))
             {
                 return VK_FALSE;
             }
@@ -3485,7 +3482,7 @@ static VkBool32 scenegraphLoadCameras(const char* directory, const char* filenam
         }
         else
         {
-            scenegraphParseUnknownBuffer(buffer);
+            parseUnknownBuffer(buffer);
         }
     }
 
@@ -3493,9 +3490,9 @@ static VkBool32 scenegraphLoadCameras(const char* directory, const char* filenam
 }
 
 
-static VkBool32 scenegraphLoadLights(const char* directory, const char* filename, const IContextSP& context)
+static VkBool32 scenegraphLoadLights(const char* directory, const char* filename, const IAssetManagerSP& assetManager)
 {
-    if (!directory || !filename || !context.get())
+    if (!directory || !filename || !assetManager.get())
     {
         return VK_FALSE;
     }
@@ -3522,14 +3519,14 @@ static VkBool32 scenegraphLoadLights(const char* directory, const char* filename
 
     while (textBuffer->gets(buffer, VKTS_MAX_BUFFER_CHARS))
     {
-        if (scenegraphParseSkipBuffer(buffer))
+        if (parseSkipBuffer(buffer))
         {
             continue;
         }
 
-        if (scenegraphParseIsToken(buffer, "name"))
+        if (parseIsToken(buffer, "name"))
         {
-            if (!scenegraphParseString(buffer, sdata))
+            if (!parseString(buffer, sdata))
             {
                 return VK_FALSE;
             }
@@ -3545,11 +3542,11 @@ static VkBool32 scenegraphLoadLights(const char* directory, const char* filename
 
             light->setName(sdata);
 
-            context->addLight(light);
+            assetManager->addLight(light);
         }
-        else if (scenegraphParseIsToken(buffer, "type"))
+        else if (parseIsToken(buffer, "type"))
         {
-            if (!scenegraphParseString(buffer, sdata))
+            if (!parseString(buffer, sdata))
             {
                 return VK_FALSE;
             }
@@ -3582,9 +3579,9 @@ static VkBool32 scenegraphLoadLights(const char* directory, const char* filename
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "falloff"))
+        else if (parseIsToken(buffer, "falloff"))
         {
-            if (!scenegraphParseString(buffer, sdata))
+            if (!parseString(buffer, sdata))
             {
                 return VK_FALSE;
             }
@@ -3617,9 +3614,9 @@ static VkBool32 scenegraphLoadLights(const char* directory, const char* filename
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "strength"))
+        else if (parseIsToken(buffer, "strength"))
         {
-            if (!scenegraphParseFloat(buffer, &fdata[0]))
+            if (!parseFloat(buffer, &fdata[0]))
             {
                 return VK_FALSE;
             }
@@ -3635,9 +3632,9 @@ static VkBool32 scenegraphLoadLights(const char* directory, const char* filename
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "outer_angle"))
+        else if (parseIsToken(buffer, "outer_angle"))
         {
-            if (!scenegraphParseFloat(buffer, &fdata[0]))
+            if (!parseFloat(buffer, &fdata[0]))
             {
                 return VK_FALSE;
             }
@@ -3653,9 +3650,9 @@ static VkBool32 scenegraphLoadLights(const char* directory, const char* filename
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "inner_angle"))
+        else if (parseIsToken(buffer, "inner_angle"))
         {
-            if (!scenegraphParseFloat(buffer, &fdata[0]))
+            if (!parseFloat(buffer, &fdata[0]))
             {
                 return VK_FALSE;
             }
@@ -3671,9 +3668,9 @@ static VkBool32 scenegraphLoadLights(const char* directory, const char* filename
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "color"))
+        else if (parseIsToken(buffer, "color"))
         {
-            if (!scenegraphParseVec3(buffer, fdata))
+            if (!parseVec3(buffer, fdata))
             {
                 return VK_FALSE;
             }
@@ -3684,7 +3681,7 @@ static VkBool32 scenegraphLoadLights(const char* directory, const char* filename
 
             	//
 
-            	context->addLight(light);
+            	assetManager->addLight(light);
             }
             else
             {
@@ -3695,16 +3692,16 @@ static VkBool32 scenegraphLoadLights(const char* directory, const char* filename
         }
         else
         {
-            scenegraphParseUnknownBuffer(buffer);
+            parseUnknownBuffer(buffer);
         }
     }
 
     return VK_TRUE;
 }
 
-static VkBool32 scenegraphLoadObjects(const char* directory, const char* filename, const IContextSP& context)
+static VkBool32 scenegraphLoadObjects(const char* directory, const char* filename, const IAssetManagerSP& assetManager)
 {
-    if (!directory || !filename || !context.get())
+    if (!directory || !filename || !assetManager.get())
     {
         return VK_FALSE;
     }
@@ -3744,84 +3741,84 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
 
     while (textBuffer->gets(buffer, VKTS_MAX_BUFFER_CHARS))
     {
-        if (scenegraphParseSkipBuffer(buffer))
+        if (parseSkipBuffer(buffer))
         {
             continue;
         }
 
-        if (scenegraphParseIsToken(buffer, "mesh_library"))
+        if (parseIsToken(buffer, "mesh_library"))
         {
-            if (!scenegraphParseString(buffer, sdata0))
+            if (!parseString(buffer, sdata0))
             {
                 return VK_FALSE;
             }
 
-            if (!scenegraphLoadMeshes(directory, sdata0, context))
+            if (!scenegraphLoadMeshes(directory, sdata0, assetManager))
             {
                 logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load meshes: '%s'", sdata0);
 
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "animation_library"))
+        else if (parseIsToken(buffer, "animation_library"))
         {
-            if (!scenegraphParseString(buffer, sdata0))
+            if (!parseString(buffer, sdata0))
             {
                 return VK_FALSE;
             }
 
-            if (!scenegraphLoadAnimations(directory, sdata0, context))
+            if (!scenegraphLoadAnimations(directory, sdata0, assetManager))
             {
                 logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load animations: '%s'", sdata0);
 
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "camera_library"))
+        else if (parseIsToken(buffer, "camera_library"))
         {
-            if (!scenegraphParseString(buffer, sdata0))
+            if (!parseString(buffer, sdata0))
             {
                 return VK_FALSE;
             }
 
-            if (!scenegraphLoadCameras(directory, sdata0, context))
+            if (!scenegraphLoadCameras(directory, sdata0, assetManager))
             {
                 logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load cameras: '%s'", sdata0);
 
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "light_library"))
+        else if (parseIsToken(buffer, "light_library"))
         {
-            if (!scenegraphParseString(buffer, sdata0))
+            if (!parseString(buffer, sdata0))
             {
                 return VK_FALSE;
             }
 
-            if (!scenegraphLoadLights(directory, sdata0, context))
+            if (!scenegraphLoadLights(directory, sdata0, assetManager))
             {
                 logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load lights: '%s'", sdata0);
 
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "particle_system_library"))
+        else if (parseIsToken(buffer, "particle_system_library"))
         {
-            if (!scenegraphParseString(buffer, sdata0))
+            if (!parseString(buffer, sdata0))
             {
                 return VK_FALSE;
             }
 
-            if (!scenegraphLoadParticleSystems(directory, sdata0, context))
+            if (!scenegraphLoadParticleSystems(directory, sdata0, assetManager))
             {
                 logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load particles: '%s'", sdata0);
 
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "name"))
+        else if (parseIsToken(buffer, "name"))
         {
-            if (!scenegraphParseString(buffer, sdata0))
+            if (!parseString(buffer, sdata0))
             {
                 return VK_FALSE;
             }
@@ -3837,11 +3834,11 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
 
             object->setName(sdata0);
 
-            context->addObject(object);
+            assetManager->addObject(object);
         }
-        else if (scenegraphParseIsToken(buffer, "node"))
+        else if (parseIsToken(buffer, "node"))
         {
-            if (!scenegraphParseStringTuple(buffer, sdata0, sdata1))
+            if (!parseStringTuple(buffer, sdata0, sdata1))
             {
                 return VK_FALSE;
             }
@@ -3892,9 +3889,9 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "layers"))
+        else if (parseIsToken(buffer, "layers"))
         {
-            if (!scenegraphParseUIntHex(buffer, &uidata))
+            if (!parseUIntHex(buffer, &uidata))
             {
                 return VK_FALSE;
             }
@@ -3910,9 +3907,9 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "particle_system"))
+        else if (parseIsToken(buffer, "particle_system"))
         {
-            if (!scenegraphParseString(buffer, sdata0))
+            if (!parseString(buffer, sdata0))
             {
                 return VK_FALSE;
             }
@@ -3928,9 +3925,9 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "seed"))
+        else if (parseIsToken(buffer, "seed"))
         {
-            if (!scenegraphParseInt(buffer, &idata))
+            if (!parseInt(buffer, &idata))
             {
                 return VK_FALSE;
             }
@@ -3946,9 +3943,9 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "constraint"))
+        else if (parseIsToken(buffer, "constraint"))
         {
-            if (!scenegraphParseString(buffer, sdata0))
+            if (!parseString(buffer, sdata0))
             {
                 return VK_FALSE;
             }
@@ -3999,9 +3996,9 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "target"))
+        else if (parseIsToken(buffer, "target"))
         {
-            if (!scenegraphParseString(buffer, sdata0))
+            if (!parseString(buffer, sdata0))
             {
                 return VK_FALSE;
             }
@@ -4010,14 +4007,14 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
             {
             	INodeSP targetNode;
 
-            	for (size_t i = 0; i < context->getAllObjects().values().size(); i++)
+            	for (size_t i = 0; i < assetManager->getAllObjects().values().size(); i++)
             	{
-            		if (!context->getAllObjects().values()[i]->getRootNode().get())
+            		if (!assetManager->getAllObjects().values()[i]->getRootNode().get())
             		{
             			continue;
             		}
 
-            		targetNode = context->getAllObjects().values()[i]->getRootNode()->findNodeRecursiveFromRoot(sdata0);
+            		targetNode = assetManager->getAllObjects().values()[i]->getRootNode()->findNodeRecursiveFromRoot(sdata0);
 
             		if (targetNode.get())
             		{
@@ -4041,9 +4038,9 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "use"))
+        else if (parseIsToken(buffer, "use"))
         {
-            if (!scenegraphParseBoolTriple(buffer, &bdata[0], &bdata[1], &bdata[2]))
+            if (!parseBoolTriple(buffer, &bdata[0], &bdata[1], &bdata[2]))
             {
                 return VK_FALSE;
             }
@@ -4059,9 +4056,9 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "invert"))
+        else if (parseIsToken(buffer, "invert"))
         {
-            if (!scenegraphParseBoolTriple(buffer, &bdata[0], &bdata[1], &bdata[2]))
+            if (!parseBoolTriple(buffer, &bdata[0], &bdata[1], &bdata[2]))
             {
                 return VK_FALSE;
             }
@@ -4077,9 +4074,9 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "use_offset"))
+        else if (parseIsToken(buffer, "use_offset"))
         {
-            if (!scenegraphParseBool(buffer, &bdata[0]))
+            if (!parseBool(buffer, &bdata[0]))
             {
                 return VK_FALSE;
             }
@@ -4095,9 +4092,9 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "use_min"))
+        else if (parseIsToken(buffer, "use_min"))
         {
-            if (!scenegraphParseBoolTriple(buffer, &bdata[0], &bdata[1], &bdata[2]))
+            if (!parseBoolTriple(buffer, &bdata[0], &bdata[1], &bdata[2]))
             {
                 return VK_FALSE;
             }
@@ -4113,9 +4110,9 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "use_max"))
+        else if (parseIsToken(buffer, "use_max"))
         {
-            if (!scenegraphParseBoolTriple(buffer, &bdata[0], &bdata[1], &bdata[2]))
+            if (!parseBoolTriple(buffer, &bdata[0], &bdata[1], &bdata[2]))
             {
                 return VK_FALSE;
             }
@@ -4131,9 +4128,9 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "min"))
+        else if (parseIsToken(buffer, "min"))
         {
-            if (!scenegraphParseVec3(buffer, fdata))
+            if (!parseVec3(buffer, fdata))
             {
                 return VK_FALSE;
             }
@@ -4149,9 +4146,9 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "max"))
+        else if (parseIsToken(buffer, "max"))
         {
-            if (!scenegraphParseVec3(buffer, fdata))
+            if (!parseVec3(buffer, fdata))
             {
                 return VK_FALSE;
             }
@@ -4167,9 +4164,9 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "influence"))
+        else if (parseIsToken(buffer, "influence"))
         {
-            if (!scenegraphParseFloat(buffer, &fdata[0]))
+            if (!parseFloat(buffer, &fdata[0]))
             {
                 return VK_FALSE;
             }
@@ -4189,9 +4186,9 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "translate"))
+        else if (parseIsToken(buffer, "translate"))
         {
-            if (!scenegraphParseVec3(buffer, fdata))
+            if (!parseVec3(buffer, fdata))
             {
                 return VK_FALSE;
             }
@@ -4207,9 +4204,9 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "rotate"))
+        else if (parseIsToken(buffer, "rotate"))
         {
-            if (!scenegraphParseVec3(buffer, fdata))
+            if (!parseVec3(buffer, fdata))
             {
                 return VK_FALSE;
             }
@@ -4225,9 +4222,9 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "scale"))
+        else if (parseIsToken(buffer, "scale"))
         {
-            if (!scenegraphParseVec3(buffer, fdata))
+            if (!parseVec3(buffer, fdata))
             {
                 return VK_FALSE;
             }
@@ -4243,9 +4240,9 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "jointIndex"))
+        else if (parseIsToken(buffer, "jointIndex"))
         {
-            if (!scenegraphParseInt(buffer, &idata))
+            if (!parseInt(buffer, &idata))
             {
                 return VK_FALSE;
             }
@@ -4261,9 +4258,9 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "joints"))
+        else if (parseIsToken(buffer, "joints"))
         {
-            if (!scenegraphParseInt(buffer, &idata))
+            if (!parseInt(buffer, &idata))
             {
                 return VK_FALSE;
             }
@@ -4273,7 +4270,7 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
                 // mat3 in std140 consumes three vec4 columns.
             	VkDeviceSize size = alignmentGetSizeInBytes(16 * sizeof(float) * (VKTS_MAX_JOINTS + 1) + 12 * sizeof(float) * (VKTS_MAX_JOINTS + 1), 16);
 
-                auto jointsUniformBuffer = scenegraphCreateUniformBufferObject(context, size);
+                auto jointsUniformBuffer = createUniformBufferObject(assetManager, size);
 
                 if (!jointsUniformBuffer.get())
                 {
@@ -4291,9 +4288,9 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "bind_translate"))
+        else if (parseIsToken(buffer, "bind_translate"))
         {
-            if (!scenegraphParseVec3(buffer, fdata))
+            if (!parseVec3(buffer, fdata))
             {
                 return VK_FALSE;
             }
@@ -4309,9 +4306,9 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "bind_rotate"))
+        else if (parseIsToken(buffer, "bind_rotate"))
         {
-            if (!scenegraphParseVec3(buffer, fdata))
+            if (!parseVec3(buffer, fdata))
             {
                 return VK_FALSE;
             }
@@ -4327,9 +4324,9 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "bind_scale"))
+        else if (parseIsToken(buffer, "bind_scale"))
         {
-            if (!scenegraphParseVec3(buffer, fdata))
+            if (!parseVec3(buffer, fdata))
             {
                 return VK_FALSE;
             }
@@ -4345,9 +4342,9 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "mesh"))
+        else if (parseIsToken(buffer, "mesh"))
         {
-            if (!scenegraphParseString(buffer, sdata0))
+            if (!parseString(buffer, sdata0))
             {
                 return VK_FALSE;
             }
@@ -4357,7 +4354,7 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
             	// mat3 in std140 consumes three vec4 columns.
             	VkDeviceSize size = alignmentGetSizeInBytes(16 * sizeof(float) + 12 * sizeof(float), 16);
 
-                auto transformUniformBuffer = scenegraphCreateUniformBufferObject(context, size);
+                auto transformUniformBuffer = createUniformBufferObject(assetManager, size);
 
                 if (!transformUniformBuffer.get())
                 {
@@ -4372,7 +4369,7 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
 
             	//
 
-                const auto& mesh = context->useMesh(sdata0);
+                const auto& mesh = assetManager->useMesh(sdata0);
 
                 if (!mesh.get())
                 {
@@ -4390,16 +4387,16 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "camera"))
+        else if (parseIsToken(buffer, "camera"))
         {
-            if (!scenegraphParseString(buffer, sdata0))
+            if (!parseString(buffer, sdata0))
             {
                 return VK_FALSE;
             }
 
             if (node.get())
             {
-                const auto& camera = context->useCamera(sdata0);
+                const auto& camera = assetManager->useCamera(sdata0);
 
                 if (!camera.get())
                 {
@@ -4417,16 +4414,16 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "light"))
+        else if (parseIsToken(buffer, "light"))
         {
-            if (!scenegraphParseString(buffer, sdata0))
+            if (!parseString(buffer, sdata0))
             {
                 return VK_FALSE;
             }
 
             if (node.get())
             {
-                const auto& light = context->useLight(sdata0);
+                const auto& light = assetManager->useLight(sdata0);
 
                 if (!light.get())
                 {
@@ -4444,16 +4441,16 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
                 return VK_FALSE;
             }
         }
-        else if (scenegraphParseIsToken(buffer, "animation"))
+        else if (parseIsToken(buffer, "animation"))
         {
-            if (!scenegraphParseString(buffer, sdata0))
+            if (!parseString(buffer, sdata0))
             {
                 return VK_FALSE;
             }
 
             if (node.get())
             {
-                const auto& animation = context->useAnimation(sdata0);
+                const auto& animation = assetManager->useAnimation(sdata0);
 
                 if (!animation.get())
                 {
@@ -4473,16 +4470,16 @@ static VkBool32 scenegraphLoadObjects(const char* directory, const char* filenam
         }
         else
         {
-            scenegraphParseUnknownBuffer(buffer);
+            parseUnknownBuffer(buffer);
         }
     }
 
     return VK_TRUE;
 }
 
-ISceneSP VKTS_APIENTRY scenegraphLoadScene(const char* filename, const IContextSP& context)
+ISceneSP VKTS_APIENTRY scenegraphLoadScene(const char* filename, const IAssetManagerSP& assetManager)
 {
-    if (!filename || !context.get())
+    if (!filename || !assetManager.get())
     {
         return ISceneSP();
     }
@@ -4513,42 +4510,42 @@ ISceneSP VKTS_APIENTRY scenegraphLoadScene(const char* filename, const IContextS
 
     while (textBuffer->gets(buffer, VKTS_MAX_BUFFER_CHARS))
     {
-        if (scenegraphParseSkipBuffer(buffer))
+        if (parseSkipBuffer(buffer))
         {
             continue;
         }
 
-        if (scenegraphParseIsToken(buffer, "scene_name"))
+        if (parseIsToken(buffer, "scene_name"))
         {
-            if (!scenegraphParseString(buffer, sdata))
+            if (!parseString(buffer, sdata))
             {
                 return ISceneSP();
             }
 
             scene->setName(std::string(sdata));
         }
-        else if (scenegraphParseIsToken(buffer, "object_library"))
+        else if (parseIsToken(buffer, "object_library"))
         {
-            if (!scenegraphParseString(buffer, sdata))
+            if (!parseString(buffer, sdata))
             {
                 return ISceneSP();
             }
 
-            if (!scenegraphLoadObjects(directory, sdata, context))
+            if (!scenegraphLoadObjects(directory, sdata, assetManager))
             {
                 logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load objects: '%s'", sdata);
 
                 return ISceneSP();
             }
         }
-        else if (scenegraphParseIsToken(buffer, "object"))
+        else if (parseIsToken(buffer, "object"))
         {
-            if (!scenegraphParseString(buffer, sdata))
+            if (!parseString(buffer, sdata))
             {
                 return ISceneSP();
             }
 
-            object = context->useObject(sdata);
+            object = assetManager->useObject(sdata);
 
             if (!object.get())
             {
@@ -4559,9 +4556,9 @@ ISceneSP VKTS_APIENTRY scenegraphLoadScene(const char* filename, const IContextS
 
             scene->addObject(object);
         }
-        else if (scenegraphParseIsToken(buffer, "name"))
+        else if (parseIsToken(buffer, "name"))
         {
-            if (!scenegraphParseString(buffer, sdata))
+            if (!parseString(buffer, sdata))
             {
                 return ISceneSP();
             }
@@ -4577,9 +4574,9 @@ ISceneSP VKTS_APIENTRY scenegraphLoadScene(const char* filename, const IContextS
                 return ISceneSP();
             }
         }
-        else if (scenegraphParseIsToken(buffer, "translate"))
+        else if (parseIsToken(buffer, "translate"))
         {
-            if (!scenegraphParseVec3(buffer, fdata))
+            if (!parseVec3(buffer, fdata))
             {
                 return ISceneSP();
             }
@@ -4595,9 +4592,9 @@ ISceneSP VKTS_APIENTRY scenegraphLoadScene(const char* filename, const IContextS
                 return ISceneSP();
             }
         }
-        else if (scenegraphParseIsToken(buffer, "rotate"))
+        else if (parseIsToken(buffer, "rotate"))
         {
-            if (!scenegraphParseVec3(buffer, fdata))
+            if (!parseVec3(buffer, fdata))
             {
                 return ISceneSP();
             }
@@ -4613,9 +4610,9 @@ ISceneSP VKTS_APIENTRY scenegraphLoadScene(const char* filename, const IContextS
                 return ISceneSP();
             }
         }
-        else if (scenegraphParseIsToken(buffer, "scale"))
+        else if (parseIsToken(buffer, "scale"))
         {
-            if (!scenegraphParseVec3(buffer, fdata))
+            if (!parseVec3(buffer, fdata))
             {
                 return ISceneSP();
             }
@@ -4631,23 +4628,23 @@ ISceneSP VKTS_APIENTRY scenegraphLoadScene(const char* filename, const IContextS
                 return ISceneSP();
             }
         }
-        else if (scenegraphParseIsToken(buffer, "environment"))
+        else if (parseIsToken(buffer, "environment"))
         {
-            if (!scenegraphParseString(buffer, sdata))
+            if (!parseString(buffer, sdata))
             {
                 return ISceneSP();
             }
 
             // Nothing for now.
         }
-        else if (scenegraphParseIsToken(buffer, "textureObject"))
+        else if (parseIsToken(buffer, "textureObject"))
         {
-            if (!scenegraphParseString(buffer, sdata))
+            if (!parseString(buffer, sdata))
             {
                 return ISceneSP();
             }
 
-            auto textureObject = context->useTextureObject(sdata);
+            auto textureObject = assetManager->useTextureObject(sdata);
 
             if (!textureObject.get())
             {
@@ -4663,7 +4660,7 @@ ISceneSP VKTS_APIENTRY scenegraphLoadScene(const char* filename, const IContextS
 
             //
 
-            textureObject = context->useTextureObject(std::string(sdata) + "_LAMBERT");
+            textureObject = assetManager->useTextureObject(std::string(sdata) + "_LAMBERT");
 
             if (textureObject.get())
             {
@@ -4671,7 +4668,7 @@ ISceneSP VKTS_APIENTRY scenegraphLoadScene(const char* filename, const IContextS
 
                 //
 
-                textureObject = context->useTextureObject(std::string(sdata) + "_COOKTORRANCE");
+                textureObject = assetManager->useTextureObject(std::string(sdata) + "_COOKTORRANCE");
 
                 if (!textureObject.get())
                 {
@@ -4682,7 +4679,7 @@ ISceneSP VKTS_APIENTRY scenegraphLoadScene(const char* filename, const IContextS
 
                 //
 
-                textureObject = context->useTextureObject("BSDF_LUT_" + std::to_string(VKTS_BSDF_LENGTH) + "_" + std::to_string(VKTS_BSDF_M));
+                textureObject = assetManager->useTextureObject("BSDF_LUT_" + std::to_string(VKTS_BSDF_LENGTH) + "_" + std::to_string(VKTS_BSDF_M));
 
                 if (!textureObject.get())
                 {
@@ -4694,35 +4691,25 @@ ISceneSP VKTS_APIENTRY scenegraphLoadScene(const char* filename, const IContextS
         }
         else
         {
-            scenegraphParseUnknownBuffer(buffer);
+            parseUnknownBuffer(buffer);
         }
     }
 
     // Gather all cameras and add too scene.
 
-    for (size_t i = 0; i < context->getAllCameras().values().size(); i++)
+    for (size_t i = 0; i < assetManager->getAllCameras().values().size(); i++)
     {
-    	scene->addCamera(context->getAllCameras().valueAt(i));
+    	scene->addCamera(assetManager->getAllCameras().valueAt(i));
     }
 
     // Gather all lights and add too scene.
 
-    for (size_t i = 0; i < context->getAllLights().values().size(); i++)
+    for (size_t i = 0; i < assetManager->getAllLights().values().size(); i++)
     {
-    	scene->addLight(context->getAllLights().valueAt(i));
+    	scene->addLight(assetManager->getAllLights().valueAt(i));
     }
 
     return scene;
-}
-
-IContextSP VKTS_APIENTRY scenegraphCreateContext(const VkBool32 replace, const IContextObjectSP& contextObject, const ICommandBuffersSP& cmdBuffer, const VkSamplerCreateInfo& samplerCreateInfo, const VkImageViewCreateInfo& imageViewCreateInfo, const IDescriptorSetLayoutSP& descriptorSetLayout)
-{
-    if (!contextObject.get())
-    {
-        return IContextSP();
-    }
-
-    return IContextSP(new Context(replace, contextObject, cmdBuffer, samplerCreateInfo, imageViewCreateInfo, descriptorSetLayout));
 }
 
 }

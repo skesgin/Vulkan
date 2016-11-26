@@ -7,10 +7,13 @@
 					<externalSetting>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS_Scenegraph"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS_PKG_Scenegraph"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS/intel64_Windows_Win32_GNU_Debug"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS_Scenegraph/intel64_Windows_Win32_GNU_Debug"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS_PKG_Scenegraph/intel64_Windows_Win32_GNU_Debug"/>
 						<entry flags="RESOLVED" kind="libraryFile" name="VKTS" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="VKTS_Scenegraph" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="VKTS_PKG_Scenegraph" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
 				<extensions>
@@ -87,10 +90,13 @@
 					<externalSetting>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS_Scenegraph"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS_PKG_Scenegraph"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS/intel64_Windows_Win32_GNU_Release"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS_Scenegraph/intel64_Windows_Win32_GNU_Release"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS_PKG_Scenegraph/intel64_Windows_Win32_GNU_Release"/>
 						<entry flags="RESOLVED" kind="libraryFile" name="VKTS" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="VKTS_Scenegraph" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="VKTS_PKG_Scenegraph" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
 				<extensions>
@@ -162,11 +168,14 @@
 					<externalSetting>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS_Scenegraph"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS_PKG_Scenegraph"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS/x64__Linux__GCC_Debug"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS/intel64_Linux_Xlib_GNU_Debug"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS_Scenegraph/intel64_Linux_Xlib_GNU_Debug"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS_PKG_Scenegraph/intel64_Linux_Xlib_GNU_Debug"/>
 						<entry flags="RESOLVED" kind="libraryFile" name="VKTS" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="VKTS_Scenegraph" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="VKTS_PKG_Scenegraph" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
 				<extensions>
@@ -229,11 +238,14 @@
 					<externalSetting>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS_Scenegraph"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS_PKG_Scenegraph"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS/X64__Linux__GCC_Release"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS/intel64_Linux_Xlib_GNU_Release"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS_Scenegraph/intel64_Linux_Xlib_GNU_Release"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS_PKG_Scenegraph/intel64_Linux_Xlib_GNU_Release"/>
 						<entry flags="RESOLVED" kind="libraryFile" name="VKTS" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="VKTS_Scenegraph" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="VKTS_PKG_Scenegraph" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
 				<extensions>
@@ -296,10 +308,13 @@
 					<externalSetting>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS_Scenegraph"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS_PKG_Scenegraph"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS/intel64_Linux_None_GNU_Debug"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS_Scenegraph/intel64_Linux_None_GNU_Debug"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS_PKG_Scenegraph/intel64_Linux_None_GNU_Debug"/>
 						<entry flags="RESOLVED" kind="libraryFile" name="VKTS" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="VKTS_Scenegraph" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="VKTS_PKG_Scenegraph" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
 				<extensions>
@@ -364,10 +379,13 @@
 					<externalSetting>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS_Scenegraph"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS_PKG_Scenegraph"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS/intel64_Linux_None_GNU_Release"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS_Scenegraph/intel64_Linux_None_GNU_Release"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS_PKG_Scenegraph/intel64_Linux_None_GNU_Release"/>
 						<entry flags="RESOLVED" kind="libraryFile" name="VKTS" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="VKTS_Scenegraph" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="VKTS_PKG_Scenegraph" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
 				<extensions>
@@ -431,10 +449,13 @@
 					<externalSetting>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS_Scenegraph"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS_PKG_Scenegraph"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS/intel64_Windows_None_GNU_Debug"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS_Scenegraph/intel64_Windows_None_GNU_Debug"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS_PKG_Scenegraph/intel64_Windows_None_GNU_Debug"/>
 						<entry flags="RESOLVED" kind="libraryFile" name="VKTS" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="VKTS_Scenegraph" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="VKTS_PKG_Scenegraph" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
 				<extensions>
@@ -513,10 +534,13 @@
 					<externalSetting>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS_Scenegraph"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS_PKG_Scenegraph"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS/intel64_Windows_None_GNU_Release"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS_Scenegraph/intel64_Windows_None_GNU_Release"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS_PKG_Scenegraph/intel64_Windows_None_GNU_Release"/>
 						<entry flags="RESOLVED" kind="libraryFile" name="VKTS" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="VKTS_Scenegraph" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="VKTS_PKG_Scenegraph" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
 				<extensions>
@@ -590,10 +614,13 @@
 					<externalSetting>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS_Scenegraph"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS_PKG_Scenegraph"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS/arm64_Linux_Display.iMX8_GNU_Debug"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS_Scenegraph/arm64_Linux_Display.iMX8_GNU_Debug"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS_PKG_Scenegraph/arm64_Linux_Display.iMX8_GNU_Debug"/>
 						<entry flags="RESOLVED" kind="libraryFile" name="VKTS" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="VKTS_Scenegraph" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="VKTS_PKG_Scenegraph" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
 				<extensions>
@@ -661,10 +688,13 @@
 					<externalSetting>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS_Scenegraph"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS_PKG_Scenegraph"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS/arm64_Linux_Display.iMX8_GNU_Release"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS_Scenegraph/arm64_Linux_Display.iMX8_GNU_Release"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS_PKG_Scenegraph/arm64_Linux_Display.iMX8_GNU_Release"/>
 						<entry flags="RESOLVED" kind="libraryFile" name="VKTS" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="VKTS_Scenegraph" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="VKTS_PKG_Scenegraph" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
 				<extensions>
@@ -732,11 +762,14 @@
 					<externalSetting>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS_Scenegraph"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS_PKG_Scenegraph"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS/arm64_Linux_None_GNU_Debug"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS/arm64_Linux_None.iMX8_GNU_Debug"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS_Scenegraph/arm64_Linux_None.iMX8_GNU_Debug"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS_PKG_Scenegraph/arm64_Linux_None.iMX8_GNU_Debug"/>
 						<entry flags="RESOLVED" kind="libraryFile" name="VKTS" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="VKTS_Scenegraph" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="VKTS_PKG_Scenegraph" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
 				<extensions>
@@ -802,10 +835,13 @@
 					<externalSetting>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS_Scenegraph"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS_PKG_Scenegraph"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS/arm64_Linux_None.iMX8_GNU_Release"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS_Scenegraph/arm64_Linux_None.iMX8_GNU_Release"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS_PKG_Scenegraph/arm64_Linux_None.iMX8_GNU_Release"/>
 						<entry flags="RESOLVED" kind="libraryFile" name="VKTS" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="VKTS_Scenegraph" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="VKTS_PKG_Scenegraph" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
 				<extensions>
@@ -871,10 +907,13 @@
 					<externalSetting>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS_Scenegraph"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS_PKG_Scenegraph"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS/intel64_Linux_Wayland_GNU_Debug"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS_Scenegraph/intel64_Linux_Wayland_GNU_Debug"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS_PKG_Scenegraph/intel64_Linux_Wayland_GNU_Debug"/>
 						<entry flags="RESOLVED" kind="libraryFile" name="VKTS" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="VKTS_Scenegraph" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="VKTS_PKG_Scenegraph" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
 				<extensions>
@@ -940,10 +979,13 @@
 					<externalSetting>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS_Scenegraph"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS_PKG_Scenegraph"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS/intel64_Linux_Wayland_GNU_Release"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS_Scenegraph/intel64_Linux_Wayland_GNU_Release"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS_PKG_Scenegraph/intel64_Linux_Wayland_GNU_Release"/>
 						<entry flags="RESOLVED" kind="libraryFile" name="VKTS" srcPrefixMapping="" srcRootPath=""/>
 						<entry flags="RESOLVED" kind="libraryFile" name="VKTS_Scenegraph" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="VKTS_PKG_Scenegraph" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
 				<extensions>

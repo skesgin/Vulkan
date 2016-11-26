@@ -24,53 +24,53 @@
  * THE SOFTWARE.
  */
 
-#include "Context.hpp"
+#include "AssetManager.hpp"
 
 namespace vkts
 {
 
-Context::Context(const VkBool32 replace, const IContextObjectSP& contextObject, const ICommandBuffersSP& cmdBuffer, const VkSamplerCreateInfo& samplerCreateInfo, const VkImageViewCreateInfo& imageViewCreateInfo, const IDescriptorSetLayoutSP& descriptorSetLayout) :
-    IContext(), replace(replace), contextObject(contextObject), cmdBuffer(cmdBuffer), samplerCreateInfo(samplerCreateInfo), imageViewCreateInfo(imageViewCreateInfo), descriptorSetLayout(descriptorSetLayout), allObjects(), allCameras(), allLights(), allMeshes(), allSubMeshes(), allAnimations(), allChannels(), allBSDFMaterials(), allUsedBSDFMaterials(), allPhongMaterials(), allUsedPhongMaterials(), allTextureObjects(), allImageDatas(), allVertexShaderModules(), allFragmentShaderModules(), renderPass()
+AssetManager::AssetManager(const VkBool32 replace, const IContextObjectSP& contextObject, const ICommandBuffersSP& cmdBuffer, const VkSamplerCreateInfo& samplerCreateInfo, const IDescriptorSetLayoutSP& descriptorSetLayout, const IRenderPassSP& renderPass) :
+    IAssetManager(), replace(replace), contextObject(contextObject), cmdBuffer(cmdBuffer), samplerCreateInfo(samplerCreateInfo), descriptorSetLayout(descriptorSetLayout), renderPass(renderPass), allObjects(), allCameras(), allLights(), allMeshes(), allSubMeshes(), allAnimations(), allChannels(), allBSDFMaterials(), allUsedBSDFMaterials(), allPhongMaterials(), allUsedPhongMaterials(), allTextureObjects(), allImageDatas(), allVertexShaderModules(), allFragmentShaderModules()
 {
 }
 
-Context::~Context()
+AssetManager::~AssetManager()
 {
     destroy();
 }
 
 //
-// IContext
+// IAssetManager
 //
 
-const IContextObjectSP& Context::getContextObject() const
+const IContextObjectSP& AssetManager::getContextObject() const
 {
     return contextObject;
 }
 
-const ICommandBuffersSP& Context::getCommandBuffer() const
+const ICommandBuffersSP& AssetManager::getCommandBuffer() const
 {
     return cmdBuffer;
 }
 
-const VkSamplerCreateInfo& Context::getSamplerCreateInfo() const
+const VkSamplerCreateInfo& AssetManager::getSamplerCreateInfo() const
 {
     return samplerCreateInfo;
 }
 
-const VkImageViewCreateInfo& Context::getImageViewCreateInfo() const
-{
-    return imageViewCreateInfo;
-}
-
-const IDescriptorSetLayoutSP& Context::getDescriptorSetLayout() const
+const IDescriptorSetLayoutSP& AssetManager::getDescriptorSetLayout() const
 {
     return descriptorSetLayout;
 }
 
+const IRenderPassSP& AssetManager::getRenderPass() const
+{
+	return renderPass;
+}
+
 //
 
-IObjectSP Context::useObject(const std::string& name) const
+IObjectSP AssetManager::useObject(const std::string& name) const
 {
 	if (!contains(name, allObjects))
 	{
@@ -82,7 +82,7 @@ IObjectSP Context::useObject(const std::string& name) const
     return get(name, allObjects);
 }
 
-VkBool32 Context::addObject(const IObjectSP& object)
+VkBool32 AssetManager::addObject(const IObjectSP& object)
 {
     if (!object.get())
     {
@@ -92,7 +92,7 @@ VkBool32 Context::addObject(const IObjectSP& object)
     return add(object->getName(), object, allObjects);
 }
 
-VkBool32 Context::removeObject(const IObjectSP& object)
+VkBool32 AssetManager::removeObject(const IObjectSP& object)
 {
     if (!object.get())
     {
@@ -102,14 +102,14 @@ VkBool32 Context::removeObject(const IObjectSP& object)
     return remove(object->getName(), allObjects);
 }
 
-const SmartPointerMap<std::string, IObjectSP>& Context::getAllObjects() const
+const SmartPointerMap<std::string, IObjectSP>& AssetManager::getAllObjects() const
 {
 	return allObjects;
 }
 
 //
 
-ICameraSP Context::useCamera(const std::string& name) const
+ICameraSP AssetManager::useCamera(const std::string& name) const
 {
 	if (!contains(name, allCameras))
 	{
@@ -121,7 +121,7 @@ ICameraSP Context::useCamera(const std::string& name) const
     return get(name, allCameras);
 }
 
-VkBool32 Context::addCamera(const ICameraSP& camera)
+VkBool32 AssetManager::addCamera(const ICameraSP& camera)
 {
     if (!camera.get())
     {
@@ -131,7 +131,7 @@ VkBool32 Context::addCamera(const ICameraSP& camera)
     return add(camera->getName(), camera, allCameras);
 }
 
-VkBool32 Context::removeCamera(const ICameraSP& camera)
+VkBool32 AssetManager::removeCamera(const ICameraSP& camera)
 {
     if (!camera.get())
     {
@@ -141,14 +141,14 @@ VkBool32 Context::removeCamera(const ICameraSP& camera)
     return remove(camera->getName(), allCameras);
 }
 
-const SmartPointerMap<std::string, ICameraSP>& Context::getAllCameras() const
+const SmartPointerMap<std::string, ICameraSP>& AssetManager::getAllCameras() const
 {
 	return allCameras;
 }
 
 //
 
-ILightSP Context::useLight(const std::string& name) const
+ILightSP AssetManager::useLight(const std::string& name) const
 {
 	if (!contains(name, allLights))
 	{
@@ -160,7 +160,7 @@ ILightSP Context::useLight(const std::string& name) const
     return get(name, allLights);
 }
 
-VkBool32 Context::addLight(const ILightSP& light)
+VkBool32 AssetManager::addLight(const ILightSP& light)
 {
     if (!light.get())
     {
@@ -170,7 +170,7 @@ VkBool32 Context::addLight(const ILightSP& light)
     return add(light->getName(), light, allLights);
 }
 
-VkBool32 Context::removeLight(const ILightSP& light)
+VkBool32 AssetManager::removeLight(const ILightSP& light)
 {
     if (!light.get())
     {
@@ -180,14 +180,14 @@ VkBool32 Context::removeLight(const ILightSP& light)
     return remove(light->getName(), allLights);
 }
 
-const SmartPointerMap<std::string, ILightSP>& Context::getAllLights() const
+const SmartPointerMap<std::string, ILightSP>& AssetManager::getAllLights() const
 {
 	return allLights;
 }
 
 //
 
-IMeshSP Context::useMesh(const std::string& name) const
+IMeshSP AssetManager::useMesh(const std::string& name) const
 {
 	if (!contains(name, allMeshes))
 	{
@@ -199,7 +199,7 @@ IMeshSP Context::useMesh(const std::string& name) const
     return get(name, allMeshes);
 }
 
-VkBool32 Context::addMesh(const IMeshSP& mesh)
+VkBool32 AssetManager::addMesh(const IMeshSP& mesh)
 {
     if (!mesh.get())
     {
@@ -209,7 +209,7 @@ VkBool32 Context::addMesh(const IMeshSP& mesh)
     return add(mesh->getName(), mesh, allMeshes);
 }
 
-VkBool32 Context::removeMesh(const IMeshSP& mesh)
+VkBool32 AssetManager::removeMesh(const IMeshSP& mesh)
 {
     if (!mesh.get())
     {
@@ -219,7 +219,7 @@ VkBool32 Context::removeMesh(const IMeshSP& mesh)
     return remove(mesh->getName(), allMeshes);
 }
 
-ISubMeshSP Context::useSubMesh(const std::string& name) const
+ISubMeshSP AssetManager::useSubMesh(const std::string& name) const
 {
 	if (!contains(name, allSubMeshes))
 	{
@@ -231,7 +231,7 @@ ISubMeshSP Context::useSubMesh(const std::string& name) const
     return get(name, allSubMeshes);
 }
 
-VkBool32 Context::addSubMesh(const ISubMeshSP& subMesh)
+VkBool32 AssetManager::addSubMesh(const ISubMeshSP& subMesh)
 {
     if (!subMesh.get())
     {
@@ -241,7 +241,7 @@ VkBool32 Context::addSubMesh(const ISubMeshSP& subMesh)
     return add(subMesh->getName(), subMesh, allSubMeshes);
 }
 
-VkBool32 Context::removeSubMesh(const ISubMeshSP& subMesh)
+VkBool32 AssetManager::removeSubMesh(const ISubMeshSP& subMesh)
 {
     if (!subMesh.get())
     {
@@ -253,7 +253,7 @@ VkBool32 Context::removeSubMesh(const ISubMeshSP& subMesh)
 
 //
 
-IAnimationSP Context::useAnimation(const std::string& name) const
+IAnimationSP AssetManager::useAnimation(const std::string& name) const
 {
 	if (!contains(name, allAnimations))
 	{
@@ -265,7 +265,7 @@ IAnimationSP Context::useAnimation(const std::string& name) const
     return get(name, allAnimations);
 }
 
-VkBool32 Context::addAnimation(const IAnimationSP& animation)
+VkBool32 AssetManager::addAnimation(const IAnimationSP& animation)
 {
     if (!animation.get())
     {
@@ -275,7 +275,7 @@ VkBool32 Context::addAnimation(const IAnimationSP& animation)
     return add(animation->getName(), animation, allAnimations);
 }
 
-VkBool32 Context::removeAnimation(const IAnimationSP& animation)
+VkBool32 AssetManager::removeAnimation(const IAnimationSP& animation)
 {
     if (!animation.get())
     {
@@ -285,7 +285,7 @@ VkBool32 Context::removeAnimation(const IAnimationSP& animation)
     return remove(animation->getName(), allAnimations);
 }
 
-IChannelSP Context::useChannel(const std::string& name) const
+IChannelSP AssetManager::useChannel(const std::string& name) const
 {
 	if (!contains(name, allChannels))
 	{
@@ -297,7 +297,7 @@ IChannelSP Context::useChannel(const std::string& name) const
     return get(name, allChannels);
 }
 
-VkBool32 Context::addChannel(const IChannelSP& channel)
+VkBool32 AssetManager::addChannel(const IChannelSP& channel)
 {
     if (!channel.get())
     {
@@ -307,7 +307,7 @@ VkBool32 Context::addChannel(const IChannelSP& channel)
     return add(channel->getName(), channel, allChannels);
 }
 
-VkBool32 Context::removeChannel(const IChannelSP& channel)
+VkBool32 AssetManager::removeChannel(const IChannelSP& channel)
 {
     if (!channel.get())
     {
@@ -319,7 +319,7 @@ VkBool32 Context::removeChannel(const IChannelSP& channel)
 
 //
 
-IBSDFMaterialSP Context::useBSDFMaterial(const std::string& name) const
+IBSDFMaterialSP AssetManager::useBSDFMaterial(const std::string& name) const
 {
 	if (!contains(name, allBSDFMaterials))
 	{
@@ -342,7 +342,7 @@ IBSDFMaterialSP Context::useBSDFMaterial(const std::string& name) const
     return result;
 }
 
-VkBool32 Context::addBSDFMaterial(const IBSDFMaterialSP& material)
+VkBool32 AssetManager::addBSDFMaterial(const IBSDFMaterialSP& material)
 {
     if (!material.get())
     {
@@ -352,7 +352,7 @@ VkBool32 Context::addBSDFMaterial(const IBSDFMaterialSP& material)
     return add(material->getName(), material, allBSDFMaterials);
 }
 
-VkBool32 Context::removeBSDFMaterial(const IBSDFMaterialSP& material)
+VkBool32 AssetManager::removeBSDFMaterial(const IBSDFMaterialSP& material)
 {
     if (!material.get())
     {
@@ -368,7 +368,7 @@ VkBool32 Context::removeBSDFMaterial(const IBSDFMaterialSP& material)
     return remove(material->getName(), allBSDFMaterials);
 }
 
-IPhongMaterialSP Context::usePhongMaterial(const std::string& name) const
+IPhongMaterialSP AssetManager::usePhongMaterial(const std::string& name) const
 {
 	if (!contains(name, allPhongMaterials))
 	{
@@ -391,7 +391,7 @@ IPhongMaterialSP Context::usePhongMaterial(const std::string& name) const
     return result;
 }
 
-VkBool32 Context::addPhongMaterial(const IPhongMaterialSP& material)
+VkBool32 AssetManager::addPhongMaterial(const IPhongMaterialSP& material)
 {
     if (!material.get())
     {
@@ -401,7 +401,7 @@ VkBool32 Context::addPhongMaterial(const IPhongMaterialSP& material)
     return add(material->getName(), material, allPhongMaterials);
 }
 
-VkBool32 Context::removePhongMaterial(const IPhongMaterialSP& material)
+VkBool32 AssetManager::removePhongMaterial(const IPhongMaterialSP& material)
 {
     if (!material.get())
     {
@@ -419,7 +419,7 @@ VkBool32 Context::removePhongMaterial(const IPhongMaterialSP& material)
 
 //
 
-ITextureObjectSP Context::useTextureObject(const std::string& name) const
+ITextureObjectSP AssetManager::useTextureObject(const std::string& name) const
 {
 	if (!contains(name, allTextureObjects))
 	{
@@ -431,7 +431,7 @@ ITextureObjectSP Context::useTextureObject(const std::string& name) const
     return get(name, allTextureObjects);
 }
 
-VkBool32 Context::addTextureObject(const ITextureObjectSP& textureObject)
+VkBool32 AssetManager::addTextureObject(const ITextureObjectSP& textureObject)
 {
     if (!textureObject.get())
     {
@@ -441,7 +441,7 @@ VkBool32 Context::addTextureObject(const ITextureObjectSP& textureObject)
     return add(textureObject->getName(), textureObject, allTextureObjects);
 }
 
-VkBool32 Context::removeTextureObject(const ITextureObjectSP& textureObject)
+VkBool32 AssetManager::removeTextureObject(const ITextureObjectSP& textureObject)
 {
     if (!textureObject.get())
     {
@@ -453,7 +453,7 @@ VkBool32 Context::removeTextureObject(const ITextureObjectSP& textureObject)
 
 //
 
-IImageObjectSP Context::useImageObject(const std::string& name) const
+IImageObjectSP AssetManager::useImageObject(const std::string& name) const
 {
 	if (!contains(name, allImageObjects))
 	{
@@ -465,7 +465,7 @@ IImageObjectSP Context::useImageObject(const std::string& name) const
     return get(name, allImageObjects);
 }
 
-VkBool32 Context::addImageObject(const IImageObjectSP& imageObject)
+VkBool32 AssetManager::addImageObject(const IImageObjectSP& imageObject)
 {
     if (!imageObject.get())
     {
@@ -475,7 +475,7 @@ VkBool32 Context::addImageObject(const IImageObjectSP& imageObject)
     return add(imageObject->getName(), imageObject, allImageObjects);
 }
 
-VkBool32 Context::removeImageObject(const IImageObjectSP& imageObject)
+VkBool32 AssetManager::removeImageObject(const IImageObjectSP& imageObject)
 {
     if (!imageObject.get())
     {
@@ -487,7 +487,7 @@ VkBool32 Context::removeImageObject(const IImageObjectSP& imageObject)
 
 //
 
-IImageDataSP Context::useImageData(const std::string& name) const
+IImageDataSP AssetManager::useImageData(const std::string& name) const
 {
 	if (!contains(name, allImageDatas))
 	{
@@ -499,7 +499,7 @@ IImageDataSP Context::useImageData(const std::string& name) const
     return get(name, allImageDatas);
 }
 
-VkBool32 Context::addImageData(const IImageDataSP& imageData)
+VkBool32 AssetManager::addImageData(const IImageDataSP& imageData)
 {
     if (!imageData.get())
     {
@@ -509,7 +509,7 @@ VkBool32 Context::addImageData(const IImageDataSP& imageData)
     return add(imageData->getName(), imageData, allImageDatas);
 }
 
-VkBool32 Context::removeImageData(const IImageDataSP& imageData)
+VkBool32 AssetManager::removeImageData(const IImageDataSP& imageData)
 {
     if (!imageData.get())
     {
@@ -522,7 +522,7 @@ VkBool32 Context::removeImageData(const IImageDataSP& imageData)
 
 //
 
-IShaderModuleSP Context::useVertexShaderModule(const VkTsVertexBufferType vertexBufferType) const
+IShaderModuleSP AssetManager::useVertexShaderModule(const VkTsVertexBufferType vertexBufferType) const
 {
 	if (!contains(vertexBufferType, allVertexShaderModules))
 	{
@@ -534,7 +534,7 @@ IShaderModuleSP Context::useVertexShaderModule(const VkTsVertexBufferType vertex
     return get(vertexBufferType, allVertexShaderModules);
 }
 
-VkBool32 Context::addVertexShaderModule(const VkTsVertexBufferType vertexBufferType, const IShaderModuleSP& shaderModule)
+VkBool32 AssetManager::addVertexShaderModule(const VkTsVertexBufferType vertexBufferType, const IShaderModuleSP& shaderModule)
 {
     if (!shaderModule.get())
     {
@@ -544,7 +544,7 @@ VkBool32 Context::addVertexShaderModule(const VkTsVertexBufferType vertexBufferT
     return add(vertexBufferType, shaderModule, allVertexShaderModules);
 }
 
-VkBool32 Context::removeVertexShaderModule(const VkTsVertexBufferType vertexBufferType, const IShaderModuleSP& shaderModule)
+VkBool32 AssetManager::removeVertexShaderModule(const VkTsVertexBufferType vertexBufferType, const IShaderModuleSP& shaderModule)
 {
     if (!shaderModule.get())
     {
@@ -554,7 +554,7 @@ VkBool32 Context::removeVertexShaderModule(const VkTsVertexBufferType vertexBuff
     return remove(vertexBufferType, allVertexShaderModules);
 }
 
-IShaderModuleSP Context::useFragmentShaderModule(const std::string& name) const
+IShaderModuleSP AssetManager::useFragmentShaderModule(const std::string& name) const
 {
 	if (!contains(name, allFragmentShaderModules))
 	{
@@ -566,7 +566,7 @@ IShaderModuleSP Context::useFragmentShaderModule(const std::string& name) const
     return get(name, allFragmentShaderModules);
 }
 
-VkBool32 Context::addFragmentShaderModule(const IShaderModuleSP& shaderModule)
+VkBool32 AssetManager::addFragmentShaderModule(const IShaderModuleSP& shaderModule)
 {
     if (!shaderModule.get())
     {
@@ -576,7 +576,7 @@ VkBool32 Context::addFragmentShaderModule(const IShaderModuleSP& shaderModule)
     return add(shaderModule->getName(), shaderModule, allFragmentShaderModules);
 }
 
-VkBool32 Context::removeFragmentShaderModule(const IShaderModuleSP& shaderModule)
+VkBool32 AssetManager::removeFragmentShaderModule(const IShaderModuleSP& shaderModule)
 {
     if (!shaderModule.get())
     {
@@ -587,20 +587,10 @@ VkBool32 Context::removeFragmentShaderModule(const IShaderModuleSP& shaderModule
 }
 
 //
-
-IRenderPassSP Context::getRenderPass() const
-{
-	return renderPass;
-}
-
-void Context::setRenderPass(const IRenderPassSP& renderPass)
-{
-	this->renderPass = renderPass;
-}
-
+//
 //
 
-void Context::addStageImage(const IImageSP& stageImage)
+void AssetManager::addStageImage(const IImageSP& stageImage)
 {
     if (stageImage.get())
     {
@@ -608,7 +598,7 @@ void Context::addStageImage(const IImageSP& stageImage)
     }
 }
 
-void Context::addStageBuffer(const IBufferSP& stageBuffer)
+void AssetManager::addStageBuffer(const IBufferSP& stageBuffer)
 {
     if (stageBuffer.get())
     {
@@ -616,7 +606,7 @@ void Context::addStageBuffer(const IBufferSP& stageBuffer)
     }
 }
 
-void Context::addStageDeviceMemory(const IDeviceMemorySP& stageDeviceMemory)
+void AssetManager::addStageDeviceMemory(const IDeviceMemorySP& stageDeviceMemory)
 {
     if (stageDeviceMemory.get())
     {
@@ -628,7 +618,7 @@ void Context::addStageDeviceMemory(const IDeviceMemorySP& stageDeviceMemory)
 // IDestroyable
 //
 
-void Context::destroy()
+void AssetManager::destroy()
 {
     // Only free resources, but do not destroy them.
 
@@ -657,8 +647,6 @@ void Context::destroy()
     allVertexShaderModules.clear();
 
     allFragmentShaderModules.clear();
-
-    renderPass.reset();
 
     // Stage resources have to be deleted.
 

@@ -26,12 +26,10 @@
 
 #include <vkts/scenegraph.hpp>
 
-#include "fn_scenegraph_internal.hpp"
-
 namespace vkts
 {
 
-ITextureObjectSP VKTS_APIENTRY scenegraphCreateTextureObject(const IContextSP& context, const glm::vec4& color, const VkFormat format)
+ITextureObjectSP VKTS_APIENTRY createTextureObject(const IAssetManagerSP& assetManager, const glm::vec4& color, const VkFormat format)
 {
 	std::string colorName = imageDataGetColorName(format, color);
 
@@ -53,7 +51,7 @@ ITextureObjectSP VKTS_APIENTRY scenegraphCreateTextureObject(const IContextSP& c
 
     //
 
-    auto imageData = context->useImageData(imageDataName);
+    auto imageData = assetManager->useImageData(imageDataName);
 
     if (!imageData.get())
     {
@@ -66,7 +64,7 @@ ITextureObjectSP VKTS_APIENTRY scenegraphCreateTextureObject(const IContextSP& c
             return ITextureObjectSP();
         }
 
-        context->addImageData(imageData);
+        assetManager->addImageData(imageData);
     }
 
     //
@@ -74,11 +72,11 @@ ITextureObjectSP VKTS_APIENTRY scenegraphCreateTextureObject(const IContextSP& c
     VkImageTiling imageTiling;
     VkMemoryPropertyFlags memoryPropertyFlags;
 
-    if (!context->getContextObject()->getPhysicalDevice()->getGetImageTilingAndMemoryProperty(imageTiling, memoryPropertyFlags, imageData->getFormat(), imageData->getImageType(), 0, imageData->getExtent3D(), imageData->getMipLevels(), 1, VK_SAMPLE_COUNT_1_BIT, imageData->getSize()))
+    if (!assetManager->getContextObject()->getPhysicalDevice()->getGetImageTilingAndMemoryProperty(imageTiling, memoryPropertyFlags, imageData->getFormat(), imageData->getImageType(), 0, imageData->getExtent3D(), imageData->getMipLevels(), 1, VK_SAMPLE_COUNT_1_BIT, imageData->getSize()))
     {
         if (format == VK_FORMAT_R8G8B8_UNORM)
         {
-            context->removeImageData(imageData);
+            assetManager->removeImageData(imageData);
 
             //
 
@@ -95,24 +93,24 @@ ITextureObjectSP VKTS_APIENTRY scenegraphCreateTextureObject(const IContextSP& c
 
             //
 
-            auto convertedImageData = context->useImageData(imageDataName);
+            auto convertedImageData = assetManager->useImageData(imageDataName);
 
             if (!convertedImageData.get())
             {
                 convertedImageData = imageDataConvert(imageData, VK_FORMAT_R8G8B8A8_UNORM, imageDataName);
 
-                if (!context->getContextObject()->getPhysicalDevice()->getGetImageTilingAndMemoryProperty(imageTiling, memoryPropertyFlags, convertedImageData->getFormat(), convertedImageData->getImageType(), 0, convertedImageData->getExtent3D(), convertedImageData->getMipLevels(), 1, VK_SAMPLE_COUNT_1_BIT, convertedImageData->getSize()))
+                if (!assetManager->getContextObject()->getPhysicalDevice()->getGetImageTilingAndMemoryProperty(imageTiling, memoryPropertyFlags, convertedImageData->getFormat(), convertedImageData->getImageType(), 0, convertedImageData->getExtent3D(), convertedImageData->getMipLevels(), 1, VK_SAMPLE_COUNT_1_BIT, convertedImageData->getSize()))
                 {
                     logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Format not supported.");
 
                     return ITextureObjectSP();
                 }
 
-                context->addImageData(convertedImageData);
+                assetManager->addImageData(convertedImageData);
             }
             else
             {
-                if (!context->getContextObject()->getPhysicalDevice()->getGetImageTilingAndMemoryProperty(imageTiling, memoryPropertyFlags, convertedImageData->getFormat(),convertedImageData->getImageType(), 0, convertedImageData->getExtent3D(), convertedImageData->getMipLevels(), 1, VK_SAMPLE_COUNT_1_BIT, convertedImageData->getSize()))
+                if (!assetManager->getContextObject()->getPhysicalDevice()->getGetImageTilingAndMemoryProperty(imageTiling, memoryPropertyFlags, convertedImageData->getFormat(),convertedImageData->getImageType(), 0, convertedImageData->getExtent3D(), convertedImageData->getMipLevels(), 1, VK_SAMPLE_COUNT_1_BIT, convertedImageData->getSize()))
                 {
                     logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Format not supported.");
 
@@ -165,34 +163,34 @@ ITextureObjectSP VKTS_APIENTRY scenegraphCreateTextureObject(const IContextSP& c
     IBufferSP stageBuffer;
     IImageSP stageImage;
 
-    auto imageObject = imageObjectCreate(stageImage, stageBuffer, stageDeviceMemory, context->getContextObject(), context->getCommandBuffer(), imageObjectName, imageData, imageCreateInfo, srcAccessMask, VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, subresourceRange, memoryPropertyFlags);
+    auto imageObject = imageObjectCreate(stageImage, stageBuffer, stageDeviceMemory, assetManager->getContextObject(), assetManager->getCommandBuffer(), imageObjectName, imageData, imageCreateInfo, srcAccessMask, VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, subresourceRange, memoryPropertyFlags);
 
-    context->addStageImage(stageImage);
-    context->addStageBuffer(stageBuffer);
-    context->addStageDeviceMemory(stageDeviceMemory);
+    assetManager->addStageImage(stageImage);
+    assetManager->addStageBuffer(stageBuffer);
+    assetManager->addStageDeviceMemory(stageDeviceMemory);
 
     if (!imageObject.get())
     {
         return ITextureObjectSP();
     }
 
-    context->addImageObject(imageObject);
+    assetManager->addImageObject(imageObject);
 
     //
 
-    auto textureObject = textureObjectCreate(context->getContextObject(), textureObjectName, VK_FALSE, imageObject, context->getSamplerCreateInfo());
+    auto textureObject = textureObjectCreate(assetManager->getContextObject(), textureObjectName, VK_FALSE, imageObject, assetManager->getSamplerCreateInfo());
 
     if (!textureObject.get())
     {
         return ITextureObjectSP();
     }
 
-    context->addTextureObject(textureObject);
+    assetManager->addTextureObject(textureObject);
 
     return textureObject;
 }
 
-IBufferObjectSP VKTS_APIENTRY scenegraphCreateUniformBufferObject(const IContextSP& context, const VkDeviceSize size)
+IBufferObjectSP VKTS_APIENTRY createUniformBufferObject(const IAssetManagerSP& assetManager, const VkDeviceSize size)
 {
     VkBufferCreateInfo bufferCreateInfo{};
 
@@ -205,10 +203,10 @@ IBufferObjectSP VKTS_APIENTRY scenegraphCreateUniformBufferObject(const IContext
     bufferCreateInfo.queueFamilyIndexCount = 0;
     bufferCreateInfo.pQueueFamilyIndices = nullptr;
 
-    return bufferObjectCreate(context->getContextObject(), bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    return bufferObjectCreate(assetManager->getContextObject(), bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 }
 
-IBufferObjectSP VKTS_APIENTRY scenegraphCreateIndexBufferObject(const IContextSP& context, const IBinaryBufferSP& binaryBuffer)
+IBufferObjectSP VKTS_APIENTRY createIndexBufferObject(const IAssetManagerSP& context, const IBinaryBufferSP& binaryBuffer)
 {
     VkBufferCreateInfo bufferCreateInfo{};
 
@@ -232,7 +230,7 @@ IBufferObjectSP VKTS_APIENTRY scenegraphCreateIndexBufferObject(const IContextSP
     return indexBufferObject;
 }
 
-IBufferObjectSP VKTS_APIENTRY scenegraphCreateVertexBufferObject(const IContextSP& context, const IBinaryBufferSP& binaryBuffer)
+IBufferObjectSP VKTS_APIENTRY createVertexBufferObject(const IAssetManagerSP& assetManager, const IBinaryBufferSP& binaryBuffer)
 {
     VkBufferCreateInfo bufferCreateInfo{};
 
@@ -248,10 +246,10 @@ IBufferObjectSP VKTS_APIENTRY scenegraphCreateVertexBufferObject(const IContextS
     IDeviceMemorySP stageDeviceMemory;
     IBufferSP stageBuffer;
 
-    auto vertexBufferObject = bufferObjectCreate(stageBuffer, stageDeviceMemory, context->getContextObject(), context->getCommandBuffer(), binaryBuffer, bufferCreateInfo, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+    auto vertexBufferObject = bufferObjectCreate(stageBuffer, stageDeviceMemory, assetManager->getContextObject(), assetManager->getCommandBuffer(), binaryBuffer, bufferCreateInfo, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-    context->addStageBuffer(stageBuffer);
-    context->addStageDeviceMemory(stageDeviceMemory);
+    assetManager->addStageBuffer(stageBuffer);
+    assetManager->addStageDeviceMemory(stageDeviceMemory);
 
     return vertexBufferObject;
 }

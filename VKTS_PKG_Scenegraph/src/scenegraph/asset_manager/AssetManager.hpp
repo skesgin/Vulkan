@@ -24,15 +24,15 @@
  * THE SOFTWARE.
  */
 
-#ifndef VKTS_CONTEXT_HPP_
-#define VKTS_CONTEXT_HPP_
+#ifndef VKTS_ASSETMANAGER_HPP_
+#define VKTS_ASSETMANAGER_HPP_
 
 #include <vkts/scenegraph.hpp>
 
 namespace vkts
 {
 
-class Context: public IContext
+class AssetManager: public IAssetManager
 {
 
 private:
@@ -45,9 +45,10 @@ private:
 
     const VkSamplerCreateInfo samplerCreateInfo;
 
-    const VkImageViewCreateInfo imageViewCreateInfo;
-
     const IDescriptorSetLayoutSP descriptorSetLayout;
+
+    const IRenderPassSP renderPass;
+
 
     SmartPointerMap<std::string, IObjectSP> allObjects;
 
@@ -78,8 +79,6 @@ private:
     SmartPointerMap<VkTsVertexBufferType, IShaderModuleSP> allVertexShaderModules;
 
     SmartPointerMap<std::string, IShaderModuleSP> allFragmentShaderModules;
-
-    IRenderPassSP renderPass;
 
     //
 
@@ -129,18 +128,18 @@ private:
 
 public:
 
-    Context() = delete;
-    Context(const VkBool32 replace, const IContextObjectSP& contextObject, const ICommandBuffersSP& cmdBuffer, const VkSamplerCreateInfo& samplerCreateInfo, const VkImageViewCreateInfo& imageViewCreateInfo, const IDescriptorSetLayoutSP& descriptorSetLayout);
-    Context(const Context& other) = delete;
-    Context(Context&& other) = delete;
-    virtual ~Context();
+    AssetManager() = delete;
+    AssetManager(const VkBool32 replace, const IContextObjectSP& contextObject, const ICommandBuffersSP& cmdBuffer, const VkSamplerCreateInfo& samplerCreateInfo, const IDescriptorSetLayoutSP& descriptorSetLayout, const IRenderPassSP& renderPass);
+    AssetManager(const AssetManager& other) = delete;
+    AssetManager(AssetManager&& other) = delete;
+    virtual ~AssetManager();
 
-    Context& operator =(const Context& other) = delete;
+    AssetManager& operator =(const AssetManager& other) = delete;
 
-    Context& operator =(Context && other) = delete;
+    AssetManager& operator =(AssetManager && other) = delete;
 
     //
-    // IContext
+    // IAssetManager
     //
 
     virtual const IContextObjectSP& getContextObject() const override;
@@ -149,9 +148,9 @@ public:
 
     virtual const VkSamplerCreateInfo& getSamplerCreateInfo() const override;
 
-    virtual const VkImageViewCreateInfo& getImageViewCreateInfo() const override;
-
     virtual const IDescriptorSetLayoutSP& getDescriptorSetLayout() const override;
+
+    virtual const IRenderPassSP& getRenderPass() const override;
 
     //
 
@@ -191,6 +190,7 @@ public:
 
     virtual VkBool32 removeMesh(const IMeshSP& mesh) override;
 
+
     virtual ISubMeshSP useSubMesh(const std::string& name) const override;
 
     virtual VkBool32 addSubMesh(const ISubMeshSP& subMesh) override;
@@ -205,6 +205,7 @@ public:
 
     virtual VkBool32 removeAnimation(const IAnimationSP& animation) override;
 
+
     virtual IChannelSP useChannel(const std::string& name) const override;
 
     virtual VkBool32 addChannel(const IChannelSP& channel) override;
@@ -218,6 +219,7 @@ public:
     virtual VkBool32 addBSDFMaterial(const IBSDFMaterialSP& material) override;
 
     virtual VkBool32 removeBSDFMaterial(const IBSDFMaterialSP& material) override;
+
 
     virtual IPhongMaterialSP usePhongMaterial(const std::string& name) const override;
 
@@ -265,11 +267,7 @@ public:
     virtual VkBool32 removeFragmentShaderModule(const IShaderModuleSP& shaderModule) override;
 
     //
-
-    virtual IRenderPassSP getRenderPass() const override;
-
-    virtual void setRenderPass(const IRenderPassSP& renderPass) override;
-
+    //
     //
 
     virtual void addStageImage(const IImageSP& stageImage) override;
@@ -288,4 +286,4 @@ public:
 
 } /* namespace vkts */
 
-#endif /* VKTS_CONTEXT_HPP_ */
+#endif /* VKTS_ASSETMANAGER_HPP_ */

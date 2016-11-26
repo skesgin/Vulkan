@@ -24,12 +24,12 @@
  * THE SOFTWARE.
  */
 
-#include <vkts/scenegraph.hpp>
+#include <vkts/core.hpp>
 
 namespace vkts
 {
 
-VkBool32 VKTS_APIENTRY scenegraphParseSkipBuffer(const char* buffer)
+VkBool32 VKTS_APIENTRY parseSkipBuffer(const char* buffer)
 {
     if (!buffer)
     {
@@ -52,7 +52,7 @@ VkBool32 VKTS_APIENTRY scenegraphParseSkipBuffer(const char* buffer)
     return VK_FALSE;
 }
 
-void VKTS_APIENTRY scenegraphParseUnknownBuffer(const char* buffer)
+void VKTS_APIENTRY parseUnknownBuffer(const char* buffer)
 {
     if (!buffer)
     {
@@ -71,7 +71,7 @@ void VKTS_APIENTRY scenegraphParseUnknownBuffer(const char* buffer)
     }
 }
 
-VkBool32 VKTS_APIENTRY scenegraphParseIsToken(const char* buffer, const char* token)
+VkBool32 VKTS_APIENTRY parseIsToken(const char* buffer, const char* token)
 {
     if (!buffer || !token)
     {
@@ -91,7 +91,7 @@ VkBool32 VKTS_APIENTRY scenegraphParseIsToken(const char* buffer, const char* to
     return VK_FALSE;
 }
 
-VkBool32 VKTS_APIENTRY scenegraphParseString(const char* buffer, char* string)
+VkBool32 VKTS_APIENTRY parseString(const char* buffer, char* string)
 {
     if (!buffer)
     {
@@ -108,7 +108,7 @@ VkBool32 VKTS_APIENTRY scenegraphParseString(const char* buffer, char* string)
     return VK_TRUE;
 }
 
-VkBool32 VKTS_APIENTRY scenegraphParseStringTuple(const char* buffer, char* string0, char* string1)
+VkBool32 VKTS_APIENTRY parseStringTuple(const char* buffer, char* string0, char* string1)
 {
     if (!buffer)
     {
@@ -125,7 +125,7 @@ VkBool32 VKTS_APIENTRY scenegraphParseStringTuple(const char* buffer, char* stri
     return VK_TRUE;
 }
 
-VkBool32 VKTS_APIENTRY scenegraphParseStringFloat(const char* buffer, char* string, float* scalar)
+VkBool32 VKTS_APIENTRY parseStringFloat(const char* buffer, char* string, float* scalar)
 {
     if (!buffer)
     {
@@ -142,7 +142,7 @@ VkBool32 VKTS_APIENTRY scenegraphParseStringFloat(const char* buffer, char* stri
     return VK_TRUE;
 }
 
-VkBool32 VKTS_APIENTRY scenegraphParseStringBool(const char* buffer, char* string, VkBool32* scalar)
+VkBool32 VKTS_APIENTRY parseStringBool(const char* buffer, char* string, VkBool32* scalar)
 {
     if (!buffer)
     {
@@ -174,7 +174,7 @@ VkBool32 VKTS_APIENTRY scenegraphParseStringBool(const char* buffer, char* strin
     return VK_TRUE;
 }
 
-VkBool32 VKTS_APIENTRY scenegraphParseBool(const char* buffer, VkBool32* scalar)
+VkBool32 VKTS_APIENTRY parseBool(const char* buffer, VkBool32* scalar)
 {
     if (!buffer)
     {
@@ -206,7 +206,7 @@ VkBool32 VKTS_APIENTRY scenegraphParseBool(const char* buffer, VkBool32* scalar)
     return VK_TRUE;
 }
 
-VkBool32 VKTS_APIENTRY scenegraphParseBoolTriple(const char* buffer, VkBool32* scalar0, VkBool32* scalar1, VkBool32* scalar2)
+VkBool32 VKTS_APIENTRY parseBoolTriple(const char* buffer, VkBool32* scalar0, VkBool32* scalar1, VkBool32* scalar2)
 {
     if (!buffer)
     {
@@ -266,7 +266,7 @@ VkBool32 VKTS_APIENTRY scenegraphParseBoolTriple(const char* buffer, VkBool32* s
     return VK_TRUE;
 }
 
-VkBool32 VKTS_APIENTRY scenegraphParseFloat(const char* buffer, float* scalar)
+VkBool32 VKTS_APIENTRY parseFloat(const char* buffer, float* scalar)
 {
     if (!buffer)
     {
@@ -283,7 +283,7 @@ VkBool32 VKTS_APIENTRY scenegraphParseFloat(const char* buffer, float* scalar)
     return VK_TRUE;
 }
 
-VkBool32 VKTS_APIENTRY scenegraphParseVec2(const char* buffer, float vec2[2])
+VkBool32 VKTS_APIENTRY parseVec2(const char* buffer, float vec2[2])
 {
     if (!buffer)
     {
@@ -300,7 +300,7 @@ VkBool32 VKTS_APIENTRY scenegraphParseVec2(const char* buffer, float vec2[2])
     return VK_TRUE;
 }
 
-VkBool32 VKTS_APIENTRY scenegraphParseVec3(const char* buffer, float vec3[3])
+VkBool32 VKTS_APIENTRY parseVec3(const char* buffer, float vec3[3])
 {
     if (!buffer)
     {
@@ -317,7 +317,7 @@ VkBool32 VKTS_APIENTRY scenegraphParseVec3(const char* buffer, float vec3[3])
     return VK_TRUE;
 }
 
-VkBool32 VKTS_APIENTRY scenegraphParseVec4(const char* buffer, float vec4[4])
+VkBool32 VKTS_APIENTRY parseVec4(const char* buffer, float vec4[4])
 {
     if (!buffer)
     {
@@ -334,7 +334,7 @@ VkBool32 VKTS_APIENTRY scenegraphParseVec4(const char* buffer, float vec4[4])
     return VK_TRUE;
 }
 
-VkBool32 VKTS_APIENTRY scenegraphParseVec6(const char* buffer, float vec6[6])
+VkBool32 VKTS_APIENTRY parseVec6(const char* buffer, float vec6[6])
 {
     if (!buffer)
     {
@@ -351,7 +351,7 @@ VkBool32 VKTS_APIENTRY scenegraphParseVec6(const char* buffer, float vec6[6])
     return VK_TRUE;
 }
 
-VkBool32 VKTS_APIENTRY scenegraphParseVec8(const char* buffer, float vec8[8])
+VkBool32 VKTS_APIENTRY parseVec8(const char* buffer, float vec8[8])
 {
     if (!buffer)
     {
@@ -368,7 +368,7 @@ VkBool32 VKTS_APIENTRY scenegraphParseVec8(const char* buffer, float vec8[8])
     return VK_TRUE;
 }
 
-VkBool32 VKTS_APIENTRY scenegraphParseInt(const char* buffer, int32_t* scalar)
+VkBool32 VKTS_APIENTRY parseInt(const char* buffer, int32_t* scalar)
 {
     if (!buffer)
     {
@@ -385,7 +385,7 @@ VkBool32 VKTS_APIENTRY scenegraphParseInt(const char* buffer, int32_t* scalar)
     return VK_TRUE;
 }
 
-VkBool32 VKTS_APIENTRY scenegraphParseIVec3(const char* buffer, int32_t ivec3[3])
+VkBool32 VKTS_APIENTRY parseIVec3(const char* buffer, int32_t ivec3[3])
 {
     if (!buffer)
     {
@@ -402,7 +402,7 @@ VkBool32 VKTS_APIENTRY scenegraphParseIVec3(const char* buffer, int32_t ivec3[3]
     return VK_TRUE;
 }
 
-VkBool32 VKTS_APIENTRY scenegraphParseUIntHex(const char* buffer, uint32_t* scalar)
+VkBool32 VKTS_APIENTRY parseUIntHex(const char* buffer, uint32_t* scalar)
 {
     if (!buffer)
     {

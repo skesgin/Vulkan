@@ -31,7 +31,7 @@
 namespace vkts
 {
 
-ITextureObjectSP VKTS_APIENTRY textureCreate(const IContextObjectSP& contextObject, const std::string& name, const VkBool32 mipmap, const IImageObjectSP& imageObject, const VkSamplerCreateInfo& samplerCreateInfo)
+ITextureObjectSP VKTS_APIENTRY textureObjectCreate(const IContextObjectSP& contextObject, const std::string& name, const VkBool32 mipmap, const IImageObjectSP& imageObject, const VkSamplerCreateInfo& samplerCreateInfo)
 {
     if (!imageObject.get())
     {

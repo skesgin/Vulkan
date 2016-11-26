@@ -32,17 +32,17 @@
 namespace vkts
 {
 
-class IContext: public IDestroyable
+class IAssetManager: public IDestroyable
 {
 
 public:
 
-    IContext() :
+    IAssetManager() :
         IDestroyable()
     {
     }
 
-    virtual ~IContext()
+    virtual ~IAssetManager()
     {
     }
 
@@ -183,7 +183,7 @@ public:
 
 };
 
-typedef std::shared_ptr<IContext> IContextSP;
+typedef std::shared_ptr<IAssetManager> IContextSP;
 
 } /* namespace vkts */
 

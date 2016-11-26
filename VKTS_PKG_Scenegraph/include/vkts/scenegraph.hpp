@@ -112,9 +112,25 @@ typedef enum VkTsInterpolator_
 
 #include <vkts/scenegraph/scene/IScene.hpp>
 
-#include <vkts/scenegraph/scene/IContext.hpp>
+/**
+ * Asset manager.
+ */
 
-#include <vkts/scenegraph/scene/fn_scenegraph.hpp>
+#include <vkts/scenegraph/asset_manager/IAssetManager.hpp>
+
+#include <vkts/scenegraph/asset_manager/fn_asset_manager.hpp>
+
+/**
+ * Create.
+ */
+
+#include <vkts/scenegraph/create/fn_create.hpp>
+
+/**
+ * Scenegraph load.
+ */
+
+#include <vkts/scenegraph/scenegraph_load/fn_scenegraph_load.hpp>
 
 /**
  * Overwrite draw.

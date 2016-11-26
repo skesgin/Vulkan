@@ -141,6 +141,12 @@ typedef enum VkTsSearch_
 #include <vkts/core/parameter/fn_parameter.hpp>
 
 /**
+ * Parse.
+ */
+
+#include <vkts/core/parse/fn_parse.hpp>
+
+/**
  * Time.
  */
 

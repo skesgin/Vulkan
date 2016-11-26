@@ -24,25 +24,25 @@
  * THE SOFTWARE.
  */
 
-#ifndef VKTS_ICONTEXT_HPP_
-#define VKTS_ICONTEXT_HPP_
+#ifndef VKTS_IASSETMANAGER_HPP_
+#define VKTS_IASSETMANAGER_HPP_
 
-#include <vkts/scenegraph.hpp>
+#include <vkts/vk_object.hpp>
 
 namespace vkts
 {
 
-class IContext: public IDestroyable
+class IAssetManager: public IDestroyable
 {
 
 public:
 
-    IContext() :
+    IAssetManager() :
         IDestroyable()
     {
     }
 
-    virtual ~IContext()
+    virtual ~IAssetManager()
     {
     }
 
@@ -52,9 +52,9 @@ public:
 
     virtual const VkSamplerCreateInfo& getSamplerCreateInfo() const = 0;
 
-    virtual const VkImageViewCreateInfo& getImageViewCreateInfo() const = 0;
-
     virtual const IDescriptorSetLayoutSP& getDescriptorSetLayout() const = 0;
+
+    virtual const IRenderPassSP& getRenderPass() const = 0;
 
     //
 
@@ -94,6 +94,7 @@ public:
 
     virtual VkBool32 removeMesh(const IMeshSP& mesh) = 0;
 
+
     virtual ISubMeshSP useSubMesh(const std::string& name) const = 0;
 
     virtual VkBool32 addSubMesh(const ISubMeshSP& subMesh) = 0;
@@ -108,6 +109,7 @@ public:
 
     virtual VkBool32 removeAnimation(const IAnimationSP& animation) = 0;
 
+
     virtual IChannelSP useChannel(const std::string& name) const = 0;
 
     virtual VkBool32 addChannel(const IChannelSP& channel) = 0;
@@ -121,6 +123,7 @@ public:
     virtual VkBool32 addBSDFMaterial(const IBSDFMaterialSP& material) = 0;
 
     virtual VkBool32 removeBSDFMaterial(const IBSDFMaterialSP& material) = 0;
+
 
     virtual IPhongMaterialSP usePhongMaterial(const std::string& name) const = 0;
 
@@ -168,11 +171,7 @@ public:
     virtual VkBool32 removeFragmentShaderModule(const IShaderModuleSP& shaderModule) = 0;
 
     //
-
-    virtual IRenderPassSP getRenderPass() const = 0;
-
-    virtual void setRenderPass(const IRenderPassSP& renderPass) = 0;
-
+    //
     //
 
     virtual void addStageImage(const IImageSP& stageImage) = 0;
@@ -183,8 +182,8 @@ public:
 
 };
 
-typedef std::shared_ptr<IContext> IContextSP;
+typedef std::shared_ptr<IAssetManager> IAssetManagerSP;
 
 } /* namespace vkts */
 
-#endif /* VKTS_ICONTEXT_HPP_ */
+#endif /* VKTS_IASSETMANAGER_HPP_ */

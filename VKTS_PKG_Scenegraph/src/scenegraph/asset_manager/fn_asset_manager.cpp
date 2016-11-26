@@ -24,26 +24,21 @@
  * THE SOFTWARE.
  */
 
-#ifndef VKTS_FN_SCENEGRAPH_HPP_
-#define VKTS_FN_SCENEGRAPH_HPP_
+#include <vkts/vk_object.hpp>
 
-#include <vkts/scenegraph.hpp>
+#include "AssetManager.hpp"
 
 namespace vkts
 {
 
-/**
- *
- * @ThreadSafe
- */
-VKTS_APICALL ISceneSP VKTS_APIENTRY scenegraphLoadScene(const char* filename, const IContextSP& cache);
+IAssetManagerSP VKTS_APIENTRY assetManagerCreate(const VkBool32 replace, const IContextObjectSP& contextObject, const ICommandBuffersSP& cmdBuffer, const VkSamplerCreateInfo& samplerCreateInfo, const IDescriptorSetLayoutSP& descriptorSetLayout, const IRenderPassSP& renderPass)
+{
+    if (!contextObject.get())
+    {
+        return IAssetManagerSP();
+    }
 
-/**
- *
- * @ThreadSafe
- */
-VKTS_APICALL IContextSP VKTS_APIENTRY scenegraphCreateContext(const VkBool32 replace, const IContextObjectSP& contextObject, const ICommandBuffersSP& cmdBuffer, const VkSamplerCreateInfo& samplerCreateInfo, const VkImageViewCreateInfo& imageViewCreateInfo, const IDescriptorSetLayoutSP& descriptorSetLayout);
-
+    return IAssetManagerSP(new AssetManager(replace, contextObject, cmdBuffer, samplerCreateInfo, descriptorSetLayout, renderPass));
 }
 
-#endif /* VKTS_FN_SCENEGRAPH_HPP_ */
+}
