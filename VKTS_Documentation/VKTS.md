@@ -1,5 +1,5 @@
-VulKan ToolS (VKTS):
---------------------
+Features of VulKan ToolS (VKTS):
+--------------------------------
 
 Authors:
 
