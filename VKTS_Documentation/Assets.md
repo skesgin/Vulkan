@@ -1,5 +1,5 @@
-Assets for the examples:
-------------------------
+Examples assets:
+----------------
 
 This folder and sub folders contains all executables, shaders and assets. The examples are copied  
 into this folder after the build. Generated mip maps, cube maps and BSDF look up textures are stored in the `cache` folder.
