@@ -38,8 +38,8 @@ VulKan ToolS (VKTS) is a cross platform, C++ 11 helper library for [Vulkan](http
 Used libraries (beside C++ 11):
 -------------------------------
 
+- [GLI](http://gli.g-truc.net)
 - [GLM](http://glm.g-truc.net)
-- [GLU](http://gli.g-truc.net)
 
 
 Supported platforms:
