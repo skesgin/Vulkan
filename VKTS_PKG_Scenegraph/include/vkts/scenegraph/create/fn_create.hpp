@@ -36,6 +36,8 @@ VKTS_APICALL IImageDataSP VKTS_APIENTRY createDeviceImageData(const IAssetManage
 
 VKTS_APICALL IImageObjectSP VKTS_APIENTRY createImageObject(const IAssetManagerSP& assetManager, const std::string& imageObjectName, const IImageDataSP& imageData, const VkBool32 environment);
 
+VKTS_APICALL ITextureObjectSP VKTS_APIENTRY createTextureObject(const IAssetManagerSP& assetManager, const std::string& textureObjectName, const VkBool32 mipmap, const VkFilter filter, const VkSamplerAddressMode samplerAddressMode, const IImageObjectSP& imageObject);
+
 VKTS_APICALL ITextureObjectSP VKTS_APIENTRY createTextureObject(const IAssetManagerSP& assetManager, const glm::vec4& color, const VkFormat format);
 
 VKTS_APICALL IBufferObjectSP VKTS_APIENTRY createUniformBufferObject(const IAssetManagerSP& assetManager, const VkDeviceSize size);

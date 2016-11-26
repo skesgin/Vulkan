@@ -43,8 +43,6 @@ private:
 
     const ICommandBuffersSP cmdBuffer;
 
-    const VkSamplerCreateInfo samplerCreateInfo;
-
     const IDescriptorSetLayoutSP descriptorSetLayout;
 
     const IRenderPassSP renderPass;
@@ -129,7 +127,7 @@ private:
 public:
 
     AssetManager() = delete;
-    AssetManager(const VkBool32 replace, const IContextObjectSP& contextObject, const ICommandBuffersSP& cmdBuffer, const VkSamplerCreateInfo& samplerCreateInfo, const IDescriptorSetLayoutSP& descriptorSetLayout, const IRenderPassSP& renderPass);
+    AssetManager(const VkBool32 replace, const IContextObjectSP& contextObject, const ICommandBuffersSP& cmdBuffer, const IDescriptorSetLayoutSP& descriptorSetLayout, const IRenderPassSP& renderPass);
     AssetManager(const AssetManager& other) = delete;
     AssetManager(AssetManager&& other) = delete;
     virtual ~AssetManager();
@@ -145,8 +143,6 @@ public:
     virtual const IContextObjectSP& getContextObject() const override;
 
     virtual const ICommandBuffersSP& getCommandBuffer() const override;
-
-    virtual const VkSamplerCreateInfo& getSamplerCreateInfo() const override;
 
     virtual const IDescriptorSetLayoutSP& getDescriptorSetLayout() const override;
 

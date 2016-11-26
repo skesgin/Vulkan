@@ -31,14 +31,14 @@
 namespace vkts
 {
 
-IAssetManagerSP VKTS_APIENTRY assetManagerCreate(const VkBool32 replace, const IContextObjectSP& contextObject, const ICommandBuffersSP& cmdBuffer, const VkSamplerCreateInfo& samplerCreateInfo, const IDescriptorSetLayoutSP& descriptorSetLayout, const IRenderPassSP& renderPass)
+IAssetManagerSP VKTS_APIENTRY assetManagerCreate(const VkBool32 replace, const IContextObjectSP& contextObject, const ICommandBuffersSP& cmdBuffer, const IDescriptorSetLayoutSP& descriptorSetLayout, const IRenderPassSP& renderPass)
 {
     if (!contextObject.get())
     {
         return IAssetManagerSP();
     }
 
-    return IAssetManagerSP(new AssetManager(replace, contextObject, cmdBuffer, samplerCreateInfo, descriptorSetLayout, renderPass));
+    return IAssetManagerSP(new AssetManager(replace, contextObject, cmdBuffer, descriptorSetLayout, renderPass));
 }
 
 }

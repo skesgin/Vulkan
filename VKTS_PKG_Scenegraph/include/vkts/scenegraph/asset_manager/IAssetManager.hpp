@@ -50,8 +50,6 @@ public:
 
     virtual const ICommandBuffersSP& getCommandBuffer() const = 0;
 
-    virtual const VkSamplerCreateInfo& getSamplerCreateInfo() const = 0;
-
     virtual const IDescriptorSetLayoutSP& getDescriptorSetLayout() const = 0;
 
     virtual const IRenderPassSP& getRenderPass() const = 0;

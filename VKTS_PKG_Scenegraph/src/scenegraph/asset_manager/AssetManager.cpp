@@ -29,8 +29,8 @@
 namespace vkts
 {
 
-AssetManager::AssetManager(const VkBool32 replace, const IContextObjectSP& contextObject, const ICommandBuffersSP& cmdBuffer, const VkSamplerCreateInfo& samplerCreateInfo, const IDescriptorSetLayoutSP& descriptorSetLayout, const IRenderPassSP& renderPass) :
-    IAssetManager(), replace(replace), contextObject(contextObject), cmdBuffer(cmdBuffer), samplerCreateInfo(samplerCreateInfo), descriptorSetLayout(descriptorSetLayout), renderPass(renderPass), allObjects(), allCameras(), allLights(), allMeshes(), allSubMeshes(), allAnimations(), allChannels(), allBSDFMaterials(), allUsedBSDFMaterials(), allPhongMaterials(), allUsedPhongMaterials(), allTextureObjects(), allImageDatas(), allVertexShaderModules(), allFragmentShaderModules()
+AssetManager::AssetManager(const VkBool32 replace, const IContextObjectSP& contextObject, const ICommandBuffersSP& cmdBuffer, const IDescriptorSetLayoutSP& descriptorSetLayout, const IRenderPassSP& renderPass) :
+    IAssetManager(), replace(replace), contextObject(contextObject), cmdBuffer(cmdBuffer), descriptorSetLayout(descriptorSetLayout), renderPass(renderPass), allObjects(), allCameras(), allLights(), allMeshes(), allSubMeshes(), allAnimations(), allChannels(), allBSDFMaterials(), allUsedBSDFMaterials(), allPhongMaterials(), allUsedPhongMaterials(), allTextureObjects(), allImageDatas(), allVertexShaderModules(), allFragmentShaderModules()
 {
 }
 
@@ -51,11 +51,6 @@ const IContextObjectSP& AssetManager::getContextObject() const
 const ICommandBuffersSP& AssetManager::getCommandBuffer() const
 {
     return cmdBuffer;
-}
-
-const VkSamplerCreateInfo& AssetManager::getSamplerCreateInfo() const
-{
-    return samplerCreateInfo;
 }
 
 const IDescriptorSetLayoutSP& AssetManager::getDescriptorSetLayout() const

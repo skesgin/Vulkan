@@ -738,7 +738,7 @@ static VkBool32 scenegraphLoadTextureObjects(const char* directory, const char* 
                 return VK_FALSE;
             }
 
-            auto textureObject = textureObjectCreate(assetManager->getContextObject(), textureObjectName, mipMap, imageObject, assetManager->getSamplerCreateInfo());
+            auto textureObject = createTextureObject(assetManager, textureObjectName, mipMap, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_REPEAT, imageObject);
 
             if (!textureObject.get())
             {
@@ -762,7 +762,7 @@ static VkBool32 scenegraphLoadTextureObjects(const char* directory, const char* 
     				return VK_FALSE;
     			}
 
-                textureObject = textureObjectCreate(assetManager->getContextObject(), textureObjectName + "_LAMBERT", mipMap, imageObject, assetManager->getSamplerCreateInfo());
+                textureObject = createTextureObject(assetManager, textureObjectName + "_LAMBERT", mipMap, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_REPEAT, imageObject);
 
                 if (!textureObject.get())
                 {
@@ -784,7 +784,7 @@ static VkBool32 scenegraphLoadTextureObjects(const char* directory, const char* 
     				return VK_FALSE;
     			}
 
-                textureObject = textureObjectCreate(assetManager->getContextObject(), textureObjectName + "_COOKTORRANCE", mipMap, imageObject, assetManager->getSamplerCreateInfo());
+    			textureObject = createTextureObject(assetManager, textureObjectName + "_COOKTORRANCE", mipMap, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_REPEAT, imageObject);
 
                 if (!textureObject.get())
                 {
@@ -808,14 +808,7 @@ static VkBool32 scenegraphLoadTextureObjects(const char* directory, const char* 
 
     			//
 
-    			VkSamplerCreateInfo lutSamplerCreateInfo = assetManager->getSamplerCreateInfo();
-
-    			lutSamplerCreateInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_NEAREST;
-    			lutSamplerCreateInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-    			lutSamplerCreateInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-    			lutSamplerCreateInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-
-                textureObject = textureObjectCreate(assetManager->getContextObject(), lutName, VK_FALSE, imageObject, lutSamplerCreateInfo);
+    			textureObject = createTextureObject(assetManager, lutName, VK_FALSE, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, imageObject);
 
                 if (!textureObject.get())
                 {

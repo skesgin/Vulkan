@@ -127,6 +127,40 @@ IImageObjectSP VKTS_APIENTRY createImageObject(const IAssetManagerSP& assetManag
 	return imageObject;
 }
 
+ITextureObjectSP VKTS_APIENTRY createTextureObject(const IAssetManagerSP& assetManager, const std::string& textureObjectName, const VkBool32 mipmap, const VkFilter filter, const VkSamplerAddressMode samplerAddressMode, const IImageObjectSP& imageObject)
+{
+    if (textureObjectName == "")
+    {
+        return ITextureObjectSP();
+    }
+
+    //
+
+	VkSamplerCreateInfo samplerCreateInfo{};
+
+	samplerCreateInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+
+	samplerCreateInfo.flags = 0;
+	samplerCreateInfo.magFilter = filter;
+	samplerCreateInfo.minFilter = filter;
+	samplerCreateInfo.mipmapMode = mipmap && imageObject->getImage()->getMipLevels() > 1 ? VK_SAMPLER_MIPMAP_MODE_LINEAR : VK_SAMPLER_MIPMAP_MODE_NEAREST;
+	samplerCreateInfo.addressModeU = samplerAddressMode;
+	samplerCreateInfo.addressModeV = samplerAddressMode;
+	samplerCreateInfo.addressModeW = samplerAddressMode;
+	samplerCreateInfo.mipLodBias = 0.0f;
+	samplerCreateInfo.maxAnisotropy = 1.0f;
+	samplerCreateInfo.compareEnable = VK_FALSE;
+	samplerCreateInfo.compareOp = VK_COMPARE_OP_NEVER;
+	samplerCreateInfo.minLod = 0.0f;
+	samplerCreateInfo.maxLod = 0.0f;
+	samplerCreateInfo.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
+	samplerCreateInfo.unnormalizedCoordinates = VK_FALSE;
+
+    //
+
+    return textureObjectCreate(assetManager->getContextObject(), textureObjectName, mipmap, imageObject, samplerCreateInfo);
+}
+
 ITextureObjectSP VKTS_APIENTRY createTextureObject(const IAssetManagerSP& assetManager, const glm::vec4& color, const VkFormat format)
 {
 	std::string colorName = imageDataGetColorName(format, color);
@@ -276,7 +310,29 @@ ITextureObjectSP VKTS_APIENTRY createTextureObject(const IAssetManagerSP& assetM
 
     //
 
-    auto textureObject = textureObjectCreate(assetManager->getContextObject(), textureObjectName, VK_FALSE, imageObject, assetManager->getSamplerCreateInfo());
+	VkSamplerCreateInfo samplerCreateInfo{};
+
+	samplerCreateInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+
+	samplerCreateInfo.flags = 0;
+	samplerCreateInfo.magFilter = VK_FILTER_NEAREST;
+	samplerCreateInfo.minFilter = VK_FILTER_NEAREST;
+	samplerCreateInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_NEAREST;
+	samplerCreateInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+	samplerCreateInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+	samplerCreateInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+	samplerCreateInfo.mipLodBias = 0.0f;
+	samplerCreateInfo.maxAnisotropy = 1.0f;
+	samplerCreateInfo.compareEnable = VK_FALSE;
+	samplerCreateInfo.compareOp = VK_COMPARE_OP_NEVER;
+	samplerCreateInfo.minLod = 0.0f;
+	samplerCreateInfo.maxLod = 0.0f;
+	samplerCreateInfo.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
+	samplerCreateInfo.unnormalizedCoordinates = VK_FALSE;
+
+    //
+
+    auto textureObject = textureObjectCreate(assetManager->getContextObject(), textureObjectName, VK_FALSE, imageObject, samplerCreateInfo);
 
     if (!textureObject.get())
     {
