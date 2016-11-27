@@ -118,11 +118,11 @@ IImageObjectSP VKTS_APIENTRY createImageObject(const IAssetManagerSP& assetManag
 	IImageSP stageImage;
 	IBufferSP stageBuffer;
 
-	auto imageObject = imageObjectCreate(stageImage, stageBuffer, stageDeviceMemory, assetManager->getContextObject(), assetManager->getCommandBuffer(), imageObjectName, imageData, imageCreateInfo, srcAccessMask, VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, subresourceRange, memoryPropertyFlags);
+	auto imageObject = imageObjectCreate(stageImage, stageBuffer, stageDeviceMemory, assetManager->getContextObject(), assetManager->getCommandObject()->getCommandBuffer(), imageObjectName, imageData, imageCreateInfo, srcAccessMask, VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, subresourceRange, memoryPropertyFlags);
 
-	assetManager->addStageImage(stageImage);
-	assetManager->addStageBuffer(stageBuffer);
-	assetManager->addStageDeviceMemory(stageDeviceMemory);
+	assetManager->getCommandObject()->addStageImage(stageImage);
+	assetManager->getCommandObject()->addStageBuffer(stageBuffer);
+	assetManager->getCommandObject()->addStageDeviceMemory(stageDeviceMemory);
 
 	return imageObject;
 }
@@ -295,11 +295,11 @@ ITextureObjectSP VKTS_APIENTRY createTextureObject(const IAssetManagerSP& assetM
     IBufferSP stageBuffer;
     IImageSP stageImage;
 
-    auto imageObject = imageObjectCreate(stageImage, stageBuffer, stageDeviceMemory, assetManager->getContextObject(), assetManager->getCommandBuffer(), imageObjectName, imageData, imageCreateInfo, srcAccessMask, VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, subresourceRange, memoryPropertyFlags);
+    auto imageObject = imageObjectCreate(stageImage, stageBuffer, stageDeviceMemory, assetManager->getContextObject(), assetManager->getCommandObject()->getCommandBuffer(), imageObjectName, imageData, imageCreateInfo, srcAccessMask, VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, subresourceRange, memoryPropertyFlags);
 
-    assetManager->addStageImage(stageImage);
-    assetManager->addStageBuffer(stageBuffer);
-    assetManager->addStageDeviceMemory(stageDeviceMemory);
+    assetManager->getCommandObject()->addStageImage(stageImage);
+    assetManager->getCommandObject()->addStageBuffer(stageBuffer);
+    assetManager->getCommandObject()->addStageDeviceMemory(stageDeviceMemory);
 
     if (!imageObject.get())
     {
@@ -360,7 +360,7 @@ IBufferObjectSP VKTS_APIENTRY createUniformBufferObject(const IAssetManagerSP& a
     return bufferObjectCreate(assetManager->getContextObject(), bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 }
 
-IBufferObjectSP VKTS_APIENTRY createIndexBufferObject(const IAssetManagerSP& context, const IBinaryBufferSP& binaryBuffer)
+IBufferObjectSP VKTS_APIENTRY createIndexBufferObject(const IAssetManagerSP& assetManager, const IBinaryBufferSP& binaryBuffer)
 {
     VkBufferCreateInfo bufferCreateInfo{};
 
@@ -376,10 +376,10 @@ IBufferObjectSP VKTS_APIENTRY createIndexBufferObject(const IAssetManagerSP& con
     IDeviceMemorySP stageDeviceMemory;
     IBufferSP stageBuffer;
 
-    auto indexBufferObject = bufferObjectCreate(stageBuffer, stageDeviceMemory, context->getContextObject(), context->getCommandBuffer(), binaryBuffer, bufferCreateInfo, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+    auto indexBufferObject = bufferObjectCreate(stageBuffer, stageDeviceMemory, assetManager->getContextObject(), assetManager->getCommandObject()->getCommandBuffer(), binaryBuffer, bufferCreateInfo, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-    context->addStageBuffer(stageBuffer);
-    context->addStageDeviceMemory(stageDeviceMemory);
+    assetManager->getCommandObject()->addStageBuffer(stageBuffer);
+    assetManager->getCommandObject()->addStageDeviceMemory(stageDeviceMemory);
 
     return indexBufferObject;
 }
@@ -400,10 +400,10 @@ IBufferObjectSP VKTS_APIENTRY createVertexBufferObject(const IAssetManagerSP& as
     IDeviceMemorySP stageDeviceMemory;
     IBufferSP stageBuffer;
 
-    auto vertexBufferObject = bufferObjectCreate(stageBuffer, stageDeviceMemory, assetManager->getContextObject(), assetManager->getCommandBuffer(), binaryBuffer, bufferCreateInfo, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+    auto vertexBufferObject = bufferObjectCreate(stageBuffer, stageDeviceMemory, assetManager->getContextObject(), assetManager->getCommandObject()->getCommandBuffer(), binaryBuffer, bufferCreateInfo, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-    assetManager->addStageBuffer(stageBuffer);
-    assetManager->addStageDeviceMemory(stageDeviceMemory);
+    assetManager->getCommandObject()->addStageBuffer(stageBuffer);
+    assetManager->getCommandObject()->addStageDeviceMemory(stageDeviceMemory);
 
     return vertexBufferObject;
 }

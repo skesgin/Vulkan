@@ -41,7 +41,7 @@ private:
 
     const IContextObjectSP contextObject;
 
-    const ICommandBuffersSP cmdBuffer;
+    const ICommandObjectSP commandObject;
 
     const IDescriptorSetLayoutSP descriptorSetLayout;
 
@@ -77,12 +77,6 @@ private:
     SmartPointerMap<VkTsVertexBufferType, IShaderModuleSP> allVertexShaderModules;
 
     SmartPointerMap<std::string, IShaderModuleSP> allFragmentShaderModules;
-
-    //
-
-    SmartPointerVector<IImageSP> allStageImages;
-    SmartPointerVector<IBufferSP> allStageBuffers;
-    SmartPointerVector<IDeviceMemorySP> allStageDeviceMemories;
 
     template<class S, class T>
     VkBool32 contains(const S& key, const SmartPointerMap<S, T>& map) const
@@ -127,7 +121,7 @@ private:
 public:
 
     AssetManager() = delete;
-    AssetManager(const VkBool32 replace, const IContextObjectSP& contextObject, const ICommandBuffersSP& cmdBuffer, const IDescriptorSetLayoutSP& descriptorSetLayout, const IRenderPassSP& renderPass);
+    AssetManager(const VkBool32 replace, const IContextObjectSP& contextObject, const ICommandObjectSP& commandObject, const IDescriptorSetLayoutSP& descriptorSetLayout, const IRenderPassSP& renderPass);
     AssetManager(const AssetManager& other) = delete;
     AssetManager(AssetManager&& other) = delete;
     virtual ~AssetManager();
@@ -142,7 +136,7 @@ public:
 
     virtual const IContextObjectSP& getContextObject() const override;
 
-    virtual const ICommandBuffersSP& getCommandBuffer() const override;
+    virtual const ICommandObjectSP& getCommandObject() const override;
 
     virtual const IDescriptorSetLayoutSP& getDescriptorSetLayout() const override;
 
@@ -261,16 +255,6 @@ public:
     virtual VkBool32 addFragmentShaderModule(const IShaderModuleSP& shaderModule) override;
 
     virtual VkBool32 removeFragmentShaderModule(const IShaderModuleSP& shaderModule) override;
-
-    //
-    //
-    //
-
-    virtual void addStageImage(const IImageSP& stageImage) override;
-
-    virtual void addStageBuffer(const IBufferSP& stageBuffer) override;
-
-    virtual void addStageDeviceMemory(const IDeviceMemorySP& stageDeviceMemory) override;
 
     //
     // IDestroyable

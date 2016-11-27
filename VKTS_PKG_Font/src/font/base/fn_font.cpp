@@ -185,9 +185,9 @@ static VkBool32 fontExtractStringValue(const char* buffer, const char* parameter
     return VK_TRUE;
 }
 
-IFontSP VKTS_APIENTRY fontCreate(const char* filename, const IContextObjectSP& contextObject, const ICommandBuffersSP& commandBuffer, const IRenderPassSP& renderPass, SmartPointerVector<IImageSP>& allStageImages, SmartPointerVector<IBufferSP>& allStageBuffers, SmartPointerVector<IDeviceMemorySP>& allStageDeviceMemories)
+IFontSP VKTS_APIENTRY fontCreate(const char* filename, const IContextObjectSP& contextObject, const ICommandObjectSP& commandObject, const IRenderPassSP& renderPass)
 {
-    if (!filename || !contextObject.get() || !commandBuffer.get())
+    if (!filename || !contextObject.get() || !commandObject.get())
     {
         return IFontSP();
     }
@@ -327,20 +327,11 @@ IFontSP VKTS_APIENTRY fontCreate(const char* filename, const IContextObjectSP& c
             IBufferSP stageBuffer;
             IImageSP stageImage;
 
-            auto imageObject = imageObjectCreate(stageImage, stageBuffer, stageDeviceMemory, contextObject, commandBuffer, font->getFace(), imageData, imageCreateInfo, srcAccessMask, VK_ACCESS_TRANSFER_WRITE_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, subresourceRange, memoryPropertyFlags);
+            auto imageObject = imageObjectCreate(stageImage, stageBuffer, stageDeviceMemory, contextObject, commandObject->getCommandBuffer(), font->getFace(), imageData, imageCreateInfo, srcAccessMask, VK_ACCESS_TRANSFER_WRITE_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, subresourceRange, memoryPropertyFlags);
 
-            if (stageDeviceMemory.get())
-            {
-            	allStageDeviceMemories.append(stageDeviceMemory);
-            }
-            if (stageBuffer.get())
-            {
-            	allStageBuffers.append(stageBuffer);
-            }
-            if (stageImage.get())
-            {
-            	allStageImages.append(stageImage);
-            }
+            commandObject->addStageDeviceMemory(stageDeviceMemory);
+            commandObject->addStageBuffer(stageBuffer);
+            commandObject->addStageImage(stageImage);
 
             if (!imageObject.get())
             {
@@ -526,16 +517,10 @@ IFontSP VKTS_APIENTRY fontCreate(const char* filename, const IContextObjectSP& c
     IDeviceMemorySP stageDeviceMemory;
     IBufferSP stageBuffer;
 
-    auto vertexBuffer = bufferObjectCreate(stageBuffer, stageDeviceMemory, contextObject, commandBuffer, binaryBuffer, bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    auto vertexBuffer = bufferObjectCreate(stageBuffer, stageDeviceMemory, contextObject, commandObject->getCommandBuffer(), binaryBuffer, bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
-    if (stageDeviceMemory.get())
-    {
-    	allStageDeviceMemories.append(stageDeviceMemory);
-    }
-    if (stageBuffer.get())
-    {
-    	allStageBuffers.append(stageBuffer);
-    }
+    commandObject->addStageDeviceMemory(stageDeviceMemory);
+    commandObject->addStageBuffer(stageBuffer);
 
     if (!vertexBuffer.get())
     {

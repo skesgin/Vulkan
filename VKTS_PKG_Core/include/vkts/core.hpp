@@ -27,6 +27,13 @@
 #ifndef VKTS_CORE_HPP_
 #define VKTS_CORE_HPP_
 
+// TODO: Mark, if functions are thread safe or not.
+// TODO: Add documentation in code.
+
+// TODO: Add documentation on GitHub.
+
+// TODO: Release version 1.0.x.
+
 /**
  *
  * C++11 Libraries.

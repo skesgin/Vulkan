@@ -24,21 +24,21 @@
  * THE SOFTWARE.
  */
 
-#include <vkts/vk_object.hpp>
+#include <vkts/scenegraph.hpp>
 
 #include "AssetManager.hpp"
 
 namespace vkts
 {
 
-IAssetManagerSP VKTS_APIENTRY assetManagerCreate(const VkBool32 replace, const IContextObjectSP& contextObject, const ICommandBuffersSP& cmdBuffer, const IDescriptorSetLayoutSP& descriptorSetLayout, const IRenderPassSP& renderPass)
+IAssetManagerSP VKTS_APIENTRY assetManagerCreate(const VkBool32 replace, const IContextObjectSP& contextObject, const ICommandObjectSP& commandObject, const IDescriptorSetLayoutSP& descriptorSetLayout, const IRenderPassSP& renderPass)
 {
     if (!contextObject.get())
     {
         return IAssetManagerSP();
     }
 
-    return IAssetManagerSP(new AssetManager(replace, contextObject, cmdBuffer, descriptorSetLayout, renderPass));
+    return IAssetManagerSP(new AssetManager(replace, contextObject, commandObject, descriptorSetLayout, renderPass));
 }
 
 }

@@ -27,7 +27,7 @@
 #ifndef VKTS_IASSETMANAGER_HPP_
 #define VKTS_IASSETMANAGER_HPP_
 
-#include <vkts/vk_object.hpp>
+#include <vkts/scenegraph.hpp>
 
 namespace vkts
 {
@@ -48,7 +48,7 @@ public:
 
     virtual const IContextObjectSP& getContextObject() const = 0;
 
-    virtual const ICommandBuffersSP& getCommandBuffer() const = 0;
+    virtual const ICommandObjectSP& getCommandObject() const = 0;
 
     virtual const IDescriptorSetLayoutSP& getDescriptorSetLayout() const = 0;
 
@@ -167,16 +167,6 @@ public:
     virtual VkBool32 addFragmentShaderModule(const IShaderModuleSP& shaderModule) = 0;
 
     virtual VkBool32 removeFragmentShaderModule(const IShaderModuleSP& shaderModule) = 0;
-
-    //
-    //
-    //
-
-    virtual void addStageImage(const IImageSP& stageImage) = 0;
-
-    virtual void addStageBuffer(const IBufferSP& stageBuffer) = 0;
-
-    virtual void addStageDeviceMemory(const IDeviceMemorySP& stageDeviceMemory) = 0;
 
 };
 

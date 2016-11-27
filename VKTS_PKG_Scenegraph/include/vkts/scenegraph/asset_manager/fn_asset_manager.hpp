@@ -27,7 +27,7 @@
 #ifndef VKTS_FN_ASSET_MANAGER_HPP_
 #define VKTS_FN_ASSET_MANAGER_HPP_
 
-#include <vkts/vk_object.hpp>
+#include <vkts/scenegraph.hpp>
 
 namespace vkts
 {
@@ -36,7 +36,7 @@ namespace vkts
  *
  * @ThreadSafe
  */
-VKTS_APICALL IAssetManagerSP VKTS_APIENTRY assetManagerContext(const VkBool32 replace, const IContextObjectSP& contextObject, const ICommandBuffersSP& cmdBuffer, const VkImageViewCreateInfo& imageViewCreateInfo, const IDescriptorSetLayoutSP& descriptorSetLayout, const IRenderPassSP& renderPass);
+VKTS_APICALL IAssetManagerSP VKTS_APIENTRY assetManagerContext(const VkBool32 replace, const IContextObjectSP& contextObject, const ICommandObjectSP& commandObject, const IDescriptorSetLayoutSP& descriptorSetLayout, const IRenderPassSP& renderPass);
 
 
 }

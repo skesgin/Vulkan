@@ -36,7 +36,7 @@ namespace vkts
  *
  * @ThreadSafe
  */
-VKTS_APICALL IFontSP VKTS_APIENTRY fontCreate(const char* filename, const IContextObjectSP& contextObject, const ICommandBuffersSP& commandBuffer, const IRenderPassSP& renderPass, SmartPointerVector<IImageSP>& allStageImages, SmartPointerVector<IBufferSP>& allStageBuffers, SmartPointerVector<IDeviceMemorySP>& allStageDeviceMemories);
+VKTS_APICALL IFontSP VKTS_APIENTRY fontCreate(const char* filename, const IContextObjectSP& contextObject, const ICommandObjectSP& commandObject, const IRenderPassSP& renderPass);
 
 }
 

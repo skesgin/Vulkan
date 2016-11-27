@@ -29,8 +29,8 @@
 namespace vkts
 {
 
-AssetManager::AssetManager(const VkBool32 replace, const IContextObjectSP& contextObject, const ICommandBuffersSP& cmdBuffer, const IDescriptorSetLayoutSP& descriptorSetLayout, const IRenderPassSP& renderPass) :
-    IAssetManager(), replace(replace), contextObject(contextObject), cmdBuffer(cmdBuffer), descriptorSetLayout(descriptorSetLayout), renderPass(renderPass), allObjects(), allCameras(), allLights(), allMeshes(), allSubMeshes(), allAnimations(), allChannels(), allBSDFMaterials(), allUsedBSDFMaterials(), allPhongMaterials(), allUsedPhongMaterials(), allTextureObjects(), allImageDatas(), allVertexShaderModules(), allFragmentShaderModules()
+AssetManager::AssetManager(const VkBool32 replace, const IContextObjectSP& contextObject, const ICommandObjectSP& commandObject, const IDescriptorSetLayoutSP& descriptorSetLayout, const IRenderPassSP& renderPass) :
+    IAssetManager(), replace(replace), contextObject(contextObject), commandObject(commandObject), descriptorSetLayout(descriptorSetLayout), renderPass(renderPass), allObjects(), allCameras(), allLights(), allMeshes(), allSubMeshes(), allAnimations(), allChannels(), allBSDFMaterials(), allUsedBSDFMaterials(), allPhongMaterials(), allUsedPhongMaterials(), allTextureObjects(), allImageDatas(), allVertexShaderModules(), allFragmentShaderModules()
 {
 }
 
@@ -48,9 +48,9 @@ const IContextObjectSP& AssetManager::getContextObject() const
     return contextObject;
 }
 
-const ICommandBuffersSP& AssetManager::getCommandBuffer() const
+const ICommandObjectSP& AssetManager::getCommandObject() const
 {
-    return cmdBuffer;
+    return commandObject;
 }
 
 const IDescriptorSetLayoutSP& AssetManager::getDescriptorSetLayout() const
@@ -582,34 +582,6 @@ VkBool32 AssetManager::removeFragmentShaderModule(const IShaderModuleSP& shaderM
 }
 
 //
-//
-//
-
-void AssetManager::addStageImage(const IImageSP& stageImage)
-{
-    if (stageImage.get())
-    {
-        allStageImages.append(stageImage);
-    }
-}
-
-void AssetManager::addStageBuffer(const IBufferSP& stageBuffer)
-{
-    if (stageBuffer.get())
-    {
-        allStageBuffers.append(stageBuffer);
-    }
-}
-
-void AssetManager::addStageDeviceMemory(const IDeviceMemorySP& stageDeviceMemory)
-{
-    if (stageDeviceMemory.get())
-    {
-        allStageDeviceMemories.append(stageDeviceMemory);
-    }
-}
-
-//
 // IDestroyable
 //
 
@@ -645,32 +617,10 @@ void AssetManager::destroy()
 
     // Stage resources have to be deleted.
 
-    for (uint32_t i = 0; i < allStageImages.size(); i++)
+    if (commandObject.get())
     {
-        if (allStageImages[i].get())
-        {
-            allStageImages[i]->destroy();
-        }
+    	commandObject->destroy();
     }
-    allStageImages.clear();
-
-    for (uint32_t i = 0; i < allStageBuffers.size(); i++)
-    {
-        if (allStageBuffers[i].get())
-        {
-            allStageBuffers[i]->destroy();
-        }
-    }
-    allStageBuffers.clear();
-
-    for (uint32_t i = 0; i < allStageDeviceMemories.size(); i++)
-    {
-        if (allStageDeviceMemories[i].get())
-        {
-            allStageDeviceMemories[i]->destroy();
-        }
-    }
-    allStageDeviceMemories.clear();
 }
 
 } /* namespace vkts */

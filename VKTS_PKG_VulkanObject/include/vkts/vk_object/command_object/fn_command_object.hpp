@@ -24,63 +24,21 @@
  * THE SOFTWARE.
  */
 
-#ifndef VKTS_VK_OBJECT_HPP_
-#define VKTS_VK_OBJECT_HPP_
+#ifndef VKTS_FN_COMMAND_OBJECT_HPP_
+#define VKTS_FN_COMMAND_OBJECT_HPP_
+
+#include <vkts/vk_object.hpp>
+
+namespace vkts
+{
 
 /**
  *
- * Depends on VKTS image and Vulkan.
- *
+ * @ThreadSafe
  */
+VKTS_APICALL ICommandObjectSP VKTS_APIENTRY commandObjectCreate(const ICommandBuffersSP& cmdBuffer);
 
-#include <vkts/vk.hpp>
 
-#include <vkts/image.hpp>
+}
 
-/**
- *
- * VKTS Start.
- *
- */
-
-/**
- * Context object.
- */
-
-#include <vkts/vk_object/context_object/IContextObject.hpp>
-
-#include <vkts/vk_object/context_object/fn_context_object.hpp>
-
-/**
- * Command object.
- */
-
-#include <vkts/vk_object/command_object/ICommandObject.hpp>
-
-#include <vkts/vk_object/command_object/fn_command_object.hpp>
-
-/**
- * Buffer object.
- */
-
-#include <vkts/vk_object/buffer_object/IBufferObject.hpp>
-
-#include <vkts/vk_object/buffer_object/fn_buffer_object.hpp>
-
-/**
- * Image object.
- */
-
-#include <vkts/vk_object/image_object/IImageObject.hpp>
-
-#include <vkts/vk_object/image_object/fn_image_object.hpp>
-
-/**
- * Texture object.
- */
-
-#include <vkts/vk_object/texture_object/ITextureObject.hpp>
-
-#include <vkts/vk_object/texture_object/fn_texture_object.hpp>
-
-#endif /* VKTS_VK_OBJECT_HPP_ */
+#endif /* VKTS_FN_COMMAND_OBJECT_HPP_ */

@@ -27,30 +27,7 @@
 #ifndef VKTS_HPP_
 #define VKTS_HPP_
 
-// TODO: Split scenegraph part into own library, having no Vulkan and VKTS dependencies.
-// TODO: Allow multiple uniform buffers in scene graph.
-
-// TODO: Implement forward renderer for PBR.
-
-// TODO: Add game mode cursor to Display and Wayland visual mode.
-
-// TODO: Import particle system.
-
-// TODO: Split VKTS into "core" library, which is the no visual configuration right now.
-//		 Split WSI part into own library, which depends on VKTS.
-//		 Split window, display and window handling plus input into own library, having no Vulkan and VKTS dependencies.
-
-// TODO: Add native window buffer and/or cleaning for windows.
-// TODO: Add query, which windowing features are supported.
-
-// TODO: General refactoring of libraries.
-
-// TODO: Mark, if functions are thread safe or not.
-// TODO: Add documentation in code.
-
-// TODO: Add documentation on GitHub.
-
-// TODO: Release version 1.0.x.
+// TODO: Delete VKTS, as soon as VKTS_PKG_* are done.
 
 /**
  *

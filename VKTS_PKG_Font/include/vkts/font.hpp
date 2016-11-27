@@ -27,6 +27,8 @@
 #ifndef VKTS_FONT_MAIN_HPP_
 #define VKTS_FONT_MAIN_HPP_
 
+// TODO: Implement distance field font.
+
 /**
  *
  * Depends on VKTS Vulkan object.

@@ -27,6 +27,11 @@
 #ifndef VKTS_WINDOW_HPP_
 #define VKTS_WINDOW_HPP_
 
+// TODO: Add game mode cursor to Display and Wayland visual mode.
+
+// TODO: Add native window buffer and/or cleaning for windows.
+// TODO: Add query, which windowing features are supported.
+
 /**
  * Window platform.
  */

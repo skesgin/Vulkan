@@ -27,6 +27,16 @@
 #ifndef VKTS_SCENEGRAPH_HPP_
 #define VKTS_SCENEGRAPH_HPP_
 
+// TODO: Export sampler data from Blender.
+
+// TODO: Reuse sampler object.
+
+// TODO: Allow multiple uniform buffers in scene graph.
+
+// TODO: Implement forward renderer for PBR.
+
+// TODO: Import particle system.
+
 /**
  *
  * Depends on VKTS entity and Vulkan object.

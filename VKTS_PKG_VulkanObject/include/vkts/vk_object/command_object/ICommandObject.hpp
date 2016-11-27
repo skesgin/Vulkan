@@ -24,63 +24,42 @@
  * THE SOFTWARE.
  */
 
-#ifndef VKTS_VK_OBJECT_HPP_
-#define VKTS_VK_OBJECT_HPP_
+#ifndef VKTS_ICOMMANDOBJECT_HPP_
+#define VKTS_ICOMMANDOBJECT_HPP_
 
-/**
- *
- * Depends on VKTS image and Vulkan.
- *
- */
+#include <vkts/vk_object.hpp>
 
-#include <vkts/vk.hpp>
+namespace vkts
+{
 
-#include <vkts/image.hpp>
+class ICommandObject: public IDestroyable
+{
 
-/**
- *
- * VKTS Start.
- *
- */
+public:
 
-/**
- * Context object.
- */
+    ICommandObject() :
+        IDestroyable()
+    {
+    }
 
-#include <vkts/vk_object/context_object/IContextObject.hpp>
+    virtual ~ICommandObject()
+    {
+    }
 
-#include <vkts/vk_object/context_object/fn_context_object.hpp>
+    virtual const ICommandBuffersSP& getCommandBuffer() const = 0;
 
-/**
- * Command object.
- */
+    //
 
-#include <vkts/vk_object/command_object/ICommandObject.hpp>
+    virtual void addStageImage(const IImageSP& stageImage) = 0;
 
-#include <vkts/vk_object/command_object/fn_command_object.hpp>
+    virtual void addStageBuffer(const IBufferSP& stageBuffer) = 0;
 
-/**
- * Buffer object.
- */
+    virtual void addStageDeviceMemory(const IDeviceMemorySP& stageDeviceMemory) = 0;
 
-#include <vkts/vk_object/buffer_object/IBufferObject.hpp>
+};
 
-#include <vkts/vk_object/buffer_object/fn_buffer_object.hpp>
+typedef std::shared_ptr<ICommandObject> ICommandObjectSP;
 
-/**
- * Image object.
- */
+} /* namespace vkts */
 
-#include <vkts/vk_object/image_object/IImageObject.hpp>
-
-#include <vkts/vk_object/image_object/fn_image_object.hpp>
-
-/**
- * Texture object.
- */
-
-#include <vkts/vk_object/texture_object/ITextureObject.hpp>
-
-#include <vkts/vk_object/texture_object/fn_texture_object.hpp>
-
-#endif /* VKTS_VK_OBJECT_HPP_ */
+#endif /* VKTS_ICOMMANDOBJECT_HPP_ */
