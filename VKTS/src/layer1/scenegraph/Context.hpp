@@ -32,7 +32,7 @@
 namespace vkts
 {
 
-class Context: public IAssetManager
+class Context: public IContext
 {
 
 private:
