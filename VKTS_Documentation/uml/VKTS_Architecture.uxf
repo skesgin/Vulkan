@@ -4,9 +4,9 @@
   <element>
     <id>UMLNote</id>
     <coordinates>
-      <x>1450</x>
+      <x>1420</x>
       <y>150</y>
-      <w>130</w>
+      <w>120</w>
       <h>30</h>
     </coordinates>
     <panel_attributes>  Not final.  
@@ -348,7 +348,7 @@ bg=red</panel_attributes>
     <coordinates>
       <x>1260</x>
       <y>240</y>
-      <w>200</w>
+      <w>440</w>
       <h>60</h>
     </coordinates>
     <panel_attributes>VKTS VulkanObject
@@ -366,5 +366,29 @@ bg=red</panel_attributes>
     <panel_attributes>VKTS Scenegraph
 bg=red</panel_attributes>
     <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1500</x>
+      <y>100</y>
+      <w>200</w>
+      <h>60</h>
+    </coordinates>
+    <panel_attributes>VKTS Font
+bg=red</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1590</x>
+      <y>150</y>
+      <w>80</w>
+      <h>110</h>
+    </coordinates>
+    <panel_attributes>lt=.&gt;
+&lt;&lt;import&gt;&gt;</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;90.0</additional_attributes>
   </element>
 </diagram>
