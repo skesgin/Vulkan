@@ -34,6 +34,7 @@
 
 #include <linux/input.h>
 #include <poll.h>
+#include <unistd.h>
 
 #ifdef VKTS_TEST
 #include "fn_visual_wayland_test_internal.hpp"
@@ -75,6 +76,8 @@ static struct wl_shm* g_nativeShm = nullptr;
 static struct wl_compositor* g_nativeCompositor = nullptr;
 
 static struct wl_registry* g_nativeRegistry = nullptr;
+
+static int g_nativeFd = -1;
 
 static struct wl_display* g_nativeDisplay = nullptr;
 
@@ -701,6 +704,13 @@ VkBool32 VKTS_APIENTRY _visualInit(const VkInstance instance, const VkPhysicalDe
     	return VK_FALSE;
     }
 
+    g_nativeFd = wl_display_get_fd(g_nativeDisplay);
+
+    if (g_nativeFd < 0)
+    {
+    	return VK_FALSE;
+    }
+
     g_nativeRegistry = wl_display_get_registry(g_nativeDisplay);
     wl_registry_add_listener(g_nativeRegistry, &registry_listener, nullptr);
 
@@ -738,27 +748,27 @@ VkBool32 VKTS_APIENTRY _visualDispatchMessages()
 	{
 		struct pollfd fds;
 
-		while (wl_display_prepare_read(g_nativeDisplay) < 0)
-		{
-			wl_display_dispatch_pending(g_nativeDisplay);
-		}
+		fds.fd = g_nativeFd;
+		fds.events = POLLIN | POLLOUT | POLLERR | POLLHUP;
+
+		wl_display_dispatch_pending(g_nativeDisplay);
 		wl_display_flush(g_nativeDisplay);
 
-		fds.fd = wl_display_get_fd(g_nativeDisplay);
-		fds.events = POLLIN;
-
-		if (poll(&fds, 1, -1))
+		if (poll(&fds, 1, 0) > 0)
 		{
-			if (wl_display_read_events(g_nativeDisplay) < 0)
+			if (fds.revents & (POLLERR | POLLHUP))
 			{
 				return VK_FALSE;
 			}
-		}
-		else
-		{
-			wl_display_cancel_read(g_nativeDisplay);
 
-			return VK_FALSE;
+			if (fds.revents & POLLIN)
+			{
+				wl_display_dispatch(g_nativeDisplay);
+			}
+			if (fds.revents & POLLOUT)
+			{
+				wl_display_flush(g_nativeDisplay);
+			}
 		}
 	}
 
@@ -1228,6 +1238,13 @@ void VKTS_APIENTRY _visualTerminate()
     	wl_registry_destroy(g_nativeRegistry);
 
     	g_nativeRegistry = nullptr;
+    }
+
+    if (g_nativeFd >= 0)
+    {
+    	close(g_nativeFd);
+
+    	g_nativeFd = -1;
     }
 
     if (g_nativeDisplay)
