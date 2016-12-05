@@ -1046,8 +1046,6 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
     _visualWaylandConfigure(windowContainer, shell_surface, 0, width, height);
 
-    wl_display_dispatch(g_nativeDisplay);
-
     logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Using Wayland, title is not shown and resize is false");
 
     return nativeWindow;
