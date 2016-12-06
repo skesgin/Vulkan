@@ -27,8 +27,6 @@
 #ifndef VKTS_GUI_HPP_
 #define VKTS_GUI_HPP_
 
-// TODO: Move vk_gui code into own library and update project imports.
-
 // TODO: Implement distance field font.
 
 /**

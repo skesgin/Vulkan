@@ -27,8 +27,6 @@
 #ifndef VKTS_SCENEGRAPH_HPP_
 #define VKTS_SCENEGRAPH_HPP_
 
-// TODO: Move vk_scenegraph code into own library and update project imports.
-
 // TODO: Convert all Bezier animations by appropriate sampling to linear animations.
 
 // TODO: Allow "multiple" uniform buffers in scene graph using dynamic offsets.
