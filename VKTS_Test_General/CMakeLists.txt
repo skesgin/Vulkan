@@ -4,13 +4,15 @@
 
 cmake_minimum_required(VERSION 3.2)
 
-set (VKTS_Test "VKTS_Test_General")
+set (VKTS_Example "VKTS_Test_General")
 
-project (${VKTS_Test})
+project (${VKTS_Example})
 
 set(VKTS_WSI "" CACHE STRING "Enter VKTS_DISPLAY_VISUAL for alternative WSI.")
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_External/include ${CMAKE_CURRENT_SOURCE_DIR}/../VKTS/include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_External/include
+			${CMAKE_CURRENT_SOURCE_DIR}/../VKTS/include
+)
 
 
 if (${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm")
@@ -45,19 +47,19 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 		set(VKTS_COMPILER "MSVC")
 
 		set(VKTS_LIB ${VKTS_COMPILER}/lib)
-		
+
         add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-        
+		
 	else ()
         
 		set(VKTS_COMPILER "GNU")
 		
-		set(VKTS_LIB "lib")
+		set(VKTS_LIB "build/lib")
 		
     endif ()        
 
 	set(VKTS_ADDITIONAL_LIBS vulkan-1 WinMM Xinput9_1_0 Pdh Psapi)
-
+	
     find_path(Vulkan_INCLUDE_DIR NAMES vulkan/vulkan.h PATHS "$ENV{VULKAN_SDK}/Include")
     include_directories(AFTER ${Vulkan_INCLUDE_DIR})
 	
@@ -79,7 +81,7 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 	
 	set(VKTS_COMPILER "GNU")
 
-	set(VKTS_LIB "lib")
+	set(VKTS_LIB "build/lib")
 
 	if (${VKTS_WSI} MATCHES "VKTS_DISPLAY_VISUAL")
 		add_definitions(-DVKTS_DISPLAY_VISUAL)
@@ -101,19 +103,43 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
 endif ()
 
-link_directories(${CMAKE_CURRENT_SOURCE_DIR}/../VKTS/${VKTS_LIB})
+link_directories(
+        ${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_PKG_Core/${VKTS_LIB}
+		${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_PKG_Entity/${VKTS_LIB}
+		${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_PKG_Gui/${VKTS_LIB}
+		${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_PKG_Image/${VKTS_LIB}
+		${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_PKG_Interactive/${VKTS_LIB}
+		${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_PKG_Math/${VKTS_LIB}
+		${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_PKG_Runtime/${VKTS_LIB}
+		${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_PKG_Scenegraph/${VKTS_LIB}
+		${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_PKG_Window/${VKTS_LIB}
+		${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_PKG_VulkanComposition/${VKTS_LIB}
+		${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_PKG_VulkanGui/${VKTS_LIB}
+		${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_PKG_VulkanScenegraph/${VKTS_LIB}
+		${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_PKG_VulkanWindow/${VKTS_LIB}
+		${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_PKG_VulkanWrapper/${VKTS_LIB}
+)
 
 file(GLOB_RECURSE CPP_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 
-add_executable(${VKTS_Test} ${CPP_FILES})
+add_executable(${VKTS_Example} ${CPP_FILES})
 
-set_property(TARGET ${VKTS_Test} PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_Binaries)
-set_property(TARGET ${VKTS_Test} PROPERTY RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_Binaries)
-set_property(TARGET ${VKTS_Test} PROPERTY RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_Binaries)
-set_property(TARGET ${VKTS_Test} PROPERTY RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_Binaries)
-set_property(TARGET ${VKTS_Test} PROPERTY RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_Binaries)
+set_property(TARGET ${VKTS_Example} PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_Binaries)
+set_property(TARGET ${VKTS_Example} PROPERTY RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_Binaries)
+set_property(TARGET ${VKTS_Example} PROPERTY RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_Binaries)
+set_property(TARGET ${VKTS_Example} PROPERTY RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_Binaries)
+set_property(TARGET ${VKTS_Example} PROPERTY RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_Binaries)
 
-set_property(TARGET ${VKTS_Test} PROPERTY CXX_STANDARD 11)
-set_property(TARGET ${VKTS_Test} PROPERTY CXX_STANDARD_REQUIRED ON)
+set_property(TARGET ${VKTS_Example} PROPERTY CXX_STANDARD 11)
+set_property(TARGET ${VKTS_Example} PROPERTY CXX_STANDARD_REQUIRED ON)
 
-target_link_libraries(${VKTS_Test} VKTS ${VKTS_ADDITIONAL_LIBS})
+target_link_libraries(${VKTS_Example}
+	VKTS_PKG_Window
+	VKTS_PKG_Interactive
+	VKTS_PKG_Entity
+	VKTS_PKG_Image
+	VKTS_PKG_Math
+	VKTS_PKG_Runtime
+	VKTS_PKG_Core
+${VKTS_ADDITIONAL_LIBS})
+

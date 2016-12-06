@@ -51,6 +51,8 @@ private:
 
 	const int32_t windowIndex;
 
+	const vkts::IVisualContextSP visualContext;
+
 	const vkts::ISurfaceSP surface;
 
 	const vkts::IDeviceSP device;
@@ -106,7 +108,7 @@ private:
 
 public:
 
-	Example(const vkts::IInstanceSP& instance, const vkts::IPhysicalDeviceSP& physicalDevice, const int32_t windowIndex, const vkts::ISurfaceSP& surface, const vkts::IDeviceSP& device, const vkts::IQueueSP& queue);
+	Example(const vkts::IInstanceSP& instance, const vkts::IPhysicalDeviceSP& physicalDevice, const int32_t windowIndex, const vkts::IVisualContextSP& visualContext, const vkts::ISurfaceSP& surface, const vkts::IDeviceSP& device, const vkts::IQueueSP& queue);
 
 	virtual ~Example();
 

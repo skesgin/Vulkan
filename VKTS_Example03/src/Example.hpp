@@ -53,6 +53,8 @@ private:
 
 	const int32_t windowIndex;
 
+	const vkts::IVisualContextSP visualContext;
+
 	const vkts::ISurfaceSP surface;
 
 	const vkts::IDeviceSP device;
@@ -65,7 +67,7 @@ private:
     vkts::ISemaphoreSP renderingCompleteSemaphore;
 
 	vkts::IImageSP image;
-	vkts::IDeviceMemorySP deviceMemoryImage;
+	vkts::IDeviceMemorySP deviceImageObject;
 	vkts::ISamplerSP sampler;
 	vkts::IImageViewSP imageView;
 
@@ -95,9 +97,9 @@ private:
 
     vkts::SmartPointerVector<vkts::ICommandBuffersSP> cmdBuffer;
 
-	VkBool32 createTexture(vkts::IImageSP& currentImage, vkts::IDeviceMemorySP& currentDeviceMemoryImage, const vkts::IImageDataSP& imageData, const VkImageTiling imageTiling, const VkImageUsageFlags usage, const VkImageLayout initialLayout, const VkMemoryPropertyFlags memoryPropertyFlagBits, const VkAccessFlags accessMask) const;
+	VkBool32 createTexture(vkts::IImageSP& currentImage, vkts::IDeviceMemorySP& currentDeviceImageObject, const vkts::IImageDataSP& imageData, const VkImageTiling imageTiling, const VkImageUsageFlags usage, const VkImageLayout initialLayout, const VkMemoryPropertyFlags memoryPropertyFlagBits, const VkAccessFlags accessMask) const;
 
-	VkBool32 destroyTexture(vkts::IImageSP& currentImage, vkts::IDeviceMemorySP& currentDeviceMemoryImage) const;
+	VkBool32 destroyTexture(vkts::IImageSP& currentImage, vkts::IDeviceMemorySP& currentDeviceImageObject) const;
 
 	//
 
@@ -109,7 +111,7 @@ private:
 
 	VkBool32 updateDescriptorSets();
 
-	VkBool32 buildTexture(const vkts::ICommandBuffersSP& cmdBuffer, vkts::IImageSP& stageImage, vkts::IDeviceMemorySP& stageDeviceMemoryImage);
+	VkBool32 buildTexture(const vkts::ICommandBuffersSP& cmdBuffer, vkts::IImageSP& stageImage, vkts::IDeviceMemorySP& stageDeviceImageObject);
 
 	VkBool32 buildPipeline();
 
@@ -133,7 +135,7 @@ private:
 
 public:
 
-	Example(const vkts::IInstanceSP& instance, const vkts::IPhysicalDeviceSP& physicalDevice, const int32_t windowIndex, const vkts::ISurfaceSP& surface, const vkts::IDeviceSP& device, const vkts::IQueueSP& queue);
+	Example(const vkts::IInstanceSP& instance, const vkts::IPhysicalDeviceSP& physicalDevice, const int32_t windowIndex, const vkts::IVisualContextSP& visualContext, const vkts::ISurfaceSP& surface, const vkts::IDeviceSP& device, const vkts::IQueueSP& queue);
 
 	virtual ~Example();
 

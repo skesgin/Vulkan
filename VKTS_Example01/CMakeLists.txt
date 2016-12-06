@@ -10,7 +10,10 @@ project (${VKTS_Example})
 
 set(VKTS_WSI "" CACHE STRING "Enter VKTS_DISPLAY_VISUAL for alternative WSI.")
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_External/include ${CMAKE_CURRENT_SOURCE_DIR}/../VKTS/include)
+include_directories(
+            ${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_External/include
+			${CMAKE_CURRENT_SOURCE_DIR}/../VKTS/include
+)
 
 
 if (${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm")
@@ -52,7 +55,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
         
 		set(VKTS_COMPILER "GNU")
 		
-		set(VKTS_LIB "lib")
+		set(VKTS_LIB "build/lib")
 		
     endif ()        
 
@@ -79,7 +82,7 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 	
 	set(VKTS_COMPILER "GNU")
 
-	set(VKTS_LIB "lib")
+	set(VKTS_LIB "build/lib")
 
 	if (${VKTS_WSI} MATCHES "VKTS_DISPLAY_VISUAL")
 		add_definitions(-DVKTS_DISPLAY_VISUAL)
@@ -101,7 +104,22 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
 endif ()
 
-link_directories(${CMAKE_CURRENT_SOURCE_DIR}/../VKTS/${VKTS_LIB})
+link_directories(
+        ${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_PKG_Core/${VKTS_LIB}
+		${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_PKG_Entity/${VKTS_LIB}
+		${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_PKG_Gui/${VKTS_LIB}
+		${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_PKG_Image/${VKTS_LIB}
+		${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_PKG_Interactive/${VKTS_LIB}
+		${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_PKG_Math/${VKTS_LIB}
+		${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_PKG_Runtime/${VKTS_LIB}
+		${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_PKG_Scenegraph/${VKTS_LIB}
+		${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_PKG_VulkanWrapper/${VKTS_LIB}
+		${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_PKG_VulkanComposition/${VKTS_LIB}
+		${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_PKG_VulkanScenegraph/${VKTS_LIB}
+		${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_PKG_VulkanGui/${VKTS_LIB}
+		${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_PKG_Window/${VKTS_LIB}
+		${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_PKG_VulkanWindow/${VKTS_LIB}
+)
 
 file(GLOB_RECURSE CPP_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 
@@ -116,4 +134,20 @@ set_property(TARGET ${VKTS_Example} PROPERTY RUNTIME_OUTPUT_DIRECTORY_RELWITHDEB
 set_property(TARGET ${VKTS_Example} PROPERTY CXX_STANDARD 11)
 set_property(TARGET ${VKTS_Example} PROPERTY CXX_STANDARD_REQUIRED ON)
 
-target_link_libraries(${VKTS_Example} VKTS ${VKTS_ADDITIONAL_LIBS})
+target_link_libraries(${VKTS_Example}
+	VKTS_PKG_VulkanGui
+	VKTS_PKG_Gui
+	VKTS_PKG_VulkanScenegraph
+	VKTS_PKG_Scenegraph
+	VKTS_PKG_VulkanComposition
+	VKTS_PKG_VulkanWindow
+	VKTS_PKG_VulkanWrapper
+	VKTS_PKG_Window
+	VKTS_PKG_Interactive
+	VKTS_PKG_Entity
+	VKTS_PKG_Image
+	VKTS_PKG_Math
+	VKTS_PKG_Runtime
+	VKTS_PKG_Core
+${VKTS_ADDITIONAL_LIBS})
+

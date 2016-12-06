@@ -70,9 +70,11 @@ class Example: public vkts::IUpdateThread
 
 private:
 
-	const vkts::IInitialResourcesSP initialResources;
+	const vkts::IContextObjectSP contextObject;
 
 	const int32_t windowIndex;
+
+	const vkts::IVisualContextSP visualContext;
 
 	const vkts::ISurfaceSP surface;
 
@@ -120,12 +122,19 @@ private:
 	vkts::IPipelineLayoutSP environmentPipelineLayout;
 	vkts::IPipelineLayoutSP resolvePipelineLayout;
 
+    vkts::IGuiRenderFactorySP guiRenderFactory;
+	vkts::IGuiManagerSP guiManager;
+	vkts::IGuiFactorySP guiFactory;
     vkts::IFontSP font;
 
-	vkts::IContextSP sceneContext;
+    vkts::ISceneRenderFactorySP renderFactory;
+	vkts::ISceneManagerSP sceneManager;
+	vkts::ISceneFactorySP sceneFactory;
 	vkts::ISceneSP scene;
 
-	vkts::IContextSP environmentSceneContext;
+    vkts::ISceneRenderFactorySP environmentRenderFactory;
+	vkts::ISceneManagerSP environmentSceneManager;
+	vkts::ISceneFactorySP environmentSceneFactory;
 	vkts::ISceneSP environmentScene;
 
 	vkts::IBufferObjectSP screenPlaneVertexBuffer;
@@ -138,7 +147,7 @@ private:
 	vkts::SmartPointerVector<vkts::IGraphicsPipelineSP> allGraphicsPipelines;
 	vkts::IGraphicsPipelineSP resolveGraphicsPipeline;
 
-	vkts::SmartPointerVector<vkts::IMemoryImageSP> allGBufferTextures;
+	vkts::SmartPointerVector<vkts::IImageObjectSP> allGBufferTextures;
 	vkts::SmartPointerVector<vkts::IImageViewSP> allGBufferImageViews;
 	vkts::ISamplerSP gbufferSampler;
 
@@ -164,7 +173,7 @@ private:
 
 	VkBool32 updateDescriptorSets();
 
-	VkBool32 buildScene(const vkts::ICommandBuffersSP& cmdBuffer);
+	VkBool32 buildScene(const vkts::ICommandObjectSP& commandObject);
 
 	VkBool32 buildSwapchainImageView(const int32_t usedBuffer);
 
@@ -196,7 +205,7 @@ private:
 
 public:
 
-	Example(const vkts::IInitialResourcesSP& initialResources, const int32_t windowIndex, const vkts::ISurfaceSP& surface);
+	Example(const vkts::IContextObjectSP& contextObject, const int32_t windowIndex, const vkts::IVisualContextSP& visualContext, const vkts::ISurfaceSP& surface);
 
 	virtual ~Example();
 

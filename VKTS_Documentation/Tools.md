@@ -1,6 +1,8 @@
 Used tools, applications and libraries:
 ---------------------------------------
 
+The tools etc. are used to develop VKTS and the Vulkan examples.   
+
 - [Android NDK](https://developer.android.com/ndk/)
 - [Apache Ant](https://ant.apache.org/)
 - [Bitmap Font Generator](http://www.angelcode.com/products/bmfont/)

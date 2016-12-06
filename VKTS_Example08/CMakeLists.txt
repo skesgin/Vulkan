@@ -8,13 +8,12 @@ set (VKTS_Example "VKTS_Example08")
 
 project (${VKTS_Example})
 
-set(VKTS_WSI "VKTS_NO_DISPLAY" CACHE STRING "Keep VKTS_NO_VISUAL for no WSI.")
+set(VKTS_WSI "" CACHE STRING "Enter VKTS_DISPLAY_VISUAL for alternative WSI.")
 
-add_definitions(-DVKTS_NO_VISUAL)
-
-set(VKTS_WINDOW "None")
-
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_External/include ${CMAKE_CURRENT_SOURCE_DIR}/../VKTS/include)
+include_directories(
+            ${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_External/include
+			${CMAKE_CURRENT_SOURCE_DIR}/../VKTS/include
+)
 
 
 if (${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm")
@@ -42,26 +41,27 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
 	set(VKTS_OS "Windows")
 	
+	set(VKTS_WINDOW "Win32")
+
     if (${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
 		
 		set(VKTS_COMPILER "MSVC")
 
 		set(VKTS_LIB ${VKTS_COMPILER}/lib)
-		
+
         add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-        
+		
 	else ()
         
 		set(VKTS_COMPILER "GNU")
 		
-		set(VKTS_LIB "lib")
+		set(VKTS_LIB "build/lib")
 		
     endif ()        
 
-	set(VKTS_ADDITIONAL_LIBS vulkan-1 Pdh Psapi)
-
+	set(VKTS_ADDITIONAL_LIBS vulkan-1 WinMM Xinput9_1_0 Pdh Psapi)
+	
     find_path(Vulkan_INCLUDE_DIR NAMES vulkan/vulkan.h PATHS "$ENV{VULKAN_SDK}/Include")
-    
     include_directories(AFTER ${Vulkan_INCLUDE_DIR})
 	
     if (${VKTS_BITS} MATCHES "64")
@@ -82,13 +82,44 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 	
 	set(VKTS_COMPILER "GNU")
 
-	set(VKTS_LIB "lib")
+	set(VKTS_LIB "build/lib")
 
-	set(VKTS_ADDITIONAL_LIBS vulkan pthread)
+	if (${VKTS_WSI} MATCHES "VKTS_DISPLAY_VISUAL")
+		add_definitions(-DVKTS_DISPLAY_VISUAL)
+
+		set(VKTS_WINDOW "Display")
+
+		set(VKTS_ADDITIONAL_LIBS vulkan pthread)
+	elseif (${VKTS_WSI} MATCHES "VKTS_WAYLAND_VISUAL")
+		add_definitions(-DVKTS_WAYLAND_VISUAL)
+
+		set(VKTS_WINDOW "Wayland")
+
+		set(VKTS_ADDITIONAL_LIBS vulkan pthread wayland-client wayland-cursor)
+	else ()
+		set(VKTS_WINDOW "Xlib")
+		
+		set(VKTS_ADDITIONAL_LIBS vulkan pthread xcb X11-xcb Xrandr X11)
+	endif ()
 
 endif ()
 
-link_directories(${CMAKE_CURRENT_SOURCE_DIR}/../VKTS/${VKTS_LIB})
+link_directories(
+        ${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_PKG_Core/${VKTS_LIB}
+		${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_PKG_Entity/${VKTS_LIB}
+		${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_PKG_Gui/${VKTS_LIB}
+		${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_PKG_Image/${VKTS_LIB}
+		${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_PKG_Interactive/${VKTS_LIB}
+		${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_PKG_Math/${VKTS_LIB}
+		${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_PKG_Runtime/${VKTS_LIB}
+		${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_PKG_Scenegraph/${VKTS_LIB}
+		${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_PKG_VulkanWrapper/${VKTS_LIB}
+		${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_PKG_VulkanComposition/${VKTS_LIB}
+		${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_PKG_VulkanScenegraph/${VKTS_LIB}
+		${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_PKG_VulkanGui/${VKTS_LIB}
+		${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_PKG_Window/${VKTS_LIB}
+		${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_PKG_VulkanWindow/${VKTS_LIB}
+)
 
 file(GLOB_RECURSE CPP_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 
@@ -103,4 +134,12 @@ set_property(TARGET ${VKTS_Example} PROPERTY RUNTIME_OUTPUT_DIRECTORY_RELWITHDEB
 set_property(TARGET ${VKTS_Example} PROPERTY CXX_STANDARD 11)
 set_property(TARGET ${VKTS_Example} PROPERTY CXX_STANDARD_REQUIRED ON)
 
-target_link_libraries(${VKTS_Example} VKTS ${VKTS_ADDITIONAL_LIBS})
+target_link_libraries(${VKTS_Example}
+	VKTS_PKG_VulkanComposition
+	VKTS_PKG_VulkanWrapper
+	VKTS_PKG_Image
+	VKTS_PKG_Math
+	VKTS_PKG_Runtime
+	VKTS_PKG_Core
+${VKTS_ADDITIONAL_LIBS})
+

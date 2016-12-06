@@ -34,11 +34,11 @@ class BuildCommandTask : public vkts::ITask
 
 private:
 
-    static vkts::Overwrite* overwrite;
+    static vkts::OverwriteDraw* overwrite;
 
 	const vkts::IUpdateThreadContext& updateContext;
 
-	const vkts::IInitialResourcesSP initialResources;
+	const vkts::IContextObjectSP contextObject;
 
     const vkts::SmartPointerVector<vkts::IGraphicsPipelineSP>& allGraphicsPipelines;
 
@@ -62,9 +62,9 @@ protected:
 
 public:
 
-    static void setOverwrite(vkts::Overwrite* overwrite);
+    static void setOverwrite(vkts::OverwriteDraw* overwrite);
 
-	BuildCommandTask(const uint64_t id, const vkts::IUpdateThreadContext& updateContext, const vkts::IInitialResourcesSP& initialResources, const vkts::SmartPointerVector<vkts::IGraphicsPipelineSP>& allGraphicsPipelines, const vkts::ISceneSP& scene, const uint32_t& objectOffset, const uint32_t& objectStep);
+	BuildCommandTask(const uint64_t id, const vkts::IUpdateThreadContext& updateContext, const vkts::IContextObjectSP& contextObject, const vkts::SmartPointerVector<vkts::IGraphicsPipelineSP>& allGraphicsPipelines, const vkts::ISceneSP& scene, const uint32_t& objectOffset, const uint32_t& objectStep);
 	virtual ~BuildCommandTask();
 
     void setCommandBufferInheritanceInfo(VkCommandBufferInheritanceInfo* commandBufferInheritanceInfo);

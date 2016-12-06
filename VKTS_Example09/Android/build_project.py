@@ -49,6 +49,7 @@ copy("../../VKTS_Binaries/shader/SPIR/V/phong_shadow.frag.spv", "./assets/shader
 copy("../../VKTS_Binaries/shader/SPIR/V/phong_write_shadow.frag.spv", "./assets/shader/SPIR/V/")
 copy("../../VKTS_Binaries/transport_shuttle/*.vkts", "./assets/transport_shuttle/")
 copy("../../VKTS_Binaries/transport_shuttle/*.tga", "./assets/transport_shuttle/")
+copy("../../VKTS_Binaries/cache/transport_shuttle/*.tga", "./assets/cache/transport_shuttle/")
 
 print("Building project")
 

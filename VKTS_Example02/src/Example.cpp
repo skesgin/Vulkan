@@ -26,8 +26,8 @@
 
 #include "Example.hpp"
 
-Example::Example(const vkts::IInstanceSP& instance, const vkts::IPhysicalDeviceSP& physicalDevice, const int32_t windowIndex, const vkts::ISurfaceSP& surface, const vkts::IDeviceSP& device, const vkts::IQueueSP& queue) :
-		IUpdateThread(), instance(instance), physicalDevice(physicalDevice), windowIndex(windowIndex), surface(surface), device(device), queue(queue), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), vertexBuffer(VK_NULL_HANDLE), deviceMemoryVertexBuffer(VK_NULL_HANDLE), vertexShaderModule(VK_NULL_HANDLE), fragmentShaderModule(VK_NULL_HANDLE), pipelineLayout(VK_NULL_HANDLE), swapchain(nullptr), renderPass(nullptr), pipeline(VK_NULL_HANDLE), swapchainImagesCount(0), swapchainImageView(), framebuffer(), cmdBuffer()
+Example::Example(const vkts::IInstanceSP& instance, const vkts::IPhysicalDeviceSP& physicalDevice, const int32_t windowIndex, const vkts::IVisualContextSP& visualContext, const vkts::ISurfaceSP& surface, const vkts::IDeviceSP& device, const vkts::IQueueSP& queue) :
+		IUpdateThread(), instance(instance), physicalDevice(physicalDevice), windowIndex(windowIndex), visualContext(visualContext), surface(surface), device(device), queue(queue), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), vertexBuffer(VK_NULL_HANDLE), deviceMemoryVertexBuffer(VK_NULL_HANDLE), vertexShaderModule(VK_NULL_HANDLE), fragmentShaderModule(VK_NULL_HANDLE), pipelineLayout(VK_NULL_HANDLE), swapchain(nullptr), renderPass(nullptr), pipeline(VK_NULL_HANDLE), swapchainImagesCount(0), swapchainImageView(), framebuffer(), cmdBuffer()
 {
 }
 
@@ -537,7 +537,7 @@ VkBool32 Example::buildVertexBuffer()
 	VkPhysicalDeviceMemoryProperties physicalDeviceMemoryProperties;
 	physicalDevice->getPhysicalDeviceMemoryProperties(physicalDeviceMemoryProperties);
 
-	if (!vkts::commonGetMemoryTypeIndex(VK_MAX_MEMORY_TYPES, physicalDeviceMemoryProperties.memoryTypes, memoryRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, memoryAllocInfo.memoryTypeIndex))
+	if (!vkts::deviceGetMemoryTypeIndex(VK_MAX_MEMORY_TYPES, physicalDeviceMemoryProperties.memoryTypes, memoryRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, memoryAllocInfo.memoryTypeIndex))
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not get memory type index.");
 
@@ -606,7 +606,7 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 
 	VkSwapchainKHR oldSwapchain = lastSwapchain.get() ? lastSwapchain->getSwapchain() : VK_NULL_HANDLE;
 
-	swapchain = vkts::wsiSwapchainCreate(physicalDevice->getPhysicalDevice(), device->getDevice(), 0, surface->getSurface(), VKTS_NUMBER_BUFFERS, 1, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_SHARING_MODE_EXCLUSIVE, 0, nullptr, VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR, VK_TRUE, oldSwapchain);
+	swapchain = vkts::wsiSwapchainCreate(physicalDevice->getPhysicalDevice(), device->getDevice(), 0, surface->getSurface(), VKTS_NUMBER_BUFFERS, 1, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_SHARING_MODE_EXCLUSIVE, 0, nullptr, VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR, VK_PRESENT_MODE_FIFO_KHR, VK_TRUE, oldSwapchain);
 
 	if (!swapchain.get())
 	{
@@ -713,8 +713,10 @@ void Example::terminateResources(const vkts::IUpdateThreadContext& updateContext
 //
 VkBool32 Example::init(const vkts::IUpdateThreadContext& updateContext)
 {
-	if (!updateContext.isWindowAttached(windowIndex))
+	if (!visualContext->isWindowAttached(windowIndex))
 	{
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not get window.");
+
 		return VK_FALSE;
 	}
 

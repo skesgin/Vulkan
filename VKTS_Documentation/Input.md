@@ -1,5 +1,5 @@
-Gamepad, keyboard and mouse input:
-----------------------------------
+Gamepad, keyboard, touch and mouse input:
+-----------------------------------------
 
 The gamepad, keyboard and mouse input does behave on Android, Linux and Windows the same.
 This allows the same input behaviour on all devices. 

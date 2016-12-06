@@ -27,7 +27,7 @@
 #ifndef EXAMPLE_HPP_
 #define EXAMPLE_HPP_
 
-#include <vkts/vkts.hpp>
+#include <vkts/vkts_no_visual.hpp>
 
 #define VKTS_EXAMPLE_NAME "Example08"
 
@@ -59,7 +59,7 @@ private:
 	vkts::ICommandPoolSP commandPool;
 
 	vkts::IImageSP image;
-	vkts::IDeviceMemorySP deviceMemoryImage;
+	vkts::IDeviceMemorySP deviceImageObject;
 	vkts::IImageViewSP imageView;
 
 	vkts::IDescriptorSetLayoutSP descriptorSetLayout;
@@ -87,9 +87,9 @@ private:
 
 	VkBool32 createBuffer(vkts::IBufferSP& buffer, vkts::IDeviceMemorySP& deviceMemory, const VkBufferCreateInfo& bufferCreateInfo, const VkMemoryPropertyFlags memoryPropertyFlags) const;
 
-	VkBool32 createTexture(vkts::IImageSP& currentImage, vkts::IDeviceMemorySP& currentDeviceMemoryImage, const VkImageTiling imageTiling, const VkImageUsageFlags usage, const VkImageLayout initialLayout, const VkMemoryPropertyFlags memoryPropertyFlagBits, const VkAccessFlags accessMask) const;
+	VkBool32 createTexture(vkts::IImageSP& currentImage, vkts::IDeviceMemorySP& currentDeviceImageObject, const VkImageTiling imageTiling, const VkImageUsageFlags usage, const VkImageLayout initialLayout, const VkMemoryPropertyFlags memoryPropertyFlagBits, const VkAccessFlags accessMask) const;
 
-	VkBool32 destroyTexture(vkts::IImageSP& currentImage, vkts::IDeviceMemorySP& currentDeviceMemoryImage) const;
+	VkBool32 destroyTexture(vkts::IImageSP& currentImage, vkts::IDeviceMemorySP& currentDeviceImageObject) const;
 
 	VkBool32 buildTexture();
 

@@ -24,7 +24,7 @@
  * THE SOFTWARE.
  */
 
-#include <vkts/vkts.hpp>
+#include <vkts/vkts_no_visual.hpp>
 
 #include "Example.hpp"
 
@@ -73,6 +73,8 @@ int main(int argc, char* argv[])
 
 	if (!vkts::engineInit())
 	{
+		terminateApp();
+
 		return -1;
 	}
 
@@ -82,13 +84,15 @@ int main(int argc, char* argv[])
 
 	uint32_t validate = 0;
 
-	if (vkts::commonGetUInt32Parameter(validate, std::string("-v"), argc, argv))
+	if (vkts::parameterGetUInt32(validate, std::string("-v"), argc, argv))
 	{
 		if (validate)
 		{
 			if (!vkts::validationGatherNeededInstanceLayers())
 			{
 				vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not gather needed instance layers.");
+
+				terminateApp();
 
 				return -1;
 			}
@@ -97,13 +101,15 @@ int main(int argc, char* argv[])
 
 	uint32_t debug = 0;
 
-	if (vkts::commonGetUInt32Parameter(debug, std::string("-d"), argc, argv))
+	if (vkts::parameterGetUInt32(debug, std::string("-d"), argc, argv))
 	{
 		if (debug)
 		{
 			if (!vkts::debugGatherNeededInstanceExtensions())
 			{
 				vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not gather needed instance layers.");
+
+				terminateApp();
 
 				return -1;
 			}
@@ -131,12 +137,16 @@ int main(int argc, char* argv[])
 		{
 			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not initialize debug extensions.");
 
+			terminateApp();
+
 			return -1;
 		}
 
 		if (!vkts::debugCreateDebugReportCallback(instance->getInstance(), debug))
 		{
 			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create debug callback.");
+
+			terminateApp();
 
 			return -1;
 		}
@@ -146,7 +156,7 @@ int main(int argc, char* argv[])
 
 	uint32_t physicalDeviceIndex = 0;
 
-	vkts::commonGetUInt32Parameter(physicalDeviceIndex, std::string("-pd"), argc, argv);
+	vkts::parameterGetUInt32(physicalDeviceIndex, std::string("-pd"), argc, argv);
 
 	//
 

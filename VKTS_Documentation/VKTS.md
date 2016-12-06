@@ -1,11 +1,11 @@
-Features of VulKan ToolS (VKTS):
---------------------------------
+Features of the VKST:
+---------------------
 
 Authors:
 
 **Norbert Nopper** (norbert@nopper.tv)
 
-VKTS version: **0.9.33.1**
+VKTS version: **1.0.33.0**
 
 Depending Vulkan API header version: **1.0.33**
 

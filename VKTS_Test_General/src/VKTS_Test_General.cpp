@@ -1,4 +1,4 @@
-#include <vkts/vkts.hpp>
+#include <vkts/vkts_no_vulkan.hpp>
 
 class Test : public vkts::IUpdateThread
 {
@@ -11,10 +11,12 @@ private:
 
 	int32_t windowIndex;
 
+	vkts::IVisualContextSP visualContext;
+
 public:
 
-	Test(const std::string& name) :
-			IUpdateThread(), name(name), displayIndex(-1), windowIndex(-1)
+	Test(const std::string& name, const vkts::IVisualContextSP& visualContext) :
+			IUpdateThread(), name(name), displayIndex(-1), windowIndex(-1), visualContext(visualContext)
 	{
 	}
 
@@ -24,23 +26,28 @@ public:
 
 	virtual VkBool32 init(const vkts::IUpdateThreadContext& updateContext)
 	{
+		if (!visualContext.get())
+		{
+			return VK_FALSE;
+		}
+
 		vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Test '%s': Initialize done.", name.c_str());
 
 		vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Test '%s': Thread %d from %d.", name.c_str(), updateContext.getThreadIndex(), updateContext.getThreadCount());
 
-		const auto displayIndexWalker = updateContext.getAttachedDisplayIndices().begin();
+		const auto displayIndexWalker = visualContext->getAttachedDisplayIndices().begin();
 
-		const auto windowIndexWalker = updateContext.getAttachedWindowIndices().begin();
+		const auto windowIndexWalker = visualContext->getAttachedWindowIndices().begin();
 
-		if (displayIndexWalker != updateContext.getAttachedDisplayIndices().end() && windowIndexWalker != updateContext.getAttachedWindowIndices().end())
+		if (displayIndexWalker != visualContext->getAttachedDisplayIndices().end() && windowIndexWalker != visualContext->getAttachedWindowIndices().end())
 		{
 			displayIndex = *displayIndexWalker;
 			windowIndex = *windowIndexWalker;
 
 			vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Test '%s': Found display index = %d", name.c_str(), displayIndex);
-			vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Test '%s': Width x Height = %d x %d", name.c_str(), updateContext.getDisplayDimension(displayIndex).x, updateContext.getDisplayDimension(displayIndex).y);
+			vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Test '%s': Width x Height = %d x %d", name.c_str(), visualContext->getDisplayDimension(displayIndex).x, visualContext->getDisplayDimension(displayIndex).y);
 			vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Test '%s': Found window index = %d", name.c_str(), windowIndex);
-			vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Test '%s': Width x Height = %d x %d", name.c_str(), updateContext.getWindowDimension(windowIndex).x, updateContext.getWindowDimension(windowIndex).y);
+			vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Test '%s': Width x Height = %d x %d", name.c_str(), visualContext->getWindowDimension(windowIndex).x, visualContext->getWindowDimension(windowIndex).y);
 		}
 
 		return VK_TRUE;
@@ -50,9 +57,9 @@ public:
 	{
 		if (windowIndex >= 0)
 		{
-			vkts::logPrint(VKTS_LOG_DEBUG, __FILE__, __LINE__, "Test '%s': Width x Height = %d x %d", name.c_str(), updateContext.getWindowDimension(windowIndex).x, updateContext.getWindowDimension(windowIndex).y);
+			vkts::logPrint(VKTS_LOG_DEBUG, __FILE__, __LINE__, "Test '%s': Width x Height = %d x %d", name.c_str(), visualContext->getWindowDimension(windowIndex).x, visualContext->getWindowDimension(windowIndex).y);
 
-			if (updateContext.getKey(windowIndex, VKTS_KEY_Q))
+			if (visualContext->getKey(windowIndex, VKTS_KEY_Q))
 			{
 				vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Test '%s': Quit pressed!", name.c_str());
 
@@ -92,18 +99,7 @@ public:
 
 int main(int argc, char* argv[])
 {
-	vkts::IUpdateThreadSP a = vkts::IUpdateThreadSP(new Test("a"));
-	vkts::IUpdateThreadSP b = vkts::IUpdateThreadSP(new Test("b"));
-	vkts::IUpdateThreadSP c = vkts::IUpdateThreadSP(new Test("c"));
-
-	if (!a.get() || !b.get() || !b.get())
-	{
-		printf("Test: Could not create test application.");
-
-		return -1;
-	}
-
-	vkts::engineInit();
+	vkts::engineInit(vkts::visualDispatchMessages);
 
 	vkts::logSetLevel(VKTS_LOG_INFO);
 
@@ -159,6 +155,43 @@ int main(int argc, char* argv[])
 			return -1;
 		}
 	}
+
+	//
+
+	auto visualContext = vkts::visualCreateContext();
+
+	if (!visualContext.get())
+	{
+		display->destroy();
+
+		vkts::visualTerminate();
+
+		vkts::engineTerminate();
+
+		return -1;
+	}
+
+	//
+
+	vkts::IUpdateThreadSP a = vkts::IUpdateThreadSP(new Test("a", visualContext));
+	vkts::IUpdateThreadSP b = vkts::IUpdateThreadSP(new Test("b", visualContext));
+	vkts::IUpdateThreadSP c = vkts::IUpdateThreadSP(new Test("c", visualContext));
+
+	if (!a.get() || !b.get() || !b.get())
+	{
+		printf("Test: Could not create test application.");
+
+		visualContext.reset();
+
+		display->destroy();
+
+		vkts::visualTerminate();
+
+		vkts::engineTerminate();
+
+		return -1;
+	}
+
 
 	//
 	// Engine setup.
@@ -345,6 +378,8 @@ int main(int argc, char* argv[])
 	//
 	// Termination.
 	//
+
+	visualContext.reset();
 
 	window->destroy();
 

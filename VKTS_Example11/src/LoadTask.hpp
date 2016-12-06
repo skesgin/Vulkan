@@ -36,15 +36,18 @@ class LoadTask : public vkts::ITask
 
 private:
 
-	const vkts::IInitialResourcesSP initialResources;
+	const vkts::IContextObjectSP contextObject;
 
 	const vkts::IDescriptorSetLayoutSP descriptorSetLayout;
 
-	vkts::IContextSP& sceneContext;
+	vkts::ISceneRenderFactorySP& renderFactory;
+	vkts::ISceneManagerSP& sceneManager;
+	vkts::ISceneFactorySP& sceneFactory;
 	vkts::ISceneSP& scene;
 
 	vkts::ICommandPoolSP commandPool;
 	vkts::ICommandBuffersSP cmdBuffer;
+	vkts::ICommandObjectSP commandObject;
 
 protected:
 
@@ -52,7 +55,7 @@ protected:
 
 public:
 
-	LoadTask(const vkts::IInitialResourcesSP& initialResources, const vkts::IDescriptorSetLayoutSP& descriptorSetLayout, vkts::IContextSP& sceneContext, vkts::ISceneSP& scene);
+	LoadTask(const vkts::IContextObjectSP& contextObject, const vkts::IDescriptorSetLayoutSP& descriptorSetLayout, vkts::ISceneRenderFactorySP& renderFactory, vkts::ISceneManagerSP& sceneManager, vkts::ISceneFactorySP& sceneFactory, vkts::ISceneSP& scene);
 	virtual ~LoadTask();
 
     VkCommandBuffer getCommandBuffer() const;

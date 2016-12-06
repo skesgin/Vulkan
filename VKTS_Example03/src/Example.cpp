@@ -26,8 +26,8 @@
 
 #include "Example.hpp"
 
-Example::Example(const vkts::IInstanceSP& instance, const vkts::IPhysicalDeviceSP& physicalDevice, const int32_t windowIndex, const vkts::ISurfaceSP& surface, const vkts::IDeviceSP& device, const vkts::IQueueSP& queue) :
-		IUpdateThread(), instance(instance), physicalDevice(physicalDevice), windowIndex(windowIndex), surface(surface), device(device), queue(queue), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), image(nullptr), deviceMemoryImage(nullptr), sampler(nullptr), imageView(nullptr), descriptorSetLayout(VK_NULL_HANDLE), descriptorPool(VK_NULL_HANDLE), descriptorSet(VK_NULL_HANDLE), vertexBuffer(nullptr), deviceMemoryVertexBuffer(nullptr), vertexShaderModule(nullptr), fragmentShaderModule(nullptr), pipelineLayout(nullptr), swapchain(nullptr), renderPass(nullptr), pipeline(nullptr), swapchainImagesCount(0), swapchainImageView(), framebuffer(), cmdBuffer()
+Example::Example(const vkts::IInstanceSP& instance, const vkts::IPhysicalDeviceSP& physicalDevice, const int32_t windowIndex, const vkts::IVisualContextSP& visualContext, const vkts::ISurfaceSP& surface, const vkts::IDeviceSP& device, const vkts::IQueueSP& queue) :
+		IUpdateThread(), instance(instance), physicalDevice(physicalDevice), windowIndex(windowIndex), visualContext(visualContext), surface(surface), device(device), queue(queue), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), image(nullptr), deviceImageObject(nullptr), sampler(nullptr), imageView(nullptr), descriptorSetLayout(VK_NULL_HANDLE), descriptorPool(VK_NULL_HANDLE), descriptorSet(VK_NULL_HANDLE), vertexBuffer(nullptr), deviceMemoryVertexBuffer(nullptr), vertexShaderModule(nullptr), fragmentShaderModule(nullptr), pipelineLayout(nullptr), swapchain(nullptr), renderPass(nullptr), pipeline(nullptr), swapchainImagesCount(0), swapchainImageView(), framebuffer(), cmdBuffer()
 {
 }
 
@@ -35,7 +35,7 @@ Example::~Example()
 {
 }
 
-VkBool32 Example::createTexture(vkts::IImageSP& currentImage, vkts::IDeviceMemorySP& currentDeviceMemoryImage, const vkts::IImageDataSP& imageData, const VkImageTiling imageTiling, const VkImageUsageFlags usage, const VkImageLayout initialLayout, const VkMemoryPropertyFlags memoryPropertyFlagBits, const VkAccessFlags accessMask) const
+VkBool32 Example::createTexture(vkts::IImageSP& currentImage, vkts::IDeviceMemorySP& currentDeviceImageObject, const vkts::IImageDataSP& imageData, const VkImageTiling imageTiling, const VkImageUsageFlags usage, const VkImageLayout initialLayout, const VkMemoryPropertyFlags memoryPropertyFlagBits, const VkAccessFlags accessMask) const
 {
 	VkResult result;
 
@@ -62,9 +62,9 @@ VkBool32 Example::createTexture(vkts::IImageSP& currentImage, vkts::IDeviceMemor
 
 	physicalDevice->getPhysicalDeviceMemoryProperties(physicalDeviceMemoryProperties);
 
-	currentDeviceMemoryImage = vkts::deviceMemoryCreate(device->getDevice(), memoryRequirements, VK_MAX_MEMORY_TYPES, physicalDeviceMemoryProperties.memoryTypes, memoryPropertyFlagBits);
+	currentDeviceImageObject = vkts::deviceMemoryCreate(device->getDevice(), memoryRequirements, VK_MAX_MEMORY_TYPES, physicalDeviceMemoryProperties.memoryTypes, memoryPropertyFlagBits);
 
-	if (!currentDeviceMemoryImage.get())
+	if (!currentDeviceImageObject.get())
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not allocate memory.");
 
@@ -73,7 +73,7 @@ VkBool32 Example::createTexture(vkts::IImageSP& currentImage, vkts::IDeviceMemor
 
 	// Bind image to memory.
 
-	result = vkBindImageMemory(device->getDevice(), currentImage->getImage(), currentDeviceMemoryImage->getDeviceMemory(), 0);
+	result = vkBindImageMemory(device->getDevice(), currentImage->getImage(), currentDeviceImageObject->getDeviceMemory(), 0);
 
 	if (result != VK_SUCCESS)
 	{
@@ -95,7 +95,7 @@ VkBool32 Example::createTexture(vkts::IImageSP& currentImage, vkts::IDeviceMemor
 
 		currentImage->getImageSubresourceLayout(subresourceLayout, imageSubresource);
 
-		result = currentDeviceMemoryImage->mapMemory(0, VK_WHOLE_SIZE, 0);
+		result = currentDeviceImageObject->mapMemory(0, VK_WHOLE_SIZE, 0);
 
 		if (result != VK_SUCCESS)
 		{
@@ -104,11 +104,11 @@ VkBool32 Example::createTexture(vkts::IImageSP& currentImage, vkts::IDeviceMemor
 			return VK_FALSE;
 		}
 
-		imageData->copy(currentDeviceMemoryImage->getMemory(), 0, 0, subresourceLayout);
+		imageData->copy(currentDeviceImageObject->getMemory(), 0, 0, subresourceLayout);
 
-		if (!(currentDeviceMemoryImage->getMemoryPropertyFlags() & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT))
+		if (!(currentDeviceImageObject->getMemoryPropertyFlags() & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT))
 		{
-			result = currentDeviceMemoryImage->flushMappedMemoryRanges(0, VK_WHOLE_SIZE);
+			result = currentDeviceImageObject->flushMappedMemoryRanges(0, VK_WHOLE_SIZE);
 
 			if (result != VK_SUCCESS)
 			{
@@ -118,19 +118,19 @@ VkBool32 Example::createTexture(vkts::IImageSP& currentImage, vkts::IDeviceMemor
 			}
 		}
 
-		currentDeviceMemoryImage->unmapMemory();
+		currentDeviceImageObject->unmapMemory();
 	}
 
 	return VK_TRUE;
 }
 
-VkBool32 Example::destroyTexture(vkts::IImageSP& currentImage, vkts::IDeviceMemorySP& currentDeviceMemoryImage) const
+VkBool32 Example::destroyTexture(vkts::IImageSP& currentImage, vkts::IDeviceMemorySP& currentDeviceImageObject) const
 {
 	if (currentImage.get())
 	{
 		currentImage->destroy();
 
-		currentDeviceMemoryImage->destroy();
+		currentDeviceImageObject->destroy();
 	}
 
 	return VK_TRUE;
@@ -297,7 +297,7 @@ VkBool32 Example::updateDescriptorSets()
 	return VK_TRUE;
 }
 
-VkBool32 Example::buildTexture(const vkts::ICommandBuffersSP& cmdBuffer, vkts::IImageSP& stageImage, vkts::IDeviceMemorySP& stageDeviceMemoryImage)
+VkBool32 Example::buildTexture(const vkts::ICommandBuffersSP& cmdBuffer, vkts::IImageSP& stageImage, vkts::IDeviceMemorySP& stageDeviceImageObject)
 {
 	auto imageData = vkts::imageDataLoad(VKTS_TEXTURE_NAME);
 
@@ -337,7 +337,7 @@ VkBool32 Example::buildTexture(const vkts::ICommandBuffersSP& cmdBuffer, vkts::I
 
 	//
 
-	if (!createTexture(image, deviceMemoryImage, imageData, imageTiling, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, initialLayout, memoryPropertyFlags, accessMask))
+	if (!createTexture(image, deviceImageObject, imageData, imageTiling, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, initialLayout, memoryPropertyFlags, accessMask))
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create image.");
 
@@ -373,7 +373,7 @@ VkBool32 Example::buildTexture(const vkts::ICommandBuffersSP& cmdBuffer, vkts::I
 	if (memoryPropertyFlags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)
 	{
 		// ... create texture with host visibility. This texture contains the pixel data.
-		if (!createTexture(stageImage, stageDeviceMemoryImage, imageData, VK_IMAGE_TILING_LINEAR, VK_IMAGE_USAGE_TRANSFER_SRC_BIT, VK_IMAGE_LAYOUT_PREINITIALIZED, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, VK_ACCESS_HOST_WRITE_BIT))
+		if (!createTexture(stageImage, stageDeviceImageObject, imageData, VK_IMAGE_TILING_LINEAR, VK_IMAGE_USAGE_TRANSFER_SRC_BIT, VK_IMAGE_LAYOUT_PREINITIALIZED, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, VK_ACCESS_HOST_WRITE_BIT))
 		{
 			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create image.");
 
@@ -898,7 +898,7 @@ VkBool32 Example::buildResources( const vkts::IUpdateThreadContext& updateContex
 
 	VkSwapchainKHR oldSwapchain = lastSwapchain.get() ? lastSwapchain->getSwapchain() : VK_NULL_HANDLE;
 
-	swapchain = vkts::wsiSwapchainCreate(physicalDevice->getPhysicalDevice(), device->getDevice(), 0, surface->getSurface(), VKTS_NUMBER_BUFFERS, 1, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_SHARING_MODE_EXCLUSIVE, 0, nullptr, VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR, VK_TRUE, oldSwapchain);
+	swapchain = vkts::wsiSwapchainCreate(physicalDevice->getPhysicalDevice(), device->getDevice(), 0, surface->getSurface(), VKTS_NUMBER_BUFFERS, 1, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_SHARING_MODE_EXCLUSIVE, 0, nullptr, VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR, VK_PRESENT_MODE_FIFO_KHR, VK_TRUE, oldSwapchain);
 
 	if (!swapchain.get())
 	{
@@ -944,7 +944,7 @@ VkBool32 Example::buildResources( const vkts::IUpdateThreadContext& updateContex
 	//
 
 	vkts::IImageSP stageImage;
-	vkts::IDeviceMemorySP stageDeviceMemoryImage;
+	vkts::IDeviceMemorySP stageDeviceImageObject;
 
 	vkts::ICommandBuffersSP updateCmdBuffer = vkts::commandBuffersCreate(device->getDevice(), commandPool->getCmdPool(), VK_COMMAND_BUFFER_LEVEL_PRIMARY, 1);
 
@@ -968,7 +968,7 @@ VkBool32 Example::buildResources( const vkts::IUpdateThreadContext& updateContex
 
 	if (!image.get())
 	{
-		if (!buildTexture(updateCmdBuffer, stageImage, stageDeviceMemoryImage))
+		if (!buildTexture(updateCmdBuffer, stageImage, stageDeviceImageObject))
 		{
 			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not build texture.");
 
@@ -1018,9 +1018,9 @@ VkBool32 Example::buildResources( const vkts::IUpdateThreadContext& updateContex
 
 	updateCmdBuffer->destroy();
 
-	if (stageImage.get() || stageDeviceMemoryImage.get())
+	if (stageImage.get() || stageDeviceImageObject.get())
 	{
-		destroyTexture(stageImage, stageDeviceMemoryImage);
+		destroyTexture(stageImage, stageDeviceImageObject);
 	}
 
 	//
@@ -1093,8 +1093,10 @@ void Example::terminateResources(const vkts::IUpdateThreadContext& updateContext
 //
 VkBool32 Example::init(const vkts::IUpdateThreadContext& updateContext)
 {
-	if (!updateContext.isWindowAttached(windowIndex))
+	if (!visualContext->isWindowAttached(windowIndex))
 	{
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not get window.");
+
 		return VK_FALSE;
 	}
 
@@ -1383,7 +1385,7 @@ void Example::terminate(const vkts::IUpdateThreadContext& updateContext)
 			sampler->destroy();
 		}
 
-		destroyTexture(image, deviceMemoryImage);
+		destroyTexture(image, deviceImageObject);
 
         if (renderingCompleteSemaphore.get())
         {

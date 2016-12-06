@@ -38,6 +38,8 @@ static vkts::INativeWindowSP window;
 
 static vkts::ISurfaceSP surface;
 
+static vkts::IVisualContextSP visualContext;
+
 static VkDevice device = VK_NULL_HANDLE;
 
 static uint32_t queueFamilyIndex = 0;
@@ -46,6 +48,8 @@ static VkQueue queue = VK_NULL_HANDLE;
 
 static void terminateApp()
 {
+	visualContext.reset();
+
 	if (device)
 	{
 		queue = VK_NULL_HANDLE;
@@ -106,8 +110,10 @@ int main(int argc, char* argv[])
 	// Engine initialization.
 	//
 
-	if (!vkts::engineInit())
+	if (!vkts::engineInit(vkts::visualDispatchMessages))
 	{
+		terminateApp();
+
 		return -1;
 	}
 
@@ -123,6 +129,8 @@ int main(int argc, char* argv[])
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not gather needed instance extensions.");
 
+		terminateApp();
+
 		return -1;
 	}
 
@@ -130,13 +138,15 @@ int main(int argc, char* argv[])
 
 	uint32_t validate = 0;
 
-	if (vkts::commonGetUInt32Parameter(validate, std::string("-v"), argc, argv))
+	if (vkts::parameterGetUInt32(validate, std::string("-v"), argc, argv))
 	{
 		if (validate)
 		{
 			if (!vkts::validationGatherNeededInstanceLayers())
 			{
 				vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not gather needed instance layers.");
+
+				terminateApp();
 
 				return -1;
 			}
@@ -145,13 +155,15 @@ int main(int argc, char* argv[])
 
 	uint32_t debug = 0;
 
-	if (vkts::commonGetUInt32Parameter(debug, std::string("-d"), argc, argv) || true)
+	if (vkts::parameterGetUInt32(debug, std::string("-d"), argc, argv) || true)
 	{
 		if (debug)
 		{
 			if (!vkts::debugGatherNeededInstanceExtensions())
 			{
 				vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not gather needed instance layers.");
+
+				terminateApp();
 
 				return -1;
 			}
@@ -187,6 +199,8 @@ int main(int argc, char* argv[])
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create instance.");
 
+		terminateApp();
+
 		return -1;
 	}
 
@@ -198,12 +212,16 @@ int main(int argc, char* argv[])
 		{
 			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not initialize debug extensions.");
 
+			terminateApp();
+
 			return -1;
 		}
 
 		if (!vkts::debugCreateDebugReportCallback(instance, debug))
 		{
 			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create debug callback.");
+
+			terminateApp();
 
 			return -1;
 		}
@@ -219,6 +237,8 @@ int main(int argc, char* argv[])
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not get physical devices count.");
 
+		terminateApp();
+
 		return -1;
 	}
 
@@ -227,6 +247,8 @@ int main(int argc, char* argv[])
 	if (!allPhysicalDevices.get())
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create physical devices array.");
+
+		terminateApp();
 
 		return -1;
 	}
@@ -237,6 +259,8 @@ int main(int argc, char* argv[])
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not enumerate physical devices.");
 
+		terminateApp();
+
 		return -1;
 	}
 
@@ -244,11 +268,13 @@ int main(int argc, char* argv[])
 
 	uint32_t physicalDeviceIndex = 0;
 
-	if (vkts::commonGetUInt32Parameter(physicalDeviceIndex, std::string("-pd"), argc, argv))
+	if (vkts::parameterGetUInt32(physicalDeviceIndex, std::string("-pd"), argc, argv))
 	{
 		if (physicalDeviceIndex >= physicalDeviceCount)
 		{
 			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Physical device %u does not exist.", physicalDeviceIndex);
+
+			terminateApp();
 
 			return -1;
 		}
@@ -262,6 +288,8 @@ int main(int argc, char* argv[])
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not gather needed device extensions.");
 
+		terminateApp();
+
 		return -1;
 	}
 
@@ -273,6 +301,8 @@ int main(int argc, char* argv[])
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not initialize visual.");
 
+		terminateApp();
+
 		return -1;
 	}
 
@@ -281,6 +311,8 @@ int main(int argc, char* argv[])
 	if (!display.get())
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create display.");
+
+		terminateApp();
 
 		return -1;
 	}
@@ -295,6 +327,8 @@ int main(int argc, char* argv[])
 		{
 			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create window.");
 
+			terminateApp();
+
 			return -1;
 		}
 	}
@@ -306,6 +340,8 @@ int main(int argc, char* argv[])
 	if (!surface.get())
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create surface.");
+
+		terminateApp();
 
 		return -1;
 	}
@@ -322,6 +358,8 @@ int main(int argc, char* argv[])
 	if (!queueFamilyProperties.get())
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not get queue family properties.");
+
+		terminateApp();
 
 		return -1;
 	}
@@ -341,6 +379,8 @@ int main(int argc, char* argv[])
 		{
 			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not get physical device surface support.");
 
+			terminateApp();
+
 			return -1;
 		}
 
@@ -355,6 +395,8 @@ int main(int argc, char* argv[])
 	if (queueFamilyIndex == physicalDeviceQueueFamilyPropertiesCount)
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not find queue family index.");
+
+		terminateApp();
 
 		return -1;
 	}
@@ -391,6 +433,8 @@ int main(int argc, char* argv[])
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create device.");
 
+		terminateApp();
+
 		return -1;
 	}
 
@@ -402,12 +446,25 @@ int main(int argc, char* argv[])
 	// Example setup.
 	//
 
+	visualContext = vkts::visualCreateContext();
+
+	if (!visualContext.get())
+	{
+		terminateApp();
+
+		return -1;
+	}
+
+	//
+
 	// Single threaded application, so it is safe to pass display and window.
-	vkts::IUpdateThreadSP example = vkts::IUpdateThreadSP(new Example(instance, physicalDevice, window->getIndex(), surface, device, queueFamilyIndex, queue));
+	vkts::IUpdateThreadSP example = vkts::IUpdateThreadSP(new Example(instance, physicalDevice, window->getIndex(), visualContext, surface, device, queueFamilyIndex, queue));
 
 	if (!example.get())
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create application.");
+
+		terminateApp();
 
 		return -1;
 	}

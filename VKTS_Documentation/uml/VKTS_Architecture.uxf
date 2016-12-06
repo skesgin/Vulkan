@@ -4,32 +4,21 @@
   <element>
     <id>UMLPackage</id>
     <coordinates>
-      <x>20</x>
-      <y>40</y>
-      <w>960</w>
-      <h>700</h>
-    </coordinates>
-    <panel_attributes>&lt;&lt;Vulkan independent packages&gt;&gt;
-layer=-1</panel_attributes>
-    <additional_attributes/>
-  </element>
-  <element>
-    <id>UMLPackage</id>
-    <coordinates>
-      <x>1000</x>
-      <y>40</y>
-      <w>720</w>
-      <h>700</h>
+      <x>1230</x>
+      <y>30</y>
+      <w>480</w>
+      <h>1100</h>
     </coordinates>
     <panel_attributes>&lt;&lt;Vulkan dependent packages&gt;&gt;
-layer=-1</panel_attributes>
+layer=-2
+bg=red</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>930</x>
-      <y>570</y>
+      <x>1160</x>
+      <y>960</y>
       <w>370</w>
       <h>110</h>
     </coordinates>
@@ -40,181 +29,157 @@ layer=-1</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>370</x>
-      <y>570</y>
-      <w>80</w>
-      <h>110</h>
-    </coordinates>
-    <panel_attributes>lt=.&gt;
-&lt;&lt;import&gt;&gt;</panel_attributes>
-    <additional_attributes>10.0;10.0;10.0;90.0</additional_attributes>
-  </element>
-  <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>1590</x>
-      <y>430</y>
-      <w>80</w>
-      <h>110</h>
-    </coordinates>
-    <panel_attributes>lt=.&gt;
-&lt;&lt;import&gt;&gt;</panel_attributes>
-    <additional_attributes>10.0;10.0;10.0;90.0</additional_attributes>
-  </element>
-  <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>1350</x>
-      <y>290</y>
-      <w>80</w>
-      <h>250</h>
-    </coordinates>
-    <panel_attributes>lt=.&gt;
-&lt;&lt;import&gt;&gt;
-
-
-</panel_attributes>
-    <additional_attributes>10.0;10.0;10.0;230.0</additional_attributes>
-  </element>
-  <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>1350</x>
-      <y>150</y>
-      <w>80</w>
-      <h>110</h>
-    </coordinates>
-    <panel_attributes>lt=.&gt;
-&lt;&lt;import&gt;&gt;</panel_attributes>
-    <additional_attributes>10.0;10.0;10.0;90.0</additional_attributes>
-  </element>
-  <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>690</x>
-      <y>290</y>
-      <w>610</w>
-      <h>110</h>
-    </coordinates>
-    <panel_attributes>lt=.&gt;
-&lt;&lt;import&gt;&gt;</panel_attributes>
-    <additional_attributes>590.0;10.0;590.0;30.0;10.0;30.0;10.0;90.0</additional_attributes>
-  </element>
-  <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>450</x>
-      <y>150</y>
-      <w>850</w>
-      <h>250</h>
-    </coordinates>
-    <panel_attributes>lt=.&gt;
-&lt;&lt;import&gt;&gt;</panel_attributes>
-    <additional_attributes>830.0;10.0;830.0;30.0;10.0;30.0;10.0;230.0</additional_attributes>
-  </element>
-  <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>610</x>
-      <y>430</y>
-      <w>80</w>
-      <h>110</h>
-    </coordinates>
-    <panel_attributes>lt=.&gt;
-&lt;&lt;import&gt;&gt;</panel_attributes>
-    <additional_attributes>10.0;10.0;10.0;90.0</additional_attributes>
-  </element>
-  <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>370</x>
-      <y>430</y>
-      <w>80</w>
-      <h>110</h>
-    </coordinates>
-    <panel_attributes>lt=.&gt;
-&lt;&lt;import&gt;&gt;
-
-</panel_attributes>
-    <additional_attributes>10.0;10.0;10.0;90.0</additional_attributes>
-  </element>
-  <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>370</x>
-      <y>150</y>
-      <w>80</w>
-      <h>250</h>
-    </coordinates>
-    <panel_attributes>lt=.&gt;
-&lt;&lt;import&gt;&gt;</panel_attributes>
-    <additional_attributes>10.0;10.0;10.0;230.0</additional_attributes>
-  </element>
-  <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>130</x>
-      <y>570</y>
-      <w>80</w>
-      <h>110</h>
-    </coordinates>
-    <panel_attributes>lt=.&gt;
-&lt;&lt;import&gt;&gt;</panel_attributes>
-    <additional_attributes>10.0;10.0;10.0;90.0</additional_attributes>
-  </element>
-  <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>860</x>
-      <y>570</y>
-      <w>80</w>
-      <h>110</h>
-    </coordinates>
-    <panel_attributes>lt=.&gt;
-&lt;&lt;import&gt;&gt;</panel_attributes>
-    <additional_attributes>10.0;10.0;10.0;90.0</additional_attributes>
-  </element>
-  <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>130</x>
-      <y>150</y>
+      <x>360</x>
+      <y>680</y>
       <w>80</w>
       <h>390</h>
     </coordinates>
     <panel_attributes>lt=.&gt;
 &lt;&lt;import&gt;&gt;</panel_attributes>
     <additional_attributes>10.0;10.0;10.0;370.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1420</x>
+      <y>820</y>
+      <w>110</w>
+      <h>110</h>
+    </coordinates>
+    <panel_attributes>lt=.&gt;
+&lt;&lt;import&gt;&gt;</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;30.0;90.0;30.0;90.0;90.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1580</x>
+      <y>400</y>
+      <w>80</w>
+      <h>530</h>
+    </coordinates>
+    <panel_attributes>lt=.&gt;
+&lt;&lt;import&gt;&gt;
+
+
+</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;510.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>440</x>
+      <y>260</y>
+      <w>350</w>
+      <h>250</h>
+    </coordinates>
+    <panel_attributes>lt=.&gt;
+&lt;&lt;import&gt;&gt;</panel_attributes>
+    <additional_attributes>330.0;10.0;330.0;30.0;10.0;30.0;10.0;230.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>600</x>
+      <y>540</y>
+      <w>80</w>
+      <h>110</h>
+    </coordinates>
+    <panel_attributes>lt=.&gt;
+&lt;&lt;import&gt;&gt;</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;90.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>360</x>
+      <y>540</y>
+      <w>80</w>
+      <h>110</h>
+    </coordinates>
+    <panel_attributes>lt=.&gt;
+&lt;&lt;import&gt;&gt;
+
+</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;90.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>360</x>
+      <y>120</y>
+      <w>80</w>
+      <h>390</h>
+    </coordinates>
+    <panel_attributes>lt=.&gt;
+&lt;&lt;import&gt;&gt;</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;370.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>120</x>
+      <y>680</y>
+      <w>80</w>
+      <h>390</h>
+    </coordinates>
+    <panel_attributes>lt=.&gt;
+&lt;&lt;import&gt;&gt;</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;370.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>850</x>
+      <y>960</y>
+      <w>80</w>
+      <h>110</h>
+    </coordinates>
+    <panel_attributes>lt=.&gt;
+&lt;&lt;import&gt;&gt;</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;90.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>120</x>
+      <y>120</y>
+      <w>80</w>
+      <h>530</h>
+    </coordinates>
+    <panel_attributes>lt=.&gt;
+&lt;&lt;import&gt;&gt;</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;510.0</additional_attributes>
   </element>
   <element>
     <id>UMLPackage</id>
     <coordinates>
       <x>0</x>
       <y>0</y>
-      <w>1740</w>
-      <h>760</h>
+      <w>1720</w>
+      <h>1140</h>
     </coordinates>
     <panel_attributes>VKTS Engine
-layer=-2</panel_attributes>
+layer=-3</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>860</x>
-      <y>150</y>
+      <x>720</x>
+      <y>120</y>
       <w>80</w>
-      <h>390</h>
+      <h>810</h>
     </coordinates>
     <panel_attributes>lt=.&gt;
 &lt;&lt;import&gt;&gt;</panel_attributes>
-    <additional_attributes>10.0;10.0;10.0;370.0</additional_attributes>
+    <additional_attributes>10.0;10.0;10.0;790.0</additional_attributes>
   </element>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>40</x>
-      <y>100</y>
+      <x>30</x>
+      <y>70</y>
       <w>920</w>
       <h>60</h>
     </coordinates>
@@ -225,8 +190,8 @@ bg=light_gray</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>40</x>
-      <y>520</y>
+      <x>30</x>
+      <y>630</y>
       <w>200</w>
       <h>60</h>
     </coordinates>
@@ -237,9 +202,9 @@ bg=light_gray</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>40</x>
-      <y>660</y>
-      <w>920</w>
+      <x>30</x>
+      <y>1050</y>
+      <w>1160</w>
       <h>60</h>
     </coordinates>
     <panel_attributes>VKTS Core
@@ -249,8 +214,8 @@ bg=light_gray</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>280</x>
-      <y>380</y>
+      <x>270</x>
+      <y>490</y>
       <w>200</w>
       <h>60</h>
     </coordinates>
@@ -261,8 +226,8 @@ bg=light_gray</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>280</x>
-      <y>520</y>
+      <x>270</x>
+      <y>630</y>
       <w>440</w>
       <h>60</h>
     </coordinates>
@@ -273,8 +238,8 @@ bg=light_gray</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>520</x>
-      <y>380</y>
+      <x>510</x>
+      <y>490</y>
       <w>200</w>
       <h>60</h>
     </coordinates>
@@ -285,9 +250,9 @@ bg=light_gray</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>760</x>
-      <y>520</y>
-      <w>260</w>
+      <x>510</x>
+      <y>910</y>
+      <w>940</w>
       <h>60</h>
     </coordinates>
     <panel_attributes>VKTS Window
@@ -297,85 +262,194 @@ bg=light_gray</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>1020</x>
-      <y>520</y>
+      <x>1490</x>
+      <y>910</y>
       <w>200</w>
       <h>60</h>
     </coordinates>
-    <panel_attributes>VKTS Window
-bg=red</panel_attributes>
+    <panel_attributes>VKTS VulkanWrapper
+bg=light_gray</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>1260</x>
-      <y>520</y>
+      <x>1250</x>
+      <y>770</y>
+      <w>200</w>
+      <h>60</h>
+    </coordinates>
+    <panel_attributes>VKTS VulkanWindow
+bg=light_gray</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1250</x>
+      <y>350</y>
       <w>440</w>
       <h>60</h>
     </coordinates>
-    <panel_attributes>VKTS Vulkan
-bg=red</panel_attributes>
+    <panel_attributes>VKTS VulkanComposition
+bg=light_gray</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>1500</x>
-      <y>380</y>
+      <x>1250</x>
+      <y>70</y>
       <w>200</w>
       <h>60</h>
     </coordinates>
-    <panel_attributes>VKTS WSI
-bg=red</panel_attributes>
+    <panel_attributes>VKTS VulkanScenegraph
+bg=light_gray</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>1260</x>
-      <y>240</y>
-      <w>440</w>
-      <h>60</h>
-    </coordinates>
-    <panel_attributes>VKTS VulkanObject
-bg=red</panel_attributes>
-    <additional_attributes/>
-  </element>
-  <element>
-    <id>UMLClass</id>
-    <coordinates>
-      <x>1260</x>
-      <y>100</y>
+      <x>1490</x>
+      <y>70</y>
       <w>200</w>
       <h>60</h>
     </coordinates>
-    <panel_attributes>VKTS Scenegraph
-bg=red</panel_attributes>
-    <additional_attributes/>
-  </element>
-  <element>
-    <id>UMLClass</id>
-    <coordinates>
-      <x>1500</x>
-      <y>100</y>
-      <w>200</w>
-      <h>60</h>
-    </coordinates>
-    <panel_attributes>VKTS Font
-bg=red</panel_attributes>
+    <panel_attributes>VKTS VulkanGui
+bg=light_gray</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>1590</x>
-      <y>150</y>
+      <x>1580</x>
+      <y>120</y>
+      <w>80</w>
+      <h>250</h>
+    </coordinates>
+    <panel_attributes>lt=.&gt;
+&lt;&lt;import&gt;&gt;</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;230.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLPackage</id>
+    <coordinates>
+      <x>10</x>
+      <y>30</y>
+      <w>1200</w>
+      <h>1100</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;Vulkan independent packages&gt;&gt;
+layer=-2</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLPackage</id>
+    <coordinates>
+      <x>20</x>
+      <y>740</y>
+      <w>1440</w>
+      <h>380</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;Platform dependent packages&gt;&gt;
+layer=-1
+bg=blue</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>750</x>
+      <y>210</y>
+      <w>200</w>
+      <h>60</h>
+    </coordinates>
+    <panel_attributes>VKTS Scenegraph
+bg=light_gray</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>920</x>
+      <y>120</y>
+      <w>370</w>
+      <h>110</h>
+    </coordinates>
+    <panel_attributes>lt=.&gt;
+&lt;&lt;import&gt;&gt;</panel_attributes>
+    <additional_attributes>350.0;10.0;350.0;30.0;10.0;30.0;10.0;90.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>680</x>
+      <y>400</y>
+      <w>610</w>
+      <h>110</h>
+    </coordinates>
+    <panel_attributes>lt=.&gt;
+&lt;&lt;import&gt;&gt;</panel_attributes>
+    <additional_attributes>590.0;10.0;590.0;30.0;10.0;30.0;10.0;90.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>920</x>
+      <y>260</y>
+      <w>370</w>
+      <h>110</h>
+    </coordinates>
+    <panel_attributes>lt=.&gt;
+&lt;&lt;import&gt;&gt;</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;50.0;350.0;50.0;350.0;90.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1340</x>
+      <y>820</y>
       <w>80</w>
       <h>110</h>
     </coordinates>
     <panel_attributes>lt=.&gt;
 &lt;&lt;import&gt;&gt;</panel_attributes>
     <additional_attributes>10.0;10.0;10.0;90.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>990</x>
+      <y>210</y>
+      <w>200</w>
+      <h>60</h>
+    </coordinates>
+    <panel_attributes>VKTS Gui
+bg=light_gray</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1160</x>
+      <y>120</y>
+      <w>370</w>
+      <h>110</h>
+    </coordinates>
+    <panel_attributes>lt=.&gt;
+&lt;&lt;import&gt;&gt;</panel_attributes>
+    <additional_attributes>350.0;10.0;350.0;50.0;10.0;50.0;10.0;90.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1160</x>
+      <y>260</y>
+      <w>150</w>
+      <h>110</h>
+    </coordinates>
+    <panel_attributes>lt=.&gt;
+&lt;&lt;import&gt;&gt;</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;30.0;130.0;30.0;130.0;90.0</additional_attributes>
   </element>
 </diagram>

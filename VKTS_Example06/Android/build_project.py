@@ -45,6 +45,7 @@ copy("../../VKTS_Binaries/shader/SPIR/V/phong_skinning.vert.spv", "./assets/shad
 copy("../../VKTS_Binaries/shader/SPIR/V/phong_skinning.frag.spv", "./assets/shader/SPIR/V/")
 copy("../../VKTS_Binaries/astro_boy/*.vkts", "./assets/astro_boy/")
 copy("../../VKTS_Binaries/astro_boy/*.tga", "./assets/astro_boy/")
+copy("../../VKTS_Binaries/cache/astro_boy/*.tga", "./assets/cache/astro_boy/")
 
 print("Building project")
 

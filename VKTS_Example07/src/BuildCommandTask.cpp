@@ -26,7 +26,7 @@
 
 #include "BuildCommandTask.hpp"
 
-vkts::Overwrite* BuildCommandTask::overwrite = nullptr;
+vkts::OverwriteDraw* BuildCommandTask::overwrite = nullptr;
 
 VkBool32 BuildCommandTask::execute()
 {
@@ -47,7 +47,7 @@ VkBool32 BuildCommandTask::execute()
     // Update / transform the scene.
     if (scene.get())
     {
-        scene->updateRecursive(updateContext, objectOffset, objectStep);
+        scene->updateTransformRecursive(updateContext.getDeltaTime(), updateContext.getDeltaTicks(), updateContext.getTickTime(), objectOffset, objectStep);
     }
 
     //
@@ -84,7 +84,7 @@ VkBool32 BuildCommandTask::execute()
 
     if (scene.get())
     {
-        scene->bindDrawIndexedRecursive(cmdBuffer, allGraphicsPipelines, overwrite, 0, objectOffset, objectStep);
+        scene->drawRecursive(cmdBuffer, allGraphicsPipelines, overwrite, 0, objectOffset, objectStep);
     }
 
     vkEndCommandBuffer(cmdBuffer->getCommandBuffer());
@@ -98,11 +98,11 @@ VkBool32 BuildCommandTask::execute()
 	return VK_TRUE;
 }
 
-BuildCommandTask::BuildCommandTask(const uint64_t id, const vkts::IUpdateThreadContext& updateContext, const vkts::IInitialResourcesSP& initialResources, const vkts::SmartPointerVector<vkts::IGraphicsPipelineSP>& allGraphicsPipelines, const vkts::ISceneSP& scene, const uint32_t& objectOffset, const uint32_t& objectStep) :
-	ITask(id), updateContext(updateContext), initialResources(initialResources), allGraphicsPipelines(allGraphicsPipelines), scene(scene), objectOffset(objectOffset), objectStep(objectStep), commandBufferInheritanceInfo(nullptr), extent{0, 0}, commandPool(nullptr), cmdBuffer(nullptr)
+BuildCommandTask::BuildCommandTask(const uint64_t id, const vkts::IUpdateThreadContext& updateContext, const vkts::IContextObjectSP& contextObject, const vkts::SmartPointerVector<vkts::IGraphicsPipelineSP>& allGraphicsPipelines, const vkts::ISceneSP& scene, const uint32_t& objectOffset, const uint32_t& objectStep) :
+	ITask(id), updateContext(updateContext), contextObject(contextObject), allGraphicsPipelines(allGraphicsPipelines), scene(scene), objectOffset(objectOffset), objectStep(objectStep), commandBufferInheritanceInfo(nullptr), extent{0, 0}, commandPool(nullptr), cmdBuffer(nullptr)
 {
 	// This pool will contain secondary command buffers, which will be reset.
-	commandPool = vkts::commandPoolCreate(initialResources->getDevice()->getDevice(), VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT, initialResources->getQueue()->getQueueFamilyIndex());
+	commandPool = vkts::commandPoolCreate(contextObject->getDevice()->getDevice(), VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT, contextObject->getQueue()->getQueueFamilyIndex());
 
 	if (!commandPool.get())
 	{
@@ -111,7 +111,7 @@ BuildCommandTask::BuildCommandTask(const uint64_t id, const vkts::IUpdateThreadC
 
 	//
 
-	cmdBuffer = vkts::commandBuffersCreate(initialResources->getDevice()->getDevice(), commandPool->getCmdPool(), VK_COMMAND_BUFFER_LEVEL_SECONDARY, 1);
+	cmdBuffer = vkts::commandBuffersCreate(contextObject->getDevice()->getDevice(), commandPool->getCmdPool(), VK_COMMAND_BUFFER_LEVEL_SECONDARY, 1);
 
 	if (!cmdBuffer.get())
 	{
@@ -154,7 +154,7 @@ VkCommandBuffer BuildCommandTask::getCommandBuffer() const
 	return VK_NULL_HANDLE;
 }
 
-void BuildCommandTask::setOverwrite(vkts::Overwrite* overwrite)
+void BuildCommandTask::setOverwrite(vkts::OverwriteDraw* overwrite)
 {
     BuildCommandTask::overwrite = overwrite;
 }

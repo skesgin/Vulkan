@@ -1,4 +1,7 @@
 import os
+import subprocess
+import sys
+import threading
 
 ####################
 #
@@ -6,6 +9,21 @@ import os
 #
 ####################
         
+class BuildThread (threading.Thread):
+
+    def __init__(self, buildDirectory, buildOption):
+        threading.Thread.__init__(self)
+        self.buildDirectory = buildDirectory
+        self.buildOption = buildOption
+
+    def run(self):
+        print("Processing '%s' ..." % (self.buildDirectory))
+
+        directory = os.getcwd() + "/" + self.buildDirectory + "/Android/jni"
+
+        subprocess.call("ndk-build -C %s" % (directory), shell=True)
+
+        print("Finished '%s'." % (self.buildDirectory))
         
 ####################
 #
@@ -15,20 +33,29 @@ import os
 
 print("Creating and building all Android projects")
 
-os.chdir("VKTS/Android/jni")
+#
 
-print("Processing 'VKTS'")
+allBuildThreads = []
 
-os.system("ndk-build")
+allVKTS = os.listdir()
 
-os.chdir("../../..")
+for package in allVKTS:
+    if package.startswith("VKTS_PKG"):
+        currentBuildThread = BuildThread(package, "")
+        allBuildThreads.append(currentBuildThread)
+        currentBuildThread.start()
+
+for currentBuildThread in allBuildThreads:
+    currentBuildThread.join()
+
+#
 
 allExamples = os.listdir()
 
 for example in allExamples:
-    if example.startswith("VKTS_Example"):
+    if example.startswith("VKTS_Example") or example.startswith("VKTS_Test"):
     
-        print("Processing '%s'" % (example))    
+        print("Processing '%s' ..." % (example))    
     
         os.chdir(example)
         os.chdir("Android")
@@ -38,17 +65,8 @@ for example in allExamples:
 
         os.chdir("../..")
 
+        print("Finished '%s'." % (example))
+
 allExamples = os.listdir()
 
-for example in allExamples:
-    if example.startswith("VKTS_Test"):
-    
-        print("Processing '%s'" % (example))    
-    
-        os.chdir(example)
-        os.chdir("Android")
-
-        exec(open("create_project.py").read())
-        exec(open("build_project.py").read())
-
-        os.chdir("../..")        
+print("Done.")

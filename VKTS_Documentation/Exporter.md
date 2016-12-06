@@ -1,5 +1,5 @@
-VulKan ToolS (VKTS) Exporter:
------------------------------
+Exporter for the scene file format:
+-----------------------------------
 
 This folder contains the [Blender](http://www.blender.org) exporter for the VKTS scene file format.
 

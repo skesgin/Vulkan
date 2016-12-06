@@ -28,19 +28,25 @@
 
 #include "Example.hpp"
 
-static vkts::IInitialResourcesSP initialResources;
+static vkts::IContextObjectSP contextObject;
 
 static vkts::INativeDisplaySP display;
 
 static vkts::INativeWindowSP window;
 
+static vkts::IVisualContextSP visualContext;
+
 static vkts::ISurfaceSP surface;
 
 static void terminateApp()
 {
-	if (initialResources.get())
+	visualContext.reset();
+
+	//
+
+	if (contextObject.get())
 	{
-		initialResources->destroyDevice();
+		contextObject->destroyDevice();
 	}
 
 	//
@@ -66,15 +72,15 @@ static void terminateApp()
 
 	//
 
-	if (initialResources.get())
+	if (contextObject.get())
 	{
-		vkts::debugDestroyDebugReportCallback(initialResources->getInstance()->getInstance());
+		vkts::debugDestroyDebugReportCallback(contextObject->getInstance()->getInstance());
 
 		//
 
-		initialResources->destroyInstance();
+		contextObject->destroyInstance();
 
-		initialResources.reset();
+		contextObject.reset();
 	}
 
 	//
@@ -88,8 +94,10 @@ int main(int argc, char* argv[])
 	// Engine initialization.
 	//
 
-	if (!vkts::engineInit())
+	if (!vkts::engineInit(vkts::visualDispatchMessages))
 	{
+		terminateApp();
+
 		return -1;
 	}
 
@@ -127,13 +135,15 @@ int main(int argc, char* argv[])
 
 	uint32_t validate = 0;
 
-	if (vkts::commonGetUInt32Parameter(validate, std::string("-v"), argc, argv))
+	if (vkts::parameterGetUInt32(validate, std::string("-v"), argc, argv))
 	{
 		if (validate)
 		{
 			if (!vkts::validationGatherNeededInstanceLayers())
 			{
 				vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not gather needed instance layers.");
+
+				terminateApp();
 
 				return -1;
 			}
@@ -142,13 +152,15 @@ int main(int argc, char* argv[])
 
 	uint32_t debug = 0;
 
-	if (vkts::commonGetUInt32Parameter(debug, std::string("-d"), argc, argv))
+	if (vkts::parameterGetUInt32(debug, std::string("-d"), argc, argv))
 	{
 		if (debug)
 		{
 			if (!vkts::debugGatherNeededInstanceExtensions())
 			{
 				vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not gather needed instance layers.");
+
+				terminateApp();
 
 				return -1;
 			}
@@ -176,12 +188,16 @@ int main(int argc, char* argv[])
 		{
 			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not initialize debug extensions.");
 
+			terminateApp();
+
 			return -1;
 		}
 
 		if (!vkts::debugCreateDebugReportCallback(instance->getInstance(), debug))
 		{
 			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create debug callback.");
+
+			terminateApp();
 
 			return -1;
 		}
@@ -191,7 +207,7 @@ int main(int argc, char* argv[])
 
 	uint32_t physicalDeviceIndex = 0;
 
-	vkts::commonGetUInt32Parameter(physicalDeviceIndex, std::string("-pd"), argc, argv);
+	vkts::parameterGetUInt32(physicalDeviceIndex, std::string("-pd"), argc, argv);
 
 	//
 
@@ -216,6 +232,8 @@ int main(int argc, char* argv[])
 	if (!physicalDeviceFeatures.geometryShader || !physicalDeviceFeatures.tessellationShader)
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Physical device not capable of geometry and tessellation shaders.");
+
+		terminateApp();
 
 		return VK_FALSE;
 	}
@@ -356,9 +374,9 @@ int main(int argc, char* argv[])
 
 	//
 
-	initialResources = vkts::initialResourcesCreate(instance, physicalDevice, device, queue);
+	contextObject = vkts::contextObjectCreate(instance, physicalDevice, device, queue);
 
-	if (!initialResources.get())
+	if (!contextObject.get())
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create initial resources.");
 
@@ -371,8 +389,19 @@ int main(int argc, char* argv[])
 	// Example setup.
 	//
 
+	visualContext = vkts::visualCreateContext();
+
+	if (!visualContext.get())
+	{
+		terminateApp();
+
+		return -1;
+	}
+
+	//
+
 	// Single threaded application, so it is safe to pass display and window.
-	vkts::IUpdateThreadSP example = vkts::IUpdateThreadSP(new Example(initialResources, window->getIndex(), surface));
+	vkts::IUpdateThreadSP example = vkts::IUpdateThreadSP(new Example(contextObject, window->getIndex(), visualContext, surface));
 
 	if (!example.get())
 	{

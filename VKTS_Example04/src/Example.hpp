@@ -51,9 +51,11 @@ class Example: public vkts::IUpdateThread
 
 private:
 
-	const vkts::IInitialResourcesSP initialResources;
+	const vkts::IContextObjectSP contextObject;
 
 	const int32_t windowIndex;
+
+	const vkts::IVisualContextSP visualContext;
 
 	const vkts::ISurfaceSP surface;
 
@@ -74,7 +76,9 @@ private:
 
 	vkts::IPipelineLayoutSP pipelineLayout;
 
-	vkts::IContextSP sceneContext;
+	vkts::ISceneRenderFactorySP renderFactory;
+	vkts::ISceneManagerSP sceneManager;
+	vkts::ISceneFactorySP sceneFactory;
 	vkts::ISceneSP scene;
 
 	vkts::ISwapchainSP swapchain;
@@ -83,7 +87,7 @@ private:
 
 	vkts::SmartPointerVector<vkts::IGraphicsPipelineSP> allGraphicsPipelines;
 
-	vkts::IMemoryImageSP depthTexture;
+	vkts::IImageObjectSP depthTexture;
 	vkts::IImageViewSP depthStencilImageView;
 
     uint32_t swapchainImagesCount;
@@ -102,7 +106,7 @@ private:
 
 	VkBool32 updateDescriptorSets();
 
-	VkBool32 buildScene(const vkts::ICommandBuffersSP& cmdBuffer);
+	VkBool32 buildScene(const vkts::ICommandObjectSP& commandObject);
 
 	VkBool32 buildDepthStencilImageView();
 
@@ -126,7 +130,7 @@ private:
 
 public:
 
-	Example(const vkts::IInitialResourcesSP& initialResources, const int32_t windowIndex, const vkts::ISurfaceSP& surface);
+	Example(const vkts::IContextObjectSP& contextObject, const int32_t windowIndex, const vkts::IVisualContextSP& visualContext, const vkts::ISurfaceSP& surface);
 
 	virtual ~Example();
 

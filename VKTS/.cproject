@@ -6,8 +6,14 @@
 				<externalSettings>
 					<externalSetting>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS_Core"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS_PKG_Core"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS/intel64_Windows_Win32_GNU_Debug"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS_Core/intel64_Windows_Win32_GNU_Debug"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS_PKG_Core/intel64_Windows_Win32_GNU_Debug"/>
 						<entry flags="RESOLVED" kind="libraryFile" name="VKTS" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="VKTS_Core" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="VKTS_PKG_Core" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
 				<extensions>
@@ -22,7 +28,7 @@
 						<toolChain id="cdt.managedbuild.toolchain.gnu.mingw.lib.debug.2040669281" name="MinGW GCC" superClass="cdt.managedbuild.toolchain.gnu.mingw.lib.debug">
 							<targetPlatform id="cdt.managedbuild.target.gnu.platform.mingw.lib.debug.1421957666" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.mingw.lib.debug"/>
 							<builder buildPath="${workspace_loc:/VKTS}/Debug" id="cdt.managedbuild.tool.gnu.builder.mingw.base.765538758" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="CDT Internal Builder" superClass="cdt.managedbuild.tool.gnu.builder.mingw.base"/>
-							<tool id="cdt.managedbuild.tool.gnu.assembler.mingw.lib.debug.2074457193" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.mingw.lib.debug">
+							<tool command="as" commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG} ${OUTPUT_PREFIX}${OUTPUT} ${INPUTS}" id="cdt.managedbuild.tool.gnu.assembler.mingw.lib.debug.2074457193" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.mingw.lib.debug">
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1175479285" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.archiver.mingw.lib.debug.1696555509" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.mingw.lib.debug"/>
@@ -66,7 +72,6 @@
 					</folderInfo>
 					<sourceEntries>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="include"/>
-						<entry excluding="layer0/visual/fn_visual_wayland_test.cpp|layer0/visual/fn_visual_xlib_glfw.cpp|layer0/visual/fn_visual_none.cpp|layer0/visual/fn_visual_x11_glfw.cpp|time_linux.cpp|layer0/wsi/fn_wsi_xlib.cpp|layer0/visual/fn_visual_display.cpp|fn_visual_x11_glfw.cpp|VKTS_visual_x11.cpp|layer0/processor/fn_processor_android.cpp|layer0/visual/fn_visual_android_glfw.cpp|layer0/profile/fn_profile_general.cpp|layer0/processor/fn_processor_linux.cpp|visual_x11_glfw.cpp|layer0/visual/fn_visual_linux_gamepad.cpp|layer0/visual/fn_visual_wayland_linux_key.cpp|VKTS_time_linux.cpp|layer0/wsi/fn_wsi_android.cpp|layer0/visual/fn_visual_android_keys.cpp|layer0/visual/fn_visual_xlib.cpp|layer0/visual/fn_visual_linux.cpp|layer0/visual/fn_visual_android.cpp|layer0/visual/fn_visual_wayland_linux.cpp|layer0/visual/fn_visual_linux_touchpad.cpp|layer0/wsi/fn_wsi_display.cpp|layer0/visual/fn_visual_x11.cpp|layer0/wsi/fn_wsi_wayland.cpp|fn_visual_x11.cpp|layer0/visual/fn_visual_wayland.cpp|layer0/visual/fn_visual_display_linux.cpp|layer0/visual/fn_visual_wayland_key.cpp|layer0/visual/fn_visual_android_key.cpp|layer0/visual/fn_visual_display_linux_key.cpp|layer0/visual/fn_visual_xlib_keys.cpp|layer0/visual/fn_visual_xlib_key.cpp|visual_x11.cpp|VKTS_visual_x11_glfw.cpp|layer0/file/fn_file_linux.cpp|fn_time_linux.cpp|layer0/file/fn_file_android.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -77,8 +82,14 @@
 				<externalSettings>
 					<externalSetting>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS_Core"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS_PKG_Core"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS/intel64_Windows_Win32_GNU_Release"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS_Core/intel64_Windows_Win32_GNU_Release"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS_PKG_Core/intel64_Windows_Win32_GNU_Release"/>
 						<entry flags="RESOLVED" kind="libraryFile" name="VKTS" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="VKTS_Core" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="VKTS_PKG_Core" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
 				<extensions>
@@ -132,7 +143,6 @@
 					</folderInfo>
 					<sourceEntries>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="include"/>
-						<entry excluding="layer0/visual/fn_visual_wayland_test.cpp|layer0/visual/fn_visual_xlib_glfw.cpp|layer0/visual/fn_visual_none.cpp|layer0/visual/fn_visual_x11_glfw.cpp|time_linux.cpp|layer0/wsi/fn_wsi_xlib.cpp|layer0/visual/fn_visual_display.cpp|fn_visual_x11_glfw.cpp|VKTS_visual_x11.cpp|layer0/processor/fn_processor_android.cpp|layer0/visual/fn_visual_android_glfw.cpp|layer0/profile/fn_profile_general.cpp|layer0/processor/fn_processor_linux.cpp|visual_x11_glfw.cpp|layer0/visual/fn_visual_linux_gamepad.cpp|layer0/visual/fn_visual_wayland_linux_key.cpp|VKTS_time_linux.cpp|layer0/wsi/fn_wsi_android.cpp|layer0/visual/fn_visual_android_keys.cpp|layer0/visual/fn_visual_xlib.cpp|layer0/visual/fn_visual_linux.cpp|layer0/visual/fn_visual_android.cpp|layer0/visual/fn_visual_wayland_linux.cpp|layer0/visual/fn_visual_linux_touchpad.cpp|layer0/wsi/fn_wsi_display.cpp|layer0/visual/fn_visual_x11.cpp|layer0/wsi/fn_wsi_wayland.cpp|fn_visual_x11.cpp|layer0/visual/fn_visual_wayland.cpp|layer0/visual/fn_visual_display_linux.cpp|layer0/visual/fn_visual_wayland_key.cpp|layer0/visual/fn_visual_android_key.cpp|layer0/visual/fn_visual_display_linux_key.cpp|layer0/visual/fn_visual_xlib_keys.cpp|layer0/visual/fn_visual_xlib_key.cpp|visual_x11.cpp|VKTS_visual_x11_glfw.cpp|layer0/file/fn_file_linux.cpp|fn_time_linux.cpp|layer0/file/fn_file_android.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -143,9 +153,15 @@
 				<externalSettings>
 					<externalSetting>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS_Core"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS_PKG_Core"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS/x64__Linux__GCC_Debug"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS/intel64_Linux_Xlib_GNU_Debug"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS_Core/intel64_Linux_Xlib_GNU_Debug"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS_PKG_Core/intel64_Linux_Xlib_GNU_Debug"/>
 						<entry flags="RESOLVED" kind="libraryFile" name="VKTS" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="VKTS_Core" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="VKTS_PKG_Core" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
 				<extensions>
@@ -189,7 +205,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="src/layer0/visual/fn_visual_wayland_test.cpp|src/layer0/visual/fn_visual_android.cpp|src/layer0/visual/fn_visual_wayland_linux.cpp|src/layer0/wsi/fn_wsi_wayland.cpp|src/fn_visual_windows_glfw.cpp|src/layer0/visual/fn_visual_win32_glfw.cpp|src/time_windows.cpp|src/layer0/visual/fn_visual_wayland.cpp|src/layer0/visual/fn_visual_display_linux.cpp|src/layer0/visual/fn_visual_android_glfw.cpp|src/VKTS_visual_windows_glfw.cpp|src/layer0/visual/fn_visual_android_key.cpp|src/layer0/visual/fn_visual_display_linux_key.cpp|src/fn_time_windows.cpp|src/layer0/wsi/fn_wsi_win32.cpp|src/layer0/visual/fn_visual_win32_keys.cpp|src/layer0/file/fn_file_windows.cpp|src/layer0/visual/fn_visual_win32.cpp|src/layer0/visual/fn_visual_windows_glfw.cpp|src/fn_visual_windows.cpp|src/layer0/processor/fn_processor_windows.cpp|src/layer0/file/fn_file_android.cpp|src/layer0/wsi/fn_wsi_display.cpp|src/VKTS_visual_windows.cpp|src/layer0/visual/fn_visual_none.cpp|src/layer0/profile/fn_profile_windows.cpp|src/layer0/visual/fn_visual_display.cpp|src/layer0/processor/fn_processor_android.cpp|src/visual_windows.cpp|src/layer0/visual/fn_visual_wayland_key.cpp|src/layer0/visual/fn_visual_win32_key.cpp|src/layer0/visual/fn_visual_windows.cpp|src/visual_windows_glfw.cpp|src/layer0/visual/fn_visual_wayland_linux_key.cpp|src/layer0/wsi/fn_wsi_android.cpp|src/VKTS_time_windows.cpp|src/layer0/visual/fn_visual_android_keys.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="src/layer0/visual/fn_visual_android.cpp|src/layer0/visual/fn_visual_wayland_linux.cpp|src/layer0/wsi/fn_wsi_wayland.cpp|src/fn_visual_windows_glfw.cpp|src/layer0/visual/fn_visual_win32_glfw.cpp|src/time_windows.cpp|src/layer0/visual/fn_visual_wayland.cpp|src/layer0/visual/fn_visual_display_linux.cpp|src/layer0/visual/fn_visual_android_glfw.cpp|src/VKTS_visual_windows_glfw.cpp|src/layer0/visual/fn_visual_android_key.cpp|src/layer0/visual/fn_visual_display_linux_key.cpp|src/fn_time_windows.cpp|src/layer0/wsi/fn_wsi_win32.cpp|src/layer0/visual/fn_visual_win32_keys.cpp|src/layer0/file/fn_file_windows.cpp|src/layer0/visual/fn_visual_win32.cpp|src/core/file/fn_file_windows.cpp|src/layer0/visual/fn_visual_windows_glfw.cpp|src/fn_visual_windows.cpp|src/layer0/processor/fn_processor_windows.cpp|src/core/processor/fn_processor_windows.cpp|src/layer0/file/fn_file_android.cpp|src/layer0/wsi/fn_wsi_display.cpp|src/VKTS_visual_windows.cpp|src/core/file/fn_file_android.cpp|src/layer0/visual/fn_visual_none.cpp|src/layer0/profile/fn_profile_windows.cpp|src/layer0/visual/fn_visual_display.cpp|src/core/profile/fn_profile_windows.cpp|src/layer0/processor/fn_processor_android.cpp|src/visual_windows.cpp|src/core/processor/fn_processor_android.cpp|src/layer0/visual/fn_visual_wayland_test.cpp|src/layer0/visual/fn_visual_wayland_key.cpp|src/layer0/visual/fn_visual_win32_key.cpp|src/layer0/visual/fn_visual_windows.cpp|src/visual_windows_glfw.cpp|src/layer0/visual/fn_visual_wayland_linux_key.cpp|src/layer0/wsi/fn_wsi_android.cpp|src/VKTS_time_windows.cpp|src/layer0/visual/fn_visual_android_keys.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -200,9 +216,15 @@
 				<externalSettings>
 					<externalSetting>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS_Core"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS_PKG_Core"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS/X64__Linux__GCC_Release"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS/intel64_Linux_Xlib_GNU_Release"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS_Core/intel64_Linux_Xlib_GNU_Release"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS_PKG_Core/intel64_Linux_Xlib_GNU_Release"/>
 						<entry flags="RESOLVED" kind="libraryFile" name="VKTS" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="VKTS_Core" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="VKTS_PKG_Core" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
 				<extensions>
@@ -246,263 +268,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="src/layer0/visual/fn_visual_wayland_test.cpp|src/layer0/visual/fn_visual_android.cpp|src/layer0/visual/fn_visual_wayland_linux.cpp|src/layer0/wsi/fn_wsi_wayland.cpp|src/fn_visual_windows_glfw.cpp|src/layer0/visual/fn_visual_win32_glfw.cpp|src/time_windows.cpp|src/layer0/visual/fn_visual_wayland.cpp|src/layer0/visual/fn_visual_display_linux.cpp|src/layer0/visual/fn_visual_android_glfw.cpp|src/VKTS_visual_windows_glfw.cpp|src/layer0/visual/fn_visual_android_key.cpp|src/layer0/visual/fn_visual_display_linux_key.cpp|src/fn_time_windows.cpp|src/layer0/wsi/fn_wsi_win32.cpp|src/layer0/visual/fn_visual_win32_keys.cpp|src/layer0/file/fn_file_windows.cpp|src/layer0/visual/fn_visual_win32.cpp|src/layer0/visual/fn_visual_windows_glfw.cpp|src/fn_visual_windows.cpp|src/layer0/processor/fn_processor_windows.cpp|src/layer0/file/fn_file_android.cpp|src/layer0/wsi/fn_wsi_display.cpp|src/VKTS_visual_windows.cpp|src/layer0/visual/fn_visual_none.cpp|src/layer0/profile/fn_profile_windows.cpp|src/layer0/visual/fn_visual_display.cpp|src/layer0/processor/fn_processor_android.cpp|src/visual_windows.cpp|src/layer0/visual/fn_visual_wayland_key.cpp|src/layer0/visual/fn_visual_win32_key.cpp|src/layer0/visual/fn_visual_windows.cpp|src/visual_windows_glfw.cpp|src/layer0/visual/fn_visual_wayland_linux_key.cpp|src/layer0/wsi/fn_wsi_android.cpp|src/VKTS_time_windows.cpp|src/layer0/visual/fn_visual_android_keys.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
-					</sourceEntries>
-				</configuration>
-			</storageModule>
-			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
-		</cconfiguration>
-		<cconfiguration id="cdt.managedbuild.config.gnu.mingw.lib.debug.973422307.1527190138.1597911203">
-			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.mingw.lib.debug.973422307.1527190138.1597911203" moduleId="org.eclipse.cdt.core.settings" name="intel64_Linux_None_GNU_Debug">
-				<externalSettings>
-					<externalSetting>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS/intel64_Linux_None_GNU_Debug"/>
-						<entry flags="RESOLVED" kind="libraryFile" name="VKTS" srcPrefixMapping="" srcRootPath=""/>
-					</externalSetting>
-				</externalSettings>
-				<extensions>
-					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
-					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
-				</extensions>
-			</storageModule>
-			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactExtension="a" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.staticLib" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.staticLib,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="rm -rf" description="" errorParsers="org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GASErrorParser;org.eclipse.cdt.core.CWDLocator;org.eclipse.cdt.core.GmakeErrorParser" id="cdt.managedbuild.config.gnu.mingw.lib.debug.973422307.1527190138.1597911203" name="intel64_Linux_None_GNU_Debug" parent="cdt.managedbuild.config.gnu.mingw.lib.debug">
-					<folderInfo id="cdt.managedbuild.config.gnu.mingw.lib.debug.973422307.1527190138.1597911203." name="/" resourcePath="">
-						<toolChain errorParsers="" id="cdt.managedbuild.toolchain.gnu.base.547374618" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.base">
-							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="cdt.managedbuild.target.gnu.platform.base.1465807844" name="Debug Platform" osList="linux,hpux,aix,qnx" superClass="cdt.managedbuild.target.gnu.platform.base"/>
-							<builder buildPath="${workspace_loc:/VKTS}/x64__Linux__GCC_Debug" errorParsers="org.eclipse.cdt.core.GmakeErrorParser;org.eclipse.cdt.core.CWDLocator" id="cdt.managedbuild.target.gnu.builder.base.512618880" keepEnvironmentInBuildfile="false" name="Gnu Make Builder" superClass="cdt.managedbuild.target.gnu.builder.base"/>
-							<tool errorParsers="" id="cdt.managedbuild.tool.gnu.archiver.base.1226464397" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base"/>
-							<tool errorParsers="org.eclipse.cdt.core.GCCErrorParser" id="cdt.managedbuild.tool.gnu.cpp.compiler.base.1566276383" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.base">
-								<option id="gnu.cpp.compiler.option.include.paths.1430272008" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_External/include}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS/include}&quot;"/>
-								</option>
-								<option id="gnu.cpp.compiler.option.optimization.level.208983014" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
-								<option id="gnu.cpp.compiler.option.debugging.level.282878949" name="Debug Level" superClass="gnu.cpp.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
-								<option id="gnu.cpp.compiler.option.other.other.433783025" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" useByScannerDiscovery="false" value="-c -fmessage-length=0 -std=c++11 -m64" valueType="string"/>
-								<option id="gnu.cpp.compiler.option.dialect.std.546329767" name="Language standard" superClass="gnu.cpp.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.cpp.compiler.dialect.default" valueType="enumerated"/>
-								<option id="gnu.cpp.compiler.option.preprocessor.def.1630304747" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
-									<listOptionValue builtIn="false" value="VKTS_NO_VISUAL"/>
-								</option>
-								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1394372540" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
-							</tool>
-							<tool errorParsers="org.eclipse.cdt.core.GCCErrorParser" id="cdt.managedbuild.tool.gnu.c.compiler.base.1777075800" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.base">
-								<option defaultValue="gnu.c.optimization.level.none" id="gnu.c.compiler.option.optimization.level.635796244" name="Optimization Level" superClass="gnu.c.compiler.option.optimization.level" useByScannerDiscovery="false" valueType="enumerated"/>
-								<option id="gnu.c.compiler.option.debugging.level.1059713070" name="Debug Level" superClass="gnu.c.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.c.debugging.level.max" valueType="enumerated"/>
-								<option id="gnu.c.compiler.option.misc.other.1292606058" name="Other flags" superClass="gnu.c.compiler.option.misc.other" useByScannerDiscovery="false" value="-c -fmessage-length=0" valueType="string"/>
-								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1385338348" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
-							</tool>
-							<tool id="cdt.managedbuild.tool.gnu.c.linker.base.1842835439" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.base"/>
-							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.base.1705046662" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.base"/>
-							<tool errorParsers="org.eclipse.cdt.core.GASErrorParser" id="cdt.managedbuild.tool.gnu.assembler.base.500510899" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.base">
-								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.628233816" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
-							</tool>
-						</toolChain>
-					</folderInfo>
-					<sourceEntries>
-						<entry excluding="src/layer0/visual/fn_visual_wayland_test.cpp|src/layer0/visual/fn_visual_android.cpp|src/layer0/visual/fn_visual_linux_touchpad.cpp|src/layer0/wsi/fn_wsi_wayland.cpp|src/layer0/wsi/SwapChain.cpp|src/layer0/visual/fn_visual_win32_glfw.cpp|src/layer0/visual/fn_visual_wayland.cpp|src/layer0/visual/fn_visual_display_linux.cpp|src/layer0/visual/fn_visual_android_glfw.cpp|src/VKTS_visual_windows_glfw.cpp|src/fn_time_windows.cpp|src/layer0/wsi/fn_wsi_win32.cpp|src/layer0/visual/fn_visual_xlib_key.cpp|src/layer0/visual/fn_visual_win32_keys.cpp|src/layer0/file/fn_file_windows.cpp|src/fn_visual_windows.cpp|src/layer0/processor/fn_processor_windows.cpp|src/layer0/file/fn_file_android.cpp|src/VKTS_visual_windows.cpp|src/layer0/visual/fn_visual_xlib_glfw.cpp|src/layer0/visual/fn_visual_x11_glfw.cpp|src/layer0/wsi/fn_wsi.cpp|src/layer0/profile/fn_profile_windows.cpp|src/layer0/wsi/fn_wsi_xlib.cpp|src/layer0/processor/fn_processor_android.cpp|src/layer0/visual/fn_visual_wayland_key.cpp|src/layer0/visual/fn_visual_win32_key.cpp|src/layer0/visual/fn_visual_linux_gamepad.cpp|src/layer0/visual/fn_visual_wayland_linux_key.cpp|src/layer0/visual/fn_visual_xlib.cpp|src/layer0/visual/fn_visual_wayland_linux.cpp|src/layer0/visual/fn_visual_x11.cpp|src/fn_visual_windows_glfw.cpp|src/time_windows.cpp|src/layer0/visual/fn_visual_android_key.cpp|src/layer0/visual/fn_visual_display_linux_key.cpp|src/layer0/visual/fn_visual_win32.cpp|src/layer0/visual/fn_visual_windows_glfw.cpp|src/layer0/wsi/Surface.cpp|src/layer0/visual/fn_visual_linux.cpp|src/layer0/wsi/fn_wsi_display.cpp|src/layer0/wsi/Swapchain.cpp|src/layer0/visual/fn_visual_display.cpp|src/visual_windows.cpp|src/layer0/visual/fn_visual_xlib_keys.cpp|src/layer0/visual/fn_visual_windows.cpp|src/visual_windows_glfw.cpp|src/layer0/wsi/fn_wsi_android.cpp|src/VKTS_time_windows.cpp|src/layer0/visual/fn_visual_android_keys.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
-					</sourceEntries>
-				</configuration>
-			</storageModule>
-			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
-		</cconfiguration>
-		<cconfiguration id="cdt.managedbuild.config.gnu.mingw.lib.release.1736187182.1295245054.1140568886">
-			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.mingw.lib.release.1736187182.1295245054.1140568886" moduleId="org.eclipse.cdt.core.settings" name="intel64_Linux_None_GNU_Release">
-				<externalSettings>
-					<externalSetting>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS/intel64_Linux_None_GNU_Release"/>
-						<entry flags="RESOLVED" kind="libraryFile" name="VKTS" srcPrefixMapping="" srcRootPath=""/>
-					</externalSetting>
-				</externalSettings>
-				<extensions>
-					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
-					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
-				</extensions>
-			</storageModule>
-			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactExtension="a" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.staticLib" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.staticLib,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.mingw.lib.release.1736187182.1295245054.1140568886" name="intel64_Linux_None_GNU_Release" parent="cdt.managedbuild.config.gnu.mingw.lib.release">
-					<folderInfo id="cdt.managedbuild.config.gnu.mingw.lib.release.1736187182.1295245054.1140568886." name="/" resourcePath="">
-						<toolChain id="cdt.managedbuild.toolchain.gnu.base.493695446" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.base">
-							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="cdt.managedbuild.target.gnu.platform.base.296435946" name="Debug Platform" osList="linux,hpux,aix,qnx" superClass="cdt.managedbuild.target.gnu.platform.base"/>
-							<builder buildPath="${workspace_loc:/VKTS}/X64__Linux__GCC_Release" id="cdt.managedbuild.target.gnu.builder.base.2017141490" keepEnvironmentInBuildfile="false" name="Gnu Make Builder" superClass="cdt.managedbuild.target.gnu.builder.base"/>
-							<tool id="cdt.managedbuild.tool.gnu.archiver.base.136494290" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base"/>
-							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.base.791801353" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.base">
-								<option id="gnu.cpp.compiler.option.include.paths.2074762007" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_External/include}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS/include}&quot;"/>
-								</option>
-								<option id="gnu.cpp.compiler.option.optimization.level.1997591581" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.most" valueType="enumerated"/>
-								<option id="gnu.cpp.compiler.option.debugging.level.1044789087" name="Debug Level" superClass="gnu.cpp.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.debugging.level.none" valueType="enumerated"/>
-								<option id="gnu.cpp.compiler.option.other.other.306989709" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" useByScannerDiscovery="false" value="-c -fmessage-length=0 -std=c++11 -m64" valueType="string"/>
-								<option id="gnu.cpp.compiler.option.preprocessor.def.1297831618" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
-									<listOptionValue builtIn="false" value="VKTS_NO_VISUAL"/>
-								</option>
-								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1647303079" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
-							</tool>
-							<tool id="cdt.managedbuild.tool.gnu.c.compiler.base.2140788384" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.base">
-								<option defaultValue="gnu.c.optimization.level.most" id="gnu.c.compiler.option.optimization.level.1913360889" name="Optimization Level" superClass="gnu.c.compiler.option.optimization.level" useByScannerDiscovery="false" valueType="enumerated"/>
-								<option id="gnu.c.compiler.option.debugging.level.544706922" name="Debug Level" superClass="gnu.c.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.c.debugging.level.none" valueType="enumerated"/>
-								<option id="gnu.c.compiler.option.misc.other.1019358022" name="Other flags" superClass="gnu.c.compiler.option.misc.other" useByScannerDiscovery="false" value="-c -fmessage-length=0" valueType="string"/>
-								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1617012137" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
-							</tool>
-							<tool id="cdt.managedbuild.tool.gnu.c.linker.base.372765067" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.base"/>
-							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.base.1258246742" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.base"/>
-							<tool id="cdt.managedbuild.tool.gnu.assembler.base.684915019" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.base">
-								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1026884704" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
-							</tool>
-						</toolChain>
-					</folderInfo>
-					<sourceEntries>
-						<entry excluding="src/layer0/visual/fn_visual_wayland_test.cpp|src/layer0/visual/fn_visual_android.cpp|src/layer0/visual/fn_visual_linux_touchpad.cpp|src/layer0/wsi/fn_wsi_wayland.cpp|src/layer0/wsi/SwapChain.cpp|src/layer0/visual/fn_visual_win32_glfw.cpp|src/layer0/visual/fn_visual_wayland.cpp|src/layer0/visual/fn_visual_display_linux.cpp|src/layer0/visual/fn_visual_android_glfw.cpp|src/VKTS_visual_windows_glfw.cpp|src/fn_time_windows.cpp|src/layer0/wsi/fn_wsi_win32.cpp|src/layer0/visual/fn_visual_xlib_key.cpp|src/layer0/visual/fn_visual_win32_keys.cpp|src/layer0/file/fn_file_windows.cpp|src/fn_visual_windows.cpp|src/layer0/processor/fn_processor_windows.cpp|src/layer0/file/fn_file_android.cpp|src/VKTS_visual_windows.cpp|src/layer0/visual/fn_visual_xlib_glfw.cpp|src/layer0/visual/fn_visual_x11_glfw.cpp|src/layer0/wsi/fn_wsi.cpp|src/layer0/profile/fn_profile_windows.cpp|src/layer0/wsi/fn_wsi_xlib.cpp|src/layer0/processor/fn_processor_android.cpp|src/layer0/visual/fn_visual_wayland_key.cpp|src/layer0/visual/fn_visual_win32_key.cpp|src/layer0/visual/fn_visual_linux_gamepad.cpp|src/layer0/visual/fn_visual_wayland_linux_key.cpp|src/layer0/visual/fn_visual_xlib.cpp|src/layer0/visual/fn_visual_wayland_linux.cpp|src/layer0/visual/fn_visual_x11.cpp|src/fn_visual_windows_glfw.cpp|src/time_windows.cpp|src/layer0/visual/fn_visual_android_key.cpp|src/layer0/visual/fn_visual_display_linux_key.cpp|src/layer0/visual/fn_visual_win32.cpp|src/layer0/visual/fn_visual_windows_glfw.cpp|src/layer0/wsi/Surface.cpp|src/layer0/visual/fn_visual_linux.cpp|src/layer0/wsi/fn_wsi_display.cpp|src/layer0/wsi/Swapchain.cpp|src/layer0/visual/fn_visual_display.cpp|src/visual_windows.cpp|src/layer0/visual/fn_visual_xlib_keys.cpp|src/layer0/visual/fn_visual_windows.cpp|src/visual_windows_glfw.cpp|src/layer0/wsi/fn_wsi_android.cpp|src/VKTS_time_windows.cpp|src/layer0/visual/fn_visual_android_keys.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
-					</sourceEntries>
-				</configuration>
-			</storageModule>
-			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
-		</cconfiguration>
-		<cconfiguration id="cdt.managedbuild.config.gnu.mingw.lib.debug.1670548533.1332824860.100449548">
-			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.mingw.lib.debug.1670548533.1332824860.100449548" moduleId="org.eclipse.cdt.core.settings" name="intel64_Windows_None_GNU_Debug">
-				<externalSettings>
-					<externalSetting>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS/intel64_Windows_None_GNU_Debug"/>
-						<entry flags="RESOLVED" kind="libraryFile" name="VKTS" srcPrefixMapping="" srcRootPath=""/>
-					</externalSetting>
-				</externalSettings>
-				<extensions>
-					<extension id="org.eclipse.cdt.core.PE" point="org.eclipse.cdt.core.BinaryParser"/>
-					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-				</extensions>
-			</storageModule>
-			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactExtension="a" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.staticLib" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.staticLib,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.mingw.lib.debug.1670548533.1332824860.100449548" name="intel64_Windows_None_GNU_Debug" parent="cdt.managedbuild.config.gnu.mingw.lib.debug">
-					<folderInfo id="cdt.managedbuild.config.gnu.mingw.lib.debug.1670548533.1332824860.100449548." name="/" resourcePath="">
-						<toolChain id="cdt.managedbuild.toolchain.gnu.mingw.lib.debug.1828823151" name="MinGW GCC" superClass="cdt.managedbuild.toolchain.gnu.mingw.lib.debug">
-							<targetPlatform id="cdt.managedbuild.target.gnu.platform.mingw.lib.debug.2065007876" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.mingw.lib.debug"/>
-							<builder buildPath="${workspace_loc:/VKTS}/Debug" id="cdt.managedbuild.tool.gnu.builder.mingw.base.2105605900" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="CDT Internal Builder" superClass="cdt.managedbuild.tool.gnu.builder.mingw.base"/>
-							<tool id="cdt.managedbuild.tool.gnu.assembler.mingw.lib.debug.2065600187" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.mingw.lib.debug">
-								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.2083205791" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
-							</tool>
-							<tool id="cdt.managedbuild.tool.gnu.archiver.mingw.lib.debug.1121905859" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.mingw.lib.debug"/>
-							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.mingw.lib.debug.2089720609" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.mingw.lib.debug">
-								<option id="gnu.cpp.compiler.mingw.lib.debug.option.optimization.level.1977885263" name="Optimization Level" superClass="gnu.cpp.compiler.mingw.lib.debug.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
-								<option id="gnu.cpp.compiler.mingw.lib.debug.option.debugging.level.788288273" name="Debug Level" superClass="gnu.cpp.compiler.mingw.lib.debug.option.debugging.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
-								<option id="gnu.cpp.compiler.option.dialect.std.23007941" name="Language standard" superClass="gnu.cpp.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.cpp.compiler.dialect.default" valueType="enumerated"/>
-								<option id="gnu.cpp.compiler.option.other.other.701996135" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" useByScannerDiscovery="false" value="-c -fmessage-length=0 -std=c++11 -m64" valueType="string"/>
-								<option id="gnu.cpp.compiler.option.include.paths.1473329949" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${env_var:VULKAN_SDK}\Include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_External/include}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS/include}&quot;"/>
-								</option>
-								<option id="gnu.cpp.compiler.option.preprocessor.def.1215269940" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
-									<listOptionValue builtIn="false" value="VKTS_NO_VISUAL"/>
-								</option>
-								<option id="gnu.cpp.compiler.option.warnings.pedantic.1605008528" name="Pedantic (-pedantic)" superClass="gnu.cpp.compiler.option.warnings.pedantic" useByScannerDiscovery="false" value="false" valueType="boolean"/>
-								<option id="gnu.cpp.compiler.option.warnings.nowarn.1965054688" name="Inhibit all warnings (-w)" superClass="gnu.cpp.compiler.option.warnings.nowarn" useByScannerDiscovery="false" value="false" valueType="boolean"/>
-								<option id="gnu.cpp.compiler.option.warnings.extrawarn.1783362308" name="Extra warnings (-Wextra)" superClass="gnu.cpp.compiler.option.warnings.extrawarn" useByScannerDiscovery="false" value="false" valueType="boolean"/>
-								<option id="gnu.cpp.compiler.option.warnings.wconversion.1640719738" name="Implicit conversion warnings (-Wconversion)" superClass="gnu.cpp.compiler.option.warnings.wconversion" useByScannerDiscovery="false" value="false" valueType="boolean"/>
-								<option id="gnu.cpp.compiler.option.warnings.syntax.1836633266" name="Check syntax only (-fsyntax-only)" superClass="gnu.cpp.compiler.option.warnings.syntax" useByScannerDiscovery="false" value="false" valueType="boolean"/>
-								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1711973797" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
-							</tool>
-							<tool id="cdt.managedbuild.tool.gnu.c.compiler.mingw.lib.debug.1132448317" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.mingw.lib.debug">
-								<option defaultValue="gnu.c.optimization.level.none" id="gnu.c.compiler.mingw.lib.debug.option.optimization.level.1316913716" name="Optimization Level" superClass="gnu.c.compiler.mingw.lib.debug.option.optimization.level" useByScannerDiscovery="false" valueType="enumerated"/>
-								<option id="gnu.c.compiler.mingw.lib.debug.option.debugging.level.78344840" name="Debug Level" superClass="gnu.c.compiler.mingw.lib.debug.option.debugging.level" useByScannerDiscovery="false" value="gnu.c.debugging.level.max" valueType="enumerated"/>
-								<option id="gnu.c.compiler.option.dialect.std.689522731" name="Language standard" superClass="gnu.c.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.c.compiler.dialect.default" valueType="enumerated"/>
-								<option id="gnu.c.compiler.option.misc.other.512295847" name="Other flags" superClass="gnu.c.compiler.option.misc.other" useByScannerDiscovery="false" value="-c -fmessage-length=0" valueType="string"/>
-								<option id="gnu.c.compiler.option.include.paths.652003273" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false"/>
-								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1009181075" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
-							</tool>
-							<tool id="cdt.managedbuild.tool.gnu.c.linker.mingw.base.1209281722" name="MinGW C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.mingw.base">
-								<option defaultValue="true" id="gnu.c.link.option.shared.800307881" name="Shared (-shared)" superClass="gnu.c.link.option.shared" valueType="boolean"/>
-							</tool>
-							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.mingw.base.283451322" name="MinGW C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.mingw.base">
-								<option defaultValue="true" id="gnu.cpp.link.option.shared.503901514" name="Shared (-shared)" superClass="gnu.cpp.link.option.shared" valueType="boolean"/>
-								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1063627961" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
-									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
-									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
-								</inputType>
-							</tool>
-						</toolChain>
-					</folderInfo>
-					<sourceEntries>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="include"/>
-						<entry excluding="layer0/visual/fn_visual_wayland_test.cpp|layer0/visual/fn_visual_xlib_glfw.cpp|time_linux.cpp|layer0/wsi/fn_wsi.cpp|layer0/wsi/fn_wsi_xlib.cpp|layer0/visual/fn_visual_display.cpp|fn_visual_x11_glfw.cpp|VKTS_visual_x11.cpp|layer0/profile/fn_profile_general.cpp|visual_x11_glfw.cpp|layer0/visual/fn_visual_win32_key.cpp|layer0/visual/fn_visual_wayland_linux_key.cpp|layer0/visual/fn_visual_windows_glfw.cpp|layer0/wsi/Surface.cpp|layer0/visual/fn_visual_xlib.cpp|layer0/visual/fn_visual_wayland_linux.cpp|layer0/wsi/fn_wsi_display.cpp|layer0/visual/fn_visual_x11.cpp|layer0/wsi/fn_wsi_wayland.cpp|layer0/visual/fn_visual_win32_glfw.cpp|fn_visual_x11.cpp|layer0/visual/fn_visual_wayland.cpp|layer0/visual/fn_visual_android_key.cpp|layer0/visual/fn_visual_display_linux_key.cpp|layer0/visual/fn_visual_xlib_keys.cpp|layer0/visual/fn_visual_xlib_key.cpp|visual_x11.cpp|layer0/visual/fn_visual_win32.cpp|layer0/wsi/Swapchain.cpp|layer0/visual/fn_visual_x11_glfw.cpp|layer0/processor/fn_processor_android.cpp|layer0/visual/fn_visual_android_glfw.cpp|layer0/processor/fn_processor_linux.cpp|layer0/visual/fn_visual_linux_gamepad.cpp|layer0/visual/fn_visual_windows.cpp|VKTS_time_linux.cpp|layer0/wsi/fn_wsi_android.cpp|layer0/visual/fn_visual_android_keys.cpp|layer0/visual/fn_visual_linux.cpp|layer0/visual/fn_visual_android.cpp|layer0/visual/fn_visual_linux_touchpad.cpp|layer0/wsi/SwapChain.cpp|layer0/visual/fn_visual_display_linux.cpp|layer0/visual/fn_visual_wayland_key.cpp|layer0/wsi/fn_wsi_win32.cpp|layer0/visual/fn_visual_win32_keys.cpp|VKTS_visual_x11_glfw.cpp|layer0/file/fn_file_linux.cpp|fn_time_linux.cpp|layer0/file/fn_file_android.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
-					</sourceEntries>
-				</configuration>
-			</storageModule>
-			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
-		</cconfiguration>
-		<cconfiguration id="cdt.managedbuild.config.gnu.mingw.lib.release.1125683436.369042502.2113175512">
-			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.mingw.lib.release.1125683436.369042502.2113175512" moduleId="org.eclipse.cdt.core.settings" name="intel64_Windows_None_GNU_Release">
-				<externalSettings>
-					<externalSetting>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS/intel64_Windows_None_GNU_Release"/>
-						<entry flags="RESOLVED" kind="libraryFile" name="VKTS" srcPrefixMapping="" srcRootPath=""/>
-					</externalSetting>
-				</externalSettings>
-				<extensions>
-					<extension id="org.eclipse.cdt.core.PE" point="org.eclipse.cdt.core.BinaryParser"/>
-					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-				</extensions>
-			</storageModule>
-			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactExtension="a" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.staticLib" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.staticLib,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.mingw.lib.release.1125683436.369042502.2113175512" name="intel64_Windows_None_GNU_Release" parent="cdt.managedbuild.config.gnu.mingw.lib.release">
-					<folderInfo id="cdt.managedbuild.config.gnu.mingw.lib.release.1125683436.369042502.2113175512." name="/" resourcePath="">
-						<toolChain id="cdt.managedbuild.toolchain.gnu.mingw.lib.release.1378806870" name="MinGW GCC" superClass="cdt.managedbuild.toolchain.gnu.mingw.lib.release">
-							<targetPlatform id="cdt.managedbuild.target.gnu.platform.mingw.lib.release.1806939402" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.mingw.lib.release"/>
-							<builder buildPath="${workspace_loc:/VKTS}/Release" id="cdt.managedbuild.tool.gnu.builder.mingw.base.1961563073" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="CDT Internal Builder" superClass="cdt.managedbuild.tool.gnu.builder.mingw.base"/>
-							<tool id="cdt.managedbuild.tool.gnu.assembler.mingw.lib.release.662837814" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.mingw.lib.release">
-								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.510240683" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
-							</tool>
-							<tool id="cdt.managedbuild.tool.gnu.archiver.mingw.lib.release.835321404" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.mingw.lib.release"/>
-							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.mingw.lib.release.469488933" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.mingw.lib.release">
-								<option id="gnu.cpp.compiler.mingw.lib.release.option.optimization.level.96974167" name="Optimization Level" superClass="gnu.cpp.compiler.mingw.lib.release.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.most" valueType="enumerated"/>
-								<option id="gnu.cpp.compiler.mingw.lib.release.option.debugging.level.2107255487" name="Debug Level" superClass="gnu.cpp.compiler.mingw.lib.release.option.debugging.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.debugging.level.none" valueType="enumerated"/>
-								<option id="gnu.cpp.compiler.option.dialect.std.685015908" name="Language standard" superClass="gnu.cpp.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.cpp.compiler.dialect.default" valueType="enumerated"/>
-								<option id="gnu.cpp.compiler.option.other.other.2558501" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" useByScannerDiscovery="false" value="-c -fmessage-length=0 -std=c++11 -m64" valueType="string"/>
-								<option id="gnu.cpp.compiler.option.include.paths.725664893" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${env_var:VULKAN_SDK}\Include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_External/include}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS/include}&quot;"/>
-								</option>
-								<option id="gnu.cpp.compiler.option.preprocessor.def.1240794190" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
-									<listOptionValue builtIn="false" value="VKTS_NO_VISUAL"/>
-								</option>
-								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1962609859" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
-							</tool>
-							<tool id="cdt.managedbuild.tool.gnu.c.compiler.mingw.lib.release.2013116719" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.mingw.lib.release">
-								<option defaultValue="gnu.c.optimization.level.most" id="gnu.c.compiler.mingw.lib.release.option.optimization.level.1234698356" name="Optimization Level" superClass="gnu.c.compiler.mingw.lib.release.option.optimization.level" useByScannerDiscovery="false" valueType="enumerated"/>
-								<option id="gnu.c.compiler.mingw.lib.release.option.debugging.level.1342383374" name="Debug Level" superClass="gnu.c.compiler.mingw.lib.release.option.debugging.level" useByScannerDiscovery="false" value="gnu.c.debugging.level.none" valueType="enumerated"/>
-								<option id="gnu.c.compiler.option.dialect.std.909442101" name="Language standard" superClass="gnu.c.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.c.compiler.dialect.default" valueType="enumerated"/>
-								<option id="gnu.c.compiler.option.misc.other.800464421" name="Other flags" superClass="gnu.c.compiler.option.misc.other" useByScannerDiscovery="false" value="-c -fmessage-length=0" valueType="string"/>
-								<option id="gnu.c.compiler.option.include.paths.601455234" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false"/>
-								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1830495455" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
-							</tool>
-							<tool id="cdt.managedbuild.tool.gnu.c.linker.mingw.base.250059664" name="MinGW C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.mingw.base">
-								<option defaultValue="true" id="gnu.c.link.option.shared.157583996" name="Shared (-shared)" superClass="gnu.c.link.option.shared" valueType="boolean"/>
-							</tool>
-							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.mingw.base.2050848903" name="MinGW C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.mingw.base">
-								<option defaultValue="true" id="gnu.cpp.link.option.shared.685269970" name="Shared (-shared)" superClass="gnu.cpp.link.option.shared" valueType="boolean"/>
-								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1047570661" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
-									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
-									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
-								</inputType>
-							</tool>
-						</toolChain>
-					</folderInfo>
-					<sourceEntries>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="include"/>
-						<entry excluding="layer0/visual/fn_visual_wayland_test.cpp|layer0/visual/fn_visual_xlib_glfw.cpp|time_linux.cpp|layer0/wsi/fn_wsi.cpp|layer0/wsi/fn_wsi_xlib.cpp|layer0/visual/fn_visual_display.cpp|fn_visual_x11_glfw.cpp|VKTS_visual_x11.cpp|layer0/profile/fn_profile_general.cpp|visual_x11_glfw.cpp|layer0/visual/fn_visual_win32_key.cpp|layer0/visual/fn_visual_wayland_linux_key.cpp|layer0/visual/fn_visual_windows_glfw.cpp|layer0/wsi/Surface.cpp|layer0/visual/fn_visual_xlib.cpp|layer0/visual/fn_visual_wayland_linux.cpp|layer0/wsi/fn_wsi_display.cpp|layer0/visual/fn_visual_x11.cpp|layer0/wsi/fn_wsi_wayland.cpp|layer0/visual/fn_visual_win32_glfw.cpp|fn_visual_x11.cpp|layer0/visual/fn_visual_wayland.cpp|layer0/visual/fn_visual_android_key.cpp|layer0/visual/fn_visual_display_linux_key.cpp|layer0/visual/fn_visual_xlib_keys.cpp|layer0/visual/fn_visual_xlib_key.cpp|visual_x11.cpp|layer0/visual/fn_visual_win32.cpp|layer0/wsi/Swapchain.cpp|layer0/visual/fn_visual_x11_glfw.cpp|layer0/processor/fn_processor_android.cpp|layer0/visual/fn_visual_android_glfw.cpp|layer0/processor/fn_processor_linux.cpp|layer0/visual/fn_visual_linux_gamepad.cpp|layer0/visual/fn_visual_windows.cpp|VKTS_time_linux.cpp|layer0/wsi/fn_wsi_android.cpp|layer0/visual/fn_visual_android_keys.cpp|layer0/visual/fn_visual_linux.cpp|layer0/visual/fn_visual_android.cpp|layer0/visual/fn_visual_linux_touchpad.cpp|layer0/wsi/SwapChain.cpp|layer0/visual/fn_visual_display_linux.cpp|layer0/visual/fn_visual_wayland_key.cpp|layer0/wsi/fn_wsi_win32.cpp|layer0/visual/fn_visual_win32_keys.cpp|VKTS_visual_x11_glfw.cpp|layer0/file/fn_file_linux.cpp|fn_time_linux.cpp|layer0/file/fn_file_android.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
+						<entry excluding="src/layer0/visual/fn_visual_android.cpp|src/layer0/visual/fn_visual_wayland_linux.cpp|src/layer0/wsi/fn_wsi_wayland.cpp|src/fn_visual_windows_glfw.cpp|src/layer0/visual/fn_visual_win32_glfw.cpp|src/time_windows.cpp|src/layer0/visual/fn_visual_wayland.cpp|src/layer0/visual/fn_visual_display_linux.cpp|src/layer0/visual/fn_visual_android_glfw.cpp|src/VKTS_visual_windows_glfw.cpp|src/layer0/visual/fn_visual_android_key.cpp|src/layer0/visual/fn_visual_display_linux_key.cpp|src/fn_time_windows.cpp|src/layer0/wsi/fn_wsi_win32.cpp|src/layer0/visual/fn_visual_win32_keys.cpp|src/layer0/file/fn_file_windows.cpp|src/layer0/visual/fn_visual_win32.cpp|src/core/file/fn_file_windows.cpp|src/layer0/visual/fn_visual_windows_glfw.cpp|src/fn_visual_windows.cpp|src/layer0/processor/fn_processor_windows.cpp|src/core/processor/fn_processor_windows.cpp|src/layer0/file/fn_file_android.cpp|src/layer0/wsi/fn_wsi_display.cpp|src/VKTS_visual_windows.cpp|src/core/file/fn_file_android.cpp|src/layer0/visual/fn_visual_none.cpp|src/layer0/profile/fn_profile_windows.cpp|src/layer0/visual/fn_visual_display.cpp|src/core/profile/fn_profile_windows.cpp|src/layer0/processor/fn_processor_android.cpp|src/visual_windows.cpp|src/core/processor/fn_processor_android.cpp|src/layer0/visual/fn_visual_wayland_test.cpp|src/layer0/visual/fn_visual_wayland_key.cpp|src/layer0/visual/fn_visual_win32_key.cpp|src/layer0/visual/fn_visual_windows.cpp|src/visual_windows_glfw.cpp|src/layer0/visual/fn_visual_wayland_linux_key.cpp|src/layer0/wsi/fn_wsi_android.cpp|src/VKTS_time_windows.cpp|src/layer0/visual/fn_visual_android_keys.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -513,8 +279,14 @@
 				<externalSettings>
 					<externalSetting>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS_Core"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS_PKG_Core"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS/arm64_Linux_Display.iMX8_GNU_Debug"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS_Core/arm64_Linux_Display.iMX8_GNU_Debug"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS_PKG_Core/arm64_Linux_Display.iMX8_GNU_Debug"/>
 						<entry flags="RESOLVED" kind="libraryFile" name="VKTS" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="VKTS_Core" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="VKTS_PKG_Core" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
 				<extensions>
@@ -563,7 +335,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="src/layer0/visual/fn_visual_wayland_test.cpp|src/layer0/visual/fn_visual_xlib.cpp|src/layer0/visual/fn_visual_android.cpp|src/layer0/visual/fn_visual_wayland_linux.cpp|src/layer0/wsi/fn_wsi_wayland.cpp|src/fn_visual_windows_glfw.cpp|src/layer0/visual/fn_visual_win32_glfw.cpp|src/time_windows.cpp|src/layer0/visual/fn_visual_wayland.cpp|src/layer0/visual/fn_visual_android_glfw.cpp|src/VKTS_visual_windows_glfw.cpp|src/layer0/visual/fn_visual_android_key.cpp|src/fn_time_windows.cpp|src/layer0/wsi/fn_wsi_win32.cpp|src/layer0/visual/fn_visual_xlib_key.cpp|src/layer0/visual/fn_visual_win32_keys.cpp|src/layer0/file/fn_file_windows.cpp|src/layer0/visual/fn_visual_win32.cpp|src/layer0/visual/fn_visual_windows_glfw.cpp|src/fn_visual_windows.cpp|src/layer0/processor/fn_processor_windows.cpp|src/layer0/file/fn_file_android.cpp|src/VKTS_visual_windows.cpp|src/layer0/visual/fn_visual_none.cpp|src/layer0/wsi/fn_wsi_xlib.cpp|src/layer0/profile/fn_profile_windows.cpp|src/layer0/processor/fn_processor_android.cpp|src/visual_windows.cpp|src/layer0/visual/fn_visual_wayland_key.cpp|src/layer0/visual/fn_visual_win32_key.cpp|src/layer0/visual/fn_visual_windows.cpp|src/visual_windows_glfw.cpp|src/layer0/visual/fn_visual_wayland_linux_key.cpp|src/layer0/wsi/fn_wsi_android.cpp|src/VKTS_time_windows.cpp|src/layer0/visual/fn_visual_android_keys.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="src/layer0/visual/fn_visual_xlib.cpp|src/layer0/visual/fn_visual_android.cpp|src/layer0/visual/fn_visual_wayland_linux.cpp|src/layer0/wsi/fn_wsi_wayland.cpp|src/fn_visual_windows_glfw.cpp|src/layer0/visual/fn_visual_win32_glfw.cpp|src/time_windows.cpp|src/layer0/visual/fn_visual_wayland.cpp|src/layer0/visual/fn_visual_android_glfw.cpp|src/VKTS_visual_windows_glfw.cpp|src/layer0/visual/fn_visual_android_key.cpp|src/fn_time_windows.cpp|src/layer0/wsi/fn_wsi_win32.cpp|src/layer0/visual/fn_visual_xlib_key.cpp|src/layer0/visual/fn_visual_win32_keys.cpp|src/layer0/file/fn_file_windows.cpp|src/layer0/visual/fn_visual_win32.cpp|src/core/file/fn_file_windows.cpp|src/layer0/visual/fn_visual_windows_glfw.cpp|src/fn_visual_windows.cpp|src/layer0/processor/fn_processor_windows.cpp|src/core/processor/fn_processor_windows.cpp|src/layer0/file/fn_file_android.cpp|src/VKTS_visual_windows.cpp|src/core/file/fn_file_android.cpp|src/layer0/visual/fn_visual_none.cpp|src/layer0/wsi/fn_wsi_xlib.cpp|src/layer0/profile/fn_profile_windows.cpp|src/core/profile/fn_profile_windows.cpp|src/layer0/processor/fn_processor_android.cpp|src/visual_windows.cpp|src/core/processor/fn_processor_android.cpp|src/layer0/visual/fn_visual_wayland_test.cpp|src/layer0/visual/fn_visual_wayland_key.cpp|src/layer0/visual/fn_visual_win32_key.cpp|src/layer0/visual/fn_visual_windows.cpp|src/visual_windows_glfw.cpp|src/layer0/visual/fn_visual_wayland_linux_key.cpp|src/layer0/wsi/fn_wsi_android.cpp|src/VKTS_time_windows.cpp|src/layer0/visual/fn_visual_android_keys.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -574,8 +346,14 @@
 				<externalSettings>
 					<externalSetting>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS_Core"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS_PKG_Core"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS/arm64_Linux_Display.iMX8_GNU_Release"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS_Core/arm64_Linux_Display.iMX8_GNU_Release"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS_PKG_Core/arm64_Linux_Display.iMX8_GNU_Release"/>
 						<entry flags="RESOLVED" kind="libraryFile" name="VKTS" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="VKTS_Core" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="VKTS_PKG_Core" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
 				<extensions>
@@ -624,126 +402,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="src/layer0/visual/fn_visual_wayland_test.cpp|src/layer0/visual/fn_visual_xlib.cpp|src/layer0/visual/fn_visual_android.cpp|src/layer0/visual/fn_visual_wayland_linux.cpp|src/layer0/wsi/fn_wsi_wayland.cpp|src/fn_visual_windows_glfw.cpp|src/layer0/visual/fn_visual_win32_glfw.cpp|src/time_windows.cpp|src/layer0/visual/fn_visual_wayland.cpp|src/layer0/visual/fn_visual_android_glfw.cpp|src/VKTS_visual_windows_glfw.cpp|src/layer0/visual/fn_visual_android_key.cpp|src/fn_time_windows.cpp|src/layer0/wsi/fn_wsi_win32.cpp|src/layer0/visual/fn_visual_xlib_key.cpp|src/layer0/visual/fn_visual_win32_keys.cpp|src/layer0/file/fn_file_windows.cpp|src/layer0/visual/fn_visual_win32.cpp|src/layer0/visual/fn_visual_windows_glfw.cpp|src/fn_visual_windows.cpp|src/layer0/processor/fn_processor_windows.cpp|src/layer0/file/fn_file_android.cpp|src/VKTS_visual_windows.cpp|src/layer0/visual/fn_visual_none.cpp|src/layer0/wsi/fn_wsi_xlib.cpp|src/layer0/profile/fn_profile_windows.cpp|src/layer0/processor/fn_processor_android.cpp|src/visual_windows.cpp|src/layer0/visual/fn_visual_wayland_key.cpp|src/layer0/visual/fn_visual_win32_key.cpp|src/layer0/visual/fn_visual_windows.cpp|src/visual_windows_glfw.cpp|src/layer0/visual/fn_visual_wayland_linux_key.cpp|src/layer0/wsi/fn_wsi_android.cpp|src/VKTS_time_windows.cpp|src/layer0/visual/fn_visual_android_keys.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
-					</sourceEntries>
-				</configuration>
-			</storageModule>
-			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
-		</cconfiguration>
-		<cconfiguration id="cdt.managedbuild.config.gnu.mingw.lib.debug.973422307.1527190138.1597911203.1102474927">
-			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.mingw.lib.debug.973422307.1527190138.1597911203.1102474927" moduleId="org.eclipse.cdt.core.settings" name="arm64_Linux_None.iMX8_GNU_Debug">
-				<externalSettings>
-					<externalSetting>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS/arm64_Linux_None_GNU_Debug"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS/arm64_Linux_None.iMX8_GNU_Debug"/>
-						<entry flags="RESOLVED" kind="libraryFile" name="VKTS" srcPrefixMapping="" srcRootPath=""/>
-					</externalSetting>
-				</externalSettings>
-				<extensions>
-					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
-					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
-				</extensions>
-			</storageModule>
-			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactExtension="a" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.staticLib" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.staticLib,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="rm -rf" description="" errorParsers="org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GASErrorParser;org.eclipse.cdt.core.CWDLocator;org.eclipse.cdt.core.GmakeErrorParser" id="cdt.managedbuild.config.gnu.mingw.lib.debug.973422307.1527190138.1597911203.1102474927" name="arm64_Linux_None.iMX8_GNU_Debug" parent="cdt.managedbuild.config.gnu.mingw.lib.debug">
-					<folderInfo id="cdt.managedbuild.config.gnu.mingw.lib.debug.973422307.1527190138.1597911203.1102474927." name="/" resourcePath="">
-						<toolChain id="cdt.managedbuild.toolchain.gnu.cross.base.1128533813" name="Cross GCC" superClass="cdt.managedbuild.toolchain.gnu.cross.base">
-							<option id="cdt.managedbuild.option.gnu.cross.prefix.934112814" name="Prefix" superClass="cdt.managedbuild.option.gnu.cross.prefix" useByScannerDiscovery="false" value="aarch64-poky-linux-" valueType="string"/>
-							<option id="cdt.managedbuild.option.gnu.cross.path.1712905520" name="Path" superClass="cdt.managedbuild.option.gnu.cross.path" useByScannerDiscovery="false" value="/opt/fsl-imx-fb/4.1.30-3.0.0/sysroots/x86_64-pokysdk-linux/usr/bin/aarch64-poky-linux" valueType="string"/>
-							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="cdt.managedbuild.targetPlatform.gnu.cross.1458125374" isAbstract="false" osList="all" superClass="cdt.managedbuild.targetPlatform.gnu.cross"/>
-							<builder buildPath="${workspace_loc:/VKTS}/arm64_Linux_None_GNU_Debug" id="cdt.managedbuild.builder.gnu.cross.1516263194" keepEnvironmentInBuildfile="false" name="Gnu Make Builder" superClass="cdt.managedbuild.builder.gnu.cross"/>
-							<tool id="cdt.managedbuild.tool.gnu.cross.c.compiler.1805972679" name="Cross GCC Compiler" superClass="cdt.managedbuild.tool.gnu.cross.c.compiler">
-								<option defaultValue="gnu.c.optimization.level.none" id="gnu.c.compiler.option.optimization.level.280550583" name="Optimization Level" superClass="gnu.c.compiler.option.optimization.level" useByScannerDiscovery="false" valueType="enumerated"/>
-								<option id="gnu.c.compiler.option.debugging.level.1602617102" name="Debug Level" superClass="gnu.c.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.c.debugging.level.max" valueType="enumerated"/>
-								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.162228603" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
-							</tool>
-							<tool id="cdt.managedbuild.tool.gnu.cross.cpp.compiler.696312577" name="Cross G++ Compiler" superClass="cdt.managedbuild.tool.gnu.cross.cpp.compiler">
-								<option id="gnu.cpp.compiler.option.include.paths.1078104080" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_External/include}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS/include}&quot;"/>
-								</option>
-								<option id="gnu.cpp.compiler.option.preprocessor.def.746640046" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
-									<listOptionValue builtIn="false" value="VKTS_NO_VISUAL"/>
-								</option>
-								<option id="gnu.cpp.compiler.option.optimization.level.795094153" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
-								<option id="gnu.cpp.compiler.option.debugging.level.2140973760" name="Debug Level" superClass="gnu.cpp.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
-								<option id="gnu.cpp.compiler.option.other.other.1164910887" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" useByScannerDiscovery="false" value="-c -fmessage-length=0 -std=c++11 --sysroot=/opt/fsl-imx-fb/4.1.30-3.0.0/sysroots/aarch64-poky-linux" valueType="string"/>
-								<option id="gnu.cpp.compiler.option.dialect.std.1185564872" name="Language standard" superClass="gnu.cpp.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.cpp.compiler.dialect.c++11" valueType="enumerated"/>
-								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1958803952" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
-							</tool>
-							<tool id="cdt.managedbuild.tool.gnu.cross.c.linker.1287344412" name="Cross GCC Linker" superClass="cdt.managedbuild.tool.gnu.cross.c.linker"/>
-							<tool id="cdt.managedbuild.tool.gnu.cross.cpp.linker.1461990667" name="Cross G++ Linker" superClass="cdt.managedbuild.tool.gnu.cross.cpp.linker"/>
-							<tool id="cdt.managedbuild.tool.gnu.cross.archiver.5470654" name="Cross GCC Archiver" superClass="cdt.managedbuild.tool.gnu.cross.archiver"/>
-							<tool id="cdt.managedbuild.tool.gnu.cross.assembler.720589104" name="Cross GCC Assembler" superClass="cdt.managedbuild.tool.gnu.cross.assembler">
-								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1500299546" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
-							</tool>
-						</toolChain>
-					</folderInfo>
-					<sourceEntries>
-						<entry excluding="src/layer0/visual/fn_visual_wayland_test.cpp|src/layer0/visual/fn_visual_android.cpp|src/layer0/visual/fn_visual_linux_touchpad.cpp|src/layer0/wsi/fn_wsi_wayland.cpp|src/layer0/wsi/SwapChain.cpp|src/layer0/visual/fn_visual_win32_glfw.cpp|src/layer0/visual/fn_visual_wayland.cpp|src/layer0/visual/fn_visual_display_linux.cpp|src/layer0/visual/fn_visual_android_glfw.cpp|src/VKTS_visual_windows_glfw.cpp|src/fn_time_windows.cpp|src/layer0/wsi/fn_wsi_win32.cpp|src/layer0/visual/fn_visual_xlib_key.cpp|src/layer0/visual/fn_visual_win32_keys.cpp|src/layer0/file/fn_file_windows.cpp|src/fn_visual_windows.cpp|src/layer0/processor/fn_processor_windows.cpp|src/layer0/file/fn_file_android.cpp|src/VKTS_visual_windows.cpp|src/layer0/visual/fn_visual_xlib_glfw.cpp|src/layer0/visual/fn_visual_x11_glfw.cpp|src/layer0/wsi/fn_wsi.cpp|src/layer0/profile/fn_profile_windows.cpp|src/layer0/wsi/fn_wsi_xlib.cpp|src/layer0/processor/fn_processor_android.cpp|src/layer0/visual/fn_visual_wayland_key.cpp|src/layer0/visual/fn_visual_win32_key.cpp|src/layer0/visual/fn_visual_linux_gamepad.cpp|src/layer0/visual/fn_visual_wayland_linux_key.cpp|src/layer0/visual/fn_visual_xlib.cpp|src/layer0/visual/fn_visual_wayland_linux.cpp|src/layer0/visual/fn_visual_x11.cpp|src/fn_visual_windows_glfw.cpp|src/time_windows.cpp|src/layer0/visual/fn_visual_android_key.cpp|src/layer0/visual/fn_visual_display_linux_key.cpp|src/layer0/visual/fn_visual_win32.cpp|src/layer0/visual/fn_visual_windows_glfw.cpp|src/layer0/wsi/Surface.cpp|src/layer0/visual/fn_visual_linux.cpp|src/layer0/wsi/fn_wsi_display.cpp|src/layer0/wsi/Swapchain.cpp|src/layer0/visual/fn_visual_display.cpp|src/visual_windows.cpp|src/layer0/visual/fn_visual_xlib_keys.cpp|src/layer0/visual/fn_visual_windows.cpp|src/visual_windows_glfw.cpp|src/layer0/wsi/fn_wsi_android.cpp|src/VKTS_time_windows.cpp|src/layer0/visual/fn_visual_android_keys.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
-					</sourceEntries>
-				</configuration>
-			</storageModule>
-			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
-		</cconfiguration>
-		<cconfiguration id="cdt.managedbuild.config.gnu.mingw.lib.debug.973422307.1527190138.1597911203.1102474927.168269627">
-			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.mingw.lib.debug.973422307.1527190138.1597911203.1102474927.168269627" moduleId="org.eclipse.cdt.core.settings" name="arm64_Linux_None.iMX8_GNU_Release">
-				<externalSettings>
-					<externalSetting>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS/arm64_Linux_None.iMX8_GNU_Release"/>
-						<entry flags="RESOLVED" kind="libraryFile" name="VKTS" srcPrefixMapping="" srcRootPath=""/>
-					</externalSetting>
-				</externalSettings>
-				<extensions>
-					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
-					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
-				</extensions>
-			</storageModule>
-			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactExtension="a" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.staticLib" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.staticLib,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="rm -rf" description="" errorParsers="org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GASErrorParser;org.eclipse.cdt.core.CWDLocator;org.eclipse.cdt.core.GmakeErrorParser" id="cdt.managedbuild.config.gnu.mingw.lib.debug.973422307.1527190138.1597911203.1102474927.168269627" name="arm64_Linux_None.iMX8_GNU_Release" parent="cdt.managedbuild.config.gnu.mingw.lib.debug">
-					<folderInfo id="cdt.managedbuild.config.gnu.mingw.lib.debug.973422307.1527190138.1597911203.1102474927.168269627." name="/" resourcePath="">
-						<toolChain id="cdt.managedbuild.toolchain.gnu.cross.base.345938049" name="Cross GCC" superClass="cdt.managedbuild.toolchain.gnu.cross.base">
-							<option id="cdt.managedbuild.option.gnu.cross.prefix.1640891670" name="Prefix" superClass="cdt.managedbuild.option.gnu.cross.prefix" useByScannerDiscovery="false" value="aarch64-poky-linux-" valueType="string"/>
-							<option id="cdt.managedbuild.option.gnu.cross.path.49223890" name="Path" superClass="cdt.managedbuild.option.gnu.cross.path" useByScannerDiscovery="false" value="/opt/fsl-imx-fb/4.1.30-3.0.0/sysroots/x86_64-pokysdk-linux/usr/bin/aarch64-poky-linux" valueType="string"/>
-							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="cdt.managedbuild.targetPlatform.gnu.cross.686872085" isAbstract="false" osList="all" superClass="cdt.managedbuild.targetPlatform.gnu.cross"/>
-							<builder buildPath="${workspace_loc:/VKTS}/arm64_Linux_None_GNU_Debug" id="cdt.managedbuild.builder.gnu.cross.1800965730" keepEnvironmentInBuildfile="false" name="Gnu Make Builder" superClass="cdt.managedbuild.builder.gnu.cross"/>
-							<tool id="cdt.managedbuild.tool.gnu.cross.c.compiler.714207859" name="Cross GCC Compiler" superClass="cdt.managedbuild.tool.gnu.cross.c.compiler">
-								<option defaultValue="gnu.c.optimization.level.none" id="gnu.c.compiler.option.optimization.level.1300551271" name="Optimization Level" superClass="gnu.c.compiler.option.optimization.level" useByScannerDiscovery="false" valueType="enumerated"/>
-								<option id="gnu.c.compiler.option.debugging.level.1777028334" name="Debug Level" superClass="gnu.c.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.c.debugging.level.max" valueType="enumerated"/>
-								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.2136654461" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
-							</tool>
-							<tool id="cdt.managedbuild.tool.gnu.cross.cpp.compiler.307514602" name="Cross G++ Compiler" superClass="cdt.managedbuild.tool.gnu.cross.cpp.compiler">
-								<option id="gnu.cpp.compiler.option.include.paths.198523765" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_External/include}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS/include}&quot;"/>
-								</option>
-								<option id="gnu.cpp.compiler.option.preprocessor.def.1304531722" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
-									<listOptionValue builtIn="false" value="VKTS_NO_VISUAL"/>
-								</option>
-								<option id="gnu.cpp.compiler.option.optimization.level.1026976399" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.most" valueType="enumerated"/>
-								<option id="gnu.cpp.compiler.option.debugging.level.1365953972" name="Debug Level" superClass="gnu.cpp.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.debugging.level.none" valueType="enumerated"/>
-								<option id="gnu.cpp.compiler.option.other.other.1089832667" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" useByScannerDiscovery="false" value="-c -fmessage-length=0 -std=c++11 --sysroot=/opt/fsl-imx-fb/4.1.30-3.0.0/sysroots/aarch64-poky-linux" valueType="string"/>
-								<option id="gnu.cpp.compiler.option.dialect.std.2107717090" name="Language standard" superClass="gnu.cpp.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.cpp.compiler.dialect.c++11" valueType="enumerated"/>
-								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1860884272" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
-							</tool>
-							<tool id="cdt.managedbuild.tool.gnu.cross.c.linker.1868653822" name="Cross GCC Linker" superClass="cdt.managedbuild.tool.gnu.cross.c.linker"/>
-							<tool id="cdt.managedbuild.tool.gnu.cross.cpp.linker.205345639" name="Cross G++ Linker" superClass="cdt.managedbuild.tool.gnu.cross.cpp.linker"/>
-							<tool id="cdt.managedbuild.tool.gnu.cross.archiver.2071649102" name="Cross GCC Archiver" superClass="cdt.managedbuild.tool.gnu.cross.archiver"/>
-							<tool id="cdt.managedbuild.tool.gnu.cross.assembler.429876133" name="Cross GCC Assembler" superClass="cdt.managedbuild.tool.gnu.cross.assembler">
-								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1920256425" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
-							</tool>
-						</toolChain>
-					</folderInfo>
-					<sourceEntries>
-						<entry excluding="src/layer0/visual/fn_visual_wayland_test.cpp|src/layer0/visual/fn_visual_android.cpp|src/layer0/visual/fn_visual_linux_touchpad.cpp|src/layer0/wsi/fn_wsi_wayland.cpp|src/layer0/wsi/SwapChain.cpp|src/layer0/visual/fn_visual_win32_glfw.cpp|src/layer0/visual/fn_visual_wayland.cpp|src/layer0/visual/fn_visual_display_linux.cpp|src/layer0/visual/fn_visual_android_glfw.cpp|src/VKTS_visual_windows_glfw.cpp|src/fn_time_windows.cpp|src/layer0/wsi/fn_wsi_win32.cpp|src/layer0/visual/fn_visual_xlib_key.cpp|src/layer0/visual/fn_visual_win32_keys.cpp|src/layer0/file/fn_file_windows.cpp|src/fn_visual_windows.cpp|src/layer0/processor/fn_processor_windows.cpp|src/layer0/file/fn_file_android.cpp|src/VKTS_visual_windows.cpp|src/layer0/visual/fn_visual_xlib_glfw.cpp|src/layer0/visual/fn_visual_x11_glfw.cpp|src/layer0/wsi/fn_wsi.cpp|src/layer0/profile/fn_profile_windows.cpp|src/layer0/wsi/fn_wsi_xlib.cpp|src/layer0/processor/fn_processor_android.cpp|src/layer0/visual/fn_visual_wayland_key.cpp|src/layer0/visual/fn_visual_win32_key.cpp|src/layer0/visual/fn_visual_linux_gamepad.cpp|src/layer0/visual/fn_visual_wayland_linux_key.cpp|src/layer0/visual/fn_visual_xlib.cpp|src/layer0/visual/fn_visual_wayland_linux.cpp|src/layer0/visual/fn_visual_x11.cpp|src/fn_visual_windows_glfw.cpp|src/time_windows.cpp|src/layer0/visual/fn_visual_android_key.cpp|src/layer0/visual/fn_visual_display_linux_key.cpp|src/layer0/visual/fn_visual_win32.cpp|src/layer0/visual/fn_visual_windows_glfw.cpp|src/layer0/wsi/Surface.cpp|src/layer0/visual/fn_visual_linux.cpp|src/layer0/wsi/fn_wsi_display.cpp|src/layer0/wsi/Swapchain.cpp|src/layer0/visual/fn_visual_display.cpp|src/visual_windows.cpp|src/layer0/visual/fn_visual_xlib_keys.cpp|src/layer0/visual/fn_visual_windows.cpp|src/visual_windows_glfw.cpp|src/layer0/wsi/fn_wsi_android.cpp|src/VKTS_time_windows.cpp|src/layer0/visual/fn_visual_android_keys.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="src/layer0/visual/fn_visual_xlib.cpp|src/layer0/visual/fn_visual_android.cpp|src/layer0/visual/fn_visual_wayland_linux.cpp|src/layer0/wsi/fn_wsi_wayland.cpp|src/fn_visual_windows_glfw.cpp|src/layer0/visual/fn_visual_win32_glfw.cpp|src/time_windows.cpp|src/layer0/visual/fn_visual_wayland.cpp|src/layer0/visual/fn_visual_android_glfw.cpp|src/VKTS_visual_windows_glfw.cpp|src/layer0/visual/fn_visual_android_key.cpp|src/fn_time_windows.cpp|src/layer0/wsi/fn_wsi_win32.cpp|src/layer0/visual/fn_visual_xlib_key.cpp|src/layer0/visual/fn_visual_win32_keys.cpp|src/layer0/file/fn_file_windows.cpp|src/layer0/visual/fn_visual_win32.cpp|src/core/file/fn_file_windows.cpp|src/layer0/visual/fn_visual_windows_glfw.cpp|src/fn_visual_windows.cpp|src/layer0/processor/fn_processor_windows.cpp|src/core/processor/fn_processor_windows.cpp|src/layer0/file/fn_file_android.cpp|src/VKTS_visual_windows.cpp|src/core/file/fn_file_android.cpp|src/layer0/visual/fn_visual_none.cpp|src/layer0/wsi/fn_wsi_xlib.cpp|src/layer0/profile/fn_profile_windows.cpp|src/core/profile/fn_profile_windows.cpp|src/layer0/processor/fn_processor_android.cpp|src/visual_windows.cpp|src/core/processor/fn_processor_android.cpp|src/layer0/visual/fn_visual_wayland_test.cpp|src/layer0/visual/fn_visual_wayland_key.cpp|src/layer0/visual/fn_visual_win32_key.cpp|src/layer0/visual/fn_visual_windows.cpp|src/visual_windows_glfw.cpp|src/layer0/visual/fn_visual_wayland_linux_key.cpp|src/layer0/wsi/fn_wsi_android.cpp|src/VKTS_time_windows.cpp|src/layer0/visual/fn_visual_android_keys.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -754,8 +413,14 @@
 				<externalSettings>
 					<externalSetting>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS_Core"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS_PKG_Core"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS/intel64_Linux_Wayland_GNU_Debug"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS_Core/intel64_Linux_Wayland_GNU_Debug"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS_PKG_Core/intel64_Linux_Wayland_GNU_Debug"/>
 						<entry flags="RESOLVED" kind="libraryFile" name="VKTS" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="VKTS_Core" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="VKTS_PKG_Core" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
 				<extensions>
@@ -784,7 +449,6 @@
 								<option id="gnu.cpp.compiler.option.dialect.std.420019561" name="Language standard" superClass="gnu.cpp.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.cpp.compiler.dialect.default" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.preprocessor.def.1942413968" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="VKTS_WAYLAND_VISUAL"/>
-									<listOptionValue builtIn="false" value="VKTS_TEST"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.221289886" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
@@ -802,7 +466,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="src/layer0/visual/fn_visual_xlib.cpp|src/layer0/visual/fn_visual_android.cpp|src/layer0/visual/fn_visual_linux_touchpad.cpp|src/fn_visual_windows_glfw.cpp|src/layer0/visual/fn_visual_win32_glfw.cpp|src/time_windows.cpp|src/layer0/visual/fn_visual_display_linux.cpp|src/layer0/visual/fn_visual_android_glfw.cpp|src/VKTS_visual_windows_glfw.cpp|src/layer0/visual/fn_visual_android_key.cpp|src/layer0/visual/fn_visual_display_linux_key.cpp|src/fn_time_windows.cpp|src/layer0/wsi/fn_wsi_win32.cpp|src/layer0/visual/fn_visual_xlib_key.cpp|src/layer0/visual/fn_visual_win32_keys.cpp|src/layer0/file/fn_file_windows.cpp|src/layer0/visual/fn_visual_win32.cpp|src/layer0/visual/fn_visual_windows_glfw.cpp|src/fn_visual_windows.cpp|src/layer0/processor/fn_processor_windows.cpp|src/layer0/file/fn_file_android.cpp|src/layer0/wsi/fn_wsi_display.cpp|src/VKTS_visual_windows.cpp|src/layer0/visual/fn_visual_none.cpp|src/layer0/wsi/fn_wsi_xlib.cpp|src/layer0/profile/fn_profile_windows.cpp|src/layer0/visual/fn_visual_display.cpp|src/layer0/processor/fn_processor_android.cpp|src/visual_windows.cpp|src/layer0/visual/fn_visual_win32_key.cpp|src/layer0/visual/fn_visual_windows.cpp|src/visual_windows_glfw.cpp|src/layer0/wsi/fn_wsi_android.cpp|src/VKTS_time_windows.cpp|src/layer0/visual/fn_visual_android_keys.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="src/layer0/visual/fn_visual_xlib.cpp|src/layer0/visual/fn_visual_android.cpp|src/layer0/visual/fn_visual_linux_touchpad.cpp|src/fn_visual_windows_glfw.cpp|src/layer0/visual/fn_visual_win32_glfw.cpp|src/time_windows.cpp|src/layer0/visual/fn_visual_display_linux.cpp|src/layer0/visual/fn_visual_android_glfw.cpp|src/VKTS_visual_windows_glfw.cpp|src/layer0/visual/fn_visual_android_key.cpp|src/layer0/visual/fn_visual_display_linux_key.cpp|src/fn_time_windows.cpp|src/layer0/wsi/fn_wsi_win32.cpp|src/layer0/visual/fn_visual_xlib_key.cpp|src/layer0/visual/fn_visual_win32_keys.cpp|src/layer0/file/fn_file_windows.cpp|src/layer0/visual/fn_visual_win32.cpp|src/core/file/fn_file_windows.cpp|src/layer0/visual/fn_visual_windows_glfw.cpp|src/fn_visual_windows.cpp|src/layer0/processor/fn_processor_windows.cpp|src/core/processor/fn_processor_windows.cpp|src/layer0/file/fn_file_android.cpp|src/layer0/wsi/fn_wsi_display.cpp|src/VKTS_visual_windows.cpp|src/core/file/fn_file_android.cpp|src/layer0/visual/fn_visual_none.cpp|src/layer0/wsi/fn_wsi_xlib.cpp|src/layer0/profile/fn_profile_windows.cpp|src/layer0/visual/fn_visual_display.cpp|src/core/profile/fn_profile_windows.cpp|src/layer0/processor/fn_processor_android.cpp|src/visual_windows.cpp|src/core/processor/fn_processor_android.cpp|src/layer0/visual/fn_visual_win32_key.cpp|src/layer0/visual/fn_visual_windows.cpp|src/visual_windows_glfw.cpp|src/layer0/wsi/fn_wsi_android.cpp|src/VKTS_time_windows.cpp|src/layer0/visual/fn_visual_android_keys.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -813,8 +477,14 @@
 				<externalSettings>
 					<externalSetting>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS_Core"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS_PKG_Core"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS/intel64_Linux_Wayland_GNU_Release"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS_Core/intel64_Linux_Wayland_GNU_Release"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS_PKG_Core/intel64_Linux_Wayland_GNU_Release"/>
 						<entry flags="RESOLVED" kind="libraryFile" name="VKTS" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="VKTS_Core" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="VKTS_PKG_Core" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
 				<extensions>
@@ -843,7 +513,6 @@
 								<option id="gnu.cpp.compiler.option.dialect.std.1400916893" name="Language standard" superClass="gnu.cpp.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.cpp.compiler.dialect.default" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.preprocessor.def.880680697" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="VKTS_WAYLAND_VISUAL"/>
-									<listOptionValue builtIn="false" value="VKTS_TEST"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1138676739" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
@@ -861,7 +530,129 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="src/layer0/visual/fn_visual_xlib.cpp|src/layer0/visual/fn_visual_android.cpp|src/layer0/visual/fn_visual_linux_touchpad.cpp|src/fn_visual_windows_glfw.cpp|src/layer0/visual/fn_visual_win32_glfw.cpp|src/time_windows.cpp|src/layer0/visual/fn_visual_display_linux.cpp|src/layer0/visual/fn_visual_android_glfw.cpp|src/VKTS_visual_windows_glfw.cpp|src/layer0/visual/fn_visual_android_key.cpp|src/layer0/visual/fn_visual_display_linux_key.cpp|src/fn_time_windows.cpp|src/layer0/wsi/fn_wsi_win32.cpp|src/layer0/visual/fn_visual_xlib_key.cpp|src/layer0/visual/fn_visual_win32_keys.cpp|src/layer0/file/fn_file_windows.cpp|src/layer0/visual/fn_visual_win32.cpp|src/layer0/visual/fn_visual_windows_glfw.cpp|src/fn_visual_windows.cpp|src/layer0/processor/fn_processor_windows.cpp|src/layer0/file/fn_file_android.cpp|src/layer0/wsi/fn_wsi_display.cpp|src/VKTS_visual_windows.cpp|src/layer0/visual/fn_visual_none.cpp|src/layer0/wsi/fn_wsi_xlib.cpp|src/layer0/profile/fn_profile_windows.cpp|src/layer0/visual/fn_visual_display.cpp|src/layer0/processor/fn_processor_android.cpp|src/visual_windows.cpp|src/layer0/visual/fn_visual_win32_key.cpp|src/layer0/visual/fn_visual_windows.cpp|src/visual_windows_glfw.cpp|src/layer0/wsi/fn_wsi_android.cpp|src/VKTS_time_windows.cpp|src/layer0/visual/fn_visual_android_keys.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="src/layer0/visual/fn_visual_xlib.cpp|src/layer0/visual/fn_visual_android.cpp|src/layer0/visual/fn_visual_linux_touchpad.cpp|src/fn_visual_windows_glfw.cpp|src/layer0/visual/fn_visual_win32_glfw.cpp|src/time_windows.cpp|src/layer0/visual/fn_visual_display_linux.cpp|src/layer0/visual/fn_visual_android_glfw.cpp|src/VKTS_visual_windows_glfw.cpp|src/layer0/visual/fn_visual_android_key.cpp|src/layer0/visual/fn_visual_display_linux_key.cpp|src/fn_time_windows.cpp|src/layer0/wsi/fn_wsi_win32.cpp|src/layer0/visual/fn_visual_xlib_key.cpp|src/layer0/visual/fn_visual_win32_keys.cpp|src/layer0/file/fn_file_windows.cpp|src/layer0/visual/fn_visual_win32.cpp|src/core/file/fn_file_windows.cpp|src/layer0/visual/fn_visual_windows_glfw.cpp|src/fn_visual_windows.cpp|src/layer0/processor/fn_processor_windows.cpp|src/core/processor/fn_processor_windows.cpp|src/layer0/file/fn_file_android.cpp|src/layer0/wsi/fn_wsi_display.cpp|src/VKTS_visual_windows.cpp|src/core/file/fn_file_android.cpp|src/layer0/visual/fn_visual_none.cpp|src/layer0/wsi/fn_wsi_xlib.cpp|src/layer0/profile/fn_profile_windows.cpp|src/layer0/visual/fn_visual_display.cpp|src/core/profile/fn_profile_windows.cpp|src/layer0/processor/fn_processor_android.cpp|src/visual_windows.cpp|src/core/processor/fn_processor_android.cpp|src/layer0/visual/fn_visual_win32_key.cpp|src/layer0/visual/fn_visual_windows.cpp|src/visual_windows_glfw.cpp|src/layer0/wsi/fn_wsi_android.cpp|src/VKTS_time_windows.cpp|src/layer0/visual/fn_visual_android_keys.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+					</sourceEntries>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+		</cconfiguration>
+		<cconfiguration id="cdt.managedbuild.config.gnu.mingw.lib.debug.973422307.1527190138.1069909318.878806480">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.mingw.lib.debug.973422307.1527190138.1069909318.878806480" moduleId="org.eclipse.cdt.core.settings" name="intel64_Linux_Display_GNU_Debug">
+				<externalSettings>
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS_Core"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS_PKG_Core"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS_Core/intel64_Linux_Display_GNU_Debug"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS_PKG_Core/intel64_Linux_Display_GNU_Debug"/>
+						<entry flags="RESOLVED" kind="libraryFile" name="VKTS_Core" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="VKTS_PKG_Core" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration artifactExtension="a" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.staticLib" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.staticLib,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="rm -rf" description="" errorParsers="org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GASErrorParser;org.eclipse.cdt.core.CWDLocator;org.eclipse.cdt.core.GmakeErrorParser" id="cdt.managedbuild.config.gnu.mingw.lib.debug.973422307.1527190138.1069909318.878806480" name="intel64_Linux_Display_GNU_Debug" parent="cdt.managedbuild.config.gnu.mingw.lib.debug">
+					<folderInfo id="cdt.managedbuild.config.gnu.mingw.lib.debug.973422307.1527190138.1069909318.878806480." name="/" resourcePath="">
+						<toolChain errorParsers="" id="cdt.managedbuild.toolchain.gnu.base.651700647" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.base">
+							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="cdt.managedbuild.target.gnu.platform.base.1918334913" name="Debug Platform" osList="linux,hpux,aix,qnx" superClass="cdt.managedbuild.target.gnu.platform.base"/>
+							<builder buildPath="${workspace_loc:/VKTS}/x64__Linux__GCC_Debug" errorParsers="org.eclipse.cdt.core.GmakeErrorParser;org.eclipse.cdt.core.CWDLocator" id="cdt.managedbuild.target.gnu.builder.base.2005867932" keepEnvironmentInBuildfile="false" name="Gnu Make Builder" superClass="cdt.managedbuild.target.gnu.builder.base"/>
+							<tool errorParsers="" id="cdt.managedbuild.tool.gnu.archiver.base.1550327779" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base"/>
+							<tool errorParsers="org.eclipse.cdt.core.GCCErrorParser" id="cdt.managedbuild.tool.gnu.cpp.compiler.base.1665292519" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.base">
+								<option id="gnu.cpp.compiler.option.include.paths.576460437" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_External/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS/include}&quot;"/>
+								</option>
+								<option id="gnu.cpp.compiler.option.optimization.level.1895253004" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.option.debugging.level.532959392" name="Debug Level" superClass="gnu.cpp.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.option.other.other.887506397" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" useByScannerDiscovery="false" value="-c -fmessage-length=0 -std=c++11 -m64" valueType="string"/>
+								<option id="gnu.cpp.compiler.option.dialect.std.872871379" name="Language standard" superClass="gnu.cpp.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.cpp.compiler.dialect.default" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.option.preprocessor.def.590247754" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="VKTS_DISPLAY_VISUAL"/>
+								</option>
+								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.353215295" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
+							</tool>
+							<tool errorParsers="org.eclipse.cdt.core.GCCErrorParser" id="cdt.managedbuild.tool.gnu.c.compiler.base.845075691" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.base">
+								<option defaultValue="gnu.c.optimization.level.none" id="gnu.c.compiler.option.optimization.level.789514648" name="Optimization Level" superClass="gnu.c.compiler.option.optimization.level" useByScannerDiscovery="false" valueType="enumerated"/>
+								<option id="gnu.c.compiler.option.debugging.level.1719864094" name="Debug Level" superClass="gnu.c.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.c.debugging.level.max" valueType="enumerated"/>
+								<option id="gnu.c.compiler.option.misc.other.1229289192" name="Other flags" superClass="gnu.c.compiler.option.misc.other" useByScannerDiscovery="false" value="-c -fmessage-length=0" valueType="string"/>
+								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1098006404" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.c.linker.base.1785405035" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.base"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.base.725639979" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.base"/>
+							<tool errorParsers="org.eclipse.cdt.core.GASErrorParser" id="cdt.managedbuild.tool.gnu.assembler.base.71339791" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.base">
+								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1411156957" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+					<sourceEntries>
+						<entry excluding="src/layer0/visual/fn_visual_xlib.cpp|src/layer0/visual/fn_visual_android.cpp|src/layer0/visual/fn_visual_linux_touchpad.cpp|src/fn_visual_windows_glfw.cpp|src/layer0/visual/fn_visual_win32_glfw.cpp|src/time_windows.cpp|src/layer0/visual/fn_visual_display_linux.cpp|src/layer0/visual/fn_visual_android_glfw.cpp|src/VKTS_visual_windows_glfw.cpp|src/layer0/visual/fn_visual_android_key.cpp|src/layer0/visual/fn_visual_display_linux_key.cpp|src/fn_time_windows.cpp|src/layer0/wsi/fn_wsi_win32.cpp|src/layer0/visual/fn_visual_xlib_key.cpp|src/layer0/visual/fn_visual_win32_keys.cpp|src/layer0/file/fn_file_windows.cpp|src/layer0/visual/fn_visual_win32.cpp|src/core/file/fn_file_windows.cpp|src/layer0/visual/fn_visual_windows_glfw.cpp|src/fn_visual_windows.cpp|src/layer0/processor/fn_processor_windows.cpp|src/core/processor/fn_processor_windows.cpp|src/layer0/file/fn_file_android.cpp|src/layer0/wsi/fn_wsi_display.cpp|src/VKTS_visual_windows.cpp|src/core/file/fn_file_android.cpp|src/layer0/visual/fn_visual_none.cpp|src/layer0/wsi/fn_wsi_xlib.cpp|src/layer0/profile/fn_profile_windows.cpp|src/layer0/visual/fn_visual_display.cpp|src/core/profile/fn_profile_windows.cpp|src/layer0/processor/fn_processor_android.cpp|src/visual_windows.cpp|src/core/processor/fn_processor_android.cpp|src/layer0/visual/fn_visual_win32_key.cpp|src/layer0/visual/fn_visual_windows.cpp|src/visual_windows_glfw.cpp|src/layer0/wsi/fn_wsi_android.cpp|src/VKTS_time_windows.cpp|src/layer0/visual/fn_visual_android_keys.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+					</sourceEntries>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+		</cconfiguration>
+		<cconfiguration id="cdt.managedbuild.config.gnu.mingw.lib.debug.973422307.1527190138.1069909318.1228033740.84072678">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.mingw.lib.debug.973422307.1527190138.1069909318.1228033740.84072678" moduleId="org.eclipse.cdt.core.settings" name="intel64_Linux_Display_GNU_Release">
+				<externalSettings>
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS_Core"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/VKTS_PKG_Core"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS_Core/intel64_Linux_Display_GNU_Release"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/VKTS_PKG_Core/intel64_Linux_Display_GNU_Release"/>
+						<entry flags="RESOLVED" kind="libraryFile" name="VKTS_Core" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="VKTS_PKG_Core" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration artifactExtension="a" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.staticLib" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.staticLib,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="rm -rf" description="" errorParsers="org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GASErrorParser;org.eclipse.cdt.core.CWDLocator;org.eclipse.cdt.core.GmakeErrorParser" id="cdt.managedbuild.config.gnu.mingw.lib.debug.973422307.1527190138.1069909318.1228033740.84072678" name="intel64_Linux_Display_GNU_Release" parent="cdt.managedbuild.config.gnu.mingw.lib.debug" postannouncebuildStep="" postbuildStep="" preannouncebuildStep="" prebuildStep="">
+					<folderInfo id="cdt.managedbuild.config.gnu.mingw.lib.debug.973422307.1527190138.1069909318.1228033740.84072678." name="/" resourcePath="">
+						<toolChain errorParsers="" id="cdt.managedbuild.toolchain.gnu.base.1106709852" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.base">
+							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="cdt.managedbuild.target.gnu.platform.base.835556307" name="Debug Platform" osList="linux,hpux,aix,qnx" superClass="cdt.managedbuild.target.gnu.platform.base"/>
+							<builder buildPath="${workspace_loc:/VKTS}/x64__Linux__GCC_Debug" errorParsers="org.eclipse.cdt.core.GmakeErrorParser;org.eclipse.cdt.core.CWDLocator" id="cdt.managedbuild.target.gnu.builder.base.1444948366" keepEnvironmentInBuildfile="false" name="Gnu Make Builder" superClass="cdt.managedbuild.target.gnu.builder.base"/>
+							<tool command="ar" commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG} ${OUTPUT_PREFIX}${OUTPUT} ${INPUTS}" errorParsers="" id="cdt.managedbuild.tool.gnu.archiver.base.1878709840" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base"/>
+							<tool command="g++" commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG} ${OUTPUT_PREFIX}${OUTPUT} ${INPUTS}" errorParsers="org.eclipse.cdt.core.GCCErrorParser" id="cdt.managedbuild.tool.gnu.cpp.compiler.base.1207641206" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.base">
+								<option id="gnu.cpp.compiler.option.include.paths.1267742672" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_External/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS/include}&quot;"/>
+								</option>
+								<option id="gnu.cpp.compiler.option.optimization.level.1827743789" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.most" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.option.debugging.level.1461256376" name="Debug Level" superClass="gnu.cpp.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.debugging.level.none" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.option.other.other.845428487" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" useByScannerDiscovery="false" value="-c -fmessage-length=0 -std=c++11 -m64" valueType="string"/>
+								<option id="gnu.cpp.compiler.option.dialect.std.1895863833" name="Language standard" superClass="gnu.cpp.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.cpp.compiler.dialect.default" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.option.preprocessor.def.2066028818" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="VKTS_DISPLAY_VISUAL"/>
+								</option>
+								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.942405320" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
+							</tool>
+							<tool command="gcc" commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG} ${OUTPUT_PREFIX}${OUTPUT} ${INPUTS}" errorParsers="org.eclipse.cdt.core.GCCErrorParser" id="cdt.managedbuild.tool.gnu.c.compiler.base.639458353" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.base">
+								<option defaultValue="gnu.c.optimization.level.none" id="gnu.c.compiler.option.optimization.level.947108341" name="Optimization Level" superClass="gnu.c.compiler.option.optimization.level" useByScannerDiscovery="false" valueType="enumerated"/>
+								<option id="gnu.c.compiler.option.debugging.level.493586114" name="Debug Level" superClass="gnu.c.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.c.debugging.level.max" valueType="enumerated"/>
+								<option id="gnu.c.compiler.option.misc.other.104501174" name="Other flags" superClass="gnu.c.compiler.option.misc.other" useByScannerDiscovery="false" value="-c -fmessage-length=0" valueType="string"/>
+								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.580715919" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.c.linker.base.1404582276" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.base"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.base.2010538390" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.base"/>
+							<tool command="as" commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG} ${OUTPUT_PREFIX}${OUTPUT} ${INPUTS}" errorParsers="org.eclipse.cdt.core.GASErrorParser" id="cdt.managedbuild.tool.gnu.assembler.base.2095111439" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.base">
+								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.13680078" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+					<sourceEntries>
+						<entry excluding="src/layer0/visual/fn_visual_xlib.cpp|src/layer0/visual/fn_visual_android.cpp|src/layer0/visual/fn_visual_linux_touchpad.cpp|src/fn_visual_windows_glfw.cpp|src/layer0/visual/fn_visual_win32_glfw.cpp|src/time_windows.cpp|src/layer0/visual/fn_visual_display_linux.cpp|src/layer0/visual/fn_visual_android_glfw.cpp|src/VKTS_visual_windows_glfw.cpp|src/layer0/visual/fn_visual_android_key.cpp|src/layer0/visual/fn_visual_display_linux_key.cpp|src/fn_time_windows.cpp|src/layer0/wsi/fn_wsi_win32.cpp|src/layer0/visual/fn_visual_xlib_key.cpp|src/layer0/visual/fn_visual_win32_keys.cpp|src/layer0/file/fn_file_windows.cpp|src/layer0/visual/fn_visual_win32.cpp|src/core/file/fn_file_windows.cpp|src/layer0/visual/fn_visual_windows_glfw.cpp|src/fn_visual_windows.cpp|src/layer0/processor/fn_processor_windows.cpp|src/core/processor/fn_processor_windows.cpp|src/layer0/file/fn_file_android.cpp|src/layer0/wsi/fn_wsi_display.cpp|src/VKTS_visual_windows.cpp|src/core/file/fn_file_android.cpp|src/layer0/visual/fn_visual_none.cpp|src/layer0/wsi/fn_wsi_xlib.cpp|src/layer0/profile/fn_profile_windows.cpp|src/layer0/visual/fn_visual_display.cpp|src/core/profile/fn_profile_windows.cpp|src/layer0/processor/fn_processor_android.cpp|src/visual_windows.cpp|src/core/processor/fn_processor_android.cpp|src/layer0/visual/fn_visual_win32_key.cpp|src/layer0/visual/fn_visual_windows.cpp|src/visual_windows_glfw.cpp|src/layer0/wsi/fn_wsi_android.cpp|src/VKTS_time_windows.cpp|src/layer0/visual/fn_visual_android_keys.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

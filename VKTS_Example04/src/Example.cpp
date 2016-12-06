@@ -26,8 +26,8 @@
 
 #include "Example.hpp"
 
-Example::Example(const vkts::IInitialResourcesSP& initialResources, const int32_t windowIndex, const vkts::ISurfaceSP& surface) :
-		IUpdateThread(), initialResources(initialResources), windowIndex(windowIndex), surface(surface), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), descriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), fragmentUniformBuffer(nullptr), vertexShaderModule(nullptr), fragmentShaderModule(nullptr), pipelineLayout(nullptr), sceneContext(nullptr), scene(nullptr), swapchain(nullptr), renderPass(nullptr), allGraphicsPipelines(), depthTexture(nullptr), depthStencilImageView(nullptr), swapchainImagesCount(0), swapchainImageView(), framebuffer(), cmdBuffer()
+Example::Example(const vkts::IContextObjectSP& contextObject, const int32_t windowIndex, const vkts::IVisualContextSP& visualContext, const vkts::ISurfaceSP& surface) :
+		IUpdateThread(), contextObject(contextObject), windowIndex(windowIndex), visualContext(visualContext), surface(surface), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), descriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), fragmentUniformBuffer(nullptr), vertexShaderModule(nullptr), fragmentShaderModule(nullptr), pipelineLayout(nullptr), renderFactory(nullptr), sceneManager(nullptr), sceneFactory(nullptr), scene(nullptr), swapchain(nullptr), renderPass(nullptr), allGraphicsPipelines(), depthTexture(nullptr), depthStencilImageView(nullptr), swapchainImagesCount(0), swapchainImageView(), framebuffer(), cmdBuffer()
 {
 }
 
@@ -39,7 +39,7 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 {
 	VkResult result;
 
-	cmdBuffer[usedBuffer] = vkts::commandBuffersCreate(initialResources->getDevice()->getDevice(), commandPool->getCmdPool(), VK_COMMAND_BUFFER_LEVEL_PRIMARY, 1);
+	cmdBuffer[usedBuffer] = vkts::commandBuffersCreate(contextObject->getDevice()->getDevice(), commandPool->getCmdPool(), VK_COMMAND_BUFFER_LEVEL_PRIMARY, 1);
 
 	if (!cmdBuffer[usedBuffer].get())
 	{
@@ -115,7 +115,7 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 
 	if (scene.get())
 	{
-		scene->bindDrawIndexedRecursive(cmdBuffer[usedBuffer], allGraphicsPipelines);
+		scene->drawRecursive(cmdBuffer[usedBuffer], allGraphicsPipelines);
 	}
 
 	cmdBuffer[usedBuffer]->cmdEndRenderPass();
@@ -145,7 +145,7 @@ VkBool32 Example::buildFramebuffer(const int32_t usedBuffer)
 	imageViews[0] = swapchainImageView[usedBuffer]->getImageView();
 	imageViews[1] = depthStencilImageView->getImageView();
 
-	framebuffer[usedBuffer] = vkts::framebufferCreate(initialResources->getDevice()->getDevice(), 0, renderPass->getRenderPass(), 2, imageViews, swapchain->getImageExtent().width, swapchain->getImageExtent().height, 1);
+	framebuffer[usedBuffer] = vkts::framebufferCreate(contextObject->getDevice()->getDevice(), 0, renderPass->getRenderPass(), 2, imageViews, swapchain->getImageExtent().width, swapchain->getImageExtent().height, 1);
 
 	if (!framebuffer[usedBuffer].get())
 	{
@@ -162,7 +162,7 @@ VkBool32 Example::buildSwapchainImageView(const int32_t usedBuffer)
 	VkComponentMapping componentMapping = { VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_G, VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_A };
 	VkImageSubresourceRange imageSubresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
 
-	swapchainImageView[usedBuffer] = vkts::imageViewCreate(initialResources->getDevice()->getDevice(), 0, swapchain->getAllSwapchainImages()[usedBuffer], VK_IMAGE_VIEW_TYPE_2D, swapchain->getImageFormat(), componentMapping, imageSubresourceRange);
+	swapchainImageView[usedBuffer] = vkts::imageViewCreate(contextObject->getDevice()->getDevice(), 0, swapchain->getAllSwapchainImages()[usedBuffer], VK_IMAGE_VIEW_TYPE_2D, swapchain->getImageFormat(), componentMapping, imageSubresourceRange);
 
 	if (!swapchainImageView[usedBuffer].get())
 	{
@@ -222,42 +222,33 @@ VkBool32 Example::updateDescriptorSets()
 	return VK_TRUE;
 }
 
-VkBool32 Example::buildScene(const vkts::ICommandBuffersSP& cmdBuffer)
+VkBool32 Example::buildScene(const vkts::ICommandObjectSP& commandObject)
 {
-	VkSamplerCreateInfo samplerCreateInfo{};
+	renderFactory = vkts::sceneRenderFactoryCreate(descriptorSetLayout, vkts::IRenderPassSP());
 
-	samplerCreateInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+	if (!renderFactory.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create data factory.");
 
-	samplerCreateInfo.flags = 0;
-	samplerCreateInfo.magFilter = VK_FILTER_LINEAR;
-	samplerCreateInfo.minFilter = VK_FILTER_LINEAR;
-	samplerCreateInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-	samplerCreateInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-	samplerCreateInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-	samplerCreateInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-	samplerCreateInfo.mipLodBias = 0.0f;
-	samplerCreateInfo.maxAnisotropy = 1.0f;
-	samplerCreateInfo.compareEnable = VK_FALSE;
-	samplerCreateInfo.compareOp = VK_COMPARE_OP_NEVER;
-	samplerCreateInfo.minLod = 0.0f;
-	samplerCreateInfo.maxLod = 0.0f;
-	samplerCreateInfo.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
-	samplerCreateInfo.unnormalizedCoordinates = VK_FALSE;
+		return VK_FALSE;
+	}
 
-	VkImageViewCreateInfo imageViewCreateInfo{};
+	//
 
-	imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+	sceneFactory = vkts::sceneFactoryCreate(renderFactory);
 
-	imageViewCreateInfo.flags = 0;
-	imageViewCreateInfo.image = VK_NULL_HANDLE;		// Defined later.
-	imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-	imageViewCreateInfo.format = VK_FORMAT_UNDEFINED;		// Defined later.
-	imageViewCreateInfo.components = {VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_G, VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_A};
-	imageViewCreateInfo.subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
+	if (!sceneFactory.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create factory.");
 
-	sceneContext = vkts::scenegraphCreateContext(VK_FALSE, initialResources, cmdBuffer, samplerCreateInfo, imageViewCreateInfo, descriptorSetLayout);
+		return VK_FALSE;
+	}
 
-	if (!sceneContext.get())
+	//
+
+	sceneManager = vkts::sceneManagerCreate(VK_FALSE, contextObject, commandObject);
+
+	if (!sceneManager.get())
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create cache.");
 
@@ -266,7 +257,7 @@ VkBool32 Example::buildScene(const vkts::ICommandBuffersSP& cmdBuffer)
 
 	//
 
-	scene = vkts::scenegraphLoadScene(VKTS_SCENE_NAME, sceneContext);
+	scene = vkts::sceneLoad(VKTS_SCENE_NAME, sceneManager, sceneFactory);
 
 	if (!scene.get())
 	{
@@ -285,7 +276,7 @@ VkBool32 Example::buildDepthStencilImageView()
 	VkComponentMapping componentMapping = { VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY };
 	VkImageSubresourceRange imageSubresourceRange = { VK_IMAGE_ASPECT_DEPTH_BIT, 0, 1, 0, 1 };
 
-	depthStencilImageView = vkts::imageViewCreate(initialResources->getDevice()->getDevice(), 0, depthTexture->getImage()->getImage(), VK_IMAGE_VIEW_TYPE_2D, depthTexture->getImage()->getFormat(), componentMapping, imageSubresourceRange);
+	depthStencilImageView = vkts::imageViewCreate(contextObject->getDevice()->getDevice(), 0, depthTexture->getImage()->getImage(), VK_IMAGE_VIEW_TYPE_2D, depthTexture->getImage()->getFormat(), componentMapping, imageSubresourceRange);
 
 	if (!depthStencilImageView.get())
 	{
@@ -319,7 +310,7 @@ VkBool32 Example::buildDepthTexture(const vkts::ICommandBuffersSP& cmdBuffer)
 
 	VkImageSubresourceRange subresourceRange = { VK_IMAGE_ASPECT_DEPTH_BIT, 0, 1, 0, 1 };
 
-	depthTexture = vkts::memoryImageCreate(initialResources, cmdBuffer, "DepthTexture", imageCreateInfo, 0, VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, subresourceRange, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+	depthTexture = vkts::imageObjectCreate(contextObject, cmdBuffer, "DepthTexture", imageCreateInfo, 0, VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, subresourceRange, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
 	if (!depthTexture.get())
 	{
@@ -358,7 +349,7 @@ VkBool32 Example::buildPipeline()
 	VkVertexInputBindingDescription vertexInputBindingDescription{};
 
 	vertexInputBindingDescription.binding = VKTS_BINDING_VERTEX_BUFFER;
-	vertexInputBindingDescription.stride = vkts::commonGetStrideInBytes(vertexBufferType);
+	vertexInputBindingDescription.stride = vkts::alignmentGetStrideInBytes(vertexBufferType);
 	vertexInputBindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
 	VkVertexInputAttributeDescription vertexInputAttributeDescription[3]{};
@@ -366,17 +357,17 @@ VkBool32 Example::buildPipeline()
 	vertexInputAttributeDescription[0].location = 0;
 	vertexInputAttributeDescription[0].binding = VKTS_BINDING_VERTEX_BUFFER;
 	vertexInputAttributeDescription[0].format = VK_FORMAT_R32G32B32A32_SFLOAT;
-	vertexInputAttributeDescription[0].offset = vkts::commonGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_VERTEX, vertexBufferType);
+	vertexInputAttributeDescription[0].offset = vkts::alignmentGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_VERTEX, vertexBufferType);
 
 	vertexInputAttributeDescription[1].location = 1;
 	vertexInputAttributeDescription[1].binding = VKTS_BINDING_VERTEX_BUFFER;
 	vertexInputAttributeDescription[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-	vertexInputAttributeDescription[1].offset = vkts::commonGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_NORMAL, vertexBufferType);
+	vertexInputAttributeDescription[1].offset = vkts::alignmentGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_NORMAL, vertexBufferType);
 
 	vertexInputAttributeDescription[2].location = 2;
 	vertexInputAttributeDescription[2].binding = VKTS_BINDING_VERTEX_BUFFER;
 	vertexInputAttributeDescription[2].format = VK_FORMAT_R32G32_SFLOAT;
-	vertexInputAttributeDescription[2].offset = vkts::commonGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_TEXCOORD, vertexBufferType);
+	vertexInputAttributeDescription[2].offset = vkts::alignmentGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_TEXCOORD, vertexBufferType);
 
 	VkPipelineVertexInputStateCreateInfo pipelineVertexInputCreateInfo{};
 
@@ -548,7 +539,7 @@ VkBool32 Example::buildPipeline()
 	graphicsPipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE;
 	graphicsPipelineCreateInfo.basePipelineIndex = 0;
 
-	auto pipeline = vkts::pipelineCreateGraphics(initialResources->getDevice()->getDevice(), VK_NULL_HANDLE, graphicsPipelineCreateInfo, vertexBufferType);
+	auto pipeline = vkts::pipelineCreateGraphics(contextObject->getDevice()->getDevice(), VK_NULL_HANDLE, graphicsPipelineCreateInfo, vertexBufferType);
 
 	if (!pipeline.get())
 	{
@@ -609,7 +600,7 @@ VkBool32 Example::buildRenderPass()
 	subpassDescription.preserveAttachmentCount = 0;
 	subpassDescription.pPreserveAttachments = nullptr;
 
-	renderPass = vkts::renderPassCreate( initialResources->getDevice()->getDevice(), 0, 2, attachmentDescription, 1, &subpassDescription, 0, nullptr);
+	renderPass = vkts::renderPassCreate( contextObject->getDevice()->getDevice(), 0, 2, attachmentDescription, 1, &subpassDescription, 0, nullptr);
 
 	if (!renderPass.get())
 	{
@@ -627,7 +618,7 @@ VkBool32 Example::buildPipelineLayout()
 
 	setLayouts[0] = descriptorSetLayout->getDescriptorSetLayout();
 
-	pipelineLayout = vkts::pipelineCreateLayout(initialResources->getDevice()->getDevice(), 0, 1, setLayouts, 0, nullptr);
+	pipelineLayout = vkts::pipelineCreateLayout(contextObject->getDevice()->getDevice(), 0, 1, setLayouts, 0, nullptr);
 
 	if (!pipelineLayout.get())
 	{
@@ -672,7 +663,7 @@ VkBool32 Example::buildDescriptorSetLayout()
 
     //
 
-    descriptorSetLayout = vkts::descriptorSetLayoutCreate(initialResources->getDevice()->getDevice(), 0, VKTS_DESCRIPTOR_SET_COUNT, descriptorSetLayoutBinding);
+    descriptorSetLayout = vkts::descriptorSetLayoutCreate(contextObject->getDevice()->getDevice(), 0, VKTS_DESCRIPTOR_SET_COUNT, descriptorSetLayoutBinding);
 
 	if (!descriptorSetLayout.get())
 	{
@@ -706,7 +697,7 @@ VkBool32 Example::buildShader()
 
 	//
 
-	vertexShaderModule = vkts::shaderModuleCreate(VKTS_VERTEX_SHADER_NAME, initialResources->getDevice()->getDevice(), 0, vertexShaderBinary->getSize(), (uint32_t*)vertexShaderBinary->getData());
+	vertexShaderModule = vkts::shaderModuleCreate(VKTS_VERTEX_SHADER_NAME, contextObject->getDevice()->getDevice(), 0, vertexShaderBinary->getSize(), (uint32_t*)vertexShaderBinary->getData());
 
 	if (!vertexShaderModule.get())
 	{
@@ -715,7 +706,7 @@ VkBool32 Example::buildShader()
 		return VK_FALSE;
 	}
 
-	fragmentShaderModule = vkts::shaderModuleCreate(VKTS_FRAGMENT_SHADER_NAME, initialResources->getDevice()->getDevice(), 0, fragmentShaderBinary->getSize(), (uint32_t*)fragmentShaderBinary->getData());
+	fragmentShaderModule = vkts::shaderModuleCreate(VKTS_FRAGMENT_SHADER_NAME, contextObject->getDevice()->getDevice(), 0, fragmentShaderBinary->getSize(), (uint32_t*)fragmentShaderBinary->getData());
 
 	if (!fragmentShaderModule.get())
 	{
@@ -734,13 +725,13 @@ VkBool32 Example::buildUniformBuffers()
 	bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 
 	bufferCreateInfo.flags = 0;
-	bufferCreateInfo.size = vkts::commonGetDeviceSize(16 * sizeof(float) * 2, 16);
+	bufferCreateInfo.size = vkts::alignmentGetSizeInBytes(16 * sizeof(float) * 2, 16);
 	bufferCreateInfo.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
 	bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 	bufferCreateInfo.queueFamilyIndexCount = 0;
 	bufferCreateInfo.pQueueFamilyIndices = nullptr;
 
-	vertexViewProjectionUniformBuffer = vkts::bufferObjectCreate(initialResources, bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+	vertexViewProjectionUniformBuffer = vkts::bufferObjectCreate(contextObject, bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
 	if (!vertexViewProjectionUniformBuffer.get())
 	{
@@ -754,13 +745,13 @@ VkBool32 Example::buildUniformBuffers()
 	bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 
 	bufferCreateInfo.flags = 0;
-	bufferCreateInfo.size = vkts::commonGetDeviceSize(3 * sizeof(float), 16);
+	bufferCreateInfo.size = vkts::alignmentGetSizeInBytes(3 * sizeof(float), 16);
 	bufferCreateInfo.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
 	bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 	bufferCreateInfo.queueFamilyIndexCount = 0;
 	bufferCreateInfo.pQueueFamilyIndices = nullptr;
 
-	fragmentUniformBuffer = vkts::bufferObjectCreate(initialResources, bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+	fragmentUniformBuffer = vkts::bufferObjectCreate(contextObject, bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
 	if (!fragmentUniformBuffer.get())
 	{
@@ -782,7 +773,7 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 
 	VkSwapchainKHR oldSwapchain = lastSwapchain.get() ? lastSwapchain->getSwapchain() : VK_NULL_HANDLE;
 
-	swapchain = vkts::wsiSwapchainCreate(initialResources->getPhysicalDevice()->getPhysicalDevice(), initialResources->getDevice()->getDevice(), 0, surface->getSurface(), VKTS_NUMBER_BUFFERS, 1, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_SHARING_MODE_EXCLUSIVE, 0, nullptr, VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR, VK_TRUE, oldSwapchain);
+	swapchain = vkts::wsiSwapchainCreate(contextObject->getPhysicalDevice()->getPhysicalDevice(), contextObject->getDevice()->getDevice(), 0, surface->getSurface(), VKTS_NUMBER_BUFFERS, 1, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_SHARING_MODE_EXCLUSIVE, 0, nullptr, VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR, VK_PRESENT_MODE_FIFO_KHR, VK_TRUE, oldSwapchain);
 
 	if (!swapchain.get())
 	{
@@ -827,7 +818,7 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 
 	//
 
-	vkts::ICommandBuffersSP updateCmdBuffer = vkts::commandBuffersCreate(initialResources->getDevice()->getDevice(), commandPool->getCmdPool(), VK_COMMAND_BUFFER_LEVEL_PRIMARY, 1);
+	vkts::ICommandBuffersSP updateCmdBuffer = vkts::commandBuffersCreate(contextObject->getDevice()->getDevice(), commandPool->getCmdPool(), VK_COMMAND_BUFFER_LEVEL_PRIMARY, 1);
 
 	if (!updateCmdBuffer.get())
 	{
@@ -836,6 +827,18 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 		return VK_FALSE;
 	}
 
+	//
+
+	auto commandObject = vkts::commandObjectCreate(updateCmdBuffer);
+
+	if (!commandObject.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create command object.");
+
+		return VK_FALSE;
+	}
+
+	//
 
 	result = updateCmdBuffer->beginCommandBuffer(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT, VK_NULL_HANDLE, 0, VK_NULL_HANDLE, VK_FALSE, 0, 0);
 
@@ -857,7 +860,7 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 
 	if (!scene.get())
 	{
-		if (!buildScene(updateCmdBuffer))
+		if (!buildScene(commandObject))
 		{
 			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not build scene.");
 
@@ -888,7 +891,7 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 	submitInfo.signalSemaphoreCount = 0;
 	submitInfo.pSignalSemaphores = nullptr;
 
-	result = initialResources->getQueue()->submit(1, &submitInfo, VK_NULL_HANDLE);
+	result = contextObject->getQueue()->submit(1, &submitInfo, VK_NULL_HANDLE);
 
 	if (result != VK_SUCCESS)
 	{
@@ -897,7 +900,7 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 		return VK_FALSE;
 	}
 
-	result = initialResources->getQueue()->waitIdle();
+	result = contextObject->getQueue()->waitIdle();
 
 	if (result != VK_SUCCESS)
 	{
@@ -905,6 +908,8 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 
 		return VK_FALSE;
 	}
+
+	commandObject->destroy();
 
 	updateCmdBuffer->destroy();
 
@@ -953,9 +958,9 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 
 void Example::terminateResources(const vkts::IUpdateThreadContext& updateContext)
 {
-	if (initialResources.get())
+	if (contextObject.get())
 	{
-		if (initialResources->getDevice().get())
+		if (contextObject->getDevice().get())
 		{
 			for (int32_t i = 0; i < (int32_t)swapchainImagesCount; i++)
 			{
@@ -1004,18 +1009,20 @@ void Example::terminateResources(const vkts::IUpdateThreadContext& updateContext
 //
 VkBool32 Example::init(const vkts::IUpdateThreadContext& updateContext)
 {
-	if (!updateContext.isWindowAttached(windowIndex))
+	if (!visualContext->isWindowAttached(windowIndex))
 	{
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not get window.");
+
 		return VK_FALSE;
 	}
 
 	//
 
-	surface->hasCurrentExtentChanged(initialResources->getPhysicalDevice()->getPhysicalDevice());
+	surface->hasCurrentExtentChanged(contextObject->getPhysicalDevice()->getPhysicalDevice());
 
 	//
 
-	commandPool = vkts::commandPoolCreate(initialResources->getDevice()->getDevice(), 0, initialResources->getQueue()->getQueueFamilyIndex());
+	commandPool = vkts::commandPoolCreate(contextObject->getDevice()->getDevice(), 0, contextObject->getQueue()->getQueueFamilyIndex());
 
 	if (!commandPool.get())
 	{
@@ -1026,7 +1033,7 @@ VkBool32 Example::init(const vkts::IUpdateThreadContext& updateContext)
 
 	//
 
-    imageAcquiredSemaphore = vkts::semaphoreCreate(initialResources->getDevice()->getDevice(), 0);
+    imageAcquiredSemaphore = vkts::semaphoreCreate(contextObject->getDevice()->getDevice(), 0);
 
     if (!imageAcquiredSemaphore.get())
     {
@@ -1035,7 +1042,7 @@ VkBool32 Example::init(const vkts::IUpdateThreadContext& updateContext)
         return VK_FALSE;
     }
 
-    renderingCompleteSemaphore = vkts::semaphoreCreate(initialResources->getDevice()->getDevice(), 0);
+    renderingCompleteSemaphore = vkts::semaphoreCreate(contextObject->getDevice()->getDevice(), 0);
 
     if (!renderingCompleteSemaphore.get())
     {
@@ -1109,9 +1116,9 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 
 	//
 
-	if (surface->hasCurrentExtentChanged(initialResources->getPhysicalDevice()->getPhysicalDevice()))
+	if (surface->hasCurrentExtentChanged(contextObject->getPhysicalDevice()->getPhysicalDevice()))
 	{
-		const auto& currentExtent = surface->getCurrentExtent(initialResources->getPhysicalDevice()->getPhysicalDevice(), VK_FALSE);
+		const auto& currentExtent = surface->getCurrentExtent(contextObject->getPhysicalDevice()->getPhysicalDevice(), VK_FALSE);
 
 		if (currentExtent.width == 0 || currentExtent.height == 0)
 		{
@@ -1135,7 +1142,7 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 		glm::mat4 projectionMatrix(1.0f);
 		glm::mat4 viewMatrix(1.0f);
 
-		const auto& currentExtent = surface->getCurrentExtent(initialResources->getPhysicalDevice()->getPhysicalDevice(), VK_FALSE);
+		const auto& currentExtent = surface->getCurrentExtent(contextObject->getPhysicalDevice()->getPhysicalDevice(), VK_FALSE);
 
 		projectionMatrix = vkts::perspectiveMat4(45.0f, (float)currentExtent.width / (float)currentExtent.height, 1.0f, 100.0f);
 		viewMatrix = vkts::lookAtMat4(0.0f, 4.0f, 5.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
@@ -1155,7 +1162,7 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 
 		if (scene.get())
 		{
-			scene->updateRecursive(updateContext);
+			scene->updateTransformRecursive(updateContext.getDeltaTime(), updateContext.getDeltaTicks(), updateContext.getTickTime());
 		}
 
 		//
@@ -1178,7 +1185,7 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
         submitInfo.signalSemaphoreCount = 1;
         submitInfo.pSignalSemaphores = &signalSemaphores;
 
-		result = initialResources->getQueue()->submit(1, &submitInfo, VK_NULL_HANDLE);
+		result = contextObject->getQueue()->submit(1, &submitInfo, VK_NULL_HANDLE);
 
 		if (result != VK_SUCCESS)
 		{
@@ -1191,11 +1198,11 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 
         VkSwapchainKHR swapchains = swapchain->getSwapchain();
 
-        result = swapchain->queuePresent(initialResources->getQueue()->getQueue(), 1, &waitSemaphores, 1, &swapchains, &currentBuffer, nullptr);
+        result = swapchain->queuePresent(contextObject->getQueue()->getQueue(), 1, &waitSemaphores, 1, &swapchains, &currentBuffer, nullptr);
 
 		if (result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR)
 		{
-			result = initialResources->getQueue()->waitIdle();
+			result = contextObject->getQueue()->waitIdle();
 
 			if (result != VK_SUCCESS)
 			{
@@ -1254,19 +1261,29 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 //
 void Example::terminate(const vkts::IUpdateThreadContext& updateContext)
 {
-	if (initialResources.get())
+	if (contextObject.get())
 	{
-		if (initialResources->getDevice().get())
+		if (contextObject->getDevice().get())
 		{
 			terminateResources(updateContext);
 
 			//
 
-			if (sceneContext.get())
+			if (sceneFactory.get())
 			{
-				sceneContext->destroy();
+				sceneFactory.reset();
+			}
 
-				sceneContext.reset();
+			if (sceneManager.get())
+			{
+				sceneManager->destroy();
+
+				sceneManager.reset();
+			}
+
+			if (renderFactory.get())
+			{
+				renderFactory.reset();
 			}
 
 			if (scene.get())

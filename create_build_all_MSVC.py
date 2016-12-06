@@ -1,6 +1,7 @@
 import os
 import subprocess
 import sys
+import threading
 
 ####################
 #
@@ -8,6 +9,22 @@ import sys
 #
 ####################
         
+class BuildThread (threading.Thread):
+
+    def __init__(self, buildDirectory, buildOption):
+        threading.Thread.__init__(self)
+        self.buildDirectory = buildDirectory
+        self.buildOption = buildOption
+
+    def run(self):
+        print("Processing '%s' ..." % (self.buildDirectory))
+
+        directory = os.getcwd() + "/" + self.buildDirectory
+
+        subprocess.call("cmake -H%s -B%s %s" % (directory, directory + "/MSVC",self.buildOption), shell=True)
+        subprocess.call("msbuild %s.sln /p:Configuration=Release" % (directory + "/MSVC/" + self.buildDirectory), shell=True)
+
+        print("Finished '%s'." % (self.buildDirectory))
         
 ####################
 #
@@ -19,74 +36,48 @@ import sys
 # Pass '64bit' for 64bit project files.
 # 
 
-print("Creating and building all MSVC projects")
+print("Creating and building all MSVC projects ...")
 
-noVisual = ["VKTS_Example08"]
+#
 
-option = ""
+currentArchitecture = ""
 
 for x in range(1, len(sys.argv)):
     if sys.argv[x] == '64bit':
-        option = option + " " + '-G "Visual Studio 14 2015 Win64"'
-        
-for currentOption in ["", "-DVKTS_WSI=VKTS_NO_VISUAL"]:
-
-    isVisual = True
-
-    if currentOption == "-DVKTS_WSI=VKTS_NO_VISUAL":
-        isVisual = False
-        
-    finalOption = option + " " + currentOption
+        currentArchitecture = " " + '-G "Visual Studio 14 2015 Win64"'
     
-    #
+option = " -DCMAKE_BUILD_TYPE=Release" + currentArchitecture 
 
-    os.chdir("VKTS/MSVC")
+#
 
-    print("Processing 'VKTS'")
+allBuildThreads = []
 
-    subprocess.call("cmake .." + finalOption, shell=True)
-    subprocess.call("msbuild VKTS.sln /p:Configuration=Release", shell=True)
+allVKTS = os.listdir()
 
-    os.chdir("../..")
+for package in allVKTS:
+    if package.startswith("VKTS_PKG"):
+        currentBuildThread = BuildThread(package, option)
+        allBuildThreads.append(currentBuildThread)
+        currentBuildThread.start()
 
-    allExamples = os.listdir()
+for currentBuildThread in allBuildThreads:
+    currentBuildThread.join()
 
-    for example in allExamples:
+#
 
-        if isVisual and example in noVisual:
-            continue
-        elif not isVisual and example not in noVisual:
-            continue
+allBuildThreads = []
 
-        if example.startswith("VKTS_Example"):
-        
-            print("Processing '%s'" % (example))    
-            
-            os.chdir(example)
-            os.chdir("MSVC")
+allVKTS = os.listdir()
 
-            subprocess.call("cmake .." + finalOption, shell=True)
-            subprocess.call("msbuild %s.sln /p:Configuration=Release" % (example), shell=True)
+for package in allVKTS:
+    if package.startswith("VKTS_Example") or package.startswith("VKTS_Test"):
+        currentBuildThread = BuildThread(package, option)
+        allBuildThreads.append(currentBuildThread)
+        currentBuildThread.start()
 
-            os.chdir("../..")
+for currentBuildThread in allBuildThreads:
+    currentBuildThread.join()
 
-    allExamples = os.listdir()
+#
 
-    for example in allExamples:
-
-        if isVisual and example in noVisual:
-            continue
-        elif not isVisual and example not in noVisual:
-            continue
-
-        if example.startswith("VKTS_Test"):
-        
-            print("Processing '%s'" % (example))    
-        
-            os.chdir(example)
-            os.chdir("MSVC")
-
-            subprocess.call("cmake .." + finalOption, shell=True)
-            subprocess.call("msbuild %s.sln /p:Configuration=Release" % (example), shell=True)
-
-            os.chdir("../..")        
+print("Done.")

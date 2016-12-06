@@ -1,5 +1,5 @@
-Execute and debug:
-------------------
+Execute and debug examples:
+---------------------------
 
 To enable the standard set of Vulkan validation layers, set the following environment variables:
   

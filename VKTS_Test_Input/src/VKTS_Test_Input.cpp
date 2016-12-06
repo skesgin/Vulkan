@@ -1,4 +1,4 @@
-#include <vkts/vkts.hpp>
+#include <vkts/vkts_no_vulkan.hpp>
 
 class Test : public vkts::IUpdateThread
 {
@@ -9,10 +9,12 @@ private:
 
 	int32_t windowIndex;
 
+	vkts::IVisualContextSP visualContext;
+
 public:
 
-	Test(const int32_t displayIndex, const int32_t windowIndex) :
-			IUpdateThread(), displayIndex(displayIndex), windowIndex(windowIndex)
+	Test(const int32_t displayIndex, const int32_t windowIndex, const vkts::IVisualContextSP& visualContext) :
+			IUpdateThread(), displayIndex(displayIndex), windowIndex(windowIndex), visualContext(visualContext)
 	{
 	}
 
@@ -22,12 +24,17 @@ public:
 
 	virtual VkBool32 init(const vkts::IUpdateThreadContext& updateContext)
 	{
-		if (!updateContext.isDisplayAttached(displayIndex))
+		if (!visualContext.get())
 		{
 			return VK_FALSE;
 		}
 
-		if (!updateContext.isWindowAttached(windowIndex))
+		if (!visualContext->isDisplayAttached(displayIndex))
+		{
+			return VK_FALSE;
+		}
+
+		if (!visualContext->isWindowAttached(windowIndex))
 		{
 			return VK_FALSE;
 		}
@@ -41,62 +48,62 @@ public:
 		// Mouse.
 		//
 
-		static glm::ivec2 lastMouseLocation = updateContext.getMouseLocation(windowIndex);
+		static glm::ivec2 lastMouseLocation = visualContext->getMouseLocation(windowIndex);
 
 		static VkBool32 lastMouseButtons[3] = { VK_FALSE, VK_FALSE, VK_FALSE };
 
-		static int32_t lastMouseWheel = updateContext.getMouseWheel(windowIndex);
+		static int32_t lastMouseWheel = visualContext->getMouseWheel(windowIndex);
 
-		if (updateContext.getMouseButton(windowIndex, VKTS_MOUSE_BUTTON_LEFT) && !lastMouseButtons[VKTS_MOUSE_BUTTON_LEFT])
+		if (visualContext->getMouseButton(windowIndex, VKTS_MOUSE_BUTTON_LEFT) && !lastMouseButtons[VKTS_MOUSE_BUTTON_LEFT])
 		{
 			vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Left mouse button pressed.");
 
 			lastMouseButtons[VKTS_MOUSE_BUTTON_LEFT] = VK_TRUE;
 		}
-		if (updateContext.getMouseButton(windowIndex, VKTS_MOUSE_BUTTON_RIGHT) && !lastMouseButtons[VKTS_MOUSE_BUTTON_RIGHT])
+		if (visualContext->getMouseButton(windowIndex, VKTS_MOUSE_BUTTON_RIGHT) && !lastMouseButtons[VKTS_MOUSE_BUTTON_RIGHT])
 		{
 			vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Right mouse button pressed.");
 
 			lastMouseButtons[VKTS_MOUSE_BUTTON_RIGHT] = VK_TRUE;
 		}
-		if (updateContext.getMouseButton(windowIndex, VKTS_MOUSE_BUTTON_MIDDLE) && !lastMouseButtons[VKTS_MOUSE_BUTTON_MIDDLE])
+		if (visualContext->getMouseButton(windowIndex, VKTS_MOUSE_BUTTON_MIDDLE) && !lastMouseButtons[VKTS_MOUSE_BUTTON_MIDDLE])
 		{
 			vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Middle mouse button pressed.");
 
 			lastMouseButtons[VKTS_MOUSE_BUTTON_MIDDLE] = VK_TRUE;
 		}
 
-		if (!updateContext.getMouseButton(windowIndex, VKTS_MOUSE_BUTTON_LEFT) && lastMouseButtons[VKTS_MOUSE_BUTTON_LEFT])
+		if (!visualContext->getMouseButton(windowIndex, VKTS_MOUSE_BUTTON_LEFT) && lastMouseButtons[VKTS_MOUSE_BUTTON_LEFT])
 		{
 			vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Left mouse button released.");
 
 			lastMouseButtons[VKTS_MOUSE_BUTTON_LEFT] = VK_FALSE;
 		}
-		if (!updateContext.getMouseButton(windowIndex, VKTS_MOUSE_BUTTON_RIGHT) && lastMouseButtons[VKTS_MOUSE_BUTTON_RIGHT])
+		if (!visualContext->getMouseButton(windowIndex, VKTS_MOUSE_BUTTON_RIGHT) && lastMouseButtons[VKTS_MOUSE_BUTTON_RIGHT])
 		{
 			vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Right mouse button released.");
 
 			lastMouseButtons[VKTS_MOUSE_BUTTON_RIGHT] = VK_FALSE;
 		}
-		if (!updateContext.getMouseButton(windowIndex, VKTS_MOUSE_BUTTON_MIDDLE) && lastMouseButtons[VKTS_MOUSE_BUTTON_MIDDLE])
+		if (!visualContext->getMouseButton(windowIndex, VKTS_MOUSE_BUTTON_MIDDLE) && lastMouseButtons[VKTS_MOUSE_BUTTON_MIDDLE])
 		{
 			vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Middle mouse button released.");
 
 			lastMouseButtons[VKTS_MOUSE_BUTTON_MIDDLE] = VK_FALSE;
 		}
 
-		if (lastMouseLocation.x != updateContext.getMouseLocation(windowIndex).x || lastMouseLocation.y != updateContext.getMouseLocation(windowIndex).y)
+		if (lastMouseLocation.x != visualContext->getMouseLocation(windowIndex).x || lastMouseLocation.y != visualContext->getMouseLocation(windowIndex).y)
 		{
-			vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Mouse location changed: %d %d", updateContext.getMouseLocation(windowIndex).x, updateContext.getMouseLocation(windowIndex).y);
+			vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Mouse location changed: %d %d", visualContext->getMouseLocation(windowIndex).x, visualContext->getMouseLocation(windowIndex).y);
 
-			lastMouseLocation = updateContext.getMouseLocation(windowIndex);
+			lastMouseLocation = visualContext->getMouseLocation(windowIndex);
 		}
 
-		if (lastMouseWheel != updateContext.getMouseWheel(windowIndex))
+		if (lastMouseWheel != visualContext->getMouseWheel(windowIndex))
 		{
-			vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Mouse wheel changed: %d", updateContext.getMouseWheel(windowIndex));
+			vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Mouse wheel changed: %d", visualContext->getMouseWheel(windowIndex));
 
-			lastMouseWheel = updateContext.getMouseWheel(windowIndex);
+			lastMouseWheel = visualContext->getMouseWheel(windowIndex);
 		}
 
 		//
@@ -107,7 +114,7 @@ public:
 
 		for (int32_t keyCode = 0; keyCode <= 1024; keyCode++)
 		{
-			if (updateContext.getKey(windowIndex, keyCode) && !lastKeys[keyCode])
+			if (visualContext->getKey(windowIndex, keyCode) && !lastKeys[keyCode])
 			{
 				vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Key pressed: %d", keyCode);
 
@@ -118,7 +125,7 @@ public:
 
 				lastKeys[keyCode] = VK_TRUE;
 			}
-			if (!updateContext.getKey(windowIndex, keyCode) && lastKeys[keyCode])
+			if (!visualContext->getKey(windowIndex, keyCode) && lastKeys[keyCode])
 			{
 				vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Key released: %d", keyCode);
 
@@ -141,13 +148,13 @@ public:
 
 		for (int32_t buttonIndex = 0; buttonIndex < VKTS_MAX_GAMEPAD_BUTTONS; buttonIndex++)
 		{
-			if (updateContext.getGamepadButton(windowIndex, 0, buttonIndex) && !lastGamepadButtons[buttonIndex])
+			if (visualContext->getGamepadButton(windowIndex, 0, buttonIndex) && !lastGamepadButtons[buttonIndex])
 			{
 				vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Gamepad button pressed: %d", buttonIndex);
 
 				lastGamepadButtons[buttonIndex] = VK_TRUE;
 			}
-			if (!updateContext.getGamepadButton(windowIndex, 0, buttonIndex) && lastGamepadButtons[buttonIndex])
+			if (!visualContext->getGamepadButton(windowIndex, 0, buttonIndex) && lastGamepadButtons[buttonIndex])
 			{
 				vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Gamepad button released: %d", buttonIndex);
 
@@ -157,11 +164,11 @@ public:
 
 		for (int32_t axisIndex = 0; axisIndex < VKTS_MAX_GAMEPAD_AXIS; axisIndex++)
 		{
-			if (updateContext.getGamepadAxis(windowIndex, 0, axisIndex) != lastJoystickAxis[axisIndex])
+			if (visualContext->getGamepadAxis(windowIndex, 0, axisIndex) != lastJoystickAxis[axisIndex])
 			{
-				vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Gamepad axis changed: %d %f", axisIndex, updateContext.getGamepadAxis(windowIndex, 0, axisIndex));
+				vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Gamepad axis changed: %d %f", axisIndex, visualContext->getGamepadAxis(windowIndex, 0, axisIndex));
 
-				lastJoystickAxis[axisIndex] = updateContext.getGamepadAxis(windowIndex, 0, axisIndex);
+				lastJoystickAxis[axisIndex] = visualContext->getGamepadAxis(windowIndex, 0, axisIndex);
 			}
 		}
 
@@ -180,7 +187,7 @@ int main(int argc, char* argv[])
 	// Engine initialization.
 	//
 
-	if (!vkts::engineInit())
+	if (!vkts::engineInit(vkts::visualDispatchMessages))
 	{
 		return -1;
 	}
@@ -238,12 +245,27 @@ int main(int argc, char* argv[])
 	// Example setup.
 	//
 
+	auto visualContext = vkts::visualCreateContext();
+
+	if (!visualContext.get())
+	{
+		display->destroy();
+
+		vkts::visualTerminate();
+
+		vkts::engineTerminate();
+
+		return -1;
+	}
+
 	// Single threaded application, so it is safe to pass display and window.
-	vkts::IUpdateThreadSP example = vkts::IUpdateThreadSP(new Test(display->getIndex(), window->getIndex()));
+	vkts::IUpdateThreadSP example = vkts::IUpdateThreadSP(new Test(display->getIndex(), window->getIndex(), visualContext));
 
 	if (!example.get())
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create application.");
+
+		visualContext.reset();
 
 		window->destroy();
 
@@ -268,6 +290,8 @@ int main(int argc, char* argv[])
 	//
 	// Termination.
 	//
+
+	visualContext.reset();
 
 	window->destroy();
 

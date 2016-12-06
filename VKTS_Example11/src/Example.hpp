@@ -64,9 +64,11 @@ class Example: public vkts::IUpdateThread
 
 private:
 
-	const vkts::IInitialResourcesSP initialResources;
+	const vkts::IContextObjectSP contextObject;
 
 	const int32_t windowIndex;
+
+	const vkts::IVisualContextSP visualContext;
 
 	const vkts::ISurfaceSP surface;
 
@@ -108,7 +110,9 @@ private:
 	ILoadTaskSP loadTask;
 
 	VkBool32 sceneLoaded;
-	vkts::IContextSP sceneContext;
+	vkts::ISceneRenderFactorySP renderFactory;
+	vkts::ISceneManagerSP sceneManager;
+	vkts::ISceneFactorySP sceneFactory;
 	vkts::ISceneSP scene;
 
     vkts::ISwapchainSP swapchain;
@@ -122,11 +126,11 @@ private:
 	vkts::SmartPointerVector<vkts::IGraphicsPipelineSP> allBlendCwGraphicsPipelines;
 	vkts::SmartPointerVector<vkts::IGraphicsPipelineSP> allShadowGraphicsPipelines;
 
-	vkts::IMemoryImageSP shadowTexture;
-	vkts::IMemoryImageSP msaaColorTexture;
-	vkts::IMemoryImageSP msaaDepthTexture;
-	vkts::IMemoryImageSP depthTexture;
-	vkts::IMemoryImageSP voxelTexture[3];
+	vkts::IImageObjectSP shadowTexture;
+	vkts::IImageObjectSP msaaColorTexture;
+	vkts::IImageObjectSP msaaDepthTexture;
+	vkts::IImageObjectSP depthTexture;
+	vkts::IImageObjectSP voxelTexture[3];
 
 	vkts::IImageViewSP shadowImageView;
 	vkts::IImageViewSP msaaColorImageView;
@@ -195,7 +199,7 @@ private:
 
 public:
 
-	Example(const vkts::IInitialResourcesSP& initialResources, const int32_t windowIndex, const vkts::ISurfaceSP& surface);
+	Example(const vkts::IContextObjectSP& contextObject, const int32_t windowIndex, const vkts::IVisualContextSP& visualContext, const vkts::ISurfaceSP& surface);
 
 	virtual ~Example();
 

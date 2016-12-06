@@ -1,5 +1,5 @@
-First steps using VKTS:
------------------------
+First steps:
+------------
   
 Before beginning, please download the assets from my website:
   

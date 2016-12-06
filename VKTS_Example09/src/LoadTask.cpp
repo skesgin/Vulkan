@@ -28,7 +28,7 @@
 
 VkBool32 LoadTask::execute()
 {
-	commandPool = vkts::commandPoolCreate(initialResources->getDevice()->getDevice(), 0, initialResources->getQueue()->getQueueFamilyIndex());
+	commandPool = vkts::commandPoolCreate(contextObject->getDevice()->getDevice(), 0, contextObject->getQueue()->getQueueFamilyIndex());
 
 	if (!commandPool.get())
 	{
@@ -39,7 +39,7 @@ VkBool32 LoadTask::execute()
 
 	//
 
-	cmdBuffer = vkts::commandBuffersCreate(initialResources->getDevice()->getDevice(), commandPool->getCmdPool(), VK_COMMAND_BUFFER_LEVEL_PRIMARY, 1);
+	cmdBuffer = vkts::commandBuffersCreate(contextObject->getDevice()->getDevice(), commandPool->getCmdPool(), VK_COMMAND_BUFFER_LEVEL_PRIMARY, 1);
 
 	if (!cmdBuffer.get())
 	{
@@ -48,6 +48,16 @@ VkBool32 LoadTask::execute()
 		return VK_FALSE;
 	}
 
+	//
+
+	commandObject = vkts::commandObjectCreate(cmdBuffer);
+
+	if (!commandObject.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create command object.");
+
+		return VK_FALSE;
+	}
 	//
 
 	auto result = cmdBuffer->beginCommandBuffer(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT, VK_NULL_HANDLE, 0, VK_NULL_HANDLE, VK_FALSE, 0, 0);
@@ -61,40 +71,31 @@ VkBool32 LoadTask::execute()
 
 	//
 
-	VkSamplerCreateInfo samplerCreateInfo{};
+	renderFactory = vkts::sceneRenderFactoryCreate(descriptorSetLayout, vkts::IRenderPassSP());
 
-	samplerCreateInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+	if (!renderFactory.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create data factory.");
 
-	samplerCreateInfo.flags = 0;
-	samplerCreateInfo.magFilter = VK_FILTER_LINEAR;
-	samplerCreateInfo.minFilter = VK_FILTER_LINEAR;
-	samplerCreateInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-	samplerCreateInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-	samplerCreateInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-	samplerCreateInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-	samplerCreateInfo.mipLodBias = 0.0f;
-	samplerCreateInfo.maxAnisotropy = 1.0f;
-	samplerCreateInfo.compareEnable = VK_FALSE;
-	samplerCreateInfo.compareOp = VK_COMPARE_OP_NEVER;
-	samplerCreateInfo.minLod = 0.0f;
-	samplerCreateInfo.maxLod = 0.0f;
-	samplerCreateInfo.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
-	samplerCreateInfo.unnormalizedCoordinates = VK_FALSE;
+		return VK_FALSE;
+	}
 
-	VkImageViewCreateInfo imageViewCreateInfo{};
+	//
 
-	imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+	sceneFactory = vkts::sceneFactoryCreate(renderFactory);
 
-	imageViewCreateInfo.flags = 0;
-	imageViewCreateInfo.image = VK_NULL_HANDLE;		// Defined later.
-	imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-	imageViewCreateInfo.format = VK_FORMAT_UNDEFINED;		// Defined later.
-	imageViewCreateInfo.components = {VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_G, VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_A};
-	imageViewCreateInfo.subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
+	if (!sceneFactory.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create factory.");
 
-	sceneContext = vkts::scenegraphCreateContext(VK_FALSE, initialResources, cmdBuffer, samplerCreateInfo, imageViewCreateInfo, descriptorSetLayout);
+		return VK_FALSE;
+	}
 
-	if (!sceneContext.get())
+	//
+
+	sceneManager = vkts::sceneManagerCreate(VK_FALSE, contextObject, commandObject);
+
+	if (!sceneManager.get())
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create cache.");
 
@@ -107,7 +108,7 @@ VkBool32 LoadTask::execute()
 
 	//
 
-	scene = vkts::scenegraphLoadScene(VKTS_SCENE_NAME, sceneContext);
+	scene = vkts::sceneLoad(VKTS_SCENE_NAME, sceneManager, sceneFactory);
 
 	if (!scene.get())
 	{
@@ -132,13 +133,18 @@ VkBool32 LoadTask::execute()
 	return VK_TRUE;
 }
 
-LoadTask::LoadTask(const vkts::IInitialResourcesSP& initialResources, const vkts::IDescriptorSetLayoutSP& descriptorSetLayout, vkts::IContextSP& sceneContext, vkts::ISceneSP& scene) :
-	ITask(0), initialResources(initialResources), descriptorSetLayout(descriptorSetLayout), sceneContext(sceneContext), scene(scene), commandPool(), cmdBuffer()
+LoadTask::LoadTask(const vkts::IContextObjectSP& contextObject, const vkts::IDescriptorSetLayoutSP& descriptorSetLayout, vkts::ISceneRenderFactorySP& renderFactory, vkts::ISceneManagerSP& sceneManager, vkts::ISceneFactorySP& sceneFactory, vkts::ISceneSP& scene) :
+	ITask(0), contextObject(contextObject), descriptorSetLayout(descriptorSetLayout), renderFactory(renderFactory), sceneManager(sceneManager), sceneFactory(sceneFactory), scene(scene), commandPool(), cmdBuffer(), commandObject()
 {
 }
 
 LoadTask::~LoadTask()
 {
+	if (commandObject.get())
+	{
+		commandObject->destroy();
+	}
+
 	if (cmdBuffer.get())
 	{
 		cmdBuffer->destroy();

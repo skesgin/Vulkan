@@ -45,6 +45,7 @@ copy("../../VKTS_Binaries/shader/SPIR/V/phong.vert.spv", "./assets/shader/SPIR/V
 copy("../../VKTS_Binaries/shader/SPIR/V/phong.frag.spv", "./assets/shader/SPIR/V/")
 copy("../../VKTS_Binaries/cartoon_tree_with_plane/*.vkts", "./assets/cartoon_tree_with_plane/")
 copy("../../VKTS_Binaries/cartoon_tree_with_plane/*.tga", "./assets/cartoon_tree_with_plane/")
+copy("../../VKTS_Binaries/cache/cartoon_tree_with_plane/*.tga", "./assets/cache/cartoon_tree_with_plane/")
 
 print("Building project")
 

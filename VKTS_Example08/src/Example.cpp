@@ -27,7 +27,7 @@
 #include "Example.hpp"
 
 Example::Example(const vkts::IInstanceSP& instance, const vkts::IPhysicalDeviceSP& physicalDevice, const vkts::IDeviceSP& device, const vkts::IQueueSP& queue) :
-		IUpdateThread(), instance(instance), physicalDevice(physicalDevice), device(device), queue(queue), fence(), computeShaderModule(), commandPool(), image(), deviceMemoryImage(), imageView(), descriptorSetLayout(), descriptorPool(), descriptorSet(), pipelineLayout(), pipeline(), cmdBuffer()
+		IUpdateThread(), instance(instance), physicalDevice(physicalDevice), device(device), queue(queue), fence(), computeShaderModule(), commandPool(), image(), deviceImageObject(), imageView(), descriptorSetLayout(), descriptorPool(), descriptorSet(), pipelineLayout(), pipeline(), cmdBuffer()
 {
 }
 
@@ -566,7 +566,7 @@ VkBool32 Example::createBuffer(vkts::IBufferSP& buffer, vkts::IDeviceMemorySP& d
 }
 
 
-VkBool32 Example::createTexture(vkts::IImageSP& currentImage, vkts::IDeviceMemorySP& currentDeviceMemoryImage, const VkImageTiling imageTiling, const VkImageUsageFlags usage, const VkImageLayout initialLayout, const VkMemoryPropertyFlags memoryPropertyFlagBits, const VkAccessFlags accessMask) const
+VkBool32 Example::createTexture(vkts::IImageSP& currentImage, vkts::IDeviceMemorySP& currentDeviceImageObject, const VkImageTiling imageTiling, const VkImageUsageFlags usage, const VkImageLayout initialLayout, const VkMemoryPropertyFlags memoryPropertyFlagBits, const VkAccessFlags accessMask) const
 {
 	VkResult result;
 
@@ -595,9 +595,9 @@ VkBool32 Example::createTexture(vkts::IImageSP& currentImage, vkts::IDeviceMemor
 
 	physicalDevice->getPhysicalDeviceMemoryProperties(physicalDeviceMemoryProperties);
 
-	currentDeviceMemoryImage = vkts::deviceMemoryCreate(device->getDevice(), memoryRequirements, VK_MAX_MEMORY_TYPES, physicalDeviceMemoryProperties.memoryTypes, memoryPropertyFlagBits);
+	currentDeviceImageObject = vkts::deviceMemoryCreate(device->getDevice(), memoryRequirements, VK_MAX_MEMORY_TYPES, physicalDeviceMemoryProperties.memoryTypes, memoryPropertyFlagBits);
 
-	if (!currentDeviceMemoryImage.get())
+	if (!currentDeviceImageObject.get())
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not allocate memory.");
 
@@ -606,7 +606,7 @@ VkBool32 Example::createTexture(vkts::IImageSP& currentImage, vkts::IDeviceMemor
 
 	// Bind image to memory.
 
-	result = vkBindImageMemory(device->getDevice(), currentImage->getImage(), currentDeviceMemoryImage->getDeviceMemory(), 0);
+	result = vkBindImageMemory(device->getDevice(), currentImage->getImage(), currentDeviceImageObject->getDeviceMemory(), 0);
 
 	if (result != VK_SUCCESS)
 	{
@@ -618,13 +618,13 @@ VkBool32 Example::createTexture(vkts::IImageSP& currentImage, vkts::IDeviceMemor
 	return VK_TRUE;
 }
 
-VkBool32 Example::destroyTexture(vkts::IImageSP& currentImage, vkts::IDeviceMemorySP& currentDeviceMemoryImage) const
+VkBool32 Example::destroyTexture(vkts::IImageSP& currentImage, vkts::IDeviceMemorySP& currentDeviceImageObject) const
 {
 	if (currentImage.get())
 	{
 		currentImage->destroy();
 
-		currentDeviceMemoryImage->destroy();
+		currentDeviceImageObject->destroy();
 	}
 
 	return VK_TRUE;
@@ -644,7 +644,7 @@ VkBool32 Example::buildTexture()
 		return VK_FALSE;
 	}
 
-	if (!createTexture(image, deviceMemoryImage, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_STORAGE_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, 0))
+	if (!createTexture(image, deviceImageObject, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_STORAGE_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, 0))
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create image.");
 
@@ -915,10 +915,10 @@ void Example::terminate(const vkts::IUpdateThreadContext& updateContext)
 	}
 
 
-	destroyTexture(image, deviceMemoryImage);
+	destroyTexture(image, deviceImageObject);
 
 	image.reset();
-	deviceMemoryImage.reset();
+	deviceImageObject.reset();
 
 
 	if (commandPool.get())

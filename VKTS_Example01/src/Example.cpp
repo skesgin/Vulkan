@@ -26,8 +26,8 @@
 
 #include "Example.hpp"
 
-Example::Example(const VkInstance instance, const VkPhysicalDevice physicalDevice, const int32_t windowIndex, const vkts::ISurfaceSP& surface, const VkDevice device, const uint32_t queueFamilyIndex, const VkQueue queue) :
-		IUpdateThread(), instance(instance), physicalDevice(physicalDevice), windowIndex(windowIndex), surface(surface), device(device), queueFamilyIndex(queueFamilyIndex), queue(queue), commandPool(VK_NULL_HANDLE), imageAcquiredSemaphore(VK_NULL_HANDLE), renderingCompleteSemaphore(VK_NULL_HANDLE), swapchainCreateInfo{}, swapchain(VK_NULL_HANDLE), renderPass(VK_NULL_HANDLE), swapchainImagesCount(0), swapchainImage(), swapchainImageView(), framebuffer(), cmdBuffer()
+Example::Example(const VkInstance instance, const VkPhysicalDevice physicalDevice, const int32_t windowIndex, const vkts::IVisualContextSP& visualContext, const vkts::ISurfaceSP& surface, const VkDevice device, const uint32_t queueFamilyIndex, const VkQueue queue) :
+		IUpdateThread(), instance(instance), physicalDevice(physicalDevice), windowIndex(windowIndex), visualContext(visualContext), surface(surface), device(device), queueFamilyIndex(queueFamilyIndex), queue(queue), commandPool(VK_NULL_HANDLE), imageAcquiredSemaphore(VK_NULL_HANDLE), renderingCompleteSemaphore(VK_NULL_HANDLE), swapchainCreateInfo{}, swapchain(VK_NULL_HANDLE), renderPass(VK_NULL_HANDLE), swapchainImagesCount(0), swapchainImage(), swapchainImageView(), framebuffer(), cmdBuffer()
 {
 }
 
@@ -545,7 +545,7 @@ void Example::terminateResources(const vkts::IUpdateThreadContext& updateContext
 //
 VkBool32 Example::init(const vkts::IUpdateThreadContext& updateContext)
 {
-	if (!updateContext.isWindowAttached(windowIndex))
+	if (!visualContext->isWindowAttached(windowIndex))
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not get window.");
 
