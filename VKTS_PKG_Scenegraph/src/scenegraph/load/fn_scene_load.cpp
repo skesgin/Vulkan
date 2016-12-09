@@ -2368,6 +2368,28 @@ static VkBool32 sceneLoadChannels(const char* directory, const char* filename, c
 
         if (parseIsToken(buffer, "name"))
         {
+        	if (channel.get() && VKTS_CONVERT_BEZIER)
+        	{
+        		auto optimizedChannel = sceneFactory->createChannel(sceneManager);
+
+                if (!optimizedChannel.get())
+                {
+                    logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Optimized channel not created: '%s'", channel->getName().c_str());
+
+                    return VK_FALSE;
+                }
+
+                if (!interpolateConvert(optimizedChannel, channel, VKTS_CONVERT_SAMPLING))
+                {
+                    logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not optimize channel: '%s'", channel->getName().c_str());
+
+                    return VK_FALSE;
+                }
+
+                sceneManager->removeChannel(channel);
+                sceneManager->addChannel(optimizedChannel);
+        	}
+
             if (!parseString(buffer, sdata))
             {
                 return VK_FALSE;
@@ -2520,6 +2542,28 @@ static VkBool32 sceneLoadChannels(const char* directory, const char* filename, c
             parseUnknownBuffer(buffer);
         }
     }
+
+	if (channel.get() && VKTS_CONVERT_BEZIER)
+	{
+		auto optimizedChannel = sceneFactory->createChannel(sceneManager);
+
+        if (!optimizedChannel.get())
+        {
+            logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Optimized channel not created: '%s'", channel->getName().c_str());
+
+            return VK_FALSE;
+        }
+
+        if (!interpolateConvert(optimizedChannel, channel, VKTS_CONVERT_SAMPLING))
+        {
+            logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not optimize channel: '%s'", channel->getName().c_str());
+
+            return VK_FALSE;
+        }
+
+        sceneManager->removeChannel(channel);
+        sceneManager->addChannel(optimizedChannel);
+	}
 
     return VK_TRUE;
 }

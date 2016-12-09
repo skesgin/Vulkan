@@ -42,7 +42,7 @@ VKTS_APICALL float VKTS_APIENTRY interpolate(const float key, const IChannelSP& 
  *
  * @ThreadSafe
  */
-VKTS_APICALL IChannelSP VKTS_APIENTRY interpolateConvert(IChannelSP& converted, const IChannelSP& channel, const float sampleTime);
+VKTS_APICALL VkBool32 VKTS_APIENTRY interpolateConvert(IChannelSP& converted, const IChannelSP& channel, const float sampleTime);
 
 }
 

@@ -27,8 +27,6 @@
 #ifndef VKTS_SCENEGRAPH_HPP_
 #define VKTS_SCENEGRAPH_HPP_
 
-// TODO: Convert all Bezier animations by appropriate sampling to linear animations.
-
 // TODO: Allow "multiple" uniform buffers in scene graph using dynamic offsets.
 
 // TODO: Import particle system.
@@ -47,6 +45,9 @@
 #define VKTS_BSDF_LENGTH 512
 #define VKTS_BSDF_M 8
 #define VKTS_BSDF_M_CUBE_MAP 10
+
+#define VKTS_CONVERT_BEZIER VK_TRUE
+#define VKTS_CONVERT_SAMPLING (1.0f/60.0f)
 
 /**
  * Types.

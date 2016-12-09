@@ -195,12 +195,16 @@ float VKTS_APIENTRY interpolate(const float key, const IChannelSP& channel)
     return channel->getValues()[currentIndex];
 }
 
-IChannelSP VKTS_APIENTRY interpolateConvert(IChannelSP& converted, const IChannelSP& channel, const float sampleTime)
+VkBool32 VKTS_APIENTRY interpolateConvert(IChannelSP& converted, const IChannelSP& channel, const float sampleTime)
 {
     if (!converted.get() || !channel.get() || sampleTime <= 0.0f)
     {
-        return IChannelSP();
+        return VK_FALSE;
     }
+
+    converted->setName(channel->getName());
+    converted->setTargetTransform(channel->getTargetTransform());
+    converted->setTargetTransformElement(channel->getTargetTransformElement());
 
     for (size_t i = 0; i < channel->getNumberEntries(); i++)
     {
@@ -235,7 +239,7 @@ IChannelSP VKTS_APIENTRY interpolateConvert(IChannelSP& converted, const IChanne
         }
     }
 
-    return converted;
+    return VK_TRUE;
 }
 
 }
