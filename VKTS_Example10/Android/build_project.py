@@ -43,6 +43,8 @@ print("Copying project assets")
 
 copy("../../VKTS_Binaries/shader/SPIR/V/font.vert.spv", "./assets/shader/SPIR/V/")
 copy("../../VKTS_Binaries/shader/SPIR/V/font.frag.spv", "./assets/shader/SPIR/V/")
+copy("../../VKTS_Binaries/shader/SPIR/V/font_df.vert.spv", "./assets/shader/SPIR/V/")
+copy("../../VKTS_Binaries/shader/SPIR/V/font_df.frag.spv", "./assets/shader/SPIR/V/")
 
 copy("../../VKTS_Binaries/shader/SPIR/V/bsdf.vert.spv", "./assets/shader/SPIR/V/")
 copy("../../VKTS_Binaries/shader/SPIR/V/bsdf_no_texcoord.vert.spv", "./assets/shader/SPIR/V/")
