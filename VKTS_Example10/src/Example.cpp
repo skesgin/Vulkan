@@ -220,19 +220,19 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 
 		sprintf(buffer, "Example FPS: %u\nExample RAM: %" SCNu64 " kb\nExample CPU: %.2f%%", fps, ram, cpuUsageApp);
 
-		float y = (float)swapchain->getImageExtent().height * 0.5f - 10.0f - font->getLineHeight(VKTS_FONT_SCALE);
+		float y = (float)swapchain->getImageExtent().height * 0.5f - 10.0f - font->getLineHeight(VKTS_FONT_SIZE);
 
-		font->drawText(cmdBuffer[usedBuffer], projectionMatrix, glm::vec2((float)swapchain->getImageExtent().width * -0.5f + 10.0f, y), buffer, VKTS_FONT_SCALE, glm::vec4(0.64f, 0.12f, 0.13f, 1.0f));
+		font->drawText(cmdBuffer[usedBuffer], projectionMatrix, glm::vec2((float)swapchain->getImageExtent().width * -0.5f + 10.0f, y), buffer, VKTS_FONT_SIZE, VKTS_FONT_COLOR);
 
-		y -= font->getLineHeight(VKTS_FONT_SCALE) * 4.0f;
+		y -= font->getLineHeight(VKTS_FONT_SIZE) * 4.0f;
 
 		for (uint32_t cpu = 0; cpu < processors; cpu++)
 		{
 			sprintf(buffer, "CPU%u: %.2f%%", cpu, cpuUsage[cpu]);
 
-			font->drawText(cmdBuffer[usedBuffer], projectionMatrix, glm::vec2((float)swapchain->getImageExtent().width * -0.5f + 10.0f, y), buffer, VKTS_FONT_SCALE, glm::vec4(0.64f, 0.12f, 0.13f, 1.0f));
+			font->drawText(cmdBuffer[usedBuffer], projectionMatrix, glm::vec2((float)swapchain->getImageExtent().width * -0.5f + 10.0f, y), buffer, VKTS_FONT_SIZE, VKTS_FONT_COLOR);
 
-			y -= font->getLineHeight(VKTS_FONT_SCALE);
+			y -= font->getLineHeight(VKTS_FONT_SIZE);
 		}
 	}
 
@@ -1481,7 +1481,7 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 			return VK_FALSE;
 		}
 
-		font = vkts::loadFont(VKTS_FONT_NAME, guiManager, guiFactory);
+		font = vkts::loadFont(VKTS_FONT_NAME, guiManager, guiFactory, VK_TRUE);
 
 		if (!font.get())
 		{

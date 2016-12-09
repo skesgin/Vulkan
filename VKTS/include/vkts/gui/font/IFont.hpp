@@ -53,6 +53,8 @@ public:
     virtual void setRenderFont(const IRenderFontSP& renderFond) = 0;
 
 
+	virtual VkBool32 isDistanceField() const = 0;
+
 	virtual const std::string& getFace() const = 0;
 
 	virtual float getSize() const = 0;

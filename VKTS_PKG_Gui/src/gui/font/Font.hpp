@@ -39,6 +39,8 @@ class Font: public IFont
 
 private:
 
+	const VkBool32 distanceField;
+
 	std::string face;
 
 	float size;
@@ -59,7 +61,8 @@ private:
 
 public:
 
-    Font();
+    Font() = delete;
+    Font(const VkBool32 distanceField);
     Font(const Font& other) = delete;
     Font(Font&& other) = delete;
     virtual ~Font();
@@ -97,6 +100,8 @@ public:
     //
     // IFont
     //
+
+	virtual VkBool32 isDistanceField() const override;
 
 	virtual const std::string& getFace() const override;
 

@@ -37,8 +37,9 @@
 
 #define VKTS_MAX_LIGHTS 16
 
-#define VKTS_FONT_NAME "font/Arial_128.fnt"
-#define VKTS_FONT_SCALE 32.0f
+#define VKTS_FONT_NAME "font/Arial_32_DF.fnt"
+#define VKTS_FONT_SIZE 16.0f
+#define VKTS_FONT_COLOR glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)
 
 
 #define VKTS_BSDF0_VERTEX_SHADER_NAME "shader/SPIR/V/bsdf.vert.spv"

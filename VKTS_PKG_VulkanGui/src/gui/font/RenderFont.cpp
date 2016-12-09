@@ -26,6 +26,8 @@
 
 #include "RenderFont.hpp"
 
+#define VKTS_SPREAD 4.0f
+
 namespace vkts
 {
 
@@ -100,6 +102,10 @@ void RenderFont::draw(const ICommandBuffersSP& cmdBuffer, const glm::mat4& viewP
 
 	const IChar* lastCharacter = nullptr;
 
+	//
+
+	float smoothing = 1.0f / (VKTS_SPREAD * fontScale);
+
 	for (auto c : text)
 	{
 		// Line break.
@@ -149,14 +155,19 @@ void RenderFont::draw(const ICommandBuffersSP& cmdBuffer, const glm::mat4& viewP
 
 		vkCmdPushConstants(cmdBuffer->getCommandBuffer(), graphicsPipeline->getLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(float) * 16, glm::value_ptr(transformVertex));
 
-		glm::mat3 translateTexCoord = translateMat3(currentCharacter->getX() / font.getScaleWidth(), (currentCharacter->getY() + currentCharacter->getHeight()) / font.getScaleHeight());
-		glm::mat3 scaleTexCoord = scaleMat3(currentCharacter->getWidth() / font.getScaleWidth(), -currentCharacter->getHeight() / font.getScaleHeight(), 1.0f);
+		glm::mat3 translateTexCoord = translateMat3(currentCharacter->getX() / font.getScaleWidth(), (font.getScaleHeight() - currentCharacter->getY() - currentCharacter->getHeight()) / font.getScaleHeight());
+		glm::mat3 scaleTexCoord = scaleMat3(currentCharacter->getWidth() / font.getScaleWidth(), currentCharacter->getHeight() / font.getScaleHeight(), 1.0f);
 
 		glm::mat3 transformTexCoord = translateTexCoord * scaleTexCoord;
 
 		vkCmdPushConstants(cmdBuffer->getCommandBuffer(), graphicsPipeline->getLayout(), VK_SHADER_STAGE_VERTEX_BIT, sizeof(float) * 16, sizeof(float) * 11, glm::value_ptr(glm::mat4(transformTexCoord)));
 
 		vkCmdPushConstants(cmdBuffer->getCommandBuffer(), graphicsPipeline->getLayout(), VK_SHADER_STAGE_VERTEX_BIT, sizeof(float) * 16 + sizeof(float) * 12, sizeof(float) * 4, glm::value_ptr(color));
+
+		if (font.isDistanceField())
+		{
+			vkCmdPushConstants(cmdBuffer->getCommandBuffer(), graphicsPipeline->getLayout(), VK_SHADER_STAGE_VERTEX_BIT, sizeof(float) * 16 + sizeof(float) * 12 + sizeof(float) * 4, sizeof(float) * 1, &smoothing);
+		}
 
 		// Expecting triangle strip as primitive topology.
 		vkCmdDraw(cmdBuffer->getCommandBuffer(), 4, 1, 0, 0);

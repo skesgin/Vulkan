@@ -36,7 +36,7 @@ namespace vkts
  *
  * @ThreadSafe
  */
-VKTS_APICALL IFontSP VKTS_APIENTRY loadFont(const char* filename, const IGuiManagerSP& guiManager, const IGuiFactorySP& guiFactory);
+VKTS_APICALL IFontSP VKTS_APIENTRY loadFont(const char* filename, const IGuiManagerSP& guiManager, const IGuiFactorySP& guiFactory, const VkBool32 distanceField);
 
 }
 

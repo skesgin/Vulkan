@@ -30,8 +30,11 @@
 
 #define VKTS_BINDING_VERTEX_BUFFER 0
 
-#define VKTS_FONT_VERTEX_SHADER_NAME 	"shader/SPIR/V/font.vert.spv"
-#define VKTS_FONT_FRAGMENT_SHADER_NAME 	"shader/SPIR/V/font.frag.spv"
+#define VKTS_FONT_VERTEX_SHADER_NAME 		"shader/SPIR/V/font.vert.spv"
+#define VKTS_FONT_FRAGMENT_SHADER_NAME 		"shader/SPIR/V/font.frag.spv"
+
+#define VKTS_FONT_DF_VERTEX_SHADER_NAME 	"shader/SPIR/V/font_df.vert.spv"
+#define VKTS_FONT_DF_FRAGMENT_SHADER_NAME 	"shader/SPIR/V/font_df.frag.spv"
 
 namespace vkts
 {
@@ -99,20 +102,24 @@ IRenderFontSP GuiRenderFactory::createRenderFont(const IGuiManagerSP& guiManager
     // Shader modules.
     //
 
-	auto vertexShaderBinary = fileLoadBinary(VKTS_FONT_VERTEX_SHADER_NAME);
+    const char* vertexShaderFilename = font.isDistanceField() ? VKTS_FONT_DF_VERTEX_SHADER_NAME  : VKTS_FONT_VERTEX_SHADER_NAME;
+
+	auto vertexShaderBinary = fileLoadBinary(vertexShaderFilename);
 
 	if (!vertexShaderBinary.get())
 	{
-		logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load vertex shader: '%s'", VKTS_FONT_VERTEX_SHADER_NAME);
+		logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load vertex shader: '%s'", vertexShaderFilename);
 
 		return IRenderFontSP();
 	}
 
-	auto fragmentShaderBinary = fileLoadBinary(VKTS_FONT_FRAGMENT_SHADER_NAME);
+	const char* fragementShaderFilename = font.isDistanceField() ? VKTS_FONT_DF_FRAGMENT_SHADER_NAME  : VKTS_FONT_FRAGMENT_SHADER_NAME;
+
+	auto fragmentShaderBinary = fileLoadBinary(fragementShaderFilename);
 
 	if (!fragmentShaderBinary.get())
 	{
-		logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load fragment shader: '%s'", VKTS_FONT_FRAGMENT_SHADER_NAME);
+		logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load fragment shader: '%s'", fragementShaderFilename);
 
 		return IRenderFontSP();
 	}
@@ -223,6 +230,11 @@ IRenderFontSP GuiRenderFactory::createRenderFont(const IGuiManagerSP& guiManager
     pushConstantRange[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
     pushConstantRange[0].offset = 0;
     pushConstantRange[0].size = 16 * sizeof(float) + 12 * sizeof(float) + 4 * sizeof(float);
+
+    if (font.isDistanceField())
+    {
+    	pushConstantRange[0].size += 1 * sizeof(float);
+    }
 
 	VkDescriptorSetLayout setLayouts[1];
 

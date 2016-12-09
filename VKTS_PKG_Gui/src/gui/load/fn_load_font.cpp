@@ -29,11 +29,6 @@
 #include "../font/Char.hpp"
 #include "../font/Font.hpp"
 
-#define VKTS_BINDING_VERTEX_BUFFER 0
-
-#define VKTS_FONT_VERTEX_SHADER_NAME 	"shader/SPIR/V/font.vert.spv"
-#define VKTS_FONT_FRAGMENT_SHADER_NAME 	"shader/SPIR/V/font.frag.spv"
-
 namespace vkts
 {
 
@@ -184,7 +179,7 @@ static VkBool32 fontExtractStringValue(const char* buffer, const char* parameter
     return VK_TRUE;
 }
 
-IFontSP VKTS_APIENTRY loadFont(const char* filename, const IGuiManagerSP& guiManager, const IGuiFactorySP& guiFactory)
+IFontSP VKTS_APIENTRY loadFont(const char* filename, const IGuiManagerSP& guiManager, const IGuiFactorySP& guiFactory, const VkBool32 distanceField)
 {
     if (!filename || !guiManager.get() || !guiFactory.get())
     {
@@ -202,7 +197,7 @@ IFontSP VKTS_APIENTRY loadFont(const char* filename, const IGuiManagerSP& guiMan
 
     fontGetDirectory(directory, filename);
 
-    auto font = new Font();
+    auto font = new Font(distanceField);
 
     auto interfaceFont = IFontSP(font);
 
@@ -304,6 +299,22 @@ IFontSP VKTS_APIENTRY loadFont(const char* filename, const IGuiManagerSP& guiMan
 
 					//
 
+					auto mipMappedImageData = imageDataMipmap(imageData, VK_TRUE, imageData->getName());
+
+					if (mipMappedImageData.size() == 0)
+					{
+						return IFontSP();
+					}
+
+					imageData = imageDataMerge(mipMappedImageData, imageData->getName(), (uint32_t)mipMappedImageData.size(), 1);
+
+					if (!imageData.get())
+					{
+						return IFontSP();
+					}
+
+					//
+
 					imageData = createDeviceImageData(guiManager->getAssetManager(), imageData);
 
 					//
@@ -348,7 +359,7 @@ IFontSP VKTS_APIENTRY loadFont(const char* filename, const IGuiManagerSP& guiMan
 
             if (!textureObject.get())
             {
-            	textureObject = createTextureObject(guiManager->getAssetManager(), font->getFace(), VK_FALSE, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_REPEAT, imageObject);
+            	textureObject = createTextureObject(guiManager->getAssetManager(), font->getFace(), VK_TRUE, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_REPEAT, imageObject);
 
 				if (!textureObject.get())
 				{

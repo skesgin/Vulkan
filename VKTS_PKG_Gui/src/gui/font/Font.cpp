@@ -29,8 +29,8 @@
 namespace vkts
 {
 
-Font::Font() :
-    IFont(), face(""), size(0.0f), lineHeight(0.0f), base(0.0f), scaleWidth(0.0f), scaleHeight(0.0f), allCharacters(), textureObject(nullptr), renderFont(nullptr)
+Font::Font(const VkBool32 distanceField) :
+    IFont(), distanceField(distanceField), face(""), size(0.0f), lineHeight(0.0f), base(0.0f), scaleWidth(0.0f), scaleHeight(0.0f), allCharacters(), textureObject(nullptr), renderFont(nullptr)
 {
 }
 
@@ -129,6 +129,11 @@ void Font::drawText(const ICommandBuffersSP& cmdBuffer, const glm::mat4& viewPro
 //
 // IFont
 //
+
+VkBool32 Font::isDistanceField() const
+{
+	return distanceField;
+}
 
 const std::string& Font::getFace() const
 {
