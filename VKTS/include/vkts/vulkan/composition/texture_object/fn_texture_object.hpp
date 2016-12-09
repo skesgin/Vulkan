@@ -36,7 +36,7 @@ namespace vkts
  *
  * @ThreadSafe
  */
-VKTS_APICALL ITextureObjectSP VKTS_APIENTRY textureObjectCreate(const IContextObjectSP& contextObject, const std::string& name, const VkBool32 mipmap, const IImageObjectSP& imageObject, const VkSamplerCreateInfo& samplerCreateInfo);
+VKTS_APICALL ITextureObjectSP VKTS_APIENTRY textureObjectCreate(const IContextObjectSP& contextObject, const std::string& name, const IImageObjectSP& imageObject, const ISamplerSP& sampler);
 
 }
 

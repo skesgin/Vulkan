@@ -48,6 +48,8 @@ protected:
 
     SmartPointerMap<std::string, IImageObjectSP> allImageObjects;
 
+    SmartPointerMap<std::string, ISamplerSP> allSamplers;
+
     SmartPointerMap<std::string, IImageDataSP> allImageDatas;
 
     SmartPointerMap<VkTsVertexBufferType, IShaderModuleSP> allVertexShaderModules;
@@ -131,6 +133,14 @@ public:
     virtual VkBool32 addImageObject(const IImageObjectSP& imageObject) override;
 
     virtual VkBool32 removeImageObject(const IImageObjectSP& imageObject) override;
+
+    //
+
+    virtual ISamplerSP useSampler(const std::string& name) const override;
+
+    virtual VkBool32 addSampler(const ISamplerSP& sampler) override;
+
+    virtual VkBool32 removeSampler(const ISamplerSP& sampler) override;
 
     //
 

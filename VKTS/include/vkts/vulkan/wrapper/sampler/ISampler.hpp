@@ -46,6 +46,9 @@ public:
     {
     }
 
+    virtual const std::string& getName() const = 0;
+
+
     virtual const VkDevice getDevice() const = 0;
 
     virtual const VkSamplerCreateInfo& getSamplerCreateInfo() const = 0;

@@ -443,6 +443,23 @@ VkBool32 SceneManager::removeImageObject(const IImageObjectSP& imageObject)
 
 //
 
+ISamplerSP SceneManager::useSampler(const std::string& name) const
+{
+	return assetManager->useSampler(name);
+}
+
+VkBool32 SceneManager::addSampler(const ISamplerSP& sampler)
+{
+	return assetManager->addSampler(sampler);
+}
+
+VkBool32 SceneManager::removeSampler(const ISamplerSP& sampler)
+{
+	return assetManager->removeSampler(sampler);
+}
+
+//
+
 IImageDataSP SceneManager::useImageData(const std::string& name) const
 {
 	return assetManager->useImageData(name);

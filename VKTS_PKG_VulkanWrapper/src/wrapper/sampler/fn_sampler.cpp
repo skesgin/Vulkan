@@ -30,6 +30,13 @@
 namespace vkts
 {
 
+std::string VKTS_APIENTRY samplerGetName(const VkSamplerCreateInfo& samplerCreateInfo)
+{
+	// Currently, the following parameters are variable when creating a sampler. So, the name can be used as an identifier.
+
+	return "SAMPLER_" + std::to_string((uint32_t)samplerCreateInfo.magFilter) + "_" + std::to_string((uint32_t)samplerCreateInfo.minFilter) + "_" + std::to_string((uint32_t)samplerCreateInfo.mipmapMode) + "_" + std::to_string((uint32_t)samplerCreateInfo.addressModeU) + "_" + std::to_string(samplerCreateInfo.maxLod);
+}
+
 ISamplerSP VKTS_APIENTRY samplerCreate(const VkDevice device, const VkSamplerCreateFlags flags, const VkFilter magFilter, const VkFilter minFilter, const VkSamplerMipmapMode mipmapMode, const VkSamplerAddressMode addressModeU, const VkSamplerAddressMode addressModeV, const VkSamplerAddressMode addressModeW, const float mipLodBias, const VkBool32 anisotropyEnable, const float maxAnisotropy, const VkBool32 compareEnable, const VkCompareOp compareOp, const float minLod, const float maxLod, const VkBorderColor borderColor, const VkBool32 unnormalizedCoordinates)
 {
     if (!device)
@@ -81,6 +88,11 @@ ISamplerSP VKTS_APIENTRY samplerCreate(const VkDevice device, const VkSamplerCre
     }
 
     return ISamplerSP(newInstance);
+}
+
+ISamplerSP VKTS_APIENTRY samplerCreate(const VkDevice device, const VkSamplerCreateInfo& samplerCreateInfo)
+{
+	return samplerCreate(device, samplerCreateInfo.flags, samplerCreateInfo.magFilter, samplerCreateInfo.minFilter, samplerCreateInfo.mipmapMode, samplerCreateInfo.addressModeU, samplerCreateInfo.addressModeV, samplerCreateInfo.addressModeW, samplerCreateInfo.mipLodBias, samplerCreateInfo.anisotropyEnable, samplerCreateInfo.maxAnisotropy, samplerCreateInfo.compareEnable, samplerCreateInfo.compareOp, samplerCreateInfo.minLod, samplerCreateInfo.maxLod, samplerCreateInfo.borderColor, samplerCreateInfo.unnormalizedCoordinates);
 }
 
 }

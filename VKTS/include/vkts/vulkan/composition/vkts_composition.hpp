@@ -27,9 +27,6 @@
 #ifndef VKTS_VKTS_COMPOSITION_HPP_
 #define VKTS_VKTS_COMPOSITION_HPP_
 
-// TODO: Reuse sampler object in asset manager.
-// TODO: Reuse image view object in asset manager.
-
 /**
  *
  * Depends on VKTS image and Vulkan.

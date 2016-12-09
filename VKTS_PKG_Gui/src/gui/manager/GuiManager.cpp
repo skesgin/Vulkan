@@ -94,6 +94,23 @@ VkBool32 GuiManager::removeImageObject(const IImageObjectSP& imageObject)
 
 //
 
+ISamplerSP GuiManager::useSampler(const std::string& name) const
+{
+	return assetManager->useSampler(name);
+}
+
+VkBool32 GuiManager::addSampler(const ISamplerSP& sampler)
+{
+	return assetManager->addSampler(sampler);
+}
+
+VkBool32 GuiManager::removeSampler(const ISamplerSP& sampler)
+{
+	return assetManager->removeSampler(sampler);
+}
+
+//
+
 IImageDataSP GuiManager::useImageData(const std::string& name) const
 {
 	return assetManager->useImageData(name);

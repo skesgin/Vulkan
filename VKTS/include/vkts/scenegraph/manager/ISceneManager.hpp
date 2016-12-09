@@ -145,6 +145,14 @@ public:
 
     //
 
+    virtual ISamplerSP useSampler(const std::string& name) const = 0;
+
+    virtual VkBool32 addSampler(const ISamplerSP& sampler) = 0;
+
+    virtual VkBool32 removeSampler(const ISamplerSP& sampler) = 0;
+
+    //
+
     virtual IImageDataSP useImageData(const std::string& name) const = 0;
 
     virtual VkBool32 addImageData(const IImageDataSP& imageData) = 0;

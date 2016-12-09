@@ -36,7 +36,19 @@ namespace vkts
  *
  * @ThreadSafe
  */
+VKTS_APICALL std::string VKTS_APIENTRY samplerGetName(const VkSamplerCreateInfo& samplerCreateInfo);
+
+/**
+ *
+ * @ThreadSafe
+ */
 VKTS_APICALL ISamplerSP VKTS_APIENTRY samplerCreate(const VkDevice device, const VkSamplerCreateFlags flags, const VkFilter magFilter, const VkFilter minFilter, const VkSamplerMipmapMode mipmapMode, const VkSamplerAddressMode addressModeU, const VkSamplerAddressMode addressModeV, const VkSamplerAddressMode addressModeW, const float mipLodBias, const VkBool32 anisotropyEnable, const float maxAnisotropy, const VkBool32 compareEnable, const VkCompareOp compareOp, const float minLod, const float maxLod, const VkBorderColor borderColor, const VkBool32 unnormalizedCoordinates);
+
+/**
+ *
+ * @ThreadSafe
+ */
+VKTS_APICALL ISamplerSP VKTS_APIENTRY samplerCreate(const VkDevice device, const VkSamplerCreateInfo& samplerCreateInfo);
 
 }
 

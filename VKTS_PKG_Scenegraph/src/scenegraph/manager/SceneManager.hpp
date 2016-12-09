@@ -216,6 +216,14 @@ public:
 
     //
 
+    virtual ISamplerSP useSampler(const std::string& name) const override;
+
+    virtual VkBool32 addSampler(const ISamplerSP& sampler) override;
+
+    virtual VkBool32 removeSampler(const ISamplerSP& sampler) override;
+
+    //
+
     virtual IImageDataSP useImageData(const std::string& name) const override;
 
     virtual VkBool32 addImageData(const IImageDataSP& imageData) override;

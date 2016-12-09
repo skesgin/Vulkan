@@ -30,27 +30,10 @@
 namespace vkts
 {
 
-ITextureObjectSP VKTS_APIENTRY textureObjectCreate(const IContextObjectSP& contextObject, const std::string& name, const VkBool32 mipmap, const IImageObjectSP& imageObject, const VkSamplerCreateInfo& samplerCreateInfo)
+ITextureObjectSP VKTS_APIENTRY textureObjectCreate(const IContextObjectSP& contextObject, const std::string& name, const IImageObjectSP& imageObject, const ISamplerSP& sampler)
 {
-    if (!imageObject.get())
+    if (!imageObject.get() || !sampler.get())
     {
-        return ITextureObjectSP();
-    }
-
-    //
-
-    VkSamplerCreateInfo finalSamplerCreateInfo;
-
-    memcpy(&finalSamplerCreateInfo, &samplerCreateInfo, sizeof(VkImageViewCreateInfo));
-
-    finalSamplerCreateInfo.maxLod = mipmap ? (float) imageObject->getImageData()->getMipLevels() : 0.0f;
-
-    auto sampler = samplerCreate(contextObject->getDevice()->getDevice(), finalSamplerCreateInfo.flags, finalSamplerCreateInfo.magFilter, finalSamplerCreateInfo.minFilter, finalSamplerCreateInfo.mipmapMode, samplerCreateInfo.addressModeU, samplerCreateInfo.addressModeV, finalSamplerCreateInfo.addressModeW, finalSamplerCreateInfo.mipLodBias, finalSamplerCreateInfo.anisotropyEnable, finalSamplerCreateInfo.maxAnisotropy, finalSamplerCreateInfo.compareEnable, finalSamplerCreateInfo.compareOp, finalSamplerCreateInfo.minLod, finalSamplerCreateInfo.maxLod, finalSamplerCreateInfo.borderColor, finalSamplerCreateInfo.unnormalizedCoordinates);
-
-    if (!sampler.get())
-    {
-        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create sampler.");
-
         return ITextureObjectSP();
     }
 

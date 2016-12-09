@@ -30,7 +30,7 @@ namespace vkts
 {
 
 Sampler::Sampler(const VkDevice device, const VkSamplerCreateFlags flags, const VkFilter magFilter, const VkFilter minFilter, const VkSamplerMipmapMode mipmapMode, const VkSamplerAddressMode addressModeU, const VkSamplerAddressMode addressModeV, const VkSamplerAddressMode addressModeW, const float mipLodBias, const VkBool32 anisotropyEnable, const float maxAnisotropy, const VkBool32 compareEnable, const VkCompareOp compareOp, const float minLod, const float maxLod, const VkBorderColor borderColor, const VkBool32 unnormalizedCoordinates, const VkSampler sampler) :
-    ISampler(), device(device), samplerCreateInfo{VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO, nullptr, flags, magFilter, minFilter, mipmapMode, addressModeU, addressModeV, addressModeW, mipLodBias, anisotropyEnable, maxAnisotropy, compareEnable, compareOp, minLod, maxLod, borderColor, unnormalizedCoordinates}, sampler(sampler)
+    ISampler(), device(device), samplerCreateInfo{VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO, nullptr, flags, magFilter, minFilter, mipmapMode, addressModeU, addressModeV, addressModeW, mipLodBias, anisotropyEnable, maxAnisotropy, compareEnable, compareOp, minLod, maxLod, borderColor, unnormalizedCoordinates}, name(samplerGetName(samplerCreateInfo)), sampler(sampler)
 {
 }
 
@@ -42,6 +42,11 @@ Sampler::~Sampler()
 //
 // ISampler
 //
+
+const std::string& Sampler::getName() const
+{
+	return name;
+}
 
 const VkDevice Sampler::getDevice() const
 {

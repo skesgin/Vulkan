@@ -152,13 +152,29 @@ ITextureObjectSP VKTS_APIENTRY createTextureObject(const IAssetManagerSP& assetM
 	samplerCreateInfo.compareEnable = VK_FALSE;
 	samplerCreateInfo.compareOp = VK_COMPARE_OP_NEVER;
 	samplerCreateInfo.minLod = 0.0f;
-	samplerCreateInfo.maxLod = 0.0f;
+	samplerCreateInfo.maxLod = mipmap ? (float)(imageObject->getImageData()->getMipLevels() - 1) : 0.0f;
 	samplerCreateInfo.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
 	samplerCreateInfo.unnormalizedCoordinates = VK_FALSE;
 
+	//
+
+	auto sampler = assetManager->useSampler(samplerGetName(samplerCreateInfo));
+
+	if (!sampler.get())
+	{
+		sampler = samplerCreate(assetManager->getContextObject()->getDevice()->getDevice(), samplerCreateInfo);
+
+		if (!sampler.get())
+		{
+			return ITextureObjectSP();
+		}
+
+		assetManager->addSampler(sampler);
+	}
+
     //
 
-    return textureObjectCreate(assetManager->getContextObject(), textureObjectName, mipmap, imageObject, samplerCreateInfo);
+    return textureObjectCreate(assetManager->getContextObject(), textureObjectName, imageObject, sampler);
 }
 
 ITextureObjectSP VKTS_APIENTRY createTextureObject(const IAssetManagerSP& assetManager, const glm::vec4& color, const VkFormat format)
@@ -330,9 +346,23 @@ ITextureObjectSP VKTS_APIENTRY createTextureObject(const IAssetManagerSP& assetM
 	samplerCreateInfo.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
 	samplerCreateInfo.unnormalizedCoordinates = VK_FALSE;
 
+	auto sampler = assetManager->useSampler(samplerGetName(samplerCreateInfo));
+
+	if (!sampler.get())
+	{
+		sampler = samplerCreate(assetManager->getContextObject()->getDevice()->getDevice(), samplerCreateInfo);
+
+		if (!sampler.get())
+		{
+			return ITextureObjectSP();
+		}
+
+		assetManager->addSampler(sampler);
+	}
+
     //
 
-    auto textureObject = textureObjectCreate(assetManager->getContextObject(), textureObjectName, VK_FALSE, imageObject, samplerCreateInfo);
+    auto textureObject = textureObjectCreate(assetManager->getContextObject(), textureObjectName, imageObject, sampler);
 
     if (!textureObject.get())
     {

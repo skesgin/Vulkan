@@ -30,7 +30,7 @@ namespace vkts
 {
 
 AssetManager::AssetManager(const VkBool32 replace, const IContextObjectSP& contextObject, const ICommandObjectSP& commandObject) :
-    IAssetManager(), replace(replace), contextObject(contextObject), commandObject(commandObject), allTextureObjects(), allImageDatas(), allVertexShaderModules(), allFragmentShaderModules()
+    IAssetManager(), replace(replace), contextObject(contextObject), commandObject(commandObject), allTextureObjects(), allImageObjects(), allSamplers(), allImageDatas(), allVertexShaderModules(), allFragmentShaderModules()
 {
 }
 
@@ -124,6 +124,40 @@ VkBool32 AssetManager::removeImageObject(const IImageObjectSP& imageObject)
     }
 
     return remove(imageObject->getName(), allImageObjects);
+}
+
+//
+
+ISamplerSP AssetManager::useSampler(const std::string& name) const
+{
+	if (!contains(name, allSamplers))
+	{
+		return ISamplerSP();
+	}
+
+	//
+
+    return get(name, allSamplers);
+}
+
+VkBool32 AssetManager::addSampler(const ISamplerSP& sampler)
+{
+    if (!sampler.get())
+    {
+        return VK_FALSE;
+    }
+
+    return add(sampler->getName(), sampler, allSamplers);
+}
+
+VkBool32 AssetManager::removeSampler(const ISamplerSP& sampler)
+{
+    if (!sampler.get())
+    {
+        return VK_FALSE;
+    }
+
+    return remove(sampler->getName(), allSamplers);
 }
 
 //
@@ -236,6 +270,10 @@ void AssetManager::destroy()
     // Only free resources, but do not destroy them.
 
     allTextureObjects.clear();
+
+    allImageObjects.clear();
+
+    allSamplers.clear();
 
     allImageDatas.clear();
 

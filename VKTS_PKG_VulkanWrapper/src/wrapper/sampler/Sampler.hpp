@@ -41,6 +41,8 @@ private:
 
     const VkSamplerCreateInfo samplerCreateInfo;
 
+    const std::string name;
+
     VkSampler sampler;
 
 public:
@@ -58,6 +60,9 @@ public:
     //
     // ISampler
     //
+
+    virtual const std::string& getName() const override;
+
 
     virtual const VkDevice getDevice() const override;
 
