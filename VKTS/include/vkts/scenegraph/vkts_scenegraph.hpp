@@ -31,8 +31,6 @@
 
 // TODO: Allow "multiple" uniform buffers in scene graph using dynamic offsets.
 
-// TODO: Implement forward renderer for PBR.
-
 // TODO: Import particle system.
 
 /**
