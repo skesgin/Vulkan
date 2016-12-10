@@ -33,8 +33,8 @@
 namespace vkts
 {
 
-SceneRenderFactory::SceneRenderFactory(const IDescriptorSetLayoutSP& descriptorSetLayout, const IRenderPassSP& renderPass) :
-	ISceneRenderFactory(), descriptorSetLayout(descriptorSetLayout), renderPass(renderPass)
+SceneRenderFactory::SceneRenderFactory(const IDescriptorSetLayoutSP& descriptorSetLayout, const IRenderPassSP& renderPass, const uint64_t buffers) :
+	ISceneRenderFactory(), descriptorSetLayout(descriptorSetLayout), renderPass(renderPass), buffers(buffers)
 {
 }
 
@@ -470,6 +470,52 @@ VkBool32 SceneRenderFactory::prepareBSDFMaterial(const ISceneManagerSP& sceneMan
 	}
 
 	subMesh->setGraphicsPipeline(pipeline);
+
+	return VK_TRUE;
+}
+
+VkBool32 SceneRenderFactory::prepareTransformUniformBuffer(const ISceneManagerSP& sceneManager, const INodeSP& node)
+{
+	if (!sceneManager.get() || !node.get())
+	{
+		return VK_FALSE;
+	}
+
+	// mat3 in std140 consumes three vec4 columns.
+	VkDeviceSize size = alignmentGetSizeInBytes(16 * sizeof(float) + 12 * sizeof(float), 16);
+
+    auto transformUniformBuffer = createUniformBufferObject(sceneManager->getAssetManager(), size * (VkDeviceSize)buffers);
+
+    if (!transformUniformBuffer.get())
+    {
+        return VK_FALSE;
+    }
+
+    //
+
+    node->setTransformUniformBuffer(transformUniformBuffer);
+
+	return VK_TRUE;
+}
+
+VkBool32 SceneRenderFactory::prepareJointsUniformBuffer(const ISceneManagerSP& sceneManager, const INodeSP& node, const int32_t joints)
+{
+	if (!sceneManager.get() || !node.get())
+	{
+		return VK_FALSE;
+	}
+
+    // mat3 in std140 consumes three vec4 columns.
+	VkDeviceSize size = alignmentGetSizeInBytes(16 * sizeof(float) * (VKTS_MAX_JOINTS + 1) + 12 * sizeof(float) * (VKTS_MAX_JOINTS + 1), 16);
+
+    auto jointsUniformBuffer = createUniformBufferObject(sceneManager->getAssetManager(), size * (VkDeviceSize)buffers);
+
+    if (!jointsUniformBuffer.get())
+    {
+        return VK_FALSE;
+    }
+
+    node->setJointsUniformBuffer(joints, jointsUniformBuffer);
 
 	return VK_TRUE;
 }

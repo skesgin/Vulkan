@@ -3743,19 +3743,12 @@ static VkBool32 sceneLoadObjects(const char* directory, const char* filename, co
 
             if (node.get())
             {
-                // mat3 in std140 consumes three vec4 columns.
-            	VkDeviceSize size = alignmentGetSizeInBytes(16 * sizeof(float) * (VKTS_MAX_JOINTS + 1) + 12 * sizeof(float) * (VKTS_MAX_JOINTS + 1), 16);
-
-                auto jointsUniformBuffer = createUniformBufferObject(sceneManager->getAssetManager(), size);
-
-                if (!jointsUniformBuffer.get())
-                {
+            	if (!sceneFactory->getSceneRenderFactory()->prepareJointsUniformBuffer(sceneManager, node, idata))
+            	{
                     logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create joint uniform buffer for node: '%s'", sdata0);
 
                     return VK_FALSE;
-                }
-
-                node->setJointsUniformBuffer(idata, jointsUniformBuffer);
+            	}
             }
             else
             {
@@ -3827,21 +3820,12 @@ static VkBool32 sceneLoadObjects(const char* directory, const char* filename, co
 
             if (node.get())
             {
-            	// mat3 in std140 consumes three vec4 columns.
-            	VkDeviceSize size = alignmentGetSizeInBytes(16 * sizeof(float) + 12 * sizeof(float), 16);
-
-                auto transformUniformBuffer = createUniformBufferObject(sceneManager->getAssetManager(), size);
-
-                if (!transformUniformBuffer.get())
-                {
+            	if (!sceneFactory->getSceneRenderFactory()->prepareTransformUniformBuffer(sceneManager, node))
+            	{
                     logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create uniform buffer for node: '%s'", sdata0);
 
                     return VK_FALSE;
-                }
-
-                //
-
-                node->setTransformUniformBuffer(transformUniformBuffer);
+            	}
 
             	//
 

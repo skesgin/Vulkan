@@ -37,7 +37,9 @@
 
 #define VKTS_MAX_LIGHTS 16
 
-#define VKTS_FONT_NAME "font/Arial_32_DF.fnt"
+#define VKTS_FONT_DISTANCE_FIELD VK_TRUE
+#define VKTS_FONT_NAME "font/Arial_32.fnt"
+#define VKTS_FONT_DF_NAME "font/Arial_32_DF.fnt"
 #define VKTS_FONT_SIZE 16.0f
 #define VKTS_FONT_COLOR glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)
 

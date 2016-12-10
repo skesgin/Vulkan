@@ -70,7 +70,7 @@ void RenderFont::setGraphicsPipeline(const IGraphicsPipelineSP& graphicsPipeline
 	this->graphicsPipeline = graphicsPipeline;
 }
 
-void RenderFont::draw(const ICommandBuffersSP& cmdBuffer, const glm::mat4& viewProjection, const glm::vec2& translate, const std::string& text, const float fontSize, const glm::vec4& color, const IFont& font)
+void RenderFont::draw(const ICommandBuffersSP& cmdBuffer, const glm::mat4& viewProjection, const glm::vec2& translate, const std::string& text, const float fontSize, const glm::vec4& color, const IFont& font, const uint32_t dynamicOffsetCount, const uint32_t* dynamicOffsets)
 {
 	if (!cmdBuffer.get() || !graphicsPipeline.get() || !pipelineLayout.get() || !descriptorSets.get() || !vertexBuffer.get())
 	{
@@ -83,7 +83,7 @@ void RenderFont::draw(const ICommandBuffersSP& cmdBuffer, const glm::mat4& viewP
 
 	//
 
-	vkCmdBindDescriptorSets(cmdBuffer->getCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout->getPipelineLayout(), 0, 1, descriptorSets->getDescriptorSets(), 0, nullptr);
+	vkCmdBindDescriptorSets(cmdBuffer->getCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout->getPipelineLayout(), 0, 1, descriptorSets->getDescriptorSets(), dynamicOffsetCount, dynamicOffsets);
 
 	//
 

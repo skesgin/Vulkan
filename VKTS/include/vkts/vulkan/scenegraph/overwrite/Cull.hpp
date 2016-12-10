@@ -69,7 +69,7 @@ public:
 
     //
 
-    virtual VkBool32 visit(const IObject& object, const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const uint32_t bufferIndex) const
+    virtual VkBool32 visit(const IObject& object, const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const uint32_t dynamicOffsetCount, const uint32_t* dynamicOffsets) const
     {
     	if (viewFrustum)
     	{

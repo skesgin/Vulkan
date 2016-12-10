@@ -162,12 +162,12 @@ void Object::updateTransformRecursive(const double deltaTime, const uint64_t del
 }
 
 
-void Object::drawRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const OverwriteDraw* renderOverwrite, const uint32_t bufferIndex)
+void Object::drawRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const OverwriteDraw* renderOverwrite, const uint32_t dynamicOffsetCount, const uint32_t* dynamicOffsets)
 {
     const OverwriteDraw* currentOverwrite = renderOverwrite;
     while (currentOverwrite)
     {
-    	if (!currentOverwrite->visit(*this, cmdBuffer, allGraphicsPipelines, bufferIndex))
+    	if (!currentOverwrite->visit(*this, cmdBuffer, allGraphicsPipelines, dynamicOffsetCount, dynamicOffsets))
     	{
     		return;
     	}
@@ -179,7 +179,7 @@ void Object::drawRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointe
 
     if (rootNode.get())
     {
-        rootNode->drawRecursive(cmdBuffer, allGraphicsPipelines, renderOverwrite, bufferIndex);
+        rootNode->drawRecursive(cmdBuffer, allGraphicsPipelines, renderOverwrite, dynamicOffsetCount, dynamicOffsets);
     }
 }
 

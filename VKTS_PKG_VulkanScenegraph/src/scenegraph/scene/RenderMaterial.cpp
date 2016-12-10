@@ -89,7 +89,7 @@ IDescriptorSetsSP RenderMaterial::getDescriptorSetsByName(const std::string& nod
 	return IDescriptorSetsSP();
 }
 
-void RenderMaterial::bindDescriptorSets(const ICommandBuffersSP& cmdBuffer, const VkPipelineLayout layout, const uint32_t bufferIndex, const std::string& nodeName) const
+void RenderMaterial::bindDescriptorSets(const ICommandBuffersSP& cmdBuffer, const VkPipelineLayout layout, const uint32_t dynamicOffsetCount, const uint32_t* dynamicOffsets, const std::string& nodeName) const
 {
     if (!cmdBuffer.get())
     {
@@ -103,7 +103,7 @@ void RenderMaterial::bindDescriptorSets(const ICommandBuffersSP& cmdBuffer, cons
         return;
     }
 
-    vkCmdBindDescriptorSets(cmdBuffer->getCommandBuffer(bufferIndex), VK_PIPELINE_BIND_POINT_GRAPHICS, layout, 0, 1, &currentDescriptorSets->getDescriptorSets()[0], 0, nullptr);
+    vkCmdBindDescriptorSets(cmdBuffer->getCommandBuffer(0), VK_PIPELINE_BIND_POINT_GRAPHICS, layout, 0, 1, &currentDescriptorSets->getDescriptorSets()[0], dynamicOffsetCount, dynamicOffsets);
 }
 
 RenderMaterial::RenderMaterial() :
@@ -276,9 +276,9 @@ void RenderMaterial::updateDescriptorSets(const uint32_t allWriteDescriptorSetsC
     currentDescriptorSets->updateDescriptorSets(finalWriteDescriptorSetsCount, finalWriteDescriptorSets, 0, nullptr);
 }
 
-void RenderMaterial::draw(const ICommandBuffersSP& cmdBuffer, const IGraphicsPipelineSP& graphicsPipeline, const uint32_t bufferIndex, const std::string& nodeName)
+void RenderMaterial::draw(const ICommandBuffersSP& cmdBuffer, const IGraphicsPipelineSP& graphicsPipeline, const uint32_t dynamicOffsetCount, const uint32_t* dynamicOffsets, const std::string& nodeName)
 {
-    bindDescriptorSets(cmdBuffer, graphicsPipeline->getLayout(), bufferIndex, nodeName);
+    bindDescriptorSets(cmdBuffer, graphicsPipeline->getLayout(), dynamicOffsetCount, dynamicOffsets, nodeName);
 }
 
 //

@@ -77,37 +77,37 @@ public:
 
     //
 
-    virtual VkBool32 visit(const IScene& scene, const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const uint32_t bufferIndex, const uint32_t objectOffset, const uint32_t objectStep, const size_t objectLimit) const
+    virtual VkBool32 visit(const IScene& scene, const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const uint32_t dynamicOffsetCount, const uint32_t* dynamicOffsets, const uint32_t objectOffset, const uint32_t objectStep, const size_t objectLimit) const
     {
     	return VK_TRUE;
     }
 
-    virtual VkBool32 visit(const IObject& object, const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const uint32_t bufferIndex) const
+    virtual VkBool32 visit(const IObject& object, const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const uint32_t dynamicOffsetCount, const uint32_t* dynamicOffsets) const
     {
     	return VK_TRUE;
     }
 
-    virtual VkBool32 visit(const INode& node, const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const uint32_t bufferIndex) const
+    virtual VkBool32 visit(const INode& node, const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const uint32_t dynamicOffsetCount, const uint32_t* dynamicOffsets) const
     {
     	return VK_TRUE;
     }
 
-    virtual VkBool32 visit(const IMesh& mesh, const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const uint32_t bufferIndex) const
+    virtual VkBool32 visit(const IMesh& mesh, const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const uint32_t dynamicOffsetCount, const uint32_t* dynamicOffsets) const
     {
     	return VK_TRUE;
     }
 
-    virtual VkBool32 visit(const ISubMesh& subMesh, const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const uint32_t bufferIndex) const
+    virtual VkBool32 visit(const ISubMesh& subMesh, const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const uint32_t dynamicOffsetCount, const uint32_t* dynamicOffsets) const
     {
     	return VK_TRUE;
     }
 
-    virtual VkBool32 visit(const IPhongMaterial& material, const ICommandBuffersSP& cmdBuffer, const IGraphicsPipelineSP& graphicsPipeline, const uint32_t bufferIndex) const
+    virtual VkBool32 visit(const IPhongMaterial& material, const ICommandBuffersSP& cmdBuffer, const IGraphicsPipelineSP& graphicsPipeline, const uint32_t dynamicOffsetCount, const uint32_t* dynamicOffsets) const
     {
     	return VK_TRUE;
     }
 
-    virtual VkBool32 visit(const IBSDFMaterial& material, const ICommandBuffersSP& cmdBuffer, const IGraphicsPipelineSP& graphicsPipeline, const uint32_t bufferIndex) const
+    virtual VkBool32 visit(const IBSDFMaterial& material, const ICommandBuffersSP& cmdBuffer, const IGraphicsPipelineSP& graphicsPipeline, const uint32_t dynamicOffsetCount, const uint32_t* dynamicOffsets) const
     {
     	return VK_TRUE;
     }

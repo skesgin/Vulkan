@@ -143,12 +143,12 @@ void Mesh::updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCo
 
 //
 
-void Mesh::drawRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const OverwriteDraw* renderOverwrite, const uint32_t bufferIndex, const std::string& nodeName)
+void Mesh::drawRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const OverwriteDraw* renderOverwrite, const uint32_t dynamicOffsetCount, const uint32_t* dynamicOffsets, const std::string& nodeName)
 {
     const OverwriteDraw* currentOverwrite = renderOverwrite;
     while (currentOverwrite)
     {
-    	if (!currentOverwrite->visit(*this, cmdBuffer, allGraphicsPipelines, bufferIndex))
+    	if (!currentOverwrite->visit(*this, cmdBuffer, allGraphicsPipelines, dynamicOffsetCount, dynamicOffsets))
     	{
     		return;
     	}
@@ -160,7 +160,7 @@ void Mesh::drawRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerV
 
     for (size_t i = 0; i < allSubMeshes.size(); i++)
     {
-        allSubMeshes[i]->drawRecursive(cmdBuffer, allGraphicsPipelines, renderOverwrite, bufferIndex, nodeName);
+        allSubMeshes[i]->drawRecursive(cmdBuffer, allGraphicsPipelines, renderOverwrite, dynamicOffsetCount, dynamicOffsets, nodeName);
     }
 }
 

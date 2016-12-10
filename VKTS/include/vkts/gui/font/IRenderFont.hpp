@@ -50,7 +50,7 @@ public:
 
     virtual std::shared_ptr<IRenderFont> create(const VkBool32 createData = VK_TRUE) const = 0;
 
-    virtual void draw(const ICommandBuffersSP& cmdBuffer, const glm::mat4& viewProjection, const glm::vec2& translate, const std::string& text, const float fontSize, const glm::vec4& color, const IFont& font) = 0;
+    virtual void draw(const ICommandBuffersSP& cmdBuffer, const glm::mat4& viewProjection, const glm::vec2& translate, const std::string& text, const float fontSize, const glm::vec4& color, const IFont& font, const uint32_t dynamicOffsetCount = 0, const uint32_t* dynamicOffsets = nullptr) = 0;
 
 };
 

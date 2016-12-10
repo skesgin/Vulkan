@@ -84,7 +84,7 @@ VkBool32 BuildCommandTask::execute()
 
     if (scene.get())
     {
-        scene->drawRecursive(cmdBuffer, allGraphicsPipelines, overwrite, 0, objectOffset, objectStep);
+        scene->drawRecursive(cmdBuffer, allGraphicsPipelines, overwrite, 0, nullptr, objectOffset, objectStep);
     }
 
     vkEndCommandBuffer(cmdBuffer->getCommandBuffer());

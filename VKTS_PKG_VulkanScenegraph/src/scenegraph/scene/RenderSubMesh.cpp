@@ -38,7 +38,7 @@ RenderSubMesh::~RenderSubMesh()
 {
 }
 
-void RenderSubMesh::draw(const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const OverwriteDraw* renderOverwrite, const uint32_t bufferIndex, const ISubMesh& subMesh, const std::string& nodeName)
+void RenderSubMesh::draw(const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const OverwriteDraw* renderOverwrite, const uint32_t dynamicOffsetCount, const uint32_t* dynamicOffsets, const ISubMesh& subMesh, const std::string& nodeName)
 {
 	IGraphicsPipelineSP graphicsPipeline;
 
@@ -81,12 +81,12 @@ void RenderSubMesh::draw(const ICommandBuffersSP& cmdBuffer, const SmartPointerV
 
 	if (subMesh.getBSDFMaterial().get())
 	{
-		subMesh.getBSDFMaterial()->drawRecursive(cmdBuffer, graphicsPipeline, renderOverwrite, bufferIndex, nodeName);
+		subMesh.getBSDFMaterial()->drawRecursive(cmdBuffer, graphicsPipeline, renderOverwrite, dynamicOffsetCount, dynamicOffsets, nodeName);
 	}
 
 	if (subMesh.getPhongMaterial().get())
 	{
-		subMesh.getPhongMaterial()->drawRecursive(cmdBuffer, graphicsPipeline, renderOverwrite, bufferIndex, nodeName);
+		subMesh.getPhongMaterial()->drawRecursive(cmdBuffer, graphicsPipeline, renderOverwrite, dynamicOffsetCount, dynamicOffsets, nodeName);
 	}
 
     // Bind index buffer.
@@ -101,7 +101,7 @@ void RenderSubMesh::draw(const ICommandBuffersSP& cmdBuffer, const SmartPointerV
         return;
     }
 
-    vkCmdBindIndexBuffer(cmdBuffer->getCommandBuffer(bufferIndex), subMesh.getIndexBuffer()->getBuffer()->getBuffer(), 0, VK_INDEX_TYPE_UINT32);
+    vkCmdBindIndexBuffer(cmdBuffer->getCommandBuffer(0), subMesh.getIndexBuffer()->getBuffer()->getBuffer(), 0, VK_INDEX_TYPE_UINT32);
 
     // Bind vertex buffer.
 
@@ -119,11 +119,11 @@ void RenderSubMesh::draw(const ICommandBuffersSP& cmdBuffer, const SmartPointerV
 
     VkBuffer buffers[1] = {subMesh.getVertexBuffer()->getBuffer()->getBuffer()};
 
-    vkCmdBindVertexBuffers(cmdBuffer->getCommandBuffer(bufferIndex), 0, 1, buffers, offsets);
+    vkCmdBindVertexBuffers(cmdBuffer->getCommandBuffer(0), 0, 1, buffers, offsets);
 
     // Draw indexed.
 
-    vkCmdDrawIndexed(cmdBuffer->getCommandBuffer(bufferIndex), subMesh.getNumberIndices(), 1, 0, 0, 0);
+    vkCmdDrawIndexed(cmdBuffer->getCommandBuffer(0), subMesh.getNumberIndices(), 1, 0, 0, 0);
 }
 
 IRenderSubMeshSP RenderSubMesh::create(const VkBool32 createData) const

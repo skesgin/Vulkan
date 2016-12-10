@@ -46,7 +46,7 @@ public:
     {
     }
 
-    virtual VkBool32 visit(const IMesh& mesh, const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const uint32_t bufferIndex) const
+    virtual VkBool32 visit(const IMesh& mesh, const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const uint32_t dynamicOffsetCount, const uint32_t* dynamicOffsets) const
     {
     	IGraphicsPipelineSP graphicsPipeline;
 
@@ -69,7 +69,7 @@ public:
 
     	const auto& displace = mesh.getDisplace();
 
-    	vkCmdPushConstants(cmdBuffer->getCommandBuffer(bufferIndex), graphicsPipeline->getLayout(), VK_SHADER_STAGE_GEOMETRY_BIT, 0, sizeof(float) * 2, glm::value_ptr(displace));
+    	vkCmdPushConstants(cmdBuffer->getCommandBuffer(0), graphicsPipeline->getLayout(), VK_SHADER_STAGE_GEOMETRY_BIT, 0, sizeof(float) * 2, glm::value_ptr(displace));
 
     	return VK_TRUE;
     }

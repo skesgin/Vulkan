@@ -1481,7 +1481,7 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 			return VK_FALSE;
 		}
 
-		font = vkts::loadFont(VKTS_FONT_NAME, guiManager, guiFactory, VK_TRUE);
+		font = vkts::loadFont(VKTS_FONT_DISTANCE_FIELD ? VKTS_FONT_DF_NAME : VKTS_FONT_NAME, guiManager, guiFactory, VKTS_FONT_DISTANCE_FIELD);
 
 		if (!font.get())
 		{

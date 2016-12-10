@@ -41,11 +41,13 @@ private:
 
     const IRenderPassSP renderPass;
 
+    const uint64_t buffers;
+
 public:
 
 	SceneRenderFactory() = delete;
 
-	SceneRenderFactory(const IDescriptorSetLayoutSP& descriptorSetLayout, const IRenderPassSP& renderPass);
+	SceneRenderFactory(const IDescriptorSetLayoutSP& descriptorSetLayout, const IRenderPassSP& renderPass, const uint64_t buffers);
 
     virtual ~SceneRenderFactory();
 
@@ -58,6 +60,9 @@ public:
     virtual VkBool32 preparePhongMaterial(const ISceneManagerSP& sceneManager, const IPhongMaterialSP& phongMaterial) override;
 
     virtual VkBool32 prepareBSDFMaterial(const ISceneManagerSP& sceneManager, const ISubMeshSP& subMesh) override;
+
+    virtual VkBool32 prepareTransformUniformBuffer(const ISceneManagerSP& sceneManager, const INodeSP& node) override;
+    virtual VkBool32 prepareJointsUniformBuffer(const ISceneManagerSP& sceneManager, const INodeSP& node, const int32_t joints) override;
 
 };
 

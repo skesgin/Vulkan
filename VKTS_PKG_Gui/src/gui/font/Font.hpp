@@ -118,7 +118,7 @@ public:
 	virtual float getScaleHeight() const override;
 
 
-	virtual void drawText(const ICommandBuffersSP& cmdBuffer, const glm::mat4& viewProjection, const glm::vec2& translate, const std::string& text, const float fontSize, const glm::vec4& color) const override;
+	virtual void drawText(const ICommandBuffersSP& cmdBuffer, const glm::mat4& viewProjection, const glm::vec2& translate, const std::string& text, const float fontSize, const glm::vec4& color, const uint32_t dynamicOffsetCount = 0, const uint32_t* dynamicOffsets = nullptr) const override;
 
     //
     // IDestroyable
