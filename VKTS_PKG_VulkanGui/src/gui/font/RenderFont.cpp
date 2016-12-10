@@ -106,6 +106,10 @@ void RenderFont::draw(const ICommandBuffersSP& cmdBuffer, const glm::mat4& viewP
 
 	float smoothing = 1.0f / (VKTS_SPREAD * fontScale);
 
+	const glm::vec3 texCoordOrigin[4] = {glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(1.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f)};
+	glm::vec3 texCoord[4];
+	float packedTexCoord[4 * 2];
+
 	for (auto c : text)
 	{
 		// Line break.
@@ -160,13 +164,21 @@ void RenderFont::draw(const ICommandBuffersSP& cmdBuffer, const glm::mat4& viewP
 
 		glm::mat3 transformTexCoord = translateTexCoord * scaleTexCoord;
 
-		vkCmdPushConstants(cmdBuffer->getCommandBuffer(), graphicsPipeline->getLayout(), VK_SHADER_STAGE_VERTEX_BIT, sizeof(float) * 16, sizeof(float) * 11, glm::value_ptr(glm::mat4(transformTexCoord)));
+		for (uint32_t i = 0; i < 4; i++)
+		{
+			texCoord[i] = transformTexCoord * texCoordOrigin[i];
 
-		vkCmdPushConstants(cmdBuffer->getCommandBuffer(), graphicsPipeline->getLayout(), VK_SHADER_STAGE_VERTEX_BIT, sizeof(float) * 16 + sizeof(float) * 12, sizeof(float) * 4, glm::value_ptr(color));
+			packedTexCoord[i * 2 + 0] = texCoord[i].s;
+			packedTexCoord[i * 2 + 1] = texCoord[i].t;
+		}
+
+		vkCmdPushConstants(cmdBuffer->getCommandBuffer(), graphicsPipeline->getLayout(), VK_SHADER_STAGE_VERTEX_BIT, sizeof(float) * 16, sizeof(float) * 2 * 4, packedTexCoord);
+
+		vkCmdPushConstants(cmdBuffer->getCommandBuffer(), graphicsPipeline->getLayout(), VK_SHADER_STAGE_VERTEX_BIT, sizeof(float) * 16 + sizeof(float) * 2 * 4, sizeof(float) * 4, glm::value_ptr(color));
 
 		if (font.isDistanceField())
 		{
-			vkCmdPushConstants(cmdBuffer->getCommandBuffer(), graphicsPipeline->getLayout(), VK_SHADER_STAGE_VERTEX_BIT, sizeof(float) * 16 + sizeof(float) * 12 + sizeof(float) * 4, sizeof(float) * 1, &smoothing);
+			vkCmdPushConstants(cmdBuffer->getCommandBuffer(), graphicsPipeline->getLayout(), VK_SHADER_STAGE_VERTEX_BIT, sizeof(float) * 16 + sizeof(float) * 2 * 4 + sizeof(float) * 4, sizeof(float) * 1, &smoothing);
 		}
 
 		// Expecting triangle strip as primitive topology.

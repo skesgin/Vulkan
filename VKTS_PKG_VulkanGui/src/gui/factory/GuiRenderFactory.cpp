@@ -229,7 +229,7 @@ IRenderFontSP GuiRenderFactory::createRenderFont(const IGuiManagerSP& guiManager
 
     pushConstantRange[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
     pushConstantRange[0].offset = 0;
-    pushConstantRange[0].size = 16 * sizeof(float) + 12 * sizeof(float) + 4 * sizeof(float);
+    pushConstantRange[0].size = 16 * sizeof(float) + 2 * sizeof(float) * 4 + 4 * sizeof(float);
 
     if (font.isDistanceField())
     {
