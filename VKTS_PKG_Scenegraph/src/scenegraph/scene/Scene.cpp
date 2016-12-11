@@ -320,7 +320,7 @@ void Scene::updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsC
     }
 }
 
-void Scene::updateTransformRecursive(const double deltaTime, const uint64_t deltaTicks, const double tickTime, const uint32_t objectOffset, const uint32_t objectStep, const size_t objectLimit)
+void Scene::updateTransformRecursive(const double deltaTime, const uint64_t deltaTicks, const double tickTime, const uint32_t dynamicOffsetIndex, const uint32_t objectOffset, const uint32_t objectStep, const size_t objectLimit)
 {
     if (objectStep == 0)
     {
@@ -329,11 +329,11 @@ void Scene::updateTransformRecursive(const double deltaTime, const uint64_t delt
 
     for (size_t i = (size_t) objectOffset; i < glm::min(allObjects.size(), objectLimit); i += (size_t) objectStep)
     {
-        allObjects[i]->updateTransformRecursive(deltaTime, deltaTicks, tickTime);
+        allObjects[i]->updateTransformRecursive(deltaTime, deltaTicks, tickTime, dynamicOffsetIndex);
     }
 }
 
-void Scene::drawRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const OverwriteDraw* renderOverwrite, const uint32_t dynamicOffsetCount, const uint32_t* dynamicOffsets, const uint32_t objectOffset, const uint32_t objectStep, const size_t objectLimit)
+void Scene::drawRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const uint32_t dynamicOffsetCount, const uint32_t* dynamicOffsets, const OverwriteDraw* renderOverwrite, const uint32_t objectOffset, const uint32_t objectStep, const size_t objectLimit)
 {
     const OverwriteDraw* currentOverwrite = renderOverwrite;
     while (currentOverwrite)
@@ -355,7 +355,7 @@ void Scene::drawRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointer
 
     for (size_t i = (size_t) objectOffset; i < glm::min(allObjects.size(), objectLimit); i += (size_t) objectStep)
     {
-        allObjects[i]->drawRecursive(cmdBuffer, allGraphicsPipelines, renderOverwrite, dynamicOffsetCount, dynamicOffsets);
+        allObjects[i]->drawRecursive(cmdBuffer, allGraphicsPipelines, dynamicOffsetCount, dynamicOffsets, renderOverwrite);
     }
 }
 

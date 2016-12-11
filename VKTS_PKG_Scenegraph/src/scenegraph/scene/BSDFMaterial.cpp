@@ -132,7 +132,7 @@ void BSDFMaterial::updateDescriptorSetsRecursive(const uint32_t allWriteDescript
 	}
 }
 
-void BSDFMaterial::drawRecursive(const ICommandBuffersSP& cmdBuffer, const IGraphicsPipelineSP& graphicsPipeline, const OverwriteDraw* renderOverwrite, const uint32_t dynamicOffsetCount, const uint32_t* dynamicOffsets, const std::string& nodeName)
+void BSDFMaterial::drawRecursive(const ICommandBuffersSP& cmdBuffer, const IGraphicsPipelineSP& graphicsPipeline, const uint32_t dynamicOffsetCount, const uint32_t* dynamicOffsets, const OverwriteDraw* renderOverwrite, const std::string& nodeName)
 {
     const OverwriteDraw* currentOverwrite = renderOverwrite;
     while (currentOverwrite)

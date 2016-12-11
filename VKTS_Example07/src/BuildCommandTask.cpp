@@ -47,7 +47,7 @@ VkBool32 BuildCommandTask::execute()
     // Update / transform the scene.
     if (scene.get())
     {
-        scene->updateTransformRecursive(updateContext.getDeltaTime(), updateContext.getDeltaTicks(), updateContext.getTickTime(), objectOffset, objectStep);
+        scene->updateTransformRecursive(updateContext.getDeltaTime(), updateContext.getDeltaTicks(), updateContext.getTickTime(), 0, objectOffset, objectStep);
     }
 
     //
@@ -84,7 +84,10 @@ VkBool32 BuildCommandTask::execute()
 
     if (scene.get())
     {
-        scene->drawRecursive(cmdBuffer, allGraphicsPipelines, overwrite, 0, nullptr, objectOffset, objectStep);
+		const uint32_t dynamicOffsetCount = 3;
+		uint32_t dynamicOffsets[dynamicOffsetCount]{};
+
+        scene->drawRecursive(cmdBuffer, allGraphicsPipelines, dynamicOffsetCount, dynamicOffsets, overwrite, objectOffset, objectStep);
     }
 
     vkEndCommandBuffer(cmdBuffer->getCommandBuffer());

@@ -70,7 +70,7 @@ void RenderNode::updateTransformDescriptorBufferInfo(const VkBuffer buffer, cons
     transformWriteDescriptorSet.dstBinding = VKTS_BINDING_UNIFORM_BUFFER_TRANSFORM;
     transformWriteDescriptorSet.dstArrayElement = 0;
     transformWriteDescriptorSet.descriptorCount = 1;
-    transformWriteDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    transformWriteDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
     transformWriteDescriptorSet.pImageInfo = nullptr;
     transformWriteDescriptorSet.pBufferInfo = &transformDescriptorBufferInfo;
     transformWriteDescriptorSet.pTexelBufferView = nullptr;
@@ -91,7 +91,7 @@ void RenderNode::updateJointDescriptorBufferInfo(const VkBuffer buffer, const Vk
     jointWriteDescriptorSet.dstBinding = VKTS_BINDING_UNIFORM_BUFFER_BONE_TRANSFORM;
     jointWriteDescriptorSet.dstArrayElement = 0;
     jointWriteDescriptorSet.descriptorCount = 1;
-    jointWriteDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    jointWriteDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
     jointWriteDescriptorSet.pImageInfo = nullptr;
     jointWriteDescriptorSet.pBufferInfo = &jointDescriptorBufferInfo;
     jointWriteDescriptorSet.pTexelBufferView = nullptr;
@@ -99,12 +99,12 @@ void RenderNode::updateJointDescriptorBufferInfo(const VkBuffer buffer, const Vk
 
 void RenderNode::updateTransformUniformBuffer(const IBufferObjectSP& transformUniformBuffer)
 {
-	updateTransformDescriptorBufferInfo(transformUniformBuffer->getBuffer()->getBuffer(), 0, transformUniformBuffer->getBuffer()->getSize());
+	updateTransformDescriptorBufferInfo(transformUniformBuffer->getBuffer()->getBuffer(), 0, transformUniformBuffer->getBuffer()->getSize() / transformUniformBuffer->getBufferCount());
 }
 
 void RenderNode::updateJointsUniformBuffer(const IBufferObjectSP& jointsUniformBuffer)
 {
-	updateJointDescriptorBufferInfo(jointsUniformBuffer->getBuffer()->getBuffer(), 0, jointsUniformBuffer->getBuffer()->getSize());
+	updateJointDescriptorBufferInfo(jointsUniformBuffer->getBuffer()->getBuffer(), 0, jointsUniformBuffer->getBuffer()->getSize() / jointsUniformBuffer->getBufferCount());
 }
 
 void RenderNode::updateDescriptorSets(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets)

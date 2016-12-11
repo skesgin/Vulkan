@@ -27,7 +27,7 @@
 #include "Example.hpp"
 
 Example::Example(const vkts::IContextObjectSP& contextObject, const int32_t windowIndex, const vkts::IVisualContextSP& visualContext, const vkts::ISurfaceSP& surface) :
-		IUpdateThread(), contextObject(contextObject), windowIndex(windowIndex), visualContext(visualContext), surface(surface), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), descriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), fragmentUniformBuffer(nullptr), vertexShaderModule(nullptr), fragmentShaderModule(nullptr), pipelineLayout(nullptr), renderFactory(nullptr), sceneManager(nullptr), sceneFactory(nullptr), scene(nullptr), swapchain(nullptr), renderPass(nullptr), allGraphicsPipelines(), depthTexture(nullptr), depthStencilImageView(nullptr), swapchainImagesCount(0), swapchainImageView(), framebuffer(), cmdBuffer()
+		IUpdateThread(), contextObject(contextObject), windowIndex(windowIndex), visualContext(visualContext), surface(surface), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), descriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), fragmentUniformBuffer(nullptr), vertexShaderModule(nullptr), fragmentShaderModule(nullptr), pipelineLayout(nullptr), renderFactory(nullptr), sceneManager(nullptr), sceneFactory(nullptr), scene(nullptr), swapchain(nullptr), renderPass(nullptr), allGraphicsPipelines(), depthTexture(nullptr), depthStencilImageView(nullptr), swapchainImagesCount(0), swapchainImageView(), framebuffer(), cmdBuffer(), cmdBufferFence()
 {
 }
 
@@ -115,7 +115,13 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 
 	if (scene.get())
 	{
-		scene->drawRecursive(cmdBuffer[usedBuffer], allGraphicsPipelines);
+		uint32_t currentDynamicOffsets[VKTS_NUMBER_DYNAMIC_UNIFORM_BUFFERS]{};
+
+		currentDynamicOffsets[0] = dynamicOffsets[0] * (VkDeviceSize)usedBuffer;
+		currentDynamicOffsets[1] = dynamicOffsets[1] * (VkDeviceSize)usedBuffer;
+		currentDynamicOffsets[2] = dynamicOffsets[2] * (VkDeviceSize)usedBuffer;
+
+		scene->drawRecursive(cmdBuffer[usedBuffer], allGraphicsPipelines, VKTS_NUMBER_DYNAMIC_UNIFORM_BUFFERS, currentDynamicOffsets);
 	}
 
 	cmdBuffer[usedBuffer]->cmdEndRenderPass();
@@ -180,11 +186,11 @@ VkBool32 Example::updateDescriptorSets()
 
 	descriptorBufferInfos[0].buffer = vertexViewProjectionUniformBuffer->getBuffer()->getBuffer();
 	descriptorBufferInfos[0].offset = 0;
-	descriptorBufferInfos[0].range = vertexViewProjectionUniformBuffer->getBuffer()->getSize();
+	descriptorBufferInfos[0].range = vertexViewProjectionUniformBuffer->getBuffer()->getSize() / vertexViewProjectionUniformBuffer->getBufferCount();
 
 	descriptorBufferInfos[1].buffer = fragmentUniformBuffer->getBuffer()->getBuffer();
 	descriptorBufferInfos[1].offset = 0;
-	descriptorBufferInfos[1].range = fragmentUniformBuffer->getBuffer()->getSize();
+	descriptorBufferInfos[1].range = fragmentUniformBuffer->getBuffer()->getSize() / fragmentUniformBuffer->getBufferCount();
 
 	memset(writeDescriptorSets, 0, sizeof(writeDescriptorSets));
 
@@ -194,7 +200,7 @@ VkBool32 Example::updateDescriptorSets()
 	writeDescriptorSets[0].dstBinding = VKTS_BINDING_UNIFORM_BUFFER_VIEWPROJECTION;
 	writeDescriptorSets[0].dstArrayElement = 0;
 	writeDescriptorSets[0].descriptorCount = 1;
-	writeDescriptorSets[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	writeDescriptorSets[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 	writeDescriptorSets[0].pImageInfo = nullptr;
 	writeDescriptorSets[0].pBufferInfo = &descriptorBufferInfos[0];
 	writeDescriptorSets[0].pTexelBufferView = nullptr;
@@ -205,7 +211,7 @@ VkBool32 Example::updateDescriptorSets()
 	writeDescriptorSets[1].dstBinding = VKTS_BINDING_UNIFORM_BUFFER_LIGHT;
 	writeDescriptorSets[1].dstArrayElement = 0;
 	writeDescriptorSets[1].descriptorCount = 1;
-	writeDescriptorSets[1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	writeDescriptorSets[1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 	writeDescriptorSets[1].pImageInfo = nullptr;
 	writeDescriptorSets[1].pBufferInfo = &descriptorBufferInfos[1];
 	writeDescriptorSets[1].pTexelBufferView = nullptr;
@@ -224,7 +230,7 @@ VkBool32 Example::updateDescriptorSets()
 
 VkBool32 Example::buildScene(const vkts::ICommandObjectSP& commandObject)
 {
-	renderFactory = vkts::sceneRenderFactoryCreate(descriptorSetLayout, vkts::IRenderPassSP());
+	renderFactory = vkts::sceneRenderFactoryCreate(descriptorSetLayout, vkts::IRenderPassSP(), VKTS_MAX_NUMBER_BUFFERS);
 
 	if (!renderFactory.get())
 	{
@@ -267,6 +273,13 @@ VkBool32 Example::buildScene(const vkts::ICommandObjectSP& commandObject)
 	}
 
 	vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Number objects: %d", scene->getNumberObjects());
+
+	//
+
+
+	dynamicOffsets[0] = (uint32_t)contextObject->getPhysicalDevice()->getUniformBufferAlignmentSizeInBytes(vkts::alignmentGetSizeInBytes(16 * sizeof(float) * 2, 16));
+	dynamicOffsets[1] = (uint32_t)sceneFactory->getSceneRenderFactory()->getTransformUniformBufferAlignmentSize(sceneManager);
+	dynamicOffsets[2] = (uint32_t)contextObject->getPhysicalDevice()->getUniformBufferAlignmentSizeInBytes(vkts::alignmentGetSizeInBytes(3 * sizeof(float), 16));
 
 	return VK_TRUE;
 }
@@ -635,21 +648,21 @@ VkBool32 Example::buildDescriptorSetLayout()
 	VkDescriptorSetLayoutBinding descriptorSetLayoutBinding[VKTS_DESCRIPTOR_SET_COUNT]{};
 
 	descriptorSetLayoutBinding[0].binding = VKTS_BINDING_UNIFORM_BUFFER_VIEWPROJECTION;
-	descriptorSetLayoutBinding[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	descriptorSetLayoutBinding[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 	descriptorSetLayoutBinding[0].descriptorCount = 1;
 	descriptorSetLayoutBinding[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 	descriptorSetLayoutBinding[0].pImmutableSamplers = nullptr;
 
-	descriptorSetLayoutBinding[1].binding = VKTS_BINDING_UNIFORM_BUFFER_LIGHT;
-	descriptorSetLayoutBinding[1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	descriptorSetLayoutBinding[1].binding = VKTS_BINDING_UNIFORM_BUFFER_TRANSFORM;
+	descriptorSetLayoutBinding[1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 	descriptorSetLayoutBinding[1].descriptorCount = 1;
-	descriptorSetLayoutBinding[1].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+	descriptorSetLayoutBinding[1].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 	descriptorSetLayoutBinding[1].pImmutableSamplers = nullptr;
 
-	descriptorSetLayoutBinding[2].binding = VKTS_BINDING_UNIFORM_BUFFER_TRANSFORM;
-	descriptorSetLayoutBinding[2].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	descriptorSetLayoutBinding[2].binding = VKTS_BINDING_UNIFORM_BUFFER_LIGHT;
+	descriptorSetLayoutBinding[2].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 	descriptorSetLayoutBinding[2].descriptorCount = 1;
-	descriptorSetLayoutBinding[2].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+	descriptorSetLayoutBinding[2].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 	descriptorSetLayoutBinding[2].pImmutableSamplers = nullptr;
 
     for (int32_t i = VKTS_BINDING_UNIFORM_SAMPLER_PHONG_FIRST; i <= VKTS_BINDING_UNIFORM_SAMPLER_PHONG_LAST; i++)
@@ -731,7 +744,7 @@ VkBool32 Example::buildUniformBuffers()
 	bufferCreateInfo.queueFamilyIndexCount = 0;
 	bufferCreateInfo.pQueueFamilyIndices = nullptr;
 
-	vertexViewProjectionUniformBuffer = vkts::bufferObjectCreate(contextObject, bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+	vertexViewProjectionUniformBuffer = vkts::bufferObjectCreate(contextObject, bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, VKTS_MAX_NUMBER_BUFFERS);
 
 	if (!vertexViewProjectionUniformBuffer.get())
 	{
@@ -751,7 +764,7 @@ VkBool32 Example::buildUniformBuffers()
 	bufferCreateInfo.queueFamilyIndexCount = 0;
 	bufferCreateInfo.pQueueFamilyIndices = nullptr;
 
-	fragmentUniformBuffer = vkts::bufferObjectCreate(contextObject, bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+	fragmentUniformBuffer = vkts::bufferObjectCreate(contextObject, bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, VKTS_MAX_NUMBER_BUFFERS);
 
 	if (!fragmentUniformBuffer.get())
 	{
@@ -793,9 +806,27 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
         return VK_FALSE;
     }
 
+    if (swapchainImagesCount > VKTS_MAX_NUMBER_BUFFERS)
+    {
+    	return VK_FALSE;
+    }
+
     swapchainImageView = vkts::SmartPointerVector<vkts::IImageViewSP>(swapchainImagesCount);
     framebuffer = vkts::SmartPointerVector<vkts::IFramebufferSP>(swapchainImagesCount);
     cmdBuffer = vkts::SmartPointerVector<vkts::ICommandBuffersSP>(swapchainImagesCount);
+    cmdBufferFence = vkts::SmartPointerVector<vkts::IFenceSP>(swapchainImagesCount);
+
+    for (uint32_t i = 0; i < swapchainImagesCount; i++)
+    {
+    	cmdBufferFence[i] = vkts::fenceCreate(contextObject->getDevice()->getDevice(), VK_FENCE_CREATE_SIGNALED_BIT);
+
+        if (!cmdBufferFence[i].get())
+        {
+            vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create fence.");
+
+            return VK_FALSE;
+        }
+    }
 
     //
 
@@ -962,8 +993,15 @@ void Example::terminateResources(const vkts::IUpdateThreadContext& updateContext
 	{
 		if (contextObject->getDevice().get())
 		{
+			contextObject->getDevice()->waitIdle();
+
 			for (int32_t i = 0; i < (int32_t)swapchainImagesCount; i++)
 			{
+		        if (cmdBufferFence[i].get())
+		        {
+		        	cmdBufferFence[i]->destroy();
+		        }
+
 				if (cmdBuffer[i].get())
 				{
 					cmdBuffer[i]->destroy();
@@ -1090,19 +1128,6 @@ VkBool32 Example::init(const vkts::IUpdateThreadContext& updateContext)
 		return VK_FALSE;
 	}
 
-	//
-
-	glm::vec3 lightDirection = glm::vec3(0.0f, 2.0f, 1.0f);
-
-	lightDirection = glm::normalize(lightDirection);
-
-	if (!fragmentUniformBuffer->upload(0, 0, lightDirection))
-	{
-		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not upload light direction.");
-
-		return VK_FALSE;
-	}
-
 	return VK_TRUE;
 }
 
@@ -1147,22 +1172,54 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 		projectionMatrix = vkts::perspectiveMat4(45.0f, (float)currentExtent.width / (float)currentExtent.height, 1.0f, 100.0f);
 		viewMatrix = vkts::lookAtMat4(0.0f, 4.0f, 5.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
 
-		if (!vertexViewProjectionUniformBuffer->upload(0 * sizeof(float) * 16, 0, projectionMatrix))
+		if (!vertexViewProjectionUniformBuffer->upload(dynamicOffsets[0] * (VkDeviceSize)currentBuffer + 0 * sizeof(float) * 16, 0, projectionMatrix))
 		{
 			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not upload matrices.");
 
 			return VK_FALSE;
 		}
-		if (!vertexViewProjectionUniformBuffer->upload(1 * sizeof(float) * 16, 0, viewMatrix))
+		if (!vertexViewProjectionUniformBuffer->upload(dynamicOffsets[0] * (VkDeviceSize)currentBuffer + 1 * sizeof(float) * 16, 0, viewMatrix))
 		{
 			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not upload matrices.");
+
+			return VK_FALSE;
+		}
+
+		//
+
+		glm::vec3 lightDirection = glm::vec3(0.0f, 2.0f, 1.0f);
+
+		lightDirection = glm::normalize(lightDirection);
+
+		if (!fragmentUniformBuffer->upload(dynamicOffsets[2] * (VkDeviceSize)currentBuffer + 0, 0, lightDirection))
+		{
+			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not upload light direction.");
 
 			return VK_FALSE;
 		}
 
 		if (scene.get())
 		{
-			scene->updateTransformRecursive(updateContext.getDeltaTime(), updateContext.getDeltaTicks(), updateContext.getTickTime());
+			scene->updateTransformRecursive(updateContext.getDeltaTime(), updateContext.getDeltaTicks(), updateContext.getTickTime(), currentBuffer);
+		}
+
+		//
+
+		// Wait until complete, before to commit again.
+		result = cmdBufferFence[currentBuffer]->waitForFence(UINT64_MAX);
+		if (result != VK_SUCCESS)
+		{
+			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not wait for fence.");
+
+			return VK_FALSE;
+		}
+
+		result = cmdBufferFence[currentBuffer]->reset();
+		if (result != VK_SUCCESS)
+		{
+			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not reset fence.");
+
+			return VK_FALSE;
 		}
 
 		//
@@ -1185,7 +1242,7 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
         submitInfo.signalSemaphoreCount = 1;
         submitInfo.pSignalSemaphores = &signalSemaphores;
 
-		result = contextObject->getQueue()->submit(1, &submitInfo, VK_NULL_HANDLE);
+		result = contextObject->getQueue()->submit(1, &submitInfo, cmdBufferFence[currentBuffer]->getFence());
 
 		if (result != VK_SUCCESS)
 		{
@@ -1202,14 +1259,7 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 
 		if (result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR)
 		{
-			result = contextObject->getQueue()->waitIdle();
-
-			if (result != VK_SUCCESS)
-			{
-				vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not wait for idle queue.");
-
-				return VK_FALSE;
-			}
+			// Do nothing, as everything is buffered and synchronized.
 		}
 		else
 		{
@@ -1328,7 +1378,7 @@ void Example::terminate(const vkts::IUpdateThreadContext& updateContext)
 
 	        if (renderingCompleteSemaphore.get())
 	        {
-	            renderingCompleteSemaphore->destroy();
+	        	renderingCompleteSemaphore->destroy();
 	        }
 
 	        if (imageAcquiredSemaphore.get())

@@ -197,7 +197,7 @@ VkBool32 Example::updateDescriptorSets()
 	writeDescriptorSets[0].dstBinding = VKTS_BINDING_UNIFORM_BUFFER_VIEWPROJECTION;
 	writeDescriptorSets[0].dstArrayElement = 0;
 	writeDescriptorSets[0].descriptorCount = 1;
-	writeDescriptorSets[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	writeDescriptorSets[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 	writeDescriptorSets[0].pImageInfo = nullptr;
 	writeDescriptorSets[0].pBufferInfo = &descriptorBufferInfos[0];
 	writeDescriptorSets[0].pTexelBufferView = nullptr;
@@ -208,7 +208,7 @@ VkBool32 Example::updateDescriptorSets()
 	writeDescriptorSets[1].dstBinding = VKTS_BINDING_UNIFORM_BUFFER_LIGHT;
 	writeDescriptorSets[1].dstArrayElement = 0;
 	writeDescriptorSets[1].descriptorCount = 1;
-	writeDescriptorSets[1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	writeDescriptorSets[1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 	writeDescriptorSets[1].pImageInfo = nullptr;
 	writeDescriptorSets[1].pBufferInfo = &descriptorBufferInfos[1];
 	writeDescriptorSets[1].pTexelBufferView = nullptr;
@@ -717,19 +717,19 @@ VkBool32 Example::buildDescriptorSetLayout()
 	VkDescriptorSetLayoutBinding descriptorSetLayoutBinding[VKTS_DESCRIPTOR_SET_COUNT]{};
 
 	descriptorSetLayoutBinding[0].binding = VKTS_BINDING_UNIFORM_BUFFER_VIEWPROJECTION;
-	descriptorSetLayoutBinding[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	descriptorSetLayoutBinding[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 	descriptorSetLayoutBinding[0].descriptorCount = 1;
 	descriptorSetLayoutBinding[0].stageFlags = VK_SHADER_STAGE_GEOMETRY_BIT;
 	descriptorSetLayoutBinding[0].pImmutableSamplers = nullptr;
 
 	descriptorSetLayoutBinding[1].binding = VKTS_BINDING_UNIFORM_BUFFER_LIGHT;
-	descriptorSetLayoutBinding[1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	descriptorSetLayoutBinding[1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 	descriptorSetLayoutBinding[1].descriptorCount = 1;
 	descriptorSetLayoutBinding[1].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 	descriptorSetLayoutBinding[1].pImmutableSamplers = nullptr;
 
 	descriptorSetLayoutBinding[2].binding = VKTS_BINDING_UNIFORM_BUFFER_TRANSFORM;
-	descriptorSetLayoutBinding[2].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	descriptorSetLayoutBinding[2].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 	descriptorSetLayoutBinding[2].descriptorCount = 1;
 	descriptorSetLayoutBinding[2].stageFlags = VK_SHADER_STAGE_GEOMETRY_BIT;
 	descriptorSetLayoutBinding[2].pImmutableSamplers = nullptr;

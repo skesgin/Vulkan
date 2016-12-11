@@ -46,6 +46,8 @@ public:
     {
     }
 
+    virtual VkResult waitIdle() const = 0;
+
     virtual const VkPhysicalDevice getPhysicalDevice() const = 0;
 
     virtual const VkDeviceCreateInfo& getDeviceCreateInfo() const = 0;

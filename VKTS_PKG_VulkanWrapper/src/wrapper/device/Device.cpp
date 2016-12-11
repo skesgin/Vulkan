@@ -59,6 +59,11 @@ Device::~Device()
 // IDevice
 //
 
+VkResult Device::waitIdle() const
+{
+	return vkDeviceWaitIdle(device);
+}
+
 const VkPhysicalDevice Device::getPhysicalDevice() const
 {
     return physicalDevice;

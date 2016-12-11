@@ -36,7 +36,7 @@ namespace vkts
  *
  * @ThreadSafe
  */
-VKTS_APICALL ISceneRenderFactorySP VKTS_APIENTRY sceneRenderFactoryCreate(const IDescriptorSetLayoutSP& descriptorSetLayout, const IRenderPassSP& renderPass, const uint64_t buffers = 1);
+VKTS_APICALL ISceneRenderFactorySP VKTS_APIENTRY sceneRenderFactoryCreate(const IDescriptorSetLayoutSP& descriptorSetLayout, const IRenderPassSP& renderPass, const VkDeviceSize bufferCount = 1);
 
 }
 

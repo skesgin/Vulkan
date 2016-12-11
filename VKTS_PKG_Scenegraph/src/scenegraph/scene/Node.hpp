@@ -50,7 +50,7 @@ private:
     glm::vec3 finalScale;
 
     glm::mat4 transformMatrix;
-    VkBool32 transformMatrixDirty;
+    std::vector<VkBool32> transformMatrixDirty;
 
     int32_t jointIndex;
     int32_t joints;
@@ -61,7 +61,7 @@ private:
 
     glm::mat4 bindMatrix;
     glm::mat4 inverseBindMatrix;
-    VkBool32 bindMatrixDirty;
+    std::vector<VkBool32> bindMatrixDirty;
 
     SmartPointerVector<INodeSP> allChildNodes;
 
@@ -212,7 +212,7 @@ public:
 
     virtual VkBool32 getDirty() const override;
 
-    virtual void setDirty() override;
+    virtual void setDirty(const VkBool32 dirty = VK_TRUE) override;
 
     virtual IBufferObjectSP getTransformUniformBuffer() const override;
 
@@ -246,9 +246,9 @@ public:
 
     virtual void updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets) override;
 
-    virtual void updateTransformRecursive(const double deltaTime, const uint64_t deltaTicks, const double tickTime, const glm::mat4& parentTransformMatrix, const VkBool32 parentTransformMatrixDirty, const glm::mat4& parentBindMatrix, const VkBool32 parentBindMatrixDirty, const INodeSP& armatureNode) override;
+    virtual void updateTransformRecursive(const double deltaTime, const uint64_t deltaTicks, const double tickTime, const uint32_t dynamicOffsetIndex, const glm::mat4& parentTransformMatrix, const VkBool32 parentTransformMatrixDirty, const glm::mat4& parentBindMatrix, const VkBool32 parentBindMatrixDirty, const INodeSP& armatureNode) override;
 
-    virtual void drawRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const OverwriteDraw* renderOverwrite = nullptr, const uint32_t dynamicOffsetCount = 0, const uint32_t* dynamicOffsets = nullptr) override;
+    virtual void drawRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const uint32_t dynamicOffsetCount, const uint32_t* dynamicOffsets, const OverwriteDraw* renderOverwrite = nullptr) override;
 
     //
     // ICloneable

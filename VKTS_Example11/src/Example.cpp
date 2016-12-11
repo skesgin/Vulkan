@@ -107,7 +107,10 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 
 	if (scene.get())
 	{
-		scene->drawRecursive(shadowCmdBuffer[usedBuffer], allShadowGraphicsPipelines);
+		const uint32_t dynamicOffsetCount = 4;
+		uint32_t dynamicOffsets[dynamicOffsetCount]{};
+
+		scene->drawRecursive(shadowCmdBuffer[usedBuffer], allShadowGraphicsPipelines, dynamicOffsetCount, dynamicOffsets);
 	}
 
 	shadowCmdBuffer[usedBuffer]->cmdEndRenderPass();
@@ -217,18 +220,23 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 
 	if (scene.get())
 	{
+		const uint32_t dynamicOffsetCount = 4;
+		uint32_t dynamicOffsets[dynamicOffsetCount]{};
+
+		//
+
 		vkts::Blend blend;
 
 		// First all opaque elements.
 		blend.setPassTransparent(VK_FALSE);
-		scene->drawRecursive(cmdBuffer[usedBuffer], allOpaqueGraphicsPipelines, &blend);
+		scene->drawRecursive(cmdBuffer[usedBuffer], allOpaqueGraphicsPipelines, dynamicOffsetCount, dynamicOffsets, &blend);
 
 		// Then, transparent elements.
 		blend.setPassTransparent(VK_TRUE);
 		// Transparent elements are one sided, so render clockwise ...
-		scene->drawRecursive(cmdBuffer[usedBuffer], allBlendCwGraphicsPipelines, &blend);
+		scene->drawRecursive(cmdBuffer[usedBuffer], allBlendCwGraphicsPipelines, dynamicOffsetCount, dynamicOffsets, &blend);
 		// ... and counter clockwise.
-		scene->drawRecursive(cmdBuffer[usedBuffer], allBlendGraphicsPipelines, &blend);
+		scene->drawRecursive(cmdBuffer[usedBuffer], allBlendGraphicsPipelines, dynamicOffsetCount, dynamicOffsets, &blend);
 	}
 
 	cmdBuffer[usedBuffer]->cmdEndRenderPass();
@@ -354,7 +362,7 @@ VkBool32 Example::updateDescriptorSets()
 	writeDescriptorSets[0].dstBinding = VKTS_BINDING_UNIFORM_BUFFER_VIEWPROJECTION;
 	writeDescriptorSets[0].dstArrayElement = 0;
 	writeDescriptorSets[0].descriptorCount = 1;
-	writeDescriptorSets[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	writeDescriptorSets[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 	writeDescriptorSets[0].pImageInfo = nullptr;
 	writeDescriptorSets[0].pBufferInfo = &descriptorBufferInfos[0];
 	writeDescriptorSets[0].pTexelBufferView = nullptr;
@@ -365,7 +373,7 @@ VkBool32 Example::updateDescriptorSets()
 	writeDescriptorSets[1].dstBinding = VKTS_BINDING_UNIFORM_BUFFER_LIGHT;
 	writeDescriptorSets[1].dstArrayElement = 0;
 	writeDescriptorSets[1].descriptorCount = 1;
-	writeDescriptorSets[1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	writeDescriptorSets[1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 	writeDescriptorSets[1].pImageInfo = nullptr;
 	writeDescriptorSets[1].pBufferInfo = &descriptorBufferInfos[1];
 	writeDescriptorSets[1].pTexelBufferView = nullptr;
@@ -387,7 +395,7 @@ VkBool32 Example::updateDescriptorSets()
 	writeDescriptorSets[3].dstBinding = VKTS_BINDING_UNIFORM_BUFFER_SHADOW;
 	writeDescriptorSets[3].dstArrayElement = 0;
 	writeDescriptorSets[3].descriptorCount = 1;
-	writeDescriptorSets[3].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	writeDescriptorSets[3].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 	writeDescriptorSets[3].pImageInfo = nullptr;
 	writeDescriptorSets[3].pBufferInfo = &descriptorBufferInfos[2];
 	writeDescriptorSets[3].pTexelBufferView = nullptr;
@@ -1179,13 +1187,13 @@ VkBool32 Example::buildDescriptorSetLayout()
 	VkDescriptorSetLayoutBinding descriptorSetLayoutBinding[VKTS_DESCRIPTOR_SET_COUNT]{};
 
 	descriptorSetLayoutBinding[0].binding = VKTS_BINDING_UNIFORM_BUFFER_VIEWPROJECTION;
-	descriptorSetLayoutBinding[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	descriptorSetLayoutBinding[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 	descriptorSetLayoutBinding[0].descriptorCount = 1;
 	descriptorSetLayoutBinding[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 	descriptorSetLayoutBinding[0].pImmutableSamplers = nullptr;
 
 	descriptorSetLayoutBinding[1].binding = VKTS_BINDING_UNIFORM_BUFFER_LIGHT;
-	descriptorSetLayoutBinding[1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	descriptorSetLayoutBinding[1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 	descriptorSetLayoutBinding[1].descriptorCount = 1;
 	descriptorSetLayoutBinding[1].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 	descriptorSetLayoutBinding[1].pImmutableSamplers = nullptr;
@@ -1197,13 +1205,13 @@ VkBool32 Example::buildDescriptorSetLayout()
 	descriptorSetLayoutBinding[2].pImmutableSamplers = nullptr;
 
 	descriptorSetLayoutBinding[3].binding = VKTS_BINDING_UNIFORM_BUFFER_SHADOW;
-	descriptorSetLayoutBinding[3].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	descriptorSetLayoutBinding[3].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 	descriptorSetLayoutBinding[3].descriptorCount = 1;
 	descriptorSetLayoutBinding[3].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 	descriptorSetLayoutBinding[3].pImmutableSamplers = nullptr;
 
 	descriptorSetLayoutBinding[4].binding = VKTS_BINDING_UNIFORM_BUFFER_TRANSFORM;
-	descriptorSetLayoutBinding[4].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	descriptorSetLayoutBinding[4].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 	descriptorSetLayoutBinding[4].descriptorCount = 1;
 	descriptorSetLayoutBinding[4].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 	descriptorSetLayoutBinding[4].pImmutableSamplers = nullptr;

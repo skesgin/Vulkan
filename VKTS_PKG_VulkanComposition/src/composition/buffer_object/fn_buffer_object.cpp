@@ -30,13 +30,31 @@
 namespace vkts
 {
 
-static VkBool32 bufferObjectPrepare(IBufferSP& buffer, IDeviceMemorySP& deviceMemory, const IContextObjectSP& contextObject, const VkBufferCreateInfo& bufferCreateInfo, const VkMemoryPropertyFlags memoryPropertyFlag)
+static VkBool32 bufferObjectPrepare(IBufferSP& buffer, IDeviceMemorySP& deviceMemory, const IContextObjectSP& contextObject, const VkBufferCreateInfo& bufferCreateInfo, const VkMemoryPropertyFlags memoryPropertyFlag, const VkDeviceSize buffers)
 {
+	if (buffers == 0)
+	{
+		return VK_FALSE;
+	}
+
     VkResult result;
 
     //
 
-    buffer = bufferCreate(contextObject->getDevice()->getDevice(), bufferCreateInfo.flags, bufferCreateInfo.size, bufferCreateInfo.usage, bufferCreateInfo.sharingMode, bufferCreateInfo.queueFamilyIndexCount, bufferCreateInfo.pQueueFamilyIndices);
+    VkDeviceSize size = bufferCreateInfo.size;
+
+    if (buffers > 1)
+    {
+    	VkPhysicalDeviceProperties physicalDeviceProperties;
+
+    	contextObject->getPhysicalDevice()->getPhysicalDeviceProperties(physicalDeviceProperties);
+
+    	size = alignmentGetSizeInBytes(size, physicalDeviceProperties.limits.minUniformBufferOffsetAlignment) * buffers;
+    }
+
+    //
+
+    buffer = bufferCreate(contextObject->getDevice()->getDevice(), bufferCreateInfo.flags, size, bufferCreateInfo.usage, bufferCreateInfo.sharingMode, bufferCreateInfo.queueFamilyIndexCount, bufferCreateInfo.pQueueFamilyIndices);
 
     if (!buffer.get())
     {
@@ -80,6 +98,8 @@ IBufferObjectSP VKTS_APIENTRY bufferObjectCreate(IBufferSP& stageBuffer, IDevice
         return IBufferObjectSP();
     }
 
+    VkDeviceSize bufferCount = 1;
+
     //
 
     VkResult result;
@@ -90,7 +110,7 @@ IBufferObjectSP VKTS_APIENTRY bufferObjectCreate(IBufferSP& stageBuffer, IDevice
 
     IDeviceMemorySP deviceMemory;
 
-    if (!bufferObjectPrepare(buffer, deviceMemory, contextObject, bufferCreateInfo, memoryPropertyFlag))
+    if (!bufferObjectPrepare(buffer, deviceMemory, contextObject, bufferCreateInfo, memoryPropertyFlag, bufferCount))
     {
         return IBufferObjectSP();
     }
@@ -110,7 +130,7 @@ IBufferObjectSP VKTS_APIENTRY bufferObjectCreate(IBufferSP& stageBuffer, IDevice
     }
     else
     {
-        if (!bufferObjectPrepare(stageBuffer, stageDeviceMemory, contextObject, bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT))
+        if (!bufferObjectPrepare(stageBuffer, stageDeviceMemory, contextObject, bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, bufferCount))
         {
             logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create vertex buffer.");
 
@@ -139,7 +159,7 @@ IBufferObjectSP VKTS_APIENTRY bufferObjectCreate(IBufferSP& stageBuffer, IDevice
 
     IBufferViewSP noBufferView;
 
-    auto newInstance = new BufferObject(contextObject, buffer, noBufferView, deviceMemory);
+    auto newInstance = new BufferObject(contextObject, buffer, noBufferView, deviceMemory, bufferCount);
 
     if (!newInstance)
     {
@@ -151,9 +171,9 @@ IBufferObjectSP VKTS_APIENTRY bufferObjectCreate(IBufferSP& stageBuffer, IDevice
     return IBufferObjectSP(newInstance);
 }
 
-IBufferObjectSP VKTS_APIENTRY bufferObjectCreate(const IContextObjectSP& contextObject, const VkBufferCreateInfo& bufferCreateInfo, const VkMemoryPropertyFlags memoryPropertyFlag)
+IBufferObjectSP VKTS_APIENTRY bufferObjectCreate(const IContextObjectSP& contextObject, const VkBufferCreateInfo& bufferCreateInfo, const VkMemoryPropertyFlags memoryPropertyFlag, const VkDeviceSize bufferCount)
 {
-    if (!contextObject.get())
+    if (!contextObject.get() || bufferCount == 0)
     {
         return IBufferObjectSP();
     }
@@ -164,7 +184,7 @@ IBufferObjectSP VKTS_APIENTRY bufferObjectCreate(const IContextObjectSP& context
 
     IDeviceMemorySP deviceMemory;
 
-    if (!bufferObjectPrepare(buffer, deviceMemory, contextObject, bufferCreateInfo, memoryPropertyFlag))
+    if (!bufferObjectPrepare(buffer, deviceMemory, contextObject, bufferCreateInfo, memoryPropertyFlag, bufferCount))
     {
         return IBufferObjectSP();
     }
@@ -173,7 +193,7 @@ IBufferObjectSP VKTS_APIENTRY bufferObjectCreate(const IContextObjectSP& context
 
     IBufferViewSP noBufferView;
 
-    auto newInstance = new BufferObject(contextObject, buffer, noBufferView, deviceMemory);
+    auto newInstance = new BufferObject(contextObject, buffer, noBufferView, deviceMemory, bufferCount);
 
     if (!newInstance)
     {
@@ -185,9 +205,9 @@ IBufferObjectSP VKTS_APIENTRY bufferObjectCreate(const IContextObjectSP& context
     return IBufferObjectSP(newInstance);
 }
 
-IBufferObjectSP VKTS_APIENTRY bufferObjectCreate(const IContextObjectSP& contextObject, const VkBufferCreateInfo& bufferCreateInfo, const VkMemoryPropertyFlags memoryPropertyFlag, const VkFormat format)
+IBufferObjectSP VKTS_APIENTRY bufferObjectCreate(const IContextObjectSP& contextObject, const VkBufferCreateInfo& bufferCreateInfo, const VkMemoryPropertyFlags memoryPropertyFlag, const VkFormat format, const VkDeviceSize bufferCount)
 {
-    if (!contextObject.get())
+    if (!contextObject.get() || bufferCount == 0)
     {
         return IBufferObjectSP();
     }
@@ -198,7 +218,7 @@ IBufferObjectSP VKTS_APIENTRY bufferObjectCreate(const IContextObjectSP& context
 
     IDeviceMemorySP deviceMemory;
 
-    if (!bufferObjectPrepare(buffer, deviceMemory, contextObject, bufferCreateInfo, memoryPropertyFlag))
+    if (!bufferObjectPrepare(buffer, deviceMemory, contextObject, bufferCreateInfo, memoryPropertyFlag, bufferCount))
     {
         return IBufferObjectSP();
     }
@@ -216,7 +236,7 @@ IBufferObjectSP VKTS_APIENTRY bufferObjectCreate(const IContextObjectSP& context
 
     //
 
-    auto newInstance = new BufferObject(contextObject, buffer, bufferView, deviceMemory);
+    auto newInstance = new BufferObject(contextObject, buffer, bufferView, deviceMemory, bufferCount);
 
     if (!newInstance)
     {

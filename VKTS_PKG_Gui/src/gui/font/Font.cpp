@@ -118,11 +118,11 @@ const IChar* Font::getChar(const int32_t c) const
 	return &(currentCharacter->second);
 }
 
-void Font::drawText(const ICommandBuffersSP& cmdBuffer, const glm::mat4& viewProjection, const glm::vec2& translate, const std::string& text, const float fontSize, const glm::vec4& color, const uint32_t dynamicOffsetCount, const uint32_t* dynamicOffsets) const
+void Font::drawText(const ICommandBuffersSP& cmdBuffer, const glm::mat4& viewProjection, const glm::vec2& translate, const std::string& text, const float fontSize, const glm::vec4& color) const
 {
 	if (renderFont.get())
 	{
-		renderFont->draw(cmdBuffer, viewProjection, translate, text, fontSize, color, *this, dynamicOffsetCount, dynamicOffsets);
+		renderFont->draw(cmdBuffer, viewProjection, translate, text, fontSize, color, *this);
 	}
 }
 

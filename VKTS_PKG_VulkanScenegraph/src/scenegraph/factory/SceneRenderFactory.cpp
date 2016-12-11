@@ -33,8 +33,8 @@
 namespace vkts
 {
 
-SceneRenderFactory::SceneRenderFactory(const IDescriptorSetLayoutSP& descriptorSetLayout, const IRenderPassSP& renderPass, const uint64_t buffers) :
-	ISceneRenderFactory(), descriptorSetLayout(descriptorSetLayout), renderPass(renderPass), buffers(buffers)
+SceneRenderFactory::SceneRenderFactory(const IDescriptorSetLayoutSP& descriptorSetLayout, const IRenderPassSP& renderPass, const VkDeviceSize bufferCount) :
+	ISceneRenderFactory(), descriptorSetLayout(descriptorSetLayout), renderPass(renderPass), bufferCount(bufferCount)
 {
 }
 
@@ -72,7 +72,7 @@ VkBool32 SceneRenderFactory::preparePhongMaterial(const ISceneManagerSP& sceneMa
 
     VkDescriptorPoolSize descriptorPoolSize[3]{};
 
-	descriptorPoolSize[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	descriptorPoolSize[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 	descriptorPoolSize[0].descriptorCount = VKTS_BINDING_UNIFORM_BUFFER_COUNT;
 
 	descriptorPoolSize[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
@@ -118,7 +118,7 @@ VkBool32 SceneRenderFactory::prepareBSDFMaterial(const ISceneManagerSP& sceneMan
 	uint32_t bindingCount = 0;
 
 	descriptorSetLayoutBinding[bindingCount].binding = VKTS_BINDING_UNIFORM_BUFFER_VIEWPROJECTION;
-	descriptorSetLayoutBinding[bindingCount].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	descriptorSetLayoutBinding[bindingCount].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 	descriptorSetLayoutBinding[bindingCount].descriptorCount = 1;
 	descriptorSetLayoutBinding[bindingCount].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 	descriptorSetLayoutBinding[bindingCount].pImmutableSamplers = nullptr;
@@ -126,7 +126,7 @@ VkBool32 SceneRenderFactory::prepareBSDFMaterial(const ISceneManagerSP& sceneMan
 	bindingCount++;
 
 	descriptorSetLayoutBinding[bindingCount].binding = VKTS_BINDING_UNIFORM_BUFFER_TRANSFORM;
-	descriptorSetLayoutBinding[bindingCount].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	descriptorSetLayoutBinding[bindingCount].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 	descriptorSetLayoutBinding[bindingCount].descriptorCount = 1;
 	descriptorSetLayoutBinding[bindingCount].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 	descriptorSetLayoutBinding[bindingCount].pImmutableSamplers = nullptr;
@@ -136,7 +136,7 @@ VkBool32 SceneRenderFactory::prepareBSDFMaterial(const ISceneManagerSP& sceneMan
 	if ((subMesh->getVertexBufferType() & VKTS_VERTEX_BUFFER_TYPE_BONES) == VKTS_VERTEX_BUFFER_TYPE_BONES)
 	{
     	descriptorSetLayoutBinding[bindingCount].binding = VKTS_BINDING_UNIFORM_BUFFER_BONE_TRANSFORM;
-    	descriptorSetLayoutBinding[bindingCount].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    	descriptorSetLayoutBinding[bindingCount].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
     	descriptorSetLayoutBinding[bindingCount].descriptorCount = 1;
     	descriptorSetLayoutBinding[bindingCount].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
     	descriptorSetLayoutBinding[bindingCount].pImmutableSamplers = nullptr;
@@ -149,7 +149,7 @@ VkBool32 SceneRenderFactory::prepareBSDFMaterial(const ISceneManagerSP& sceneMan
 	if (subMesh->getBSDFMaterial()->getForwardRendering())
 	{
     	descriptorSetLayoutBinding[bindingCount].binding = VKTS_BINDING_UNIFORM_BUFFER_LIGHT;
-    	descriptorSetLayoutBinding[bindingCount].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    	descriptorSetLayoutBinding[bindingCount].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
     	descriptorSetLayoutBinding[bindingCount].descriptorCount = 1;
     	descriptorSetLayoutBinding[bindingCount].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
     	descriptorSetLayoutBinding[bindingCount].pImmutableSamplers = nullptr;
@@ -157,7 +157,7 @@ VkBool32 SceneRenderFactory::prepareBSDFMaterial(const ISceneManagerSP& sceneMan
     	bindingCount++;
 
     	descriptorSetLayoutBinding[bindingCount].binding = VKTS_BINDING_UNIFORM_BUFFER_BSDF_INVERSE;
-    	descriptorSetLayoutBinding[bindingCount].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    	descriptorSetLayoutBinding[bindingCount].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
     	descriptorSetLayoutBinding[bindingCount].descriptorCount = 1;
     	descriptorSetLayoutBinding[bindingCount].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
     	descriptorSetLayoutBinding[bindingCount].pImmutableSamplers = nullptr;
@@ -234,7 +234,7 @@ VkBool32 SceneRenderFactory::prepareBSDFMaterial(const ISceneManagerSP& sceneMan
 
 	VkDescriptorPoolSize descriptorPoolSize[2]{};
 
-	descriptorPoolSize[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	descriptorPoolSize[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 	descriptorPoolSize[0].descriptorCount = 5;
 
 	descriptorPoolSize[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
@@ -484,7 +484,7 @@ VkBool32 SceneRenderFactory::prepareTransformUniformBuffer(const ISceneManagerSP
 	// mat3 in std140 consumes three vec4 columns.
 	VkDeviceSize size = alignmentGetSizeInBytes(16 * sizeof(float) + 12 * sizeof(float), 16);
 
-    auto transformUniformBuffer = createUniformBufferObject(sceneManager->getAssetManager(), size * (VkDeviceSize)buffers);
+    auto transformUniformBuffer = createUniformBufferObject(sceneManager->getAssetManager(), size, bufferCount);
 
     if (!transformUniformBuffer.get())
     {
@@ -498,6 +498,20 @@ VkBool32 SceneRenderFactory::prepareTransformUniformBuffer(const ISceneManagerSP
 	return VK_TRUE;
 }
 
+VkDeviceSize SceneRenderFactory::getTransformUniformBufferAlignmentSize(const ISceneManagerSP& sceneManager) const
+{
+	if (!sceneManager.get())
+	{
+		return 0;
+	}
+
+	auto size = alignmentGetSizeInBytes(16 * sizeof(float) + 12 * sizeof(float), 16);
+
+	//
+
+	return sceneManager->getContextObject()->getPhysicalDevice()->getUniformBufferAlignmentSizeInBytes(size);
+}
+
 VkBool32 SceneRenderFactory::prepareJointsUniformBuffer(const ISceneManagerSP& sceneManager, const INodeSP& node, const int32_t joints)
 {
 	if (!sceneManager.get() || !node.get())
@@ -508,7 +522,7 @@ VkBool32 SceneRenderFactory::prepareJointsUniformBuffer(const ISceneManagerSP& s
     // mat3 in std140 consumes three vec4 columns.
 	VkDeviceSize size = alignmentGetSizeInBytes(16 * sizeof(float) * (VKTS_MAX_JOINTS + 1) + 12 * sizeof(float) * (VKTS_MAX_JOINTS + 1), 16);
 
-    auto jointsUniformBuffer = createUniformBufferObject(sceneManager->getAssetManager(), size * (VkDeviceSize)buffers);
+    auto jointsUniformBuffer = createUniformBufferObject(sceneManager->getAssetManager(), size, bufferCount);
 
     if (!jointsUniformBuffer.get())
     {
@@ -518,6 +532,20 @@ VkBool32 SceneRenderFactory::prepareJointsUniformBuffer(const ISceneManagerSP& s
     node->setJointsUniformBuffer(joints, jointsUniformBuffer);
 
 	return VK_TRUE;
+}
+
+VkDeviceSize SceneRenderFactory::getJointsUniformBufferAlignmentSize(const ISceneManagerSP& sceneManager) const
+{
+	if (!sceneManager.get())
+	{
+		return 0;
+	}
+
+	auto size = alignmentGetSizeInBytes(16 * sizeof(float) * (VKTS_MAX_JOINTS + 1) + 12 * sizeof(float) * (VKTS_MAX_JOINTS + 1), 16);
+
+	//
+
+	return sceneManager->getContextObject()->getPhysicalDevice()->getUniformBufferAlignmentSizeInBytes(size);
 }
 
 } /* namespace vkts */

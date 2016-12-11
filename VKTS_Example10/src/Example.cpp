@@ -144,9 +144,12 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 
 	if (scene.get())
 	{
+		const uint32_t dynamicOffsetCount = 3;
+		uint32_t dynamicOffsets[dynamicOffsetCount]{};
+
 		vkts::SmartPointerVector<vkts::IGraphicsPipelineSP> empty;
 
-		scene->drawRecursive(cmdBuffer[usedBuffer], empty);
+		scene->drawRecursive(cmdBuffer[usedBuffer], empty, dynamicOffsetCount, dynamicOffsets);
 	}
 
 	cmdBuffer[usedBuffer]->cmdEndRenderPass();
@@ -192,7 +195,10 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 
 	if (environmentScene.get())
 	{
-		environmentScene->drawRecursive(cmdBuffer[usedBuffer], allGraphicsPipelines);
+		const uint32_t dynamicOffsetCount = 2;
+		uint32_t dynamicOffsets[dynamicOffsetCount]{};
+
+		environmentScene->drawRecursive(cmdBuffer[usedBuffer], allGraphicsPipelines, dynamicOffsetCount, dynamicOffsets);
 	}
 
 	//
@@ -201,7 +207,10 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 
 	vkCmdBindPipeline(cmdBuffer[usedBuffer]->getCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, resolveGraphicsPipeline->getPipeline());
 
-	vkCmdBindDescriptorSets(cmdBuffer[usedBuffer]->getCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, resolvePipelineLayout->getPipelineLayout(), 0, 1, resolveDescriptorSet->getDescriptorSets(), 0, nullptr);
+	const uint32_t dynamicOffsetCount = 2;
+	uint32_t dynamicOffsets[dynamicOffsetCount]{};
+
+	vkCmdBindDescriptorSets(cmdBuffer[usedBuffer]->getCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, resolvePipelineLayout->getPipelineLayout(), 0, 1, resolveDescriptorSet->getDescriptorSets(), dynamicOffsetCount, dynamicOffsets);
 
 	VkDeviceSize offsets[1] = { 0 };
 	VkBuffer buffers[1] = { screenPlaneVertexBuffer->getBuffer()->getBuffer() };
@@ -325,7 +334,7 @@ VkBool32 Example::updateDescriptorSets()
 	environmentWriteDescriptorSets[0].dstBinding = VKTS_BINDING_UNIFORM_BUFFER_VIEWPROJECTION;
 	environmentWriteDescriptorSets[0].dstArrayElement = 0;
 	environmentWriteDescriptorSets[0].descriptorCount = 1;
-	environmentWriteDescriptorSets[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	environmentWriteDescriptorSets[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 	environmentWriteDescriptorSets[0].pImageInfo = nullptr;
 	environmentWriteDescriptorSets[0].pBufferInfo = &environmentDescriptorBufferInfos[0];
 	environmentWriteDescriptorSets[0].pTexelBufferView = nullptr;
@@ -363,7 +372,7 @@ VkBool32 Example::updateDescriptorSets()
 	writeDescriptorSets[0].dstBinding = VKTS_BINDING_UNIFORM_BUFFER_VIEWPROJECTION;
 	writeDescriptorSets[0].dstArrayElement = 0;
 	writeDescriptorSets[0].descriptorCount = 1;
-	writeDescriptorSets[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	writeDescriptorSets[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 	writeDescriptorSets[0].pImageInfo = nullptr;
 	writeDescriptorSets[0].pBufferInfo = &descriptorBufferInfos[0];
 	writeDescriptorSets[0].pTexelBufferView = nullptr;
@@ -472,7 +481,7 @@ VkBool32 Example::updateDescriptorSets()
 	resolveWriteDescriptorSets[7].dstBinding = 7;
 	resolveWriteDescriptorSets[7].dstArrayElement = 0;
 	resolveWriteDescriptorSets[7].descriptorCount = 1;
-	resolveWriteDescriptorSets[7].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	resolveWriteDescriptorSets[7].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 	resolveWriteDescriptorSets[7].pImageInfo = nullptr;
 	resolveWriteDescriptorSets[7].pBufferInfo = &resolveDescriptorBufferInfos[0];
 	resolveWriteDescriptorSets[7].pTexelBufferView = nullptr;
@@ -488,7 +497,7 @@ VkBool32 Example::updateDescriptorSets()
 	resolveWriteDescriptorSets[8].dstBinding = 8;
 	resolveWriteDescriptorSets[8].dstArrayElement = 0;
 	resolveWriteDescriptorSets[8].descriptorCount = 1;
-	resolveWriteDescriptorSets[8].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	resolveWriteDescriptorSets[8].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 	resolveWriteDescriptorSets[8].pImageInfo = nullptr;
 	resolveWriteDescriptorSets[8].pBufferInfo = &resolveDescriptorBufferInfos[1];
 	resolveWriteDescriptorSets[8].pTexelBufferView = nullptr;
@@ -1056,7 +1065,7 @@ VkBool32 Example::buildDescriptorSetPool()
 	descriptorPoolSize[0].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 	descriptorPoolSize[0].descriptorCount = 7;
 
-	descriptorPoolSize[1].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	descriptorPoolSize[1].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 	descriptorPoolSize[1].descriptorCount = 2;
 
 	resolveDescriptorPool = vkts::descriptorPoolCreate(contextObject->getDevice()->getDevice(), VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT, 1, 2, descriptorPoolSize);
@@ -1074,13 +1083,13 @@ VkBool32 Example::buildDescriptorSetLayout()
 	VkDescriptorSetLayoutBinding descriptorSetLayoutBinding[3]{};
 
 	descriptorSetLayoutBinding[0].binding = VKTS_BINDING_UNIFORM_BUFFER_VIEWPROJECTION;
-	descriptorSetLayoutBinding[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	descriptorSetLayoutBinding[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 	descriptorSetLayoutBinding[0].descriptorCount = 1;
 	descriptorSetLayoutBinding[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 	descriptorSetLayoutBinding[0].pImmutableSamplers = nullptr;
 
 	descriptorSetLayoutBinding[1].binding = VKTS_BINDING_UNIFORM_BUFFER_TRANSFORM;
-	descriptorSetLayoutBinding[1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	descriptorSetLayoutBinding[1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 	descriptorSetLayoutBinding[1].descriptorCount = 1;
 	descriptorSetLayoutBinding[1].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 	descriptorSetLayoutBinding[1].pImmutableSamplers = nullptr;
@@ -1114,13 +1123,13 @@ VkBool32 Example::buildDescriptorSetLayout()
 	}
 
 	resolveDescriptorSetLayoutBinding[VKTS_BSDF_DESCRIPTOR_SET_COUNT - 2].binding = VKTS_BSDF_DESCRIPTOR_SET_COUNT - 2;
-	resolveDescriptorSetLayoutBinding[VKTS_BSDF_DESCRIPTOR_SET_COUNT - 2].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	resolveDescriptorSetLayoutBinding[VKTS_BSDF_DESCRIPTOR_SET_COUNT - 2].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 	resolveDescriptorSetLayoutBinding[VKTS_BSDF_DESCRIPTOR_SET_COUNT - 2].descriptorCount = 1;
 	resolveDescriptorSetLayoutBinding[VKTS_BSDF_DESCRIPTOR_SET_COUNT - 2].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 	resolveDescriptorSetLayoutBinding[VKTS_BSDF_DESCRIPTOR_SET_COUNT - 2].pImmutableSamplers = nullptr;
 
 	resolveDescriptorSetLayoutBinding[VKTS_BSDF_DESCRIPTOR_SET_COUNT - 1].binding = VKTS_BSDF_DESCRIPTOR_SET_COUNT - 1;
-	resolveDescriptorSetLayoutBinding[VKTS_BSDF_DESCRIPTOR_SET_COUNT - 1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	resolveDescriptorSetLayoutBinding[VKTS_BSDF_DESCRIPTOR_SET_COUNT - 1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 	resolveDescriptorSetLayoutBinding[VKTS_BSDF_DESCRIPTOR_SET_COUNT - 1].descriptorCount = 1;
 	resolveDescriptorSetLayoutBinding[VKTS_BSDF_DESCRIPTOR_SET_COUNT - 1].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 	resolveDescriptorSetLayoutBinding[VKTS_BSDF_DESCRIPTOR_SET_COUNT - 1].pImmutableSamplers = nullptr;

@@ -46,6 +46,9 @@ public:
     {
     }
 
+    virtual VkDeviceSize getBufferCount() const = 0;
+
+
     virtual const IContextObjectSP& getContextObject() const = 0;
 
     virtual const IBufferSP& getBuffer() const = 0;

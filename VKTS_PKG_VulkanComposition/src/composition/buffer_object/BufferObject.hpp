@@ -45,10 +45,12 @@ private:
 
     IDeviceMemorySP deviceMemory;
 
+    const VkDeviceSize bufferCount;
+
 public:
 
     BufferObject() = delete;
-    BufferObject(const IContextObjectSP& contextObject, const IBufferSP& buffer, const IBufferViewSP& bufferView, const IDeviceMemorySP& deviceMemory);
+    BufferObject(const IContextObjectSP& contextObject, const IBufferSP& buffer, const IBufferViewSP& bufferView, const IDeviceMemorySP& deviceMemory, const VkDeviceSize bufferCount);
     BufferObject(const BufferObject& other) = delete;
     BufferObject(BufferObject&& other) = delete;
     virtual ~BufferObject();
@@ -59,6 +61,9 @@ public:
     //
     // IBufferObject
     //
+
+    virtual VkDeviceSize getBufferCount() const override;
+
 
     virtual const IContextObjectSP& getContextObject() const override;
 

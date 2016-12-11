@@ -45,6 +45,7 @@ protected:
 
     SmartPointerMap<std::string, IDescriptorPoolSP> allDescriptorPools;
     SmartPointerMap<std::string, IDescriptorSetsSP> allDescriptorSets;
+    std::map<std::string, uint32_t> allDynamicOffsetCounts;
 
     IDescriptorSetsSP createDescriptorSetsByName(const std::string& nodeName);
     IDescriptorSetsSP getDescriptorSetsByName(const std::string& nodeName) const;

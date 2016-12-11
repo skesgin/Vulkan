@@ -42,13 +42,13 @@ VKTS_APICALL IBufferObjectSP VKTS_APIENTRY bufferObjectCreate(IBufferSP& stageBu
  *
  * @ThreadSafe
  */
-VKTS_APICALL IBufferObjectSP VKTS_APIENTRY bufferObjectCreate(const IContextObjectSP& contextObject, const VkBufferCreateInfo& bufferCreateInfo, const VkMemoryPropertyFlags memoryPropertyFlag);
+VKTS_APICALL IBufferObjectSP VKTS_APIENTRY bufferObjectCreate(const IContextObjectSP& contextObject, const VkBufferCreateInfo& bufferCreateInfo, const VkMemoryPropertyFlags memoryPropertyFlag, const VkDeviceSize bufferCount = 1);
 
 /**
  *
  * @ThreadSafe
  */
-VKTS_APICALL IBufferObjectSP VKTS_APIENTRY bufferObjectCreate(const IContextObjectSP& contextObject, const VkBufferCreateInfo& bufferCreateInfo, const VkMemoryPropertyFlags memoryPropertyFlag, const VkFormat format);
+VKTS_APICALL IBufferObjectSP VKTS_APIENTRY bufferObjectCreate(const IContextObjectSP& contextObject, const VkBufferCreateInfo& bufferCreateInfo, const VkMemoryPropertyFlags memoryPropertyFlag, const VkFormat format, const VkDeviceSize bufferCount = 1);
 
 }
 

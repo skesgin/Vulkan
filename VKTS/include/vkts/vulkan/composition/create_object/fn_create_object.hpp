@@ -40,7 +40,7 @@ VKTS_APICALL ITextureObjectSP VKTS_APIENTRY createTextureObject(const IAssetMana
 
 VKTS_APICALL ITextureObjectSP VKTS_APIENTRY createTextureObject(const IAssetManagerSP& assetManager, const glm::vec4& color, const VkFormat format);
 
-VKTS_APICALL IBufferObjectSP VKTS_APIENTRY createUniformBufferObject(const IAssetManagerSP& assetManager, const VkDeviceSize size);
+VKTS_APICALL IBufferObjectSP VKTS_APIENTRY createUniformBufferObject(const IAssetManagerSP& assetManager, const VkDeviceSize size, const VkDeviceSize bufferCount = 1);
 
 VKTS_APICALL IBufferObjectSP VKTS_APIENTRY createIndexBufferObject(const IAssetManagerSP& assetManager, const IBinaryBufferSP& binaryBuffer);
 

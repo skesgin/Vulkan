@@ -54,7 +54,9 @@ public:
     virtual VkBool32 prepareBSDFMaterial(const ISceneManagerSP& sceneManager, const ISubMeshSP& subMesh) = 0;
 
     virtual VkBool32 prepareTransformUniformBuffer(const ISceneManagerSP& sceneManager, const INodeSP& node) = 0;
+    virtual VkDeviceSize getTransformUniformBufferAlignmentSize(const ISceneManagerSP& sceneManager) const = 0;
     virtual VkBool32 prepareJointsUniformBuffer(const ISceneManagerSP& sceneManager, const INodeSP& node, const int32_t joints) = 0;
+    virtual VkDeviceSize getJointsUniformBufferAlignmentSize(const ISceneManagerSP& sceneManager) const = 0;
 
 };
 

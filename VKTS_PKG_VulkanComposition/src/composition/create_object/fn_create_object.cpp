@@ -374,7 +374,7 @@ ITextureObjectSP VKTS_APIENTRY createTextureObject(const IAssetManagerSP& assetM
     return textureObject;
 }
 
-IBufferObjectSP VKTS_APIENTRY createUniformBufferObject(const IAssetManagerSP& assetManager, const VkDeviceSize size)
+IBufferObjectSP VKTS_APIENTRY createUniformBufferObject(const IAssetManagerSP& assetManager, const VkDeviceSize size, const VkDeviceSize bufferCount)
 {
     VkBufferCreateInfo bufferCreateInfo{};
 
@@ -387,7 +387,7 @@ IBufferObjectSP VKTS_APIENTRY createUniformBufferObject(const IAssetManagerSP& a
     bufferCreateInfo.queueFamilyIndexCount = 0;
     bufferCreateInfo.pQueueFamilyIndices = nullptr;
 
-    return bufferObjectCreate(assetManager->getContextObject(), bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    return bufferObjectCreate(assetManager->getContextObject(), bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, bufferCount);
 }
 
 IBufferObjectSP VKTS_APIENTRY createIndexBufferObject(const IAssetManagerSP& assetManager, const IBinaryBufferSP& binaryBuffer)

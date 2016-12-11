@@ -63,6 +63,8 @@ public:
     // IDevice
     //
 
+    virtual VkResult waitIdle() const override;
+
     virtual const VkPhysicalDevice getPhysicalDevice() const override;
 
     virtual const VkDeviceCreateInfo& getDeviceCreateInfo() const override;

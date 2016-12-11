@@ -31,14 +31,14 @@
 namespace vkts
 {
 
-ISceneRenderFactorySP VKTS_APIENTRY sceneRenderFactoryCreate(const IDescriptorSetLayoutSP& descriptorSetLayout, const IRenderPassSP& renderPass, const uint64_t buffers)
+ISceneRenderFactorySP VKTS_APIENTRY sceneRenderFactoryCreate(const IDescriptorSetLayoutSP& descriptorSetLayout, const IRenderPassSP& renderPass, const VkDeviceSize bufferCount)
 {
-	if (buffers == 0)
+	if (bufferCount == 0)
 	{
 		return ISceneRenderFactorySP();
 	}
 
-    return ISceneRenderFactorySP(new SceneRenderFactory(descriptorSetLayout, renderPass, buffers));
+    return ISceneRenderFactorySP(new SceneRenderFactory(descriptorSetLayout, renderPass, bufferCount));
 }
 
 }

@@ -47,7 +47,6 @@ void Node::reset()
     finalScale = scale;
 
     transformMatrix = glm::mat4(1.0f);
-    transformMatrixDirty = VK_TRUE;
 
     jointIndex = -1;
     joints = 0;
@@ -59,7 +58,7 @@ void Node::reset()
     bindMatrix = glm::mat4(1.0f);
     inverseBindMatrix = glm::mat4(1.0f);
 
-    bindMatrixDirty = VK_FALSE;
+    setDirty();
 
     allChildNodes.clear();
 
@@ -92,7 +91,7 @@ void Node::reset()
 }
 
 Node::Node() :
-    INode(), name(""), parentNode(), translate(0.0f, 0.0f, 0.0f), rotate(0.0f, 0.0f, 0.0f), scale(1.0f, 1.0f, 1.0f), finalTranslate(0.0f, 0.0f, 0.0f), finalRotate(0.0f, 0.0f, 0.0f), finalScale(1.0f, 1.0f, 1.0f), transformMatrix(1.0f), transformMatrixDirty(VK_TRUE), jointIndex(-1), joints(0), bindTranslate(0.0f, 0.0f, 0.0f), bindRotate(0.0f, 0.0f,0.0f), bindScale(1.0f, 1.0f, 1.0f), bindMatrix(1.0f), inverseBindMatrix(1.0f), bindMatrixDirty(VK_FALSE), allChildNodes(), allMeshes(), allCameras(), allLights(), allConstraints(), allAnimations(), currentAnimation(-1), transformUniformBuffer(), jointsUniformBuffer(), box(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)), layers(0x01), nodeData()
+    INode(), name(""), parentNode(), translate(0.0f, 0.0f, 0.0f), rotate(0.0f, 0.0f, 0.0f), scale(1.0f, 1.0f, 1.0f), finalTranslate(0.0f, 0.0f, 0.0f), finalRotate(0.0f, 0.0f, 0.0f), finalScale(1.0f, 1.0f, 1.0f), transformMatrix(1.0f), transformMatrixDirty(), jointIndex(-1), joints(0), bindTranslate(0.0f, 0.0f, 0.0f), bindRotate(0.0f, 0.0f,0.0f), bindScale(1.0f, 1.0f, 1.0f), bindMatrix(1.0f), inverseBindMatrix(1.0f), bindMatrixDirty(), allChildNodes(), allMeshes(), allCameras(), allLights(), allConstraints(), allAnimations(), currentAnimation(-1), transformUniformBuffer(), jointsUniformBuffer(), box(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)), layers(0x01), nodeData()
 {
     reset();
 }
@@ -416,7 +415,7 @@ void Node::setBindTranslate(const glm::vec3& translate)
 {
     this->bindTranslate = translate;
 
-    this->bindMatrixDirty = VK_TRUE;
+    setDirty();
 }
 
 const glm::vec3& Node::getBindRotate() const
@@ -428,7 +427,7 @@ void Node::setBindRotate(const glm::vec3& rotate)
 {
     this->bindRotate = rotate;
 
-    this->bindMatrixDirty = VK_TRUE;
+    setDirty();
 }
 
 const glm::vec3& Node::getBindScale() const
@@ -440,7 +439,7 @@ void Node::setBindScale(const glm::vec3& scale)
 {
     this->bindScale = scale;
 
-    this->bindMatrixDirty = VK_TRUE;
+    setDirty();
 }
 
 void Node::addChildNode(const INodeSP& childNode)
@@ -616,12 +615,27 @@ void Node::setCurrentAnimation(const int32_t currentAnimation)
 
 VkBool32 Node::getDirty() const
 {
-    return transformMatrixDirty;
+	VkBool32 total = VK_FALSE;
+
+	for (size_t i = 0; i < transformMatrixDirty.size(); i++)
+    {
+		total = total || transformMatrixDirty[i];
+    }
+
+    return total;
 }
 
-void Node::setDirty()
+void Node::setDirty(const VkBool32 dirty)
 {
-    transformMatrixDirty = VK_TRUE;
+    for (size_t i = 0; i < transformMatrixDirty.size(); i++)
+    {
+    	transformMatrixDirty[i] = dirty;
+    }
+
+    for (size_t i = 0; i < bindMatrixDirty.size(); i++)
+    {
+    	bindMatrixDirty[i] = dirty;
+    }
 }
 
 IBufferObjectSP Node::getTransformUniformBuffer() const
@@ -633,12 +647,13 @@ void Node::setTransformUniformBuffer(const IBufferObjectSP& transformUniformBuff
 {
     this->transformUniformBuffer = transformUniformBuffer;
 
+    this->transformMatrixDirty.resize(0);
+    this->bindMatrixDirty.resize(0);
+
     if (nodeData.get())
     {
-    	nodeData->updateTransformUniformBuffer(transformUniformBuffer);
+        nodeData->updateTransformUniformBuffer(transformUniformBuffer);
     }
-
-    setDirty();
 }
 
 IBufferObjectSP Node::getJointsUniformBuffer() const
@@ -651,12 +666,13 @@ void Node::setJointsUniformBuffer(const int32_t joints, const IBufferObjectSP& j
 	this->joints = joints;
 	this->jointsUniformBuffer = jointsUniformBuffer;
 
+    this->transformMatrixDirty.resize(0);
+    this->bindMatrixDirty.resize(0);
+
     if (nodeData.get())
     {
     	nodeData->updateJointsUniformBuffer(jointsUniformBuffer);
     }
-
-    this->bindMatrixDirty = VK_TRUE;
 }
 
 const Aabb& Node::getAABB() const
@@ -809,11 +825,19 @@ void Node::updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCo
 	}
 }
 
-void Node::updateTransformRecursive(const double deltaTime, const uint64_t deltaTicks, const double tickTime, const glm::mat4& parentTransformMatrix, const VkBool32 parentTransformMatrixDirty, const glm::mat4& parentBindMatrix, const VkBool32 parentBindMatrixDirty, const INodeSP& armatureNode)
+void Node::updateTransformRecursive(const double deltaTime, const uint64_t deltaTicks, const double tickTime, const uint32_t dynamicOffsetIndex, const glm::mat4& parentTransformMatrix, const VkBool32 parentTransformMatrixDirty, const glm::mat4& parentBindMatrix, const VkBool32 parentBindMatrixDirty, const INodeSP& armatureNode)
 {
-    transformMatrixDirty = transformMatrixDirty || parentTransformMatrixDirty;
+	if (transformMatrixDirty.size() != bindMatrixDirty.size() || dynamicOffsetIndex >= (uint32_t)transformMatrixDirty.size())
+	{
+		transformMatrixDirty.resize(dynamicOffsetIndex + 1);
+		bindMatrixDirty.resize(dynamicOffsetIndex + 1);
 
-    bindMatrixDirty = bindMatrixDirty || parentBindMatrixDirty;
+		setDirty();
+	}
+
+    transformMatrixDirty[dynamicOffsetIndex] = transformMatrixDirty[dynamicOffsetIndex] || parentTransformMatrixDirty;
+
+    bindMatrixDirty[dynamicOffsetIndex] = bindMatrixDirty[dynamicOffsetIndex] || parentBindMatrixDirty;
 
     auto newArmatureNode = (joints != 0) ? INode::shared_from_this() : armatureNode;
 
@@ -886,11 +910,11 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
 
         //
 
-        transformMatrixDirty = VK_TRUE;
+        transformMatrixDirty[dynamicOffsetIndex] = VK_TRUE;
 
         if (joints != 0)
         {
-        	bindMatrixDirty = VK_TRUE;
+        	bindMatrixDirty[dynamicOffsetIndex] = VK_TRUE;
         }
     }
 
@@ -908,17 +932,17 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
 
         //
 
-        transformMatrixDirty = VK_TRUE;
+        transformMatrixDirty[dynamicOffsetIndex] = VK_TRUE;
 
         if (joints != 0)
         {
-        	bindMatrixDirty = VK_TRUE;
+        	bindMatrixDirty[dynamicOffsetIndex] = VK_TRUE;
         }
     }
 
     //
 
-    if (bindMatrixDirty)
+    if (bindMatrixDirty[dynamicOffsetIndex])
     {
     	// Only armature, having joints not zero and joints can enter here.
 
@@ -941,12 +965,12 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
 
         //
 
-        transformMatrixDirty = VK_TRUE;
+        transformMatrixDirty[dynamicOffsetIndex] = VK_TRUE;
     }
 
     //
 
-    if (transformMatrixDirty)
+    if (transformMatrixDirty[dynamicOffsetIndex])
     {
         if (jointIndex == -1)
         {
@@ -990,22 +1014,26 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
         // Update buffer.
         if (allMeshes.size() > 0)
         {
-            transformUniformBuffer->upload(0, 0, this->transformMatrix);
+        	VkDeviceSize dynamicOffset = (VkDeviceSize)dynamicOffsetIndex * transformUniformBuffer->getBuffer()->getSize() / transformUniformBuffer->getBufferCount();
+
+            transformUniformBuffer->upload(dynamicOffset + 0, 0, this->transformMatrix);
 
             auto transformNormalMatrix = glm::transpose(glm::inverse(glm::mat3(this->transformMatrix)));
 
-            transformUniformBuffer->upload(sizeof(float) * 16, 0, transformNormalMatrix);
+            transformUniformBuffer->upload(dynamicOffset + sizeof(float) * 16, 0, transformNormalMatrix);
         }
         else if (joints != 0)
         {
+        	VkDeviceSize dynamicOffset = (VkDeviceSize)dynamicOffsetIndex * jointsUniformBuffer->getBuffer()->getSize() / jointsUniformBuffer->getBufferCount();
+
         	// If this is an armature, store the parent matrix.
         	// This allows to modify the parent matrices without recalculating the bind matrices.
 
-			jointsUniformBuffer->upload(0, 0, parentTransformMatrix);
+			jointsUniformBuffer->upload(dynamicOffset + 0, 0, parentTransformMatrix);
 
             auto transformNormalMatrix = glm::transpose(glm::inverse(glm::mat3(parentTransformMatrix)));
 
-            jointsUniformBuffer->upload(sizeof(float) * 16, 0, transformNormalMatrix);
+            jointsUniformBuffer->upload(dynamicOffset + sizeof(float) * 16, 0, transformNormalMatrix);
         }
         else if (jointIndex >= 0 && jointIndex < VKTS_MAX_JOINTS)
         {
@@ -1015,15 +1043,17 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
 
         		if (currentJointsUniformBuffer.get())
         		{
+                	VkDeviceSize dynamicOffset = (VkDeviceSize)dynamicOffsetIndex * currentJointsUniformBuffer->getBuffer()->getSize() / currentJointsUniformBuffer->getBufferCount();
+
         			// Upload the joint matrices to blend them on the GPU.
 
         			size_t offset = sizeof(float) * 16 + sizeof(float) * 12;
 
-        			currentJointsUniformBuffer->upload(offset + jointIndex * sizeof(float) * 16, 0, this->transformMatrix);
+        			currentJointsUniformBuffer->upload(dynamicOffset + offset + jointIndex * sizeof(float) * 16, 0, this->transformMatrix);
 
                     auto transformNormalMatrix = glm::transpose(glm::inverse(glm::mat3(this->transformMatrix)));
 
-        			currentJointsUniformBuffer->upload(offset + VKTS_MAX_JOINTS * sizeof(float) * 16 + jointIndex * sizeof(float) * 12, 0, transformNormalMatrix);
+        			currentJointsUniformBuffer->upload(dynamicOffset + offset + VKTS_MAX_JOINTS * sizeof(float) * 16 + jointIndex * sizeof(float) * 12, 0, transformNormalMatrix);
         		}
         	}
         }
@@ -1037,17 +1067,17 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
 
     for (size_t i = 0; i < allChildNodes.size(); i++)
     {
-        allChildNodes[i]->updateTransformRecursive(deltaTime, deltaTicks, tickTime, this->transformMatrix, this->transformMatrixDirty, this->bindMatrix, this->bindMatrixDirty, newArmatureNode);
+        allChildNodes[i]->updateTransformRecursive(deltaTime, deltaTicks, tickTime, dynamicOffsetIndex, this->transformMatrix, this->transformMatrixDirty[dynamicOffsetIndex], this->bindMatrix, this->bindMatrixDirty[dynamicOffsetIndex], newArmatureNode);
     }
 
     //
 
-    transformMatrixDirty = VK_FALSE;
+    transformMatrixDirty[dynamicOffsetIndex] = VK_FALSE;
 
-    bindMatrixDirty = VK_FALSE;
+    bindMatrixDirty[dynamicOffsetIndex] = VK_FALSE;
 }
 
-void Node::drawRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const OverwriteDraw* renderOverwrite, const uint32_t dynamicOffsetCount, const uint32_t* dynamicOffsets)
+void Node::drawRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const uint32_t dynamicOffsetCount, const uint32_t* dynamicOffsets, const OverwriteDraw* renderOverwrite)
 {
     const OverwriteDraw* currentOverwrite = renderOverwrite;
     while (currentOverwrite)
@@ -1064,12 +1094,12 @@ void Node::drawRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerV
 
 	for (size_t i = 0; i < allMeshes.size(); i++)
 	{
-		allMeshes[i]->drawRecursive(cmdBuffer, allGraphicsPipelines, renderOverwrite, dynamicOffsetCount, dynamicOffsets, name);
+		allMeshes[i]->drawRecursive(cmdBuffer, allGraphicsPipelines, dynamicOffsetCount, dynamicOffsets, renderOverwrite, name);
 	}
 
 	for (size_t i = 0; i < allChildNodes.size(); i++)
 	{
-		allChildNodes[i]->drawRecursive(cmdBuffer, allGraphicsPipelines, renderOverwrite, dynamicOffsetCount, dynamicOffsets);
+		allChildNodes[i]->drawRecursive(cmdBuffer, allGraphicsPipelines, dynamicOffsetCount, dynamicOffsets, renderOverwrite);
 	}
 }
 

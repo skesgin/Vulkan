@@ -156,7 +156,7 @@ public:
 
     virtual VkBool32 getDirty() const = 0;
 
-    virtual void setDirty() = 0;
+    virtual void setDirty(const VkBool32 dirty = VK_TRUE) = 0;
 
     virtual IBufferObjectSP getTransformUniformBuffer() const = 0;
 
@@ -190,9 +190,9 @@ public:
 
     virtual void updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets) = 0;
 
-    virtual void updateTransformRecursive(const double deltaTime, const uint64_t deltaTicks, const double tickTime, const glm::mat4& parentTransformMatrix, const VkBool32 parentTransformMatrixDirty, const glm::mat4& parentBindMatrix, const VkBool32 parentBindMatrixDirty, const std::shared_ptr<INode>& armatureNode) = 0;
+    virtual void updateTransformRecursive(const double deltaTime, const uint64_t deltaTicks, const double tickTime, const uint32_t dynamicOffsetIndex, const glm::mat4& parentTransformMatrix, const VkBool32 parentTransformMatrixDirty, const glm::mat4& parentBindMatrix, const VkBool32 parentBindMatrixDirty, const std::shared_ptr<INode>& armatureNode) = 0;
 
-    virtual void drawRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const OverwriteDraw* renderOverwrite = nullptr, const uint32_t dynamicOffsetCount = 0, const uint32_t* dynamicOffsets = nullptr) = 0;
+    virtual void drawRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const uint32_t dynamicOffsetCount, const uint32_t* dynamicOffsets, const OverwriteDraw* renderOverwrite = nullptr) = 0;
 
 };
 

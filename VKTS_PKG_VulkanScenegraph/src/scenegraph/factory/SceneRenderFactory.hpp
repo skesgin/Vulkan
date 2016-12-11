@@ -41,13 +41,13 @@ private:
 
     const IRenderPassSP renderPass;
 
-    const uint64_t buffers;
+    const VkDeviceSize bufferCount;
 
 public:
 
 	SceneRenderFactory() = delete;
 
-	SceneRenderFactory(const IDescriptorSetLayoutSP& descriptorSetLayout, const IRenderPassSP& renderPass, const uint64_t buffers);
+	SceneRenderFactory(const IDescriptorSetLayoutSP& descriptorSetLayout, const IRenderPassSP& renderPass, const VkDeviceSize bufferCount);
 
     virtual ~SceneRenderFactory();
 
@@ -62,8 +62,9 @@ public:
     virtual VkBool32 prepareBSDFMaterial(const ISceneManagerSP& sceneManager, const ISubMeshSP& subMesh) override;
 
     virtual VkBool32 prepareTransformUniformBuffer(const ISceneManagerSP& sceneManager, const INodeSP& node) override;
+    virtual VkDeviceSize getTransformUniformBufferAlignmentSize(const ISceneManagerSP& sceneManager) const override;
     virtual VkBool32 prepareJointsUniformBuffer(const ISceneManagerSP& sceneManager, const INodeSP& node, const int32_t joints) override;
-
+    virtual VkDeviceSize getJointsUniformBufferAlignmentSize(const ISceneManagerSP& sceneManager) const override;
 };
 
 } /* namespace vkts */

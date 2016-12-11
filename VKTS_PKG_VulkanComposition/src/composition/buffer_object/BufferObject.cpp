@@ -29,8 +29,8 @@
 namespace vkts
 {
 
-BufferObject::BufferObject(const IContextObjectSP& contextObject, const IBufferSP& buffer, const IBufferViewSP& bufferView, const IDeviceMemorySP& deviceMemory) :
-    IBufferObject(), contextObject(contextObject), buffer(buffer), bufferView(bufferView), deviceMemory(deviceMemory)
+BufferObject::BufferObject(const IContextObjectSP& contextObject, const IBufferSP& buffer, const IBufferViewSP& bufferView, const IDeviceMemorySP& deviceMemory, const VkDeviceSize bufferCount) :
+    IBufferObject(), contextObject(contextObject), buffer(buffer), bufferView(bufferView), deviceMemory(deviceMemory), bufferCount(bufferCount)
 {
 }
 
@@ -42,6 +42,11 @@ BufferObject::~BufferObject()
 //
 // IBufferObject
 //
+
+VkDeviceSize BufferObject::getBufferCount() const
+{
+	return bufferCount;
+}
 
 const IContextObjectSP& BufferObject::getContextObject() const
 {

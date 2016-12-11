@@ -51,6 +51,8 @@ IDescriptorSetsSP RenderMaterial::createDescriptorSetsByName(const std::string& 
 
 		allDescriptorSets[nodeName] = descriptorSets;
 
+		allDynamicOffsetCounts[nodeName] = 0;
+
 		return descriptorSets;
 	}
 
@@ -73,6 +75,8 @@ IDescriptorSetsSP RenderMaterial::createDescriptorSetsByName(const std::string& 
     allDescriptorPools[nodeName] = currentDescriptorPool;
 
     allDescriptorSets[nodeName] = currentDescriptorSets;
+
+    allDynamicOffsetCounts[nodeName] = 0;
 
     //
 
@@ -103,16 +107,23 @@ void RenderMaterial::bindDescriptorSets(const ICommandBuffersSP& cmdBuffer, cons
         return;
     }
 
-    vkCmdBindDescriptorSets(cmdBuffer->getCommandBuffer(0), VK_PIPELINE_BIND_POINT_GRAPHICS, layout, 0, 1, &currentDescriptorSets->getDescriptorSets()[0], dynamicOffsetCount, dynamicOffsets);
+    const uint32_t localDynamicOffsetCount = allDynamicOffsetCounts.at(nodeName);
+
+    if (localDynamicOffsetCount > dynamicOffsetCount)
+    {
+    	return;
+    }
+
+    vkCmdBindDescriptorSets(cmdBuffer->getCommandBuffer(0), VK_PIPELINE_BIND_POINT_GRAPHICS, layout, 0, 1, &currentDescriptorSets->getDescriptorSets()[0], localDynamicOffsetCount, dynamicOffsets);
 }
 
 RenderMaterial::RenderMaterial() :
-    IRenderMaterial(), descriptorPool(), descriptorSets(), descriptorImageInfos{}, writeDescriptorSets{}, nodeName(), allDescriptorPools(), allDescriptorSets()
+    IRenderMaterial(), descriptorPool(), descriptorSets(), descriptorImageInfos{}, writeDescriptorSets{}, nodeName(), allDescriptorPools(), allDescriptorSets(), allDynamicOffsetCounts()
 {
 }
 
 RenderMaterial::RenderMaterial(const RenderMaterial& other) :
-	IRenderMaterial(), descriptorPool(), descriptorSets(), descriptorImageInfos{}, writeDescriptorSets{}, nodeName(), allDescriptorPools(), allDescriptorSets()
+	IRenderMaterial(), descriptorPool(), descriptorSets(), descriptorImageInfos{}, writeDescriptorSets{}, nodeName(), allDescriptorPools(), allDescriptorSets(), allDynamicOffsetCounts(other.allDynamicOffsetCounts)
 {
 	if (other.descriptorPool.get())
 	{
@@ -236,6 +247,8 @@ void RenderMaterial::updateDescriptorSets(const uint32_t allWriteDescriptorSetsC
         return;
     }
 
+    uint32_t dynamicOffsetCount = 0;
+
     //
 
     VkWriteDescriptorSet finalWriteDescriptorSets[VKTS_BINDING_UNIFORM_MATERIAL_TOTAL_BINDING_COUNT];
@@ -251,6 +264,11 @@ void RenderMaterial::updateDescriptorSets(const uint32_t allWriteDescriptorSetsC
     		finalWriteDescriptorSets[finalWriteDescriptorSetsCount].dstSet = currentDescriptorSets->getDescriptorSets()[0];
 
 			finalWriteDescriptorSetsCount++;
+
+			if (allWriteDescriptorSets[i].descriptorType == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC)
+			{
+				dynamicOffsetCount++;
+			}
     	}
     }
 
@@ -269,9 +287,16 @@ void RenderMaterial::updateDescriptorSets(const uint32_t allWriteDescriptorSetsC
 	    		finalWriteDescriptorSets[finalWriteDescriptorSetsCount].dstSet = currentDescriptorSets->getDescriptorSets()[0];
 
 				finalWriteDescriptorSetsCount++;
+
+				if (writeDescriptorSets[k].descriptorType == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC)
+				{
+					dynamicOffsetCount++;
+				}
 			}
         }
     }
+
+    allDynamicOffsetCounts[nodeName] = dynamicOffsetCount;
 
     currentDescriptorSets->updateDescriptorSets(finalWriteDescriptorSetsCount, finalWriteDescriptorSets, 0, nullptr);
 }
@@ -324,6 +349,8 @@ void RenderMaterial::destroy()
     	allDescriptorPools.valueAt(i)->destroy();
     }
     allDescriptorPools.clear();
+
+    allDynamicOffsetCounts.clear();
 
     memset(writeDescriptorSets, 0, sizeof(writeDescriptorSets));
     memset(descriptorImageInfos, 0, sizeof(descriptorImageInfos));
