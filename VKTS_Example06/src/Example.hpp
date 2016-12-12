@@ -33,6 +33,9 @@
 
 #define VKTS_NUMBER_DYNAMIC_STATES 2
 
+#define VKTS_NUMBER_DYNAMIC_UNIFORM_BUFFERS 4
+#define VKTS_MAX_NUMBER_BUFFERS 3
+
 #define VKTS_NUMBER_BUFFERS 2
 #define VKTS_SHADER_STAGE_COUNT 2
 #define VKTS_PIPELINE_CACHE_SIZE 0
@@ -74,6 +77,8 @@ private:
 
     VkWriteDescriptorSet writeDescriptorSets[VKTS_DESCRIPTOR_SET_COUNT];
 
+    uint32_t dynamicOffsets[VKTS_NUMBER_DYNAMIC_UNIFORM_BUFFERS];
+
 	vkts::IBufferObjectSP vertexViewProjectionUniformBuffer;
 	vkts::IBufferObjectSP fragmentUniformBuffer;
 
@@ -103,6 +108,8 @@ private:
     vkts::SmartPointerVector<vkts::IFramebufferSP> framebuffer;
 
     vkts::SmartPointerVector<vkts::ICommandBuffersSP> cmdBuffer;
+
+    vkts::SmartPointerVector<vkts::IFenceSP> cmdBufferFence;
 
 	VkBool32 buildCmdBuffer(const int32_t usedBuffer);
 
