@@ -276,7 +276,7 @@ VkBool32 Example::buildScene(const vkts::ICommandObjectSP& commandObject)
 
 	//
 
-
+	// Sorted by binding
 	dynamicOffsets[0] = (uint32_t)contextObject->getPhysicalDevice()->getUniformBufferAlignmentSizeInBytes(vkts::alignmentGetSizeInBytes(16 * sizeof(float) * 2, 16));
 	dynamicOffsets[1] = (uint32_t)sceneFactory->getSceneRenderFactory()->getTransformUniformBufferAlignmentSize(sceneManager);
 	dynamicOffsets[2] = (uint32_t)contextObject->getPhysicalDevice()->getUniformBufferAlignmentSizeInBytes(vkts::alignmentGetSizeInBytes(3 * sizeof(float), 16));
@@ -653,16 +653,16 @@ VkBool32 Example::buildDescriptorSetLayout()
 	descriptorSetLayoutBinding[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 	descriptorSetLayoutBinding[0].pImmutableSamplers = nullptr;
 
-	descriptorSetLayoutBinding[1].binding = VKTS_BINDING_UNIFORM_BUFFER_TRANSFORM;
+	descriptorSetLayoutBinding[1].binding = VKTS_BINDING_UNIFORM_BUFFER_LIGHT;
 	descriptorSetLayoutBinding[1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 	descriptorSetLayoutBinding[1].descriptorCount = 1;
-	descriptorSetLayoutBinding[1].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+	descriptorSetLayoutBinding[1].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 	descriptorSetLayoutBinding[1].pImmutableSamplers = nullptr;
 
-	descriptorSetLayoutBinding[2].binding = VKTS_BINDING_UNIFORM_BUFFER_LIGHT;
+	descriptorSetLayoutBinding[2].binding = VKTS_BINDING_UNIFORM_BUFFER_TRANSFORM;
 	descriptorSetLayoutBinding[2].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 	descriptorSetLayoutBinding[2].descriptorCount = 1;
-	descriptorSetLayoutBinding[2].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+	descriptorSetLayoutBinding[2].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 	descriptorSetLayoutBinding[2].pImmutableSamplers = nullptr;
 
     for (int32_t i = VKTS_BINDING_UNIFORM_SAMPLER_PHONG_FIRST; i <= VKTS_BINDING_UNIFORM_SAMPLER_PHONG_LAST; i++)
@@ -1164,6 +1164,25 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 
 	if (result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR)
 	{
+		// Wait until complete, before to commit again.
+		result = cmdBufferFence[currentBuffer]->waitForFence(UINT64_MAX);
+		if (result != VK_SUCCESS)
+		{
+			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not wait for fence.");
+
+			return VK_FALSE;
+		}
+
+		result = cmdBufferFence[currentBuffer]->reset();
+		if (result != VK_SUCCESS)
+		{
+			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not reset fence.");
+
+			return VK_FALSE;
+		}
+
+		//
+
 		glm::mat4 projectionMatrix(1.0f);
 		glm::mat4 viewMatrix(1.0f);
 
@@ -1201,25 +1220,6 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 		if (scene.get())
 		{
 			scene->updateTransformRecursive(updateContext.getDeltaTime(), updateContext.getDeltaTicks(), updateContext.getTickTime(), currentBuffer);
-		}
-
-		//
-
-		// Wait until complete, before to commit again.
-		result = cmdBufferFence[currentBuffer]->waitForFence(UINT64_MAX);
-		if (result != VK_SUCCESS)
-		{
-			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not wait for fence.");
-
-			return VK_FALSE;
-		}
-
-		result = cmdBufferFence[currentBuffer]->reset();
-		if (result != VK_SUCCESS)
-		{
-			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not reset fence.");
-
-			return VK_FALSE;
 		}
 
 		//
