@@ -88,6 +88,9 @@ private:
 
     VkWriteDescriptorSet writeDescriptorSets[VKTS_DESCRIPTOR_SET_COUNT];
 
+    std::map<uint32_t, VkTsDynamicOffset> dynamicOffsetsShadowPass;
+    std::map<uint32_t, VkTsDynamicOffset> dynamicOffsetsColorPass;
+
 	vkts::IBufferObjectSP vertexViewProjectionUniformBuffer;
 	vkts::IBufferObjectSP fragmentUniformBuffer;
 	vkts::IBufferObjectSP shadowUniformBuffer;
@@ -139,14 +142,12 @@ private:
     vkts::SmartPointerVector<vkts::IFramebufferSP> framebuffer;
     vkts::SmartPointerVector<vkts::IFramebufferSP> shadowFramebuffer;
 
-    vkts::SmartPointerVector<vkts::IFenceSP> fences;
-
     vkts::SmartPointerVector<vkts::ICommandBuffersSP> cmdBuffer;
     vkts::SmartPointerVector<vkts::ICommandBuffersSP> shadowCmdBuffer;
 
-	VkBool32 buildCmdBuffer(const int32_t usedBuffer);
+    vkts::SmartPointerVector<vkts::IFenceSP> cmdBufferFence;
 
-	VkBool32 buildFences(const int32_t usedBuffer);
+	VkBool32 buildCmdBuffer(const int32_t usedBuffer);
 
 	VkBool32 buildFramebuffer(const int32_t usedBuffer);
 

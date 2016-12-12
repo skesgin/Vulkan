@@ -77,7 +77,7 @@ private:
 
     VkWriteDescriptorSet writeDescriptorSets[VKTS_DESCRIPTOR_SET_COUNT];
 
-    uint32_t dynamicOffsets[VKTS_NUMBER_DYNAMIC_UNIFORM_BUFFERS];
+    std::map<uint32_t, VkTsDynamicOffset> dynamicOffsets;
 
 	vkts::IBufferObjectSP vertexViewProjectionUniformBuffer;
 	vkts::IBufferObjectSP fragmentUniformBuffer;

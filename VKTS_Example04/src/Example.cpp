@@ -115,13 +115,7 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 
 	if (scene.get())
 	{
-		uint32_t currentDynamicOffsets[VKTS_NUMBER_DYNAMIC_UNIFORM_BUFFERS]{};
-
-		currentDynamicOffsets[0] = dynamicOffsets[0] * (VkDeviceSize)usedBuffer;
-		currentDynamicOffsets[1] = dynamicOffsets[1] * (VkDeviceSize)usedBuffer;
-		currentDynamicOffsets[2] = dynamicOffsets[2] * (VkDeviceSize)usedBuffer;
-
-		scene->drawRecursive(cmdBuffer[usedBuffer], allGraphicsPipelines, VKTS_NUMBER_DYNAMIC_UNIFORM_BUFFERS, currentDynamicOffsets);
+		scene->drawRecursive(cmdBuffer[usedBuffer], allGraphicsPipelines, usedBuffer, dynamicOffsets);
 	}
 
 	cmdBuffer[usedBuffer]->cmdEndRenderPass();
@@ -277,9 +271,9 @@ VkBool32 Example::buildScene(const vkts::ICommandObjectSP& commandObject)
 	//
 
 	// Sorted by binding
-	dynamicOffsets[0] = (uint32_t)contextObject->getPhysicalDevice()->getUniformBufferAlignmentSizeInBytes(vkts::alignmentGetSizeInBytes(16 * sizeof(float) * 2, 16));
-	dynamicOffsets[1] = (uint32_t)sceneFactory->getSceneRenderFactory()->getTransformUniformBufferAlignmentSize(sceneManager);
-	dynamicOffsets[2] = (uint32_t)contextObject->getPhysicalDevice()->getUniformBufferAlignmentSizeInBytes(vkts::alignmentGetSizeInBytes(3 * sizeof(float), 16));
+	dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_VIEWPROJECTION] = VkTsDynamicOffset{0, (uint32_t)contextObject->getPhysicalDevice()->getUniformBufferAlignmentSizeInBytes(vkts::alignmentGetSizeInBytes(16 * sizeof(float) * 2, 16))};
+	dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_TRANSFORM] = VkTsDynamicOffset{0, (uint32_t)sceneFactory->getSceneRenderFactory()->getTransformUniformBufferAlignmentSize(sceneManager)};
+	dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_LIGHT] = VkTsDynamicOffset{0, (uint32_t)contextObject->getPhysicalDevice()->getUniformBufferAlignmentSizeInBytes(vkts::alignmentGetSizeInBytes(3 * sizeof(float), 16))};
 
 	return VK_TRUE;
 }
@@ -1191,13 +1185,13 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 		projectionMatrix = vkts::perspectiveMat4(45.0f, (float)currentExtent.width / (float)currentExtent.height, 1.0f, 100.0f);
 		viewMatrix = vkts::lookAtMat4(0.0f, 4.0f, 5.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
 
-		if (!vertexViewProjectionUniformBuffer->upload(dynamicOffsets[0] * (VkDeviceSize)currentBuffer + 0 * sizeof(float) * 16, 0, projectionMatrix))
+		if (!vertexViewProjectionUniformBuffer->upload(dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_VIEWPROJECTION].stride * (VkDeviceSize)currentBuffer + 0 * sizeof(float) * 16, 0, projectionMatrix))
 		{
 			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not upload matrices.");
 
 			return VK_FALSE;
 		}
-		if (!vertexViewProjectionUniformBuffer->upload(dynamicOffsets[0] * (VkDeviceSize)currentBuffer + 1 * sizeof(float) * 16, 0, viewMatrix))
+		if (!vertexViewProjectionUniformBuffer->upload(dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_VIEWPROJECTION].stride * (VkDeviceSize)currentBuffer + 1 * sizeof(float) * 16, 0, viewMatrix))
 		{
 			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not upload matrices.");
 
@@ -1210,7 +1204,7 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 
 		lightDirection = glm::normalize(lightDirection);
 
-		if (!fragmentUniformBuffer->upload(dynamicOffsets[2] * (VkDeviceSize)currentBuffer + 0, 0, lightDirection))
+		if (!fragmentUniformBuffer->upload(dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_LIGHT].stride * (VkDeviceSize)currentBuffer + 0, 0, lightDirection))
 		{
 			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not upload light direction.");
 

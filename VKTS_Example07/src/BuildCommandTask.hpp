@@ -29,6 +29,9 @@
 
 #include <vkts/vkts.hpp>
 
+#define VKTS_NUMBER_DYNAMIC_UNIFORM_BUFFERS 4
+#define VKTS_MAX_NUMBER_BUFFERS 3
+
 class BuildCommandTask : public vkts::ITask
 {
 
@@ -44,6 +47,8 @@ private:
 
 	const vkts::ISceneSP scene;
 
+	const std::map<uint32_t, VkTsDynamicOffset>& dynamicOffsets;
+
 	const uint32_t objectOffset;
 
 	const uint32_t objectStep;
@@ -52,9 +57,11 @@ private:
 
     VkExtent2D extent;
 
+    uint32_t usedBuffer;
+
 	vkts::ICommandPoolSP commandPool;
 
-	vkts::ICommandBuffersSP cmdBuffer;
+	vkts::SmartPointerVector<vkts::ICommandBuffersSP> cmdBuffer;
 
 protected:
 
@@ -64,12 +71,14 @@ public:
 
     static void setOverwrite(vkts::OverwriteDraw* overwrite);
 
-	BuildCommandTask(const uint64_t id, const vkts::IUpdateThreadContext& updateContext, const vkts::IContextObjectSP& contextObject, const vkts::SmartPointerVector<vkts::IGraphicsPipelineSP>& allGraphicsPipelines, const vkts::ISceneSP& scene, const uint32_t& objectOffset, const uint32_t& objectStep);
+	BuildCommandTask(const uint64_t id, const vkts::IUpdateThreadContext& updateContext, const vkts::IContextObjectSP& contextObject, const vkts::SmartPointerVector<vkts::IGraphicsPipelineSP>& allGraphicsPipelines, const vkts::ISceneSP& scene, const uint32_t buffers, const std::map<uint32_t, VkTsDynamicOffset>& dynamicOffsets, const uint32_t& objectOffset, const uint32_t& objectStep);
 	virtual ~BuildCommandTask();
 
     void setCommandBufferInheritanceInfo(VkCommandBufferInheritanceInfo* commandBufferInheritanceInfo);
 
     void setExtent(const VkExtent2D& extent);
+
+    void setUsedBuffer(const uint32_t usedBuffer);
 
     VkCommandBuffer getCommandBuffer() const;
 

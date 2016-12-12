@@ -111,6 +111,12 @@ typedef enum VkTsSearch_
     VKTS_SEARCH_ABSOLUTE = 0, VKTS_SEARCH_RELATVE = 1
 } VkTsSearch;
 
+typedef struct VkTsDynamicOffset_
+{
+    uint32_t offset;
+    uint32_t stride;
+} VkTsDynamicOffset;
+
 /**
  * Interface.
  */

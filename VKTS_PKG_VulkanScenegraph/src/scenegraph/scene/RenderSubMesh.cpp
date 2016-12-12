@@ -38,7 +38,7 @@ RenderSubMesh::~RenderSubMesh()
 {
 }
 
-void RenderSubMesh::draw(const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const uint32_t dynamicOffsetCount, const uint32_t* dynamicOffsets, const OverwriteDraw* renderOverwrite, const ISubMesh& subMesh, const std::string& nodeName)
+void RenderSubMesh::draw(const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const uint32_t currentBuffer, const std::map<uint32_t, VkTsDynamicOffset>& dynamicOffsetMappings, const OverwriteDraw* renderOverwrite, const ISubMesh& subMesh, const std::string& nodeName)
 {
 	IGraphicsPipelineSP graphicsPipeline;
 
@@ -81,12 +81,12 @@ void RenderSubMesh::draw(const ICommandBuffersSP& cmdBuffer, const SmartPointerV
 
 	if (subMesh.getBSDFMaterial().get())
 	{
-		subMesh.getBSDFMaterial()->drawRecursive(cmdBuffer, graphicsPipeline, dynamicOffsetCount, dynamicOffsets, renderOverwrite, nodeName);
+		subMesh.getBSDFMaterial()->drawRecursive(cmdBuffer, graphicsPipeline, currentBuffer, dynamicOffsetMappings, renderOverwrite, nodeName);
 	}
 
 	if (subMesh.getPhongMaterial().get())
 	{
-		subMesh.getPhongMaterial()->drawRecursive(cmdBuffer, graphicsPipeline, dynamicOffsetCount, dynamicOffsets, renderOverwrite, nodeName);
+		subMesh.getPhongMaterial()->drawRecursive(cmdBuffer, graphicsPipeline, currentBuffer, dynamicOffsetMappings, renderOverwrite, nodeName);
 	}
 
     // Bind index buffer.

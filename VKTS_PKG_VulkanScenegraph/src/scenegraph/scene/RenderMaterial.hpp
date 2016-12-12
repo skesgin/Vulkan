@@ -45,12 +45,12 @@ protected:
 
     SmartPointerMap<std::string, IDescriptorPoolSP> allDescriptorPools;
     SmartPointerMap<std::string, IDescriptorSetsSP> allDescriptorSets;
-    std::map<std::string, uint32_t> allDynamicOffsetCounts;
+    std::map<std::string, std::map<uint32_t, VkBool32>> allBindingPresent;
 
     IDescriptorSetsSP createDescriptorSetsByName(const std::string& nodeName);
     IDescriptorSetsSP getDescriptorSetsByName(const std::string& nodeName) const;
 
-    void bindDescriptorSets(const ICommandBuffersSP& cmdBuffer, const VkPipelineLayout layout, const uint32_t dynamicOffsetCount, const uint32_t* dynamicOffsets, const std::string& nodeName) const;
+    void bindDescriptorSets(const ICommandBuffersSP& cmdBuffer, const VkPipelineLayout layout, const uint32_t currentBuffer, const std::map<uint32_t, VkTsDynamicOffset>& dynamicOffsetMappings, const std::string& nodeName) const;
 
 public:
 
@@ -80,7 +80,7 @@ public:
 
     virtual void updateDescriptorSets(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets, const std::string& nodeName) override;
 
-    virtual void draw(const ICommandBuffersSP& cmdBuffer, const IGraphicsPipelineSP& graphicsPipeline, const uint32_t dynamicOffsetCount, const uint32_t* dynamicOffsets, const std::string& nodeName) override;
+    virtual void draw(const ICommandBuffersSP& cmdBuffer, const IGraphicsPipelineSP& graphicsPipeline, const uint32_t currentBuffer, const std::map<uint32_t, VkTsDynamicOffset>& dynamicOffsetMappings, const std::string& nodeName) override;
 
     //
     // IDestroyable

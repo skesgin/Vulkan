@@ -71,7 +71,7 @@ VkBool32 LoadTask::execute()
 
 	//
 
-	renderFactory = vkts::sceneRenderFactoryCreate(descriptorSetLayout, vkts::IRenderPassSP());
+	renderFactory = vkts::sceneRenderFactoryCreate(descriptorSetLayout, vkts::IRenderPassSP(), VKTS_MAX_NUMBER_BUFFERS);
 
 	if (!renderFactory.get())
 	{

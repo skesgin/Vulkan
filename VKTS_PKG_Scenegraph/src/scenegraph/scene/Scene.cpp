@@ -333,12 +333,12 @@ void Scene::updateTransformRecursive(const double deltaTime, const uint64_t delt
     }
 }
 
-void Scene::drawRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const uint32_t dynamicOffsetCount, const uint32_t* dynamicOffsets, const OverwriteDraw* renderOverwrite, const uint32_t objectOffset, const uint32_t objectStep, const size_t objectLimit)
+void Scene::drawRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const uint32_t currentBuffer, const std::map<uint32_t, VkTsDynamicOffset>& dynamicOffsetMappings, const OverwriteDraw* renderOverwrite, const uint32_t objectOffset, const uint32_t objectStep, const size_t objectLimit)
 {
     const OverwriteDraw* currentOverwrite = renderOverwrite;
     while (currentOverwrite)
     {
-    	if (!currentOverwrite->visit(*this, cmdBuffer, allGraphicsPipelines, dynamicOffsetCount, dynamicOffsets, objectOffset, objectStep, objectLimit))
+    	if (!currentOverwrite->visit(*this, cmdBuffer, allGraphicsPipelines, currentBuffer, dynamicOffsetMappings, objectOffset, objectStep, objectLimit))
     	{
     		return;
     	}
@@ -355,7 +355,7 @@ void Scene::drawRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointer
 
     for (size_t i = (size_t) objectOffset; i < glm::min(allObjects.size(), objectLimit); i += (size_t) objectStep)
     {
-        allObjects[i]->drawRecursive(cmdBuffer, allGraphicsPipelines, dynamicOffsetCount, dynamicOffsets, renderOverwrite);
+        allObjects[i]->drawRecursive(cmdBuffer, allGraphicsPipelines, currentBuffer, dynamicOffsetMappings, renderOverwrite);
     }
 }
 

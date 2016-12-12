@@ -27,7 +27,7 @@
 #include "Example.hpp"
 
 Example::Example(const vkts::IContextObjectSP& contextObject, const int32_t windowIndex, const vkts::IVisualContextSP& visualContext, const vkts::ISurfaceSP& surface) :
-		IUpdateThread(), contextObject(contextObject), windowIndex(windowIndex), visualContext(visualContext), surface(surface), showStats(VK_TRUE), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), environmentDescriptorSetLayout(nullptr), resolveDescriptorSetLayout(nullptr), resolveDescriptorPool(nullptr), resolveDescriptorSet(nullptr), vertexViewProjectionUniformBuffer(nullptr), environmentVertexViewProjectionUniformBuffer(nullptr), resolveFragmentLightsUniformBuffer(nullptr), resolveFragmentMatricesUniformBuffer(nullptr), allBSDFVertexShaderModules(), envVertexShaderModule(nullptr), envFragmentShaderModule(nullptr), resolveVertexShaderModule(nullptr), resolveFragmentShaderModule(nullptr), environmentPipelineLayout(nullptr), resolvePipelineLayout(nullptr), guiRenderFactory(nullptr), guiManager(nullptr), guiFactory(nullptr), font(nullptr), renderFactory(nullptr), sceneManager(nullptr), sceneFactory(nullptr), scene(nullptr), environmentRenderFactory(nullptr), environmentSceneManager(nullptr), environmentSceneFactory(nullptr), environmentScene(nullptr), screenPlaneVertexBuffer(nullptr), swapchain(nullptr), renderPass(nullptr), gbufferRenderPass(nullptr), allGraphicsPipelines(), resolveGraphicsPipeline(nullptr), allGBufferTextures(), allGBufferImageViews(), gbufferSampler(nullptr), swapchainImagesCount(0), swapchainImageView(), gbufferFramebuffer(), framebuffer(), cmdBuffer(), rebuildCmdBufferCounter(0), fps(0), ram(0), cpuUsageApp(0.0f), processors(0)
+		IUpdateThread(), contextObject(contextObject), windowIndex(windowIndex), visualContext(visualContext), surface(surface), showStats(VK_TRUE), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), environmentDescriptorSetLayout(nullptr), resolveDescriptorSetLayout(nullptr), resolveDescriptorPool(nullptr), resolveDescriptorSet(nullptr), vertexViewProjectionUniformBuffer(nullptr), environmentVertexViewProjectionUniformBuffer(nullptr), resolveFragmentLightsUniformBuffer(nullptr), resolveFragmentMatricesUniformBuffer(nullptr), allBSDFVertexShaderModules(), envVertexShaderModule(nullptr), envFragmentShaderModule(nullptr), resolveVertexShaderModule(nullptr), resolveFragmentShaderModule(nullptr), environmentPipelineLayout(nullptr), resolvePipelineLayout(nullptr), guiRenderFactory(nullptr), guiManager(nullptr), guiFactory(nullptr), font(nullptr), renderFactory(nullptr), sceneManager(nullptr), sceneFactory(nullptr), scene(nullptr), environmentRenderFactory(nullptr), environmentSceneManager(nullptr), environmentSceneFactory(nullptr), environmentScene(nullptr), screenPlaneVertexBuffer(nullptr), swapchain(nullptr), renderPass(nullptr), gbufferRenderPass(nullptr), allGraphicsPipelines(), resolveGraphicsPipeline(nullptr), allGBufferTextures(), allGBufferImageViews(), gbufferSampler(nullptr), swapchainImagesCount(0), swapchainImageView(), gbufferFramebuffer(), framebuffer(), cmdBuffer(), cmdBufferFence(), rebuildCmdBufferCounter(0), fps(0), ram(0), cpuUsageApp(0.0f), processors(0)
 {
 	processors = glm::min(vkts::processorGetNumber(), VKTS_MAX_CORES);
 
@@ -144,12 +144,9 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 
 	if (scene.get())
 	{
-		const uint32_t dynamicOffsetCount = 3;
-		uint32_t dynamicOffsets[dynamicOffsetCount]{};
-
 		vkts::SmartPointerVector<vkts::IGraphicsPipelineSP> empty;
 
-		scene->drawRecursive(cmdBuffer[usedBuffer], empty, dynamicOffsetCount, dynamicOffsets);
+		scene->drawRecursive(cmdBuffer[usedBuffer], empty, usedBuffer, dynamicOffsets);
 	}
 
 	cmdBuffer[usedBuffer]->cmdEndRenderPass();
@@ -195,10 +192,7 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 
 	if (environmentScene.get())
 	{
-		const uint32_t dynamicOffsetCount = 2;
-		uint32_t dynamicOffsets[dynamicOffsetCount]{};
-
-		environmentScene->drawRecursive(cmdBuffer[usedBuffer], allGraphicsPipelines, dynamicOffsetCount, dynamicOffsets);
+		environmentScene->drawRecursive(cmdBuffer[usedBuffer], allGraphicsPipelines, usedBuffer, dynamicOffsets);
 	}
 
 	//
@@ -316,7 +310,7 @@ VkBool32 Example::updateDescriptorSets()
 
 	environmentDescriptorBufferInfos[0].buffer = environmentVertexViewProjectionUniformBuffer->getBuffer()->getBuffer();
 	environmentDescriptorBufferInfos[0].offset = 0;
-	environmentDescriptorBufferInfos[0].range = environmentVertexViewProjectionUniformBuffer->getBuffer()->getSize();
+	environmentDescriptorBufferInfos[0].range = environmentVertexViewProjectionUniformBuffer->getBuffer()->getSize() / environmentVertexViewProjectionUniformBuffer->getBufferCount();
 
 
 	memset(environmentDescriptorImageInfos, 0, sizeof(environmentDescriptorImageInfos));
@@ -361,7 +355,7 @@ VkBool32 Example::updateDescriptorSets()
 
 	descriptorBufferInfos[0].buffer = vertexViewProjectionUniformBuffer->getBuffer()->getBuffer();
 	descriptorBufferInfos[0].offset = 0;
-	descriptorBufferInfos[0].range = vertexViewProjectionUniformBuffer->getBuffer()->getSize();
+	descriptorBufferInfos[0].range = vertexViewProjectionUniformBuffer->getBuffer()->getSize() / vertexViewProjectionUniformBuffer->getBufferCount();
 
 
 	memset(writeDescriptorSets, 0, sizeof(writeDescriptorSets));
@@ -473,7 +467,7 @@ VkBool32 Example::updateDescriptorSets()
 	// Dynamic lights.
 	resolveDescriptorBufferInfos[0].buffer = resolveFragmentLightsUniformBuffer->getBuffer()->getBuffer();
 	resolveDescriptorBufferInfos[0].offset = 0;
-	resolveDescriptorBufferInfos[0].range = resolveFragmentLightsUniformBuffer->getBuffer()->getSize();
+	resolveDescriptorBufferInfos[0].range = resolveFragmentLightsUniformBuffer->getBuffer()->getSize() / resolveFragmentLightsUniformBuffer->getBufferCount();
 
 	resolveWriteDescriptorSets[7].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 
@@ -489,7 +483,7 @@ VkBool32 Example::updateDescriptorSets()
 	// Inverse matrix.
 	resolveDescriptorBufferInfos[1].buffer = resolveFragmentMatricesUniformBuffer->getBuffer()->getBuffer();
 	resolveDescriptorBufferInfos[1].offset = 0;
-	resolveDescriptorBufferInfos[1].range = resolveFragmentMatricesUniformBuffer->getBuffer()->getSize();
+	resolveDescriptorBufferInfos[1].range = resolveFragmentMatricesUniformBuffer->getBuffer()->getSize() / resolveFragmentMatricesUniformBuffer->getBufferCount();
 
 	resolveWriteDescriptorSets[8].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 
@@ -511,7 +505,7 @@ VkBool32 Example::updateDescriptorSets()
 
 VkBool32 Example::buildScene(const vkts::ICommandObjectSP& commandObject)
 {
-	renderFactory = vkts::sceneRenderFactoryCreate(vkts::IDescriptorSetLayoutSP(), gbufferRenderPass);
+	renderFactory = vkts::sceneRenderFactoryCreate(vkts::IDescriptorSetLayoutSP(), gbufferRenderPass, VKTS_MAX_NUMBER_BUFFERS);
 
 	if (!renderFactory.get())
 	{
@@ -569,7 +563,7 @@ VkBool32 Example::buildScene(const vkts::ICommandObjectSP& commandObject)
 
 	if (!environmentSceneManager.get() && !environmentScene.get())
 	{
-		environmentRenderFactory = vkts::sceneRenderFactoryCreate(environmentDescriptorSetLayout, vkts::IRenderPassSP());
+		environmentRenderFactory = vkts::sceneRenderFactoryCreate(environmentDescriptorSetLayout, vkts::IRenderPassSP(), VKTS_MAX_NUMBER_BUFFERS);
 
 		if (!environmentRenderFactory.get())
 		{
@@ -640,6 +634,13 @@ VkBool32 Example::buildScene(const vkts::ICommandObjectSP& commandObject)
 	        return VK_FALSE;
 	    }
 	}
+
+	// Sorted by binding
+	dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_VIEWPROJECTION] = VkTsDynamicOffset{0, (uint32_t)contextObject->getPhysicalDevice()->getUniformBufferAlignmentSizeInBytes(vkts::alignmentGetSizeInBytes(16 * sizeof(float) * 2, 16))};
+	dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_TRANSFORM] = VkTsDynamicOffset{0, (uint32_t)sceneFactory->getSceneRenderFactory()->getTransformUniformBufferAlignmentSize(sceneManager)};
+	dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_BONE_TRANSFORM] = VkTsDynamicOffset{0, (uint32_t)sceneFactory->getSceneRenderFactory()->getJointsUniformBufferAlignmentSize(sceneManager)};
+	dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_BSDF_INVERSE] = VkTsDynamicOffset{0, (uint32_t)contextObject->getPhysicalDevice()->getUniformBufferAlignmentSizeInBytes(vkts::alignmentGetSizeInBytes(16 * sizeof(float) * 2, 16))};
+	dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_LIGHT] = VkTsDynamicOffset{0, (uint32_t)contextObject->getPhysicalDevice()->getUniformBufferAlignmentSizeInBytes(vkts::alignmentGetSizeInBytes(VKTS_MAX_LIGHTS * 4 * sizeof(float) * 2 + sizeof(int32_t), 16))};
 
 	return VK_TRUE;
 }
@@ -1326,7 +1327,7 @@ VkBool32 Example::buildUniformBuffers()
 	bufferCreateInfo.pQueueFamilyIndices = nullptr;
 
 
-	vertexViewProjectionUniformBuffer = vkts::bufferObjectCreate(contextObject, bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+	vertexViewProjectionUniformBuffer = vkts::bufferObjectCreate(contextObject, bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, VKTS_MAX_NUMBER_BUFFERS);
 
 	if (!vertexViewProjectionUniformBuffer.get())
 	{
@@ -1335,7 +1336,7 @@ VkBool32 Example::buildUniformBuffers()
 		return VK_FALSE;
 	}
 
-	environmentVertexViewProjectionUniformBuffer = vkts::bufferObjectCreate(contextObject, bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+	environmentVertexViewProjectionUniformBuffer = vkts::bufferObjectCreate(contextObject, bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, VKTS_MAX_NUMBER_BUFFERS);
 
 	if (!environmentVertexViewProjectionUniformBuffer.get())
 	{
@@ -1347,7 +1348,7 @@ VkBool32 Example::buildUniformBuffers()
 
 	bufferCreateInfo.size = vkts::alignmentGetSizeInBytes(VKTS_MAX_LIGHTS * 4 * sizeof(float) * 2 + sizeof(int32_t), 16);
 
-	resolveFragmentLightsUniformBuffer = vkts::bufferObjectCreate(contextObject, bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+	resolveFragmentLightsUniformBuffer = vkts::bufferObjectCreate(contextObject, bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, VKTS_MAX_NUMBER_BUFFERS);
 
 	if (!resolveFragmentLightsUniformBuffer.get())
 	{
@@ -1359,7 +1360,7 @@ VkBool32 Example::buildUniformBuffers()
 
 	bufferCreateInfo.size = vkts::alignmentGetSizeInBytes(16 * sizeof(float) * 2, 16);
 
-	resolveFragmentMatricesUniformBuffer = vkts::bufferObjectCreate(contextObject, bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+	resolveFragmentMatricesUniformBuffer = vkts::bufferObjectCreate(contextObject, bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, VKTS_MAX_NUMBER_BUFFERS);
 
 	if (!resolveFragmentMatricesUniformBuffer.get())
 	{
@@ -1401,11 +1402,30 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
         return VK_FALSE;
     }
 
+    if (swapchainImagesCount > VKTS_MAX_NUMBER_BUFFERS)
+    {
+    	return VK_FALSE;
+    }
+
     swapchainImageView = vkts::SmartPointerVector<vkts::IImageViewSP>(swapchainImagesCount);
     gbufferFramebuffer = vkts::SmartPointerVector<vkts::IFramebufferSP>(swapchainImagesCount);
     framebuffer = vkts::SmartPointerVector<vkts::IFramebufferSP>(swapchainImagesCount);
     cmdBuffer = vkts::SmartPointerVector<vkts::ICommandBuffersSP>(swapchainImagesCount);
     rebuildCmdBufferCounter = swapchainImagesCount;
+
+    cmdBufferFence = vkts::SmartPointerVector<vkts::IFenceSP>(swapchainImagesCount);
+
+    for (uint32_t i = 0; i < swapchainImagesCount; i++)
+    {
+    	cmdBufferFence[i] = vkts::fenceCreate(contextObject->getDevice()->getDevice(), VK_FENCE_CREATE_SIGNALED_BIT);
+
+        if (!cmdBufferFence[i].get())
+        {
+            vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create fence.");
+
+            return VK_FALSE;
+        }
+    }
 
     //
 
@@ -1618,9 +1638,16 @@ void Example::terminateResources(const vkts::IUpdateThreadContext& updateContext
 	{
 		if (contextObject->getDevice().get())
 		{
+			contextObject->getDevice()->waitIdle();
+
 			for (int32_t i = 0; i < (int32_t)swapchainImagesCount; i++)
 			{
-				if (gbufferFramebuffer[i].get())
+		        if (cmdBufferFence[i].get())
+		        {
+		        	cmdBufferFence[i]->destroy();
+		        }
+
+		        if (gbufferFramebuffer[i].get())
 				{
 					gbufferFramebuffer[i]->destroy();
 				}
@@ -1878,6 +1905,25 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 
 	if (result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR)
 	{
+		// Wait until complete, before to commit again.
+		result = cmdBufferFence[currentBuffer]->waitForFence(UINT64_MAX);
+		if (result != VK_SUCCESS)
+		{
+			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not wait for fence.");
+
+			return VK_FALSE;
+		}
+
+		result = cmdBufferFence[currentBuffer]->reset();
+		if (result != VK_SUCCESS)
+		{
+			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not reset fence.");
+
+			return VK_FALSE;
+		}
+
+		//
+
 		glm::mat4 projectionMatrix(1.0f);
 		glm::mat4 viewMatrix(1.0f);
 
@@ -1891,19 +1937,19 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 
 		auto inverseViewMatrix = glm::inverse(viewMatrix);
 
-		if (!vertexViewProjectionUniformBuffer->upload(0 * sizeof(float) * 16, 0, projectionMatrix))
+		if (!vertexViewProjectionUniformBuffer->upload(dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_VIEWPROJECTION].stride * (VkDeviceSize)currentBuffer + 0 * sizeof(float) * 16, 0, projectionMatrix))
 		{
 			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not upload matrices.");
 
 			return VK_FALSE;
 		}
-		if (!environmentVertexViewProjectionUniformBuffer->upload(0 * sizeof(float) * 16, 0, projectionMatrix))
+		if (!environmentVertexViewProjectionUniformBuffer->upload(dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_VIEWPROJECTION].stride * (VkDeviceSize)currentBuffer + 0 * sizeof(float) * 16, 0, projectionMatrix))
 		{
 			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not upload matrices.");
 
 			return VK_FALSE;
 		}
-		if (!resolveFragmentMatricesUniformBuffer->upload(0 * sizeof(float) * 16, 0, inverseProjectionMatrix))
+		if (!resolveFragmentMatricesUniformBuffer->upload(dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_BSDF_INVERSE].stride * (VkDeviceSize)currentBuffer + 0 * sizeof(float) * 16, 0, inverseProjectionMatrix))
 		{
 			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not upload matrices.");
 
@@ -1912,13 +1958,13 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 
 		//
 
-		if (!vertexViewProjectionUniformBuffer->upload(1 * sizeof(float) * 16, 0, viewMatrix))
+		if (!vertexViewProjectionUniformBuffer->upload(dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_VIEWPROJECTION].stride * (VkDeviceSize)currentBuffer + 1 * sizeof(float) * 16, 0, viewMatrix))
 		{
 			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not upload matrices.");
 
 			return VK_FALSE;
 		}
-		if (!resolveFragmentMatricesUniformBuffer->upload(1 * sizeof(float) * 16, 0, inverseViewMatrix))
+		if (!resolveFragmentMatricesUniformBuffer->upload(dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_BSDF_INVERSE].stride * (VkDeviceSize)currentBuffer + 1 * sizeof(float) * 16, 0, inverseViewMatrix))
 		{
 			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not upload matrices.");
 
@@ -1929,7 +1975,7 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 		auto fixedViewMatrix = viewMatrix;
 		fixedViewMatrix[3] = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
-		if (!environmentVertexViewProjectionUniformBuffer->upload(1 * sizeof(float) * 16, 0, fixedViewMatrix))
+		if (!environmentVertexViewProjectionUniformBuffer->upload(dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_VIEWPROJECTION].stride * (VkDeviceSize)currentBuffer + 1 * sizeof(float) * 16, 0, fixedViewMatrix))
 		{
 			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not upload matrices.");
 
@@ -1938,20 +1984,20 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 
 		if (environmentScene.get())
 		{
-			environmentScene->updateTransformRecursive(updateContext.getDeltaTime(), updateContext.getDeltaTicks(), updateContext.getTickTime());
+			environmentScene->updateTransformRecursive(updateContext.getDeltaTime(), updateContext.getDeltaTicks(), updateContext.getTickTime(), currentBuffer);
 		}
 
 		//
 
 		if (scene.get())
 		{
-			scene->updateTransformRecursive(updateContext.getDeltaTime(), updateContext.getDeltaTicks(), updateContext.getTickTime());
+			scene->updateTransformRecursive(updateContext.getDeltaTime(), updateContext.getDeltaTicks(), updateContext.getTickTime(), currentBuffer);
 
 			// Lights need to uploaded after the scene has been updated.
 
 			int32_t lightCount = glm::min((int32_t)scene->getLights().size(), VKTS_MAX_LIGHTS);
 
-			if (!resolveFragmentLightsUniformBuffer->upload(VKTS_MAX_LIGHTS * 4 * sizeof(float) * 2, 0, lightCount))
+			if (!resolveFragmentLightsUniformBuffer->upload(dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_LIGHT].stride * (VkDeviceSize)currentBuffer + VKTS_MAX_LIGHTS * 4 * sizeof(float) * 2, 0, lightCount))
 			{
 				vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not upload lights.");
 
@@ -1960,14 +2006,14 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 
 			for (int32_t i = 0; i < lightCount; i++)
 			{
-				if (!resolveFragmentLightsUniformBuffer->upload(i * 4 * sizeof(float), 0, scene->getLights()[i]->getDirection()))
+				if (!resolveFragmentLightsUniformBuffer->upload(dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_LIGHT].stride * (VkDeviceSize)currentBuffer + i * 4 * sizeof(float), 0, scene->getLights()[i]->getDirection()))
 				{
 					vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not upload lights.");
 
 					return VK_FALSE;
 				}
 
-				if (!resolveFragmentLightsUniformBuffer->upload(i * 4 * sizeof(float) + VKTS_MAX_LIGHTS * 4 * sizeof(float), 0, glm::vec4(scene->getLights()[i]->getColor(), 1.0)))
+				if (!resolveFragmentLightsUniformBuffer->upload(dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_LIGHT].stride * (VkDeviceSize)currentBuffer + i * 4 * sizeof(float) + VKTS_MAX_LIGHTS * 4 * sizeof(float), 0, glm::vec4(scene->getLights()[i]->getColor(), 1.0)))
 				{
 					vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not upload lights.");
 
@@ -2047,7 +2093,7 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
         submitInfo.signalSemaphoreCount = 1;
         submitInfo.pSignalSemaphores = &signalSemaphores;
 
-		result = contextObject->getQueue()->submit(1, &submitInfo, VK_NULL_HANDLE);
+		result = contextObject->getQueue()->submit(1, &submitInfo, cmdBufferFence[currentBuffer]->getFence());
 
 		if (result != VK_SUCCESS)
 		{
@@ -2064,14 +2110,7 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 
 		if (result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR)
 		{
-			result = contextObject->getQueue()->waitIdle();
-
-			if (result != VK_SUCCESS)
-			{
-				vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not wait for idle queue.");
-
-				return VK_FALSE;
-			}
+			// Do nothing, as everything is buffered and synchronized.
 		}
 		else
 		{

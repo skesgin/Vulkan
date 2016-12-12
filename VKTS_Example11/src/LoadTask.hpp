@@ -31,6 +31,9 @@
 
 #define VKTS_SCENE_NAME "sponza/sponza.vkts"
 
+#define VKTS_NUMBER_DYNAMIC_UNIFORM_BUFFERS 4
+#define VKTS_MAX_NUMBER_BUFFERS 3
+
 class LoadTask : public vkts::ITask
 {
 

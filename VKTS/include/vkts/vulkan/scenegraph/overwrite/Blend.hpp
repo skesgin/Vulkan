@@ -50,7 +50,7 @@ public:
     {
     }
 
-    virtual VkBool32 visit(const ISubMesh& subMesh, const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const uint32_t dynamicOffsetCount, const uint32_t* dynamicOffsets) const
+    virtual VkBool32 visit(const ISubMesh& subMesh, const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const uint32_t currentBuffer, const std::map<uint32_t, VkTsDynamicOffset>& dynamicOffsetMappings) const
     {
     	VkBool32 transparent = VK_FALSE;
 

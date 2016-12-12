@@ -31,6 +31,9 @@
 
 #define VKTS_SCENE_NAME "transport_shuttle/transport_shuttle.vkts"
 
+#define VKTS_NUMBER_DYNAMIC_UNIFORM_BUFFERS 5
+#define VKTS_MAX_NUMBER_BUFFERS 3
+
 class LoadTask : public vkts::ITask
 {
 

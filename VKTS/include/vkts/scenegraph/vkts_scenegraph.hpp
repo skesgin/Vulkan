@@ -27,8 +27,6 @@
 #ifndef VKTS_SCENEGRAPH_HPP_
 #define VKTS_SCENEGRAPH_HPP_
 
-// TODO: Use dynamic uniform buffers for example 5, 6, 7, 9, 10 and 11.
-
 // TODO: Import particle system.
 
 /**

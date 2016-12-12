@@ -1077,12 +1077,12 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
     bindMatrixDirty[dynamicOffsetIndex] = VK_FALSE;
 }
 
-void Node::drawRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const uint32_t dynamicOffsetCount, const uint32_t* dynamicOffsets, const OverwriteDraw* renderOverwrite)
+void Node::drawRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const uint32_t currentBuffer, const std::map<uint32_t, VkTsDynamicOffset>& dynamicOffsetMappings, const OverwriteDraw* renderOverwrite)
 {
     const OverwriteDraw* currentOverwrite = renderOverwrite;
     while (currentOverwrite)
     {
-    	if (!currentOverwrite->visit(*this, cmdBuffer, allGraphicsPipelines, dynamicOffsetCount, dynamicOffsets))
+    	if (!currentOverwrite->visit(*this, cmdBuffer, allGraphicsPipelines, currentBuffer, dynamicOffsetMappings))
     	{
     		return;
     	}
@@ -1094,12 +1094,12 @@ void Node::drawRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerV
 
 	for (size_t i = 0; i < allMeshes.size(); i++)
 	{
-		allMeshes[i]->drawRecursive(cmdBuffer, allGraphicsPipelines, dynamicOffsetCount, dynamicOffsets, renderOverwrite, name);
+		allMeshes[i]->drawRecursive(cmdBuffer, allGraphicsPipelines, currentBuffer, dynamicOffsetMappings, renderOverwrite, name);
 	}
 
 	for (size_t i = 0; i < allChildNodes.size(); i++)
 	{
-		allChildNodes[i]->drawRecursive(cmdBuffer, allGraphicsPipelines, dynamicOffsetCount, dynamicOffsets, renderOverwrite);
+		allChildNodes[i]->drawRecursive(cmdBuffer, allGraphicsPipelines, currentBuffer, dynamicOffsetMappings, renderOverwrite);
 	}
 }
 

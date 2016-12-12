@@ -80,6 +80,8 @@ private:
     VkDescriptorBufferInfo descriptorBufferInfos[1 + 1];
     VkWriteDescriptorSet writeDescriptorSets[VKTS_DESCRIPTOR_SET_COUNT];
 
+    std::map<uint32_t, VkTsDynamicOffset> dynamicOffsets;
+
 	vkts::IBufferObjectSP vertexViewProjectionUniformBuffer;
 	vkts::IBufferObjectSP fragmentUniformBuffer;
 
@@ -114,6 +116,8 @@ private:
     vkts::SmartPointerVector<vkts::IFramebufferSP> framebuffer;
 
     vkts::SmartPointerVector<vkts::ICommandBuffersSP> cmdBuffer;
+
+    vkts::SmartPointerVector<vkts::IFenceSP> cmdBufferFence;
 
     uint32_t commandBufferCount;
 

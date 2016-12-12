@@ -31,6 +31,9 @@
 
 #define VKTS_EXAMPLE_NAME "Example10"
 
+#define VKTS_NUMBER_DYNAMIC_UNIFORM_BUFFERS 3
+#define VKTS_MAX_NUMBER_BUFFERS 3
+
 #define VKTS_NUMBER_BUFFERS 2
 
 #define VKTS_BINDING_VERTEX_BUFFER 0
@@ -109,6 +112,8 @@ private:
     VkWriteDescriptorSet environmentWriteDescriptorSets[VKTS_ENVIRONMENT_DESCRIPTOR_SET_COUNT];
     VkWriteDescriptorSet resolveWriteDescriptorSets[VKTS_BSDF_DESCRIPTOR_SET_COUNT];
 
+    std::map<uint32_t, VkTsDynamicOffset> dynamicOffsets;
+
     vkts::IBufferObjectSP vertexViewProjectionUniformBuffer;
 	vkts::IBufferObjectSP environmentVertexViewProjectionUniformBuffer;
 	vkts::IBufferObjectSP resolveFragmentLightsUniformBuffer;
@@ -162,6 +167,9 @@ private:
     vkts::SmartPointerVector<vkts::IFramebufferSP> framebuffer;
 
     vkts::SmartPointerVector<vkts::ICommandBuffersSP> cmdBuffer;
+
+    vkts::SmartPointerVector<vkts::IFenceSP> cmdBufferFence;
+
     uint32_t rebuildCmdBufferCounter;
 
     uint32_t fps;
