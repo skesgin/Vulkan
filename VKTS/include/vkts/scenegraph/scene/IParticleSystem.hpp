@@ -32,15 +32,17 @@
 namespace vkts
 {
 
+enum EmitType {VerticesEmitType, FacesEmitType};
 enum RenderType {BillboardRenderType, ObjectRenderType};
 
-class IParticleSystem : public ICloneable<IParticleSystem>
+class IObject;
+
+class IParticleSystem
 {
 
 public:
 
-    IParticleSystem() :
-        ICloneable<IParticleSystem>()
+    IParticleSystem()
     {
     }
 
@@ -66,8 +68,8 @@ public:
     virtual float getEmissionRandom() const = 0;
     virtual void setEmissionRandom(const float random) = 0;
 
-    virtual float getEmissionEmitFrom() const = 0;
-    virtual void setEmissionEmitFrom(const float emitfrom) = 0;
+    virtual enum EmitType getEmissionEmitFrom() const = 0;
+    virtual void setEmissionEmitFrom(const enum EmitType emitfrom) = 0;
 
     virtual float getVelocityNormalFactor() const = 0;
     virtual void setVelocityNormalFactor(const float factor) = 0;
@@ -96,8 +98,8 @@ public:
     virtual const std::string& getRenderObjectName() const = 0;
     virtual void setRenderObjectName(const std::string& objectName) = 0;
 
-    virtual const IObjectSP& getRenderObject() const = 0;
-    virtual void setRenderObject(const IObjectSP& object) = 0;
+    virtual const std::shared_ptr<IObject>& getRenderObject() const = 0;
+    virtual void setRenderObject(const std::shared_ptr<IObject>& object) = 0;
 
 };
 

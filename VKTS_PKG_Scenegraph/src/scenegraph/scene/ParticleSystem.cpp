@@ -30,7 +30,7 @@ namespace vkts
 {
 
 ParticleSystem::ParticleSystem() :
-    IParticleSystem(), name(""), emissionNumber(0), emissionStart(0.0f), emissionEnd(0.0f), emissionLifetime(0.0f), emissionRandom(0.0f), emissionEmitFrom(0.0f), velocityNormalFactor(0.0f), velocityObjectAlignFactor(0.0f), velocityFactorRandom(0.0f), physicsParticleSize(0.0f), physicsSizeRandom(0.0f), physicsMass(0.0f), physicsMultiplySizeMass(0.0f), renderType(BillboardRenderType), renderObjectName(""), renderObject()
+    IParticleSystem(), name(""), emissionNumber(0), emissionStart(0.0f), emissionEnd(0.0f), emissionLifetime(0.0f), emissionRandom(0.0f), emissionEmitFrom(VerticesEmitType), velocityNormalFactor(0.0f), velocityObjectAlignFactor(0.0f), velocityFactorRandom(0.0f), physicsParticleSize(0.0f), physicsSizeRandom(0.0f), physicsMass(0.0f), physicsMultiplySizeMass(0.0f), renderType(BillboardRenderType), renderObjectName(""), renderObject()
 {
 }
 
@@ -107,12 +107,12 @@ void ParticleSystem::setEmissionRandom(const float random)
     this->emissionRandom = random;
 }
 
-float ParticleSystem::getEmissionEmitFrom() const
+enum EmitType ParticleSystem::getEmissionEmitFrom() const
 {
     return emissionEmitFrom;
 }
 
-void ParticleSystem::setEmissionEmitFrom(const float emitfrom)
+void ParticleSystem::setEmissionEmitFrom(const enum EmitType emitfrom)
 {
     this->emissionEmitFrom = emitfrom;
 }
@@ -242,14 +242,5 @@ void ParticleSystem::setRenderObject(const IObjectSP& object)
 		currentSceneVisitor = currentSceneVisitor->getNextSceneVisitor();
 	}
 }*/
-
-//
-// ICloneable
-//
-
-IParticleSystemSP ParticleSystem::clone() const
-{
-    return IParticleSystemSP(new ParticleSystem(*this));
-}
 
 } /* namespace vkts */

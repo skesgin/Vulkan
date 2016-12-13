@@ -2758,6 +2758,11 @@ static VkBool32 sceneLoadParticleSystems(const char* directory, const char* file
     }
 
     char buffer[VKTS_MAX_BUFFER_CHARS + 1];
+    char sdata[VKTS_MAX_TOKEN_CHARS + 1];
+    float fdata[3];
+    int32_t idata[1];
+
+    auto particleSystem = IParticleSystemSP();
 
     while (textBuffer->gets(buffer, VKTS_MAX_BUFFER_CHARS))
     {
@@ -2766,7 +2771,334 @@ static VkBool32 sceneLoadParticleSystems(const char* directory, const char* file
             continue;
         }
 
-        // TODO: Load particle systems and its data.
+        if (parseIsToken(buffer, "name"))
+        {
+            if (!parseString(buffer, sdata))
+            {
+                return VK_FALSE;
+            }
+
+            particleSystem = sceneFactory->createParticleSystem(sceneManager);
+
+            if (!particleSystem.get())
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Particle System not created: '%s'", sdata);
+
+                return VK_FALSE;
+            }
+
+            particleSystem->setName(sdata);
+
+            sceneManager->addParticleSystem(particleSystem);
+        }
+        else if (parseIsToken(buffer, "emission_number"))
+        {
+            if (!parseInt(buffer, &idata[0]))
+            {
+                return VK_FALSE;
+            }
+
+            if (particleSystem.get())
+            {
+            	particleSystem->setEmissionNumber((uint32_t)idata[0]);
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No particle system");
+
+                return VK_FALSE;
+            }
+        }
+        else if (parseIsToken(buffer, "emission_start"))
+        {
+            if (!parseFloat(buffer, &fdata[0]))
+            {
+                return VK_FALSE;
+            }
+
+            if (particleSystem.get())
+            {
+            	particleSystem->setEmissionStart(fdata[0]);
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No particle system");
+
+                return VK_FALSE;
+            }
+        }
+        else if (parseIsToken(buffer, "emission_end"))
+        {
+            if (!parseFloat(buffer, &fdata[0]))
+            {
+                return VK_FALSE;
+            }
+
+            if (particleSystem.get())
+            {
+            	particleSystem->setEmissionEnd(fdata[0]);
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No particle system");
+
+                return VK_FALSE;
+            }
+        }
+        else if (parseIsToken(buffer, "emission_lifetime"))
+        {
+            if (!parseFloat(buffer, &fdata[0]))
+            {
+                return VK_FALSE;
+            }
+
+            if (particleSystem.get())
+            {
+            	particleSystem->setEmissionLifetime(fdata[0]);
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No particle system");
+
+                return VK_FALSE;
+            }
+        }
+        else if (parseIsToken(buffer, "emission_random"))
+        {
+            if (!parseFloat(buffer, &fdata[0]))
+            {
+                return VK_FALSE;
+            }
+
+            if (particleSystem.get())
+            {
+            	particleSystem->setEmissionRandom(fdata[0]);
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No particle system");
+
+                return VK_FALSE;
+            }
+        }
+        else if (parseIsToken(buffer, "emission_emit_from"))
+        {
+            if (!parseString(buffer, sdata))
+            {
+                return VK_FALSE;
+            }
+
+            enum EmitType emitType = VerticesEmitType;
+
+            if (strcmp(sdata, "Vertices") == 0)
+            {
+            	emitType = VerticesEmitType;
+            }
+            else if (strcmp(sdata, "Faces") == 0)
+            {
+            	emitType = FacesEmitType;
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Unknown emit type '%s'", sdata);
+
+                return VK_FALSE;
+            }
+
+            if (particleSystem.get())
+            {
+            	particleSystem->setEmissionEmitFrom(emitType);
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No particle system");
+
+                return VK_FALSE;
+            }
+        }
+        else if (parseIsToken(buffer, "velocity_normal_factor"))
+        {
+            if (!parseFloat(buffer, &fdata[0]))
+            {
+                return VK_FALSE;
+            }
+
+            if (particleSystem.get())
+            {
+            	particleSystem->setVelocityNormalFactor(fdata[0]);
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No particle system");
+
+                return VK_FALSE;
+            }
+        }
+        else if (parseIsToken(buffer, "velocity_object_align_factor"))
+        {
+            if (!parseVec3(buffer, fdata))
+            {
+                return VK_FALSE;
+            }
+
+            if (particleSystem.get())
+            {
+            	particleSystem->setVelocityObjectAlignFactor(fdata[0]);
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No particle system");
+
+                return VK_FALSE;
+            }
+        }
+        else if (parseIsToken(buffer, "velocity_factor_random"))
+        {
+            if (!parseFloat(buffer, &fdata[0]))
+            {
+                return VK_FALSE;
+            }
+
+            if (particleSystem.get())
+            {
+            	particleSystem->setVelocityFactorRandom(fdata[0]);
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No particle system");
+
+                return VK_FALSE;
+            }
+        }
+        else if (parseIsToken(buffer, "physics_particle_size"))
+        {
+            if (!parseFloat(buffer, &fdata[0]))
+            {
+                return VK_FALSE;
+            }
+
+            if (particleSystem.get())
+            {
+            	particleSystem->setPhysicsParticleSize(fdata[0]);
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No particle system");
+
+                return VK_FALSE;
+            }
+        }
+        else if (parseIsToken(buffer, "physics_size_random"))
+        {
+            if (!parseFloat(buffer, &fdata[0]))
+            {
+                return VK_FALSE;
+            }
+
+            if (particleSystem.get())
+            {
+            	particleSystem->setPhysicsSizeRandom(fdata[0]);
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No particle system");
+
+                return VK_FALSE;
+            }
+        }
+        else if (parseIsToken(buffer, "physics_mass"))
+        {
+            if (!parseFloat(buffer, &fdata[0]))
+            {
+                return VK_FALSE;
+            }
+
+            if (particleSystem.get())
+            {
+            	particleSystem->setPhysicsMass(fdata[0]);
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No particle system");
+
+                return VK_FALSE;
+            }
+        }
+        else if (parseIsToken(buffer, "physics_multiply_size_mass"))
+        {
+            if (!parseFloat(buffer, &fdata[0]))
+            {
+                return VK_FALSE;
+            }
+
+            if (particleSystem.get())
+            {
+            	particleSystem->setPhysicsMultiplySizeMass(fdata[0]);
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No particle system");
+
+                return VK_FALSE;
+            }
+        }
+        else if (parseIsToken(buffer, "render_type"))
+        {
+            if (!parseString(buffer, sdata))
+            {
+                return VK_FALSE;
+            }
+
+            enum RenderType renderType = BillboardRenderType;
+
+            if (strcmp(sdata, "Billboard") == 0)
+            {
+            	renderType = BillboardRenderType;
+            }
+            else if (strcmp(sdata, "Object") == 0)
+            {
+            	renderType = ObjectRenderType;
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Unknown render type '%s'", sdata);
+
+                return VK_FALSE;
+            }
+
+            if (particleSystem.get())
+            {
+            	particleSystem->setRenderType(renderType);
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No particle system");
+
+                return VK_FALSE;
+            }
+        }
+        else if (parseIsToken(buffer, "render_object"))
+        {
+            if (!parseString(buffer, sdata))
+            {
+                return VK_FALSE;
+            }
+
+            if (particleSystem.get())
+            {
+            	particleSystem->setRenderObjectName(sdata);
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No particle system");
+
+                return VK_FALSE;
+            }
+        }
+        else
+        {
+            parseUnknownBuffer(buffer);
+        }
     }
 
     return VK_TRUE;
@@ -3184,6 +3516,8 @@ static VkBool32 sceneLoadObjects(const char* directory, const char* filename, co
 
     auto node = INodeSP();
 
+    auto particleSystem = IParticleSystemSP();
+
     IConstraintSP constraint;
     ICopyConstraint* copyConstraint;
     ILimitConstraint* limitConstraint;
@@ -3367,7 +3701,18 @@ static VkBool32 sceneLoadObjects(const char* directory, const char* filename, co
 
             if (node.get())
             {
-                // TODO: Append particle system.
+                particleSystem = sceneManager->useParticleSystem(sdata0);
+
+                if (particleSystem.get())
+                {
+                    node->addParticleSystem(particleSystem);
+                }
+                else
+                {
+                    logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Particle system not found: '%s'", sdata0);
+
+                    return VK_FALSE;
+                }
             }
             else
             {
@@ -3385,7 +3730,16 @@ static VkBool32 sceneLoadObjects(const char* directory, const char* filename, co
 
             if (node.get())
             {
-                // TODO: Append particle system seed.
+                if (particleSystem.get())
+                {
+                	node->setParticleSystemSeed(particleSystem, (uint32_t)idata);
+                }
+                else
+                {
+                    logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No particle system");
+
+                    return VK_FALSE;
+                }
             }
             else
             {
@@ -4167,6 +4521,20 @@ ISceneSP VKTS_APIENTRY sceneLoad(const char* filename, const ISceneManagerSP& sc
     for (size_t i = 0; i < sceneManager->getAllLights().values().size(); i++)
     {
     	scene->addLight(sceneManager->getAllLights().valueAt(i));
+    }
+
+    // Assign all objects to the particle system.
+
+    for (size_t i = 0; i < sceneManager->getAllParticleSystems().values().size(); i++)
+    {
+    	const auto& currentParticleSystem = sceneManager->getAllParticleSystems().valueAt(i);
+
+    	auto currentObject = sceneManager->useObject(currentParticleSystem->getRenderObjectName());
+
+    	if (currentObject.get())
+    	{
+    		currentParticleSystem->setRenderObject(currentObject);
+    	}
     }
 
     return scene;

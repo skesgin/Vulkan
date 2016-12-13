@@ -44,7 +44,7 @@ private:
 	float emissionEnd;
 	float emissionLifetime;
 	float emissionRandom;
-	float emissionEmitFrom;
+	enum EmitType emissionEmitFrom;
 
 	float velocityNormalFactor;
 	float velocityObjectAlignFactor;
@@ -91,8 +91,8 @@ public:
     virtual float getEmissionRandom() const override;
     virtual void setEmissionRandom(const float random) override;
 
-    virtual float getEmissionEmitFrom() const override;
-    virtual void setEmissionEmitFrom(const float emitfrom) override;
+    virtual enum EmitType getEmissionEmitFrom() const override;
+    virtual void setEmissionEmitFrom(const enum EmitType emitfrom) override;
 
     virtual float getVelocityNormalFactor() const override;
     virtual void setVelocityNormalFactor(const float factor) override;
@@ -123,12 +123,6 @@ public:
 
     virtual const IObjectSP& getRenderObject() const override;
     virtual void setRenderObject(const IObjectSP& object) override;
-
-    //
-    // ICloneable
-    //
-
-    virtual IParticleSystemSP clone() const override;
 
 };
 

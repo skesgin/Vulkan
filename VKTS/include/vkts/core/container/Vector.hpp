@@ -100,6 +100,70 @@ public:
         other.allDataCount = 0;
     }
 
+
+    Vector& operator= (const Vector& other)
+    {
+    	clear();
+
+        if (allData)
+        {
+            delete[] allData;
+
+            allData = nullptr;
+        }
+
+        topElement = 0;
+        allDataCount = 0;
+
+        //
+
+        allData = new V[other.allDataCount];
+
+        if (!allData)
+        {
+        	throw std::bad_alloc();
+        }
+
+        for (size_t i = 0; i < other.allDataCount; i++)
+        {
+            allData[i] = other.allData[i];
+        }
+
+        this->topElement = other.topElement;
+        this->allDataCount = other.allDataCount;
+
+        return *this;
+    }
+
+    Vector& operator= (Vector&& other)
+    {
+    	clear();
+
+        if (allData)
+        {
+            delete[] allData;
+
+            allData = nullptr;
+        }
+
+        topElement = 0;
+        allDataCount = 0;
+
+    	//
+
+        allData = other.allData;
+        topElement = other.topElement;
+        allDataCount = other.allDataCount;
+
+        other.allData = nullptr;
+        other.topElement = 0;
+        other.allDataCount = 0;
+
+        //
+
+    	return *this;
+    }
+
     ~Vector()
     {
         clear();
@@ -286,6 +350,20 @@ public:
     {
         return topElement;
     }
+
+    size_t index(const V& value) const
+    {
+        for (size_t i = 0; i < topElement; i++)
+        {
+            if (value == allData[i])
+            {
+                return i;
+            }
+        }
+
+        return topElement;
+    }
+
 };
 
 }

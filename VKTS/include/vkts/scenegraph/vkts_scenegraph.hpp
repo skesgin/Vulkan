@@ -27,7 +27,7 @@
 #ifndef VKTS_SCENEGRAPH_HPP_
 #define VKTS_SCENEGRAPH_HPP_
 
-// TODO: Import particle system.
+// TODO: Implement particle system renderer.
 
 /**
  *
@@ -109,14 +109,14 @@ typedef enum VkTsInterpolator_
 
 #include <vkts/scenegraph/scene/ILight.hpp>
 
+#include <vkts/scenegraph/scene/IParticleSystem.hpp>
+
 #include <vkts/scenegraph/scene/IMesh.hpp>
 
 #include <vkts/scenegraph/scene/IRenderNode.hpp>
 #include <vkts/scenegraph/scene/INode.hpp>
 
 #include <vkts/scenegraph/scene/IObject.hpp>
-
-#include <vkts/scenegraph/scene/IParticleSystem.hpp>
 
 #include <vkts/scenegraph/scene/IScene.hpp>
 

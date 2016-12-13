@@ -167,6 +167,11 @@ ILightSP SceneFactory::createLight(const ISceneManagerSP& sceneManager)
 	return ILightSP(new Light());
 }
 
+IParticleSystemSP SceneFactory::createParticleSystem(const ISceneManagerSP& sceneManager)
+{
+	return IParticleSystemSP(new ParticleSystem());
+}
+
 //
 
 IConstraintSP SceneFactory::createCopyConstraint(const ISceneManagerSP& sceneManager, const enum CopyConstraintType copyConstraintType)

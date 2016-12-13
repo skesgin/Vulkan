@@ -373,6 +373,20 @@ public:
     {
         return topElement;
     }
+
+    size_t index(const V& value) const
+    {
+        for (size_t i = 0; i < topElement; i++)
+        {
+            if (value == allData[i])
+            {
+                return i;
+            }
+        }
+
+        return topElement;
+    }
+
 };
 
 }
