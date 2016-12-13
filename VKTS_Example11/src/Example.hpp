@@ -51,7 +51,7 @@
 #define VKTS_STANDARD_FRAGMENT_SHADER_NAME 			"shader/SPIR/V/phong_tangents_shadow.frag.spv"
 #define VKTS_STANDARD_SHADOW_FRAGMENT_SHADER_NAME	"shader/SPIR/V/phong_tangents_write_shadow.frag.spv"
 
-#define VKTS_DESCRIPTOR_SET_COUNT (VKTS_BINDING_UNIFORM_PHONG_BINDING_COUNT + VKTS_BINDING_UNIFORM_LIGHTING_BINDING_COUNT + VKTS_BINDING_UNIFORM_TRANSFORM_BINDING_COUNT + VKTS_BINDING_UNIFORM_SHADOW_BINDING_COUNT)
+#define VKTS_DESCRIPTOR_SET_COUNT (VKTS_BINDING_UNIFORM_PHONG_BINDING_COUNT + VKTS_BINDING_UNIFORM_LIGHTING_BINDING_COUNT + VKTS_BINDING_UNIFORM_TRANSFORM_BINDING_COUNT + VKTS_BINDING_UNIFORM_SHADOW_BINDING_COUNT + VKTS_BINDING_STORAGE_IMAGE_COUNT)
 
 #define VKTS_VOXELIZE_VERTEX_SHADER_NAME 			"shader/SPIR/V/voxelize.vert.spv"
 #define VKTS_VOXELIZE_GEOMETRY_SHADER_NAME 			"shader/SPIR/V/voxelize.geom.spv"
@@ -85,7 +85,7 @@ private:
     vkts::ISemaphoreSP renderingCompleteSemaphore;
 
 	vkts::IDescriptorSetLayoutSP descriptorSetLayout;
-	VkDescriptorImageInfo descriptorImageInfos[1];
+	VkDescriptorImageInfo descriptorImageInfos[1 + VKTS_BINDING_STORAGE_IMAGE_COUNT];
     VkDescriptorBufferInfo descriptorBufferInfos[1 + 1 + 1];
 
     VkWriteDescriptorSet writeDescriptorSets[VKTS_DESCRIPTOR_SET_COUNT];
@@ -133,14 +133,16 @@ private:
 	vkts::IImageObjectSP msaaColorTexture;
 	vkts::IImageObjectSP msaaDepthTexture;
 	vkts::IImageObjectSP depthTexture;
-	vkts::IImageObjectSP voxelTexture[3];
+	vkts::IImageObjectSP voxelTexture[VKTS_BINDING_STORAGE_IMAGE_COUNT];
 
 	vkts::IImageViewSP shadowImageView;
 	vkts::IImageViewSP msaaColorImageView;
 	vkts::IImageViewSP msaaDepthStencilImageView;
 	vkts::IImageViewSP depthStencilImageView;
+	vkts::IImageViewSP voxelImageView[VKTS_BINDING_STORAGE_IMAGE_COUNT];
 
 	vkts::ISamplerSP shadowSampler;
+	vkts::ISamplerSP voxelSampler[VKTS_BINDING_STORAGE_IMAGE_COUNT];
 
     uint32_t swapchainImagesCount;
 
@@ -164,6 +166,8 @@ private:
 
 	VkBool32 buildShadowSampler();
 
+	VkBool32 buildVoxelSampler();
+
 	VkBool32 buildDepthStencilImageView();
 
 	VkBool32 buildMSAADepthStencilImageView();
@@ -171,6 +175,8 @@ private:
 	VkBool32 buildMSAAColorImageView();
 
 	VkBool32 buildShadowImageView();
+
+	VkBool32 buildVoxelImageView();
 
 	VkBool32 buildVoxelTexture(const vkts::ICommandBuffersSP& cmdBuffer);
 

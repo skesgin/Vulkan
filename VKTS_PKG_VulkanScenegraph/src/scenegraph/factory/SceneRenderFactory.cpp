@@ -79,7 +79,7 @@ VkBool32 SceneRenderFactory::preparePhongMaterial(const ISceneManagerSP& sceneMa
 	descriptorPoolSize[1].descriptorCount = VKTS_BINDING_UNIFORM_PHONG_BINDING_COUNT + 2;
 
 	descriptorPoolSize[2].type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
-	descriptorPoolSize[2].descriptorCount = VKTS_BINDING_UNIFORM_VOXEL_COUNT;
+	descriptorPoolSize[2].descriptorCount = VKTS_BINDING_STORAGE_IMAGE_COUNT;
 
     auto descriptorPool = descriptorPoolCreate(sceneManager->getContextObject()->getDevice()->getDevice(), VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT, 1, 3, descriptorPoolSize);
 

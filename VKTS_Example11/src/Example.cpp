@@ -332,6 +332,13 @@ VkBool32 Example::updateDescriptorSets()
     descriptorImageInfos[0].imageView = shadowImageView->getImageView();
     descriptorImageInfos[0].imageLayout = shadowTexture->getImage()->getImageLayout();
 
+    for (uint32_t i = 0; i < VKTS_BINDING_STORAGE_IMAGE_COUNT; i++)
+    {
+        descriptorImageInfos[1 + i].sampler = voxelSampler[i]->getSampler();
+        descriptorImageInfos[1 + i].imageView = voxelImageView[i]->getImageView();
+        descriptorImageInfos[1 + i].imageLayout = voxelTexture[i]->getImage()->getImageLayout();
+    }
+
 	memset(writeDescriptorSets, 0, sizeof(writeDescriptorSets));
 
 	writeDescriptorSets[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -382,9 +389,26 @@ VkBool32 Example::updateDescriptorSets()
 
 	writeDescriptorSets[4].dstBinding = VKTS_BINDING_UNIFORM_BUFFER_TRANSFORM;
 
+	//
+
+	for (int32_t i = 0; i < VKTS_BINDING_STORAGE_IMAGE_COUNT; i++)
+    {
+		writeDescriptorSets[5 + i].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+
+		writeDescriptorSets[5 + i].dstSet = VK_NULL_HANDLE;	// Defined later.
+		writeDescriptorSets[5 + i].dstBinding = VKTS_BINDING_UNIFORM_IMAGE_VOXEL_EMISSIVE + i;
+		writeDescriptorSets[5 + i].dstArrayElement = 0;
+		writeDescriptorSets[5 + i].descriptorCount = 1;
+		writeDescriptorSets[5 + i].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+		writeDescriptorSets[5 + i].pImageInfo = &descriptorImageInfos[1 + i];
+		writeDescriptorSets[5 + i].pBufferInfo = nullptr;
+		writeDescriptorSets[5 + i].pTexelBufferView = nullptr;
+    }
+
+    int32_t indexOffset = 5 + VKTS_BINDING_STORAGE_IMAGE_COUNT;
 	for (uint32_t i = VKTS_BINDING_UNIFORM_SAMPLER_PHONG_FIRST; i <= VKTS_BINDING_UNIFORM_SAMPLER_PHONG_LAST; i++)
 	{
-		writeDescriptorSets[5 + i - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_FIRST].dstBinding = i;
+		writeDescriptorSets[indexOffset + i - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_FIRST].dstBinding = i;
 	}
 
 	return VK_TRUE;
@@ -400,6 +424,35 @@ VkBool32 Example::buildShadowSampler()
 		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create sampler.");
 
 		return VK_FALSE;
+	}
+
+	return VK_TRUE;
+}
+
+VkBool32 Example::buildVoxelSampler()
+{
+	if (voxelSampler[0].get() && voxelSampler[1].get() && voxelSampler[2].get())
+	{
+		return VK_TRUE;
+	}
+	else if (voxelSampler[0].get() || voxelSampler[1].get() || voxelSampler[2].get())
+	{
+		return VK_FALSE;
+	}
+
+	//
+
+	for (uint32_t i = 0; i < VKTS_BINDING_STORAGE_IMAGE_COUNT; i++)
+	{
+		// Enabled texture compare.
+		voxelSampler[i] = vkts::samplerCreate(contextObject->getDevice()->getDevice(), 0, VK_FILTER_LINEAR, VK_FILTER_LINEAR, VK_SAMPLER_MIPMAP_MODE_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, 0.0f, VK_FALSE, 1.0f, VK_FALSE, VK_COMPARE_OP_NEVER, 0.0f, 0.0f, VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK, VK_FALSE);
+
+		if (!voxelSampler[i].get())
+		{
+			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create sampler.");
+
+			return VK_FALSE;
+		}
 	}
 
 	return VK_TRUE;
@@ -473,6 +526,37 @@ VkBool32 Example::buildShadowImageView()
 	return VK_TRUE;
 }
 
+VkBool32 Example::buildVoxelImageView()
+{
+	if (voxelImageView[0].get() && voxelImageView[1].get() && voxelImageView[2].get())
+	{
+		return VK_TRUE;
+	}
+	else if (voxelImageView[0].get() || voxelImageView[1].get() || voxelImageView[2].get())
+	{
+		return VK_FALSE;
+	}
+
+	//
+
+	VkComponentMapping componentMapping = { VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY };
+	VkImageSubresourceRange imageSubresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
+
+	for (uint32_t i = 0; i < VKTS_BINDING_STORAGE_IMAGE_COUNT; i++)
+	{
+		voxelImageView[i] = vkts::imageViewCreate(contextObject->getDevice()->getDevice(), 0, voxelTexture[i]->getImage()->getImage(), VK_IMAGE_VIEW_TYPE_3D, voxelTexture[i]->getImage()->getFormat(), componentMapping, imageSubresourceRange);
+
+		if (!voxelImageView[i].get())
+		{
+			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create voxel view.");
+
+			return VK_FALSE;
+		}
+	}
+
+	return VK_TRUE;
+}
+
 VkBool32 Example::buildVoxelTexture(const vkts::ICommandBuffersSP& cmdBuffer)
 {
 	if (voxelTexture[0].get() && voxelTexture[1].get() && voxelTexture[2].get())
@@ -506,9 +590,9 @@ VkBool32 Example::buildVoxelTexture(const vkts::ICommandBuffersSP& cmdBuffer)
 
 	VkImageSubresourceRange subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
 
-	for (uint32_t i = 0; i < 3; i++)
+	for (uint32_t i = 0; i < VKTS_BINDING_STORAGE_IMAGE_COUNT; i++)
 	{
-		voxelTexture[i] = vkts::imageObjectCreate(contextObject, cmdBuffer, "VoxelTexture_" + std::to_string(i), imageCreateInfo, 0, VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_GENERAL, subresourceRange, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+		voxelTexture[i] = vkts::imageObjectCreate(contextObject, cmdBuffer, "VoxelTexture_" + std::to_string(i), imageCreateInfo, 0, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL, subresourceRange, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
 		if (!voxelTexture[i].get())
 		{
@@ -900,8 +984,10 @@ VkBool32 Example::buildPipeline()
 	allOpaqueGraphicsPipelines.append(pipeline);
 
 	//
-	// Same as above without writing color.
+	// Shadow pipelines.
 	//
+
+	// Same as above without writing color.
 
 	pipelineShaderStageCreateInfo[1].module = standardShadowFragmentShaderModule->getShaderModule();
 
@@ -994,6 +1080,12 @@ VkBool32 Example::buildPipeline()
 	}
 
 	allBlendCwGraphicsPipelines.append(pipeline);
+
+	//
+	// Voxelize pipeline.
+	//
+
+	// TODO: Create.
 
 	return VK_TRUE;
 }
@@ -1117,12 +1209,6 @@ VkBool32 Example::buildRenderPass()
 	// Create voxel render pass.
 	//
 
-	attachmentDescription[0].format = VK_FORMAT_R32_UINT;
-	attachmentDescription[0].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-	attachmentDescription[0].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-	attachmentDescription[0].initialLayout = VK_IMAGE_LAYOUT_GENERAL;
-	attachmentDescription[0].finalLayout = VK_IMAGE_LAYOUT_GENERAL;
-
 	subpassDescription[0].colorAttachmentCount = 0;
 	subpassDescription[0].pColorAttachments = nullptr;
 	subpassDescription[0].pResolveAttachments = nullptr;
@@ -1130,7 +1216,7 @@ VkBool32 Example::buildRenderPass()
 
     //
 
-	voxelRenderPass = vkts::renderPassCreate(contextObject->getDevice()->getDevice(), 0, 1, attachmentDescription, 1, subpassDescription, 0, nullptr);
+	voxelRenderPass = vkts::renderPassCreate(contextObject->getDevice()->getDevice(), 0, 0, nullptr, 1, subpassDescription, 0, nullptr);
 
 	if (!voxelRenderPass.get())
 	{
@@ -1194,13 +1280,23 @@ VkBool32 Example::buildDescriptorSetLayout()
 	descriptorSetLayoutBinding[4].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 	descriptorSetLayoutBinding[4].pImmutableSamplers = nullptr;
 
+    for (int32_t i = 0; i < VKTS_BINDING_STORAGE_IMAGE_COUNT; i++)
+    {
+    	descriptorSetLayoutBinding[5 + i].binding = VKTS_BINDING_UNIFORM_IMAGE_VOXEL_EMISSIVE + i;
+    	descriptorSetLayoutBinding[5 + i].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+    	descriptorSetLayoutBinding[5 + i].descriptorCount = 1;
+    	descriptorSetLayoutBinding[5 + i].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    	descriptorSetLayoutBinding[5 + i].pImmutableSamplers = nullptr;
+    }
+
+    int32_t indexOffset = 5 + VKTS_BINDING_STORAGE_IMAGE_COUNT;
     for (int32_t i = VKTS_BINDING_UNIFORM_SAMPLER_PHONG_FIRST; i <= VKTS_BINDING_UNIFORM_SAMPLER_PHONG_LAST; i++)
     {
-		descriptorSetLayoutBinding[5 + i - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_FIRST].binding = i;
-		descriptorSetLayoutBinding[5 + i - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_FIRST].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		descriptorSetLayoutBinding[5 + i - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_FIRST].descriptorCount = 1;
-		descriptorSetLayoutBinding[5 + i - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_FIRST].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-		descriptorSetLayoutBinding[5 + i - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_FIRST].pImmutableSamplers = nullptr;
+		descriptorSetLayoutBinding[indexOffset + i - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_FIRST].binding = i;
+		descriptorSetLayoutBinding[indexOffset + i - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_FIRST].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		descriptorSetLayoutBinding[indexOffset + i - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_FIRST].descriptorCount = 1;
+		descriptorSetLayoutBinding[indexOffset + i - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_FIRST].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+		descriptorSetLayoutBinding[indexOffset + i - VKTS_BINDING_UNIFORM_SAMPLER_PHONG_FIRST].pImmutableSamplers = nullptr;
     }
 
     //
@@ -1620,6 +1716,11 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 
 	//
 
+	if (!buildVoxelImageView())
+	{
+		return VK_FALSE;
+	}
+
 	if (!buildShadowImageView())
 	{
 		return VK_FALSE;
@@ -1640,6 +1741,10 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 		return VK_FALSE;
 	}
 
+	if (!buildVoxelSampler())
+	{
+		return VK_FALSE;
+	}
 
 	if (!buildShadowSampler())
 	{
@@ -2312,8 +2417,18 @@ void Example::terminate(const vkts::IUpdateThreadContext& updateContext)
 
 			//
 
-			for (uint32_t i = 0; i < 3; i++)
+			for (uint32_t i = 0; i < VKTS_BINDING_STORAGE_IMAGE_COUNT; i++)
 			{
+				if (voxelSampler[i].get())
+				{
+					voxelSampler[i]->destroy();
+				}
+
+				if (voxelImageView[i].get())
+				{
+					voxelImageView[i]->destroy();
+				}
+
 				if (voxelTexture[i].get())
 				{
 					voxelTexture[i]->destroy();
