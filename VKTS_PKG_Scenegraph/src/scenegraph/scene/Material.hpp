@@ -43,7 +43,7 @@ protected:
 
     std::string name;
 
-    IRenderMaterialSP materialData;
+    SmartPointerVector<IRenderMaterialSP> materialData;
 
     Material(const VkBool32 forwardRendering, const VkBool32 createData, const std::string& name);
     Material(const Material& other);

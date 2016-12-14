@@ -75,14 +75,17 @@ IPhongMaterialSP SceneFactory::createPhongMaterial(const ISceneManagerSP& sceneM
 		return IPhongMaterialSP();
 	}
 
-	auto renderMaterial = sceneRenderFactory->createRenderMaterial(sceneManager);
-
-	if (!renderMaterial.get())
+	for (VkDeviceSize i = 0; i < sceneRenderFactory->getBufferCount(); i++)
 	{
-		return IPhongMaterialSP();
-	}
+		auto renderMaterial = sceneRenderFactory->createRenderMaterial(sceneManager);
 
-	material->setRenderMaterial(renderMaterial);
+		if (!renderMaterial.get())
+		{
+			return IPhongMaterialSP();
+		}
+
+		material->addRenderMaterial(renderMaterial);
+	}
 
 	return material;
 }
@@ -98,14 +101,17 @@ IBSDFMaterialSP SceneFactory::createBSDFMaterial(const ISceneManagerSP& sceneMan
 		return IBSDFMaterialSP();
 	}
 
-	auto renderMaterial = sceneRenderFactory->createRenderMaterial(sceneManager);
-
-	if (!renderMaterial.get())
+	for (VkDeviceSize i = 0; i < sceneRenderFactory->getBufferCount(); i++)
 	{
-		return IBSDFMaterialSP();
-	}
+		auto renderMaterial = sceneRenderFactory->createRenderMaterial(sceneManager);
 
-	material->setRenderMaterial(renderMaterial);
+		if (!renderMaterial.get())
+		{
+			return IBSDFMaterialSP();
+		}
+
+		material->addRenderMaterial(renderMaterial);
+	}
 
 	return material;
 }
@@ -195,14 +201,17 @@ INodeSP SceneFactory::createNode(const ISceneManagerSP& sceneManager)
 		return INodeSP();
 	}
 
-	auto renderNode = sceneRenderFactory->createRenderNode(sceneManager);
-
-	if (!renderNode.get())
+	for (VkDeviceSize i = 0; i < sceneRenderFactory->getBufferCount(); i++)
 	{
-		return INodeSP();
-	}
+		auto renderNode = sceneRenderFactory->createRenderNode(sceneManager);
 
-	node->setRenderNode(renderNode);
+		if (!renderNode.get())
+		{
+			return INodeSP();
+		}
+
+		node->addRenderNode(renderNode);
+	}
 
 	return node;
 }

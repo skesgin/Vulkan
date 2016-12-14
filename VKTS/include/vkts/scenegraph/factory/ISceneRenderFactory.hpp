@@ -45,6 +45,8 @@ public:
     {
     }
 
+    virtual VkDeviceSize getBufferCount() const = 0;
+
     virtual IRenderNodeSP createRenderNode(const ISceneManagerSP& sceneManager) = 0;
     virtual IRenderSubMeshSP createRenderSubMesh(const ISceneManagerSP& sceneManager) = 0;
     virtual IRenderMaterialSP createRenderMaterial(const ISceneManagerSP& sceneManager) = 0;

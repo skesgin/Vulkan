@@ -46,6 +46,11 @@ SceneRenderFactory::~SceneRenderFactory()
 // IDataFactory
 //
 
+VkDeviceSize SceneRenderFactory::getBufferCount() const
+{
+	return bufferCount;
+}
+
 IRenderNodeSP SceneRenderFactory::createRenderNode(const ISceneManagerSP& sceneManager)
 {
 	return IRenderNodeSP(new RenderNode());
@@ -63,14 +68,14 @@ IRenderMaterialSP SceneRenderFactory::createRenderMaterial(const ISceneManagerSP
 
 VkBool32 SceneRenderFactory::preparePhongMaterial(const ISceneManagerSP& sceneManager, const IPhongMaterialSP& phongMaterial)
 {
-	if (!sceneManager.get() || !phongMaterial.get() || !phongMaterial->getRenderMaterial().get())
+	if (!sceneManager.get() || !phongMaterial.get() || (phongMaterial->getRenderMaterialSize() != bufferCount))
 	{
 		return VK_FALSE;
 	}
 
-    // Create all possibilities, even when not used.
+	// Create all possibilities, even when not used.
 
-    VkDescriptorPoolSize descriptorPoolSize[3]{};
+	VkDescriptorPoolSize descriptorPoolSize[3]{};
 
 	descriptorPoolSize[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 	descriptorPoolSize[0].descriptorCount = VKTS_BINDING_UNIFORM_BUFFER_COUNT;
@@ -81,34 +86,37 @@ VkBool32 SceneRenderFactory::preparePhongMaterial(const ISceneManagerSP& sceneMa
 	descriptorPoolSize[2].type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
 	descriptorPoolSize[2].descriptorCount = VKTS_BINDING_STORAGE_IMAGE_COUNT;
 
-    auto descriptorPool = descriptorPoolCreate(sceneManager->getContextObject()->getDevice()->getDevice(), VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT, 1, 3, descriptorPoolSize);
+	for (uint32_t currentBuffer = 0; currentBuffer < (uint32_t)bufferCount; currentBuffer++)
+	{
+		auto descriptorPool = descriptorPoolCreate(sceneManager->getContextObject()->getDevice()->getDevice(), VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT, 1, 3, descriptorPoolSize);
 
-    if (!descriptorPool.get())
-    {
-    	return VK_FALSE;
-    }
+		if (!descriptorPool.get())
+		{
+			return VK_FALSE;
+		}
 
-    phongMaterial->getRenderMaterial()->setDescriptorPool(descriptorPool);
+		phongMaterial->getRenderMaterial(currentBuffer)->setDescriptorPool(descriptorPool);
 
-    //
+		//
 
-    auto allDescriptorSetLayouts = descriptorSetLayout->getDescriptorSetLayout();
+		auto allDescriptorSetLayouts = descriptorSetLayout->getDescriptorSetLayout();
 
-    auto descriptorSets = descriptorSetsCreate(sceneManager->getContextObject()->getDevice()->getDevice(), descriptorPool->getDescriptorPool(), 1, &allDescriptorSetLayouts);
+		auto descriptorSets = descriptorSetsCreate(sceneManager->getContextObject()->getDevice()->getDevice(), descriptorPool->getDescriptorPool(), 1, &allDescriptorSetLayouts);
 
-    if (!descriptorSets.get())
-    {
-    	return VK_FALSE;
-    }
+		if (!descriptorSets.get())
+		{
+			return VK_FALSE;
+		}
 
-    phongMaterial->getRenderMaterial()->setDescriptorSets(descriptorSets);
+		phongMaterial->getRenderMaterial(currentBuffer)->setDescriptorSets(descriptorSets);
+	}
 
     return VK_TRUE;
 }
 
 VkBool32 SceneRenderFactory::prepareBSDFMaterial(const ISceneManagerSP& sceneManager, const ISubMeshSP& subMesh)
 {
-	if (!sceneManager.get() || !subMesh.get() || !subMesh->getRenderSubMesh().get() || !subMesh->getBSDFMaterial().get() || !subMesh->getBSDFMaterial()->getRenderMaterial().get())
+	if (!sceneManager.get() || !subMesh.get() || !subMesh->getRenderSubMesh().get() || !subMesh->getBSDFMaterial().get() || (subMesh->getBSDFMaterial()->getRenderMaterialSize() != bufferCount))
 	{
 		return VK_FALSE;
 	}
@@ -240,31 +248,34 @@ VkBool32 SceneRenderFactory::prepareBSDFMaterial(const ISceneManagerSP& sceneMan
 	descriptorPoolSize[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 	descriptorPoolSize[1].descriptorCount = 18;
 
-	auto descriptorPool = descriptorPoolCreate(sceneManager->getContextObject()->getDevice()->getDevice(), VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT, 1, 2, descriptorPoolSize);
-
-	if (!descriptorPool.get())
+	for (uint32_t currentBuffer = 0; currentBuffer < (uint32_t)bufferCount; currentBuffer++)
 	{
-		logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create descriptor pool.");
+		auto descriptorPool = descriptorPoolCreate(sceneManager->getContextObject()->getDevice()->getDevice(), VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT, 1, 2, descriptorPoolSize);
 
-		return VK_FALSE;
+		if (!descriptorPool.get())
+		{
+			logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create descriptor pool.");
+
+			return VK_FALSE;
+		}
+
+		bsdfMaterial->getRenderMaterial(currentBuffer)->setDescriptorPool(descriptorPool);
+
+		//
+
+		const auto allDescriptorSetLayouts = descriptorSetLayout->getDescriptorSetLayout();
+
+		auto descriptorSets = descriptorSetsCreate(sceneManager->getContextObject()->getDevice()->getDevice(), bsdfMaterial->getRenderMaterial(currentBuffer)->getDescriptorPool()->getDescriptorPool(), 1, &allDescriptorSetLayouts);
+
+		if (!descriptorSets.get())
+		{
+			logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create descriptor sets.");
+
+			return VK_FALSE;
+		}
+
+		bsdfMaterial->getRenderMaterial(currentBuffer)->setDescriptorSets(descriptorSets);
 	}
-
-	bsdfMaterial->getRenderMaterial()->setDescriptorPool(descriptorPool);
-
-	//
-
-	const auto allDescriptorSetLayouts = descriptorSetLayout->getDescriptorSetLayout();
-
-	auto descriptorSets = descriptorSetsCreate(sceneManager->getContextObject()->getDevice()->getDevice(), bsdfMaterial->getRenderMaterial()->getDescriptorPool()->getDescriptorPool(), 1, &allDescriptorSetLayouts);
-
-	if (!descriptorSets.get())
-	{
-		logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create descriptor sets.");
-
-		return VK_FALSE;
-	}
-
-	bsdfMaterial->getRenderMaterial()->setDescriptorSets(descriptorSets);
 
     //
     //

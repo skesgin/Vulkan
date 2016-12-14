@@ -307,7 +307,7 @@ void Scene::updateParameterRecursive(const Parameter* parameter, const uint32_t 
     }
 }
 
-void Scene::updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets, const uint32_t objectOffset, const uint32_t objectStep, const size_t objectLimit)
+void Scene::updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets, const uint32_t currentBuffer, const uint32_t objectOffset, const uint32_t objectStep, const size_t objectLimit)
 {
     if (objectStep == 0)
     {
@@ -316,11 +316,11 @@ void Scene::updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsC
 
     for (size_t i = (size_t) objectOffset; i < glm::min(allObjects.size(), objectLimit); i += (size_t) objectStep)
     {
-        allObjects[i]->updateDescriptorSetsRecursive(allWriteDescriptorSetsCount, allWriteDescriptorSets);
+        allObjects[i]->updateDescriptorSetsRecursive(allWriteDescriptorSetsCount, allWriteDescriptorSets, currentBuffer);
     }
 }
 
-void Scene::updateTransformRecursive(const double deltaTime, const uint64_t deltaTicks, const double tickTime, const uint32_t dynamicOffsetIndex, const uint32_t objectOffset, const uint32_t objectStep, const size_t objectLimit)
+void Scene::updateTransformRecursive(const double deltaTime, const uint64_t deltaTicks, const double tickTime, const uint32_t currentBuffer, const uint32_t objectOffset, const uint32_t objectStep, const size_t objectLimit)
 {
     if (objectStep == 0)
     {
@@ -329,7 +329,7 @@ void Scene::updateTransformRecursive(const double deltaTime, const uint64_t delt
 
     for (size_t i = (size_t) objectOffset; i < glm::min(allObjects.size(), objectLimit); i += (size_t) objectStep)
     {
-        allObjects[i]->updateTransformRecursive(deltaTime, deltaTicks, tickTime, dynamicOffsetIndex);
+        allObjects[i]->updateTransformRecursive(deltaTime, deltaTicks, tickTime, currentBuffer);
     }
 }
 

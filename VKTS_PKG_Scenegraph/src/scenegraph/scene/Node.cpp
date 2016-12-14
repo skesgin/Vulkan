@@ -87,10 +87,14 @@ void Node::reset()
 
     //
 
-    if (nodeData.get())
+    for (size_t i = 0; i < nodeData.size(); i++)
     {
-    	nodeData->reset();
+        if (nodeData[i].get())
+        {
+        	nodeData[i]->reset();
+        }
     }
+    nodeData.clear();
 }
 
 Node::Node() :
@@ -102,15 +106,20 @@ Node::Node() :
 Node::Node(const Node& other) :
     INode(), name(other.name + "_clone"), parentNode(other.parentNode), translate(other.translate), rotate(other.rotate), scale(other.scale), finalTranslate(other.finalTranslate), finalRotate(other.finalRotate), finalScale(other.finalScale), transformMatrix(other.transformMatrix), transformMatrixDirty(other.transformMatrixDirty), jointIndex(-1), joints(0), bindTranslate(other.bindTranslate), bindRotate(other.bindRotate), bindScale(other.bindScale), bindMatrix(other.bindMatrix), inverseBindMatrix(other.inverseBindMatrix), bindMatrixDirty(other.bindMatrixDirty), box(other.box), layers(other.layers), nodeData()
 {
-	if (other.nodeData.get())
-	{
-		nodeData = other.nodeData->create();
+    for (size_t i = 0; i < other.nodeData.size(); i++)
+    {
+        if (other.nodeData[i].get())
+        {
+        	auto currentNodeData = other.nodeData[i]->create();
 
-		if (!nodeData.get())
-		{
-			return;
-		}
-	}
+    		if (!currentNodeData.get())
+    		{
+    			return;
+    		}
+
+        	nodeData.append(currentNodeData);
+        }
+    }
 
     for (size_t i = 0; i < other.allChildNodes.size(); i++)
     {
@@ -313,14 +322,24 @@ void Node::setName(const std::string& name)
     this->name = name;
 }
 
-IRenderNodeSP Node::getRenderNode() const
+IRenderNodeSP Node::getRenderNode(const uint32_t index) const
 {
-	return nodeData;
+	if ((size_t)index >= nodeData.size())
+	{
+		return IRenderNodeSP();
+	}
+
+	return nodeData[index];
 }
 
-void Node::setRenderNode(const IRenderNodeSP& nodeData)
+size_t Node::getRenderNodeSize() const
 {
-    this->nodeData = nodeData;
+	return nodeData.size();
+}
+
+void Node::addRenderNode(const IRenderNodeSP& nodeData)
+{
+	this->nodeData.append(nodeData);
 }
 
 const INodeSP& Node::getParentNode() const
@@ -723,9 +742,12 @@ void Node::setTransformUniformBuffer(const IBufferObjectSP& transformUniformBuff
     this->transformMatrixDirty.resize(0);
     this->bindMatrixDirty.resize(0);
 
-    if (nodeData.get())
+    for (size_t i = 0; i < nodeData.size(); i++)
     {
-        nodeData->updateTransformUniformBuffer(transformUniformBuffer);
+        if (nodeData[i].get())
+        {
+            nodeData[i]->updateTransformUniformBuffer(transformUniformBuffer);
+        }
     }
 }
 
@@ -742,9 +764,12 @@ void Node::setJointsUniformBuffer(const int32_t joints, const IBufferObjectSP& j
     this->transformMatrixDirty.resize(0);
     this->bindMatrixDirty.resize(0);
 
-    if (nodeData.get())
+    for (size_t i = 0; i < nodeData.size(); i++)
     {
-    	nodeData->updateJointsUniformBuffer(jointsUniformBuffer);
+        if (nodeData[i].get())
+        {
+            nodeData[i]->updateJointsUniformBuffer(jointsUniformBuffer);
+        }
     }
 }
 
@@ -878,39 +903,44 @@ void Node::updateParameterRecursive(const Parameter* parameter)
 	}
 }
 
-void Node::updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets)
+void Node::updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets, const uint32_t currentBuffer)
 {
-	if (nodeData.get())
+	if ((size_t)currentBuffer >= nodeData.size())
 	{
-		nodeData->updateDescriptorSets(allWriteDescriptorSetsCount, allWriteDescriptorSets);
+		return;
+	}
+
+	if (nodeData[currentBuffer].get())
+	{
+		nodeData[currentBuffer]->updateDescriptorSets(allWriteDescriptorSetsCount, allWriteDescriptorSets);
 	}
 
     //
 
 	for (size_t i = 0; i < allMeshes.size(); i++)
 	{
-		allMeshes[i]->updateDescriptorSetsRecursive(allWriteDescriptorSetsCount, allWriteDescriptorSets, name);
+		allMeshes[i]->updateDescriptorSetsRecursive(allWriteDescriptorSetsCount, allWriteDescriptorSets, currentBuffer, name);
 	}
 
 	for (size_t i = 0; i < allChildNodes.size(); i++)
 	{
-		allChildNodes[i]->updateDescriptorSetsRecursive(allWriteDescriptorSetsCount, allWriteDescriptorSets);
+		allChildNodes[i]->updateDescriptorSetsRecursive(allWriteDescriptorSetsCount, allWriteDescriptorSets, currentBuffer);
 	}
 }
 
-void Node::updateTransformRecursive(const double deltaTime, const uint64_t deltaTicks, const double tickTime, const uint32_t dynamicOffsetIndex, const glm::mat4& parentTransformMatrix, const VkBool32 parentTransformMatrixDirty, const glm::mat4& parentBindMatrix, const VkBool32 parentBindMatrixDirty, const INodeSP& armatureNode)
+void Node::updateTransformRecursive(const double deltaTime, const uint64_t deltaTicks, const double tickTime, const uint32_t currentBuffer, const glm::mat4& parentTransformMatrix, const VkBool32 parentTransformMatrixDirty, const glm::mat4& parentBindMatrix, const VkBool32 parentBindMatrixDirty, const INodeSP& armatureNode)
 {
-	if (transformMatrixDirty.size() != bindMatrixDirty.size() || dynamicOffsetIndex >= (uint32_t)transformMatrixDirty.size())
+	if (transformMatrixDirty.size() != bindMatrixDirty.size() || currentBuffer >= (uint32_t)transformMatrixDirty.size())
 	{
-		transformMatrixDirty.resize(dynamicOffsetIndex + 1);
-		bindMatrixDirty.resize(dynamicOffsetIndex + 1);
+		transformMatrixDirty.resize(currentBuffer + 1);
+		bindMatrixDirty.resize(currentBuffer + 1);
 
 		setDirty();
 	}
 
-    transformMatrixDirty[dynamicOffsetIndex] = transformMatrixDirty[dynamicOffsetIndex] || parentTransformMatrixDirty;
+    transformMatrixDirty[currentBuffer] = transformMatrixDirty[currentBuffer] || parentTransformMatrixDirty;
 
-    bindMatrixDirty[dynamicOffsetIndex] = bindMatrixDirty[dynamicOffsetIndex] || parentBindMatrixDirty;
+    bindMatrixDirty[currentBuffer] = bindMatrixDirty[currentBuffer] || parentBindMatrixDirty;
 
     auto newArmatureNode = (joints != 0) ? INode::shared_from_this() : armatureNode;
 
@@ -983,11 +1013,11 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
 
         //
 
-        transformMatrixDirty[dynamicOffsetIndex] = VK_TRUE;
+        transformMatrixDirty[currentBuffer] = VK_TRUE;
 
         if (joints != 0)
         {
-        	bindMatrixDirty[dynamicOffsetIndex] = VK_TRUE;
+        	bindMatrixDirty[currentBuffer] = VK_TRUE;
         }
     }
 
@@ -1005,17 +1035,17 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
 
         //
 
-        transformMatrixDirty[dynamicOffsetIndex] = VK_TRUE;
+        transformMatrixDirty[currentBuffer] = VK_TRUE;
 
         if (joints != 0)
         {
-        	bindMatrixDirty[dynamicOffsetIndex] = VK_TRUE;
+        	bindMatrixDirty[currentBuffer] = VK_TRUE;
         }
     }
 
     //
 
-    if (bindMatrixDirty[dynamicOffsetIndex])
+    if (bindMatrixDirty[currentBuffer])
     {
     	// Only armature, having joints not zero and joints can enter here.
 
@@ -1038,12 +1068,12 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
 
         //
 
-        transformMatrixDirty[dynamicOffsetIndex] = VK_TRUE;
+        transformMatrixDirty[currentBuffer] = VK_TRUE;
     }
 
     //
 
-    if (transformMatrixDirty[dynamicOffsetIndex])
+    if (transformMatrixDirty[currentBuffer])
     {
         if (jointIndex == -1)
         {
@@ -1087,7 +1117,7 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
         // Update buffer.
         if (allMeshes.size() > 0)
         {
-        	VkDeviceSize dynamicOffset = (VkDeviceSize)dynamicOffsetIndex * transformUniformBuffer->getBuffer()->getSize() / transformUniformBuffer->getBufferCount();
+        	VkDeviceSize dynamicOffset = (VkDeviceSize)currentBuffer * transformUniformBuffer->getBuffer()->getSize() / transformUniformBuffer->getBufferCount();
 
             transformUniformBuffer->upload(dynamicOffset + 0, 0, this->transformMatrix);
 
@@ -1097,7 +1127,7 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
         }
         else if (joints != 0)
         {
-        	VkDeviceSize dynamicOffset = (VkDeviceSize)dynamicOffsetIndex * jointsUniformBuffer->getBuffer()->getSize() / jointsUniformBuffer->getBufferCount();
+        	VkDeviceSize dynamicOffset = (VkDeviceSize)currentBuffer * jointsUniformBuffer->getBuffer()->getSize() / jointsUniformBuffer->getBufferCount();
 
         	// If this is an armature, store the parent matrix.
         	// This allows to modify the parent matrices without recalculating the bind matrices.
@@ -1116,7 +1146,7 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
 
         		if (currentJointsUniformBuffer.get())
         		{
-                	VkDeviceSize dynamicOffset = (VkDeviceSize)dynamicOffsetIndex * currentJointsUniformBuffer->getBuffer()->getSize() / currentJointsUniformBuffer->getBufferCount();
+                	VkDeviceSize dynamicOffset = (VkDeviceSize)currentBuffer * currentJointsUniformBuffer->getBuffer()->getSize() / currentJointsUniformBuffer->getBufferCount();
 
         			// Upload the joint matrices to blend them on the GPU.
 
@@ -1140,14 +1170,14 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
 
     for (size_t i = 0; i < allChildNodes.size(); i++)
     {
-        allChildNodes[i]->updateTransformRecursive(deltaTime, deltaTicks, tickTime, dynamicOffsetIndex, this->transformMatrix, this->transformMatrixDirty[dynamicOffsetIndex], this->bindMatrix, this->bindMatrixDirty[dynamicOffsetIndex], newArmatureNode);
+        allChildNodes[i]->updateTransformRecursive(deltaTime, deltaTicks, tickTime, currentBuffer, this->transformMatrix, this->transformMatrixDirty[currentBuffer], this->bindMatrix, this->bindMatrixDirty[currentBuffer], newArmatureNode);
     }
 
     //
 
-    transformMatrixDirty[dynamicOffsetIndex] = VK_FALSE;
+    transformMatrixDirty[currentBuffer] = VK_FALSE;
 
-    bindMatrixDirty[dynamicOffsetIndex] = VK_FALSE;
+    bindMatrixDirty[currentBuffer] = VK_FALSE;
 }
 
 void Node::drawRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const uint32_t currentBuffer, const std::map<uint32_t, VkTsDynamicOffset>& dynamicOffsetMappings, const OverwriteDraw* renderOverwrite)
@@ -1184,7 +1214,7 @@ INodeSP Node::clone() const
 {
 	auto result = INodeSP(new Node(*this));
 
-	if (result.get() && getRenderNode().get() && !result->getRenderNode().get())
+	if (result.get() && (getRenderNodeSize() != result->getRenderNodeSize()))
 	{
 		return INodeSP();
 	}
@@ -1258,9 +1288,12 @@ void Node::destroy()
     allParticleSystems.clear();
     allParticleSystemSeeds.clear();
 
-    if (nodeData.get())
+    for (size_t i = 0; i < nodeData.size(); i++)
     {
-    	nodeData->destroy();
+        if (nodeData[i].get())
+        {
+        	nodeData[i]->destroy();
+        }
     }
 }
 

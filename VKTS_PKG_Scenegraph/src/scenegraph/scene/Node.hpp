@@ -87,7 +87,7 @@ private:
 
     uint32_t layers;
 
-    IRenderNodeSP nodeData;
+    SmartPointerVector<IRenderNodeSP> nodeData;
 
     void reset();
 
@@ -110,9 +110,11 @@ public:
     virtual void setName(const std::string& name) override;
 
 
-    virtual IRenderNodeSP getRenderNode() const override;
+    virtual IRenderNodeSP getRenderNode(const uint32_t index) const override;
 
-    virtual void setRenderNode(const IRenderNodeSP& nodeData) override;
+    virtual size_t getRenderNodeSize() const override;
+
+    virtual void addRenderNode(const IRenderNodeSP& nodeData) override;
 
 
     virtual const INodeSP& getParentNode() const override;
@@ -262,9 +264,9 @@ public:
 
     virtual void updateParameterRecursive(const Parameter* parameter) override;
 
-    virtual void updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets) override;
+    virtual void updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets, const uint32_t currentBuffer) override;
 
-    virtual void updateTransformRecursive(const double deltaTime, const uint64_t deltaTicks, const double tickTime, const uint32_t dynamicOffsetIndex, const glm::mat4& parentTransformMatrix, const VkBool32 parentTransformMatrixDirty, const glm::mat4& parentBindMatrix, const VkBool32 parentBindMatrixDirty, const INodeSP& armatureNode) override;
+    virtual void updateTransformRecursive(const double deltaTime, const uint64_t deltaTicks, const double tickTime, const uint32_t currentBuffer, const glm::mat4& parentTransformMatrix, const VkBool32 parentTransformMatrixDirty, const glm::mat4& parentBindMatrix, const VkBool32 parentBindMatrixDirty, const INodeSP& armatureNode) override;
 
     virtual void drawRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const uint32_t currentBuffer, const std::map<uint32_t, VkTsDynamicOffset>& dynamicOffsetMappings, const OverwriteDraw* renderOverwrite = nullptr) override;
 

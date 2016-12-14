@@ -53,6 +53,8 @@ public:
 
     //
 
+    VkDeviceSize getBufferCount() const override;
+
     virtual IRenderNodeSP createRenderNode(const ISceneManagerSP& sceneManager) override;
     virtual IRenderSubMeshSP createRenderSubMesh(const ISceneManagerSP& sceneManager) override;
     virtual IRenderMaterialSP createRenderMaterial(const ISceneManagerSP& sceneManager) override;

@@ -133,11 +133,11 @@ void Mesh::updateParameterRecursive(const Parameter* parameter)
     }
 }
 
-void Mesh::updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets, const std::string& nodeName)
+void Mesh::updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets, const uint32_t currentBuffer, const std::string& nodeName)
 {
     for (size_t i = 0; i < allSubMeshes.size(); i++)
     {
-        allSubMeshes[i]->updateDescriptorSetsRecursive(allWriteDescriptorSetsCount, allWriteDescriptorSets, nodeName);
+        allSubMeshes[i]->updateDescriptorSetsRecursive(allWriteDescriptorSetsCount, allWriteDescriptorSets, currentBuffer, nodeName);
     }
 }
 

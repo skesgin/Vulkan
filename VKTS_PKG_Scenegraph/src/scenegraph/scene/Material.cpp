@@ -31,10 +31,14 @@ namespace vkts
 
 void Material::destroyMaterial()
 {
-	if (materialData.get())
+	for (size_t i = 0; i < materialData.size(); i++)
 	{
-		materialData->destroy();
+		if (materialData[i].get())
+		{
+			materialData[i]->destroy();
+		}
 	}
+	materialData.clear();
 }
 
 Material::Material(const VkBool32 forwardRendering, const VkBool32 createData, const std::string& name) :
@@ -45,9 +49,19 @@ Material::Material(const VkBool32 forwardRendering, const VkBool32 createData, c
 Material::Material(const Material& other) :
     forwardRendering(other.forwardRendering), createData(other.createData), name(other.name + "_clone"), materialData()
 {
-	if (other.materialData.get())
+	for (size_t i = 0; i < other.materialData.size(); i++)
 	{
-		materialData = other.materialData->create(createData);
+		if (other.materialData[i].get())
+		{
+			auto currentMaterialData = other.materialData[i]->create(createData);
+
+			if (!currentMaterialData.get())
+			{
+				return;
+			}
+
+			materialData.append(currentMaterialData);
+		}
 	}
 }
 

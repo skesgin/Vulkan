@@ -84,9 +84,11 @@ public:
     virtual void setName(const std::string& name) override;
 
 
-    virtual IRenderMaterialSP getRenderMaterial() const override;
+    virtual IRenderMaterialSP getRenderMaterial(const uint32_t index) const override;
 
-    virtual void setRenderMaterial(const IRenderMaterialSP& materialData) override;
+    virtual VkDeviceSize getRenderMaterialSize() const override;
+
+    virtual void addRenderMaterial(const IRenderMaterialSP& materialData) override;
 
 
     virtual const ITextureObjectSP& getAlpha() const override;
@@ -139,7 +141,7 @@ public:
 
     //
 
-    virtual void updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets, const std::string& nodeName) override;
+    virtual void updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets, const uint32_t currentBuffer, const std::string& nodeName) override;
 
     //
 

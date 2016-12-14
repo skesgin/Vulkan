@@ -319,15 +319,15 @@ void SubMesh::updateParameterRecursive(const Parameter* parameter)
 	}
 }
 
-void SubMesh::updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets, const std::string& nodeName)
+void SubMesh::updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets, const uint32_t currentBuffer, const std::string& nodeName)
 {
 	if (bsdfMaterial.get())
 	{
-		bsdfMaterial->updateDescriptorSetsRecursive(allWriteDescriptorSetsCount, allWriteDescriptorSets, nodeName);
+		bsdfMaterial->updateDescriptorSetsRecursive(allWriteDescriptorSetsCount, allWriteDescriptorSets, currentBuffer, nodeName);
 	}
 	else if (phongMaterial.get())
 	{
-		phongMaterial->updateDescriptorSetsRecursive(allWriteDescriptorSetsCount, allWriteDescriptorSets, nodeName);
+		phongMaterial->updateDescriptorSetsRecursive(allWriteDescriptorSetsCount, allWriteDescriptorSets, currentBuffer, nodeName);
 	}
 }
 

@@ -27,7 +27,7 @@
 #include "Example.hpp"
 
 Example::Example(const vkts::IContextObjectSP& contextObject, const int32_t windowIndex, const vkts::IVisualContextSP& visualContext, const vkts::ISurfaceSP& surface) :
-		IUpdateThread(), contextObject(contextObject), windowIndex(windowIndex), visualContext(visualContext), surface(surface), depthFormat(VK_FORMAT_D32_SFLOAT), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), descriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), fragmentUniformBuffer(nullptr), shadowUniformBuffer(nullptr), voxelizeViewProjectionUniformBuffer(nullptr), voxelizeModelNormalUniformBuffer(nullptr), standardVertexShaderModule(nullptr), standardFragmentShaderModule(nullptr), standardShadowFragmentShaderModule(nullptr), voxelizeVertexShaderModule(nullptr), voxelizeGeometryShaderModule(nullptr), voxelizeFragmentShaderModule(nullptr), pipelineLayout(nullptr), loadTask(), sceneLoaded(VK_FALSE), sceneManager(nullptr), sceneFactory(nullptr), scene(nullptr), swapchain(nullptr), renderPass(nullptr), shadowRenderPass(nullptr), voxelRenderPass(nullptr), allOpaqueGraphicsPipelines(), allBlendGraphicsPipelines(), allBlendCwGraphicsPipelines(), allShadowGraphicsPipelines(), shadowTexture(nullptr), msaaColorTexture(nullptr), msaaDepthTexture(nullptr), depthTexture(nullptr), voxelTexture{nullptr, nullptr, nullptr}, shadowImageView(nullptr), msaaColorImageView(nullptr), msaaDepthStencilImageView(nullptr), depthStencilImageView(nullptr), shadowSampler(nullptr), swapchainImagesCount(0), swapchainImageView(), framebuffer(), shadowFramebuffer(), cmdBuffer(), shadowCmdBuffer(), cmdBufferFence()
+		IUpdateThread(), contextObject(contextObject), windowIndex(windowIndex), visualContext(visualContext), surface(surface), depthFormat(VK_FORMAT_D32_SFLOAT), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), imageAcquiredSemaphore(nullptr), betweenSemaphore(nullptr), renderingCompleteSemaphore(nullptr), descriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), fragmentUniformBuffer(nullptr), shadowUniformBuffer(nullptr), voxelizeViewProjectionUniformBuffer(nullptr), voxelizeModelNormalUniformBuffer(nullptr), standardVertexShaderModule(nullptr), standardFragmentShaderModule(nullptr), standardShadowFragmentShaderModule(nullptr), voxelizeVertexShaderModule(nullptr), voxelizeGeometryShaderModule(nullptr), voxelizeFragmentShaderModule(nullptr), pipelineLayout(nullptr), loadTask(), sceneLoaded(VK_FALSE), sceneManager(nullptr), sceneFactory(nullptr), scene(nullptr), swapchain(nullptr), renderPass(nullptr), shadowRenderPass(nullptr), voxelRenderPass(nullptr), allOpaqueGraphicsPipelines(), allBlendGraphicsPipelines(), allBlendCwGraphicsPipelines(), allShadowGraphicsPipelines(), shadowTexture(), msaaColorTexture(nullptr), msaaDepthTexture(nullptr), depthTexture(nullptr), voxelTexture{nullptr, nullptr, nullptr}, shadowImageView(), msaaColorImageView(nullptr), msaaDepthStencilImageView(nullptr), depthStencilImageView(nullptr), shadowSampler(nullptr), swapchainImagesCount(0), swapchainImageView(), framebuffer(), shadowFramebuffer(), cmdBuffer(), shadowCmdBuffer(), cmdBufferFence()
 {
 }
 
@@ -157,7 +157,7 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 
     VkImageSubresourceRange depthSubresourceRange = {VK_IMAGE_ASPECT_DEPTH_BIT, 0, 1, 0, 1};
 
-	shadowTexture->getImage()->cmdPipelineBarrier(cmdBuffer[usedBuffer]->getCommandBuffer(), VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, depthSubresourceRange);
+	shadowTexture[usedBuffer]->getImage()->cmdPipelineBarrier(cmdBuffer[usedBuffer]->getCommandBuffer(), VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, depthSubresourceRange);
 
 	//
 
@@ -239,7 +239,7 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 	// Barrier, that we can write to the shadow map.
 	//
 
-	shadowTexture->getImage()->cmdPipelineBarrier(cmdBuffer[usedBuffer]->getCommandBuffer(), VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, depthSubresourceRange);
+	shadowTexture[usedBuffer]->getImage()->cmdPipelineBarrier(cmdBuffer[usedBuffer]->getCommandBuffer(), VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, depthSubresourceRange);
 
 	//
 
@@ -279,7 +279,7 @@ VkBool32 Example::buildFramebuffer(const int32_t usedBuffer)
 
 	// Build shadow frame buffer.
 
-	imageViews[0] = shadowImageView->getImageView();
+	imageViews[0] = shadowImageView[usedBuffer]->getImageView();
 
 	shadowFramebuffer[usedBuffer] = vkts::framebufferCreate(contextObject->getDevice()->getDevice(), 0, shadowRenderPass->getRenderPass(), 1, imageViews, VKTS_SHADOW_MAP_SIZE, VKTS_SHADOW_MAP_SIZE, 1);
 
@@ -310,7 +310,7 @@ VkBool32 Example::buildSwapchainImageView(const int32_t usedBuffer)
 	return VK_TRUE;
 }
 
-VkBool32 Example::updateDescriptorSets()
+VkBool32 Example::updateDescriptorSets(const int32_t usedBuffer)
 {
 	memset(descriptorBufferInfos, 0, sizeof(descriptorBufferInfos));
 
@@ -329,8 +329,8 @@ VkBool32 Example::updateDescriptorSets()
     memset(descriptorImageInfos, 0, sizeof(descriptorImageInfos));
 
     descriptorImageInfos[0].sampler = shadowSampler->getSampler();
-    descriptorImageInfos[0].imageView = shadowImageView->getImageView();
-    descriptorImageInfos[0].imageLayout = shadowTexture->getImage()->getImageLayout();
+    descriptorImageInfos[0].imageView = shadowImageView[usedBuffer]->getImageView();
+    descriptorImageInfos[0].imageLayout = shadowTexture[usedBuffer]->getImage()->getImageLayout();
 
     for (uint32_t i = 0; i < VKTS_BINDING_STORAGE_IMAGE_COUNT; i++)
     {
@@ -509,14 +509,14 @@ VkBool32 Example::buildMSAAColorImageView()
 	return VK_TRUE;
 }
 
-VkBool32 Example::buildShadowImageView()
+VkBool32 Example::buildShadowImageView(const int32_t usedBuffer)
 {
 	VkComponentMapping componentMapping = { VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY };
 	VkImageSubresourceRange imageSubresourceRange = { VK_IMAGE_ASPECT_DEPTH_BIT, 0, 1, 0, 1 };
 
-	shadowImageView = vkts::imageViewCreate(contextObject->getDevice()->getDevice(), 0, shadowTexture->getImage()->getImage(), VK_IMAGE_VIEW_TYPE_2D, shadowTexture->getImage()->getFormat(), componentMapping, imageSubresourceRange);
+	shadowImageView[usedBuffer] = vkts::imageViewCreate(contextObject->getDevice()->getDevice(), 0, shadowTexture[usedBuffer]->getImage()->getImage(), VK_IMAGE_VIEW_TYPE_2D, shadowTexture[usedBuffer]->getImage()->getFormat(), componentMapping, imageSubresourceRange);
 
-	if (!shadowImageView.get())
+	if (!shadowImageView[usedBuffer].get())
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create shadow attachment view.");
 
@@ -707,7 +707,7 @@ VkBool32 Example::buildMSAAColorTexture(const vkts::ICommandBuffersSP& cmdBuffer
 	return VK_TRUE;
 }
 
-VkBool32 Example::buildShadowTexture(const vkts::ICommandBuffersSP& cmdBuffer)
+VkBool32 Example::buildShadowTexture(const vkts::ICommandBuffersSP& cmdBuffer, const int32_t usedBuffer)
 {
 	VkImageCreateInfo imageCreateInfo{};
 
@@ -729,9 +729,9 @@ VkBool32 Example::buildShadowTexture(const vkts::ICommandBuffersSP& cmdBuffer)
 
 	VkImageSubresourceRange subresourceRange = { VK_IMAGE_ASPECT_DEPTH_BIT, 0, 1, 0, 1 };
 
-	shadowTexture = vkts::imageObjectCreate(contextObject, cmdBuffer, "ShadowTexture", imageCreateInfo, 0, VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, subresourceRange, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+	shadowTexture[usedBuffer] = vkts::imageObjectCreate(contextObject, cmdBuffer, "ShadowTexture_" + std::to_string(usedBuffer), imageCreateInfo, 0, VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, subresourceRange, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-	if (!shadowTexture.get())
+	if (!shadowTexture[usedBuffer].get())
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create shadow texture.");
 
@@ -1638,11 +1638,14 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 		return VK_FALSE;
 	}
 
-	if (!buildShadowTexture(updateCmdBuffer))
+	for (int32_t i = 0; i < (int32_t)swapchainImagesCount; i++)
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not build MSAA color texture.");
+		if (!buildShadowTexture(updateCmdBuffer, i))
+		{
+			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not build shadow texture.");
 
-		return VK_FALSE;
+			return VK_FALSE;
+		}
 	}
 
 	if (!buildMSAAColorTexture(updateCmdBuffer))
@@ -1721,9 +1724,12 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 		return VK_FALSE;
 	}
 
-	if (!buildShadowImageView())
+	for (int32_t i = 0; i < (int32_t)swapchainImagesCount; i++)
 	{
-		return VK_FALSE;
+		if (!buildShadowImageView(i))
+		{
+			return VK_FALSE;
+		}
 	}
 
 	if (!buildMSAAColorImageView())
@@ -1755,14 +1761,17 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 
 	if (sceneLoaded)
 	{
-		if (!updateDescriptorSets())
-		{
-			return VK_FALSE;
-		}
-
 		if (scene.get())
 		{
-			scene->updateDescriptorSetsRecursive(VKTS_DESCRIPTOR_SET_COUNT, writeDescriptorSets);
+			for (uint32_t i = 0; i < swapchainImagesCount; i++)
+			{
+				if (!updateDescriptorSets(i))
+				{
+					return VK_FALSE;
+				}
+
+				scene->updateDescriptorSetsRecursive(VKTS_DESCRIPTOR_SET_COUNT, writeDescriptorSets, i);
+			}
 		}
 	}
 
@@ -1851,9 +1860,12 @@ void Example::terminateResources(const vkts::IUpdateThreadContext& updateContext
 				msaaColorImageView->destroy();
 			}
 
-			if (shadowImageView.get())
+			for (int32_t i = 0; i < (int32_t)swapchainImagesCount; i++)
 			{
-				shadowImageView->destroy();
+				if (shadowImageView[i].get())
+				{
+					shadowImageView[i]->destroy();
+				}
 			}
 
 			if (depthTexture.get())
@@ -1871,9 +1883,12 @@ void Example::terminateResources(const vkts::IUpdateThreadContext& updateContext
 				msaaColorTexture->destroy();
 			}
 
-			if (shadowTexture.get())
+			for (int32_t i = 0; i < (int32_t)swapchainImagesCount; i++)
 			{
-				shadowTexture->destroy();
+				if (shadowTexture[i].get())
+				{
+					shadowTexture[i]->destroy();
+				}
 			}
 
 			for (size_t i = 0; i < allShadowGraphicsPipelines.size(); i++)
@@ -1981,6 +1996,15 @@ VkBool32 Example::init(const vkts::IUpdateThreadContext& updateContext)
     imageAcquiredSemaphore = vkts::semaphoreCreate(contextObject->getDevice()->getDevice(), 0);
 
     if (!imageAcquiredSemaphore.get())
+    {
+        vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create semaphore.");
+
+        return VK_FALSE;
+    }
+
+    betweenSemaphore = vkts::semaphoreCreate(contextObject->getDevice()->getDevice(), 0);
+
+    if (!betweenSemaphore.get())
     {
         vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create semaphore.");
 
@@ -2157,6 +2181,7 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 			//
 
 			VkSemaphore waitSemaphores = imageAcquiredSemaphore->getSemaphore();
+			VkSemaphore signalSemaphores = betweenSemaphore->getSemaphore();
 
 			VkPipelineStageFlags waitDstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
 
@@ -2169,8 +2194,8 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 			submitInfo.pWaitDstStageMask = &waitDstStageMask;
 			submitInfo.commandBufferCount = 1;
 			submitInfo.pCommandBuffers = shadowCmdBuffer[currentBuffer]->getCommandBuffers();
-			submitInfo.signalSemaphoreCount = 0;
-			submitInfo.pSignalSemaphores = nullptr;
+			submitInfo.signalSemaphoreCount = 1;
+			submitInfo.pSignalSemaphores = &signalSemaphores;
 
 			// Added fence for later waiting.
 			result = contextObject->getQueue()->submit(1, &submitInfo, nullptr);
@@ -2225,16 +2250,17 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 
 			//
 
-			VkSemaphore signalSemaphores = renderingCompleteSemaphore->getSemaphore();
+			waitSemaphores = betweenSemaphore->getSemaphore();
+			signalSemaphores = renderingCompleteSemaphore->getSemaphore();
 
 
 			memset(&submitInfo, 0, sizeof(VkSubmitInfo));
 
 			submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-			submitInfo.waitSemaphoreCount = 0;
-			submitInfo.pWaitSemaphores = nullptr;
-			submitInfo.pWaitDstStageMask = nullptr;
+			submitInfo.waitSemaphoreCount = 1;
+			submitInfo.pWaitSemaphores = &waitSemaphores;
+			submitInfo.pWaitDstStageMask = &waitDstStageMask;
 			submitInfo.commandBufferCount = 1;
 			submitInfo.pCommandBuffers = cmdBuffer[currentBuffer]->getCommandBuffers();
 			submitInfo.signalSemaphoreCount = 1;
@@ -2372,14 +2398,17 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 
 		//
 
-		if (!updateDescriptorSets())
-		{
-			return VK_FALSE;
-		}
-
 		if (scene.get())
 		{
-			scene->updateDescriptorSetsRecursive(VKTS_DESCRIPTOR_SET_COUNT, writeDescriptorSets);
+			for (uint32_t i = 0; i < swapchainImagesCount; i++)
+			{
+				if (!updateDescriptorSets(i))
+				{
+					return VK_FALSE;
+				}
+
+				scene->updateDescriptorSetsRecursive(VKTS_DESCRIPTOR_SET_COUNT, writeDescriptorSets, i);
+			}
 		}
 
 		for (int32_t i = 0; i < (int32_t)swapchainImagesCount; i++)
@@ -2532,6 +2561,11 @@ void Example::terminate(const vkts::IUpdateThreadContext& updateContext)
             if (renderingCompleteSemaphore.get())
             {
                 renderingCompleteSemaphore->destroy();
+            }
+
+            if (betweenSemaphore.get())
+            {
+            	betweenSemaphore->destroy();
             }
 
             if (imageAcquiredSemaphore.get())

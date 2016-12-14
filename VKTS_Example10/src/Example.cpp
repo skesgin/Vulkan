@@ -159,12 +159,12 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 
 	for (uint32_t i = 0; i < 3; i++)
 	{
-		allGBufferTextures[i]->getImage()->cmdPipelineBarrier(cmdBuffer[usedBuffer]->getCommandBuffer(), VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, colorSubresourceRange);
+		allGBufferTextures[i + 4 * usedBuffer]->getImage()->cmdPipelineBarrier(cmdBuffer[usedBuffer]->getCommandBuffer(), VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, colorSubresourceRange);
 	}
 
 	VkImageSubresourceRange depthSubresourceRange = {VK_IMAGE_ASPECT_DEPTH_BIT, 0, 1, 0, 1};
 
-	allGBufferTextures[3]->getImage()->cmdPipelineBarrier(cmdBuffer[usedBuffer]->getCommandBuffer(), VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, depthSubresourceRange);
+	allGBufferTextures[3 + 4 * usedBuffer]->getImage()->cmdPipelineBarrier(cmdBuffer[usedBuffer]->getCommandBuffer(), VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, depthSubresourceRange);
 
     //
     // Default pass.
@@ -251,10 +251,10 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 
 	for (uint32_t i = 0; i < 3; i++)
 	{
-		allGBufferTextures[i]->getImage()->cmdPipelineBarrier(cmdBuffer[usedBuffer]->getCommandBuffer(), VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, colorSubresourceRange);
+		allGBufferTextures[i + 4 * usedBuffer]->getImage()->cmdPipelineBarrier(cmdBuffer[usedBuffer]->getCommandBuffer(), VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, colorSubresourceRange);
 	}
 
-	allGBufferTextures[3]->getImage()->cmdPipelineBarrier(cmdBuffer[usedBuffer]->getCommandBuffer(), VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, depthSubresourceRange);
+	allGBufferTextures[3 + 4 * usedBuffer]->getImage()->cmdPipelineBarrier(cmdBuffer[usedBuffer]->getCommandBuffer(), VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, depthSubresourceRange);
 
     //
 
@@ -272,14 +272,14 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 
 VkBool32 Example::buildFramebuffer(const int32_t usedBuffer)
 {
-	VkImageView imageViews[6];
+	VkImageView imageViews[4];
 
-	for (size_t i = 0; i < allGBufferImageViews.size(); i++)
+	for (size_t i = 0; i < 4; i++)
 	{
-		imageViews[i] = allGBufferImageViews[i]->getImageView();
+		imageViews[i] = allGBufferImageViews[i + 4* usedBuffer]->getImageView();
 	}
 
-	gbufferFramebuffer[usedBuffer] = vkts::framebufferCreate(contextObject->getDevice()->getDevice(), 0, gbufferRenderPass->getRenderPass(), (uint32_t)allGBufferImageViews.size(), imageViews, swapchain->getImageExtent().width, swapchain->getImageExtent().height, 1);
+	gbufferFramebuffer[usedBuffer] = vkts::framebufferCreate(contextObject->getDevice()->getDevice(), 0, gbufferRenderPass->getRenderPass(), 4, imageViews, swapchain->getImageExtent().width, swapchain->getImageExtent().height, 1);
 
 	if (!gbufferFramebuffer[usedBuffer].get())
 	{
@@ -304,7 +304,7 @@ VkBool32 Example::buildFramebuffer(const int32_t usedBuffer)
 	return VK_TRUE;
 }
 
-VkBool32 Example::updateDescriptorSets()
+VkBool32 Example::updateDescriptorSets(const int32_t usedBuffer)
 {
 	memset(environmentDescriptorBufferInfos, 0, sizeof(environmentDescriptorBufferInfos));
 
@@ -401,7 +401,7 @@ VkBool32 Example::updateDescriptorSets()
 	for (uint32_t i = 0; i < 4; i++)
 	{
 		resolveDescriptorImageInfos[i].sampler = gbufferSampler->getSampler();
-		resolveDescriptorImageInfos[i].imageView = allGBufferImageViews[i]->getImageView();
+		resolveDescriptorImageInfos[i].imageView = allGBufferImageViews[i + 4 * usedBuffer]->getImageView();
 		resolveDescriptorImageInfos[i].imageLayout = VK_IMAGE_LAYOUT_GENERAL;
 
 		resolveWriteDescriptorSets[i].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -676,14 +676,14 @@ VkBool32 Example::buildGBufferSampler()
 	return VK_TRUE;
 }
 
-VkBool32 Example::buildGBufferImageView()
+VkBool32 Example::buildGBufferImageView(const int32_t usedBuffer)
 {
 	VkComponentMapping componentMapping = { VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY };
 	VkImageSubresourceRange imageSubresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
 
 	for (uint32_t i = 0; i < 3; i++)
 	{
-		auto currentImageView = vkts::imageViewCreate(contextObject->getDevice()->getDevice(), 0, allGBufferTextures[i]->getImage()->getImage(), VK_IMAGE_VIEW_TYPE_2D, allGBufferTextures[i]->getImage()->getFormat(), componentMapping, imageSubresourceRange);
+		auto currentImageView = vkts::imageViewCreate(contextObject->getDevice()->getDevice(), 0, allGBufferTextures[i + 4 * usedBuffer]->getImage()->getImage(), VK_IMAGE_VIEW_TYPE_2D, allGBufferTextures[i + 4 * usedBuffer]->getImage()->getFormat(), componentMapping, imageSubresourceRange);
 
 		if (!currentImageView.get())
 		{
@@ -699,7 +699,7 @@ VkBool32 Example::buildGBufferImageView()
 
 	imageSubresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
 
-	auto currentImageView = vkts::imageViewCreate(contextObject->getDevice()->getDevice(), 0, allGBufferTextures[3]->getImage()->getImage(), VK_IMAGE_VIEW_TYPE_2D, allGBufferTextures[3]->getImage()->getFormat(), componentMapping, imageSubresourceRange);
+	auto currentImageView = vkts::imageViewCreate(contextObject->getDevice()->getDevice(), 0, allGBufferTextures[3 + 4 * usedBuffer]->getImage()->getImage(), VK_IMAGE_VIEW_TYPE_2D, allGBufferTextures[3]->getImage()->getFormat(), componentMapping, imageSubresourceRange);
 
 	if (!currentImageView.get())
 	{
@@ -1479,12 +1479,15 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 		return VK_FALSE;
 	}
 
-	if (!buildGBufferTexture(updateCmdBuffer))
-	{
-		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not build texture.");
+    for (uint32_t i = 0; i < swapchainImagesCount; i++)
+    {
+		if (!buildGBufferTexture(updateCmdBuffer))
+		{
+			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not build texture.");
 
-		return VK_FALSE;
-	}
+			return VK_FALSE;
+		}
+    }
 
     vkts::SmartPointerVector<vkts::IImageSP> allStageImages;
     vkts::SmartPointerVector<vkts::IBufferSP> allStageBuffers;
@@ -1572,10 +1575,13 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 
 	//
 
-	if (!buildGBufferImageView())
-	{
-		return VK_FALSE;
-	}
+    for (uint32_t i = 0; i < swapchainImagesCount; i++)
+    {
+		if (!buildGBufferImageView(i))
+		{
+			return VK_FALSE;
+		}
+    }
 
 	if (!buildGBufferSampler())
 	{
@@ -1599,19 +1605,22 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 
 	//
 
-	if (!updateDescriptorSets())
+	for (uint32_t i = 0; i < swapchainImagesCount; i++)
 	{
-		return VK_FALSE;
-	}
+		if (!updateDescriptorSets(i))
+		{
+			return VK_FALSE;
+		}
 
-	if (scene.get())
-	{
-		scene->updateDescriptorSetsRecursive(VKTS_BINDING_UNIFORM_BSDF_DEFERRED_TOTAL_BINDING_COUNT, writeDescriptorSets);
-	}
+		if (scene.get())
+		{
+			scene->updateDescriptorSetsRecursive(VKTS_BINDING_UNIFORM_BSDF_DEFERRED_TOTAL_BINDING_COUNT, writeDescriptorSets, i);
+		}
 
-	if (environmentScene.get())
-	{
-		environmentScene->updateDescriptorSetsRecursive(VKTS_ENVIRONMENT_DESCRIPTOR_SET_COUNT, environmentWriteDescriptorSets);
+		if (environmentScene.get())
+		{
+			environmentScene->updateDescriptorSetsRecursive(VKTS_ENVIRONMENT_DESCRIPTOR_SET_COUNT, environmentWriteDescriptorSets, i);
+		}
 	}
 
 	//

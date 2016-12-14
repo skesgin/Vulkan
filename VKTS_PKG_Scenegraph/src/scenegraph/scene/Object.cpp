@@ -133,15 +133,15 @@ void Object::updateParameterRecursive(const Parameter* parameter)
     }
 }
 
-void Object::updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets)
+void Object::updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets, const uint32_t currentBuffer)
 {
     if (rootNode.get())
     {
-        rootNode->updateDescriptorSetsRecursive(allWriteDescriptorSetsCount, allWriteDescriptorSets);
+        rootNode->updateDescriptorSetsRecursive(allWriteDescriptorSetsCount, allWriteDescriptorSets, currentBuffer);
     }
 }
 
-void Object::updateTransformRecursive(const double deltaTime, const uint64_t deltaTicks, const double tickTime, const uint32_t dynamicOffsetIndex)
+void Object::updateTransformRecursive(const double deltaTime, const uint64_t deltaTicks, const double tickTime, const uint32_t currentBuffer)
 {
 	if (!IMoveable::update(deltaTime, deltaTicks, tickTime))
 	{
@@ -155,7 +155,7 @@ void Object::updateTransformRecursive(const double deltaTime, const uint64_t del
 
     if (rootNode.get())
     {
-        rootNode->updateTransformRecursive(deltaTime, deltaTicks, tickTime, dynamicOffsetIndex, transformMatrix, dirty, glm::mat4(1.0f), VK_FALSE, INodeSP());
+        rootNode->updateTransformRecursive(deltaTime, deltaTicks, tickTime, currentBuffer, transformMatrix, dirty, glm::mat4(1.0f), VK_FALSE, INodeSP());
     }
 
     dirty = VK_FALSE;

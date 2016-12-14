@@ -82,6 +82,7 @@ private:
 	vkts::ICommandPoolSP commandPool;
 
     vkts::ISemaphoreSP imageAcquiredSemaphore;
+    vkts::ISemaphoreSP betweenSemaphore;
     vkts::ISemaphoreSP renderingCompleteSemaphore;
 
 	vkts::IDescriptorSetLayoutSP descriptorSetLayout;
@@ -129,13 +130,13 @@ private:
 	vkts::SmartPointerVector<vkts::IGraphicsPipelineSP> allBlendCwGraphicsPipelines;
 	vkts::SmartPointerVector<vkts::IGraphicsPipelineSP> allShadowGraphicsPipelines;
 
-	vkts::IImageObjectSP shadowTexture;
+	vkts::SmartPointerVector<vkts::IImageObjectSP> shadowTexture;
 	vkts::IImageObjectSP msaaColorTexture;
 	vkts::IImageObjectSP msaaDepthTexture;
 	vkts::IImageObjectSP depthTexture;
 	vkts::IImageObjectSP voxelTexture[VKTS_BINDING_STORAGE_IMAGE_COUNT];
 
-	vkts::IImageViewSP shadowImageView;
+	vkts::SmartPointerVector<vkts::IImageViewSP> shadowImageView;
 	vkts::IImageViewSP msaaColorImageView;
 	vkts::IImageViewSP msaaDepthStencilImageView;
 	vkts::IImageViewSP depthStencilImageView;
@@ -162,7 +163,7 @@ private:
 
 	VkBool32 buildSwapchainImageView(const int32_t usedBuffer);
 
-	VkBool32 updateDescriptorSets();
+	VkBool32 updateDescriptorSets(const int32_t usedBuffer);
 
 	VkBool32 buildShadowSampler();
 
@@ -174,7 +175,7 @@ private:
 
 	VkBool32 buildMSAAColorImageView();
 
-	VkBool32 buildShadowImageView();
+	VkBool32 buildShadowImageView(const int32_t usedBuffer);
 
 	VkBool32 buildVoxelImageView();
 
@@ -186,7 +187,7 @@ private:
 
 	VkBool32 buildMSAAColorTexture(const vkts::ICommandBuffersSP& cmdBuffer);
 
-	VkBool32 buildShadowTexture(const vkts::ICommandBuffersSP& cmdBuffer);
+	VkBool32 buildShadowTexture(const vkts::ICommandBuffersSP& cmdBuffer, const int32_t usedBuffer);
 
 	VkBool32 buildPipeline();
 

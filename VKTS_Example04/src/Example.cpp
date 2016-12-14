@@ -949,7 +949,10 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 
 		if (scene.get())
 		{
-			scene->updateDescriptorSetsRecursive(VKTS_DESCRIPTOR_SET_COUNT, writeDescriptorSets);
+			for (uint32_t i = 0; i < swapchainImagesCount; i++)
+			{
+				scene->updateDescriptorSetsRecursive(VKTS_DESCRIPTOR_SET_COUNT, writeDescriptorSets, i);
+			}
 		}
 	}
 

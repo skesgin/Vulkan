@@ -34,6 +34,11 @@
 namespace vkts
 {
 
+static PFN_imageDataLoadFunction g_loadFunction = nullptr;
+static VkBool32 g_loadFallback = VK_TRUE;
+static PFN_imageDataSaveFunction g_saveFunction = nullptr;
+static VkBool32 g_saveFallback = VK_TRUE;
+
 template<typename T>
 static void imageDataSwapRedBlueChannel(const size_t numberChannels, T* data, const size_t length)
 {
@@ -582,8 +587,37 @@ static IImageDataSP imageDataLoadHdr(const std::string& name, const IBinaryBuffe
     return IImageDataSP(new ImageData(name, VK_IMAGE_TYPE_2D, VK_FORMAT_R32G32B32_SFLOAT, { (uint32_t)width, (uint32_t)height, (uint32_t)depth }, 1, 1, allOffsets, reinterpret_cast<const uint8_t*>(&data[0]), width * height * depth * numberChannels * sizeof(float)));
 }
 
+void VKTS_APIENTRY imageDataSetLoadFunction(const PFN_imageDataLoadFunction loadFunction, const VkBool32 fallback)
+{
+	g_loadFunction = loadFunction;
+	g_loadFallback = fallback;
+}
+
+void VKTS_APIENTRY imageDataSetSaveFunction(const PFN_imageDataSaveFunction saveFunction, const VkBool32 fallback)
+{
+	g_saveFunction = saveFunction;
+	g_saveFallback = fallback;
+}
+
 IImageDataSP VKTS_APIENTRY imageDataLoad(const char* filename)
 {
+	if (g_loadFunction)
+	{
+		auto externalImageData = g_loadFunction(filename);
+
+		if (externalImageData.get())
+		{
+			return externalImageData;
+		}
+
+		if (!g_loadFallback)
+		{
+			return IImageDataSP();
+		}
+	}
+
+	//
+
     if (!filename)
     {
         return IImageDataSP();
@@ -850,6 +884,21 @@ static IBinaryBufferSP imageDataSaveHdr(const IImageDataSP& imageData, const uin
 
 VkBool32 VKTS_APIENTRY imageDataSave(const char* filename, const IImageDataSP& imageData, const uint32_t mipLevel, const uint32_t arrayLayer)
 {
+	if (g_saveFunction)
+	{
+		if (g_saveFunction(filename, imageData, mipLevel, arrayLayer))
+		{
+			return VK_TRUE;
+		}
+
+		if (!g_saveFallback)
+		{
+			return VK_FALSE;
+		}
+	}
+
+	//
+
     if (!filename || !imageData.get())
     {
         return VK_FALSE;

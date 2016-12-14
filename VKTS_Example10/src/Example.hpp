@@ -182,7 +182,7 @@ private:
 
 	VkBool32 buildFramebuffer(const int32_t usedBuffer);
 
-	VkBool32 updateDescriptorSets();
+	VkBool32 updateDescriptorSets(const int32_t usedBuffer);
 
 	VkBool32 buildScene(const vkts::ICommandObjectSP& commandObject);
 
@@ -190,7 +190,7 @@ private:
 
 	VkBool32 buildGBufferSampler();
 
-	VkBool32 buildGBufferImageView();
+	VkBool32 buildGBufferImageView(const int32_t usedBuffer);
 
 	VkBool32 buildGBufferTexture(const vkts::ICommandBuffersSP& cmdBuffer);
 

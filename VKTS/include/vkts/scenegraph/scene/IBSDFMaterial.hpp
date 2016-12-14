@@ -53,9 +53,11 @@ public:
     virtual void setName(const std::string& name) = 0;
 
 
-    virtual IRenderMaterialSP getRenderMaterial() const = 0;
+    virtual IRenderMaterialSP getRenderMaterial(const uint32_t index) const = 0;
 
-    virtual void setRenderMaterial(const IRenderMaterialSP& renderMaterial) = 0;
+    virtual VkDeviceSize getRenderMaterialSize() const = 0;
+
+    virtual void addRenderMaterial(const IRenderMaterialSP& renderMaterial) = 0;
 
 
     virtual IShaderModuleSP getFragmentShader() const = 0;
@@ -76,7 +78,7 @@ public:
 
     //
 
-    virtual void updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets, const std::string& nodeName) = 0;
+    virtual void updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets, const uint32_t currentBuffer, const std::string& nodeName) = 0;
 
     //
 

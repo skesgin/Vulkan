@@ -32,6 +32,9 @@
 namespace vkts
 {
 
+typedef IImageDataSP (VKTS_APIENTRY *PFN_imageDataLoadFunction)(const char* filename);
+typedef VkBool32 (VKTS_APIENTRY *PFN_imageDataSaveFunction)(const char* filename, const IImageDataSP& imageData, const uint32_t mipLevel, const uint32_t arrayLayer);
+
 /**
  * Only supported BLOCKs are returned as true.
  *
@@ -83,6 +86,10 @@ VKTS_APICALL int32_t VKTS_APIENTRY imageDataGetNumberChannels(const VkFormat for
 VKTS_APICALL std::string VKTS_APIENTRY imageDataGetColorName(const VkFormat format, const glm::vec4& color);
 
 //
+
+VKTS_APICALL void VKTS_APIENTRY imageDataSetLoadFunction(const PFN_imageDataLoadFunction loadFunction, const VkBool32 fallback = VK_TRUE);
+
+VKTS_APICALL void VKTS_APIENTRY imageDataSetSaveFunction(const PFN_imageDataSaveFunction saveFunction, const VkBool32 fallback = VK_TRUE);
 
 /**
  *
