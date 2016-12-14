@@ -166,15 +166,6 @@ static VkBool32 sceneLoadImageObjects(const char* directory, const char* filenam
 
 					//
 
-					imageData = createDeviceImageData(sceneManager->getAssetManager(), imageData);
-
-					if (!imageData.get())
-					{
-						return VK_FALSE;
-					}
-
-					//
-
 					if (mipMap && imageData->getMipLevels() == 1 && (imageData->getExtent3D().width > 1 || imageData->getExtent3D().height > 1 || imageData->getExtent3D().depth > 1))
 					{
 						//
@@ -261,6 +252,11 @@ static VkBool32 sceneLoadImageObjects(const char* directory, const char* filenam
 							logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Using cached data for '%s'", finalImageDataFilename.c_str());
 						}
 
+						for (size_t i = 0; i < allMipMaps.size(); i++)
+						{
+							allMipMaps[i] = createDeviceImageData(sceneManager->getAssetManager(), allMipMaps[i]);
+						}
+
 						imageData = imageDataMerge(allMipMaps, finalImageDataFilename, (uint32_t)allMipMaps.size(), 1);
 
 						if (!imageData.get())
@@ -339,6 +335,11 @@ static VkBool32 sceneLoadImageObjects(const char* directory, const char* filenam
 								logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Using cached data for '%s'", finalImageDataFilename.c_str());
 							}
 
+							for (size_t i = 0; i < allCubeMaps.size(); i++)
+							{
+								allCubeMaps[i] = createDeviceImageData(sceneManager->getAssetManager(), allCubeMaps[i]);
+							}
+
 							imageData = imageDataMerge(allCubeMaps, finalImageDataFilename, 1, (uint32_t)allCubeMaps.size());
 
 							if (!imageData.get())
@@ -400,6 +401,11 @@ static VkBool32 sceneLoadImageObjects(const char* directory, const char* filenam
 							else
 							{
 								logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Using cached data for '%s'", finalImageDataFilename.c_str());
+							}
+
+							for (size_t i = 0; i < allDiffuseCubeMaps.size(); i++)
+							{
+								allDiffuseCubeMaps[i] = createDeviceImageData(sceneManager->getAssetManager(), allDiffuseCubeMaps[i]);
 							}
 
 							auto diffuseImageData = imageDataMerge(allDiffuseCubeMaps, finalImageDataFilename, 1, (uint32_t)allDiffuseCubeMaps.size());
@@ -495,6 +501,11 @@ static VkBool32 sceneLoadImageObjects(const char* directory, const char* filenam
 								logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Using cached data for '%s'", finalImageDataFilename.c_str());
 							}
 
+							for (size_t i = 0; i < allCookTorranceCubeMaps.size(); i++)
+							{
+								allCookTorranceCubeMaps[i] = createDeviceImageData(sceneManager->getAssetManager(), allCookTorranceCubeMaps[i]);
+							}
+
 							auto cookTorranceImageData = imageDataMerge(allCookTorranceCubeMaps, finalImageDataFilename, levelCount, 6);
 
 							if (!cookTorranceImageData.get())
@@ -558,6 +569,15 @@ static VkBool32 sceneLoadImageObjects(const char* directory, const char* filenam
 							}
 
 							sceneManager->addImageObject(imageObject);
+						}
+					}
+					else
+					{
+						imageData = createDeviceImageData(sceneManager->getAssetManager(), imageData);
+
+						if (!imageData.get())
+						{
+							return VK_FALSE;
 						}
 					}
 
