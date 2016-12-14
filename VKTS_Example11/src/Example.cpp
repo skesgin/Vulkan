@@ -2198,7 +2198,7 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 			submitInfo.pSignalSemaphores = &signalSemaphores;
 
 			// Added fence for later waiting.
-			result = contextObject->getQueue()->submit(1, &submitInfo, nullptr);
+			result = contextObject->getQueue()->submit(1, &submitInfo, VK_NULL_HANDLE);
 
 			if (result != VK_SUCCESS)
 			{
