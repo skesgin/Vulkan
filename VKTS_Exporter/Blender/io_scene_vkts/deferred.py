@@ -32,10 +32,10 @@ deferredGeneralTextureGLSL = """"""
 
 deferredGeneralFunctionsGLSL = """"""
 
-deferredOutDeclareGLSL = """layout (location = 2) out vec4 ob_ambientOcclusionF0;   // Ambient occlusion and F0. GB not used.
+deferredOutDeclareGLSL = """layout (location = 2) out vec4 ob_ambientOcclusion;   // Ambient occlusion. GBA not used.
 layout (location = 1) out vec4 ob_normalRoughness;      // Normal and roughness.
 layout (location = 0) out vec4 ob_colorMetallic;        // Color and metallic."""
 
-deferredOutAssignGLSL = """ob_ambientOcclusionF0 = vec4(AmbientOcclusion_0, 0.0, 0.0, F0_0);
+deferredOutAssignGLSL = """ob_ambientOcclusion = vec4(AmbientOcclusion_0, 0.0, 0.0, 0.0);
     ob_normalRoughness = vec4(Normal_0.xyz * 0.5 + 0.5, Roughness_0);
     ob_colorMetallic = vec4(Color_0.rgb, Metallic_0);"""

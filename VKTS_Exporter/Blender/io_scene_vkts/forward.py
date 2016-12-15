@@ -28,8 +28,6 @@ forwardGeneralDefineGLSL = """#define VKTS_MAX_LIGHTS 16
 
 #define VKTS_PI 3.14159265
 
-#define VKTS_FO_LINEAR_RANGE 0.08
-
 #define VKTS_ONE_OVER_PI (1.0 / VKTS_PI)
 
 #define VKTS_NORMAL_VALID_BIAS 0.1"""
@@ -192,42 +190,44 @@ forwardOutAssignGLSL = """
         
         float ambientOcclusion = AmbientOcclusion_0;
         
-        float F0 = F0_0;
+        float F0_dielectric = 0.04;
+        float F0_metallic = dot(baseColor, vec3(0.2126, 0.7152, 0.0722));
+        
+        //
+        // Lambert.
+        //
+
+        vec3 colorLambert = iblLambert(N, baseColor) * ambientOcclusion;
         
         //
         // Dielectric
         //
         
-        vec3 colorLambert = vec3(0.0, 0.0, 0.0);
+        vec3 colorDielectric = vec3(0.0, 0.0, 0.0);
 
         if (metallic < 1.0)
         {
-            // FIXME: Use for roughness > 0.0 Oren-Nayar.
-            colorLambert = iblLambert(N, baseColor) * ambientOcclusion;
-
-            //
-            
-            vec3 colorReflective = iblCookTorrance(N, V, roughness, vec3(1.0, 1.0, 1.0), F0 * VKTS_FO_LINEAR_RANGE);
+            vec3 colorReflective = iblCookTorrance(N, V, roughness, vec3(1.0, 1.0, 1.0), F0_dielectric);
             
             //
 
-            colorLambert = mix(colorLambert, colorReflective, fresnel(NdotV, F0 * VKTS_FO_LINEAR_RANGE));
+            colorDielectric += mix(colorLambert, colorReflective, fresnel(NdotV, F0_dielectric));
         }
 
         //
         // Metallic
         //
         
-        vec3 colorCookTorrance = vec3(0.0, 0.0, 0.0);
+        vec3 colorMetallic = vec3(0.0, 0.0, 0.0);
 
         if (metallic > 0.0)
         {
-            colorCookTorrance = iblCookTorrance(N, V, roughness, baseColor, F0);
+            vec3 colorReflective = iblCookTorrance(N, V, roughness, vec3(1.0, 1.0, 1.0), F0_metallic);
+            
+            colorMetallic += mix(colorLambert, colorReflective, fresnel(NdotV, F0_metallic));
         }
         
         // Dynamic lights.
-        
-        vec3 dynamicLight = vec3(0.0, 0.0, 0.0);
         
         // Bring vertex to world space.
         vertex = u_bufferMatrices.inverseViewMatrix * vertex; 
@@ -244,25 +244,27 @@ forwardOutAssignGLSL = """
             {
                 light = u_bufferLights.L[i].xyz;
             }
+            
+            vec3 lambertLight = lambert(light, u_bufferLights.color[i].xyz, N, baseColor);
         
             if (metallic < 1.0)
             {
-                dynamicLight += lambert(light, u_bufferLights.color[i].xyz, N, baseColor) * (1.0 - metallic);
+                vec3 cookTorranceLight = cookTorrance(light, u_bufferLights.color[i].xyz, N, V, roughness, F0_dielectric);
                 
-                dynamicLight += cookTorrance(light, u_bufferLights.color[i].xyz, N, V, roughness, F0 * VKTS_FO_LINEAR_RANGE);
+                colorDielectric += mix(lambertLight, cookTorranceLight, fresnel(NdotV, F0_dielectric));
             }
 
             if (metallic > 0.0)
             {
-                dynamicLight += cookTorrance(light, u_bufferLights.color[i].xyz, N, V, roughness, F0);
+                vec3 cookTorranceLight = cookTorrance(light, u_bufferLights.color[i].xyz, N, V, roughness, F0_metallic);
+                
+                colorMetallic += mix(lambertLight, cookTorranceLight, fresnel(NdotV, F0_metallic));
             }
         }                
         
         //
         
-        color = mix(colorLambert, colorCookTorrance, metallic);
-        
-        color += dynamicLight;
+        color = mix(colorDielectric, colorMetallic, metallic);
     }
     else
     {

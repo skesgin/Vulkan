@@ -621,7 +621,6 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName, use
             ambientOcclusionCounter = 0
             colorCounter = 0
             distanceCounter = 0
-            F0Counter = 0
             facCounter = 0
             heightCounter = 0
             imageCounter = 0
@@ -657,7 +656,6 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName, use
                 if isinstance(currentNode, bpy.types.ShaderNodeGroup) and currentNode.node_tree.name == 'PBR':
                     # PBR
 
-                    F0InputName = "F0_%d" % F0Counter
                     ambientOcclusionInputName = "AmbientOcclusion_%d" % ambientOcclusionCounter
                     roughnessInputName = "Roughness_%d" % roughnessCounter
                     metallicInputName = "Metallic_%d" % metallicCounter
@@ -665,7 +663,6 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName, use
                     normalInputName = "Normal_%d" % normalCounter
                     colorInputName = "Color_%d" % colorCounter
 
-                    F0Counter += 1
                     ambientOcclusionCounter += 1
                     roughnessCounter += 1
                     metallicCounter += 1
@@ -673,7 +670,6 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName, use
                     normalCounter += 1
                     colorCounter += 1
                     
-                    F0InputParameterName = "F0_Dummy"
                     ambientOcclusionInputParameterName = "AmbientOcclusion_Dummy"
                     roughnessInputParameterName = "Roughness_Dummy"
                     metallicInputParameterName = "Metallic_Dummy"
@@ -687,7 +683,7 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName, use
 
                     #                    
 
-                    currentMain = pbrMain % (F0InputName, F0InputParameterName, ambientOcclusionInputName, ambientOcclusionInputParameterName, roughnessInputName, roughnessInputParameterName, metallicInputName, metallicInputParameterName, maskInputName, maskInputParameterName, normalInputName, normalInputParameterName, colorInputName, colorInputParameterName)
+                    currentMain = pbrMain % (ambientOcclusionInputName, ambientOcclusionInputParameterName, roughnessInputName, roughnessInputParameterName, metallicInputName, metallicInputParameterName, maskInputName, maskInputParameterName, normalInputName, normalInputParameterName, colorInputName, colorInputParameterName)
 
                     #
 

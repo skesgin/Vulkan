@@ -1636,6 +1636,22 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 
 	//
 
+	if (sceneLoaded)
+	{
+		if (scene.get())
+		{
+			for (uint32_t i = 0; i < swapchainImagesCount; i++)
+			{
+				if (!updateDescriptorSets(i))
+				{
+					return VK_FALSE;
+				}
+
+				scene->updateDescriptorSetsRecursive(VKTS_DESCRIPTOR_SET_COUNT, writeDescriptorSets, i);
+			}
+		}
+	}
+
 	for (int32_t i = 0; i < (int32_t)swapchainImagesCount; i++)
 	{
 		if (!buildSwapchainImageView(i))

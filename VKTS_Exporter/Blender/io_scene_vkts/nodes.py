@@ -160,7 +160,6 @@ pbrMain = """#previousMain#
     float %s = %s;
     float %s = %s;
     float %s = %s;
-    float %s = %s;
     vec3 %s = %s;
     vec4 %s = %s;
     
