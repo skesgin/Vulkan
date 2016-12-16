@@ -503,7 +503,12 @@ def replaceParameters(currentNode, openNodes, processedNodes, currentMain):
             elif isinstance(currentSocket, bpy.types.NodeSocketFloat):
                 currentValue = getFloat(currentSocket.default_value)
             elif isinstance(currentSocket, bpy.types.NodeSocketVector):
-                if currentSocket.name == "Normal":
+
+                if isinstance(currentNode, bpy.types.ShaderNodeTexChecker) and currentSocket.name == "Vector":
+                    currentValue = "texCoord"
+                elif isinstance(currentNode, bpy.types.ShaderNodeTexImage):
+                    currentValue = "texCoord"
+                elif currentSocket.name == "Normal":
                     currentValue = "normal"
                 else:
                     currentValue = getVec3(currentSocket.default_value)
@@ -1132,6 +1137,10 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName, use
                     #
                     
                     currentFragmentGLSL = currentFragmentGLSL.replace("#previousMain#", currentMain)
+
+                    texCoordUsed = True
+                    
+                    vertexAttributes = vertexAttributes | 0x00000010
 
                 elif isinstance(currentNode, bpy.types.ShaderNodeFresnel):
                     # Fresnel.
