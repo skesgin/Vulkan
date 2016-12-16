@@ -1896,10 +1896,11 @@ def saveAnimation(context, fw, fw_animation, fw_channel, name, currentAnimation,
 
     # Check, animation data for a specific filter is available. 
 
-    for currentCurve in currentAnimation.action.fcurves:
-        if filterName == extractNode(currentCurve.data_path):
-            hasData = True
-            break
+    if currentAnimation.action is not None:
+        for currentCurve in currentAnimation.action.fcurves:
+            if filterName == extractNode(currentCurve.data_path):
+                hasData = True
+                break
 
     if not hasData:
         return
@@ -1931,64 +1932,66 @@ def saveAnimation(context, fw, fw_animation, fw_channel, name, currentAnimation,
 
         for usedElement in ["X", "Y", "Z", "W"]:
 
-            for currentCurve in currentAnimation.action.fcurves:
-
-                currentFilterName = extractNode(currentCurve.data_path)
-
-                if currentFilterName != filterName:
-                    continue
-
-
-                transform = friendlyTransformName(currentCurve.data_path)
-                element = friendlyElementName(currentCurve.array_index, currentCurve.data_path, isJoint)
-
-                if transform != usedTransform or element != usedElement:
-                    continue
-
-                if not dataWritten:
-                    fw_animation("# %s\n" % (transform.lower().title() + "."))
-                    fw_animation("\n")
-
-                dataWritten = True
+            if currentAnimation.action is not None:
                 
-                fw_animation("channel %s\n" % friendlyName("channel_" + transform + "_" + element + "_" + name))
+                for currentCurve in currentAnimation.action.fcurves:
 
-                # Save the channel.
+                    currentFilterName = extractNode(currentCurve.data_path)
 
-                fw_channel("#\n")
-                fw_channel("# Channel.\n")
-                fw_channel("#\n")
-                fw_channel("\n")
-                fw_channel("name %s\n" % friendlyName("channel_" + transform + "_" + element + "_" + name))
-                fw_channel("\n")
-                fw_channel("target_transform %s\n" % transform)
-                fw_channel("target_element %s\n" % element)
-                fw_channel("\n")
+                    if currentFilterName != filterName:
+                        continue
 
-                for currentKeyframe in currentCurve.keyframe_points:
 
-                    value = currentKeyframe.co[1]
-                    leftValue = currentKeyframe.handle_left[1]
-                    rightValue = currentKeyframe.handle_right[1]
+                    transform = friendlyTransformName(currentCurve.data_path)
+                    element = friendlyElementName(currentCurve.array_index, currentCurve.data_path, isJoint)
 
-                    if element == "Z" and transform != "SCALE" and not isJoint:
-                        value = -value
-                        leftValue = -leftValue
-                        rightValue = -rightValue
-                        
-                    if transform == "ROTATE":
-                        value = math.degrees(value)
-                        leftValue = math.degrees(leftValue)
-                        rightValue = math.degrees(rightValue)
+                    if transform != usedTransform or element != usedElement:
+                        continue
 
-                    if currentKeyframe.interpolation == 'BEZIER':
-                        fw_channel("keyframe %f %f BEZIER %f %f %f %f\n" % (currentKeyframe.co[0] / context.scene.render.fps, value, currentKeyframe.handle_left[0] / context.scene.render.fps, leftValue, currentKeyframe.handle_right[0] / context.scene.render.fps, rightValue))        
-                    elif currentKeyframe.interpolation == 'LINEAR':
-                        fw_channel("keyframe %f %f LINEAR\n" % (currentKeyframe.co[0] / context.scene.render.fps, value))    
-                    elif currentKeyframe.interpolation == 'CONSTANT':
-                        fw_channel("keyframe %f %f CONSTANT\n" % (currentKeyframe.co[0] / context.scene.render.fps, value))    
+                    if not dataWritten:
+                        fw_animation("# %s\n" % (transform.lower().title() + "."))
+                        fw_animation("\n")
+
+                    dataWritten = True
                     
-                fw_channel("\n")
+                    fw_animation("channel %s\n" % friendlyName("channel_" + transform + "_" + element + "_" + name))
+
+                    # Save the channel.
+
+                    fw_channel("#\n")
+                    fw_channel("# Channel.\n")
+                    fw_channel("#\n")
+                    fw_channel("\n")
+                    fw_channel("name %s\n" % friendlyName("channel_" + transform + "_" + element + "_" + name))
+                    fw_channel("\n")
+                    fw_channel("target_transform %s\n" % transform)
+                    fw_channel("target_element %s\n" % element)
+                    fw_channel("\n")
+
+                    for currentKeyframe in currentCurve.keyframe_points:
+
+                        value = currentKeyframe.co[1]
+                        leftValue = currentKeyframe.handle_left[1]
+                        rightValue = currentKeyframe.handle_right[1]
+
+                        if element == "Z" and transform != "SCALE" and not isJoint:
+                            value = -value
+                            leftValue = -leftValue
+                            rightValue = -rightValue
+                            
+                        if transform == "ROTATE":
+                            value = math.degrees(value)
+                            leftValue = math.degrees(leftValue)
+                            rightValue = math.degrees(rightValue)
+
+                        if currentKeyframe.interpolation == 'BEZIER':
+                            fw_channel("keyframe %f %f BEZIER %f %f %f %f\n" % (currentKeyframe.co[0] / context.scene.render.fps, value, currentKeyframe.handle_left[0] / context.scene.render.fps, leftValue, currentKeyframe.handle_right[0] / context.scene.render.fps, rightValue))        
+                        elif currentKeyframe.interpolation == 'LINEAR':
+                            fw_channel("keyframe %f %f LINEAR\n" % (currentKeyframe.co[0] / context.scene.render.fps, value))    
+                        elif currentKeyframe.interpolation == 'CONSTANT':
+                            fw_channel("keyframe %f %f CONSTANT\n" % (currentKeyframe.co[0] / context.scene.render.fps, value))    
+                        
+                    fw_channel("\n")
 
         if dataWritten:    
             fw_animation("\n")
