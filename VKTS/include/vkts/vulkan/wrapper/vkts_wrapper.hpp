@@ -48,7 +48,7 @@
 #define VKTS_ENGINE_NAME            "VKTS"
 #define VKTS_ENGINE_MAJOR           1
 #define VKTS_ENGINE_MINOR           0
-#define VKTS_ENGINE_PATCH           33
+#define VKTS_ENGINE_PATCH           37
 #define VKTS_ENGINE_REVISION        0
 
 /**
