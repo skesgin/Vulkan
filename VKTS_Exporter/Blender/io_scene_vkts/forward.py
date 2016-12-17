@@ -187,6 +187,8 @@ forwardOutAssignGLSL = """
         float metallic = Metallic_0;
         
         vec3 baseColor = Color_0.rgb;
+
+        vec3 emissiveColor = Emissive_0.rgb;
         
         float ambientOcclusion = AmbientOcclusion_0;
         
@@ -264,7 +266,7 @@ forwardOutAssignGLSL = """
         
         //
         
-        color = mix(colorDielectric, colorMetallic, metallic);
+        color = mix(colorDielectric, colorMetallic, metallic) + emissiveColor;
     }
     else
     {
