@@ -502,6 +502,8 @@ def replaceParameters(currentNode, openNodes, processedNodes, currentMain):
                 currentValue = getFloat(currentSocket.default_value)
             elif isinstance(currentSocket, bpy.types.NodeSocketFloat):
                 currentValue = getFloat(currentSocket.default_value)
+            elif isinstance(currentSocket, bpy.types.NodeSocketFloatUnsigned):
+                currentValue = getFloat(currentSocket.default_value)
             elif isinstance(currentSocket, bpy.types.NodeSocketVector):
 
                 if isinstance(currentNode, bpy.types.ShaderNodeTexChecker) and currentSocket.name == "Vector":
@@ -628,6 +630,7 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName, use
             distanceCounter = 0
             emissiveCounter = 0
             facCounter = 0
+            gammaCounter = 0
             heightCounter = 0
             imageCounter = 0
             iorCounter = 0
@@ -979,6 +982,36 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName, use
                     normalMapUsed = True
                     
                     vertexAttributes = vertexAttributes | 0x00000004 | 0x00000008
+
+                elif isinstance(currentNode, bpy.types.ShaderNodeGamma):
+                    # Gamma.
+
+                    # Inputs
+                    
+                    colorInputName = "Color_%d" % (colorCounter)
+                    gammaInputName = "Gamma_%d" % (gammaCounter)
+
+                    colorCounter += 1
+                    gammaCounter += 1
+
+                    colorInputParameterName = "Color_Dummy"
+                    gammaInputParameterName = "Gamma_Dummy"
+                    
+                    # Outputs
+                    
+                    colorOutputName = friendlyNodeName(currentNode.name) + "_" + friendlyNodeName(currentNode.outputs["Color"].name) 
+                    
+                    #
+                    
+                    currentMain = gammaMain % (colorInputName, colorInputParameterName, gammaInputName, gammaInputParameterName, colorOutputName, colorInputName, gammaInputName) 
+                    
+                    #
+                    
+                    currentMain = replaceParameters(currentNode, openNodes, processedNodes, currentMain)
+                    
+                    #
+                        
+                    currentFragmentGLSL = currentFragmentGLSL.replace("#previousMain#", currentMain)
 
                 elif isinstance(currentNode, bpy.types.ShaderNodeInvert):
                     # Invert color.

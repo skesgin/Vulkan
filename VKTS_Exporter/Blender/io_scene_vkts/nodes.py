@@ -274,6 +274,19 @@ normalMapMain = """#previousMain#
 # Color
 #
 
+gammaMain =  """#previousMain#
+    
+    // Gamma start
+
+    // In
+    vec4 %s = %s;
+    float %s = clamp(%s, 0.001, 10.000);
+    
+    // Out
+    vec4 %s = pow(%s, vec4(1.0 / %s));
+    
+    // Gamma end"""
+
 invertMain = """#previousMain#
     
     // Invert start
