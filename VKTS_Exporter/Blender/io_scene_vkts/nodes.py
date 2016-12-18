@@ -170,6 +170,34 @@ pbrMain = """#previousMain#
 # Converter
 #
 
+combineRgbMain = """#previousMain#
+    
+    // Combine RGB start
+
+    // In
+    float %s = %s;
+    float %s = %s;
+    float %s = %s;
+    
+    // Out
+    vec4 %s = vec4(%s, %s, %s, 1.0);
+    
+    // end""" 
+
+combineXyzMain = """#previousMain#
+    
+    // Combine XYZ start
+
+    // In
+    float %s = %s;
+    float %s = %s;
+    float %s = %s;
+    
+    // Out
+    vec3 %s = vec3(%s, %s, %s);
+    
+    // end""" 
+
 mathMain = """#previousMain#
     
     // Math start
@@ -255,6 +283,20 @@ mappingMain = """#previousMain#
     vec3 %s = %s%s%s.xyz;
     
     // Mapping end"""
+
+normalMain = """#previousMain#
+    
+    // Normal start
+
+    // In
+    vec3 %s = %s;
+    
+    // Out
+    
+    vec3 %s = %s;
+    float %s = dot(%s, %s);
+    
+    // Normal end"""
 
 normalMapMain = """#previousMain#
     

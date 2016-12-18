@@ -504,6 +504,8 @@ def replaceParameters(currentNode, openNodes, processedNodes, currentMain):
                 currentValue = getFloat(currentSocket.default_value)
             elif isinstance(currentSocket, bpy.types.NodeSocketFloatUnsigned):
                 currentValue = getFloat(currentSocket.default_value)
+            elif isinstance(currentSocket, bpy.types.NodeSocketVectorDirection):                
+                currentValue = getVec3(currentSocket.default_value)
             elif isinstance(currentSocket, bpy.types.NodeSocketVector):
 
                 if isinstance(currentNode, bpy.types.ShaderNodeTexChecker) and currentSocket.name == "Vector":
@@ -643,6 +645,14 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName, use
             tempCounter = 0
             valueCounter = 0
             vectorCounter = 0
+
+            rCounter = 0
+            gCounter = 0
+            bCounter = 0
+
+            xCounter = 0
+            yCounter = 0
+            zCounter = 0
             
             openNodes = []
             processedNodes = []
@@ -712,6 +722,72 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName, use
                     
                         vertexAttributes = vertexAttributes | 0x00000010 | 0x00000004 | 0x00000008
 
+                    currentMain = replaceParameters(currentNode, openNodes, processedNodes, currentMain)
+                    
+                    #
+                        
+                    currentFragmentGLSL = currentFragmentGLSL.replace("#previousMain#", currentMain)
+
+                elif isinstance(currentNode, bpy.types.ShaderNodeCombineRGB):
+                    # Combine color.
+
+                    # Inputs
+                    
+                    rInputName = "R_%d" % (rCounter)
+                    gInputName = "G_%d" % (gCounter)
+                    bInputName = "B_%d" % (bCounter)
+
+                    rCounter += 1
+                    gCounter += 1
+                    bCounter += 1
+
+                    rInputParameterName = "R_Dummy"
+                    gInputParameterName = "G_Dummy"
+                    bInputParameterName = "B_Dummy"
+                    
+                    # Outputs
+                    
+                    imageOutputName = friendlyNodeName(currentNode.name) + "_" + friendlyNodeName(currentNode.outputs["Image"].name) 
+                    
+                    #
+                    
+                    currentMain = combineRgbMain % (rInputName, rInputParameterName, gInputName, gInputParameterName, bInputName, bInputParameterName, imageOutputName, rInputName, gInputName, bInputName)
+                    
+                    #
+                    
+                    currentMain = replaceParameters(currentNode, openNodes, processedNodes, currentMain)
+                    
+                    #
+                        
+                    currentFragmentGLSL = currentFragmentGLSL.replace("#previousMain#", currentMain)
+
+                elif isinstance(currentNode, bpy.types.ShaderNodeCombineXYZ):
+                    # Combine xyz.
+
+                    # Inputs
+                    
+                    xInputName = "X_%d" % (xCounter)
+                    yInputName = "Y_%d" % (yCounter)
+                    zInputName = "Z_%d" % (zCounter)
+
+                    xCounter += 1
+                    yCounter += 1
+                    zCounter += 1
+
+                    xInputParameterName = "X_Dummy"
+                    yInputParameterName = "Y_Dummy"
+                    zInputParameterName = "Z_Dummy"
+                    
+                    # Outputs
+                    
+                    vectorOutputName = friendlyNodeName(currentNode.name) + "_" + friendlyNodeName(currentNode.outputs["Vector"].name) 
+                    
+                    #
+                    
+                    currentMain = combineXyzMain % (xInputName, xInputParameterName, yInputName, yInputParameterName, zInputName, zInputParameterName, vectorOutputName, xInputName, yInputName, zInputName)
+                    
+                    #
+                    
                     currentMain = replaceParameters(currentNode, openNodes, processedNodes, currentMain)
                     
                     #
@@ -945,6 +1021,38 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName, use
                      
                     #
                         
+                    currentFragmentGLSL = currentFragmentGLSL.replace("#previousMain#", currentMain)
+
+                elif isinstance(currentNode, bpy.types.ShaderNodeNormal):
+                    # Normal.
+                    
+                    # Inputs
+                    
+                    normalInputName = "Normal_%d" % (normalCounter)
+
+                    normalCounter += 1
+
+                    normalInputParameterName = "Normal_Dummy"
+                    
+                    # Outputs
+                    
+                    normalOutputName = friendlyNodeName(currentNode.name) + "_" + friendlyNodeName(currentNode.outputs["Normal"].name)
+                    dotOutputName = friendlyNodeName(currentNode.name) + "_" + friendlyNodeName(currentNode.outputs["Dot"].name)
+                    
+                    #
+
+                    internalNormal = getVec3(currentNode.outputs[0].default_value)
+
+                    #
+                    
+                    currentMain = normalMain % (normalInputName, normalInputParameterName, normalOutputName, internalNormal, dotOutputName, normalInputName, internalNormal) 
+                    
+                    #
+                    
+                    currentMain = replaceParameters(currentNode, openNodes, processedNodes, currentMain)
+                    
+                    #
+                    
                     currentFragmentGLSL = currentFragmentGLSL.replace("#previousMain#", currentMain)
 
                 elif isinstance(currentNode, bpy.types.ShaderNodeNormalMap):
