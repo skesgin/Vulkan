@@ -219,4 +219,24 @@ glm::mat3 VKTS_APIENTRY renderGetBasis(const glm::vec3& normal)
 	return glm::mat3(tangent, bitangent, normal);
 }
 
+glm::vec3 VKTS_APIENTRY renderColorToLinear(const glm::vec3& c, const float invGamma)
+{
+	return glm::pow(c, glm::vec3(invGamma, invGamma, invGamma));
+}
+
+glm::vec3 VKTS_APIENTRY renderColorToNonLinear(const glm::vec3& c, const float gamma)
+{
+	return glm::pow(c, glm::vec3(gamma, gamma, gamma));
+}
+
+glm::vec4 VKTS_APIENTRY renderColorToLinear(const glm::vec4& c, const float invGamma)
+{
+	return glm::vec4(renderColorToLinear(glm::vec3(c), invGamma), c.a);
+}
+
+glm::vec4 VKTS_APIENTRY renderColorToNonLinear(const glm::vec4& c, const float gamma)
+{
+	return glm::vec4(renderColorToNonLinear(glm::vec3(c), gamma), c.a);
+}
+
 }

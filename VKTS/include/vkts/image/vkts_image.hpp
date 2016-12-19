@@ -41,6 +41,8 @@
  *
  */
 
+#define VKTS_GAMMA 2.2f
+
 /**
  * Image data.
  */
