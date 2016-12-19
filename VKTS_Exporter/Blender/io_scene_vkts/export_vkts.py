@@ -1272,8 +1272,18 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName, use
                     alphaOutputName = friendlyNodeName(currentNode.name) + "_" + friendlyNodeName(currentNode.outputs["Alpha"].name)
                     
                     #
+
+                    preContent = ""
+                    postContent = ""
+
+                    # SRGB to color.
+                    if currentNode.color_space == 'COLOR':
+                        preContent = "pow("
+                        postContent = ", vec4(2.2, 2.2, 2.2, 1.0))"
+
+                    #
                     
-                    currentMain = texImageMain % (vectorInputName, vectorInputParameterName, colorOutputName, textureIndex, vectorInputName, alphaOutputName, textureIndex, vectorInputName)
+                    currentMain = texImageMain % (vectorInputName, vectorInputParameterName, colorOutputName, preContent, textureIndex, vectorInputName, postContent, alphaOutputName, textureIndex, vectorInputName)
                     
                     #
                     

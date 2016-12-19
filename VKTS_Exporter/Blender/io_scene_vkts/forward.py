@@ -266,7 +266,7 @@ forwardOutAssignGLSL = """
         
         //
         
-        color = mix(colorDielectric, colorMetallic, metallic) + emissiveColor;
+        color = pow(mix(colorDielectric, colorMetallic, metallic) + emissiveColor, vec3(0.4545,0.4545,0.4545));
     }
     else
     {
