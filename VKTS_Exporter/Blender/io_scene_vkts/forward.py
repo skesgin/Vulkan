@@ -24,7 +24,10 @@
 
 VKTS_BINDING_UNIFORM_SAMPLER_BSDF_FORWARD_FIRST = 10
 
-forwardGeneralDefineGLSL = """#define VKTS_MAX_LIGHTS 16
+forwardGeneralDefineGLSL = """#define VKTS_GAMMA 2.2
+#define VKTS_INV_GAMMA (1.0/VKTS_GAMMA)
+
+#define VKTS_MAX_LIGHTS 16
 
 #define VKTS_PI 3.14159265
 
@@ -47,7 +50,17 @@ forwardGeneralTextureGLSL = """layout (binding = 9) uniform sampler2D u_lut;
 layout (binding = 8) uniform samplerCube u_specularCubemap;
 layout (binding = 7) uniform samplerCube u_diffuseCubemap;"""
 
-forwardGeneralFunctionsGLSL = """float pow_5(float x)
+forwardGeneralFunctionsGLSL = """vec3 colorToLinear(vec3 c)
+{
+    return pow(c, vec3(VKTS_GAMMA, VKTS_GAMMA, VKTS_GAMMA));
+}
+
+vec3 colorToNonLinear(vec3 c)
+{
+    return pow(c, vec3(VKTS_INV_GAMMA, VKTS_INV_GAMMA, VKTS_INV_GAMMA));
+}
+
+float pow_5(float x)
 {
     float x2 = x * x;
     float x4 = x2 * x2;
@@ -98,7 +111,7 @@ vec3 lambert(vec3 L, vec3 lightColor, vec3 N, vec3 baseColor)
 
 vec3 iblLambert(vec3 N, vec3 baseColor)
 {
-    return baseColor * texture(u_diffuseCubemap, N).rgb;
+    return baseColor * colorToLinear(texture(u_diffuseCubemap, N).rgb);
 }
 
 vec3 cookTorrance(vec3 L, vec3 lightColor, vec3 N, vec3 V, float roughness, float F0)
@@ -146,7 +159,7 @@ vec3 iblCookTorrance(vec3 N, vec3 V, float roughness, vec3 baseColor, float F0)
         float rHigh = ceil(scaledRoughness);    
         float rFraction = scaledRoughness - rLow;
         
-        vec3 prefilteredColor = mix(textureLod(u_specularCubemap, L, rLow).rgb, textureLod(u_specularCubemap, L, rHigh).rgb, rFraction);
+        vec3 prefilteredColor = mix(colorToLinear(textureLod(u_specularCubemap, L, rLow).rgb), colorToLinear(textureLod(u_specularCubemap, L, rHigh).rgb), rFraction);
 
         vec2 envBRDF = texture(u_lut, vec2(NdotV, roughness)).rg;
         
@@ -266,7 +279,7 @@ forwardOutAssignGLSL = """
         
         //
         
-        color = pow(mix(colorDielectric, colorMetallic, metallic) + emissiveColor, vec3(0.4545,0.4545,0.4545));
+        color = colorToNonLinear(mix(colorDielectric, colorMetallic, metallic) + emissiveColor);
     }
     else
     {
