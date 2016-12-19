@@ -1077,7 +1077,7 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
     {
         if (jointIndex == -1)
         {
-        	this->transformMatrix = translateMat4(finalTranslate.x, finalTranslate.y, finalTranslate.z) * rotateRzRyRxMat4(finalRotate.z, finalRotate.y, finalRotate.x) * scaleMat4(finalScale.x, finalScale.y, finalScale.z);
+        	this->transformMatrix = translateMat4(finalTranslate.x, finalTranslate.y, finalTranslate.z) * rotateRyRzRxMat4(finalRotate.y, finalRotate.z, finalRotate.x) * scaleMat4(finalScale.x, finalScale.y, finalScale.z);
 
         	// Only use parent transform, if this is not an armature.
         	if (joints == 0)

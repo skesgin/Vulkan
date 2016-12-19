@@ -114,6 +114,12 @@ VKTS_APICALL glm::mat4 VKTS_APIENTRY rotateRzRyRxMat4(const float anglez, const 
  *
  * @ThreadSafe
  */
+VKTS_APICALL glm::mat4 VKTS_APIENTRY rotateRyRzRxMat4(const float angley, const float anglez, const float anglex);
+
+/**
+ *
+ * @ThreadSafe
+ */
 VKTS_APICALL glm::mat3 VKTS_APIENTRY rotateRzRxRyMat3(const float anglez, const float anglex, const float angley);
 
 /**
@@ -121,6 +127,12 @@ VKTS_APICALL glm::mat3 VKTS_APIENTRY rotateRzRxRyMat3(const float anglez, const 
  * @ThreadSafe
  */
 VKTS_APICALL glm::mat3 VKTS_APIENTRY rotateRzRyRxMat3(const float anglez, const float angley, const float anglex);
+
+/**
+ *
+ * @ThreadSafe
+ */
+VKTS_APICALL glm::mat3 VKTS_APIENTRY rotateRyRzRxMat3(const float angley, const float anglez, const float anglex);
 
 /**
  *
@@ -182,19 +194,32 @@ VKTS_APICALL glm::vec3 VKTS_APIENTRY decomposeRotateRzRxRy(const glm::mat4& matr
  *
  * @ThreadSafe
  */
-VKTS_APICALL glm::vec3 VKTS_APIENTRY decomposeRotateRzRxRy(const glm::mat3& matrix);
-
-/**
- *
- * @ThreadSafe
- */
 VKTS_APICALL glm::vec3 VKTS_APIENTRY decomposeRotateRzRyRx(const glm::mat4& matrix);
 
 /**
  *
  * @ThreadSafe
  */
+VKTS_APICALL glm::vec3 VKTS_APIENTRY decomposeRotateRyRzRx(const glm::mat4& matrix);
+
+
+/**
+ *
+ * @ThreadSafe
+ */
+VKTS_APICALL glm::vec3 VKTS_APIENTRY decomposeRotateRzRxRy(const glm::mat3& matrix);
+
+/**
+ *
+ * @ThreadSafe
+ */
 VKTS_APICALL glm::vec3 VKTS_APIENTRY decomposeRotateRzRyRx(const glm::mat3& matrix);
+
+/**
+ *
+ * @ThreadSafe
+ */
+VKTS_APICALL glm::vec3 VKTS_APIENTRY decomposeRotateRyRzRx(const glm::mat3& matrix);
 
 /**
  *

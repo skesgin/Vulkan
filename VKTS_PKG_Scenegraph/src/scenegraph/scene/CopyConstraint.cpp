@@ -127,7 +127,14 @@ VkBool32 CopyConstraint::applyConstraint(INode& node)
 			break;
 		case COPY_ROTATION:
 			currentTransform = node.getFinalRotate();
-			targetTransform  = decomposeRotateRzRyRx(target->getTransformMatrix());
+			if (node.getJointIndex() == -1)
+			{
+				targetTransform  = decomposeRotateRyRzRx(target->getTransformMatrix());
+			}
+			else
+			{
+				targetTransform  = decomposeRotateRzRyRx(target->getTransformMatrix());
+			}
 			break;
 		case COPY_SCALE:
 			currentTransform = node.getFinalScale();

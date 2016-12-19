@@ -3539,8 +3539,8 @@ static VkBool32 sceneLoadObjects(const char* directory, const char* filename, co
     auto particleSystem = IParticleSystemSP();
 
     IConstraintSP constraint;
-    ICopyConstraint* copyConstraint;
-    ILimitConstraint* limitConstraint;
+    ICopyConstraint* copyConstraint = nullptr;
+    ILimitConstraint* limitConstraint = nullptr;
 
     SmartPointerMap<std::string, INodeSP> allNodes;
 

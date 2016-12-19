@@ -272,6 +272,36 @@ glm::mat4 VKTS_APIENTRY rotateRzRyRxMat4(const float anglez, const float angley,
     return matrix;
 }
 
+glm::mat4 VKTS_APIENTRY rotateRyRzRxMat4(const float angley, const float anglez, const float anglex)
+{
+    glm::mat4 matrix(1.0f);
+
+    float rx = glm::radians(anglex);
+    float ry = glm::radians(angley);
+    float rz = glm::radians(anglez);
+
+    float sx = sinf(rx);
+    float cx = cosf(rx);
+    float sy = sinf(ry);
+    float cy = cosf(ry);
+    float sz = sinf(rz);
+    float cz = cosf(rz);
+
+    matrix[0][0] = cy * cz;
+    matrix[0][1] = sz;
+    matrix[0][2] = -cz * sy;
+
+    matrix[1][0] = sx * sy - cx * cy * sz;
+    matrix[1][1] = cx * cz;
+    matrix[1][2] = cy * sx + cx * sy * sz;
+
+    matrix[2][0] = cx * sy + cy * sx * sz;
+    matrix[2][1] = -cz * sx;
+    matrix[2][2] = cx * cy - sx * sy * sz;
+
+    return matrix;
+}
+
 glm::mat3 VKTS_APIENTRY rotateRzRxRyMat3(const float anglez, const float anglex, const float angley)
 {
     glm::mat3 matrix(1.0f);
@@ -328,6 +358,36 @@ glm::mat3 VKTS_APIENTRY rotateRzRyRxMat3(const float anglez, const float angley,
     matrix[2][0] = sz * sx + cx * cz * sy;
     matrix[2][1] = -cz * sx + cx * sy * sz;
     matrix[2][2] = cx * cy;
+
+    return matrix;
+}
+
+glm::mat3 VKTS_APIENTRY rotateRyRzRxMat3(const float angley, const float anglez, const float anglex)
+{
+    glm::mat3 matrix(1.0f);
+
+    float rx = glm::radians(anglex);
+    float ry = glm::radians(angley);
+    float rz = glm::radians(anglez);
+
+    float sx = sinf(rx);
+    float cx = cosf(rx);
+    float sy = sinf(ry);
+    float cy = cosf(ry);
+    float sz = sinf(rz);
+    float cz = cosf(rz);
+
+    matrix[0][0] = cy * cz;
+    matrix[0][1] = sz;
+    matrix[0][2] = -cz * sy;
+
+    matrix[1][0] = sx * sy - cx * cy * sz;
+    matrix[1][1] = cx * cz;
+    matrix[1][2] = cy * sx + cx * sy * sz;
+
+    matrix[2][0] = cx * sy + cy * sx * sz;
+    matrix[2][1] = -cz * sx;
+    matrix[2][2] = cx * cy - sx * sy * sz;
 
     return matrix;
 }
@@ -431,7 +491,7 @@ glm::vec3 VKTS_APIENTRY decomposeRotateRzRxRy(const glm::mat3& matrix)
 	glm::vec3 scale = decomposeScale(matrix);
 
 	rotation[0] = glm::degrees(asinf(matrix[1][2] / scale[1]));
-	rotation[1] = glm::degrees(atan2f(-matrix[0][2] / scale[0], matrix[3][3] / scale[2]));
+	rotation[1] = glm::degrees(atan2f(-matrix[0][2] / scale[0], matrix[2][2] / scale[2]));
 	rotation[2] = glm::degrees(atan2f(-matrix[1][0] / scale[1], matrix[1][1] / scale[1]));
 
 	// Bring between [-180.0;180.0[
@@ -476,6 +536,49 @@ glm::vec3 VKTS_APIENTRY decomposeRotateRzRyRx(const glm::mat3& matrix)
 	rotation[0] = glm::degrees(atan2f(matrix[1][2] / scale[1], matrix[2][2] / scale[2]));
 	rotation[1] = glm::degrees(asinf(-matrix[0][2] / scale[0]));
 	rotation[2] = glm::degrees(atan2f(matrix[0][1] / scale[0], matrix[0][0] / scale[0]));
+
+	// Bring between [-180.0;180.0[
+	if ((rotation[0] <= -90.0f || rotation[0] > 90.0f) && (rotation[2] <= -90.0f || rotation[2] > 90.0f))
+	{
+		rotation[0] -= 180.0f;
+		if (rotation[0] < -180.0f)
+		{
+			rotation[0] += 360.0f;
+		}
+
+		if (rotation[1] >= 0.0f)
+		{
+			rotation[1] = 180.0f - rotation[1];
+		}
+		else
+		{
+			rotation[1] = -180.0f - rotation[1];
+		}
+
+		rotation[2] -= 180.0f;
+		if (rotation[2] < -180.0f)
+		{
+			rotation[2] += 360.0f;
+		}
+	}
+
+	return rotation;
+}
+
+glm::vec3 VKTS_APIENTRY decomposeRotateRyRzRx(const glm::mat4& matrix)
+{
+	return decomposeRotateRzRyRx(glm::mat3(matrix));
+}
+
+glm::vec3 VKTS_APIENTRY decomposeRotateRyRzRx(const glm::mat3& matrix)
+{
+	glm::vec3 rotation;
+
+	glm::vec3 scale = decomposeScale(matrix);
+
+	rotation[0] = glm::degrees(atan2f(-matrix[2][1] / scale[1], matrix[1][1] / scale[2]));
+	rotation[1] = glm::degrees(atan2f(-matrix[0][2] / scale[0], matrix[0][0] / scale[0]));
+	rotation[2] = glm::degrees(asinf(matrix[0][1] / scale[0]));
 
 	// Bring between [-180.0;180.0[
 	if ((rotation[0] <= -90.0f || rotation[0] > 90.0f) && (rotation[2] <= -90.0f || rotation[2] > 90.0f))
