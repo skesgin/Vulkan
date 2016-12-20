@@ -56,6 +56,12 @@ VKTS_APICALL VkBool32 VKTS_APIENTRY imageDataIsUNORM(const VkFormat format);
  */
 VKTS_APICALL VkBool32 VKTS_APIENTRY imageDataIsSFLOAT(const VkFormat format);
 
+/**
+ * Only supported SRGBs and non compressed formats are returned as true.
+ *
+ * @ThreadSafe
+ */
+VKTS_APICALL VkBool32 VKTS_APIENTRY imageDataIsSRGB(const VkFormat format);
 
 /**
  * Only for supported formats the bytes per texel is returned.
@@ -95,7 +101,7 @@ VKTS_APICALL void VKTS_APIENTRY imageDataSetSaveFunction(const PFN_imageDataSave
  *
  * @ThreadSafe
  */
-VKTS_APICALL IImageDataSP VKTS_APIENTRY imageDataLoad(const char* filename);
+VKTS_APICALL IImageDataSP VKTS_APIENTRY imageDataLoad(const char* filename, const VkBool32 srgb = VK_FALSE);
 
 /**
  *
@@ -131,7 +137,7 @@ VKTS_APICALL IImageDataSP VKTS_APIENTRY imageDataCreate(const std::string& name,
  *
  * @ThreadSafe
  */
-VKTS_APICALL IImageDataSP VKTS_APIENTRY imageDataConvert(const IImageDataSP& sourceImage, const VkFormat targetFormat, const std::string& name);
+VKTS_APICALL IImageDataSP VKTS_APIENTRY imageDataConvert(const IImageDataSP& sourceImage, const VkFormat targetFormat, const std::string& name, const VkBool32 srgbConversion = VK_TRUE);
 
 /**
  *

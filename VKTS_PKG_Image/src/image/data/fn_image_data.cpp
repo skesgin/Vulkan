@@ -991,7 +991,19 @@ IImageDataSP VKTS_APIENTRY imageDataCreate(const std::string& name, const uint32
 
         numberChannels = 1;
     }
+    else if (format == VK_FORMAT_R8_SRGB)
+    {
+        bytesPerChannel = 1;
+
+        numberChannels = 1;
+    }
     else if (format == VK_FORMAT_R8G8_UNORM)
+    {
+        bytesPerChannel = 1;
+
+        numberChannels = 2;
+    }
+    else if (format == VK_FORMAT_R8G8_SRGB)
     {
         bytesPerChannel = 1;
 
@@ -1003,7 +1015,19 @@ IImageDataSP VKTS_APIENTRY imageDataCreate(const std::string& name, const uint32
 
         numberChannels = 3;
     }
+    else if (format == VK_FORMAT_R8G8B8_SRGB)
+    {
+        bytesPerChannel = 1;
+
+        numberChannels = 3;
+    }
     else if (format == VK_FORMAT_B8G8R8_UNORM)
+    {
+        bytesPerChannel = 1;
+
+        numberChannels = 3;
+    }
+    else if (format == VK_FORMAT_B8G8R8_SRGB)
     {
         bytesPerChannel = 1;
 
@@ -1015,7 +1039,19 @@ IImageDataSP VKTS_APIENTRY imageDataCreate(const std::string& name, const uint32
 
         numberChannels = 4;
     }
+    else if (format == VK_FORMAT_R8G8B8A8_SRGB)
+    {
+        bytesPerChannel = 1;
+
+        numberChannels = 4;
+    }
     else if (format == VK_FORMAT_B8G8R8A8_UNORM)
+    {
+        bytesPerChannel = 1;
+
+        numberChannels = 4;
+    }
+    else if (format == VK_FORMAT_B8G8R8A8_SRGB)
     {
         bytesPerChannel = 1;
 
@@ -1092,7 +1128,7 @@ IImageDataSP VKTS_APIENTRY imageDataCreate(const std::string& name, const uint32
 	return imageDataCreate(name, width, height, depth, glm::vec4(red, green, blue, alpha), imageType, format);
 }
 
-IImageDataSP VKTS_APIENTRY imageDataConvert(const IImageDataSP& sourceImage, const VkFormat targetFormat, const std::string& name)
+IImageDataSP VKTS_APIENTRY imageDataConvert(const IImageDataSP& sourceImage, const VkFormat targetFormat, const std::string& name, const VkBool32 srgbConversion)
 {
     if (!sourceImage.get() || sourceImage->getMipLevels() != 1)
     {
@@ -1103,15 +1139,16 @@ IImageDataSP VKTS_APIENTRY imageDataConvert(const IImageDataSP& sourceImage, con
 
     VkBool32 sourceIsUNORM = VK_TRUE;
     VkBool32 sourceIsSFLOAT = VK_FALSE;
+    float sourceGamma = 1.0f;
 
-    int8_t sourceRgbaIndices[4] =
-    { 0, -1, -1, -1 };
+    int8_t sourceRgbaIndices[4] = { 0, -1, -1, -1 };
 
     int32_t targetBytesPerChannel;
     int32_t targetNumberChannels;
 
     VkBool32 targetIsUNORM = VK_TRUE;
     VkBool32 targetIsSFLOAT = VK_FALSE;
+    float targetGamma = 1.0f;
 
     int8_t targetRgbaIndices[4] = { 0, -1, -1, -1 };
 
@@ -1126,11 +1163,29 @@ IImageDataSP VKTS_APIENTRY imageDataConvert(const IImageDataSP& sourceImage, con
 
             break;
 
+        case VK_FORMAT_R8_SRGB:
+
+            sourceNumberChannels = 1;
+
+            sourceGamma = 2.2f;
+
+            break;
+
         case VK_FORMAT_R8G8_UNORM:
 
             sourceNumberChannels = 2;
 
             sourceRgbaIndices[1] = 1;
+
+            break;
+
+        case VK_FORMAT_R8G8_SRGB:
+
+            sourceNumberChannels = 2;
+
+            sourceRgbaIndices[1] = 1;
+
+            sourceGamma = 2.2f;
 
             break;
 
@@ -1140,6 +1195,17 @@ IImageDataSP VKTS_APIENTRY imageDataConvert(const IImageDataSP& sourceImage, con
 
             sourceRgbaIndices[1] = 1;
             sourceRgbaIndices[2] = 2;
+
+            break;
+
+        case VK_FORMAT_R8G8B8_SRGB:
+
+            sourceNumberChannels = 3;
+
+            sourceRgbaIndices[1] = 1;
+            sourceRgbaIndices[2] = 2;
+
+            sourceGamma = 2.2f;
 
             break;
 
@@ -1153,6 +1219,18 @@ IImageDataSP VKTS_APIENTRY imageDataConvert(const IImageDataSP& sourceImage, con
 
             break;
 
+        case VK_FORMAT_B8G8R8_SRGB:
+
+            sourceNumberChannels = 3;
+
+            sourceRgbaIndices[0] = 2;
+            sourceRgbaIndices[1] = 1;
+            sourceRgbaIndices[2] = 0;
+
+            sourceGamma = 2.2f;
+
+            break;
+
         case VK_FORMAT_R8G8B8A8_UNORM:
 
             sourceNumberChannels = 4;
@@ -1160,6 +1238,18 @@ IImageDataSP VKTS_APIENTRY imageDataConvert(const IImageDataSP& sourceImage, con
             sourceRgbaIndices[1] = 1;
             sourceRgbaIndices[2] = 2;
             sourceRgbaIndices[3] = 3;
+
+            break;
+
+        case VK_FORMAT_R8G8B8A8_SRGB:
+
+            sourceNumberChannels = 4;
+
+            sourceRgbaIndices[1] = 1;
+            sourceRgbaIndices[2] = 2;
+            sourceRgbaIndices[3] = 3;
+
+            sourceGamma = 2.2f;
 
             break;
 
@@ -1171,6 +1261,19 @@ IImageDataSP VKTS_APIENTRY imageDataConvert(const IImageDataSP& sourceImage, con
             sourceRgbaIndices[1] = 1;
             sourceRgbaIndices[2] = 0;
             sourceRgbaIndices[3] = 3;
+
+            break;
+
+        case VK_FORMAT_B8G8R8A8_SRGB:
+
+            sourceNumberChannels = 4;
+
+            sourceRgbaIndices[0] = 2;
+            sourceRgbaIndices[1] = 1;
+            sourceRgbaIndices[2] = 0;
+            sourceRgbaIndices[3] = 3;
+
+            sourceGamma = 2.2f;
 
             break;
 
@@ -1235,6 +1338,16 @@ IImageDataSP VKTS_APIENTRY imageDataConvert(const IImageDataSP& sourceImage, con
 
             break;
 
+        case VK_FORMAT_R8_SRGB:
+
+            targetBytesPerChannel = 1;
+
+            targetNumberChannels = 1;
+
+            targetGamma = 2.2f;
+
+            break;
+
         case VK_FORMAT_R8G8_UNORM:
 
             targetBytesPerChannel = 1;
@@ -1242,6 +1355,18 @@ IImageDataSP VKTS_APIENTRY imageDataConvert(const IImageDataSP& sourceImage, con
             targetNumberChannels = 2;
 
             targetRgbaIndices[1] = 1;
+
+            break;
+
+        case VK_FORMAT_R8G8_SRGB:
+
+            targetBytesPerChannel = 1;
+
+            targetNumberChannels = 2;
+
+            targetRgbaIndices[1] = 1;
+
+            targetGamma = 2.2f;
 
             break;
 
@@ -1253,6 +1378,19 @@ IImageDataSP VKTS_APIENTRY imageDataConvert(const IImageDataSP& sourceImage, con
 
             targetRgbaIndices[1] = 1;
             targetRgbaIndices[2] = 2;
+
+            break;
+
+        case VK_FORMAT_R8G8B8_SRGB:
+
+            targetBytesPerChannel = 1;
+
+            targetNumberChannels = 3;
+
+            targetRgbaIndices[1] = 1;
+            targetRgbaIndices[2] = 2;
+
+            targetGamma = 2.2f;
 
             break;
 
@@ -1268,6 +1406,20 @@ IImageDataSP VKTS_APIENTRY imageDataConvert(const IImageDataSP& sourceImage, con
 
             break;
 
+        case VK_FORMAT_B8G8R8_SRGB:
+
+            targetBytesPerChannel = 1;
+
+            targetNumberChannels = 3;
+
+            targetRgbaIndices[0] = 2;
+            targetRgbaIndices[1] = 1;
+            targetRgbaIndices[2] = 0;
+
+            targetGamma = 2.2f;
+
+            break;
+
         case VK_FORMAT_R8G8B8A8_UNORM:
 
             targetBytesPerChannel = 1;
@@ -1277,6 +1429,20 @@ IImageDataSP VKTS_APIENTRY imageDataConvert(const IImageDataSP& sourceImage, con
             targetRgbaIndices[1] = 1;
             targetRgbaIndices[2] = 2;
             targetRgbaIndices[3] = 3;
+
+            break;
+
+        case VK_FORMAT_R8G8B8A8_SRGB:
+
+            targetBytesPerChannel = 1;
+
+            targetNumberChannels = 4;
+
+            targetRgbaIndices[1] = 1;
+            targetRgbaIndices[2] = 2;
+            targetRgbaIndices[3] = 3;
+
+            targetGamma = 2.2f;
 
             break;
 
@@ -1290,6 +1456,21 @@ IImageDataSP VKTS_APIENTRY imageDataConvert(const IImageDataSP& sourceImage, con
             targetRgbaIndices[1] = 1;
             targetRgbaIndices[2] = 0;
             targetRgbaIndices[3] = 3;
+
+            break;
+
+        case VK_FORMAT_B8G8R8A8_SRGB:
+
+            targetBytesPerChannel = 1;
+
+            targetNumberChannels = 4;
+
+            targetRgbaIndices[0] = 2;
+            targetRgbaIndices[1] = 1;
+            targetRgbaIndices[2] = 0;
+            targetRgbaIndices[3] = 3;
+
+            targetGamma = 2.2f;
 
             break;
 
@@ -1367,24 +1548,50 @@ IImageDataSP VKTS_APIENTRY imageDataConvert(const IImageDataSP& sourceImage, con
     uint8_t* currentTargetUINT8 = &targetData[0];
     float* currentTargetFLOAT = (float*) &targetData[0];
 
+    float exponent = 1.0f;
+    if (sourceGamma != targetGamma && srgbConversion)
+    {
+    	if (targetGamma != 1.0f)
+    	{
+    		exponent = 1.0f / targetGamma;
+    	}
+    	else
+    	{
+    		exponent = sourceGamma;
+    	}
+    }
+
     for (int32_t z = 0; z < (int32_t)sourceImage->getDepth(); z++)
     {
         for (int32_t y = 0; y < (int32_t)sourceImage->getHeight(); y++)
         {
             for (int32_t x = 0; x < (int32_t)sourceImage->getWidth(); x++)
             {
-                for (int32_t channel = 0; channel < targetNumberChannels;
-                        channel++)
+                for (int32_t channel = 0; channel < targetNumberChannels; channel++)
                 {
                     if (channel < sourceNumberChannels)
                     {
                         if (sourceIsUNORM)
                         {
                             rgbaUINT8[sourceRgbaIndices[channel]] = currentSourceUINT8[channel + x * sourceNumberChannels + y * sourceImage->getWidth() * sourceNumberChannels + z * sourceImage->getHeight() * sourceImage->getWidth() * sourceNumberChannels];
+
+                            // Only for color channels.
+                            if (exponent != 1.0f && channel < 3)
+                            {
+                            	float temp = static_cast<float>(rgbaUINT8[sourceRgbaIndices[channel]]) / 255.0f;
+                            	temp = powf(temp, exponent);
+                            	rgbaUINT8[sourceRgbaIndices[channel]] = static_cast<uint8_t>(glm::clamp(temp, 0.0f, 1.0f) * 255.0f);
+                            }
                         }
                         else if (sourceIsSFLOAT)
                         {
                             rgbaFLOAT[sourceRgbaIndices[channel]] = currentSourceFLOAT[channel + x * sourceNumberChannels + y * sourceImage->getWidth() * sourceNumberChannels + z * sourceImage->getHeight() * sourceImage->getWidth() * sourceNumberChannels];
+
+                            // Only for color channels.
+                            if (exponent != 1.0f && channel < 3)
+                            {
+                            	rgbaFLOAT[sourceRgbaIndices[channel]] = powf(rgbaFLOAT[sourceRgbaIndices[channel]], exponent);
+                            }
                         }
                     }
 

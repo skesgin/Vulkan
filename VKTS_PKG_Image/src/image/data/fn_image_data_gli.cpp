@@ -50,6 +50,20 @@ static VkFormat imageDataTranslateFormat(const gli::format format)
 			return VK_FORMAT_R8G8B8A8_UNORM;
 		case gli::FORMAT_BGRA8_UNORM_PACK8:
 			return VK_FORMAT_B8G8R8A8_UNORM;
+		//
+		case gli::FORMAT_R8_SRGB_PACK8:
+			return VK_FORMAT_R8_SRGB;
+		case gli::FORMAT_RG8_SRGB_PACK8:
+			return VK_FORMAT_R8G8_SRGB;
+		case gli::FORMAT_RGB8_SRGB_PACK8:
+			return VK_FORMAT_R8G8B8_SRGB;
+		case gli::FORMAT_BGR8_SRGB_PACK8:
+			return VK_FORMAT_B8G8R8_SRGB;
+		case gli::FORMAT_RGBA8_SRGB_PACK8:
+			return VK_FORMAT_R8G8B8A8_SRGB;
+		case gli::FORMAT_BGRA8_SRGB_PACK8:
+			return VK_FORMAT_B8G8R8A8_SRGB;
+		//
 		case gli::FORMAT_R32_SFLOAT_PACK32:
 			return VK_FORMAT_R32_SFLOAT;
 		case gli::FORMAT_RG32_SFLOAT_PACK32:
@@ -140,6 +154,20 @@ static gli::format imageDataTranslateFormat(const VkFormat format)
 			return gli::FORMAT_RGBA8_UNORM_PACK8;
 		case VK_FORMAT_B8G8R8A8_UNORM:
 			return gli::FORMAT_BGRA8_UNORM_PACK8;
+		//
+		case VK_FORMAT_R8_SRGB:
+			return gli::FORMAT_R8_SRGB_PACK8;
+		case VK_FORMAT_R8G8_SRGB:
+			return gli::FORMAT_RG8_SRGB_PACK8;
+		case VK_FORMAT_R8G8B8_SRGB:
+			return gli::FORMAT_RGB8_SRGB_PACK8;
+		case VK_FORMAT_B8G8R8_SRGB:
+			return gli::FORMAT_BGR8_SRGB_PACK8;
+		case VK_FORMAT_R8G8B8A8_SRGB:
+			return gli::FORMAT_RGBA8_SRGB_PACK8;
+		case VK_FORMAT_B8G8R8A8_SRGB:
+			return gli::FORMAT_BGRA8_SRGB_PACK8;
+		//
 		case VK_FORMAT_R32_SFLOAT:
 			return gli::FORMAT_R32_SFLOAT_PACK32;
 		case VK_FORMAT_R32G32_SFLOAT:

@@ -102,6 +102,24 @@ VkBool32 VKTS_APIENTRY imageDataIsSFLOAT(const VkFormat format)
     return VK_FALSE;
 }
 
+VkBool32 VKTS_APIENTRY imageDataIsSRGB(const VkFormat format)
+{
+    switch (format)
+    {
+		case VK_FORMAT_R8_SRGB:
+		case VK_FORMAT_R8G8_SRGB:
+		case VK_FORMAT_R8G8B8_SRGB:
+		case VK_FORMAT_B8G8R8_SRGB:
+		case VK_FORMAT_R8G8B8A8_SRGB:
+		case VK_FORMAT_B8G8R8A8_SRGB:
+            return VK_TRUE;
+        default:
+            return VK_FALSE;
+    }
+
+    return VK_FALSE;
+}
+
 int32_t VKTS_APIENTRY imageDataGetBytesPerTexel(const VkFormat format)
 {
     switch (format)
@@ -112,6 +130,12 @@ int32_t VKTS_APIENTRY imageDataGetBytesPerTexel(const VkFormat format)
         case VK_FORMAT_B8G8R8_UNORM:
         case VK_FORMAT_R8G8B8A8_UNORM:
         case VK_FORMAT_B8G8R8A8_UNORM:
+		case VK_FORMAT_R8_SRGB:
+		case VK_FORMAT_R8G8_SRGB:
+		case VK_FORMAT_R8G8B8_SRGB:
+		case VK_FORMAT_B8G8R8_SRGB:
+		case VK_FORMAT_R8G8B8A8_SRGB:
+		case VK_FORMAT_B8G8R8A8_SRGB:
         case VK_FORMAT_R32_SFLOAT:
         case VK_FORMAT_R32G32_SFLOAT:
         case VK_FORMAT_R32G32B32_SFLOAT:
@@ -176,6 +200,12 @@ int32_t VKTS_APIENTRY imageDataGetBytesPerChannel(const VkFormat format)
         case VK_FORMAT_B8G8R8_UNORM:
         case VK_FORMAT_R8G8B8A8_UNORM:
         case VK_FORMAT_B8G8R8A8_UNORM:
+		case VK_FORMAT_R8_SRGB:
+		case VK_FORMAT_R8G8_SRGB:
+		case VK_FORMAT_R8G8B8_SRGB:
+		case VK_FORMAT_B8G8R8_SRGB:
+		case VK_FORMAT_R8G8B8A8_SRGB:
+		case VK_FORMAT_B8G8R8A8_SRGB:
             return 1;
 
         case VK_FORMAT_R32_SFLOAT:
@@ -205,6 +235,19 @@ int32_t VKTS_APIENTRY imageDataGetNumberChannels(const VkFormat format)
         case VK_FORMAT_R8G8B8A8_UNORM:
             return 4;
         case VK_FORMAT_B8G8R8A8_UNORM:
+            return 4;
+
+		case VK_FORMAT_R8_SRGB:
+            return 1;
+		case VK_FORMAT_R8G8_SRGB:
+            return 2;
+		case VK_FORMAT_R8G8B8_SRGB:
+            return 3;
+		case VK_FORMAT_B8G8R8_SRGB:
+            return 3;
+		case VK_FORMAT_R8G8B8A8_SRGB:
+            return 4;
+		case VK_FORMAT_B8G8R8A8_SRGB:
             return 4;
 
         case VK_FORMAT_R32_SFLOAT:
@@ -245,6 +288,25 @@ std::string VKTS_APIENTRY imageDataGetColorName(const VkFormat format, const glm
             break;
         case VK_FORMAT_B8G8R8A8_UNORM:
             sprintf(colorName, "B%1.3f_G%1.3f_R%1.3f_A%1.3f_UNORM", color.b, color.g, color.r, color.a);
+            break;
+
+        case VK_FORMAT_R8_SRGB:
+            sprintf(colorName, "R%1.3f_SRGB", color.r);
+            break;
+        case VK_FORMAT_R8G8_SRGB:
+            sprintf(colorName, "R%1.3f_G%1.3f_SRGB", color.r, color.g);
+            break;
+        case VK_FORMAT_R8G8B8_SRGB:
+            sprintf(colorName, "R%1.3f_G%1.3f_B%1.3f_SRGB", color.r, color.g, color.b);
+            break;
+        case VK_FORMAT_B8G8R8_SRGB:
+            sprintf(colorName, "B%1.3f_G%1.3f_R%1.3f_SRGB", color.b, color.g, color.r);
+            break;
+        case VK_FORMAT_R8G8B8A8_SRGB:
+            sprintf(colorName, "R%1.3f_G%1.3f_B%1.3f_A%1.3f_SRGB", color.r, color.g, color.b, color.a);
+            break;
+        case VK_FORMAT_B8G8R8A8_SRGB:
+            sprintf(colorName, "B%1.3f_G%1.3f_R%1.3f_A%1.3f_SRGB", color.b, color.g, color.r, color.a);
             break;
 
         case VK_FORMAT_R32_SFLOAT:

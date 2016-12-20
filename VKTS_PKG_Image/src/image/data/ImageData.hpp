@@ -50,6 +50,7 @@ private:
     VkBool32 BLOCK;
     VkBool32 UNORM;
     VkBool32 SFLOAT;
+    VkBool32 SRGB;
     int32_t bytesPerChannel;
     int32_t numberChannels;
 
@@ -111,6 +112,8 @@ public:
     virtual VkBool32 isUNORM() const override;
 
     virtual VkBool32 isSFLOAT() const override;
+
+    virtual VkBool32 isSRGB() const override;
 
     virtual int32_t getBytesPerTexel() const override;
 

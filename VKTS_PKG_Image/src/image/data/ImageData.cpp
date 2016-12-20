@@ -50,6 +50,7 @@ void ImageData::reset()
     BLOCK = VK_FALSE;
     UNORM = VK_FALSE;
     SFLOAT = VK_FALSE;
+    SRGB = VK_FALSE;
     bytesPerChannel = 0;
     numberChannels = 0;
 
@@ -211,6 +212,7 @@ ImageData::ImageData(const std::string& name, const VkImageType imageType, const
     BLOCK = imageDataIsBLOCK(format);
     UNORM = imageDataIsUNORM(format);
     SFLOAT = imageDataIsSFLOAT(format);
+    SRGB = imageDataIsSRGB(format);
     bytesPerChannel = imageDataGetBytesPerChannel(format);
     numberChannels = imageDataGetNumberChannels(format);
 }
@@ -226,6 +228,7 @@ ImageData::ImageData(const std::string& name, const VkImageType imageType, const
     BLOCK = imageDataIsBLOCK(format);
     UNORM = imageDataIsUNORM(format);
     SFLOAT = imageDataIsSFLOAT(format);
+    SFLOAT = imageDataIsSRGB(format);
     bytesPerChannel = imageDataGetBytesPerChannel(format);
     numberChannels = imageDataGetNumberChannels(format);
 }
@@ -457,6 +460,11 @@ VkBool32 ImageData::isSFLOAT() const
     return SFLOAT;
 }
 
+VkBool32 ImageData::isSRGB() const
+{
+    return SRGB;
+}
+
 int32_t ImageData::getBytesPerTexel() const
 {
 	return imageDataGetBytesPerTexel(format);
@@ -506,7 +514,7 @@ void ImageData::setTexel(const glm::vec4& rgba, const uint32_t x, const uint32_t
         {
             currentTargetChannelIndex = currentChannelIndex;
 
-            if (format == VK_FORMAT_B8G8R8_UNORM || format == VK_FORMAT_B8G8R8A8_UNORM)
+            if (format == VK_FORMAT_B8G8R8_UNORM || format == VK_FORMAT_B8G8R8A8_UNORM || format == VK_FORMAT_B8G8R8_SRGB || format == VK_FORMAT_B8G8R8A8_SRGB)
             {
                 if (currentChannelIndex == 0)
                 {
@@ -566,7 +574,7 @@ glm::vec4 ImageData::getTexel(const uint32_t x, const uint32_t y, const uint32_t
         {
             currentTargetChannelIndex = currentChannelIndex;
 
-            if (format == VK_FORMAT_B8G8R8_UNORM || format == VK_FORMAT_B8G8R8A8_UNORM)
+            if (format == VK_FORMAT_B8G8R8_UNORM || format == VK_FORMAT_B8G8R8A8_UNORM || format == VK_FORMAT_B8G8R8_SRGB || format == VK_FORMAT_B8G8R8A8_SRGB)
             {
                 if (currentChannelIndex == 0)
                 {
