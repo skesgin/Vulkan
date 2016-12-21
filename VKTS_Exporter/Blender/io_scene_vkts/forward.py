@@ -27,6 +27,8 @@ VKTS_BINDING_UNIFORM_SAMPLER_BSDF_FORWARD_FIRST = 10
 forwardGeneralDefineGLSL = """#define VKTS_GAMMA 2.2
 #define VKTS_INV_GAMMA (1.0/VKTS_GAMMA)
 
+#define VKTS_METALLIC_SWITCH 0.83553
+
 #define VKTS_MAX_LIGHTS 16
 
 #define VKTS_PI 3.14159265
@@ -212,34 +214,33 @@ forwardOutAssignGLSL = """
         // Lambert.
         //
 
-        vec3 colorLambert = iblLambert(N, baseColor) * ambientOcclusion;
-        
-        //
-        // Dielectric
-        //
-        
-        vec3 colorDielectric = vec3(0.0, 0.0, 0.0);
+        vec3 colorLambert = vec3(0.0, 0.0, 0.0);
 
-        if (metallic < 1.0)
+        //
+        // Cook Torrance.
+        //
+                
+        vec3 colorCookTorrance = vec3(0.0, 0.0, 0.0);
+        
+        // Image based lighting.
+        
+        if (metallic < VKTS_METALLIC_SWITCH)
         {
-            vec3 colorReflective = iblCookTorrance(N, V, roughness, F0_dielectric);
-            
+            //
+            // Dielectric
             //
 
-            colorDielectric += mix(colorLambert, colorReflective, fresnel(NdotV, F0_dielectric));
-        }
-
-        //
-        // Metallic
-        //
+            colorLambert += iblLambert(N, baseColor) * ambientOcclusion;
         
-        vec3 colorMetallic = vec3(0.0, 0.0, 0.0);
-
-        if (metallic > 0.0)
+            colorCookTorrance += iblCookTorrance(N, V, roughness, F0_dielectric);
+        }
+        else
         {
-            vec3 colorReflective = iblCookTorrance(N, V, roughness, F0_metallic);
-            
-            colorMetallic += mix(colorLambert, colorReflective, fresnel(NdotV, F0_metallic));
+            //
+            // Metallic
+            //
+        
+            colorCookTorrance += iblCookTorrance(N, V, roughness, F0_metallic);
         }
         
         // Dynamic lights.
@@ -260,26 +261,23 @@ forwardOutAssignGLSL = """
                 light = u_bufferLights.L[i].xyz;
             }
             
-            vec3 lambertLight = lambert(light, u_bufferLights.color[i].xyz, N, baseColor);
+            //
+            
+            colorLambert += lambert(light, u_bufferLights.color[i].xyz, N, baseColor);
         
-            if (metallic < 1.0)
+            if (metallic < VKTS_METALLIC_SWITCH)
             {
-                vec3 cookTorranceLight = cookTorrance(light, u_bufferLights.color[i].xyz, N, V, roughness, F0_dielectric);
-                
-                colorDielectric += mix(lambertLight, cookTorranceLight, fresnel(NdotV, F0_dielectric));
+                colorCookTorrance += cookTorrance(light, u_bufferLights.color[i].xyz, N, V, roughness, F0_dielectric);
             }
-
-            if (metallic > 0.0)
+            else
             {
-                vec3 cookTorranceLight = cookTorrance(light, u_bufferLights.color[i].xyz, N, V, roughness, F0_metallic);
-                
-                colorMetallic += mix(lambertLight, cookTorranceLight, fresnel(NdotV, F0_metallic));
+                colorCookTorrance += cookTorrance(light, u_bufferLights.color[i].xyz, N, V, roughness, F0_metallic);
             }
         }                
         
         //
         
-        color = colorToNonLinear(mix(colorDielectric, colorMetallic, metallic) + emissiveColor);
+        color = colorToNonLinear(mix(colorLambert, colorCookTorrance, metallic) + emissiveColor);
     }
     else
     {
