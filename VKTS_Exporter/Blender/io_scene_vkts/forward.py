@@ -83,7 +83,7 @@ float ndfTrowbridgeReitzGGX(float NdotH, float roughness)
 
 //
 
-float fresnel(float NdotV, float F0)
+vec3 fresnel(float NdotV, vec3 F0)
 {
     return F0 + (1.0 - F0) * pow_5(1.0 - NdotV);
 }
@@ -114,7 +114,7 @@ vec3 iblLambert(vec3 N, vec3 baseColor)
     return baseColor * colorToLinear(texture(u_diffuseCubemap, N).rgb);
 }
 
-vec3 cookTorrance(vec3 L, vec3 lightColor, vec3 N, vec3 V, float roughness, float F0)
+vec3 cookTorrance(vec3 L, vec3 lightColor, vec3 N, vec3 V, float roughness, vec3 F0)
 {
     float NdotL = dot(N, L);
     float NdotV = dot(N, V);
@@ -128,10 +128,10 @@ vec3 cookTorrance(vec3 L, vec3 lightColor, vec3 N, vec3 V, float roughness, floa
         float VdotH = dot(V, H);
         
         float D = ndfTrowbridgeReitzGGX(NdotH, roughness);
-        float F = fresnel(VdotH, F0);
+        vec3 F = fresnel(VdotH, F0);
         float G = geometricShadowingSmithSchlickGGX(NdotL, NdotV, roughness);
         
-        float f =  D * F * G / (4.0 * NdotL * NdotV);
+        vec3 f =  D * F * G / (4.0 * NdotL * NdotV);
         
         return f * lightColor;
     }
@@ -139,7 +139,7 @@ vec3 cookTorrance(vec3 L, vec3 lightColor, vec3 N, vec3 V, float roughness, floa
     return vec3(0.0, 0.0, 0.0);
 }
 
-vec3 iblCookTorrance(vec3 N, vec3 V, float roughness, vec3 baseColor, float F0)
+vec3 iblCookTorrance(vec3 N, vec3 V, float roughness, vec3 baseColor, vec3 F0)
 {
     // Note: reflect takes incident vector.
     // Note: Use N instead of H for approximation.
@@ -205,8 +205,8 @@ forwardOutAssignGLSL = """
         
         float ambientOcclusion = AmbientOcclusion_0;
         
-        float F0_dielectric = 0.04;
-        float F0_metallic = dot(baseColor, vec3(0.2126, 0.7152, 0.0722));
+        vec3 F0_dielectric = vec3(0.04, 0.04, 0.04);
+        vec3 F0_metallic = baseColor.rgb;
         
         //
         // Lambert.
