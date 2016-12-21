@@ -101,7 +101,7 @@ VKTS_APICALL void VKTS_APIENTRY imageDataSetSaveFunction(const PFN_imageDataSave
  *
  * @ThreadSafe
  */
-VKTS_APICALL IImageDataSP VKTS_APIENTRY imageDataLoad(const char* filename, const VkBool32 srgb = VK_FALSE);
+VKTS_APICALL IImageDataSP VKTS_APIENTRY imageDataLoad(const char* filename);
 
 /**
  *
