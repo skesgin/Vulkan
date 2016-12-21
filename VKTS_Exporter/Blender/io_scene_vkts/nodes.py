@@ -423,7 +423,7 @@ texImageMain = """#previousMain#
     vec3 %s = %s;
     
     // Out
-    vec4 %s = %stexture(u_texture%d, %s.st).rgba%s;
+    vec4 %s = vec4(%stexture(u_texture%d, %s.st).rgb%s, texture(u_texture%d, %s.st).a);
     float %s = texture(u_texture%d, %s.st).a;
     
     // Image texture end"""

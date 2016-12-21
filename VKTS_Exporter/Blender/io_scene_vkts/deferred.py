@@ -24,13 +24,22 @@
 
 VKTS_BINDING_UNIFORM_SAMPLER_BSDF_DEFERRED_FIRST = 4
 
-deferredGeneralDefineGLSL = """"""
+deferredGeneralDefineGLSL = """#define VKTS_GAMMA 2.2
+#define VKTS_INV_GAMMA (1.0/VKTS_GAMMA)"""
 
 deferredGeneralBufferGLSL = """"""
 
 deferredGeneralTextureGLSL = """"""
 
-deferredGeneralFunctionsGLSL = """"""
+deferredGeneralFunctionsGLSL = """vec3 colorToLinear(vec3 c)
+{
+    return pow(c, vec3(VKTS_GAMMA, VKTS_GAMMA, VKTS_GAMMA));
+}
+
+vec3 colorToNonLinear(vec3 c)
+{
+    return pow(c, vec3(VKTS_INV_GAMMA, VKTS_INV_GAMMA, VKTS_INV_GAMMA));
+}"""
 
 deferredOutDeclareGLSL = """layout (location = 2) out vec4 ob_emissiveAmbientOcclusion;   // Emissive and ambient occlusion.
 layout (location = 1) out vec4 ob_normalRoughness;      // Normal and roughness.

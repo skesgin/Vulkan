@@ -111,7 +111,7 @@ vec3 lambert(vec3 L, vec3 lightColor, vec3 N, vec3 baseColor)
 
 vec3 iblLambert(vec3 N, vec3 baseColor)
 {
-    return baseColor * colorToLinear(texture(u_diffuseCubemap, N).rgb);
+    return baseColor * texture(u_diffuseCubemap, N).rgb;
 }
 
 vec3 cookTorrance(vec3 L, vec3 lightColor, vec3 N, vec3 V, float roughness, vec3 F0)
@@ -139,7 +139,7 @@ vec3 cookTorrance(vec3 L, vec3 lightColor, vec3 N, vec3 V, float roughness, vec3
     return vec3(0.0, 0.0, 0.0);
 }
 
-vec3 iblCookTorrance(vec3 N, vec3 V, float roughness, vec3 baseColor, vec3 F0)
+vec3 iblCookTorrance(vec3 N, vec3 V, float roughness, vec3 F0)
 {
     // Note: reflect takes incident vector.
     // Note: Use N instead of H for approximation.
@@ -159,11 +159,11 @@ vec3 iblCookTorrance(vec3 N, vec3 V, float roughness, vec3 baseColor, vec3 F0)
         float rHigh = ceil(scaledRoughness);    
         float rFraction = scaledRoughness - rLow;
         
-        vec3 prefilteredColor = mix(colorToLinear(textureLod(u_specularCubemap, L, rLow).rgb), colorToLinear(textureLod(u_specularCubemap, L, rHigh).rgb), rFraction);
+        vec3 prefilteredColor = mix(textureLod(u_specularCubemap, L, rLow).rgb, textureLod(u_specularCubemap, L, rHigh).rgb, rFraction);
 
         vec2 envBRDF = texture(u_lut, vec2(NdotV, roughness)).rg;
         
-        return baseColor * prefilteredColor * (F0 * envBRDF.x + envBRDF.y);
+        return prefilteredColor * (F0 * envBRDF.x + envBRDF.y);
     }
     
     return vec3(0.0, 0.0, 0.0);
@@ -222,7 +222,7 @@ forwardOutAssignGLSL = """
 
         if (metallic < 1.0)
         {
-            vec3 colorReflective = iblCookTorrance(N, V, roughness, vec3(1.0, 1.0, 1.0), F0_dielectric);
+            vec3 colorReflective = iblCookTorrance(N, V, roughness, F0_dielectric);
             
             //
 
@@ -237,7 +237,7 @@ forwardOutAssignGLSL = """
 
         if (metallic > 0.0)
         {
-            vec3 colorReflective = iblCookTorrance(N, V, roughness, vec3(1.0, 1.0, 1.0), F0_metallic);
+            vec3 colorReflective = iblCookTorrance(N, V, roughness, F0_metallic);
             
             colorMetallic += mix(colorLambert, colorReflective, fresnel(NdotV, F0_metallic));
         }

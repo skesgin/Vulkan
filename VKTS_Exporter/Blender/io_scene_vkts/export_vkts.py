@@ -1276,14 +1276,14 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName, use
                     preContent = ""
                     postContent = ""
 
-                    # SRGB to color.
+                    # SRGB to linear.
                     if currentNode.color_space == 'COLOR':
-                        preContent = "pow("
-                        postContent = ", vec4(2.2, 2.2, 2.2, 1.0))"
+                        preContent = "colorToLinear("
+                        postContent = ")"
 
                     #
                     
-                    currentMain = texImageMain % (vectorInputName, vectorInputParameterName, colorOutputName, preContent, textureIndex, vectorInputName, postContent, alphaOutputName, textureIndex, vectorInputName)
+                    currentMain = texImageMain % (vectorInputName, vectorInputParameterName, colorOutputName, preContent, textureIndex, vectorInputName, postContent, textureIndex, vectorInputName, alphaOutputName, textureIndex, vectorInputName)
                     
                     #
                     
