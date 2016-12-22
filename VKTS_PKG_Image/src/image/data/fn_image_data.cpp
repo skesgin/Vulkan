@@ -653,6 +653,10 @@ IImageDataSP VKTS_APIENTRY imageDataLoad(const char* filename)
     {
         return imageDataLoadGli(filename, buffer);
     }
+    else if (lowerCaseExtension == ".png" || lowerCaseExtension == ".jpg" || lowerCaseExtension == ".jpeg")
+    {
+        return imageDataLoadStb(filename, buffer);
+    }
 
     return IImageDataSP();
 }
@@ -959,6 +963,10 @@ VkBool32 VKTS_APIENTRY imageDataSave(const char* filename, const IImageDataSP& i
     else if (lowerCaseExtension == ".dds" || lowerCaseExtension == ".ktx" )
     {
     	return imageDataSaveGli(filename, imageData, mipLevel, arrayLayer);
+    }
+    else if (lowerCaseExtension == ".png")
+    {
+    	return imageDataSaveStb(filename, imageData, mipLevel, arrayLayer);
     }
 
     return VK_FALSE;

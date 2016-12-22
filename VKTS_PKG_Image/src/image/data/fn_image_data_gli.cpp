@@ -249,7 +249,7 @@ IImageDataSP VKTS_APIENTRY imageDataLoadGli(const std::string& name, const IBina
         return IImageDataSP();
     }
 
-    auto texture = gli::load(name.c_str());
+    auto texture = gli::load((char const *)buffer->getData(), (std::size_t)buffer->getSize());
     if (texture.empty())
     {
     	return IImageDataSP();
@@ -314,6 +314,11 @@ IImageDataSP VKTS_APIENTRY imageDataLoadGli(const std::string& name, const IBina
 
 VkBool32 VKTS_APIENTRY imageDataSaveGli(const std::string& name, const IImageDataSP& imageData, const uint32_t mipLevel, const uint32_t arrayLayer)
 {
+	if (!imageData.get())
+	{
+		return VK_FALSE;
+	}
+
 	gli::format format = imageDataTranslateFormat(imageData->getFormat());
 
 	if (format == gli::FORMAT_UNDEFINED)

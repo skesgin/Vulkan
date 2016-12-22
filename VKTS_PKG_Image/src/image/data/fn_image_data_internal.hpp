@@ -46,6 +46,18 @@ VKTS_APICALL IImageDataSP VKTS_APIENTRY imageDataLoadGli(const std::string& name
  */
 VKTS_APICALL VkBool32 VKTS_APIENTRY imageDataSaveGli(const std::string& name, const IImageDataSP& imageData, const uint32_t mipLevel, const uint32_t arrayLayer);
 
+/**
+ *
+ * @ThreadSafe
+ */
+VKTS_APICALL IImageDataSP VKTS_APIENTRY imageDataLoadStb(const std::string& name, const IBinaryBufferSP& buffer);
+
+/**
+ *
+ * @ThreadSafe
+ */
+VKTS_APICALL VkBool32 VKTS_APIENTRY imageDataSaveStb(const std::string& name, const IImageDataSP& imageData, const uint32_t mipLevel, const uint32_t arrayLayer);
+
 }
 
 #endif /* VKTS_FN_IMAGE_DATA_INTERNAL_HPP_ */

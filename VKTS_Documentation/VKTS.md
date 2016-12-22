@@ -63,7 +63,7 @@ Features:
 - Basic native window handling including fullscreen support.
 - Basic input handling: Gamepad, keyboard, mouse and touch.
 - None visual configuration for console/compute only applications.
-- Loading and saving of text, binary and image files (TGA and HDR).
+- Loading and saving of text, binary and image files (Loading TGA, HDR, KTX, DDS, PNG and JPG - JPG cannot be saved).
 - VKTS scene file format:  
     * 3D objects (incl. node hierarchy)  
     * Meshes (incl. sub meshes)  

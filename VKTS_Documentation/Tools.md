@@ -15,5 +15,6 @@ The tools etc. are used to develop VKTS and the Vulkan examples.
 - [LunarG Vulkan SDK](https://vulkan.lunarg.com/)
 - [MinGW-w64 - for 32 and 64 bit Windows](https://sourceforge.net/projects/mingw-w64/)
 - [Python](https://www.python.org/)
+- [stb](https://github.com/nothings/stb/)
 - [UMLet](http://www.umlet.com/)
 - [Visual Studio 2015 Community Edition](https://www.visualstudio.com/de/downloads/)
