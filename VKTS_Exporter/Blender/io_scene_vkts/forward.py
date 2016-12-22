@@ -226,20 +226,30 @@ forwardOutAssignGLSL = """
         // Dielectric
         //
         
+        vec3 dielectricFresnel = vec3(0.0, 0.0, 0.0);
+        vec3 inverseDielectricFresnel = vec3(0.0, 0.0, 0.0);
+        
         if (metallic < 1.0)
         {
-            colorLambert += iblLambert(N, baseColor) * ambientOcclusion;
+            dielectricFresnel = fresnel(NdotV, F0_dielectric);
+            inverseDielectricFresnel = vec3(1.0, 1.0, 1.0) - dielectricFresnel;
         
-            colorCookTorrance += iblCookTorrance(N, V, roughness, F0_dielectric);
+            colorLambert += iblLambert(N, baseColor) * ambientOcclusion * inverseDielectricFresnel;
+        
+            colorCookTorrance += iblCookTorrance(N, V, roughness, F0_dielectric) * dielectricFresnel;
         }
 
         //
         // Metallic
         //
+        
+        vec3 metallicFresnel = vec3(0.0, 0.0, 0.0);
     
         if (metallic > 0.0)
         {
-            colorCookTorrance += iblCookTorrance(N, V, roughness, F0_metallic);
+            metallicFresnel = fresnel(NdotV, F0_metallic);
+        
+            colorCookTorrance += iblCookTorrance(N, V, roughness, F0_metallic) * metallicFresnel;
         }
         
         // Dynamic lights.
@@ -264,14 +274,14 @@ forwardOutAssignGLSL = """
             
             if (metallic < 1.0)
             {
-                colorLambert += lambert(light, u_bufferLights.color[i].xyz, N, baseColor);
+                colorLambert += lambert(light, u_bufferLights.color[i].xyz, N, baseColor) * inverseDielectricFresnel;
         
-                colorCookTorrance += cookTorrance(light, u_bufferLights.color[i].xyz, N, V, roughness, F0_dielectric);
+                colorCookTorrance += cookTorrance(light, u_bufferLights.color[i].xyz, N, V, roughness, F0_dielectric) * dielectricFresnel;
             }
 
             if (metallic > 0.0)
             {
-                colorCookTorrance += cookTorrance(light, u_bufferLights.color[i].xyz, N, V, roughness, F0_metallic);
+                colorCookTorrance += cookTorrance(light, u_bufferLights.color[i].xyz, N, V, roughness, F0_metallic) * metallicFresnel;
             }
         }                
         
