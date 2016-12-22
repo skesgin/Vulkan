@@ -1085,7 +1085,7 @@ VkBool32 Example::buildPipeline()
 	// Voxelize pipeline.
 	//
 
-	// TODO: Create.
+	// TODO: Create pipeline for voxelization.
 
 	return VK_TRUE;
 }
