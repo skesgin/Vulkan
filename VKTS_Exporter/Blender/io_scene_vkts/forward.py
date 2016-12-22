@@ -242,14 +242,10 @@ forwardOutAssignGLSL = """
         //
         // Metallic
         //
-        
-        vec3 metallicFresnel = vec3(0.0, 0.0, 0.0);
     
         if (metallic > 0.0)
         {
-            metallicFresnel = fresnel(NdotV, F0_metallic);
-        
-            colorCookTorrance += iblCookTorrance(N, V, roughness, F0_metallic) * metallicFresnel;
+            colorCookTorrance += iblCookTorrance(N, V, roughness, F0_metallic);
         }
         
         // Dynamic lights.
@@ -281,7 +277,7 @@ forwardOutAssignGLSL = """
 
             if (metallic > 0.0)
             {
-                colorCookTorrance += cookTorrance(light, u_bufferLights.color[i].xyz, N, V, roughness, F0_metallic) * metallicFresnel;
+                colorCookTorrance += cookTorrance(light, u_bufferLights.color[i].xyz, N, V, roughness, F0_metallic);
             }
         }                
         
