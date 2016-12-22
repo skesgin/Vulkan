@@ -27,8 +27,6 @@ VKTS_BINDING_UNIFORM_SAMPLER_BSDF_FORWARD_FIRST = 10
 forwardGeneralDefineGLSL = """#define VKTS_GAMMA 2.2
 #define VKTS_INV_GAMMA (1.0/VKTS_GAMMA)
 
-#define VKTS_METALLIC_SWITCH 0.83553
-
 #define VKTS_MAX_LIGHTS 16
 
 #define VKTS_PI 3.14159265
@@ -224,22 +222,23 @@ forwardOutAssignGLSL = """
         
         // Image based lighting.
         
-        if (metallic < VKTS_METALLIC_SWITCH)
+        //
+        // Dielectric
+        //
+        
+        if (metallic < 1.0)
         {
-            //
-            // Dielectric
-            //
-
             colorLambert += iblLambert(N, baseColor) * ambientOcclusion;
         
             colorCookTorrance += iblCookTorrance(N, V, roughness, F0_dielectric);
         }
-        else
+
+        //
+        // Metallic
+        //
+    
+        if (metallic > 0.0)
         {
-            //
-            // Metallic
-            //
-        
             colorCookTorrance += iblCookTorrance(N, V, roughness, F0_metallic);
         }
         
@@ -263,13 +262,14 @@ forwardOutAssignGLSL = """
             
             //
             
-            colorLambert += lambert(light, u_bufferLights.color[i].xyz, N, baseColor);
-        
-            if (metallic < VKTS_METALLIC_SWITCH)
+            if (metallic < 1.0)
             {
+                colorLambert += lambert(light, u_bufferLights.color[i].xyz, N, baseColor);
+        
                 colorCookTorrance += cookTorrance(light, u_bufferLights.color[i].xyz, N, V, roughness, F0_dielectric);
             }
-            else
+
+            if (metallic > 0.0)
             {
                 colorCookTorrance += cookTorrance(light, u_bufferLights.color[i].xyz, N, V, roughness, F0_metallic);
             }
