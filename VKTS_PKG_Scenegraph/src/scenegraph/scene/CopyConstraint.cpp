@@ -127,7 +127,7 @@ VkBool32 CopyConstraint::applyConstraint(INode& node)
 			break;
 		case COPY_ROTATION:
 			currentTransform = node.getFinalRotate();
-			if (node.getJointIndex() == -1)
+			if (node.getJointIndex() == -1 && node.getNumberJoints() == 0)
 			{
 	        	switch (target->getNodeRotationMode())
 	        	{

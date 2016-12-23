@@ -969,6 +969,7 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
 
     bindMatrixDirty[currentBuffer] = bindMatrixDirty[currentBuffer] || parentBindMatrixDirty;
 
+    // Gathering armature.
     auto newArmatureNode = (joints != 0) ? INode::shared_from_this() : armatureNode;
 
     //
@@ -1024,12 +1025,16 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
         {
         	VkTsRotationMode currentRotationMode = VKTS_EULER_XZY;
 
-        	if (joints == -1)
+        	if (jointIndex == -1 && joints == 0)
         	{
+        		// Processing node.
+
         		currentRotationMode = nodeRotationMode;
         	}
         	else
         	{
+        		// Processing joint and armature.
+
         		currentRotationMode = bindRotationMode;
         	}
 
@@ -1051,8 +1056,10 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
 
         transformMatrixDirty[currentBuffer] = VK_TRUE;
 
-        if (joints != 0)
+        if (jointIndex > 0 || joints != 0)
         {
+        	// Processing joint and armature.
+
         	bindMatrixDirty[currentBuffer] = VK_TRUE;
         }
     }
@@ -1073,8 +1080,10 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
 
         transformMatrixDirty[currentBuffer] = VK_TRUE;
 
-        if (joints != 0)
+        if (jointIndex > 0 || joints != 0)
         {
+        	// Processing joint and armature.
+
         	bindMatrixDirty[currentBuffer] = VK_TRUE;
         }
     }
@@ -1083,12 +1092,14 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
 
     if (bindMatrixDirty[currentBuffer])
     {
-    	// Only armature, having joints not zero and joints can enter here.
+    	// Processing joints and armature.
 
     	glm::mat4 localBindMatrix;
 
     	if (joints == 0)
     	{
+    		// Processing joints.
+
         	glm::mat4 currentRotation(1.0f);
 
         	switch (bindRotationMode)
@@ -1108,6 +1119,8 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
     	}
     	else
     	{
+    		// Processing armature.
+
         	glm::mat4 currentRotation(1.0f);
 
         	switch (bindRotationMode)
@@ -1143,6 +1156,8 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
     {
         if (jointIndex == -1)
         {
+        	// Processing node and armature.
+
         	glm::mat4 currentRotation(1.0f);
 
         	switch (nodeRotationMode)
@@ -1160,9 +1175,10 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
 
         	this->transformMatrix = translateMat4(finalTranslate.x, finalTranslate.y, finalTranslate.z) * currentRotation * scaleMat4(finalScale.x, finalScale.y, finalScale.z);
 
-        	// Only use parent transform, if this is not an armature.
         	if (joints == 0)
         	{
+        		// Processing node.
+
         		this->transformMatrix = parentTransformMatrix * this->transformMatrix;
         	}
         }
@@ -1210,10 +1226,13 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
         	}
         }
 
-        // Update buffer.
         if (allMeshes.size() > 0)
         {
+        	// Process node.
+
         	VkDeviceSize dynamicOffset = (VkDeviceSize)currentBuffer * transformUniformBuffer->getBuffer()->getSize() / transformUniformBuffer->getBufferCount();
+
+        	// A mesh has to be rendered, so update with transform matrix from the node tree.
 
             transformUniformBuffer->upload(dynamicOffset + 0, 0, this->transformMatrix);
 
@@ -1223,10 +1242,11 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
         }
         else if (joints != 0)
         {
+        	// Process armature.
+
         	VkDeviceSize dynamicOffset = (VkDeviceSize)currentBuffer * jointsUniformBuffer->getBuffer()->getSize() / jointsUniformBuffer->getBufferCount();
 
-        	// If this is an armature, store the parent matrix.
-        	// This allows to modify the parent matrices without recalculating the bind matrices.
+        	// Store parent matrix separately, as this allows to modify it without recalculating the bind matrices.
 
 			jointsUniformBuffer->upload(dynamicOffset + 0, 0, parentTransformMatrix);
 
@@ -1236,6 +1256,8 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
         }
         else if (jointIndex >= 0 && jointIndex < VKTS_MAX_JOINTS)
         {
+        	// Process joint.
+
         	if (newArmatureNode.get())
         	{
         		auto currentJointsUniformBuffer = newArmatureNode->getJointsUniformBuffer();
@@ -1244,9 +1266,9 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
         		{
                 	VkDeviceSize dynamicOffset = (VkDeviceSize)currentBuffer * currentJointsUniformBuffer->getBuffer()->getSize() / currentJointsUniformBuffer->getBufferCount();
 
-        			// Upload the joint matrices to blend them on the GPU.
-
         			size_t offset = sizeof(float) * 16 + sizeof(float) * 12;
+
+        			// Upload the joint matrices to blend them on the GPU.
 
         			currentJointsUniformBuffer->upload(dynamicOffset + offset + jointIndex * sizeof(float) * 16, 0, this->transformMatrix);
 
