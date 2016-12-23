@@ -197,4 +197,26 @@ typedef struct VkTsDynamicOffset_
 
 #include <vkts/core/file/fn_file.hpp>
 
+/**
+ * JSON.
+ */
+
+#include <vkts/core/json/fn_json_tokens.hpp>
+
+#include <vkts/core/json/JsonVisitor.hpp>
+
+#include <vkts/core/json/JSONvalue.hpp>
+#include <vkts/core/json/JSONnumber.hpp>
+
+#include <vkts/core/json/JSONnull.hpp>
+#include <vkts/core/json/JSONtrue.hpp>
+#include <vkts/core/json/JSONfalse.hpp>
+#include <vkts/core/json/JSONstring.hpp>
+#include <vkts/core/json/JSONobject.hpp>
+#include <vkts/core/json/JSONarray.hpp>
+#include <vkts/core/json/JSONfloat.hpp>
+#include <vkts/core/json/JSONinteger.hpp>
+
+#include <vkts/core/json/fn_json.hpp>
+
 #endif /* VKTS_VKTS_CORE_HPP_ */
