@@ -27,6 +27,8 @@
 #ifndef VKTS_SCENEGRAPH_HPP_
 #define VKTS_SCENEGRAPH_HPP_
 
+// TODO: Implement different XYZ rotation orders.
+
 // Example 11
 // TODO: Implement global illumination using voxel cone tracing.
 
