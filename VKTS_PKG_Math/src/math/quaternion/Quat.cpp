@@ -85,6 +85,52 @@ Quat Quat::operator +() const
 	return *this;
 }
 
+float& Quat::operator[](const uint32_t index)
+{
+	if (index >= 4)
+	{
+		throw std::out_of_range(std::to_string(index) + " >= 4");
+	}
+
+	if (index == 0)
+	{
+		return x;
+	}
+	else if (index == 1)
+	{
+		return y;
+	}
+	else if (index == 2)
+	{
+		return z;
+	}
+
+	return w;
+}
+
+const float& Quat::operator[](const uint32_t index) const
+{
+	if (index >= 4)
+	{
+		throw std::out_of_range(std::to_string(index) + " >= 4");
+	}
+
+	if (index == 0)
+	{
+		return x;
+	}
+	else if (index == 1)
+	{
+		return y;
+	}
+	else if (index == 2)
+	{
+		return z;
+	}
+
+	return w;
+}
+
 Quat Quat::operator -() const
 {
 	return Quat(-x, -y, -z, -w);
@@ -212,28 +258,6 @@ glm::mat3 Quat::mat3() const
 glm::mat4 Quat::mat4() const
 {
     return glm::mat4(mat3());
-}
-
-glm::vec3 Quat::rotation() const
-{
-	glm::vec3 rotation(0.0f, 0.0f, 0.0f);
-
-	auto temp = mat3();
-
-	if (!(temp[1][2] == 0.0f && temp[2][2] == 0.0f) && !(temp[0][1] == 0.0f && temp[0][0] == 0.0f))
-	{
-		rotation[0] = glm::degrees(atan2f(temp[1][2], temp[2][2]));
-		rotation[1] = glm::degrees(asinf(-temp[0][2]));
-		rotation[2] = glm::degrees(atan2f(temp[0][1], temp[0][0]));
-	}
-	else if (!(temp[1][0] == 0.0f && temp[1][1] == 0.0f))
-	{
-		rotation[0] = glm::degrees(atan2f(temp[1][0], temp[1][1]));
-		rotation[1] = glm::degrees(asinf(-temp[0][2]));
-		rotation[2] = 0.0f;
-	}
-
-	return rotation;
 }
 
 //

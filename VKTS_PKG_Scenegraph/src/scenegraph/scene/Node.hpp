@@ -42,6 +42,7 @@ private:
     INodeSP parentNode;
 
     glm::vec3 translate;
+    VkTsRotationMode nodeRotationMode;
     glm::vec3 rotate;
     glm::vec3 scale;
 
@@ -56,6 +57,7 @@ private:
     int32_t joints;
 
     glm::vec3 bindTranslate;
+    VkTsRotationMode bindRotationMode;
     glm::vec3 bindRotate;
     glm::vec3 bindScale;
 
@@ -125,6 +127,10 @@ public:
 
     virtual void setTranslate(const glm::vec3& translate) override;
 
+    virtual VkTsRotationMode getNodeRotationMode() const override;
+
+    virtual void setNodeRotationMode(const VkTsRotationMode rotationMode) override;
+
     virtual const glm::vec3& getRotate() const override;
 
     virtual void setRotate(const glm::vec3& rotate) override;
@@ -154,6 +160,10 @@ public:
     virtual const glm::vec3& getBindTranslate() const override;
 
     virtual void setBindTranslate(const glm::vec3& translate) override;
+
+    virtual VkTsRotationMode getBindRotationMode() const override;
+
+    virtual void setBindRotationMode(const VkTsRotationMode rotationMode) override;
 
     virtual const glm::vec3& getBindRotate() const override;
 

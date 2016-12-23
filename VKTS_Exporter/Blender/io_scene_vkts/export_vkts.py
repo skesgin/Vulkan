@@ -2182,7 +2182,7 @@ def saveBone(context, fw, fw_animation, fw_channel, currentPoseBone, armatureNam
     fw("node %s %s\n" % (friendlyName(currentPoseBone.name), friendlyName(parentName)))
     fw("\n")
     fw("translate %f %f %f\n" % (convertLocationNoAdjust(location)))
-    fw("rotate %f %f %f\n" % (convertRotationNoAdjust(rotation.to_euler())))
+    fw("rotate %f %f %f\n" % (convertRotationNoAdjust(rotation.to_euler('XYZ'))))
     fw("scale %f %f %f\n" % (convertScaleNoAdjust(scale)))
     fw("\n")
     fw("jointIndex %d\n" % jointIndex)
@@ -2207,7 +2207,7 @@ def saveBone(context, fw, fw_animation, fw_channel, currentPoseBone, armatureNam
     location, rotation, scale = bindMatrix.decompose()        
 
     location = convertLocationNoAdjust(location)
-    rotation = convertRotationNoAdjust(rotation.to_euler())
+    rotation = convertRotationNoAdjust(rotation.to_euler('XYZ'))
     scale = convertScaleNoAdjust(scale)
 
     fw("bind_translate %f %f %f\n" % (location))
@@ -2224,7 +2224,7 @@ def saveNode(context, fw, fw_animation, fw_channel, currentObject):
     location, rotation, scale = currentObject.matrix_local.decompose()
 
     location = convertLocation(location)
-    rotation = convertRotation(rotation.to_euler())
+    rotation = convertRotation(rotation.to_euler('XYZ'))
     scale = convertScale(scale)
 
     parentObject = currentObject.parent
@@ -2324,7 +2324,8 @@ def saveNode(context, fw, fw_animation, fw_channel, currentObject):
             fw("\n")
 
     if currentObject.animation_data is not None:
-        saveAnimation(context, fw, fw_animation, fw_channel, currentObject.name, currentObject.animation_data, None, False)
+        isJoint = currentObject.type == 'ARMATURE'
+        saveAnimation(context, fw, fw_animation, fw_channel, currentObject.name, currentObject.animation_data, None, isJoint)
 
     if currentObject.type == 'ARMATURE':
         fw("joints %d\n" % len(currentObject.pose.bones.values()))

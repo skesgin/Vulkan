@@ -114,6 +114,11 @@ Quat VKTS_APIENTRY rotateRz(const float anglez)
     return rotateAxis(anglez, 0.0f, 0.0f, 1.0f);
 }
 
+Quat VKTS_APIENTRY rotateRyRzRx(const float angley, const float anglez, const float anglex)
+{
+    return rotateRy(angley) * rotateRz(anglez) * rotateRx(anglex);
+}
+
 Quat VKTS_APIENTRY rotateRzRyRx(const float anglez, const float angley, const float anglex)
 {
     return rotateRz(anglez) * rotateRy(angley) * rotateRx(anglex);

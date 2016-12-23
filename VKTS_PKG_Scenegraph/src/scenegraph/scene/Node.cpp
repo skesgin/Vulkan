@@ -39,6 +39,7 @@ void Node::reset()
     parentNode = INodeSP();
 
     translate = glm::vec3(0.0f, 0.0f, 0.0f);
+    nodeRotationMode = VKTS_EULER_XZY;
     rotate = glm::vec3(0.0f, 0.0f, 0.0f);
     scale = glm::vec3(1.0f, 1.0f, 1.0f);
 
@@ -52,6 +53,7 @@ void Node::reset()
     joints = 0;
 
     bindTranslate = glm::vec3(0.0f, 0.0f, 0.0f);
+    bindRotationMode = VKTS_EULER_XYZ;
     bindRotate = glm::vec3(0.0f, 0.0f, 0.0f);
     bindScale = glm::vec3(1.0f, 1.0f, 1.0f);
 
@@ -98,13 +100,14 @@ void Node::reset()
 }
 
 Node::Node() :
-    INode(), name(""), parentNode(), translate(0.0f, 0.0f, 0.0f), rotate(0.0f, 0.0f, 0.0f), scale(1.0f, 1.0f, 1.0f), finalTranslate(0.0f, 0.0f, 0.0f), finalRotate(0.0f, 0.0f, 0.0f), finalScale(1.0f, 1.0f, 1.0f), transformMatrix(1.0f), transformMatrixDirty(), jointIndex(-1), joints(0), bindTranslate(0.0f, 0.0f, 0.0f), bindRotate(0.0f, 0.0f,0.0f), bindScale(1.0f, 1.0f, 1.0f), bindMatrix(1.0f), inverseBindMatrix(1.0f), bindMatrixDirty(), allChildNodes(), allMeshes(), allCameras(), allLights(), allConstraints(), allAnimations(), currentAnimation(-1), allParticleSystems(), allParticleSystemSeeds(), transformUniformBuffer(), jointsUniformBuffer(), box(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)), layers(0x01), nodeData()
+    INode(), name(""), parentNode(), translate(0.0f, 0.0f, 0.0f), nodeRotationMode(VKTS_EULER_XZY), rotate(0.0f, 0.0f, 0.0f), scale(1.0f, 1.0f, 1.0f), finalTranslate(0.0f, 0.0f, 0.0f), finalRotate(0.0f, 0.0f, 0.0f), finalScale(1.0f, 1.0f, 1.0f), transformMatrix(1.0f), transformMatrixDirty(), jointIndex(-1), joints(0), bindTranslate(0.0f, 0.0f, 0.0f), bindRotationMode(VKTS_EULER_XYZ), bindRotate(0.0f, 0.0f,0.0f), bindScale(1.0f, 1.0f, 1.0f), bindMatrix(1.0f), inverseBindMatrix(1.0f), bindMatrixDirty(), allChildNodes(), allMeshes(), allCameras(), allLights(), allConstraints(), allAnimations(), currentAnimation(-1), allParticleSystems(), allParticleSystemSeeds(), transformUniformBuffer(), jointsUniformBuffer(), box(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)), layers(0x01), nodeData()
+
 {
     reset();
 }
 
 Node::Node(const Node& other) :
-    INode(), name(other.name + "_clone"), parentNode(other.parentNode), translate(other.translate), rotate(other.rotate), scale(other.scale), finalTranslate(other.finalTranslate), finalRotate(other.finalRotate), finalScale(other.finalScale), transformMatrix(other.transformMatrix), transformMatrixDirty(other.transformMatrixDirty), jointIndex(-1), joints(0), bindTranslate(other.bindTranslate), bindRotate(other.bindRotate), bindScale(other.bindScale), bindMatrix(other.bindMatrix), inverseBindMatrix(other.inverseBindMatrix), bindMatrixDirty(other.bindMatrixDirty), box(other.box), layers(other.layers), nodeData()
+    INode(), name(other.name + "_clone"), parentNode(other.parentNode), translate(other.translate), nodeRotationMode(other.nodeRotationMode), rotate(other.rotate), scale(other.scale), finalTranslate(other.finalTranslate), finalRotate(other.finalRotate), finalScale(other.finalScale), transformMatrix(other.transformMatrix), transformMatrixDirty(other.transformMatrixDirty), jointIndex(-1), joints(0), bindTranslate(other.bindTranslate), bindRotationMode(other.bindRotationMode), bindRotate(other.bindRotate), bindScale(other.bindScale), bindMatrix(other.bindMatrix), inverseBindMatrix(other.inverseBindMatrix), bindMatrixDirty(other.bindMatrixDirty), box(other.box), layers(other.layers), nodeData()
 {
     for (size_t i = 0; i < other.nodeData.size(); i++)
     {
@@ -364,6 +367,18 @@ void Node::setTranslate(const glm::vec3& translate)
     setDirty();
 }
 
+VkTsRotationMode Node::getNodeRotationMode() const
+{
+	return nodeRotationMode;
+}
+
+void Node::setNodeRotationMode(const VkTsRotationMode rotationMode)
+{
+	this->nodeRotationMode = rotationMode;
+
+	setDirty();
+}
+
 const glm::vec3& Node::getRotate() const
 {
     return rotate;
@@ -443,6 +458,18 @@ void Node::setBindTranslate(const glm::vec3& translate)
     this->bindTranslate = translate;
 
     setDirty();
+}
+
+VkTsRotationMode Node::getBindRotationMode() const
+{
+	return bindRotationMode;
+}
+
+void Node::setBindRotationMode(const VkTsRotationMode rotationMode)
+{
+	this->bindRotationMode = rotationMode;
+
+	setDirty();
 }
 
 const glm::vec3& Node::getBindRotate() const
@@ -958,12 +985,11 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
 
         const auto& currentChannels = allAnimations[currentAnimation]->getChannels();
 
-        float value;
-
         //
 
-        Quat quaternion;
+        float value = 0.0f;
 
+        Quat quaternion;
         VkBool32 quaternionDirty = VK_FALSE;
 
         //
@@ -982,23 +1008,9 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
             }
             else if (currentChannels[i]->getTargetTransform() == VKTS_TARGET_TRANSFORM_QUATERNION_ROTATE)
             {
-            	switch (currentChannels[i]->getTargetTransformElement())
-            	{
-            		case VKTS_TARGET_TRANSFORM_ELEMENT_X:
-            			quaternion.x = value;
-            			break;
-            		case VKTS_TARGET_TRANSFORM_ELEMENT_Y:
-            			quaternion.y = value;
-            			break;
-            		case VKTS_TARGET_TRANSFORM_ELEMENT_Z:
-            			quaternion.z = value;
-            			break;
-            		case VKTS_TARGET_TRANSFORM_ELEMENT_W:
-            			quaternion.w = value;
-            			break;
-            	}
+            	quaternion[currentChannels[i]->getTargetTransformElement()] = value;
 
-                quaternionDirty = VK_TRUE;
+            	quaternionDirty = VK_TRUE;
             }
             else if (currentChannels[i]->getTargetTransform() == VKTS_TARGET_TRANSFORM_SCALE)
             {
@@ -1006,9 +1018,33 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
             }
         }
 
+        //
+
         if (quaternionDirty)
         {
-        	finalRotate = quaternion.rotation();
+        	VkTsRotationMode currentRotationMode = VKTS_EULER_XZY;
+
+        	if (joints == -1)
+        	{
+        		currentRotationMode = nodeRotationMode;
+        	}
+        	else
+        	{
+        		currentRotationMode = bindRotationMode;
+        	}
+
+        	switch (currentRotationMode)
+        	{
+        		case VKTS_EULER_YXZ:
+        			finalRotate = decomposeRotateRzRxRy(quaternion.mat3());
+        			break;
+        		case VKTS_EULER_XYZ:
+        			finalRotate = decomposeRotateRzRyRx(quaternion.mat3());
+        			break;
+        		case VKTS_EULER_XZY:
+        			finalRotate = decomposeRotateRyRzRx(quaternion.mat3());
+        			break;
+        	}
         }
 
         //
@@ -1053,13 +1089,43 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
 
     	if (joints == 0)
     	{
-    		localBindMatrix = translateMat4(bindTranslate.x, bindTranslate.y, bindTranslate.z) * rotateRzRyRxMat4(bindRotate.z, bindRotate.y, bindRotate.x) * scaleMat4(bindScale.x, bindScale.y, bindScale.z);
+        	glm::mat4 currentRotation(1.0f);
+
+        	switch (bindRotationMode)
+        	{
+        		case VKTS_EULER_YXZ:
+        			currentRotation = rotateRzRxRyMat4(bindRotate.z, bindRotate.x, bindRotate.y);
+        			break;
+        		case VKTS_EULER_XYZ:
+        			currentRotation = rotateRzRyRxMat4(bindRotate.z, bindRotate.y, bindRotate.x);
+        			break;
+        		case VKTS_EULER_XZY:
+        			currentRotation = rotateRyRzRxMat4(bindRotate.y, bindRotate.z, bindRotate.x);
+        			break;
+        	}
+
+    		localBindMatrix = translateMat4(bindTranslate.x, bindTranslate.y, bindTranslate.z) * currentRotation * scaleMat4(bindScale.x, bindScale.y, bindScale.z);
     	}
     	else
     	{
-    		// Armature has no bind values, but transform is taken into account.
+        	glm::mat4 currentRotation(1.0f);
 
-    		localBindMatrix = translateMat4(finalTranslate.x, finalTranslate.y, finalTranslate.z) * rotateRzRyRxMat4(finalRotate.z, finalRotate.y, finalRotate.x) * scaleMat4(finalScale.x, finalScale.y, finalScale.z);
+        	switch (bindRotationMode)
+        	{
+        		case VKTS_EULER_YXZ:
+        			currentRotation = rotateRzRxRyMat4(finalRotate.z, finalRotate.x, finalRotate.y);
+        			break;
+        		case VKTS_EULER_XYZ:
+        			currentRotation = rotateRzRyRxMat4(finalRotate.z, finalRotate.y, finalRotate.x);
+        			break;
+        		case VKTS_EULER_XZY:
+        			currentRotation = rotateRyRzRxMat4(finalRotate.y, finalRotate.z, finalRotate.x);
+        			break;
+        	}
+
+        	// Armature has no bind values, but transform is taken into account.
+
+    		localBindMatrix = translateMat4(finalTranslate.x, finalTranslate.y, finalTranslate.z) * currentRotation * scaleMat4(finalScale.x, finalScale.y, finalScale.z);
     	}
 
 		this->bindMatrix = parentBindMatrix * localBindMatrix;
@@ -1077,7 +1143,22 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
     {
         if (jointIndex == -1)
         {
-        	this->transformMatrix = translateMat4(finalTranslate.x, finalTranslate.y, finalTranslate.z) * rotateRyRzRxMat4(finalRotate.y, finalRotate.z, finalRotate.x) * scaleMat4(finalScale.x, finalScale.y, finalScale.z);
+        	glm::mat4 currentRotation(1.0f);
+
+        	switch (nodeRotationMode)
+        	{
+        		case VKTS_EULER_YXZ:
+        			currentRotation = rotateRzRxRyMat4(finalRotate.z, finalRotate.x, finalRotate.y);
+        			break;
+        		case VKTS_EULER_XYZ:
+        			currentRotation = rotateRzRyRxMat4(finalRotate.z, finalRotate.y, finalRotate.x);
+        			break;
+        		case VKTS_EULER_XZY:
+        			currentRotation = rotateRyRzRxMat4(finalRotate.y, finalRotate.z, finalRotate.x);
+        			break;
+        	}
+
+        	this->transformMatrix = translateMat4(finalTranslate.x, finalTranslate.y, finalTranslate.z) * currentRotation * scaleMat4(finalScale.x, finalScale.y, finalScale.z);
 
         	// Only use parent transform, if this is not an armature.
         	if (joints == 0)
@@ -1089,7 +1170,22 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
         {
         	// Processing joints.
 
-        	this->transformMatrix = bindMatrix * translateMat4(finalTranslate.x, finalTranslate.y, finalTranslate.z) * rotateRzRyRxMat4(finalRotate.z, finalRotate.y, finalRotate.x) * scaleMat4(finalScale.x, finalScale.y, finalScale.z) * this->inverseBindMatrix;
+        	glm::mat4 currentRotation(1.0f);
+
+        	switch (bindRotationMode)
+        	{
+        		case VKTS_EULER_YXZ:
+        			currentRotation = rotateRzRxRyMat4(finalRotate.z, finalRotate.x, finalRotate.y);
+        			break;
+        		case VKTS_EULER_XYZ:
+        			currentRotation = rotateRzRyRxMat4(finalRotate.z, finalRotate.y, finalRotate.x);
+        			break;
+        		case VKTS_EULER_XZY:
+        			currentRotation = rotateRyRzRxMat4(finalRotate.y, finalRotate.z, finalRotate.x);
+        			break;
+        	}
+
+        	this->transformMatrix = bindMatrix * translateMat4(finalTranslate.x, finalTranslate.y, finalTranslate.z) * currentRotation * scaleMat4(finalScale.x, finalScale.y, finalScale.z) * this->inverseBindMatrix;
 
         	// Only use parent transform, if parent is not an armature.
         	if (parentNode.get() && parentNode->getNumberJoints() == 0)

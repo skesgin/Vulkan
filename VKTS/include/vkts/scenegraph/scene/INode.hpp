@@ -66,6 +66,10 @@ public:
 
     virtual void setTranslate(const glm::vec3& translate) = 0;
 
+    virtual VkTsRotationMode getNodeRotationMode() const = 0;
+
+    virtual void setNodeRotationMode(const VkTsRotationMode rotationMode) = 0;
+
     virtual const glm::vec3& getRotate() const = 0;
 
     virtual void setRotate(const glm::vec3& rotate) = 0;
@@ -95,6 +99,10 @@ public:
     virtual const glm::vec3& getBindTranslate() const = 0;
 
     virtual void setBindTranslate(const glm::vec3& translate) = 0;
+
+    virtual VkTsRotationMode getBindRotationMode() const = 0;
+
+    virtual void setBindRotationMode(const VkTsRotationMode rotationMode) = 0;
 
     virtual const glm::vec3& getBindRotate() const = 0;
 

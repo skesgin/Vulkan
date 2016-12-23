@@ -96,6 +96,12 @@ VKTS_APICALL Quat VKTS_APIENTRY rotateRz(const float anglez);
  *
  * @ThreadSafe
  */
+VKTS_APICALL Quat VKTS_APIENTRY rotateRyRzRx(const float angley, const float anglez, const float anglex);
+
+/**
+ *
+ * @ThreadSafe
+ */
 VKTS_APICALL Quat VKTS_APIENTRY rotateRzRyRx(const float anglez, const float angley, const float anglex);
 
 /**

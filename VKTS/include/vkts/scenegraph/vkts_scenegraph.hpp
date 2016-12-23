@@ -75,6 +75,13 @@ typedef enum VkTsTargetTransformElement_
 	VKTS_TARGET_TRANSFORM_ELEMENT_W = 3
 } VkTsTargetTransformElement;
 
+typedef enum VkTsRotationMode_
+{
+    VKTS_EULER_YXZ = 0,
+    VKTS_EULER_XYZ = 1,
+    VKTS_EULER_XZY = 2
+} VkTsRotationMode;
+
 typedef enum VkTsInterpolator_
 {
     VKTS_INTERPOLATOR_CONSTANT = 0,

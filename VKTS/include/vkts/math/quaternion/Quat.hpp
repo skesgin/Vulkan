@@ -62,6 +62,10 @@ public:
     Quat operator -() const;
 
 
+    float& operator[](const uint32_t index);
+    const float& operator[](const uint32_t index) const;
+
+
     Quat operator +(const Quat& other) const;
 
     Quat& operator +=(const Quat& other);
@@ -92,8 +96,6 @@ public:
     glm::mat3 mat3() const;
 
     glm::mat4 mat4() const;
-
-    glm::vec3 rotation() const;
 
 };
 
