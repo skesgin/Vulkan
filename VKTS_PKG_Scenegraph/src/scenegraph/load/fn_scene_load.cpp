@@ -394,7 +394,16 @@ static VkBool32 sceneLoadImageObjects(const char* directory, const char* filenam
 
 									for (size_t i = 0; i < allDiffuseCubeMaps.size(); i++)
 									{
-										cacheSaveImageData(allDiffuseCubeMaps[i]);
+										if (allDiffuseCubeMaps[i]->getFormat() == VK_FORMAT_R32G32B32A32_SFLOAT)
+										{
+											auto tempCubeMap = imageDataConvert(allDiffuseCubeMaps[i], VK_FORMAT_R32G32B32_SFLOAT, allDiffuseCubeMaps[i]->getName());
+
+											cacheSaveImageData(tempCubeMap);
+										}
+										else
+										{
+											cacheSaveImageData(allDiffuseCubeMaps[i]);
+										}
 									}
 								}
 							}
@@ -492,7 +501,16 @@ static VkBool32 sceneLoadImageObjects(const char* directory, const char* filenam
 
 									for (size_t i = 0; i < allCookTorranceCubeMaps.size(); i++)
 									{
-										cacheSaveImageData(allCookTorranceCubeMaps[i]);
+										if (allCookTorranceCubeMaps[i]->getFormat() == VK_FORMAT_R32G32B32A32_SFLOAT)
+										{
+											auto tempCubeMap = imageDataConvert(allCookTorranceCubeMaps[i], VK_FORMAT_R32G32B32_SFLOAT, allCookTorranceCubeMaps[i]->getName());
+
+											cacheSaveImageData(tempCubeMap);
+										}
+										else
+										{
+											cacheSaveImageData(allCookTorranceCubeMaps[i]);
+										}
 									}
 								}
 							}

@@ -1665,6 +1665,11 @@ IImageDataSP VKTS_APIENTRY imageDataMerge(const SmartPointerVector<IImageDataSP>
 
     for (size_t i = 0; i < sourceImages.size(); i++)
     {
+    	if (!sourceImages[i].get())
+    	{
+    		return IImageDataSP();
+    	}
+
         totalSize += sourceImages[i]->getSize();
 
         if (i == 0)

@@ -228,7 +228,7 @@ ImageData::ImageData(const std::string& name, const VkImageType imageType, const
     BLOCK = imageDataIsBLOCK(format);
     UNORM = imageDataIsUNORM(format);
     SFLOAT = imageDataIsSFLOAT(format);
-    SFLOAT = imageDataIsSRGB(format);
+    SRGB = imageDataIsSRGB(format);
     bytesPerChannel = imageDataGetBytesPerChannel(format);
     numberChannels = imageDataGetNumberChannels(format);
 }

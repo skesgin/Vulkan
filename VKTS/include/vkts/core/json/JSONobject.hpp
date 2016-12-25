@@ -35,7 +35,7 @@ namespace vkts
 class CompareJSONstringSP
 {
 	public:
-		VkBool32 operator()(const JSONstringSP& first, const JSONstringSP& second) const { return first->getValue() < second->getValue(); }
+		bool operator()(const JSONstringSP& first, const JSONstringSP& second) const { return first->getValue() < second->getValue(); }
 };
 
 class JSONobject : public JSONvalue
