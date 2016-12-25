@@ -218,6 +218,13 @@ public:
 
     virtual void drawRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const uint32_t currentBuffer, const std::map<uint32_t, VkTsDynamicOffset>& dynamicOffsetMappings, const OverwriteDraw* renderOverwrite = nullptr) = 0;
 
+
+    virtual VkBool32 isNode() const = 0;
+
+    virtual VkBool32 isArmature() const = 0;
+
+    virtual VkBool32 isJoint() const = 0;
+
 };
 
 typedef std::shared_ptr<INode> INodeSP;

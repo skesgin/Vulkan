@@ -970,7 +970,7 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
     bindMatrixDirty[currentBuffer] = bindMatrixDirty[currentBuffer] || parentBindMatrixDirty;
 
     // Gathering armature.
-    auto newArmatureNode = (joints != 0) ? INode::shared_from_this() : armatureNode;
+    auto newArmatureNode = isArmature() ? INode::shared_from_this() : armatureNode;
 
     //
 
@@ -1025,17 +1025,23 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
         {
         	VkTsRotationMode currentRotationMode = VKTS_EULER_XZY;
 
-        	if (jointIndex == -1 && joints == 0)
+        	if (isNode())
         	{
         		// Processing node.
 
         		currentRotationMode = nodeRotationMode;
         	}
-        	else
+        	else if (isArmature() || isJoint())
         	{
         		// Processing joint and armature.
 
         		currentRotationMode = bindRotationMode;
+        	}
+        	else
+        	{
+            	logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Invalid combination: joints = %d jointIndex = %d", joints, jointIndex);
+
+            	return;
         	}
 
         	switch (currentRotationMode)
@@ -1056,7 +1062,7 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
 
         transformMatrixDirty[currentBuffer] = VK_TRUE;
 
-        if (jointIndex > 0 || joints != 0)
+        if (isArmature() || isJoint())
         {
         	// Processing joint and armature.
 
@@ -1080,7 +1086,7 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
 
         transformMatrixDirty[currentBuffer] = VK_TRUE;
 
-        if (jointIndex > 0 || joints != 0)
+        if (isArmature() || isJoint())
         {
         	// Processing joint and armature.
 
@@ -1089,72 +1095,80 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
     }
 
     //
-
-    if (bindMatrixDirty[currentBuffer])
+    if (isArmature() || isJoint())
     {
-    	// Processing joints and armature.
+		if (bindMatrixDirty[currentBuffer])
+		{
+			// Processing joints and armature.
 
-    	glm::mat4 localBindMatrix;
+			glm::mat4 localBindMatrix;
 
-    	if (joints == 0)
-    	{
-    		// Processing joints.
+			if (isJoint())
+			{
+				// Processing joints.
 
-        	glm::mat4 currentRotation(1.0f);
+				glm::mat4 currentRotation(1.0f);
 
-        	switch (bindRotationMode)
-        	{
-        		case VKTS_EULER_YXZ:
-        			currentRotation = rotateRzRxRyMat4(bindRotate.z, bindRotate.x, bindRotate.y);
-        			break;
-        		case VKTS_EULER_XYZ:
-        			currentRotation = rotateRzRyRxMat4(bindRotate.z, bindRotate.y, bindRotate.x);
-        			break;
-        		case VKTS_EULER_XZY:
-        			currentRotation = rotateRyRzRxMat4(bindRotate.y, bindRotate.z, bindRotate.x);
-        			break;
-        	}
+				switch (bindRotationMode)
+				{
+					case VKTS_EULER_YXZ:
+						currentRotation = rotateRzRxRyMat4(bindRotate.z, bindRotate.x, bindRotate.y);
+						break;
+					case VKTS_EULER_XYZ:
+						currentRotation = rotateRzRyRxMat4(bindRotate.z, bindRotate.y, bindRotate.x);
+						break;
+					case VKTS_EULER_XZY:
+						currentRotation = rotateRyRzRxMat4(bindRotate.y, bindRotate.z, bindRotate.x);
+						break;
+				}
 
-    		localBindMatrix = translateMat4(bindTranslate.x, bindTranslate.y, bindTranslate.z) * currentRotation * scaleMat4(bindScale.x, bindScale.y, bindScale.z);
-    	}
-    	else
-    	{
-    		// Processing armature.
+				localBindMatrix = translateMat4(bindTranslate.x, bindTranslate.y, bindTranslate.z) * currentRotation * scaleMat4(bindScale.x, bindScale.y, bindScale.z);
+			}
+			else if (isArmature())
+			{
+				// Processing armature.
 
-        	glm::mat4 currentRotation(1.0f);
+				glm::mat4 currentRotation(1.0f);
 
-        	switch (bindRotationMode)
-        	{
-        		case VKTS_EULER_YXZ:
-        			currentRotation = rotateRzRxRyMat4(finalRotate.z, finalRotate.x, finalRotate.y);
-        			break;
-        		case VKTS_EULER_XYZ:
-        			currentRotation = rotateRzRyRxMat4(finalRotate.z, finalRotate.y, finalRotate.x);
-        			break;
-        		case VKTS_EULER_XZY:
-        			currentRotation = rotateRyRzRxMat4(finalRotate.y, finalRotate.z, finalRotate.x);
-        			break;
-        	}
+				switch (bindRotationMode)
+				{
+					case VKTS_EULER_YXZ:
+						currentRotation = rotateRzRxRyMat4(finalRotate.z, finalRotate.x, finalRotate.y);
+						break;
+					case VKTS_EULER_XYZ:
+						currentRotation = rotateRzRyRxMat4(finalRotate.z, finalRotate.y, finalRotate.x);
+						break;
+					case VKTS_EULER_XZY:
+						currentRotation = rotateRyRzRxMat4(finalRotate.y, finalRotate.z, finalRotate.x);
+						break;
+				}
 
-        	// Armature has no bind values, but transform is taken into account.
+				// Armature has no bind values, but transform is taken into account.
 
-    		localBindMatrix = translateMat4(finalTranslate.x, finalTranslate.y, finalTranslate.z) * currentRotation * scaleMat4(finalScale.x, finalScale.y, finalScale.z);
-    	}
+				localBindMatrix = translateMat4(finalTranslate.x, finalTranslate.y, finalTranslate.z) * currentRotation * scaleMat4(finalScale.x, finalScale.y, finalScale.z);
+			}
+			else
+			{
+				logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Invalid combination: joints = %d jointIndex = %d", joints, jointIndex);
 
-		this->bindMatrix = parentBindMatrix * localBindMatrix;
+				return;
+			}
 
-        this->inverseBindMatrix = glm::inverse(this->bindMatrix);
+			this->bindMatrix = parentBindMatrix * localBindMatrix;
 
-        //
+			this->inverseBindMatrix = glm::inverse(this->bindMatrix);
 
-        transformMatrixDirty[currentBuffer] = VK_TRUE;
-    }
+			//
+
+			transformMatrixDirty[currentBuffer] = VK_TRUE;
+		}
+	}
 
     //
 
     if (transformMatrixDirty[currentBuffer])
     {
-        if (jointIndex == -1)
+        if (isNode() || isArmature())
         {
         	// Processing node and armature.
 
@@ -1175,14 +1189,14 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
 
         	this->transformMatrix = translateMat4(finalTranslate.x, finalTranslate.y, finalTranslate.z) * currentRotation * scaleMat4(finalScale.x, finalScale.y, finalScale.z);
 
-        	if (joints == 0)
+        	if (isNode())
         	{
         		// Processing node.
 
         		this->transformMatrix = parentTransformMatrix * this->transformMatrix;
         	}
         }
-        else
+        else if (isJoint())
         {
         	// Processing joints.
 
@@ -1209,38 +1223,48 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
         		this->transformMatrix = parentTransformMatrix * this->transformMatrix;
         	}
         }
-
-        if (allCameras.size() > 0)
+        else
         {
-        	for (size_t i = 0; i < allCameras.size(); i++)
-        	{
-        		allCameras[i]->updateViewMatrix(this->transformMatrix);
-        	}
+        	logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Invalid combination: joints = %d jointIndex = %d", joints, jointIndex);
+
+        	return;
         }
 
-        if (allLights.size() > 0)
+        if (isNode() || isArmature())
         {
-        	for (size_t i = 0; i < allLights.size(); i++)
-        	{
-        		allLights[i]->updateDirection(this->transformMatrix);
-        	}
+			// Process node and armature.
+
+        	if (allCameras.size() > 0)
+			{
+				for (size_t i = 0; i < allCameras.size(); i++)
+				{
+					allCameras[i]->updateViewMatrix(this->transformMatrix);
+				}
+			}
+
+			if (allLights.size() > 0)
+			{
+				for (size_t i = 0; i < allLights.size(); i++)
+				{
+					allLights[i]->updateDirection(this->transformMatrix);
+				}
+			}
+
+			if (allMeshes.size() > 0)
+			{
+				VkDeviceSize dynamicOffset = (VkDeviceSize)currentBuffer * transformUniformBuffer->getBuffer()->getSize() / transformUniformBuffer->getBufferCount();
+
+				// A mesh has to be rendered, so update with transform matrix from the node tree.
+
+				transformUniformBuffer->upload(dynamicOffset + 0, 0, this->transformMatrix);
+
+				auto transformNormalMatrix = glm::transpose(glm::inverse(glm::mat3(this->transformMatrix)));
+
+				transformUniformBuffer->upload(dynamicOffset + sizeof(float) * 16, 0, transformNormalMatrix);
+			}
         }
 
-        if (allMeshes.size() > 0)
-        {
-        	// Process node.
-
-        	VkDeviceSize dynamicOffset = (VkDeviceSize)currentBuffer * transformUniformBuffer->getBuffer()->getSize() / transformUniformBuffer->getBufferCount();
-
-        	// A mesh has to be rendered, so update with transform matrix from the node tree.
-
-            transformUniformBuffer->upload(dynamicOffset + 0, 0, this->transformMatrix);
-
-            auto transformNormalMatrix = glm::transpose(glm::inverse(glm::mat3(this->transformMatrix)));
-
-            transformUniformBuffer->upload(dynamicOffset + sizeof(float) * 16, 0, transformNormalMatrix);
-        }
-        else if (joints != 0)
+        if (isArmature())
         {
         	// Process armature.
 
@@ -1254,37 +1278,51 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
 
             jointsUniformBuffer->upload(dynamicOffset + sizeof(float) * 16, 0, transformNormalMatrix);
         }
-        else if (jointIndex >= 0 && jointIndex < VKTS_MAX_JOINTS)
+
+        if (isJoint())
         {
-        	// Process joint.
+			// Process joint.
 
-        	if (newArmatureNode.get())
-        	{
-        		auto currentJointsUniformBuffer = newArmatureNode->getJointsUniformBuffer();
+			if (jointIndex >= 0 && jointIndex < VKTS_MAX_JOINTS)
+			{
+				if (newArmatureNode.get())
+				{
+					auto currentJointsUniformBuffer = newArmatureNode->getJointsUniformBuffer();
 
-        		if (currentJointsUniformBuffer.get())
-        		{
-                	VkDeviceSize dynamicOffset = (VkDeviceSize)currentBuffer * currentJointsUniformBuffer->getBuffer()->getSize() / currentJointsUniformBuffer->getBufferCount();
+					if (currentJointsUniformBuffer.get())
+					{
+						VkDeviceSize dynamicOffset = (VkDeviceSize)currentBuffer * currentJointsUniformBuffer->getBuffer()->getSize() / currentJointsUniformBuffer->getBufferCount();
 
-        			size_t offset = sizeof(float) * 16 + sizeof(float) * 12;
+						size_t offset = sizeof(float) * 16 + sizeof(float) * 12;
 
-        			// Upload the joint matrices to blend them on the GPU.
+						// Upload the joint matrices to blend them on the GPU.
 
-        			currentJointsUniformBuffer->upload(dynamicOffset + offset + jointIndex * sizeof(float) * 16, 0, this->transformMatrix);
+						currentJointsUniformBuffer->upload(dynamicOffset + offset + jointIndex * sizeof(float) * 16, 0, this->transformMatrix);
 
-                    auto transformNormalMatrix = glm::transpose(glm::inverse(glm::mat3(this->transformMatrix)));
+						auto transformNormalMatrix = glm::transpose(glm::inverse(glm::mat3(this->transformMatrix)));
 
-        			currentJointsUniformBuffer->upload(dynamicOffset + offset + VKTS_MAX_JOINTS * sizeof(float) * 16 + jointIndex * sizeof(float) * 12, 0, transformNormalMatrix);
-        		}
-        	}
-        }
-        else if (jointIndex >= VKTS_MAX_JOINTS)
-        {
-        	logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Too many joints: %d >= %d",  jointIndex, VKTS_MAX_JOINTS);
+						currentJointsUniformBuffer->upload(dynamicOffset + offset + VKTS_MAX_JOINTS * sizeof(float) * 16 + jointIndex * sizeof(float) * 12, 0, transformNormalMatrix);
+					}
+				}
+				else
+				{
+					logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No root armature node");
 
-        	return;
+					return;
+				}
+			}
+			else if (jointIndex >= VKTS_MAX_JOINTS)
+			{
+				logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Too many joints: %d >= %d",  jointIndex, VKTS_MAX_JOINTS);
+
+				return;
+			}
         }
     }
+
+    //
+
+    // Process children.
 
     for (size_t i = 0; i < allChildNodes.size(); i++)
     {
@@ -1292,6 +1330,8 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
     }
 
     //
+
+    // Reset dirty for current buffer.
 
     transformMatrixDirty[currentBuffer] = VK_FALSE;
 
@@ -1322,6 +1362,21 @@ void Node::drawRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerV
 	{
 		allChildNodes[i]->drawRecursive(cmdBuffer, allGraphicsPipelines, currentBuffer, dynamicOffsetMappings, renderOverwrite);
 	}
+}
+
+VkBool32 Node::isNode() const
+{
+	return (joints == 0) && (jointIndex == -1);
+}
+
+VkBool32 Node::isArmature() const
+{
+	return (joints != 0) && (jointIndex == -1);
+}
+
+VkBool32 Node::isJoint() const
+{
+	return (joints == 0) && (jointIndex != -1);
 }
 
 //

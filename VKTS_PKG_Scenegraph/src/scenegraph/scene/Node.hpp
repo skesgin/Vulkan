@@ -226,7 +226,6 @@ public:
     virtual void setCurrentAnimation(const int32_t currentAnimation) override;
 
 
-
     virtual void addParticleSystem(const IParticleSystemSP& particleSystem) override;
 
     virtual VkBool32 removeParticleSystem(const IParticleSystemSP& particleSystem) override;
@@ -279,6 +278,13 @@ public:
     virtual void updateTransformRecursive(const double deltaTime, const uint64_t deltaTicks, const double tickTime, const uint32_t currentBuffer, const glm::mat4& parentTransformMatrix, const VkBool32 parentTransformMatrixDirty, const glm::mat4& parentBindMatrix, const VkBool32 parentBindMatrixDirty, const INodeSP& armatureNode) override;
 
     virtual void drawRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const uint32_t currentBuffer, const std::map<uint32_t, VkTsDynamicOffset>& dynamicOffsetMappings, const OverwriteDraw* renderOverwrite = nullptr) override;
+
+
+    virtual VkBool32 isNode() const override;
+
+    virtual VkBool32 isArmature() const override;
+
+    virtual VkBool32 isJoint() const override;
 
     //
     // ICloneable
