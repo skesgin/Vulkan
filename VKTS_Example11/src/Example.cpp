@@ -27,7 +27,7 @@
 #include "Example.hpp"
 
 Example::Example(const vkts::IContextObjectSP& contextObject, const int32_t windowIndex, const vkts::IVisualContextSP& visualContext, const vkts::ISurfaceSP& surface) :
-		IUpdateThread(), contextObject(contextObject), windowIndex(windowIndex), visualContext(visualContext), surface(surface), depthFormat(VK_FORMAT_D32_SFLOAT), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), imageAcquiredSemaphore(nullptr), betweenSemaphore(nullptr), renderingCompleteSemaphore(nullptr), descriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), fragmentUniformBuffer(nullptr), shadowUniformBuffer(nullptr), voxelizeViewProjectionUniformBuffer(nullptr), voxelizeModelNormalUniformBuffer(nullptr), standardVertexShaderModule(nullptr), standardFragmentShaderModule(nullptr), standardShadowFragmentShaderModule(nullptr), voxelizeVertexShaderModule(nullptr), voxelizeGeometryShaderModule(nullptr), voxelizeFragmentShaderModule(nullptr), pipelineLayout(nullptr), loadTask(), sceneLoaded(VK_FALSE), sceneManager(nullptr), sceneFactory(nullptr), scene(nullptr), swapchain(nullptr), renderPass(nullptr), shadowRenderPass(nullptr), voxelRenderPass(nullptr), allOpaqueGraphicsPipelines(), allBlendGraphicsPipelines(), allBlendCwGraphicsPipelines(), allShadowGraphicsPipelines(), shadowTexture(), msaaColorTexture(nullptr), msaaDepthTexture(nullptr), depthTexture(nullptr), voxelTexture{nullptr, nullptr, nullptr}, shadowImageView(), msaaColorImageView(nullptr), msaaDepthStencilImageView(nullptr), depthStencilImageView(nullptr), shadowSampler(nullptr), swapchainImagesCount(0), swapchainImageView(), framebuffer(), shadowFramebuffer(), cmdBuffer(), shadowCmdBuffer(), cmdBufferFence()
+		IUpdateThread(), contextObject(contextObject), windowIndex(windowIndex), visualContext(visualContext), surface(surface), depthFormat(VK_FORMAT_D32_SFLOAT), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), imageAcquiredSemaphore(nullptr), betweenSemaphore(nullptr), renderingCompleteSemaphore(nullptr), descriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), fragmentUniformBuffer(nullptr), shadowUniformBuffer(nullptr), voxelizeViewProjectionUniformBuffer(nullptr), voxelizeModelNormalUniformBuffer(nullptr), standardVertexShaderModule(nullptr), standardFragmentShaderModule(nullptr), standardShadowFragmentShaderModule(nullptr), voxelizeVertexShaderModule(nullptr), voxelizeGeometryShaderModule(nullptr), voxelizeFragmentShaderModule(nullptr), pipelineLayout(nullptr), loadTask(), sceneLoaded(VK_FALSE), sceneManager(nullptr), sceneFactory(nullptr), scene(nullptr), swapchain(nullptr), renderPass(nullptr), shadowRenderPass(nullptr), voxelRenderPass(nullptr), allOpaqueGraphicsPipelines(), allBlendGraphicsPipelines(), allBlendCwGraphicsPipelines(), allShadowGraphicsPipelines(), allVoxelGraphicsPipelines(), shadowTexture(), msaaColorTexture(nullptr), msaaDepthTexture(nullptr), depthTexture(nullptr), voxelTexture{nullptr, nullptr, nullptr}, shadowImageView(), msaaColorImageView(nullptr), msaaDepthStencilImageView(nullptr), depthStencilImageView(nullptr), shadowSampler(nullptr), swapchainImagesCount(0), swapchainImageView(), framebuffer(), shadowFramebuffer(), cmdBuffer(), shadowCmdBuffer(), cmdBufferFence()
 {
 }
 
@@ -234,6 +234,10 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 	cmdBuffer[usedBuffer]->cmdEndRenderPass();
 
     //
+	// Voxel render pass.
+	//
+
+	// TODO: Add render to 3D image.
 
 	//
 	// Barrier, that we can write to the shadow map.
@@ -1085,7 +1089,92 @@ VkBool32 Example::buildPipeline()
 	// Voxelize pipeline.
 	//
 
-	// TODO: Create pipeline for voxelization.
+    vkts::DefaultGraphicsPipeline gp;
+
+    gp.getPipelineShaderStageCreateInfo(0).stage = VK_SHADER_STAGE_VERTEX_BIT;
+    gp.getPipelineShaderStageCreateInfo(0).module = voxelizeVertexShaderModule->getShaderModule();
+
+    gp.getPipelineShaderStageCreateInfo(1).stage = VK_SHADER_STAGE_GEOMETRY_BIT;
+    gp.getPipelineShaderStageCreateInfo(1).module = voxelizeGeometryShaderModule->getShaderModule();
+
+    gp.getPipelineShaderStageCreateInfo(2).stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+    gp.getPipelineShaderStageCreateInfo(2).module = voxelizeFragmentShaderModule->getShaderModule();
+
+
+    gp.getVertexInputBindingDescription(0).binding = VKTS_BINDING_VERTEX_BUFFER;
+    gp.getVertexInputBindingDescription(0).stride = vkts::alignmentGetStrideInBytes(vertexBufferType);
+    gp.getVertexInputBindingDescription(0).inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+
+    gp.getVertexInputAttributeDescription(0).location = 0;
+    gp.getVertexInputAttributeDescription(0).binding = VKTS_BINDING_VERTEX_BUFFER;
+    gp.getVertexInputAttributeDescription(0).format = VK_FORMAT_R32G32B32A32_SFLOAT;
+    gp.getVertexInputAttributeDescription(0).offset = vkts::alignmentGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_VERTEX, vertexBufferType);
+
+    gp.getVertexInputAttributeDescription(1).location = 1;
+    gp.getVertexInputAttributeDescription(1).binding = VKTS_BINDING_VERTEX_BUFFER;
+    gp.getVertexInputAttributeDescription(1).format = VK_FORMAT_R32G32B32_SFLOAT;
+    gp.getVertexInputAttributeDescription(1).offset = vkts::alignmentGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_NORMAL, vertexBufferType);
+
+    gp.getVertexInputAttributeDescription(2).location = 2;
+    gp.getVertexInputAttributeDescription(2).binding = VKTS_BINDING_VERTEX_BUFFER;
+    gp.getVertexInputAttributeDescription(2).format = VK_FORMAT_R32G32B32_SFLOAT;
+    gp.getVertexInputAttributeDescription(2).offset = vkts::alignmentGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_BITANGENT, vertexBufferType);
+
+    gp.getVertexInputAttributeDescription(3).location = 3;
+    gp.getVertexInputAttributeDescription(3).binding = VKTS_BINDING_VERTEX_BUFFER;
+    gp.getVertexInputAttributeDescription(3).format = VK_FORMAT_R32G32B32_SFLOAT;
+    gp.getVertexInputAttributeDescription(3).offset = vkts::alignmentGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_TANGENT, vertexBufferType);
+
+    gp.getVertexInputAttributeDescription(4).location = 4;
+    gp.getVertexInputAttributeDescription(4).binding = VKTS_BINDING_VERTEX_BUFFER;
+    gp.getVertexInputAttributeDescription(4).format = VK_FORMAT_R32G32_SFLOAT;
+    gp.getVertexInputAttributeDescription(4).offset = vkts::alignmentGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_TEXCOORD, vertexBufferType);
+
+
+    gp.getPipelineInputAssemblyStateCreateInfo().topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+
+
+    gp.getViewports(0).x = 0.0f;
+    gp.getViewports(0).y = 0.0f;
+    gp.getViewports(0).width = (float)VKTS_VOXEL_CUBE_SIZE;
+    gp.getViewports(0).height = (float)VKTS_VOXEL_CUBE_SIZE;
+    gp.getViewports(0).minDepth = 0.0f;
+    gp.getViewports(0).maxDepth = 1.0f;
+
+
+    gp.getScissors(0).offset.x = 0;
+    gp.getScissors(0).offset.y = 0;
+    gp.getScissors(0).extent = {VKTS_VOXEL_CUBE_SIZE, VKTS_VOXEL_CUBE_SIZE};
+
+
+    gp.getPipelineRasterizationStateCreateInfo();
+
+    gp.getPipelineMultisampleStateCreateInfo();
+
+    gp.getPipelineDepthStencilStateCreateInfo();
+
+    gp.getPipelineColorBlendAttachmentState(0);
+
+
+    gp.getDynamicState(0) = VK_DYNAMIC_STATE_VIEWPORT;
+    gp.getDynamicState(1) = VK_DYNAMIC_STATE_SCISSOR;
+
+
+    gp.getGraphicsPipelineCreateInfo().layout = pipelineLayout->getPipelineLayout();
+    gp.getGraphicsPipelineCreateInfo().renderPass = voxelRenderPass->getRenderPass();
+
+
+    pipeline = vkts::pipelineCreateGraphics(contextObject->getDevice()->getDevice(), VK_NULL_HANDLE, gp.getGraphicsPipelineCreateInfo(), vertexBufferType);
+
+    if (!pipeline.get())
+    {
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create graphics pipeline.");
+
+		return VK_FALSE;
+	}
+
+	allVoxelGraphicsPipelines.append(pipeline);
 
 	return VK_TRUE;
 }
@@ -1230,11 +1319,21 @@ VkBool32 Example::buildRenderPass()
 
 VkBool32 Example::buildPipelineLayout()
 {
+	// Using push constant to set the voxel grid dynamically.
+
+	VkPushConstantRange pushConstantRange[1];
+
+	pushConstantRange[0].stageFlags = VK_SHADER_STAGE_GEOMETRY_BIT;
+	pushConstantRange[0].offset = 0;
+	pushConstantRange[0].size = 2 * sizeof(float);
+
+	//
+
 	VkDescriptorSetLayout setLayouts[1];
 
 	setLayouts[0] = descriptorSetLayout->getDescriptorSetLayout();
 
-	pipelineLayout = vkts::pipelineCreateLayout(contextObject->getDevice()->getDevice(), 0, 1, setLayouts, 0, nullptr);
+	pipelineLayout = vkts::pipelineCreateLayout(contextObject->getDevice()->getDevice(), 0, 1, setLayouts, 1, pushConstantRange);
 
 	if (!pipelineLayout.get())
 	{
@@ -1253,7 +1352,7 @@ VkBool32 Example::buildDescriptorSetLayout()
 	descriptorSetLayoutBinding[0].binding = VKTS_BINDING_UNIFORM_BUFFER_VIEWPROJECTION;
 	descriptorSetLayoutBinding[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 	descriptorSetLayoutBinding[0].descriptorCount = 1;
-	descriptorSetLayoutBinding[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+	descriptorSetLayoutBinding[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_GEOMETRY_BIT;
 	descriptorSetLayoutBinding[0].pImmutableSamplers = nullptr;
 
 	descriptorSetLayoutBinding[1].binding = VKTS_BINDING_UNIFORM_BUFFER_LIGHT;
@@ -1277,7 +1376,7 @@ VkBool32 Example::buildDescriptorSetLayout()
 	descriptorSetLayoutBinding[4].binding = VKTS_BINDING_UNIFORM_BUFFER_TRANSFORM;
 	descriptorSetLayoutBinding[4].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 	descriptorSetLayoutBinding[4].descriptorCount = 1;
-	descriptorSetLayoutBinding[4].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+	descriptorSetLayoutBinding[4].stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_GEOMETRY_BIT;
 	descriptorSetLayoutBinding[4].pImmutableSamplers = nullptr;
 
     for (int32_t i = 0; i < VKTS_BINDING_STORAGE_IMAGE_COUNT; i++)
@@ -1890,6 +1989,12 @@ void Example::terminateResources(const vkts::IUpdateThreadContext& updateContext
 					shadowTexture[i]->destroy();
 				}
 			}
+
+			for (size_t i = 0; i < allVoxelGraphicsPipelines.size(); i++)
+			{
+				allVoxelGraphicsPipelines[i]->destroy();
+			}
+			allVoxelGraphicsPipelines.clear();
 
 			for (size_t i = 0; i < allShadowGraphicsPipelines.size(); i++)
 			{

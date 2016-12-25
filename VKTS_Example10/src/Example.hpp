@@ -60,9 +60,7 @@
 #define VKTS_RESOLVE_FRAGMENT_SHADER_NAME "shader/SPIR/V/resolve_bsdf.frag.spv"
 
 
-//#define VKTS_SCENE_NAME "buster_drone/buster_drone.vkts"
 #define VKTS_SCENE_NAME "material_probes/material_probes.vkts"
-//#define VKTS_SCENE_NAME "panorama/panorama.vkts"
 
 #define VKTS_ENVIRONMENT_SCENE_NAME "primitives/sphere.vkts"
 

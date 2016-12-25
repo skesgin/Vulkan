@@ -129,6 +129,7 @@ private:
 	vkts::SmartPointerVector<vkts::IGraphicsPipelineSP> allBlendGraphicsPipelines;
 	vkts::SmartPointerVector<vkts::IGraphicsPipelineSP> allBlendCwGraphicsPipelines;
 	vkts::SmartPointerVector<vkts::IGraphicsPipelineSP> allShadowGraphicsPipelines;
+	vkts::SmartPointerVector<vkts::IGraphicsPipelineSP> allVoxelGraphicsPipelines;
 
 	vkts::SmartPointerVector<vkts::IImageObjectSP> shadowTexture;
 	vkts::IImageObjectSP msaaColorTexture;

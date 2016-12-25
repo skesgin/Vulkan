@@ -251,6 +251,26 @@ int main(int argc, char* argv[])
 
 	//
 
+	VkPhysicalDeviceFeatures physicalDeviceFeatures;
+
+	physicalDevice->getPhysicalDeviceFeatures(physicalDeviceFeatures);
+
+	// Check, if geometry shader is available.
+	if (!physicalDeviceFeatures.geometryShader)
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Physical device not capable of geometry shaders.");
+
+		terminateApp();
+
+		return VK_FALSE;
+	}
+
+	// Only enable needed features.
+	memset(&physicalDeviceFeatures, 0, sizeof(physicalDeviceFeatures));
+	physicalDeviceFeatures.geometryShader = VK_TRUE;
+
+	//
+
 	if (!vkts::wsiGatherNeededDeviceExtensions(physicalDevice->getPhysicalDevice()))
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not gather device extension.");
@@ -354,7 +374,7 @@ int main(int argc, char* argv[])
 	deviceQueueCreateInfo.queueCount = 1;
 	deviceQueueCreateInfo.pQueuePriorities = queuePriorities;
 
-	auto device = vkts::deviceCreate(physicalDevice->getPhysicalDevice(), 0, 1, &deviceQueueCreateInfo, 0, nullptr, vkts::extensionGetNeededDeviceExtensionCount(), vkts::extensionGetNeededDeviceExtensionNames(), nullptr);
+	auto device = vkts::deviceCreate(physicalDevice->getPhysicalDevice(), 0, 1, &deviceQueueCreateInfo, 0, nullptr, vkts::extensionGetNeededDeviceExtensionCount(), vkts::extensionGetNeededDeviceExtensionNames(), &physicalDeviceFeatures);
 
 	if (!device.get())
 	{
