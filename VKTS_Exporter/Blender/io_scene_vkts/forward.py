@@ -44,13 +44,28 @@ forwardGeneralBufferGLSL = """layout (binding = 2, std140) uniform _u_bufferLigh
 layout (binding = 6, std140) uniform _u_bufferMatrices {
         mat4 inverseProjectionMatrix;
         mat4 inverseViewMatrix;
-} u_bufferMatrices;"""
+} u_bufferMatrices;
+
+layout(push_constant) uniform _u_bufferParameter {
+        int toneMap;
+        float exposure;
+} u_bufferParameter;"""
 
 forwardGeneralTextureGLSL = """layout (binding = 9) uniform sampler2D u_lut;
 layout (binding = 8) uniform samplerCube u_specularCubemap;
 layout (binding = 7) uniform samplerCube u_diffuseCubemap;"""
 
-forwardGeneralFunctionsGLSL = """vec3 colorToLinear(vec3 c)
+forwardGeneralFunctionsGLSL = """vec3 basicTonemap(vec3 c)
+{
+    if (u_bufferParameter.toneMap != 0)
+    {
+        return c * u_bufferParameter.exposure / (1.0 + c / u_bufferParameter.exposure);
+    }
+    
+    return c;
+}
+
+vec3 colorToLinear(vec3 c)
 {
     return pow(c, vec3(VKTS_GAMMA, VKTS_GAMMA, VKTS_GAMMA));
 }
@@ -283,7 +298,7 @@ forwardOutAssignGLSL = """
         
         //
         
-        color = colorToNonLinear(mix(colorLambert, colorCookTorrance, metallic) + emissiveColor);
+        color = colorToNonLinear(basicTonemap(mix(colorLambert, colorCookTorrance, metallic) + emissiveColor));
     }
     else
     {

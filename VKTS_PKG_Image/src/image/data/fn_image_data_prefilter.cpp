@@ -80,74 +80,6 @@ VKTS_APICALL glm::vec3 VKTS_APIENTRY imageDataGetScanVector(const uint32_t x, co
 	return glm::normalize(scanVector);
 }
 
-static void imageDataPrefilterCookTorranceThread(SmartPointerVector<IImageDataSP> result, const IImageDataSP sourceImage, const uint32_t m, const uint32_t side)
-{
-    //
-    // Cook torrance specular.
-    //
-
-    uint32_t roughnessSamples = (uint32_t)(result.size() / 6);
-
-    uint32_t samples = 1 << m;
-
-	for (uint32_t roughnessSampleIndex = 0; roughnessSampleIndex < roughnessSamples; roughnessSampleIndex++)
-	{
-		uint32_t length = (uint32_t)sourceImage->getWidth() / (1 << roughnessSampleIndex);
-
-		// 0.5 as step goes form -1.0 to 1.0 and not just 0.0 to 1.0
-		float step = 2.0f / (float)length;
-		float offset = step * 0.5f;
-
-		//
-
-		float roughness = (float)roughnessSampleIndex / (float)(roughnessSamples - 1);
-
-		//
-
-		glm::vec3 scanVector;
-
-		for (uint32_t y = 0; y < length; y++)
-		{
-			for (uint32_t x = 0; x < length; x++)
-			{
-				scanVector = imageDataGetScanVector(x, y, side, step, offset);
-
-				//
-
-				glm::mat3 basis = renderGetBasis(scanVector);
-
-				glm::vec3 colorCookTorrance = glm::vec3(0.0f, 0.0f, 0.0f);
-
-				float sampleDivisior = 0.0f;
-
-				for (uint32_t sampleIndex = 0; sampleIndex < samples; sampleIndex++)
-				{
-					glm::vec2 randomPoint = randomHammersley(sampleIndex, m);
-
-					// N = V
-					auto currentColorCookTorrance = renderCookTorrance(sourceImage, VK_FILTER_LINEAR, 0, randomPoint, basis, scanVector, scanVector, roughness);
-
-					if (!std::isnan(currentColorCookTorrance.x) && !std::isnan(currentColorCookTorrance.y) && !std::isnan(currentColorCookTorrance.z))
-					{
-						colorCookTorrance += currentColorCookTorrance;
-
-						sampleDivisior += 1.0f;
-					}
-				}
-
-				//
-
-				if (sampleDivisior > 0.0f)
-				{
-					colorCookTorrance = colorCookTorrance / sampleDivisior;
-				}
-
-				result[side * roughnessSamples + roughnessSampleIndex]->setTexel(glm::vec4(colorCookTorrance, 1.0f), x, y, 0, 0, 0);
-			}
-		}
-	}
-}
-
 SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterCookTorrance(const IImageDataSP& sourceImage, const uint32_t m, const std::string& name)
 {
     if (name.size() == 0 || !sourceImage.get() || sourceImage->getArrayLayers() != 6 || sourceImage->getDepth() != 1 || sourceImage->getWidth() != sourceImage->getHeight() || m == 0 || m > 32 || sourceImage->getWidth() < 2)
@@ -204,88 +136,73 @@ SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterCookTorrance(co
     // Cook torrance specular.
     //
 
-    std::vector<std::thread> allThreads;
-
     for (uint32_t side = 0; side < 6; side++)
     {
-    	allThreads.push_back(std::thread(std::thread(imageDataPrefilterCookTorranceThread, result, sourceImage, m, side)));
-    }
+        uint32_t roughnessSamples = (uint32_t)(result.size() / 6);
 
-    for (uint32_t side = 0; side < 6; side++)
-    {
-    	allThreads[side].join();
+        uint32_t samples = 1 << m;
+
+    	for (uint32_t roughnessSampleIndex = 0; roughnessSampleIndex < roughnessSamples; roughnessSampleIndex++)
+    	{
+    		uint32_t length = (uint32_t)sourceImage->getWidth() / (1 << roughnessSampleIndex);
+
+    		// 0.5 as step goes form -1.0 to 1.0 and not just 0.0 to 1.0
+    		float step = 2.0f / (float)length;
+    		float offset = step * 0.5f;
+
+    		//
+
+    		float roughness = (float)roughnessSampleIndex / (float)(roughnessSamples - 1);
+
+    		//
+
+    		glm::vec3 scanVector;
+
+    		for (uint32_t y = 0; y < length; y++)
+    		{
+    			for (uint32_t x = 0; x < length; x++)
+    			{
+    				scanVector = imageDataGetScanVector(x, y, side, step, offset);
+
+    				//
+
+    				glm::mat3 basis = renderGetBasis(scanVector);
+
+    				glm::vec3 colorCookTorrance = glm::vec3(0.0f, 0.0f, 0.0f);
+
+    				float sampleDivisior = 0.0f;
+
+    				for (uint32_t sampleIndex = 0; sampleIndex < samples; sampleIndex++)
+    				{
+    					glm::vec2 randomPoint = randomHammersley(sampleIndex, m);
+
+    					// N = V
+    					auto currentColorCookTorrance = renderCookTorrance(sourceImage, VK_FILTER_LINEAR, 0, randomPoint, basis, scanVector, scanVector, roughness);
+
+    					if (!std::isnan(currentColorCookTorrance.x) && !std::isnan(currentColorCookTorrance.y) && !std::isnan(currentColorCookTorrance.z))
+    					{
+    						colorCookTorrance += currentColorCookTorrance;
+
+    						sampleDivisior += 1.0f;
+    					}
+    				}
+
+    				//
+
+    				if (sampleDivisior > 0.0f)
+    				{
+    					colorCookTorrance = colorCookTorrance / sampleDivisior;
+    				}
+
+    				result[side * roughnessSamples + roughnessSampleIndex]->setTexel(glm::vec4(colorCookTorrance, 1.0f), x, y, 0, 0, 0);
+    			}
+    		}
+    	}
     }
 
     //
 
     return result;
-}
-
-static void imageDataPrefilterOrenNayarThread(SmartPointerVector<IImageDataSP> result, const IImageDataSP sourceImage, const uint32_t m, const uint32_t side)
-{
-    //
-    // Oren-Nayar diffuse.
-    //
-
-    uint32_t roughnessSamples = (uint32_t)(result.size() / 6);
-
-    uint32_t samples = 1 << m;
-
-    uint32_t length = (uint32_t)sourceImage->getWidth();
-
-    // 0.5 as step goes form -1.0 to 1.0 and not just 0.0 to 1.0
-	float step = 2.0f / (float)length;
-	float offset = step * 0.5f;
-
-	//
-
-	glm::vec3 scanVector;
-
-	for (uint32_t y = 0; y < length; y++)
-	{
-		for (uint32_t x = 0; x < length; x++)
-		{
-			scanVector = imageDataGetScanVector(x, y, side, step, offset);
-
-			//
-
-			glm::mat3 basis = renderGetBasis(scanVector);
-
-			for (uint32_t roughnessSampleIndex = 0; roughnessSampleIndex < roughnessSamples; roughnessSampleIndex++)
-			{
-				glm::vec3 colorOrenNayar = glm::vec3(0.0f, 0.0f, 0.0f);
-
-				float roughness = (float)roughnessSampleIndex / (float)(roughnessSamples - 1);
-
-				float sampleDivisior = 0.0f;
-
-				for (uint32_t sampleIndex = 0; sampleIndex < samples; sampleIndex++)
-				{
-					glm::vec2 randomPoint = randomHammersley(sampleIndex, m);
-
-					// N = V
-					auto currentColorOrenNayar = renderOrenNayar(sourceImage, VK_FILTER_LINEAR, 0, randomPoint, basis, scanVector, scanVector, roughness);
-
-					if (!std::isnan(currentColorOrenNayar.x) && !std::isnan(currentColorOrenNayar.y) && !std::isnan(currentColorOrenNayar.z))
-					{
-						colorOrenNayar += currentColorOrenNayar;
-
-						sampleDivisior += 1.0f;
-					}
-
-				}
-
-				//
-
-				if (sampleDivisior > 0.0f)
-				{
-					colorOrenNayar = colorOrenNayar / sampleDivisior;
-				}
-
-				result[side * roughnessSamples + roughnessSampleIndex]->setTexel(glm::vec4(colorOrenNayar, 1.0f), x, y, 0, 0, 0);
-			}
-		}
-	}
 }
 
 SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterOrenNayar(const IImageDataSP& sourceImage, const uint32_t m, const std::string& name)
@@ -344,79 +261,72 @@ SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterOrenNayar(const
     // Oren-Nayar diffuse.
     //
 
-    std::vector<std::thread> allThreads;
-
     for (uint32_t side = 0; side < 6; side++)
     {
-    	allThreads.push_back(std::thread(imageDataPrefilterOrenNayarThread, result, sourceImage, m, side));
-    }
+        uint32_t roughnessSamples = (uint32_t)(result.size() / 6);
 
-    for (uint32_t side = 0; side < 6; side++)
-    {
-    	allThreads[side].join();
+        uint32_t samples = 1 << m;
+
+        uint32_t length = (uint32_t)sourceImage->getWidth();
+
+        // 0.5 as step goes form -1.0 to 1.0 and not just 0.0 to 1.0
+    	float step = 2.0f / (float)length;
+    	float offset = step * 0.5f;
+
+    	//
+
+    	glm::vec3 scanVector;
+
+    	for (uint32_t y = 0; y < length; y++)
+    	{
+    		for (uint32_t x = 0; x < length; x++)
+    		{
+    			scanVector = imageDataGetScanVector(x, y, side, step, offset);
+
+    			//
+
+    			glm::mat3 basis = renderGetBasis(scanVector);
+
+    			for (uint32_t roughnessSampleIndex = 0; roughnessSampleIndex < roughnessSamples; roughnessSampleIndex++)
+    			{
+    				glm::vec3 colorOrenNayar = glm::vec3(0.0f, 0.0f, 0.0f);
+
+    				float roughness = (float)roughnessSampleIndex / (float)(roughnessSamples - 1);
+
+    				float sampleDivisior = 0.0f;
+
+    				for (uint32_t sampleIndex = 0; sampleIndex < samples; sampleIndex++)
+    				{
+    					glm::vec2 randomPoint = randomHammersley(sampleIndex, m);
+
+    					// N = V
+    					auto currentColorOrenNayar = renderOrenNayar(sourceImage, VK_FILTER_LINEAR, 0, randomPoint, basis, scanVector, scanVector, roughness);
+
+    					if (!std::isnan(currentColorOrenNayar.x) && !std::isnan(currentColorOrenNayar.y) && !std::isnan(currentColorOrenNayar.z))
+    					{
+    						colorOrenNayar += currentColorOrenNayar;
+
+    						sampleDivisior += 1.0f;
+    					}
+
+    				}
+
+    				//
+
+    				if (sampleDivisior > 0.0f)
+    				{
+    					colorOrenNayar = colorOrenNayar / sampleDivisior;
+    				}
+
+    				result[side * roughnessSamples + roughnessSampleIndex]->setTexel(glm::vec4(colorOrenNayar, 1.0f), x, y, 0, 0, 0);
+    			}
+    		}
+    	}
     }
 
     //
 
     return result;
-}
-
-static void imageDataPrefilterLambertThread(SmartPointerVector<IImageDataSP> result, const IImageDataSP sourceImage, const uint32_t m, const uint32_t side)
-{
-    //
-    // Lambert diffuse.
-    //
-
-    uint32_t samples = 1 << m;
-
-    uint32_t length = (uint32_t)sourceImage->getWidth();
-
-    // 0.5 as step goes form -1.0 to 1.0 and not just 0.0 to 1.0
-	float step = 2.0f / (float)length;
-	float offset = step * 0.5f;
-
-	//
-
-	glm::vec3 scanVector;
-
-	for (uint32_t y = 0; y < length; y++)
-	{
-		for (uint32_t x = 0; x < length; x++)
-		{
-			scanVector = imageDataGetScanVector(x, y, side, step, offset);
-
-			//
-
-			glm::mat3 basis = renderGetBasis(scanVector);
-
-			glm::vec3 colorLambert = glm::vec3(0.0f, 0.0f, 0.0f);
-
-			float sampleDivisior = 0.0f;
-
-			for (uint32_t sampleIndex = 0; sampleIndex < samples; sampleIndex++)
-			{
-				glm::vec2 randomPoint = randomHammersley(sampleIndex, m);
-
-				auto currentColorLambert = renderLambert(sourceImage, VK_FILTER_LINEAR, 0, randomPoint, basis);
-
-				if (!std::isnan(currentColorLambert.x) && !std::isnan(currentColorLambert.y) && !std::isnan(currentColorLambert.z))
-				{
-					colorLambert += currentColorLambert;
-
-					sampleDivisior += 1.0f;
-				}
-			}
-
-			//
-
-			if (sampleDivisior > 0.0f)
-			{
-				colorLambert = colorLambert / sampleDivisior;
-			}
-
-			result[side]->setTexel(glm::vec4(colorLambert, 1.0f), x, y, 0, 0, 0);
-		}
-	}
 }
 
 SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterLambert(const IImageDataSP& sourceImage, const uint32_t m, const std::string& name)
@@ -462,17 +372,58 @@ SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterLambert(const I
     // Lambert diffuse.
     //
 
-
-    std::vector<std::thread> allThreads;
-
     for (uint32_t side = 0; side < 6; side++)
     {
-    	allThreads.push_back(std::thread(imageDataPrefilterLambertThread, result, sourceImage, m, side));
-    }
+        uint32_t samples = 1 << m;
 
-    for (uint32_t side = 0; side < 6; side++)
-    {
-    	allThreads[side].join();
+        uint32_t length = (uint32_t)sourceImage->getWidth();
+
+        // 0.5 as step goes form -1.0 to 1.0 and not just 0.0 to 1.0
+    	float step = 2.0f / (float)length;
+    	float offset = step * 0.5f;
+
+    	//
+
+    	glm::vec3 scanVector;
+
+    	for (uint32_t y = 0; y < length; y++)
+    	{
+    		for (uint32_t x = 0; x < length; x++)
+    		{
+    			scanVector = imageDataGetScanVector(x, y, side, step, offset);
+
+    			//
+
+    			glm::mat3 basis = renderGetBasis(scanVector);
+
+    			glm::vec3 colorLambert = glm::vec3(0.0f, 0.0f, 0.0f);
+
+    			float sampleDivisior = 0.0f;
+
+    			for (uint32_t sampleIndex = 0; sampleIndex < samples; sampleIndex++)
+    			{
+    				glm::vec2 randomPoint = randomHammersley(sampleIndex, m);
+
+    				auto currentColorLambert = renderLambert(sourceImage, VK_FILTER_LINEAR, 0, randomPoint, basis);
+
+    				if (!std::isnan(currentColorLambert.x) && !std::isnan(currentColorLambert.y) && !std::isnan(currentColorLambert.z))
+    				{
+    					colorLambert += currentColorLambert;
+
+    					sampleDivisior += 1.0f;
+    				}
+    			}
+
+    			//
+
+    			if (sampleDivisior > 0.0f)
+    			{
+    				colorLambert = colorLambert / sampleDivisior;
+    			}
+
+    			result[side]->setTexel(glm::vec4(colorLambert, 1.0f), x, y, 0, 0, 0);
+    		}
+    	}
     }
 
     //

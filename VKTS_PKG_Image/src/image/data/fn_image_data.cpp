@@ -540,14 +540,9 @@ static IImageDataSP imageDataLoadHdr(const std::string& name, const IBinaryBuffe
             	scanline[currentX * 4 + 2] = tempBuffer[2];
             	scanline[currentX * 4 + 3] = tempBuffer[3];
 
-                if (tempBuffer[1] != 2 || (tempBuffer[2] & 128))
-                {
-                	scanline[currentX * 4 + 0] = 2;
-                }
-
             	if (tempBuffer[0] == 1 && tempBuffer[1] == 1 && tempBuffer[2] == 1)
             	{
-            		int32_t loop = (int32_t)tempBuffer[3] << rshift;
+            		int32_t loop = ((int32_t)tempBuffer[3]) << rshift;
 
             		for (int32_t i = 0; i < loop; i++)
             		{
@@ -1160,9 +1155,6 @@ IImageDataSP VKTS_APIENTRY imageDataConvert(const IImageDataSP& sourceImage, con
 
     int8_t targetRgbaIndices[4] = { 0, -1, -1, -1 };
 
-    uint8_t rgbaUINT8[4] = { 255, 255, 255, 255 };
-    float rgbaFLOAT[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
-
     switch (sourceImage->getFormat())
     {
         case VK_FORMAT_R8_UNORM:
@@ -1577,54 +1569,69 @@ IImageDataSP VKTS_APIENTRY imageDataConvert(const IImageDataSP& sourceImage, con
             {
                 for (int32_t channel = 0; channel < targetNumberChannels; channel++)
                 {
+                	// Default target channel values, when less source channel values are present.
+
+                    uint8_t currentByte = 0;
+                    float currentFloat = 0.0;
+
+                	if (targetRgbaIndices[channel] == 3)
+                	{
+                		// Alpha is opaque.
+
+                        currentByte = 255;
+                        currentFloat = 1.0;
+                	}
+
+                	//
+
                     if (channel < sourceNumberChannels)
                     {
                         if (sourceIsUNORM)
                         {
-                            rgbaUINT8[sourceRgbaIndices[channel]] = currentSourceUINT8[channel + x * sourceNumberChannels + y * sourceImage->getWidth() * sourceNumberChannels + z * sourceImage->getHeight() * sourceImage->getWidth() * sourceNumberChannels];
+                        	currentByte = currentSourceUINT8[sourceRgbaIndices[channel] + x * sourceNumberChannels + y * sourceImage->getWidth() * sourceNumberChannels + z * sourceImage->getHeight() * sourceImage->getWidth() * sourceNumberChannels];
 
                             // Only for color channels.
                             if (exponent != 1.0f && channel < 3)
                             {
-                            	float temp = static_cast<float>(rgbaUINT8[sourceRgbaIndices[channel]]) / 255.0f;
+                            	float temp = static_cast<float>(currentByte) / 255.0f;
                             	temp = powf(temp, exponent);
-                            	rgbaUINT8[sourceRgbaIndices[channel]] = static_cast<uint8_t>(glm::clamp(temp, 0.0f, 1.0f) * 255.0f);
+                            	currentByte = static_cast<uint8_t>(glm::clamp(temp, 0.0f, 1.0f) * 255.0f);
                             }
                         }
                         else if (sourceIsSFLOAT)
                         {
-                            rgbaFLOAT[sourceRgbaIndices[channel]] = currentSourceFLOAT[channel + x * sourceNumberChannels + y * sourceImage->getWidth() * sourceNumberChannels + z * sourceImage->getHeight() * sourceImage->getWidth() * sourceNumberChannels];
+                        	currentFloat = currentSourceFLOAT[sourceRgbaIndices[channel] + x * sourceNumberChannels + y * sourceImage->getWidth() * sourceNumberChannels + z * sourceImage->getHeight() * sourceImage->getWidth() * sourceNumberChannels];
 
                             // Only for color channels.
                             if (exponent != 1.0f && channel < 3)
                             {
-                            	rgbaFLOAT[sourceRgbaIndices[channel]] = powf(rgbaFLOAT[sourceRgbaIndices[channel]], exponent);
+                            	currentFloat = powf(currentFloat, exponent);
                             }
                         }
                     }
 
-                    if (targetIsUNORM)
-                    {
-                        if (sourceIsUNORM)
-                        {
-                            currentTargetUINT8[targetRgbaIndices[channel] + x * targetNumberChannels + y * sourceImage->getWidth() * targetNumberChannels + z * sourceImage->getHeight() * sourceImage->getWidth() * targetNumberChannels] = rgbaUINT8[channel];
-                        }
-                        else if (sourceIsSFLOAT)
-                        {
-                            currentTargetUINT8[targetRgbaIndices[channel] + x * targetNumberChannels + y * sourceImage->getWidth() * targetNumberChannels + z * sourceImage->getHeight() * sourceImage->getWidth() * targetNumberChannels] = static_cast<uint8_t>(glm::clamp(rgbaFLOAT[channel], 0.0f, 1.0f) * 255.0f);
-                        }
-                    }
-                    else if (targetIsSFLOAT)
-                    {
-                        if (sourceIsUNORM)
-                        {
-                            currentTargetFLOAT[targetRgbaIndices[channel] + x * targetNumberChannels + y * sourceImage->getWidth() * targetNumberChannels + z * sourceImage->getHeight() * sourceImage->getWidth() * targetNumberChannels] = static_cast<float>(rgbaUINT8[channel]) / 255.0f;
-                        }
-                        else if (sourceIsSFLOAT)
-                        {
-                            currentTargetFLOAT[targetRgbaIndices[channel] + x * targetNumberChannels + y * sourceImage->getWidth() * targetNumberChannels + z * sourceImage->getHeight() * sourceImage->getWidth() * targetNumberChannels] = rgbaFLOAT[channel];
-                        }
-                    }
+					if (targetIsUNORM)
+					{
+						if (sourceIsUNORM)
+						{
+							currentTargetUINT8[targetRgbaIndices[channel] + x * targetNumberChannels + y * sourceImage->getWidth() * targetNumberChannels + z * sourceImage->getHeight() * sourceImage->getWidth() * targetNumberChannels] = currentByte;
+						}
+						else if (sourceIsSFLOAT)
+						{
+							currentTargetUINT8[targetRgbaIndices[channel] + x * targetNumberChannels + y * sourceImage->getWidth() * targetNumberChannels + z * sourceImage->getHeight() * sourceImage->getWidth() * targetNumberChannels] = static_cast<uint8_t>(glm::clamp(currentFloat, 0.0f, 1.0f) * 255.0f);
+						}
+					}
+					else if (targetIsSFLOAT)
+					{
+						if (sourceIsUNORM)
+						{
+							currentTargetFLOAT[targetRgbaIndices[channel] + x * targetNumberChannels + y * sourceImage->getWidth() * targetNumberChannels + z * sourceImage->getHeight() * sourceImage->getWidth() * targetNumberChannels] = static_cast<float>(currentByte) / 255.0f;
+						}
+						else if (sourceIsSFLOAT)
+						{
+							currentTargetFLOAT[targetRgbaIndices[channel] + x * targetNumberChannels + y * sourceImage->getWidth() * targetNumberChannels + z * sourceImage->getHeight() * sourceImage->getWidth() * targetNumberChannels] = currentFloat;
+						}
+					}
                 }
             }
         }

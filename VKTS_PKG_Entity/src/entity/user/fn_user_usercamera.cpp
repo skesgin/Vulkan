@@ -69,4 +69,22 @@ IUserCameraSP VKTS_APIENTRY userCameraCreate(const glm::vec4& position, const gl
     return IUserCameraSP(newInstance);
 }
 
+IUserCameraSP VKTS_APIENTRY userCameraCreate(const glm::mat4& viewMatrix)
+{
+	auto position = viewMatrix * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+
+    auto newInstance = new UserCamera(position, glm::vec3(0.0f, 0.0f, 0.0f));
+
+    if (!newInstance)
+    {
+        return IUserCameraSP();
+    }
+
+    auto forward = viewMatrix * glm::vec4(0.0f, 0.0f, 1.0f, 0.0f);
+
+    newInstance->setForwardUp(-glm::vec3(forward), glm::vec3(0.0f, 1.0f, 0.0f));
+
+    return IUserCameraSP(newInstance);
+}
+
 }

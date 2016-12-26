@@ -27,7 +27,6 @@
 #ifndef EXAMPLE_HPP_
 #define EXAMPLE_HPP_
 
-// TODO: Implement HDR renderer.
 // TODO: Implement PBR forward renderer.
 // TODO: Add MSAA for PBR.
 // TODO: Implement particle system renderer.
@@ -44,6 +43,8 @@
 #define VKTS_BINDING_VERTEX_BUFFER 0
 
 #define VKTS_MAX_LIGHTS 16
+
+#define VKTS_EXPOSURE 2.5f
 
 #define VKTS_FONT_DISTANCE_FIELD VK_TRUE
 #define VKTS_FONT_NAME "font/Arial_32.fnt"
@@ -65,8 +66,8 @@
 #define VKTS_RESOLVE_FRAGMENT_SHADER_NAME "shader/SPIR/V/resolve_bsdf.frag.spv"
 
 
-#define VKTS_SCENE_NAME "buster_drone/buster_drone.vkts"
-//#define VKTS_SCENE_NAME "scifi_helmet/scifi_helmet.vkts"
+//#define VKTS_SCENE_NAME "buster_drone/buster_drone.vkts"
+#define VKTS_SCENE_NAME "scifi_helmet/scifi_helmet.vkts"
 
 #define VKTS_ENVIRONMENT_SCENE_NAME "primitives/sphere.vkts"
 

@@ -43,6 +43,20 @@ Example::~Example()
 
 VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 {
+	int32_t toneMapping = 0;
+
+	if (scene.get())
+	{
+		if (scene->getEnvironment()->getImageObject()->getImageData()->isSFLOAT())
+		{
+			toneMapping = 1;
+		}
+	}
+
+	float exposure = VKTS_EXPOSURE;
+
+	//
+
 	VkResult result;
 
 	if (cmdBuffer[usedBuffer].get())
@@ -190,6 +204,9 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 
 	// Render cube map.
 
+	vkCmdPushConstants(cmdBuffer[usedBuffer]->getCommandBuffer(), allGraphicsPipelines[0]->getLayout(), VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(int32_t), &toneMapping);
+	vkCmdPushConstants(cmdBuffer[usedBuffer]->getCommandBuffer(), allGraphicsPipelines[0]->getLayout(), VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(int32_t), sizeof(float), &exposure);
+
 	if (environmentScene.get())
 	{
 		environmentScene->drawRecursive(cmdBuffer[usedBuffer], allGraphicsPipelines, usedBuffer, dynamicOffsets);
@@ -205,6 +222,13 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 	uint32_t dynamicOffsets[dynamicOffsetCount]{};
 
 	vkCmdBindDescriptorSets(cmdBuffer[usedBuffer]->getCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, resolvePipelineLayout->getPipelineLayout(), 0, 1, resolveDescriptorSet->getDescriptorSets(), dynamicOffsetCount, dynamicOffsets);
+
+	//
+
+	vkCmdPushConstants(cmdBuffer[usedBuffer]->getCommandBuffer(), resolvePipelineLayout->getPipelineLayout(), VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(int32_t), &toneMapping);
+	vkCmdPushConstants(cmdBuffer[usedBuffer]->getCommandBuffer(), resolvePipelineLayout->getPipelineLayout(), VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(int32_t), sizeof(float), &exposure);
+
+	//
 
 	VkDeviceSize offsets[1] = { 0 };
 	VkBuffer buffers[1] = { screenPlaneVertexBuffer->getBuffer()->getBuffer() };
@@ -1014,11 +1038,21 @@ VkBool32 Example::buildRenderPass()
 
 VkBool32 Example::buildPipelineLayout()
 {
+	// Using push constant to set the tone mapping dynamically.
+
+	VkPushConstantRange pushConstantRange[1];
+
+	pushConstantRange[0].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+	pushConstantRange[0].offset = 0;
+	pushConstantRange[0].size = sizeof(int32_t) + sizeof(float);
+
+	//
+
 	VkDescriptorSetLayout setLayouts[1];
 
 	setLayouts[0] = environmentDescriptorSetLayout->getDescriptorSetLayout();
 
-	environmentPipelineLayout = vkts::pipelineCreateLayout(contextObject->getDevice()->getDevice(), 0, 1, setLayouts, 0, nullptr);
+	environmentPipelineLayout = vkts::pipelineCreateLayout(contextObject->getDevice()->getDevice(), 0, 1, setLayouts, 1, pushConstantRange);
 
 	if (!environmentPipelineLayout.get())
 	{
@@ -1031,7 +1065,7 @@ VkBool32 Example::buildPipelineLayout()
 
 	setLayouts[0] = resolveDescriptorSetLayout->getDescriptorSetLayout();
 
-	resolvePipelineLayout = vkts::pipelineCreateLayout(contextObject->getDevice()->getDevice(), 0, 1, setLayouts, 0, nullptr);
+	resolvePipelineLayout = vkts::pipelineCreateLayout(contextObject->getDevice()->getDevice(), 0, 1, setLayouts, 1, pushConstantRange);
 
 	if (!resolvePipelineLayout.get())
 	{
@@ -1755,26 +1789,6 @@ VkBool32 Example::init(const vkts::IUpdateThreadContext& updateContext)
 
 	//
 
-	camera = vkts::userCameraCreate(glm::vec4(0.0f, 4.0f, 10.0f, 1.0f), glm::vec4(0.0f, 2.0f, 0.0f, 1.0f));
-
-	if (!camera.get())
-	{
-		return VK_FALSE;
-	}
-
-	allUpdateables.append(camera);
-
-	inputController = vkts::inputControllerCreate(updateContext, visualContext, windowIndex, 0, camera);
-
-	if (!inputController.get())
-	{
-		return VK_FALSE;
-	}
-
-	allUpdateables.insert(0, inputController);
-
-	//
-
 	commandPool = vkts::commandPoolCreate(contextObject->getDevice()->getDevice(), VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT, contextObject->getQueue()->getQueueFamilyIndex());
 
 	if (!commandPool.get())
@@ -1932,6 +1946,78 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 		}
 
 		//
+		// Set Camera.
+		//
+
+		if (scene.get())
+		{
+			scene->updateTransformRecursive(updateContext.getDeltaTime(), updateContext.getDeltaTicks(), updateContext.getTickTime(), currentBuffer);
+
+			// Camera
+
+			if (!camera.get())
+			{
+				if (scene->getNumberCameras() > 0)
+				{
+					camera = vkts::userCameraCreate(scene->getCameras()[0]->getViewMatrix());
+				}
+				else
+				{
+					camera = vkts::userCameraCreate(glm::vec4(0.0f, 4.0f, 10.0f, 1.0f), glm::vec4(0.0f, 2.0f, 0.0f, 1.0f));
+				}
+
+				if (!camera.get())
+				{
+					return VK_FALSE;
+				}
+
+				allUpdateables.append(camera);
+
+				inputController = vkts::inputControllerCreate(updateContext, visualContext, windowIndex, 0, camera);
+
+				if (!inputController.get())
+				{
+					return VK_FALSE;
+				}
+
+				allUpdateables.insert(0, inputController);
+			}
+
+			// Lights need to uploaded after the scene has been updated.
+
+			int32_t lightCount = glm::min((int32_t)scene->getLights().size(), VKTS_MAX_LIGHTS);
+
+			if (!resolveFragmentLightsUniformBuffer->upload(dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_LIGHT].stride * (VkDeviceSize)currentBuffer + VKTS_MAX_LIGHTS * 4 * sizeof(float) * 2, 0, lightCount))
+			{
+				vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not upload lights.");
+
+				return VK_FALSE;
+			}
+
+			for (int32_t i = 0; i < lightCount; i++)
+			{
+				if (!resolveFragmentLightsUniformBuffer->upload(dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_LIGHT].stride * (VkDeviceSize)currentBuffer + i * 4 * sizeof(float), 0, scene->getLights()[i]->getDirection()))
+				{
+					vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not upload lights.");
+
+					return VK_FALSE;
+				}
+
+				if (!resolveFragmentLightsUniformBuffer->upload(dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_LIGHT].stride * (VkDeviceSize)currentBuffer + i * 4 * sizeof(float) + VKTS_MAX_LIGHTS * 4 * sizeof(float), 0, glm::vec4(scene->getLights()[i]->getColor(), 1.0)))
+				{
+					vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not upload lights.");
+
+					return VK_FALSE;
+				}
+			}
+		}
+
+		if (!camera.get())
+		{
+			return VK_FALSE;
+		}
+
+		//
 
 		glm::mat4 projectionMatrix(1.0f);
 		glm::mat4 viewMatrix(1.0f);
@@ -1994,41 +2080,6 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 		if (environmentScene.get())
 		{
 			environmentScene->updateTransformRecursive(updateContext.getDeltaTime(), updateContext.getDeltaTicks(), updateContext.getTickTime(), currentBuffer);
-		}
-
-		//
-
-		if (scene.get())
-		{
-			scene->updateTransformRecursive(updateContext.getDeltaTime(), updateContext.getDeltaTicks(), updateContext.getTickTime(), currentBuffer);
-
-			// Lights need to uploaded after the scene has been updated.
-
-			int32_t lightCount = glm::min((int32_t)scene->getLights().size(), VKTS_MAX_LIGHTS);
-
-			if (!resolveFragmentLightsUniformBuffer->upload(dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_LIGHT].stride * (VkDeviceSize)currentBuffer + VKTS_MAX_LIGHTS * 4 * sizeof(float) * 2, 0, lightCount))
-			{
-				vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not upload lights.");
-
-				return VK_FALSE;
-			}
-
-			for (int32_t i = 0; i < lightCount; i++)
-			{
-				if (!resolveFragmentLightsUniformBuffer->upload(dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_LIGHT].stride * (VkDeviceSize)currentBuffer + i * 4 * sizeof(float), 0, scene->getLights()[i]->getDirection()))
-				{
-					vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not upload lights.");
-
-					return VK_FALSE;
-				}
-
-				if (!resolveFragmentLightsUniformBuffer->upload(dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_LIGHT].stride * (VkDeviceSize)currentBuffer + i * 4 * sizeof(float) + VKTS_MAX_LIGHTS * 4 * sizeof(float), 0, glm::vec4(scene->getLights()[i]->getColor(), 1.0)))
-				{
-					vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not upload lights.");
-
-					return VK_FALSE;
-				}
-			}
 		}
 
 		//

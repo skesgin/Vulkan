@@ -50,6 +50,12 @@ VKTS_APICALL IUserCameraSP VKTS_APIENTRY userCameraCreate(const glm::vec4& posit
  */
 VKTS_APICALL IUserCameraSP VKTS_APIENTRY userCameraCreate(const glm::vec4& position, const glm::vec4& center);
 
+/**
+ *
+ * @ThreadSafe
+ */
+VKTS_APICALL IUserCameraSP VKTS_APIENTRY userCameraCreate(const glm::mat4& viewMatrix);
+
 }
 
 #endif /* VKTS_FN_USER_CAMERA_HPP_ */
