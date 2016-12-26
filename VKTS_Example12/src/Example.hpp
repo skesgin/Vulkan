@@ -29,7 +29,6 @@
 
 // TODO: Implement PBR forward renderer.
 // TODO: Add MSAA for PBR.
-// TODO: Implement particle system renderer.
 
 #include <vkts/vkts.hpp>
 

@@ -27,6 +27,8 @@
 #ifndef VKTS_SCENEGRAPH_HPP_
 #define VKTS_SCENEGRAPH_HPP_
 
+// TODO: Implement particle system renderer in Example 13.
+
 /**
  *
  * Depends on VKTS entity and Vulkan object.
