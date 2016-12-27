@@ -24,43 +24,45 @@
  * THE SOFTWARE.
  */
 
-#ifndef VKTS_JSONARRAY_HPP_
-#define VKTS_JSONARRAY_HPP_
+#include <vkts/scenegraph/vkts_scenegraph.hpp>
 
-#include <vkts/core/vkts_core.hpp>
+#include "GltfVisitor.hpp"
 
 namespace vkts
 {
 
-class JSONarray : public JSONvalue
+ISceneSP VKTS_APIENTRY gltfLoad(const char* filename, const ISceneManagerSP& sceneManager, const ISceneFactorySP& sceneFactory)
 {
+    if (!filename/* || !sceneManager.get() || !sceneFactory.get()*/)
+    {
+        return ISceneSP();
+    }
 
-private:
+	auto textFile = fileLoadText(filename);
 
-	SmartPointerVector<JSONvalueSP> allValues;
+	if (!textFile.get())
+	{
+		return ISceneSP();
+	}
 
-public:
+	auto json = jsonDecode(textFile->getString());
 
-	JSONarray();
-	virtual ~JSONarray();
+	if (!json.get())
+	{
+		return ISceneSP();
+	}
 
-	void addValue(const JSONvalueSP& value);
+    char directory[VKTS_MAX_BUFFER_CHARS] = "";
 
-	JSONvalueSP getValueAt(std::int32_t index) const;
+    fileGetDirectory(directory, filename);
 
-	const SmartPointerVector<JSONvalueSP>& getAllValues() const;
+	GltfVisitor visitor(directory);
 
-	size_t size() const;
+	json->visit(visitor);
 
+	// TODO: Implement glTF scene load.
 
-	virtual VkBool32 encode(std::string& jsonText, std::int32_t& spaces) const;
-
-	virtual void visit(JsonVisitor& jsonVisitor);
-
-};
-
-typedef std::shared_ptr<JSONarray> JSONarraySP;
-
+    return ISceneSP();
 }
 
-#endif /* VKTS_JSONARRAY_HPP_ */
+}

@@ -48,6 +48,7 @@
 #include <memory>
 #include <mutex>
 #include <queue>
+#include <stack>
 #include <stdexcept>
 #include <string>
 #include <thread>

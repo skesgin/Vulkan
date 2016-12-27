@@ -40,15 +40,15 @@ JSONarray::~JSONarray()
 
 void JSONarray::addValue(const JSONvalueSP& value)
 {
-	allValues.push_back(value);
+	allValues.append(value);
 }
 
 JSONvalueSP JSONarray::getValueAt(std::int32_t index) const
 {
-	return allValues.at(index);
+	return allValues[index];
 }
 
-const std::vector<JSONvalueSP>& JSONarray::getAllValues() const
+const SmartPointerVector<JSONvalueSP>& JSONarray::getAllValues() const
 {
 	return allValues;
 }
@@ -68,18 +68,14 @@ VkBool32 JSONarray::encode(std::string& jsonText, std::int32_t& spaces) const
 	{
 		doLineFeed(jsonText, spaces, 1);
 
-		auto walker = allValues.begin();
-
-		while (walker != allValues.end())
+		for (size_t i = 0; i < allValues.size(); i++)
 		{
-			if (!(*walker)->encode(jsonText, spaces))
+			if (!allValues[i]->encode(jsonText, spaces))
 			{
 				return VK_FALSE;
 			}
 
-			walker++;
-
-			if (walker != allValues.end())
+			if (i + 1 < allValues.size())
 			{
 				jsonText += JSON_comma;
 

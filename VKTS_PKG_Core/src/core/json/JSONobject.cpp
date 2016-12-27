@@ -30,7 +30,7 @@ namespace vkts
 {
 
 JSONobject::JSONobject() :
-	JSONvalue(), allKeyValues(), allKeys()
+	JSONvalue(), allKeyValues()
 {
 }
 
@@ -38,30 +38,29 @@ JSONobject::~JSONobject()
 {
 }
 
-void JSONobject::addKeyValue(const JSONstringSP& key, const JSONvalueSP& value)
+void JSONobject::addKeyValue(const std::string& key, const JSONvalueSP& value)
 {
 	allKeyValues[key] = value;
-	allKeys.push_back(key);
 }
 
-VkBool32 JSONobject::hasKey(const JSONstringSP& key) const
+VkBool32 JSONobject::hasKey(const std::string& key) const
 {
-	return allKeyValues.find(key) != allKeyValues.end();
+	return allKeyValues.contains(key);
 }
 
-JSONvalueSP JSONobject::getValue(const JSONstringSP& key) const
+JSONvalueSP JSONobject::getValue(const std::string& key) const
 {
-	return allKeyValues.at(key);
+	return allKeyValues[key];
 }
 
-const std::map<JSONstringSP, JSONvalueSP, CompareJSONstringSP>& JSONobject::getAllKeyValues() const
+const SmartPointerMap<std::string, JSONvalueSP>& JSONobject::getAllKeyValues() const
 {
 	return allKeyValues;
 }
 
-const std::vector<JSONstringSP>& JSONobject::getAllKeys() const
+const Vector<std::string>& JSONobject::getAllKeys() const
 {
-	return allKeys;
+	return allKeyValues.keys();
 }
 
 size_t JSONobject::size() const
@@ -79,11 +78,11 @@ VkBool32 JSONobject::encode(std::string& jsonText, std::int32_t& spaces) const
 	{
 		doLineFeed(jsonText, spaces, 1);
 
-		auto walker = allKeys.begin();
-
-		while (walker != allKeys.end())
+		for (size_t key = 0; key < allKeys.size(); key++)
 		{
-			if (!(*walker)->encode(jsonText, spaces))
+			JSONstring tempJSONstring(allKeys[key]);
+
+			if (!tempJSONstring.encode(jsonText, spaces))
 			{
 				return VK_FALSE;
 			}
@@ -92,14 +91,12 @@ VkBool32 JSONobject::encode(std::string& jsonText, std::int32_t& spaces) const
 			jsonText += JSON_colon;
 			jsonText += JSON_space;
 
-			if (!getValue(*walker)->encode(jsonText, spaces))
+			if (!getValue(allKeys[key])->encode(jsonText, spaces))
 			{
 				return VK_FALSE;
 			}
 
-			walker++;
-
-			if (walker != allKeys.end())
+			if (key + 1 < allKeys.size())
 			{
 				jsonText += JSON_comma;
 

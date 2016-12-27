@@ -394,7 +394,7 @@ VkBool32 JsonDecoder::decodeObject(size_t& index, JSONobjectSP& jsonObject)
 				return VK_FALSE;
 			}
 
-			tempJsonObject->addKeyValue(jsonString, jsonValue);
+			tempJsonObject->addKeyValue(jsonString->getValue(), jsonValue);
 
 			while (decodeWhitespace(tempIndex));
 

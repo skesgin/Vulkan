@@ -32,20 +32,12 @@
 namespace vkts
 {
 
-class CompareJSONstringSP
-{
-	public:
-		bool operator()(const JSONstringSP& first, const JSONstringSP& second) const { return first->getValue() < second->getValue(); }
-};
-
 class JSONobject : public JSONvalue
 {
 
 private:
 
-	std::map<JSONstringSP, JSONvalueSP, CompareJSONstringSP> allKeyValues;
-
-	std::vector<JSONstringSP> allKeys;
+	SmartPointerMap<std::string, JSONvalueSP> allKeyValues;
 
 public:
 
@@ -53,15 +45,15 @@ public:
 
 	virtual ~JSONobject();
 
-	void addKeyValue(const JSONstringSP& key, const JSONvalueSP& value);
+	void addKeyValue(const std::string& key, const JSONvalueSP& value);
 
-	VkBool32 hasKey(const JSONstringSP& key) const;
+	VkBool32 hasKey(const std::string& key) const;
 
-	JSONvalueSP getValue(const JSONstringSP& key) const;
+	JSONvalueSP getValue(const std::string& key) const;
 
-	const std::map<JSONstringSP, JSONvalueSP, CompareJSONstringSP>& getAllKeyValues() const;
+	const SmartPointerMap<std::string, JSONvalueSP>& getAllKeyValues() const;
 
-	const std::vector<JSONstringSP>& getAllKeys() const;
+	const Vector<std::string>& getAllKeys() const;
 
 	size_t size() const;
 
