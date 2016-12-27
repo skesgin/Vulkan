@@ -29,6 +29,8 @@
 
 // TODO: Implement particle system renderer in Example 13.
 
+// TODO: Implement glTF 1.1 as soon as pre-final.
+
 /**
  *
  * Depends on VKTS entity and Vulkan object.

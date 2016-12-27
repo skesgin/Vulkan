@@ -1962,10 +1962,10 @@ def saveMeshes(context, filepath, materialsLibraryName, subMeshLibraryName):
                             
                             group = currentGroups[item[0]]
                             
-                            tempBoneIndices.append(groupNameToIndex[group.name])
-                            
-                            tempBoneWeights.append(item[1])
-                            numberBones += 1.0
+                            if group.name in groupNameToIndex.keys():
+                                tempBoneIndices.append(groupNameToIndex[group.name])
+                                tempBoneWeights.append(item[1])
+                                numberBones += 1.0
 
                             if numberBones == 8.0:
                                 break
