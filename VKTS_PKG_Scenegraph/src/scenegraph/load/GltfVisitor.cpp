@@ -465,7 +465,20 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 			return;
 		}
 
-		currentAccessor.componentType = currentInteger;
+		if (currentInteger == 5120 ||
+			currentInteger == 5121 ||
+			currentInteger == 5122 ||
+			currentInteger == 5123 ||
+			currentInteger == 5125 ||
+			currentInteger == 5126)
+		{
+			currentAccessor.componentType = currentInteger;
+		}
+		else
+		{
+			state.push(GltfState_Error);
+			return;
+		}
 
 		//
 
