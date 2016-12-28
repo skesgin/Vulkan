@@ -53,8 +53,10 @@ enum GltfState {
 	GltfState_Node,
 	GltfState_Scene,
 
-	GltfState_Primitive,
-	GltfState_Attribute
+	GltfState_Mesh_Primitive,
+	GltfState_Mesh_Primitive_Attribute,
+	GltfState_Node_Mesh,
+	GltfState_Scene_Node
 };
 
 typedef struct _GltfBuffer {
@@ -109,11 +111,11 @@ typedef struct _GltfMesh {
 } GltfMesh;
 
 typedef struct _GltfNode {
-	// TODO: Implement.
+	Vector<GltfMesh*> meshes;
 } GltfNode;
 
 typedef struct _GltfScene {
-	// TODO: Implement.
+	Vector<GltfNode*> nodes;
 } GltfScene;
 
 class GltfVisitor : public JsonVisitor

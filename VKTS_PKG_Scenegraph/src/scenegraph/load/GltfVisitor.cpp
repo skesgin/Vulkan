@@ -151,7 +151,7 @@ void GltfVisitor::visit(JSONarray& jsonArray)
 	}
 	else if (objectArray)
 	{
-		if (gltfState == GltfState_Primitive)
+		if (gltfState == GltfState_Mesh_Primitive)
 		{
 			for (int32_t i = 0; i < (int32_t)jsonArray.size(); i++)
 			{
@@ -165,6 +165,46 @@ void GltfVisitor::visit(JSONarray& jsonArray)
 				}
 
 				gltfMesh.primitives.append(gltfPrimitive);
+			}
+		}
+		else if (gltfState == GltfState_Node_Mesh)
+		{
+			for (int32_t i = 0; i < (int32_t)jsonArray.size(); i++)
+			{
+				jsonArray.getValueAt(i)->visit(*this);
+
+				if (state.top() == GltfState_Error)
+				{
+					return;
+				}
+
+				if (!allGltfMeshes.contains(gltfString))
+				{
+					state.push(GltfState_Error);
+					return;
+				}
+
+				gltfNode.meshes.append(&allGltfMeshes[gltfString]);
+			}
+		}
+		else if (gltfState == GltfState_Scene_Node)
+		{
+			for (int32_t i = 0; i < (int32_t)jsonArray.size(); i++)
+			{
+				jsonArray.getValueAt(i)->visit(*this);
+
+				if (state.top() == GltfState_Error)
+				{
+					return;
+				}
+
+				if (!allGltfNodes.contains(gltfString))
+				{
+					state.push(GltfState_Error);
+					return;
+				}
+
+				gltfScene.nodes.append(&allGltfNodes[gltfString]);
 			}
 		}
 		else
@@ -497,7 +537,7 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 
 		for (size_t i = 0; i < allKeys.size(); i++)
 		{
-			memset(&gltfScene, 0, sizeof(GltfNode));
+			memset(&gltfScene, 0, sizeof(GltfScene));
 
 			//
 
@@ -848,7 +888,7 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 
 		auto primitives = jsonObject.getValue("primitives");
 
-		state.push(GltfState_Primitive);
+		state.push(GltfState_Mesh_Primitive);
 		primitives->visit(*this);
 
 		objectArray = VK_FALSE;
@@ -864,13 +904,51 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 	}
 	else if (gltfState == GltfState_Node)
 	{
-		// TODO: Implement.
+		if (jsonObject.hasKey("meshes"))
+		{
+			objectArray = VK_TRUE;
+
+			auto meshes = jsonObject.getValue("meshes");
+
+			state.push(GltfState_Node_Mesh);
+			meshes->visit(*this);
+
+			objectArray = VK_FALSE;
+
+			if (state.top() == GltfState_Error)
+			{
+				return;
+			}
+		}
+
+		//
+
+		// TODO: Create node and objects and add to scene manager.
 	}
 	else if (gltfState == GltfState_Scene)
 	{
-		// TODO: Implement.
+		if (jsonObject.hasKey("nodes"))
+		{
+			objectArray = VK_TRUE;
+
+			auto nodes = jsonObject.getValue("nodes");
+
+			state.push(GltfState_Scene_Node);
+			nodes->visit(*this);
+
+			objectArray = VK_FALSE;
+
+			if (state.top() == GltfState_Error)
+			{
+				return;
+			}
+		}
+
+		//
+
+		// TODO: Create scene and add to scene manager.
 	}
-	else if (gltfState == GltfState_Primitive)
+	else if (gltfState == GltfState_Mesh_Primitive)
 	{
 		if (!jsonObject.hasKey("attributes"))
 		{
@@ -880,7 +958,7 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 
 		auto attributes = jsonObject.getValue("attributes");
 
-		state.push(GltfState_Attribute);
+		state.push(GltfState_Mesh_Primitive_Attribute);
 		attributes->visit(*this);
 
 		if (state.top() == GltfState_Error)
@@ -910,7 +988,7 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 			gltfPrimitive.indices = &(allGltfAccessors[gltfString]);
 		}
 	}
-	else if (gltfState == GltfState_Attribute)
+	else if (gltfState == GltfState_Mesh_Primitive_Attribute)
 	{
 		if (!jsonObject.hasKey("POSITION"))
 		{
