@@ -53,8 +53,12 @@ enum GltfState {GltfState_Start,
 				GltfState_Scene
 };
 
+typedef struct _GltfBuffer {
+	IBinaryBufferSP binaryBuffer;
+} GltfBuffer;
+
 typedef struct _GltfBufferView {
-	IBinaryBufferSP buffer;
+	GltfBuffer* buffer;
     size_t byteOffset;
 } GltfBufferView;
 
@@ -66,6 +70,18 @@ typedef struct _GltfAccessor {
     std::string type;
 } GltfAccessor;
 
+typedef struct _GltfMesh {
+	// TODO
+} GltfMesh;
+
+typedef struct _GltfNode {
+	// TODO
+} GltfNode;
+
+typedef struct _GltfScene {
+	// TODO
+} GltfScene;
+
 class GltfVisitor : public JsonVisitor
 {
 
@@ -75,16 +91,23 @@ private:
 
 	std::stack<enum GltfState> state;
 
-	std::string currentString;
-	std::int32_t currentInteger;
-	float currentFloat;
+	std::string gltfString;
+	std::int32_t gltfInteger;
+	float gltfFloat;
 
-	GltfBufferView currentBufferView;
-	GltfAccessor currentAccessor;
+	GltfBuffer gltfBuffer;
+	GltfBufferView gltfBufferView;
+	GltfAccessor gltfAccessor;
+	GltfAccessor gltfMesh;
+	GltfAccessor gltfNode;
+	GltfAccessor gltfScene;
 
-	SmartPointerMap<std::string, IBinaryBufferSP> allBuffers;
-	Map<std::string, GltfBufferView> allBufferViews;
-	Map<std::string, GltfAccessor> allAccessors;
+	Map<std::string, GltfBuffer> allGltfBuffers;
+	Map<std::string, GltfBufferView> allGltfBufferViews;
+	Map<std::string, GltfAccessor> allGltfAccessors;
+	Map<std::string, GltfMesh> allGltfMeshes;
+	Map<std::string, GltfNode> allGltfNodes;
+	Map<std::string, GltfScene> allGltfScenes;
 
 public:
 
