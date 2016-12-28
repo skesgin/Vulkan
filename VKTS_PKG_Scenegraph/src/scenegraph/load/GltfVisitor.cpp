@@ -30,7 +30,7 @@ namespace vkts
 {
 
 GltfVisitor::GltfVisitor(const std::string& directory) :
-	JsonVisitor(), directory(directory), state(), currentString(), currentInteger(0), currentFloat(0.0f), currentBool(VK_FALSE), currentBufferView{}, allBuffers(), allBufferViews()
+	JsonVisitor(), directory(directory), state(), currentString(), currentInteger(0), currentFloat(0.0f), currentBufferView{}, currentAccessor{}, allBuffers(), allBufferViews(), allAccessors()
 {
 }
 
@@ -49,6 +49,7 @@ void GltfVisitor::visit(JSONnull& jsonNull)
 		return;
 	}
 
+	// No used, so always error.
 	state.push(GltfState_Error);
 }
 
@@ -61,7 +62,8 @@ void GltfVisitor::visit(JSONfalse& jsonFalse)
 		return;
 	}
 
-	currentBool = VK_FALSE;
+	// No used, so always error.
+	state.push(GltfState_Error);
 }
 
 void GltfVisitor::visit(JSONtrue& jsonTrue)
@@ -73,7 +75,8 @@ void GltfVisitor::visit(JSONtrue& jsonTrue)
 		return;
 	}
 
-	currentBool = VK_TRUE;
+	// No used, so always error.
+	state.push(GltfState_Error);
 }
 
 void GltfVisitor::visit(JSONfloat& jsonFloat)
@@ -156,7 +159,7 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 
 		auto buffers = jsonObject.getValue("buffers");
 
-		state.push(GltfState_GltfBuffers);
+		state.push(GltfState_Buffers);
 		buffers->visit(*this);
 
 		if (state.top() == GltfState_Error)
@@ -174,7 +177,7 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 
 		auto bufferViews = jsonObject.getValue("bufferViews");
 
-		state.push(GltfState_GltfBufferViews);
+		state.push(GltfState_BufferViews);
 		bufferViews->visit(*this);
 
 		if (state.top() == GltfState_Error)
@@ -192,7 +195,7 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 
 		auto accessors = jsonObject.getValue("accessors");
 
-		state.push(GltfState_GltfAccessors);
+		state.push(GltfState_Accessors);
 		accessors->visit(*this);
 
 		if (state.top() == GltfState_Error)
@@ -210,7 +213,7 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 
 		auto meshes = jsonObject.getValue("meshes");
 
-		state.push(GltfState_GltfMeshes);
+		state.push(GltfState_Meshes);
 		meshes->visit(*this);
 
 		if (state.top() == GltfState_Error)
@@ -228,7 +231,7 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 
 		auto nodes = jsonObject.getValue("nodes");
 
-		state.push(GltfState_GltfNodes);
+		state.push(GltfState_Nodes);
 		nodes->visit(*this);
 
 		if (state.top() == GltfState_Error)
@@ -246,7 +249,7 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 
 		auto scenes = jsonObject.getValue("scenes");
 
-		state.push(GltfState_GltfScenes);
+		state.push(GltfState_Scenes);
 		scenes->visit(*this);
 
 		if (state.top() == GltfState_Error)
@@ -256,11 +259,11 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 
 		//
 
-		state.push(GltfState_Success);
+		state.push(GltfState_End);
 
 		return;
 	}
-	else if (currentState == GltfState_GltfBuffers)
+	else if (currentState == GltfState_Buffers)
 	{
 		const auto& allBuffers = jsonObject.getAllKeys();
 
@@ -268,7 +271,7 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 		{
 			auto currentBuffer = jsonObject.getValue(allBuffers[i]);
 
-			state.push(GltfState_GltfBuffer);
+			state.push(GltfState_Buffer);
 			currentBuffer->visit(*this);
 
 			if (state.top() == GltfState_Error)
@@ -296,7 +299,7 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 			this->allBuffers[allBuffers[i]] = binaryBuffer;
 		}
 	}
-	else if (currentState == GltfState_GltfBufferViews)
+	else if (currentState == GltfState_BufferViews)
 	{
 		const auto& allBufferViews = jsonObject.getAllKeys();
 
@@ -308,7 +311,7 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 
 			auto currentBufferView = jsonObject.getValue(allBufferViews[i]);
 
-			state.push(GltfState_GltfBufferView);
+			state.push(GltfState_BufferView);
 			currentBufferView->visit(*this);
 
 			if (state.top() == GltfState_Error)
@@ -321,23 +324,44 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 			this->allBufferViews[allBufferViews[i]] = this->currentBufferView;
 		}
 	}
-	else if (currentState == GltfState_GltfAccessors)
+	else if (currentState == GltfState_Accessors)
+	{
+		const auto& allAccessors = jsonObject.getAllKeys();
+
+		for (size_t i = 0; i < allAccessors.size(); i++)
+		{
+			memset(&currentAccessor, 0, sizeof(GltfAccessor));
+
+			//
+
+			auto currentAccessor = jsonObject.getValue(allAccessors[i]);
+
+			state.push(GltfState_Accessor);
+			currentAccessor->visit(*this);
+
+			if (state.top() == GltfState_Error)
+			{
+				return;
+			}
+
+			//
+
+			this->allAccessors[allAccessors[i]] = this->currentAccessor;
+		}
+	}
+	else if (currentState == GltfState_Meshes)
 	{
 		// TODO: Implement.
 	}
-	else if (currentState == GltfState_GltfMeshes)
+	else if (currentState == GltfState_Nodes)
 	{
 		// TODO: Implement.
 	}
-	else if (currentState == GltfState_GltfNodes)
+	else if (currentState == GltfState_Scenes)
 	{
 		// TODO: Implement.
 	}
-	else if (currentState == GltfState_GltfScenes)
-	{
-		// TODO: Implement.
-	}
-	else if (currentState == GltfState_GltfBuffer)
+	else if (currentState == GltfState_Buffer)
 	{
 		if (!jsonObject.hasKey("uri"))
 		{
@@ -354,9 +378,9 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 			return;
 		}
 	}
-	else if (currentState == GltfState_GltfBufferView)
+	else if (currentState == GltfState_BufferView)
 	{
-		if (!jsonObject.hasKey("buffer") || !jsonObject.hasKey("byteOffset") || !jsonObject.hasKey("byteLength"))
+		if (!jsonObject.hasKey("buffer") || !jsonObject.hasKey("byteOffset"))
 		{
 			state.push(GltfState_Error);
 			return;
@@ -391,19 +415,109 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 		}
 
 		currentBufferView.byteOffset = (size_t)currentInteger;
+	}
+	else if (currentState == GltfState_Accessor)
+	{
+		if (!jsonObject.hasKey("bufferView") || !jsonObject.hasKey("byteOffset") || !jsonObject.hasKey("componentType") || !jsonObject.hasKey("count") || !jsonObject.hasKey("type"))
+		{
+			state.push(GltfState_Error);
+			return;
+		}
 
-		//
+		auto currentBufferView = jsonObject.getValue("bufferView");
 
-		auto byteLength = jsonObject.getValue("byteLength");
-
-		byteLength->visit(*this);
+		currentBufferView->visit(*this);
 
 		if (state.top() == GltfState_Error)
 		{
 			return;
 		}
 
-		currentBufferView.byteLength = (size_t)currentInteger;
+		if (!allBufferViews.contains(currentString))
+		{
+			state.push(GltfState_Error);
+			return;
+		}
+
+		currentAccessor.bufferView = &(allBufferViews[currentString]);
+
+		//
+
+		auto byteOffset = jsonObject.getValue("byteOffset");
+
+		byteOffset->visit(*this);
+
+		if (state.top() == GltfState_Error)
+		{
+			return;
+		}
+
+		currentAccessor.byteOffset = (size_t)currentInteger;
+
+		//
+
+		auto componentType = jsonObject.getValue("componentType");
+
+		componentType->visit(*this);
+
+		if (state.top() == GltfState_Error)
+		{
+			return;
+		}
+
+		currentAccessor.componentType = currentInteger;
+
+		//
+
+		auto count = jsonObject.getValue("count");
+
+		count->visit(*this);
+
+		if (state.top() == GltfState_Error)
+		{
+			return;
+		}
+
+		currentAccessor.count = currentInteger;
+
+		//
+
+		auto type = jsonObject.getValue("type");
+
+		type->visit(*this);
+
+		if (state.top() == GltfState_Error)
+		{
+			return;
+		}
+
+		if (currentString == "SCALAR" ||
+			currentString == "VEC2" ||
+			currentString == "VEC3" ||
+			currentString == "VEC4" ||
+			currentString == "MAT2" ||
+			currentString == "MAT3" ||
+			currentString == "MAT4")
+		{
+			currentAccessor.type = currentString;
+		}
+		else
+		{
+			state.push(GltfState_Error);
+			return;
+		}
+	}
+	else if (currentState == GltfState_Mesh)
+	{
+		// TODO: Implement.
+	}
+	else if (currentState == GltfState_Node)
+	{
+		// TODO: Implement.
+	}
+	else if (currentState == GltfState_Scene)
+	{
+		// TODO: Implement.
 	}
 	else
 	{
@@ -412,6 +526,16 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 	}
 
 	state.pop();
+}
+
+enum GltfState GltfVisitor::getState() const
+{
+	if (state.size() > 0)
+	{
+		return state.top();
+	}
+
+	return GltfState_Error;
 }
 
 }

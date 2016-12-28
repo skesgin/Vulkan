@@ -49,6 +49,8 @@ ISceneSP VKTS_APIENTRY gltfLoad(const char* filename, const ISceneManagerSP& sce
 
 	if (!json.get())
 	{
+		logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Parsing JSON failed");
+
 		return ISceneSP();
 	}
 
@@ -59,6 +61,15 @@ ISceneSP VKTS_APIENTRY gltfLoad(const char* filename, const ISceneManagerSP& sce
 	GltfVisitor visitor(directory);
 
 	json->visit(visitor);
+
+	if (visitor.getState() != GltfState_End)
+	{
+		logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Processing glTF failed");
+
+		return ISceneSP();
+	}
+
+	logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Processing glTF succeeded");
 
 	// TODO: Implement glTF scene load.
 

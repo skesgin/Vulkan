@@ -33,26 +33,37 @@ namespace vkts
 {
 
 enum GltfState {GltfState_Start,
+				GltfState_End,
 
 				GltfState_Error,
-				GltfState_Success,
 
-				GltfState_JsonObject,
-				GltfState_GltfBuffers,
-				GltfState_GltfBufferViews,
-				GltfState_GltfAccessors,
-				GltfState_GltfMeshes,
-				GltfState_GltfNodes,
-				GltfState_GltfScenes,
+				GltfState_Buffers,
+				GltfState_BufferViews,
+				GltfState_Accessors,
+				GltfState_Meshes,
+				GltfState_Nodes,
+				GltfState_Scenes,
 
-				GltfState_GltfBuffer,
-				GltfState_GltfBufferView};
+				GltfState_Buffer,
+				GltfState_BufferView,
+				GltfState_Accessor,
+				GltfState_Mesh,
+				GltfState_Node,
+				GltfState_Scene
+};
 
 typedef struct _GltfBufferView {
 	IBinaryBufferSP buffer;
     size_t byteOffset;
-    size_t byteLength;
 } GltfBufferView;
+
+typedef struct _GltfAccessor {
+	GltfBufferView* bufferView;
+    size_t byteOffset;
+    int32_t componentType;
+    int32_t count;
+    std::string type;
+} GltfAccessor;
 
 class GltfVisitor : public JsonVisitor
 {
@@ -66,12 +77,13 @@ private:
 	std::string currentString;
 	std::int32_t currentInteger;
 	float currentFloat;
-	VkBool32 currentBool;
 
 	GltfBufferView currentBufferView;
+	GltfAccessor currentAccessor;
 
-	SmartPointerMap<std::string, IBinaryBufferSP>	allBuffers;
-	std::map<std::string, GltfBufferView>	allBufferViews;
+	SmartPointerMap<std::string, IBinaryBufferSP> allBuffers;
+	Map<std::string, GltfBufferView> allBufferViews;
+	Map<std::string, GltfAccessor> allAccessors;
 
 public:
 
@@ -98,6 +110,10 @@ public:
 	virtual void visit(JSONarray& jsonArray) override;
 
 	virtual void visit(JSONobject& jsonObject) override;
+
+	//
+
+	enum GltfState getState() const;
 
 };
 
