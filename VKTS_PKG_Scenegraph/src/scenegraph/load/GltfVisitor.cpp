@@ -30,7 +30,7 @@ namespace vkts
 {
 
 GltfVisitor::GltfVisitor(const std::string& directory) :
-	JsonVisitor(), directory(directory), state(), gltfString(), gltfInteger(0), gltfFloat(0.0f), gltfBuffer{}, gltfBufferView{}, gltfAccessor{}, gltfMesh{}, gltfNode{}, gltfScene{}, allGltfBuffers(), allGltfBufferViews(), allGltfAccessors(), allGltfMeshes(), allGltfNodes(), allGltfScenes()
+	JsonVisitor(), directory(directory), state(), gltfString(), gltfInteger(0), gltfFloat(0.0f), gltfIntegerArray{}, gltfFloatArray{}, arrayIndex(0), arraySize(0), numberArray(VK_FALSE), objectArray(VK_FALSE), gltfBuffer{}, gltfBufferView{}, gltfAccessor{}, gltfMesh{}, gltfNode{}, gltfScene{}, gltfPrimitive{}, allGltfBuffers(), allGltfBufferViews(), allGltfAccessors(), allGltfMeshes(), allGltfNodes(), allGltfScenes()
 {
 }
 
@@ -125,13 +125,59 @@ void GltfVisitor::visit(JSONarray& jsonArray)
 	{
 		return;
 	}
+
+	if (numberArray)
+	{
+		if (arrayIndex >= arraySize || jsonArray.size() != arraySize)
+		{
+			state.push(GltfState_Error);
+			return;
+		}
+
+		for (int32_t i = 0; i < (int32_t)jsonArray.size(); i++)
+		{
+			jsonArray.getValueAt(i)->visit(*this);
+
+			if (state.top() == GltfState_Error)
+			{
+				return;
+			}
+
+			gltfIntegerArray[arrayIndex] = gltfInteger;
+			gltfFloatArray[arrayIndex] = gltfFloat;
+
+			arrayIndex++;
+		}
+	}
+	else if (objectArray)
+	{
+		if (gltfState == GltfState_Primitive)
+		{
+			for (int32_t i = 0; i < (int32_t)jsonArray.size(); i++)
+			{
+				memset(&gltfPrimitive, 0, sizeof(GltfPrimitive));
+
+				jsonArray.getValueAt(i)->visit(*this);
+
+				if (state.top() == GltfState_Error)
+				{
+					return;
+				}
+
+				gltfMesh.primitives.append(gltfPrimitive);
+			}
+		}
+		else
+		{
+			state.push(GltfState_Error);
+			return;
+		}
+	}
 	else
 	{
 		state.push(GltfState_Error);
 		return;
 	}
-
-	state.pop();
 }
 
 void GltfVisitor::visit(JSONobject& jsonObject)
@@ -342,25 +388,6 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 
 			//
 
-			std::string finalFilename = directory + gltfString;
-
-			auto binaryBuffer = fileLoadBinary(finalFilename.c_str());
-
-			if (!binaryBuffer.get())
-			{
-				binaryBuffer = fileLoadBinary(gltfString.c_str());
-
-				if (!binaryBuffer.get())
-				{
-					state.push(GltfState_Error);
-					return;
-				}
-			}
-
-			gltfBuffer.binaryBuffer = binaryBuffer;
-
-			//
-
 			allGltfBuffers[allKeys[i]] = gltfBuffer;
 		}
 	}
@@ -416,19 +443,82 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 	}
 	else if (gltfState == GltfState_Meshes)
 	{
-		// TODO: Implement.
+		const auto& allKeys = jsonObject.getAllKeys();
+
+		for (size_t i = 0; i < allKeys.size(); i++)
+		{
+			memset(&gltfMesh, 0, sizeof(GltfMesh));
+
+			//
+
+			auto currentMesh = jsonObject.getValue(allKeys[i]);
+
+			state.push(GltfState_Mesh);
+			currentMesh->visit(*this);
+
+			if (state.top() == GltfState_Error)
+			{
+				return;
+			}
+
+			//
+
+			allGltfMeshes[allKeys[i]] = gltfMesh;
+		}
 	}
 	else if (gltfState == GltfState_Nodes)
 	{
-		// TODO: Implement.
+		const auto& allKeys = jsonObject.getAllKeys();
+
+		for (size_t i = 0; i < allKeys.size(); i++)
+		{
+			memset(&gltfNode, 0, sizeof(GltfNode));
+
+			//
+
+			auto currentNode = jsonObject.getValue(allKeys[i]);
+
+			state.push(GltfState_Node);
+			currentNode->visit(*this);
+
+			if (state.top() == GltfState_Error)
+			{
+				return;
+			}
+
+			//
+
+			allGltfNodes[allKeys[i]] = gltfNode;
+		}
 	}
 	else if (gltfState == GltfState_Scenes)
 	{
-		// TODO: Implement.
+		const auto& allKeys = jsonObject.getAllKeys();
+
+		for (size_t i = 0; i < allKeys.size(); i++)
+		{
+			memset(&gltfScene, 0, sizeof(GltfNode));
+
+			//
+
+			auto currentScene = jsonObject.getValue(allKeys[i]);
+
+			state.push(GltfState_Scene);
+			currentScene->visit(*this);
+
+			if (state.top() == GltfState_Error)
+			{
+				return;
+			}
+
+			//
+
+			allGltfScenes[allKeys[i]] = gltfScene;
+		}
 	}
 	else if (gltfState == GltfState_Buffer)
 	{
-		if (!jsonObject.hasKey("uri"))
+		if (!jsonObject.hasKey("uri") ||  !jsonObject.hasKey("byteLength"))
 		{
 			state.push(GltfState_Error);
 			return;
@@ -440,6 +530,44 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 
 		if (state.top() == GltfState_Error)
 		{
+			return;
+		}
+
+		//
+
+		std::string finalFilename = directory + gltfString;
+
+		auto binaryBuffer = fileLoadBinary(finalFilename.c_str());
+
+		if (!binaryBuffer.get())
+		{
+			binaryBuffer = fileLoadBinary(gltfString.c_str());
+
+			if (!binaryBuffer.get())
+			{
+				state.push(GltfState_Error);
+				return;
+			}
+		}
+
+		gltfBuffer.binaryBuffer = binaryBuffer;
+
+		//
+
+		auto byteLength = jsonObject.getValue("byteLength");
+
+		byteLength->visit(*this);
+
+		if (state.top() == GltfState_Error)
+		{
+			return;
+		}
+
+		gltfBuffer.byteLength = (int32_t)gltfInteger;
+
+		if (gltfBuffer.byteLength != gltfBuffer.binaryBuffer->getSize())
+		{
+			state.push(GltfState_Error);
 			return;
 		}
 	}
@@ -480,10 +608,23 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 		}
 
 		gltfBufferView.byteOffset = (size_t)gltfInteger;
+
+		//
+
+		auto byteLength = jsonObject.getValue("byteLength");
+
+		byteLength->visit(*this);
+
+		if (state.top() == GltfState_Error)
+		{
+			return;
+		}
+
+		gltfBufferView.byteLength = (size_t)gltfInteger;
 	}
 	else if (gltfState == GltfState_Accessor)
 	{
-		if (!jsonObject.hasKey("bufferView") || !jsonObject.hasKey("byteOffset") || !jsonObject.hasKey("componentType") || !jsonObject.hasKey("count") || !jsonObject.hasKey("type"))
+		if (!jsonObject.hasKey("bufferView") || !jsonObject.hasKey("byteOffset") || !jsonObject.hasKey("componentType") || !jsonObject.hasKey("count") || !jsonObject.hasKey("type") || !jsonObject.hasKey("min") || !jsonObject.hasKey("max"))
 		{
 			state.push(GltfState_Error);
 			return;
@@ -569,25 +710,157 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 			return;
 		}
 
-		if (gltfString == "SCALAR" ||
-			gltfString == "VEC2" ||
-			gltfString == "VEC3" ||
-			gltfString == "VEC4" ||
-			gltfString == "MAT2" ||
-			gltfString == "MAT3" ||
-			gltfString == "MAT4")
+		if (gltfString == "SCALAR")
 		{
-			gltfAccessor.type = gltfString;
+			arraySize = 1;
+		}
+		else if (gltfString == "VEC2")
+		{
+			arraySize = 2;
+		}
+		else if (gltfString == "VEC3")
+		{
+			arraySize = 3;
+		}
+		else if (gltfString == "VEC4" || gltfString == "MAT2")
+		{
+			arraySize = 4;
+		}
+		else if (gltfString == "MAT3")
+		{
+			arraySize = 9;
+		}
+		else if (gltfString == "MAT4")
+		{
+			arraySize = 16;
 		}
 		else
 		{
 			state.push(GltfState_Error);
 			return;
 		}
+
+		numberArray = VK_TRUE;
+
+		gltfAccessor.type = gltfString;
+
+		//
+
+		auto min = jsonObject.getValue("min");
+
+		min->visit(*this);
+
+		if (state.top() == GltfState_Error)
+		{
+			return;
+		}
+
+		if (arrayIndex != arraySize)
+		{
+			state.push(GltfState_Error);
+			return;
+		}
+
+		for (size_t i = 0; i < arraySize; i++)
+		{
+			switch (gltfAccessor.componentType)
+			{
+				case 5120:
+					gltfAccessor.minByte.append((int8_t)gltfIntegerArray[i]);
+					break;
+				case 5121:
+					gltfAccessor.minUnsignedByte.append((uint8_t)gltfIntegerArray[i]);
+					break;
+				case 5122:
+					gltfAccessor.minShort.append((int16_t)gltfIntegerArray[i]);
+					break;
+				case 5123:
+					gltfAccessor.minUnsignedShort.append((uint16_t)gltfIntegerArray[i]);
+					break;
+				case 5125:
+					gltfAccessor.minUnsignedInteger.append(gltfIntegerArray[i]);
+					break;
+				case 5126:
+					gltfAccessor.minFloat.append(gltfFloatArray[i]);
+					break;
+			}
+		}
+
+		arrayIndex = 0;
+
+		//
+
+		auto max = jsonObject.getValue("max");
+
+		max->visit(*this);
+
+		if (state.top() == GltfState_Error)
+		{
+			return;
+		}
+
+		if (arrayIndex != arraySize)
+		{
+			state.push(GltfState_Error);
+			return;
+		}
+
+		for (size_t i = 0; i < arraySize; i++)
+		{
+			switch (gltfAccessor.componentType)
+			{
+				case 5120:
+					gltfAccessor.maxByte.append((int8_t)gltfIntegerArray[i]);
+					break;
+				case 5121:
+					gltfAccessor.maxUnsignedByte.append((uint8_t)gltfIntegerArray[i]);
+					break;
+				case 5122:
+					gltfAccessor.maxShort.append((int16_t)gltfIntegerArray[i]);
+					break;
+				case 5123:
+					gltfAccessor.maxUnsignedShort.append((uint16_t)gltfIntegerArray[i]);
+					break;
+				case 5125:
+					gltfAccessor.maxUnsignedInteger.append(gltfIntegerArray[i]);
+					break;
+				case 5126:
+					gltfAccessor.maxFloat.append(gltfFloatArray[i]);
+					break;
+			}
+		}
+
+		arrayIndex = 0;
+
+		arraySize = 0;
+
+		numberArray = VK_FALSE;
 	}
 	else if (gltfState == GltfState_Mesh)
 	{
-		// TODO: Implement.
+		if (!jsonObject.hasKey("primitives"))
+		{
+			state.push(GltfState_Error);
+			return;
+		}
+
+		objectArray = VK_TRUE;
+
+		auto primitives = jsonObject.getValue("primitives");
+
+		state.push(GltfState_Primitive);
+		primitives->visit(*this);
+
+		objectArray = VK_FALSE;
+
+		if (state.top() == GltfState_Error)
+		{
+			return;
+		}
+
+		//
+
+		// TODO: Create and assign sub mesh.
 	}
 	else if (gltfState == GltfState_Node)
 	{
@@ -596,6 +869,10 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 	else if (gltfState == GltfState_Scene)
 	{
 		// TODO: Implement.
+	}
+	else if (gltfState == GltfState_Primitive)
+	{
+		// TODO: Implement next.
 	}
 	else
 	{

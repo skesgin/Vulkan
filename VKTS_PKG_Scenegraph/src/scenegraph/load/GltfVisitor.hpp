@@ -50,16 +50,20 @@ enum GltfState {GltfState_Start,
 				GltfState_Accessor,
 				GltfState_Mesh,
 				GltfState_Node,
-				GltfState_Scene
+				GltfState_Scene,
+
+				GltfState_Primitive
 };
 
 typedef struct _GltfBuffer {
 	IBinaryBufferSP binaryBuffer;
+	size_t byteLength;
 } GltfBuffer;
 
 typedef struct _GltfBufferView {
 	GltfBuffer* buffer;
     size_t byteOffset;
+    size_t byteLength;
 } GltfBufferView;
 
 typedef struct _GltfAccessor {
@@ -68,18 +72,39 @@ typedef struct _GltfAccessor {
     int32_t componentType;
     int32_t count;
     std::string type;
+
+    Vector<int8_t> minByte;
+    Vector<uint8_t> minUnsignedByte;
+    Vector<int16_t> minShort;
+    Vector<uint16_t> minUnsignedShort;
+    Vector<uint32_t> minUnsignedInteger;
+    Vector<float> minFloat;
+
+    Vector<int8_t> maxByte;
+    Vector<uint8_t> maxUnsignedByte;
+    Vector<int16_t> maxShort;
+    Vector<uint16_t> maxUnsignedShort;
+    Vector<uint32_t> maxUnsignedInteger;
+    Vector<float> maxFloat;
+
 } GltfAccessor;
 
+typedef struct _GltfPrimitive {
+	// TODO: Implement.
+} GltfPrimitive;
+
 typedef struct _GltfMesh {
-	// TODO
+	Vector<GltfPrimitive> primitives;
+	//
+	ISubMeshSP subMesh;
 } GltfMesh;
 
 typedef struct _GltfNode {
-	// TODO
+	// TODO: Implement.
 } GltfNode;
 
 typedef struct _GltfScene {
-	// TODO
+	// TODO: Implement.
 } GltfScene;
 
 class GltfVisitor : public JsonVisitor
@@ -94,13 +119,23 @@ private:
 	std::string gltfString;
 	std::int32_t gltfInteger;
 	float gltfFloat;
+	std::int32_t gltfIntegerArray[16];
+	float gltfFloatArray[16];
+
+	size_t arrayIndex;
+	size_t arraySize;
+	VkBool32 numberArray;
+
+	VkBool32 objectArray;
 
 	GltfBuffer gltfBuffer;
 	GltfBufferView gltfBufferView;
 	GltfAccessor gltfAccessor;
-	GltfAccessor gltfMesh;
-	GltfAccessor gltfNode;
-	GltfAccessor gltfScene;
+	GltfMesh gltfMesh;
+	GltfNode gltfNode;
+	GltfScene gltfScene;
+
+	GltfPrimitive gltfPrimitive;
 
 	Map<std::string, GltfBuffer> allGltfBuffers;
 	Map<std::string, GltfBufferView> allGltfBufferViews;
