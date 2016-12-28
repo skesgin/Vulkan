@@ -37,6 +37,7 @@ enum GltfState {GltfState_Start,
 
 				GltfState_Error,
 
+				GltfState_Asset,
 				GltfState_Buffers,
 				GltfState_BufferViews,
 				GltfState_Accessors,

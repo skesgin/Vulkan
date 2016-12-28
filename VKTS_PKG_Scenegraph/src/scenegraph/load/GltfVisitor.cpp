@@ -151,6 +151,24 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 	}
 	else if (currentState == GltfState_Start)
 	{
+		if (!jsonObject.hasKey("asset"))
+		{
+			state.push(GltfState_Error);
+			return;
+		}
+
+		auto asset = jsonObject.getValue("asset");
+
+		state.push(GltfState_Asset);
+		asset->visit(*this);
+
+		if (state.top() == GltfState_Error)
+		{
+			return;
+		}
+
+		//
+
 		if (!jsonObject.hasKey("buffers"))
 		{
 			state.push(GltfState_Error);
@@ -262,6 +280,45 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 		state.push(GltfState_End);
 
 		return;
+	}
+	else if (currentState == GltfState_Asset)
+	{
+		if (!jsonObject.hasKey("version"))
+		{
+			state.push(GltfState_Error);
+			return;
+		}
+
+		auto currentVersion = jsonObject.getValue("version");
+
+		currentVersion->visit(*this);
+
+		if (state.top() == GltfState_Error)
+		{
+			return;
+		}
+
+		//
+
+		auto dotIndex = currentString.find(".");
+
+		if (dotIndex == currentString.npos)
+		{
+			state.push(GltfState_Error);
+			return;
+		}
+
+		auto majorName = currentString.substr(0, dotIndex);
+		auto minorName = currentString.substr(dotIndex + 1);
+
+		int32_t majorVersion = (int32_t)atoi(majorName.c_str());
+		int32_t minorVersion = (int32_t)atoi(minorName.c_str());
+
+		if (majorVersion != 1 || minorVersion != 1)
+		{
+			state.push(GltfState_Error);
+			return;
+		}
 	}
 	else if (currentState == GltfState_Buffers)
 	{
