@@ -860,7 +860,7 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 
 		//
 
-		// TODO: Create and assign sub mesh.
+		// TODO: Create sub mesh and add to scene manager.
 	}
 	else if (gltfState == GltfState_Node)
 	{
@@ -872,7 +872,184 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 	}
 	else if (gltfState == GltfState_Primitive)
 	{
-		// TODO: Implement next.
+		if (!jsonObject.hasKey("attributes"))
+		{
+			state.push(GltfState_Error);
+			return;
+		}
+
+		auto attributes = jsonObject.getValue("attributes");
+
+		state.push(GltfState_Attribute);
+		attributes->visit(*this);
+
+		if (state.top() == GltfState_Error)
+		{
+			return;
+		}
+
+		// Optional
+
+		if (jsonObject.hasKey("indices"))
+		{
+			auto indices = jsonObject.getValue("indices");
+
+			indices->visit(*this);
+
+			if (state.top() == GltfState_Error)
+			{
+				return;
+			}
+
+			if (!allGltfAccessors.contains(gltfString))
+			{
+				state.push(GltfState_Error);
+				return;
+			}
+
+			gltfPrimitive.indices = &(allGltfAccessors[gltfString]);
+		}
+	}
+	else if (gltfState == GltfState_Attribute)
+	{
+		if (!jsonObject.hasKey("POSITION"))
+		{
+			state.push(GltfState_Error);
+			return;
+		}
+
+		auto position = jsonObject.getValue("POSITION");
+
+		position->visit(*this);
+
+		if (state.top() == GltfState_Error)
+		{
+			return;
+		}
+
+		gltfPrimitive.position = &(allGltfAccessors[gltfString]);
+
+		// Optional
+
+		if (jsonObject.hasKey("NORMAL"))
+		{
+			auto normal = jsonObject.getValue("NORMAL");
+
+			normal->visit(*this);
+
+			if (state.top() == GltfState_Error)
+			{
+				return;
+			}
+
+			if (!allGltfAccessors.contains(gltfString))
+			{
+				state.push(GltfState_Error);
+				return;
+			}
+
+			gltfPrimitive.normal = &(allGltfAccessors[gltfString]);
+		}
+
+		if (jsonObject.hasKey("BINORMAL"))
+		{
+			auto binormal = jsonObject.getValue("BINORMAL");
+
+			binormal->visit(*this);
+
+			if (state.top() == GltfState_Error)
+			{
+				return;
+			}
+
+			if (!allGltfAccessors.contains(gltfString))
+			{
+				state.push(GltfState_Error);
+				return;
+			}
+
+			gltfPrimitive.binormal = &(allGltfAccessors[gltfString]);
+		}
+
+		if (jsonObject.hasKey("TANGENT"))
+		{
+			auto tangent = jsonObject.getValue("TANGENT");
+
+			tangent->visit(*this);
+
+			if (state.top() == GltfState_Error)
+			{
+				return;
+			}
+
+			if (!allGltfAccessors.contains(gltfString))
+			{
+				state.push(GltfState_Error);
+				return;
+			}
+
+			gltfPrimitive.tangent = &(allGltfAccessors[gltfString]);
+		}
+
+		if (jsonObject.hasKey("TEXCOORD_0"))
+		{
+			auto texCoord = jsonObject.getValue("TEXCOORD_0");
+
+			texCoord->visit(*this);
+
+			if (state.top() == GltfState_Error)
+			{
+				return;
+			}
+
+			if (!allGltfAccessors.contains(gltfString))
+			{
+				state.push(GltfState_Error);
+				return;
+			}
+
+			gltfPrimitive.texCoord = &(allGltfAccessors[gltfString]);
+		}
+
+		if (jsonObject.hasKey("JOINT"))
+		{
+			auto joint = jsonObject.getValue("JOINT");
+
+			joint->visit(*this);
+
+			if (state.top() == GltfState_Error)
+			{
+				return;
+			}
+
+			if (!allGltfAccessors.contains(gltfString))
+			{
+				state.push(GltfState_Error);
+				return;
+			}
+
+			gltfPrimitive.joint = &(allGltfAccessors[gltfString]);
+		}
+
+		if (jsonObject.hasKey("WEIGHT"))
+		{
+			auto weight = jsonObject.getValue("WEIGHT");
+
+			weight->visit(*this);
+
+			if (state.top() == GltfState_Error)
+			{
+				return;
+			}
+
+			if (!allGltfAccessors.contains(gltfString))
+			{
+				state.push(GltfState_Error);
+				return;
+			}
+
+			gltfPrimitive.weight = &(allGltfAccessors[gltfString]);
+		}
 	}
 	else
 	{

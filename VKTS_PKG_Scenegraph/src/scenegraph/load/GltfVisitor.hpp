@@ -32,27 +32,29 @@
 namespace vkts
 {
 
-enum GltfState {GltfState_Start,
-				GltfState_End,
+enum GltfState {
+	GltfState_Start,
+	GltfState_End,
 
-				GltfState_Error,
+	GltfState_Error,
 
-				GltfState_Asset,
-				GltfState_Buffers,
-				GltfState_BufferViews,
-				GltfState_Accessors,
-				GltfState_Meshes,
-				GltfState_Nodes,
-				GltfState_Scenes,
+	GltfState_Asset,
+	GltfState_Buffers,
+	GltfState_BufferViews,
+	GltfState_Accessors,
+	GltfState_Meshes,
+	GltfState_Nodes,
+	GltfState_Scenes,
 
-				GltfState_Buffer,
-				GltfState_BufferView,
-				GltfState_Accessor,
-				GltfState_Mesh,
-				GltfState_Node,
-				GltfState_Scene,
+	GltfState_Buffer,
+	GltfState_BufferView,
+	GltfState_Accessor,
+	GltfState_Mesh,
+	GltfState_Node,
+	GltfState_Scene,
 
-				GltfState_Primitive
+	GltfState_Primitive,
+	GltfState_Attribute
 };
 
 typedef struct _GltfBuffer {
@@ -90,13 +92,20 @@ typedef struct _GltfAccessor {
 } GltfAccessor;
 
 typedef struct _GltfPrimitive {
-	// TODO: Implement.
+	// Attributes
+	GltfAccessor* position;
+	GltfAccessor* normal;
+	GltfAccessor* binormal;
+	GltfAccessor* tangent;
+	GltfAccessor* texCoord;
+	GltfAccessor* joint;
+	GltfAccessor* weight;
+	//
+	GltfAccessor* indices;
 } GltfPrimitive;
 
 typedef struct _GltfMesh {
 	Vector<GltfPrimitive> primitives;
-	//
-	ISubMeshSP subMesh;
 } GltfMesh;
 
 typedef struct _GltfNode {
