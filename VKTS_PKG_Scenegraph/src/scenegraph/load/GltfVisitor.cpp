@@ -427,6 +427,58 @@ void GltfVisitor::visitMesh(JSONobject& jsonObject)
 
 void GltfVisitor::visitNode(JSONobject& jsonObject)
 {
+	// Not processing camera.
+
+	if (jsonObject.hasKey("children"))
+	{
+		objectArray = VK_TRUE;
+
+		auto children = jsonObject.getValue("children");
+
+		state.push(GltfState_Node_Children);
+		children->visit(*this);
+
+		objectArray = VK_FALSE;
+
+		if (state.top() == GltfState_Error)
+		{
+			return;
+		}
+	}
+
+	// TODO: Process skeletons.
+
+	// TODO: Process skins.
+
+	// TODO: Process jointName.
+
+	if (jsonObject.hasKey("matrix"))
+	{
+		numberArray = VK_TRUE;
+
+		arrayIndex = 0;
+		arraySize = 16;
+
+		auto matrix = jsonObject.getValue("matrix");
+
+		matrix->visit(*this);
+
+		numberArray = VK_FALSE;
+
+		arrayIndex = 0;
+		arraySize = 0;
+
+		if (state.top() == GltfState_Error)
+		{
+			return;
+		}
+
+		for (int32_t i = 0; i < 16; i++)
+		{
+			gltfNode.matrix[i] = gltfFloatArray[i];
+		}
+	}
+
 	if (jsonObject.hasKey("meshes"))
 	{
 		objectArray = VK_TRUE;
@@ -444,7 +496,84 @@ void GltfVisitor::visitNode(JSONobject& jsonObject)
 		}
 	}
 
-	// TODO: Process node properties.
+	if (jsonObject.hasKey("rotation"))
+	{
+		numberArray = VK_TRUE;
+
+		arrayIndex = 0;
+		arraySize = 4;
+
+		auto rotation = jsonObject.getValue("rotation");
+
+		rotation->visit(*this);
+
+		numberArray = VK_FALSE;
+
+		arrayIndex = 0;
+		arraySize = 0;
+
+		if (state.top() == GltfState_Error)
+		{
+			return;
+		}
+
+		gltfNode.rotation[0] = gltfFloatArray[0];
+		gltfNode.rotation[1] = gltfFloatArray[1];
+		gltfNode.rotation[2] = gltfFloatArray[2];
+		gltfNode.rotation[3] = gltfFloatArray[3];
+	}
+
+	if (jsonObject.hasKey("scale"))
+	{
+		numberArray = VK_TRUE;
+
+		arrayIndex = 0;
+		arraySize = 3;
+
+		auto scale = jsonObject.getValue("scale");
+
+		scale->visit(*this);
+
+		numberArray = VK_FALSE;
+
+		arrayIndex = 0;
+		arraySize = 0;
+
+		if (state.top() == GltfState_Error)
+		{
+			return;
+		}
+
+		gltfNode.scale[0] = gltfFloatArray[0];
+		gltfNode.scale[1] = gltfFloatArray[1];
+		gltfNode.scale[2] = gltfFloatArray[2];
+	}
+
+	if (jsonObject.hasKey("translation"))
+	{
+		numberArray = VK_TRUE;
+
+		arrayIndex = 0;
+		arraySize = 3;
+
+		auto translation = jsonObject.getValue("translation");
+
+		translation->visit(*this);
+
+		numberArray = VK_FALSE;
+
+		arrayIndex = 0;
+		arraySize = 0;
+
+		if (state.top() == GltfState_Error)
+		{
+			return;
+		}
+
+		gltfNode.translation[0] = gltfFloatArray[0];
+		gltfNode.translation[1] = gltfFloatArray[1];
+		gltfNode.translation[2] = gltfFloatArray[2];
+	}
 }
 
 void GltfVisitor::visitAnimation(JSONobject& jsonObject)
@@ -993,6 +1122,20 @@ void GltfVisitor::visit(JSONarray& jsonArray)
 				gltfMesh.primitives.append(gltfPrimitive);
 			}
 		}
+		else if (gltfState == GltfState_Node_Children)
+		{
+			for (int32_t i = 0; i < (int32_t)jsonArray.size(); i++)
+			{
+				jsonArray.getValueAt(i)->visit(*this);
+
+				if (state.top() == GltfState_Error)
+				{
+					return;
+				}
+
+				gltfNode.children.append(gltfString);
+			}
+		}
 		else if (gltfState == GltfState_Node_Mesh)
 		{
 			for (int32_t i = 0; i < (int32_t)jsonArray.size(); i++)
@@ -1183,6 +1326,23 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 		if (state.top() == GltfState_Error)
 		{
 			return;
+		}
+
+		// Resolve pointers.
+		for (size_t i = 0; allGltfNodes.values().size(); i++)
+		{
+			for (size_t k = 0; k < allGltfNodes.valueAt(i).children.size(); k++)
+			{
+				std::string currentNodeName = allGltfNodes.valueAt(i).children[k];
+
+				if (!allGltfNodes.contains(currentNodeName))
+				{
+					state.push(GltfState_Error);
+					return;
+				}
+
+				allGltfNodes.valueAt(i).childrenPointer.append(&allGltfNodes[currentNodeName]);
+			}
 		}
 
 		//
@@ -1393,7 +1553,35 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 
 		for (size_t i = 0; i < allKeys.size(); i++)
 		{
+			gltfNode.children.clear();
+			gltfNode.childrenPointer.clear();
+
+			for (int32_t k = 0; k < 16; k++)
+			{
+				if ((k % 4) - (k / 4) == 0)
+				{
+					gltfNode.matrix[k] = 1.0f;
+				}
+				else
+				{
+					gltfNode.matrix[k] = 0.0f;
+				}
+			}
+
 			gltfNode.meshes.clear();
+
+			gltfNode.rotation[0] = 0.0f;
+			gltfNode.rotation[1] = 0.0f;
+			gltfNode.rotation[2] = 0.0f;
+			gltfNode.rotation[3] = 1.0f;
+
+			gltfNode.scale[0] = 1.0f;
+			gltfNode.scale[1] = 1.0f;
+			gltfNode.scale[2] = 1.0f;
+
+			gltfNode.translation[0] = 0.0f;
+			gltfNode.translation[1] = 0.0f;
+			gltfNode.translation[2] = 0.0f;
 
 			//
 

@@ -217,12 +217,12 @@ public:
         return allValues[index];
     }
 
-    const SmartPointerVector<K>& keys() const
+    const Vector<K>& keys() const
     {
         return allKeys;
     }
 
-    const SmartPointerVector<V>& values() const
+    const Vector<V>& values() const
     {
         return allValues;
     }

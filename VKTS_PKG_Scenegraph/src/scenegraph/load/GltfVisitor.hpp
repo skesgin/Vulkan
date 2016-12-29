@@ -57,6 +57,7 @@ enum GltfState {
 
 	GltfState_Mesh_Primitive,
 	GltfState_Mesh_Primitive_Attributes,
+	GltfState_Node_Children,
 	GltfState_Node_Mesh,
 	GltfState_Animation_Sampler,
 	GltfState_Animation_Sampler_Properties,
@@ -119,7 +120,13 @@ typedef struct _GltfMesh {
 } GltfMesh;
 
 typedef struct _GltfNode {
+	Vector<std::string> children;
+	Vector<const struct _GltfNode*> childrenPointer;
+	float matrix[16];
 	Vector<GltfMesh*> meshes;
+	float rotation[4];
+	float scale[3];
+	float translation[3];
 } GltfNode;
 
 typedef struct _GltfSampler {
