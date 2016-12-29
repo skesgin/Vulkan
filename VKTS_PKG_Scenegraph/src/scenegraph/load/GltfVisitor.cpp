@@ -98,6 +98,10 @@ void GltfVisitor::visitBuffer(JSONobject& jsonObject)
 
 void GltfVisitor::visitBufferView(JSONobject& jsonObject)
 {
+	// Not processing target.
+
+	//
+
 	if (!jsonObject.hasKey("buffer") || !jsonObject.hasKey("byteOffset") || !jsonObject.hasKey("byteLength"))
 	{
 		state.push(GltfState_Error);
@@ -146,10 +150,6 @@ void GltfVisitor::visitBufferView(JSONobject& jsonObject)
 	}
 
 	gltfBufferView.byteLength = (size_t)gltfInteger;
-
-	//
-
-	// Not processing target.
 }
 
 void GltfVisitor::visitAccessor(JSONobject& jsonObject)
@@ -433,6 +433,24 @@ void GltfVisitor::visitSkin(JSONobject& jsonObject)
 		return;
 	}
 
+	//
+
+	objectArray = VK_TRUE;
+
+	auto jointNames = jsonObject.getValue("jointNames");
+
+	state.push(GltfState_Skin_JointNames);
+	jointNames->visit(*this);
+
+	objectArray = VK_FALSE;
+
+	if (state.top() == GltfState_Error)
+	{
+		return;
+	}
+
+	//
+
 	if (jsonObject.hasKey("bindShapeMatrix"))
 	{
 		numberArray = VK_TRUE;
@@ -478,27 +496,13 @@ void GltfVisitor::visitSkin(JSONobject& jsonObject)
 			return;
 		}
 	}
-
-	//
-
-	objectArray = VK_TRUE;
-
-	auto jointNames = jsonObject.getValue("jointNames");
-
-	state.push(GltfState_Skin_JointNames);
-	jointNames->visit(*this);
-
-	objectArray = VK_FALSE;
-
-	if (state.top() == GltfState_Error)
-	{
-		return;
-	}
 }
 
 void GltfVisitor::visitNode(JSONobject& jsonObject)
 {
 	// Not processing camera.
+
+	//
 
 	if (jsonObject.hasKey("children"))
 	{
@@ -519,6 +523,14 @@ void GltfVisitor::visitNode(JSONobject& jsonObject)
 
 	if (jsonObject.hasKey("skeletons"))
 	{
+		if (!jsonObject.hasKey("skin") || !jsonObject.hasKey("meshes"))
+		{
+			state.push(GltfState_Error);
+			return;
+		}
+
+		//
+
 		objectArray = VK_TRUE;
 
 		auto skeletons = jsonObject.getValue("skeletons");
@@ -536,6 +548,14 @@ void GltfVisitor::visitNode(JSONobject& jsonObject)
 
 	if (jsonObject.hasKey("skin"))
 	{
+		if (!jsonObject.hasKey("skeletons") || !jsonObject.hasKey("meshes"))
+		{
+			state.push(GltfState_Error);
+			return;
+		}
+
+		//
+
 		auto skin = jsonObject.getValue("skin");
 
 		skin->visit(*this);
@@ -694,36 +714,44 @@ void GltfVisitor::visitNode(JSONobject& jsonObject)
 
 void GltfVisitor::visitAnimation(JSONobject& jsonObject)
 {
-	if (!jsonObject.hasKey("samplers") || !jsonObject.hasKey("channels"))
+	if (jsonObject.hasKey("samplers"))
 	{
-		state.push(GltfState_Error);
-		return;
-	}
+		auto samplers = jsonObject.getValue("samplers");
 
-	auto samplers = jsonObject.getValue("samplers");
+		state.push(GltfState_Animation_Sampler);
+		samplers->visit(*this);
 
-	state.push(GltfState_Animation_Sampler);
-	samplers->visit(*this);
-
-	if (state.top() == GltfState_Error)
-	{
-		return;
+		if (state.top() == GltfState_Error)
+		{
+			return;
+		}
 	}
 
 	//
 
-	objectArray = VK_TRUE;
-
-	auto channels = jsonObject.getValue("channels");
-
-	state.push(GltfState_Animation_Channel);
-	channels->visit(*this);
-
-	objectArray = VK_FALSE;
-
-	if (state.top() == GltfState_Error)
+	if (jsonObject.hasKey("channels"))
 	{
-		return;
+		if (!jsonObject.hasKey("samplers"))
+		{
+			state.push(GltfState_Error);
+			return;
+		}
+
+		//
+
+		objectArray = VK_TRUE;
+
+		auto channels = jsonObject.getValue("channels");
+
+		state.push(GltfState_Animation_Channel);
+		channels->visit(*this);
+
+		objectArray = VK_FALSE;
+
+		if (state.top() == GltfState_Error)
+		{
+			return;
+		}
 	}
 }
 
@@ -750,6 +778,10 @@ void GltfVisitor::visitScene(JSONobject& jsonObject)
 
 void GltfVisitor::visitMesh_Primitive(JSONobject& jsonObject)
 {
+	// Not processing material
+
+	//
+
 	if (!jsonObject.hasKey("attributes"))
 	{
 		state.push(GltfState_Error);
@@ -787,10 +819,36 @@ void GltfVisitor::visitMesh_Primitive(JSONobject& jsonObject)
 
 		gltfPrimitive.indices = &(allGltfAccessors[gltfString]);
 	}
+
+	//
+
+	if (jsonObject.hasKey("mode"))
+	{
+		auto mode = jsonObject.getValue("mode");
+
+		mode->visit(*this);
+
+		if (state.top() == GltfState_Error)
+		{
+			return;
+		}
+
+		if (gltfInteger < 0 || gltfInteger > 5)
+		{
+			state.push(GltfState_Error);
+			return;
+		}
+
+		gltfPrimitive.mode = gltfInteger;
+	}
 }
 
 void GltfVisitor::visitMesh_Primitive_Attributes(JSONobject& jsonObject)
 {
+	// Not processing TEXCOORD_x (x >= 1) and COLOR_x (x >= 0)
+
+	//
+
 	if (!jsonObject.hasKey("POSITION"))
 	{
 		state.push(GltfState_Error);
@@ -1227,6 +1285,9 @@ void GltfVisitor::visit(JSONarray& jsonArray)
 			for (int32_t i = 0; i < (int32_t)jsonArray.size(); i++)
 			{
 				memset(&gltfPrimitive, 0, sizeof(GltfPrimitive));
+				gltfPrimitive.mode = 4;
+
+				//
 
 				jsonArray.getValueAt(i)->visit(*this);
 
@@ -1387,6 +1448,8 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 	else if (gltfState == GltfState_Start)
 	{
 		// Not processing extensionsUsed, extensionsRequired, cameras, images, materials, programs, samplers, scene, shaders, techniques, textures, glExtensionsUsed
+
+		//
 
 		if (!jsonObject.hasKey("asset"))
 		{

@@ -118,6 +118,7 @@ typedef struct _GltfPrimitive {
 	GltfAccessor* weight;
 	//
 	GltfAccessor* indices;
+	int32_t mode;
 } GltfPrimitive;
 
 typedef struct _GltfMesh {
