@@ -1,4 +1,8 @@
 language: cpp
+env:
+  - VISUAL=""
+  - VISUAL="-DVKTS_WSI=VKTS_WAYLAND_VISUAL"
+  - VISUAL="-DVKTS_WSI=VKTS_DISPLAY_VISUAL"
 sudo: required
 dist: xenial
 compiler: gcc
@@ -6,7 +10,7 @@ os: linux
 
 before_install:
   - sudo apt-get -qq update
-  - sudo apt-get install -y libx11-xcb-dev libxrandr-dev
+  - sudo apt-get install -y libx11-xcb-dev libxrandr-dev libwayland-dev
   - cd
   - mkdir Development
   - cd Development
@@ -27,7 +31,7 @@ before_script:
   - LIBRARY_PATH=$VULKAN_SDK/lib
   - export LIBRARY_PATH
   - python3 create_master_CMakeLists.py
-  - cmake .
 
 script:
+  - cmake . $VISUAL
   - make
