@@ -227,6 +227,12 @@ void GltfVisitor::visitAccessor(JSONobject& jsonObject)
 		return;
 	}
 
+	if (gltfInteger < 1)
+	{
+		state.push(GltfState_Error);
+		return;
+	}
+
 	gltfAccessor.count = gltfInteger;
 
 	//
@@ -2077,6 +2083,115 @@ const Map<std::string, GltfAnimation>& GltfVisitor::getAllGltfAnimations() const
 const Map<std::string, GltfScene>& GltfVisitor::getAllGltfScenes() const
 {
 	return allGltfScenes;
+}
+
+const void* GltfVisitor::getBufferPointer(const GltfAccessor& accessor, const int32_t element) const
+{
+	if (accessor.bufferView == nullptr)
+	{
+		return nullptr;
+	}
+	if (accessor.bufferView->buffer == nullptr)
+	{
+		return nullptr;
+	}
+	if (!accessor.bufferView->buffer->binaryBuffer.get())
+	{
+		return nullptr;
+	}
+	if (accessor.bufferView->buffer->byteLength != accessor.bufferView->buffer->binaryBuffer->getSize())
+	{
+		return nullptr;
+	}
+	if (element >= accessor.count)
+	{
+		return nullptr;
+	}
+
+	//
+
+	size_t bytesPerComponent = 0;
+
+	switch (accessor.componentType)
+	{
+		case 5120:
+		case 5121:
+			bytesPerComponent = 1;
+			break;
+			break;
+		case 5122:
+		case 5123:
+			bytesPerComponent = 2;
+			break;
+		case 5125:
+		case 5126:
+			bytesPerComponent = 4;
+			break;
+
+		default:
+			return nullptr;
+	}
+
+	//
+
+	size_t componentsPerType = 0;
+
+	if (accessor.type == "SCALAR")
+	{
+		componentsPerType = 1;
+	}
+	else if (accessor.type == "VEC2")
+	{
+		componentsPerType = 2;
+	}
+	else if (accessor.type == "VEC3")
+	{
+		componentsPerType = 3;
+	}
+	else if (accessor.type == "VEC4" || accessor.type == "MAT2")
+	{
+		componentsPerType = 4;
+	}
+	else if (accessor.type == "MAT3")
+	{
+		componentsPerType = 9;
+	}
+	else if (accessor.type == "MAT4")
+	{
+		componentsPerType = 16;
+	}
+	else
+	{
+		return nullptr;
+	}
+
+	//
+
+	size_t elementSize = bytesPerComponent * componentsPerType + accessor.byteStride;
+
+	size_t totalOffset = elementSize * (size_t)element + accessor.byteOffset + accessor.bufferView->byteOffset;
+
+	if (totalOffset >= accessor.bufferView->byteLength)
+	{
+		return nullptr;
+	}
+	if (elementSize + totalOffset > accessor.bufferView->byteLength)
+	{
+		return nullptr;
+	}
+
+	if (totalOffset >= accessor.bufferView->buffer->byteLength)
+	{
+		return nullptr;
+	}
+	if (elementSize + totalOffset > accessor.bufferView->buffer->byteLength)
+	{
+		return nullptr;
+	}
+
+	//
+
+	return (const void*)&(accessor.bufferView->buffer->binaryBuffer->getByteData()[totalOffset]);
 }
 
 }

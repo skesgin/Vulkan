@@ -276,6 +276,10 @@ public:
 
 	const Map<std::string, GltfScene>& getAllGltfScenes() const;
 
+	//
+
+	const void* getBufferPointer(const GltfAccessor& accessor, const int32_t element) const;
+
 };
 
 }
