@@ -43,6 +43,7 @@ enum GltfState {
 	GltfState_BufferViews,
 	GltfState_Accessors,
 	GltfState_Meshes,
+	GltfState_Skins,
 	GltfState_Nodes,
 	GltfState_Animations,
 	GltfState_Scenes,
@@ -51,13 +52,17 @@ enum GltfState {
 	GltfState_BufferView,
 	GltfState_Accessor,
 	GltfState_Mesh,
+	GltfState_Skin,
 	GltfState_Node,
 	GltfState_Animation,
 	GltfState_Scene,
 
 	GltfState_Mesh_Primitive,
 	GltfState_Mesh_Primitive_Attributes,
+	GltfState_Skin_InverseBindMatrices,
+	GltfState_Skin_JointNames,
 	GltfState_Node_Children,
+	GltfState_Node_Skeletons,
 	GltfState_Node_Mesh,
 	GltfState_Animation_Sampler,
 	GltfState_Animation_Sampler_Properties,
@@ -119,9 +124,22 @@ typedef struct _GltfMesh {
 	Vector<GltfPrimitive> primitives;
 } GltfMesh;
 
+struct _GltfNode;
+
+typedef struct _GltfSkin {
+	float bindShapeMatrix[16];
+	Vector<GltfAccessor*> inverseBindMatrices;
+	Vector<std::string> jointNames;
+	Vector<struct _GltfNode*> jointNodes;
+} GltfSkin;
+
 typedef struct _GltfNode {
 	Vector<std::string> children;
 	Vector<const struct _GltfNode*> childrenPointer;
+	Vector<std::string> skeletons;
+	Vector<const struct _GltfNode*> skeletonsPointer;
+	GltfSkin* skin;
+	std::string jointName;
 	float matrix[16];
 	Vector<GltfMesh*> meshes;
 	float rotation[4];
@@ -129,20 +147,20 @@ typedef struct _GltfNode {
 	float translation[3];
 } GltfNode;
 
-typedef struct _GltfSampler {
+typedef struct _GltfAnimation_Sampler {
 	GltfAccessor* input;
     std::string interpolation;
     GltfAccessor* output;
-} GltfSampler;
+} GltfAnimation_Sampler;
 
 typedef struct _GltfChannel {
-	GltfSampler* sampler;
+	GltfAnimation_Sampler* sampler;
 	GltfNode* targetNode;
 	std::string targetPath;
 } GltfChannel;
 
 typedef struct _GltfAnimation {
-	Map<std::string, GltfSampler> samplers;
+	Map<std::string, GltfAnimation_Sampler> samplers;
 	Vector<GltfChannel> channels;
 } GltfAnimation;
 
@@ -177,8 +195,9 @@ private:
 	GltfAccessor gltfAccessor;
 	GltfPrimitive gltfPrimitive;
 	GltfMesh gltfMesh;
+	GltfSkin gltfSkin;
 	GltfNode gltfNode;
-	GltfSampler gltfSampler;
+	GltfAnimation_Sampler gltfAnimation_Sampler;
 	GltfChannel gltfChannel;
 	GltfAnimation gltfAnimation;
 	GltfScene gltfScene;
@@ -187,24 +206,16 @@ private:
 	Map<std::string, GltfBufferView> allGltfBufferViews;
 	Map<std::string, GltfAccessor> allGltfAccessors;
 	Map<std::string, GltfMesh> allGltfMeshes;
+	Map<std::string, GltfSkin> allGltfSkins;
 	Map<std::string, GltfNode> allGltfNodes;
 	Map<std::string, GltfAnimation> allGltfAnimations;
 	Map<std::string, GltfScene> allGltfScenes;
-
-public:
-
-	GltfVisitor() = delete;
-
-	GltfVisitor(const std::string& directory);
-
-	virtual ~GltfVisitor();
-
-	//
 
 	void visitBuffer(JSONobject& jsonObject);
 	void visitBufferView(JSONobject& jsonObject);
 	void visitAccessor(JSONobject& jsonObject);
 	void visitMesh(JSONobject& jsonObject);
+	void visitSkin(JSONobject& jsonObject);
 	void visitNode(JSONobject& jsonObject);
 	void visitAnimation(JSONobject& jsonObject);
 	void visitScene(JSONobject& jsonObject);
@@ -215,6 +226,14 @@ public:
 	void visitAnimation_Sampler_Properties(JSONobject& jsonObject);
 	void visitAnimation_Channel(JSONobject& jsonObject);
 	void visitAnimation_Channel_Target(JSONobject& jsonObject);
+
+public:
+
+	GltfVisitor() = delete;
+
+	GltfVisitor(const std::string& directory);
+
+	virtual ~GltfVisitor();
 
 	//
 
@@ -237,6 +256,24 @@ public:
 	//
 
 	enum GltfState getState() const;
+
+	//
+
+	const Map<std::string, GltfBuffer>& getAllGltfBuffers() const;
+
+	const Map<std::string, GltfBufferView>& getAllGltfBufferViews() const;
+
+	const Map<std::string, GltfAccessor>& getAllGltfAccessors() const;
+
+	const Map<std::string, GltfMesh>& getAllGltfMeshes() const;
+
+	const Map<std::string, GltfSkin>& getAllGltfSkins() const;
+
+	const Map<std::string, GltfNode>& getAllGltfNodes() const;
+
+	const Map<std::string, GltfAnimation>& getAllGltfAnimations() const;
+
+	const Map<std::string, GltfScene>& getAllGltfScenes() const;
 
 };
 
