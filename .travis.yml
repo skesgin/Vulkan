@@ -7,11 +7,14 @@ os: linux
 before_install:
   - sudo apt-get -qq update
   - sudo apt-get install -y libx11-xcb-dev libxrandr-dev
+  - cd
   - mkdir Development
   - cd Development
   - wget https://vulkan.lunarg.com/sdk/download/1.0.37.0/linux/vulkansdk-linux-x86_64-1.0.37.0.run
   - chmod 777 vulkansdk-linux-x86_64-1.0.37.0.run
   - ./vulkansdk-linux-x86_64-1.0.37.0.run
+  - cd
+  - cd McNopper/Vulkan
 
 script:
   - python3 create_build_all_make.py
