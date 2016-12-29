@@ -1,3 +1,6 @@
+![Travis CI](https://api.travis-ci.org/McNopper/Vulkan.svg?branch=master)
+![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)
+
 ![Vulkan](VKTS_Documentation/images/vulkan_logo.png)  
 Vulkan examples using VulKan ToolS (VKTS):
 ------------------------------------------
