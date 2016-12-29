@@ -26,6 +26,5 @@ before_script:
   - export CPLUS_INCLUDE_PATH
   - LIBRARY_PATH=$VULKAN_SDK/lib
   - export LIBRARY_PATH
-
-script:
-  - python3 create_build_all_make.py
+  - python3 create_master_CMakeLists.py
+  - cmake .
