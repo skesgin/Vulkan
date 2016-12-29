@@ -14,7 +14,7 @@ before_install:
   - chmod 777 vulkansdk-linux-x86_64-1.0.37.0.run
   - ./vulkansdk-linux-x86_64-1.0.37.0.run
   - cd
-  - ls
+  - cd McNopper/Vulkan
 
 script:
   - python3 create_build_all_make.py
