@@ -211,6 +211,7 @@ private:
 	Map<std::string, GltfNode> allGltfNodes;
 	Map<std::string, GltfAnimation> allGltfAnimations;
 	Map<std::string, GltfScene> allGltfScenes;
+	GltfScene* defaultScene;
 
 	void visitBuffer(JSONobject& jsonObject);
 	void visitBufferView(JSONobject& jsonObject);
@@ -275,6 +276,10 @@ public:
 	const Map<std::string, GltfAnimation>& getAllGltfAnimations() const;
 
 	const Map<std::string, GltfScene>& getAllGltfScenes() const;
+
+	//
+
+	const GltfScene* getDefaultScene() const;
 
 	//
 

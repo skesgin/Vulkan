@@ -30,7 +30,7 @@ namespace vkts
 {
 
 GltfVisitor::GltfVisitor(const std::string& directory) :
-	JsonVisitor(), directory(directory), state(), gltfBool(VK_FALSE), gltfString(), gltfInteger(0), gltfFloat(0.0f), gltfIntegerArray{}, gltfFloatArray{}, arrayIndex(0), arraySize(0), numberArray(VK_FALSE), objectArray(VK_FALSE), gltfBuffer{}, gltfBufferView{}, gltfAccessor{}, gltfPrimitive{}, gltfMesh{}, gltfSkin{}, gltfNode{}, gltfAnimation_Sampler{}, gltfChannel{}, gltfAnimation{}, gltfScene{}, allGltfBuffers(), allGltfBufferViews(), allGltfAccessors(), allGltfMeshes(), allGltfSkins(), allGltfNodes(), allGltfAnimations(), allGltfScenes()
+	JsonVisitor(), directory(directory), state(), gltfBool(VK_FALSE), gltfString(), gltfInteger(0), gltfFloat(0.0f), gltfIntegerArray{}, gltfFloatArray{}, arrayIndex(0), arraySize(0), numberArray(VK_FALSE), objectArray(VK_FALSE), gltfBuffer{}, gltfBufferView{}, gltfAccessor{}, gltfPrimitive{}, gltfMesh{}, gltfSkin{}, gltfNode{}, gltfAnimation_Sampler{}, gltfChannel{}, gltfAnimation{}, gltfScene{}, allGltfBuffers(), allGltfBufferViews(), allGltfAccessors(), allGltfMeshes(), allGltfSkins(), allGltfNodes(), allGltfAnimations(), allGltfScenes(), defaultScene(nullptr)
 {
 }
 
@@ -1453,7 +1453,7 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 	}
 	else if (gltfState == GltfState_Start)
 	{
-		// Not processing extensionsUsed, extensionsRequired, cameras, images, materials, programs, samplers, scene, shaders, techniques, textures, glExtensionsUsed
+		// Not processing extensionsUsed, extensionsRequired, cameras, images, materials, programs, samplers, shaders, techniques, textures, glExtensionsUsed
 
 		//
 
@@ -1651,6 +1651,36 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 			{
 				return;
 			}
+		}
+
+		//
+
+		if (jsonObject.hasKey("scene"))
+		{
+			if (!jsonObject.hasKey("scenes"))
+			{
+				state.push(GltfState_Error);
+				return;
+			}
+
+			//
+
+			auto scene = jsonObject.getValue("scene");
+
+			scene->visit(*this);
+
+			if (state.top() == GltfState_Error)
+			{
+				return;
+			}
+
+			if (!allGltfScenes.contains(gltfString))
+			{
+				state.push(GltfState_Error);
+				return;
+			}
+
+			defaultScene = &(allGltfScenes[gltfString]);
 		}
 
 		//
@@ -2083,6 +2113,11 @@ const Map<std::string, GltfAnimation>& GltfVisitor::getAllGltfAnimations() const
 const Map<std::string, GltfScene>& GltfVisitor::getAllGltfScenes() const
 {
 	return allGltfScenes;
+}
+
+const GltfScene* GltfVisitor::getDefaultScene() const
+{
+	return defaultScene;
 }
 
 const void* GltfVisitor::getBufferPointer(const GltfAccessor& accessor, const int32_t element) const
