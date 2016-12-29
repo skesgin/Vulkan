@@ -27,6 +27,7 @@ Following requirements do depend on the platform:
     - Minimum [CMake](https://cmake.org/) version has to be 3.2.0.  
 - Needed libraries:
     - X11: libx11-xcb-dev libxrandr-dev
+    - Wayland: libwayland-dev
 
 
 ![Windows](images/windows_logo.png) Windows:
@@ -40,6 +41,35 @@ Following requirements do depend on the platform:
 - Building: make  
     - Minimum CMake version has to be 3.2.0.  
     - [MinGW-w64 - for 32 and 64 bit Windows](https://sourceforge.net/projects/mingw-w64/) required.  
+
+
+---
+
+Using Python scripts:
+---------------------
+
+The Python scripts in the root folder do build all VKTS packages and examples for the target operating system and compiler.
+
+Execute for Windows:
+- Default build: `create_build_all_MSVC.py`  
+- 64 bit build: `create_build_all_MSVC.py 64bit`  
+
+Execute for Linux:
+- XLib/Xcb build : `python3 create_build_all_make.py`  
+- Wayland build: `python3 create_build_all_make.py VKTS_WAYLAND_VISUAL`  
+- Display build: `python3 create_build_all_make.py VKTS_DISPLAY_VISUAL`  
+
+Execute for Android under Windows:
+- Default build: `create_build_all_Android.py`  
+  
+  
+Also, a global CMake file can be generated for all VKTS packages and Vulkan examples:
+
+Execute for Windows:
+- `create_master_CMakeLists.py`
+
+Execute for Linux:
+- `python3 create_master_CMakeLists.py`
 
 
 ---
@@ -64,7 +94,6 @@ Using Visual C++ 2015:
 
 1. Install [Visual Studio 2015 Community Edition](https://www.visualstudio.com/de/downloads/) for Windows.
 2. Run CMake and configure for "Visual Studio 14 2015 Win64".
-   Add `-DVKTS_WSI=VKTS_NO_VISUAL` to create without windowing system.
 3. Set the source code directory to VKTS.
 4. Set the build directory to VKTS/MSVC (Note: This build directory is expected by the examples).
 5. Open the Visual C++ solution file and __build VKTS first__.
@@ -80,7 +109,8 @@ Using make:
 
 1. Install a GNU GCC toolchain.
 2. Run CMake and configure "MSYS Makefiles" for Windows or "Unix Makefiles" for Linux.
-   Add `-DVKTS_WSI=VKTS_NO_VISUAL` to create without windowing system.
+   Add `-DVKTS_WSI=VKTS_WAYLAND_VISUAL` to create for Wayland window system.
+   Add `-DVKTS_WSI=VKTS_DISPLAY_VISUAL` to create for Display window system.
 3. Set the source code directory to VKTS.
 4. Set the build directory to VKTS (Note: This build directory is expected by the examples). 
 5. __Run make and build VKTS first__.
