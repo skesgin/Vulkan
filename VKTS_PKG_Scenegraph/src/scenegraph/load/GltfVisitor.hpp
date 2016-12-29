@@ -42,26 +42,26 @@ enum GltfState {
 	GltfState_Buffers,
 	GltfState_BufferViews,
 	GltfState_Accessors,
-	GltfState_Animations,
 	GltfState_Meshes,
 	GltfState_Nodes,
+	GltfState_Animations,
 	GltfState_Scenes,
 
 	GltfState_Buffer,
 	GltfState_BufferView,
 	GltfState_Accessor,
-	GltfState_Animation,
 	GltfState_Mesh,
 	GltfState_Node,
+	GltfState_Animation,
 	GltfState_Scene,
 
+	GltfState_Mesh_Primitive,
+	GltfState_Mesh_Primitive_Attributes,
+	GltfState_Node_Mesh,
 	GltfState_Animation_Sampler,
-	GltfState_Animation_Sampler_Parameters,
+	GltfState_Animation_Sampler_Properties,
 	GltfState_Animation_Channel,
 	GltfState_Animation_Channel_Target,
-	GltfState_Mesh_Primitive,
-	GltfState_Mesh_Primitive_Attribute,
-	GltfState_Node_Mesh,
 	GltfState_Scene_Node
 };
 
@@ -79,7 +79,9 @@ typedef struct _GltfBufferView {
 typedef struct _GltfAccessor {
 	GltfBufferView* bufferView;
     size_t byteOffset;
+    size_t byteStride;
     int32_t componentType;
+    VkBool32 normalzed;
     int32_t count;
     std::string type;
 
@@ -150,6 +152,7 @@ private:
 
 	std::stack<enum GltfState> state;
 
+	VkBool32 gltfBool;
 	std::string gltfString;
 	std::int32_t gltfInteger;
 	float gltfFloat;
@@ -165,21 +168,20 @@ private:
 	GltfBuffer gltfBuffer;
 	GltfBufferView gltfBufferView;
 	GltfAccessor gltfAccessor;
-	GltfAnimation gltfAnimation;
-	GltfSampler gltfSampler;
-	GltfChannel gltfChannel;
+	GltfPrimitive gltfPrimitive;
 	GltfMesh gltfMesh;
 	GltfNode gltfNode;
+	GltfSampler gltfSampler;
+	GltfChannel gltfChannel;
+	GltfAnimation gltfAnimation;
 	GltfScene gltfScene;
-
-	GltfPrimitive gltfPrimitive;
 
 	Map<std::string, GltfBuffer> allGltfBuffers;
 	Map<std::string, GltfBufferView> allGltfBufferViews;
 	Map<std::string, GltfAccessor> allGltfAccessors;
-	Map<std::string, GltfAnimation> allGltfAnimations;
 	Map<std::string, GltfMesh> allGltfMeshes;
 	Map<std::string, GltfNode> allGltfNodes;
+	Map<std::string, GltfAnimation> allGltfAnimations;
 	Map<std::string, GltfScene> allGltfScenes;
 
 public:
@@ -189,6 +191,23 @@ public:
 	GltfVisitor(const std::string& directory);
 
 	virtual ~GltfVisitor();
+
+	//
+
+	void visitBuffer(JSONobject& jsonObject);
+	void visitBufferView(JSONobject& jsonObject);
+	void visitAccessor(JSONobject& jsonObject);
+	void visitMesh(JSONobject& jsonObject);
+	void visitNode(JSONobject& jsonObject);
+	void visitAnimation(JSONobject& jsonObject);
+	void visitScene(JSONobject& jsonObject);
+
+	void visitMesh_Primitive(JSONobject& jsonObject);
+	void visitMesh_Primitive_Attributes(JSONobject& jsonObject);
+	void visitAnimation_Sampler(JSONobject& jsonObject);
+	void visitAnimation_Sampler_Properties(JSONobject& jsonObject);
+	void visitAnimation_Channel(JSONobject& jsonObject);
+	void visitAnimation_Channel_Target(JSONobject& jsonObject);
 
 	//
 
