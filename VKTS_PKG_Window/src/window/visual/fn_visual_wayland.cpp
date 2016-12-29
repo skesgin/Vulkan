@@ -177,7 +177,7 @@ void VKTS_APIENTRY _visualWaylandModifiers(void *data, struct wl_keyboard *wl_ke
 	// Nothing for now.
 }
 
-#if WAYLAND_VERSION_MINOR > 3
+#if WAYLAND_VERSION_MINOR > 4
 void VKTS_APIENTRY _visualWaylandRepeat_info(void *data, struct wl_keyboard *wl_keyboard, int32_t rate, int32_t delay)
 {
 	// Nothing for now.
@@ -441,7 +441,7 @@ static const struct wl_keyboard_listener keyboard_listener =
 	_visualWaylandKeyLeave,
 	_visualWaylandKey,
 	_visualWaylandModifiers
-#if WAYLAND_VERSION_MINOR > 3
+#if WAYLAND_VERSION_MINOR > 4
 	, _visualWaylandRepeat_info
 #endif
 };
