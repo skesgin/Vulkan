@@ -28,3 +28,6 @@ before_script:
   - export LIBRARY_PATH
   - python3 create_master_CMakeLists.py
   - cmake .
+
+script:
+  - make
