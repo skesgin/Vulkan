@@ -1,5 +1,5 @@
 [![Travis CI](https://api.travis-ci.org/McNopper/Vulkan.svg?branch=master)](https://travis-ci.org/McNopper/Vulkan)
-[![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](VKTS_Licenses/VKTS_license.md)
+[![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](VKTS_Licenses/VKTS_license.txt)
 
 ![Vulkan](VKTS_Documentation/images/vulkan_logo.png)  
 Vulkan examples using VulKan ToolS (VKTS):
