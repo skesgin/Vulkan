@@ -177,11 +177,6 @@ void VKTS_APIENTRY _visualWaylandModifiers(void *data, struct wl_keyboard *wl_ke
 	// Nothing for now.
 }
 
-void VKTS_APIENTRY _visualWaylandRepeat_info(void *data, struct wl_keyboard *wl_keyboard, int32_t rate, int32_t delay)
-{
-	// Nothing for now.
-}
-
 //
 
 void VKTS_APIENTRY _visualWaylandEnter(void *data, struct wl_pointer *wl_pointer, uint32_t serial, struct wl_surface *surface, wl_fixed_t surface_x, wl_fixed_t surface_y)
@@ -438,8 +433,7 @@ static const struct wl_keyboard_listener keyboard_listener =
 	_visualWaylandKeyEnter,
 	_visualWaylandKeyLeave,
 	_visualWaylandKey,
-	_visualWaylandModifiers,
-	_visualWaylandRepeat_info
+	_visualWaylandModifiers
 };
 
 static const struct wl_pointer_listener pointer_listener =
