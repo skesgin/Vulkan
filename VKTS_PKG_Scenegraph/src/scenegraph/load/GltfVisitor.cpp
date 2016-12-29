@@ -30,7 +30,7 @@ namespace vkts
 {
 
 GltfVisitor::GltfVisitor(const std::string& directory) :
-	JsonVisitor(), directory(directory), state(), gltfString(), gltfInteger(0), gltfFloat(0.0f), gltfIntegerArray{}, gltfFloatArray{}, arrayIndex(0), arraySize(0), numberArray(VK_FALSE), objectArray(VK_FALSE), gltfBuffer{}, gltfBufferView{}, gltfAccessor{}, gltfMesh{}, gltfNode{}, gltfScene{}, gltfPrimitive{}, allGltfBuffers(), allGltfBufferViews(), allGltfAccessors(), allGltfMeshes(), allGltfNodes(), allGltfScenes()
+	JsonVisitor(), directory(directory), state(), gltfString(), gltfInteger(0), gltfFloat(0.0f), gltfIntegerArray{}, gltfFloatArray{}, arrayIndex(0), arraySize(0), numberArray(VK_FALSE), objectArray(VK_FALSE), gltfBuffer{}, gltfBufferView{}, gltfAccessor{}, gltfAnimation{}, gltfSampler{}, gltfChannel{}, gltfMesh{}, gltfNode{}, gltfScene{}, gltfPrimitive{}, allGltfBuffers(), allGltfBufferViews(), allGltfAccessors(), allGltfAnimations(), allGltfMeshes(), allGltfNodes(), allGltfScenes()
 {
 }
 
@@ -151,7 +151,23 @@ void GltfVisitor::visit(JSONarray& jsonArray)
 	}
 	else if (objectArray)
 	{
-		if (gltfState == GltfState_Mesh_Primitive)
+		if (gltfState == GltfState_Animation_Channel)
+		{
+			for (int32_t i = 0; i < (int32_t)jsonArray.size(); i++)
+			{
+				memset(&gltfChannel, 0, sizeof(GltfPrimitive));
+
+				jsonArray.getValueAt(i)->visit(*this);
+
+				if (state.top() == GltfState_Error)
+				{
+					return;
+				}
+
+				gltfAnimation.channels.append(gltfChannel);
+			}
+		}
+		else if (gltfState == GltfState_Mesh_Primitive)
 		{
 			for (int32_t i = 0; i < (int32_t)jsonArray.size(); i++)
 			{
@@ -345,6 +361,22 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 
 		//
 
+		// Optional.
+		if (jsonObject.hasKey("animations"))
+		{
+			auto animations = jsonObject.getValue("animations");
+
+			state.push(GltfState_Animations);
+			animations->visit(*this);
+
+			if (state.top() == GltfState_Error)
+			{
+				return;
+			}
+		}
+
+		//
+
 		if (!jsonObject.hasKey("scenes"))
 		{
 			state.push(GltfState_Error);
@@ -412,7 +444,8 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 
 		for (size_t i = 0; i < allKeys.size(); i++)
 		{
-			memset(&gltfBuffer, 0, sizeof(GltfBuffer));
+			gltfBuffer.binaryBuffer = IBinaryBufferSP();
+			gltfBuffer.byteLength = 0;
 
 			//
 
@@ -462,7 +495,24 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 
 		for (size_t i = 0; i < allKeys.size(); i++)
 		{
-			memset(&gltfAccessor, 0, sizeof(GltfAccessor));
+			gltfAccessor.bufferView = nullptr;
+			gltfAccessor.byteOffset = 0;
+			gltfAccessor.componentType = 0;
+			gltfAccessor.count = 0;
+			gltfAccessor.type = "";
+
+			gltfAccessor.minByte.clear();
+			gltfAccessor.minUnsignedByte.clear();
+			gltfAccessor.minUnsignedShort.clear();
+			gltfAccessor.minUnsignedInteger.clear();
+			gltfAccessor.minFloat.clear();
+
+			gltfAccessor.maxByte.clear();
+			gltfAccessor.maxUnsignedByte.clear();
+			gltfAccessor.maxShort.clear();
+			gltfAccessor.maxUnsignedShort.clear();
+			gltfAccessor.maxUnsignedInteger.clear();
+			gltfAccessor.maxFloat.clear();
 
 			//
 
@@ -481,13 +531,39 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 			allGltfAccessors[allKeys[i]] = gltfAccessor;
 		}
 	}
+	else if (gltfState == GltfState_Animations)
+	{
+		const auto& allKeys = jsonObject.getAllKeys();
+
+		for (size_t i = 0; i < allKeys.size(); i++)
+		{
+			gltfAnimation.samplers.clear();
+			gltfAnimation.channels.clear();
+
+			//
+
+			auto currentAnimation = jsonObject.getValue(allKeys[i]);
+
+			state.push(GltfState_Animation);
+			currentAnimation->visit(*this);
+
+			if (state.top() == GltfState_Error)
+			{
+				return;
+			}
+
+			//
+
+			allGltfAnimations[allKeys[i]] = gltfAnimation;
+		}
+	}
 	else if (gltfState == GltfState_Meshes)
 	{
 		const auto& allKeys = jsonObject.getAllKeys();
 
 		for (size_t i = 0; i < allKeys.size(); i++)
 		{
-			memset(&gltfMesh, 0, sizeof(GltfMesh));
+			gltfMesh.primitives.clear();
 
 			//
 
@@ -512,7 +588,7 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 
 		for (size_t i = 0; i < allKeys.size(); i++)
 		{
-			memset(&gltfNode, 0, sizeof(GltfNode));
+			gltfNode.meshes.clear();
 
 			//
 
@@ -537,7 +613,7 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 
 		for (size_t i = 0; i < allKeys.size(); i++)
 		{
-			memset(&gltfScene, 0, sizeof(GltfScene));
+			gltfScene.nodes.clear();
 
 			//
 
@@ -876,6 +952,40 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 
 		numberArray = VK_FALSE;
 	}
+	else if (gltfState == GltfState_Animation)
+	{
+		if (!jsonObject.hasKey("samplers") || !jsonObject.hasKey("channels"))
+		{
+			state.push(GltfState_Error);
+			return;
+		}
+
+		auto samplers = jsonObject.getValue("samplers");
+
+		state.push(GltfState_Animation_Sampler);
+		samplers->visit(*this);
+
+		if (state.top() == GltfState_Error)
+		{
+			return;
+		}
+
+		//
+
+		objectArray = VK_TRUE;
+
+		auto channels = jsonObject.getValue("channels");
+
+		state.push(GltfState_Animation_Channel);
+		channels->visit(*this);
+
+		objectArray = VK_FALSE;
+
+		if (state.top() == GltfState_Error)
+		{
+			return;
+		}
+	}
 	else if (gltfState == GltfState_Mesh)
 	{
 		if (!jsonObject.hasKey("primitives"))
@@ -897,10 +1007,6 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 		{
 			return;
 		}
-
-		//
-
-		// TODO: Create sub mesh and add to scene manager.
 	}
 	else if (gltfState == GltfState_Node)
 	{
@@ -920,10 +1026,6 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 				return;
 			}
 		}
-
-		//
-
-		// TODO: Create node and objects and add to scene manager.
 	}
 	else if (gltfState == GltfState_Scene)
 	{
@@ -943,10 +1045,177 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 				return;
 			}
 		}
+	}
+	else if (gltfState == GltfState_Animation_Sampler)
+	{
+		const auto& allKeys = jsonObject.getAllKeys();
+
+		for (size_t i = 0; i < allKeys.size(); i++)
+		{
+			gltfSampler.input = nullptr;
+			gltfSampler.interpolation = "";
+			gltfSampler.output = nullptr;
+
+			//
+
+			auto currentBuffer = jsonObject.getValue(allKeys[i]);
+
+			state.push(GltfState_Animation_Sampler_Parameters);
+			currentBuffer->visit(*this);
+
+			if (state.top() == GltfState_Error)
+			{
+				return;
+			}
+
+			//
+
+			gltfAnimation.samplers[allKeys[i]] = gltfSampler;
+		}
+	}
+	else if (gltfState == GltfState_Animation_Channel)
+	{
+		if (!jsonObject.hasKey("sampler") || !jsonObject.hasKey("target"))
+		{
+			state.push(GltfState_Error);
+			return;
+		}
+
+		auto sampler = jsonObject.getValue("sampler");
+
+		sampler->visit(*this);
+
+		if (state.top() == GltfState_Error)
+		{
+			return;
+		}
+
+		if (!gltfAnimation.samplers.contains(gltfString))
+		{
+			state.push(GltfState_Error);
+			return;
+		}
+
+		gltfChannel.sampler = &gltfAnimation.samplers[gltfString];
 
 		//
 
-		// TODO: Create scene and add to scene manager.
+		auto target = jsonObject.getValue("target");
+
+		state.push(GltfState_Animation_Channel_Target);
+		target->visit(*this);
+
+		if (state.top() == GltfState_Error)
+		{
+			return;
+		}
+	}
+	else if (gltfState == GltfState_Animation_Channel_Target)
+	{
+		if (!jsonObject.hasKey("id") || !jsonObject.hasKey("path"))
+		{
+			state.push(GltfState_Error);
+			return;
+		}
+
+		auto id = jsonObject.getValue("id");
+
+		id->visit(*this);
+
+		if (state.top() == GltfState_Error)
+		{
+			return;
+		}
+
+		if (!allGltfNodes.contains(gltfString))
+		{
+			state.push(GltfState_Error);
+			return;
+		}
+
+		gltfChannel.targetNode = &allGltfNodes[gltfString];
+
+		//
+
+		auto path = jsonObject.getValue("path");
+
+		path->visit(*this);
+
+		if (state.top() == GltfState_Error)
+		{
+			return;
+		}
+
+		if (gltfString != "translation" && gltfString != "rotation" && gltfString != "scale")
+		{
+			state.push(GltfState_Error);
+			return;
+		}
+
+		gltfChannel.targetPath = gltfString;
+	}
+	else if (gltfState == GltfState_Animation_Sampler_Parameters)
+	{
+		if (!jsonObject.hasKey("input") || !jsonObject.hasKey("interpolation") || !jsonObject.hasKey("output"))
+		{
+			state.push(GltfState_Error);
+			return;
+		}
+
+		auto input = jsonObject.getValue("input");
+
+		input->visit(*this);
+
+		if (state.top() == GltfState_Error)
+		{
+			return;
+		}
+
+		if (!allGltfAccessors.contains(gltfString))
+		{
+			state.push(GltfState_Error);
+			return;
+		}
+
+		gltfSampler.input = &(allGltfAccessors[gltfString]);
+
+		//
+
+		auto interpolation = jsonObject.getValue("interpolation");
+
+		interpolation->visit(*this);
+
+		if (state.top() == GltfState_Error)
+		{
+			return;
+		}
+
+		if (gltfString != "STEP" && gltfString != "LINEAR")
+		{
+			state.push(GltfState_Error);
+			return;
+		}
+
+		gltfSampler.interpolation = gltfString;
+
+		//
+
+		auto output = jsonObject.getValue("output");
+
+		output->visit(*this);
+
+		if (state.top() == GltfState_Error)
+		{
+			return;
+		}
+
+		if (!allGltfAccessors.contains(gltfString))
+		{
+			state.push(GltfState_Error);
+			return;
+		}
+
+		gltfSampler.output = &(allGltfAccessors[gltfString]);
 	}
 	else if (gltfState == GltfState_Mesh_Primitive)
 	{

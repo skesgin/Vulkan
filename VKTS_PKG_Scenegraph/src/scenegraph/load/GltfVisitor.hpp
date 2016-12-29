@@ -42,6 +42,7 @@ enum GltfState {
 	GltfState_Buffers,
 	GltfState_BufferViews,
 	GltfState_Accessors,
+	GltfState_Animations,
 	GltfState_Meshes,
 	GltfState_Nodes,
 	GltfState_Scenes,
@@ -49,10 +50,15 @@ enum GltfState {
 	GltfState_Buffer,
 	GltfState_BufferView,
 	GltfState_Accessor,
+	GltfState_Animation,
 	GltfState_Mesh,
 	GltfState_Node,
 	GltfState_Scene,
 
+	GltfState_Animation_Sampler,
+	GltfState_Animation_Sampler_Parameters,
+	GltfState_Animation_Channel,
+	GltfState_Animation_Channel_Target,
 	GltfState_Mesh_Primitive,
 	GltfState_Mesh_Primitive_Attribute,
 	GltfState_Node_Mesh,
@@ -114,6 +120,23 @@ typedef struct _GltfNode {
 	Vector<GltfMesh*> meshes;
 } GltfNode;
 
+typedef struct _GltfSampler {
+	GltfAccessor* input;
+    std::string interpolation;
+    GltfAccessor* output;
+} GltfSampler;
+
+typedef struct _GltfChannel {
+	GltfSampler* sampler;
+	GltfNode* targetNode;
+	std::string targetPath;
+} GltfChannel;
+
+typedef struct _GltfAnimation {
+	Map<std::string, GltfSampler> samplers;
+	Vector<GltfChannel> channels;
+} GltfAnimation;
+
 typedef struct _GltfScene {
 	Vector<GltfNode*> nodes;
 } GltfScene;
@@ -142,6 +165,9 @@ private:
 	GltfBuffer gltfBuffer;
 	GltfBufferView gltfBufferView;
 	GltfAccessor gltfAccessor;
+	GltfAnimation gltfAnimation;
+	GltfSampler gltfSampler;
+	GltfChannel gltfChannel;
 	GltfMesh gltfMesh;
 	GltfNode gltfNode;
 	GltfScene gltfScene;
@@ -151,6 +177,7 @@ private:
 	Map<std::string, GltfBuffer> allGltfBuffers;
 	Map<std::string, GltfBufferView> allGltfBufferViews;
 	Map<std::string, GltfAccessor> allGltfAccessors;
+	Map<std::string, GltfAnimation> allGltfAnimations;
 	Map<std::string, GltfMesh> allGltfMeshes;
 	Map<std::string, GltfNode> allGltfNodes;
 	Map<std::string, GltfScene> allGltfScenes;

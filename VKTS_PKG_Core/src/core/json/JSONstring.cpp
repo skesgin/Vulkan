@@ -62,7 +62,7 @@ VkBool32 JSONstring::encode(std::string& jsonText, std::int32_t& spaces) const
 	{
 		c = getValue()[i];
 
-		if ((c >= JSON_C0_start && c <= JSON_C0_end) || (c >= JSON_C1_start && c <= JSON_C1_end))
+		if (((int32_t)c >= JSON_C0_start && (int32_t)c <= JSON_C0_end) || ((int32_t)c >= JSON_C1_start && (int32_t)c <= JSON_C1_end))
 		{
 			return VK_FALSE;
 		}

@@ -613,7 +613,7 @@ VkBool32 JsonDecoder::decodeString(size_t& index, JSONstringSP& jsonString)
 				return VK_FALSE;
 			}
 		}
-		else if ((jsonText[tempIndex] >= JSON_C0_start && jsonText[tempIndex] <= JSON_C0_end) || (jsonText[tempIndex] >= JSON_C1_start && jsonText[tempIndex] <= JSON_C1_end))
+		else if (((int32_t)jsonText[tempIndex] >= JSON_C0_start && (int32_t)jsonText[tempIndex] <= JSON_C0_end) || ((int32_t)jsonText[tempIndex] >= JSON_C1_start && (int32_t)jsonText[tempIndex] <= JSON_C1_end))
 		{
 			return VK_FALSE;
 		}

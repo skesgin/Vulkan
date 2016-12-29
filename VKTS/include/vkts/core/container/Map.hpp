@@ -63,6 +63,22 @@ public:
     {
     }
 
+    Map& operator= (const Map& other)
+    {
+    	allKeys = other.allKeys;
+    	allValues = other.allValues;
+
+    	return *this;
+    }
+
+    Map& operator= (Map&& other)
+    {
+    	allKeys = other.allKeys;
+    	allValues = other.allValues;
+
+    	return *this;
+    }
+
     ~Map()
     {
     }
