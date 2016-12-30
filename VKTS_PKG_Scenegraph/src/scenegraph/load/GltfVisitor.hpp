@@ -104,11 +104,9 @@ typedef struct _GltfAccessor {
     Vector<uint16_t> maxUnsignedShort;
     Vector<uint32_t> maxUnsignedInteger;
     Vector<float> maxFloat;
-
 } GltfAccessor;
 
 typedef struct _GltfPrimitive {
-	// Attributes
 	GltfAccessor* position;
 	GltfAccessor* normal;
 	GltfAccessor* binormal;
@@ -116,7 +114,6 @@ typedef struct _GltfPrimitive {
 	GltfAccessor* texCoord;
 	GltfAccessor* joint;
 	GltfAccessor* weight;
-	//
 	GltfAccessor* indices;
 	int32_t mode;
 } GltfPrimitive;
@@ -136,9 +133,7 @@ typedef struct _GltfSkin {
 
 typedef struct _GltfNode {
 	Vector<std::string> children;
-	Vector<const struct _GltfNode*> childrenPointer;
 	Vector<std::string> skeletons;
-	Vector<const struct _GltfNode*> skeletonsPointer;
 	GltfSkin* skin;
 	std::string jointName;
 	float matrix[16];
@@ -146,6 +141,14 @@ typedef struct _GltfNode {
 	float rotation[4];
 	float scale[3];
 	float translation[3];
+	// Helper
+	Vector<const struct _GltfNode*> childrenPointer;
+	Vector<const struct _GltfNode*> skeletonsPointer;
+	VkBool32 useMatrix;
+	VkBool32 useRotation;
+	VkBool32 useScale;
+	VkBool32 useTranslation;
+	std::string name;
 } GltfNode;
 
 typedef struct _GltfAnimation_Sampler {
@@ -167,6 +170,8 @@ typedef struct _GltfAnimation {
 
 typedef struct _GltfScene {
 	Vector<GltfNode*> nodes;
+	// Helper
+	std::string name;
 } GltfScene;
 
 class GltfVisitor : public JsonVisitor

@@ -619,6 +619,8 @@ void GltfVisitor::visitNode(JSONobject& jsonObject)
 		{
 			gltfNode.matrix[i] = gltfFloatArray[i];
 		}
+
+		gltfNode.useMatrix = VK_TRUE;
 	}
 
 	if (jsonObject.hasKey("meshes"))
@@ -640,6 +642,14 @@ void GltfVisitor::visitNode(JSONobject& jsonObject)
 
 	if (jsonObject.hasKey("rotation"))
 	{
+		if (gltfNode.useMatrix)
+		{
+			state.push(GltfState_Error);
+			return;
+		}
+
+		//
+
 		numberArray = VK_TRUE;
 
 		arrayIndex = 0;
@@ -663,10 +673,20 @@ void GltfVisitor::visitNode(JSONobject& jsonObject)
 		gltfNode.rotation[1] = gltfFloatArray[1];
 		gltfNode.rotation[2] = gltfFloatArray[2];
 		gltfNode.rotation[3] = gltfFloatArray[3];
+
+		gltfNode.useRotation = VK_TRUE;
 	}
 
 	if (jsonObject.hasKey("scale"))
 	{
+		if (gltfNode.useMatrix)
+		{
+			state.push(GltfState_Error);
+			return;
+		}
+
+		//
+
 		numberArray = VK_TRUE;
 
 		arrayIndex = 0;
@@ -689,10 +709,20 @@ void GltfVisitor::visitNode(JSONobject& jsonObject)
 		gltfNode.scale[0] = gltfFloatArray[0];
 		gltfNode.scale[1] = gltfFloatArray[1];
 		gltfNode.scale[2] = gltfFloatArray[2];
+
+		gltfNode.useScale = VK_TRUE;
 	}
 
 	if (jsonObject.hasKey("translation"))
 	{
+		if (gltfNode.useMatrix)
+		{
+			state.push(GltfState_Error);
+			return;
+		}
+
+		//
+
 		numberArray = VK_TRUE;
 
 		arrayIndex = 0;
@@ -715,6 +745,8 @@ void GltfVisitor::visitNode(JSONobject& jsonObject)
 		gltfNode.translation[0] = gltfFloatArray[0];
 		gltfNode.translation[1] = gltfFloatArray[1];
 		gltfNode.translation[2] = gltfFloatArray[2];
+
+		gltfNode.useTranslation = VK_TRUE;
 	}
 }
 
@@ -1896,13 +1928,17 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 		for (size_t i = 0; i < allKeys.size(); i++)
 		{
 			gltfNode.children.clear();
-			gltfNode.childrenPointer.clear();
-
 			gltfNode.skeletons.clear();
-			gltfNode.skeletonsPointer.clear();
-
 			gltfNode.skin = nullptr;
 			gltfNode.jointName = "";
+
+			gltfNode.childrenPointer.clear();
+			gltfNode.skeletonsPointer.clear();
+			gltfNode.useMatrix = VK_FALSE;
+			gltfNode.useRotation = VK_FALSE;
+			gltfNode.useScale = VK_FALSE;
+			gltfNode.useTranslation = VK_FALSE;
+			gltfNode.name = allKeys[i];
 
 			for (int32_t k = 0; k < 16; k++)
 			{
@@ -1981,6 +2017,8 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 		for (size_t i = 0; i < allKeys.size(); i++)
 		{
 			gltfScene.nodes.clear();
+
+			gltfScene.name = allKeys[i];
 
 			//
 
