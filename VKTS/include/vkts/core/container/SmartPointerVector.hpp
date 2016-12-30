@@ -58,7 +58,7 @@ public:
 
     }
 
-    SmartPointerVector(const uint32_t& allDataCount) :
+    SmartPointerVector(const uint32_t allDataCount) :
         allData(nullptr), topElement(0), allDataCount(0)
     {
         allData = new V[allDataCount];
@@ -298,8 +298,7 @@ public:
                     return VK_TRUE;
                 }
 
-                for (uint32_t copyIndex = i; copyIndex < topElement - 1;
-                        copyIndex++)
+                for (uint32_t copyIndex = i; copyIndex < topElement - 1; copyIndex++)
                 {
                     allData[copyIndex] = allData[copyIndex + 1];
                     allData[copyIndex + 1].reset();

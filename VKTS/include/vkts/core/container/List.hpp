@@ -374,7 +374,7 @@ public:
 		return result;
     }
 
-    V getFront()
+    V& getFront()
     {
     	if (!front)
     	{
@@ -384,7 +384,7 @@ public:
         return front->value;
     }
 
-    V getBack()
+    V& getBack()
     {
     	if (!back)
     	{

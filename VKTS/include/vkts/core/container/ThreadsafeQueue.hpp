@@ -53,14 +53,14 @@ public:
 
     ThreadsafeQueue(const ThreadsafeQueue& other)
     {
-        std::lock_guard<std::mutex> queueLock(other.queueMutex);
+        std::lock_guard<std::mutex> queueLockOther(other.queueMutex);
 
         allElements = other.allElements;
     }
 
     ThreadsafeQueue(ThreadsafeQueue&& other)
     {
-        std::lock_guard<std::mutex> queueLock(other.queueMutex);
+        std::lock_guard<std::mutex> queueLockOther(other.queueMutex);
 
         allElements = std::move(other.allElements);
     }
@@ -82,7 +82,8 @@ public:
             return *this;
         }
 
-        std::lock_guard<std::mutex> queueLock(other.queueMutex);
+        std::lock_guard<std::mutex> queueLock(queueMutex);
+        std::lock_guard<std::mutex> queueLockOther(other.queueMutex);
 
         allElements = other.allElements;
 
@@ -96,7 +97,8 @@ public:
             return *this;
         }
 
-        std::lock_guard<std::mutex> queueLock(other.queueMutex);
+        std::lock_guard<std::mutex> queueLock(queueMutex);
+        std::lock_guard<std::mutex> queueLockOther(other.queueMutex);
 
         allElements = std::move(other.allElements);
 
@@ -140,7 +142,7 @@ public:
     {
         std::lock_guard<std::mutex> queueLock(queueMutex);
 
-        return allElements.empty();
+        return (VkBool32)allElements.empty();
     }
 
     uint32_t size() const

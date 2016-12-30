@@ -58,7 +58,7 @@ public:
 
     }
 
-    Vector(const uint32_t& allDataCount) :
+    Vector(const uint32_t allDataCount) :
         allData(nullptr), topElement(0), allDataCount(0)
     {
         allData = new V[allDataCount];
@@ -103,8 +103,6 @@ public:
 
     Vector& operator= (const Vector& other)
     {
-    	clear();
-
         if (allData)
         {
             delete[] allData;
@@ -137,8 +135,6 @@ public:
 
     Vector& operator= (Vector&& other)
     {
-    	clear();
-
         if (allData)
         {
             delete[] allData;
@@ -166,8 +162,6 @@ public:
 
     ~Vector()
     {
-        clear();
-
         if (allData)
         {
             delete[] allData;
@@ -195,12 +189,9 @@ public:
             	throw std::bad_alloc();
             }
 
-            for (uint32_t i = 0; i < getAllocSize(); i++)
+            for (uint32_t i = 0; i < allDataCount; i++)
             {
-                if (i < allDataCount)
-                {
-                    newAllData[i] = allData[i];
-                }
+            	newAllData[i] = allData[i];
             }
 
             delete[] allData;
@@ -237,12 +228,9 @@ public:
             	throw std::bad_alloc();
             }
 
-            for (uint32_t i = 0; i < getAllocSize(); i++)
+            for (uint32_t i = 0; i < allDataCount; i++)
             {
-                if (i < allDataCount)
-                {
-                    newAllData[i] = allData[i];
-                }
+            	newAllData[i] = allData[i];
             }
 
             delete[] allData;
@@ -276,8 +264,7 @@ public:
                     return VK_TRUE;
                 }
 
-                for (uint32_t copyIndex = i; copyIndex < topElement - 1;
-                        copyIndex++)
+                for (uint32_t copyIndex = i; copyIndex < topElement - 1; copyIndex++)
                 {
                     allData[copyIndex] = allData[copyIndex + 1];
                 }
