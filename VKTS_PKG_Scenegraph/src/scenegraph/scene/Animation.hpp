@@ -103,7 +103,7 @@ public:
 
     virtual VkBool32 removeMarker(const IMarkerSP& marker) override;
 
-    virtual size_t getNumberMarkers() const override;
+    virtual uint32_t getNumberMarkers() const override;
 
     virtual const SmartPointerVector<IMarkerSP>& getMarkers() const override;
 
@@ -111,7 +111,7 @@ public:
 
     virtual VkBool32 removeChannel(const IChannelSP& channel) override;
 
-    virtual size_t getNumberChannels() const override;
+    virtual uint32_t getNumberChannels() const override;
 
     virtual const SmartPointerVector<IChannelSP>& getChannels() const override;
 

@@ -31,7 +31,7 @@
 namespace vkts
 {
 
-IBinaryBufferSP VKTS_APIENTRY binaryBufferCreate(const size_t size)
+IBinaryBufferSP VKTS_APIENTRY binaryBufferCreate(const uint32_t size)
 {
     if (size == 0)
     {
@@ -48,7 +48,7 @@ IBinaryBufferSP VKTS_APIENTRY binaryBufferCreate(const size_t size)
     return result;
 }
 
-IBinaryBufferSP VKTS_APIENTRY binaryBufferCreate(const uint8_t* data, const size_t size)
+IBinaryBufferSP VKTS_APIENTRY binaryBufferCreate(const uint8_t* data, const uint32_t size)
 {
     if (!data || size == 0)
     {

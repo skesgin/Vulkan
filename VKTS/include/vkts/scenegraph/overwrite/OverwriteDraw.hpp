@@ -77,7 +77,7 @@ public:
 
     //
 
-    virtual VkBool32 visit(const IScene& scene, const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const uint32_t currentBuffer, const std::map<uint32_t, VkTsDynamicOffset>& dynamicOffsetMappings, const uint32_t objectOffset, const uint32_t objectStep, const size_t objectLimit) const
+    virtual VkBool32 visit(const IScene& scene, const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const uint32_t currentBuffer, const std::map<uint32_t, VkTsDynamicOffset>& dynamicOffsetMappings, const uint32_t objectOffset, const uint32_t objectStep, const uint32_t objectLimit) const
     {
     	return VK_TRUE;
     }

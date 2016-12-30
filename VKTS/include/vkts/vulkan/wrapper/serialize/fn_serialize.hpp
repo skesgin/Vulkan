@@ -36,7 +36,7 @@ namespace vkts
  *
  * @ThreadSafe
  */
-VKTS_APICALL size_t VKTS_APIENTRY serializeGetStructureTypeSize(const void* ptr);
+VKTS_APICALL uint32_t VKTS_APIENTRY serializeGetStructureTypeSize(const void* ptr);
 
 /**
  *

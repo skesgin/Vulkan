@@ -177,8 +177,8 @@ VkBool32 Example::buildFramebuffer(const int32_t usedBuffer)
 	framebufferCreateInfo.renderPass = renderPass;
 	framebufferCreateInfo.attachmentCount = 1;
 	framebufferCreateInfo.pAttachments = &swapchainImageView[usedBuffer];
-	framebufferCreateInfo.width = (uint32_t) swapchainCreateInfo.imageExtent.width;
-	framebufferCreateInfo.height = (uint32_t) swapchainCreateInfo.imageExtent.height;
+	framebufferCreateInfo.width = swapchainCreateInfo.imageExtent.width;
+	framebufferCreateInfo.height = swapchainCreateInfo.imageExtent.height;
 	framebufferCreateInfo.layers = 1;
 
 	result = vkCreateFramebuffer(device, &framebufferCreateInfo, nullptr, &framebuffer[usedBuffer]);
@@ -427,7 +427,7 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 
 	VkBool32 surfaceFormatFound = VK_FALSE;
 
-	for (size_t i = 0; i < surfaceFormatsCount; i++)
+	for (uint32_t i = 0; i < surfaceFormatsCount; i++)
 	{
 		if (surfaceFormats[i].format == format && surfaceFormats[i].colorSpace == imageColorSpace)
 		{

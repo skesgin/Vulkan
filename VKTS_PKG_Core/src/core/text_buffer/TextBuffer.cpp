@@ -57,9 +57,9 @@ const char* TextBuffer::getString() const
     return static_cast<const char*>(text.c_str());
 }
 
-size_t TextBuffer::getLength() const
+uint32_t TextBuffer::getLength() const
 {
-    return text.length();
+    return (uint32_t)text.length();
 }
 
 VkBool32 TextBuffer::seek(const int64_t offset, const VkTsSearch search)
@@ -73,7 +73,7 @@ VkBool32 TextBuffer::seek(const int64_t offset, const VkTsSearch search)
                 return VK_FALSE;
             }
 
-            pos = (size_t)offset;
+            pos = static_cast<uint32_t>(offset);
 
             return VK_TRUE;
         }
@@ -86,6 +86,8 @@ VkBool32 TextBuffer::seek(const int64_t offset, const VkTsSearch search)
                 {
                     return VK_FALSE;
                 }
+
+                pos -= static_cast<uint32_t>(-offset);
             }
             else if (offset > 0)
             {
@@ -93,9 +95,9 @@ VkBool32 TextBuffer::seek(const int64_t offset, const VkTsSearch search)
                 {
                     return VK_FALSE;
                 }
-            }
 
-            pos += (size_t)offset;
+                pos += static_cast<uint32_t>(offset);
+            }
 
             return VK_TRUE;
         }
@@ -105,7 +107,7 @@ VkBool32 TextBuffer::seek(const int64_t offset, const VkTsSearch search)
     return VK_FALSE;
 }
 
-const char* TextBuffer::gets(char* str, const size_t num)
+const char* TextBuffer::gets(char* str, const uint32_t num)
 {
     if (!str || num == 0)
     {
@@ -117,7 +119,7 @@ const char* TextBuffer::gets(char* str, const size_t num)
         return nullptr;
     }
 
-    size_t strIndex = 0;
+    uint32_t strIndex = 0;
 
     while (strIndex < num)
     {
@@ -150,20 +152,20 @@ VkBool32 TextBuffer::puts(const char* str)
         return VK_FALSE;
     }
 
-    if (pos == text.length() + 1)
+    if (pos == (uint32_t)text.length() + 1)
     {
         text.append(str);
 
-        pos = text.length() + 1;
+        pos = (uint32_t)text.length() + 1;
 
         return VK_TRUE;
     }
 
-    size_t strLen = strlen(str);
+    uint32_t strLen = (uint32_t)strlen(str);
 
-    size_t strIndex = 0;
+    uint32_t strIndex = 0;
 
-    while (strIndex < strLen && pos < text.length())
+    while (strIndex < strLen && pos < (uint32_t)text.length())
     {
         text[pos] = str[strIndex];
 
@@ -178,7 +180,7 @@ VkBool32 TextBuffer::puts(const char* str)
         strIndex++;
     }
 
-    pos = text.length() + 1;
+    pos = (uint32_t)text.length() + 1;
 
     return VK_TRUE;
 }

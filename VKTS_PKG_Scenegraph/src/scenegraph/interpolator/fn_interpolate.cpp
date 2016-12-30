@@ -32,7 +32,7 @@
 namespace vkts
 {
 
-static float interpolateLinear(const size_t currentIndex, const float key, const IChannelSP& channel)
+static float interpolateLinear(const uint32_t currentIndex, const float key, const IChannelSP& channel)
 {
     float beforeKey = channel->getKeys()[currentIndex];
     float beforeValue = channel->getValues()[currentIndex];
@@ -50,7 +50,7 @@ static float interpolateLinear(const size_t currentIndex, const float key, const
     return (afterValue - beforeValue) * (key - beforeKey) / deltaKey + beforeValue;
 }
 
-static float interpolateBezier(const size_t currentIndex, const float key, const IChannelSP& channel)
+static float interpolateBezier(const uint32_t currentIndex, const float key, const IChannelSP& channel)
 {
     float beforeKey = channel->getKeys()[currentIndex];
     float beforeValue = channel->getValues()[currentIndex];
@@ -163,7 +163,7 @@ float VKTS_APIENTRY interpolate(const float key, const IChannelSP& channel)
 
     // Key is in between the available keys now.
 
-    size_t currentIndex = 0;
+    uint32_t currentIndex = 0;
     while (currentIndex < channel->getNumberEntries())
     {
         if (key < channel->getKeys()[currentIndex])
@@ -206,7 +206,7 @@ VkBool32 VKTS_APIENTRY interpolateConvert(IChannelSP& converted, const IChannelS
     converted->setTargetTransform(channel->getTargetTransform());
     converted->setTargetTransformElement(channel->getTargetTransformElement());
 
-    for (size_t i = 0; i < channel->getNumberEntries(); i++)
+    for (uint32_t i = 0; i < channel->getNumberEntries(); i++)
     {
         if (channel->getInterpolators()[i] != VKTS_INTERPOLATOR_BEZIER)
         {

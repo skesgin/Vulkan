@@ -67,7 +67,7 @@ private:
     SmartPointerListElement<V>* front;
     SmartPointerListElement<V>* back;
 
-    size_t listSize;
+    uint32_t listSize;
 
 public:
 
@@ -221,7 +221,7 @@ public:
         listSize++;
     }
 
-    VkBool32 insert(const size_t index, const V& value)
+    VkBool32 insert(const uint32_t index, const V& value)
     {
         auto walker = front;
         auto counter = 0;
@@ -413,7 +413,7 @@ public:
         return VK_FALSE;
     }
 
-    V& operator[](const size_t index)
+    V& operator[](const uint32_t index)
     {
     	if (index > listSize)
     	{
@@ -440,7 +440,7 @@ public:
         return walker->element;
     }
 
-    const V& operator[](const size_t index) const
+    const V& operator[](const uint32_t index) const
     {
     	if (index >= listSize)
     	{
@@ -460,7 +460,7 @@ public:
         return walker->element;
     }
 
-    size_t size() const
+    uint32_t size() const
     {
         return listSize;
     }

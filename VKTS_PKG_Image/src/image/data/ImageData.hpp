@@ -51,10 +51,10 @@ private:
     VkBool32 UNORM;
     VkBool32 SFLOAT;
     VkBool32 SRGB;
-    int32_t bytesPerChannel;
-    int32_t numberChannels;
+    uint32_t bytesPerChannel;
+    uint32_t numberChannels;
 
-    std::vector<size_t> allOffsets;
+    std::vector<uint32_t> allOffsets;
 
     void reset();
 
@@ -65,8 +65,8 @@ private:
 public:
 
     ImageData() = delete;
-    ImageData(const std::string& name, const VkImageType imageType, const VkFormat& format, const VkExtent3D& extent, const uint32_t mipLevels, const uint32_t arrayLayers, const std::vector<size_t>& allOffsets, const uint8_t* data, const size_t size);
-    ImageData(const std::string& name, const VkImageType imageType, const VkFormat& format, const VkExtent3D& extent, const uint32_t mipLevels, const uint32_t arrayLayers, const std::vector<size_t>& allOffsets, const IBinaryBufferSP& buffer);
+    ImageData(const std::string& name, const VkImageType imageType, const VkFormat& format, const VkExtent3D& extent, const uint32_t mipLevels, const uint32_t arrayLayers, const std::vector<uint32_t>& allOffsets, const uint8_t* data, const uint32_t size);
+    ImageData(const std::string& name, const VkImageType imageType, const VkFormat& format, const VkExtent3D& extent, const uint32_t mipLevels, const uint32_t arrayLayers, const std::vector<uint32_t>& allOffsets, const IBinaryBufferSP& buffer);
     ImageData(const ImageData& other) = delete;
     ImageData(ImageData&& other) = delete;
     virtual ~ImageData();
@@ -101,7 +101,7 @@ public:
 
     virtual const uint8_t* getByteData() const override;
 
-    virtual size_t getSize() const override;
+    virtual uint32_t getSize() const override;
 
     virtual VkBool32 copy(void* data, const uint32_t mipLevel, const uint32_t arrayLayer, const VkSubresourceLayout& subresourceLayout) const override;
 
@@ -115,13 +115,13 @@ public:
 
     virtual VkBool32 isSRGB() const override;
 
-    virtual int32_t getBytesPerTexel() const override;
+    virtual uint32_t getBytesPerTexel() const override;
 
-    virtual int32_t getBytesPerChannel() const override;
+    virtual uint32_t getBytesPerChannel() const override;
 
-    virtual int32_t getNumberChannels() const override;
+    virtual uint32_t getNumberChannels() const override;
 
-    virtual const std::vector<size_t>& getAllOffsets() const override;
+    virtual const std::vector<uint32_t>& getAllOffsets() const override;
 
     virtual void setTexel(const glm::vec4& rgba, const uint32_t x, const uint32_t y, const uint32_t z, const uint32_t mipLevel, const uint32_t arrayLayer) override;
 
@@ -131,7 +131,7 @@ public:
 
     virtual glm::vec4 getSampleCubeMap(const float x, const float y, const float z, const VkFilter filter, const uint32_t mipLevel) const override;
 
-    virtual VkBool32 getExtentAndOffset(VkExtent3D& currentExtent, size_t& currentOffset, const uint32_t mipLevel, const uint32_t arrayLayer) const override;
+    virtual VkBool32 getExtentAndOffset(VkExtent3D& currentExtent, uint32_t& currentOffset, const uint32_t mipLevel, const uint32_t arrayLayer) const override;
 
 };
 

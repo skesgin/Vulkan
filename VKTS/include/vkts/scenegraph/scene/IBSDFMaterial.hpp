@@ -72,7 +72,7 @@ public:
 
     virtual VkBool32 removeTextureObject(const ITextureObjectSP& textureObject) = 0;
 
-    virtual size_t getNumberTextureObjects() const = 0;
+    virtual uint32_t getNumberTextureObjects() const = 0;
 
     virtual const SmartPointerVector<ITextureObjectSP>& getTextureObjects() const = 0;
 

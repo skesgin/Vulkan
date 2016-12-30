@@ -57,23 +57,23 @@ public:
 
     virtual const IDeviceMemorySP& getDeviceMemory() const = 0;
 
-    virtual VkBool32 upload(const size_t offset, const VkMemoryMapFlags flags, const void* data, const size_t size) const = 0;
+    virtual VkBool32 upload(const uint32_t offset, const VkMemoryMapFlags flags, const void* data, const uint32_t size) const = 0;
 
-    virtual VkBool32 upload(const size_t offset, const VkMemoryMapFlags flags, const glm::mat4& mat) const = 0;
+    virtual VkBool32 upload(const uint32_t offset, const VkMemoryMapFlags flags, const glm::mat4& mat) const = 0;
 
-    virtual VkBool32 upload(const size_t offset, const VkMemoryMapFlags flags, const glm::mat3& mat) const = 0;
+    virtual VkBool32 upload(const uint32_t offset, const VkMemoryMapFlags flags, const glm::mat3& mat) const = 0;
 
-    virtual VkBool32 upload(const size_t offset, const VkMemoryMapFlags flags, const glm::mat2& mat) const = 0;
+    virtual VkBool32 upload(const uint32_t offset, const VkMemoryMapFlags flags, const glm::mat2& mat) const = 0;
 
-    virtual VkBool32 upload(const size_t offset, const VkMemoryMapFlags flags, const glm::vec4& vec) const = 0;
+    virtual VkBool32 upload(const uint32_t offset, const VkMemoryMapFlags flags, const glm::vec4& vec) const = 0;
 
-    virtual VkBool32 upload(const size_t offset, const VkMemoryMapFlags flags, const glm::vec3& vec) const = 0;
+    virtual VkBool32 upload(const uint32_t offset, const VkMemoryMapFlags flags, const glm::vec3& vec) const = 0;
 
-    virtual VkBool32 upload(const size_t offset, const VkMemoryMapFlags flags, const glm::vec2& vec) const = 0;
+    virtual VkBool32 upload(const uint32_t offset, const VkMemoryMapFlags flags, const glm::vec2& vec) const = 0;
 
-    virtual VkBool32 upload(const size_t offset, const VkMemoryMapFlags flags, const float scalar) const = 0;
+    virtual VkBool32 upload(const uint32_t offset, const VkMemoryMapFlags flags, const float scalar) const = 0;
 
-    virtual VkBool32 upload(const size_t offset, const VkMemoryMapFlags flags, const int32_t scalar) const = 0;
+    virtual VkBool32 upload(const uint32_t offset, const VkMemoryMapFlags flags, const int32_t scalar) const = 0;
 
 };
 

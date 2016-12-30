@@ -36,7 +36,7 @@ namespace vkts
  *
  * @ThreadSafe
  */
-VKTS_APICALL IPipelineCacheSP VKTS_APIENTRY pipelineCreateCache(const VkDevice device, const VkPipelineCacheCreateFlags flags, const size_t initialSize, const void* initialData);
+VKTS_APICALL IPipelineCacheSP VKTS_APIENTRY pipelineCreateCache(const VkDevice device, const VkPipelineCacheCreateFlags flags, const uint32_t initialSize, const void* initialData);
 
 /**
  *

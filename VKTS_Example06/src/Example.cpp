@@ -1068,7 +1068,7 @@ void Example::terminateResources(const vkts::IUpdateThreadContext& updateContext
 				depthTexture->destroy();
 			}
 
-			for (size_t i = 0; i < allGraphicsPipelines.size(); i++)
+			for (uint32_t i = 0; i < allGraphicsPipelines.size(); i++)
 			{
 				allGraphicsPipelines[i]->destroy();
 			}
@@ -1209,7 +1209,7 @@ VkBool32 Example::init(const vkts::IUpdateThreadContext& updateContext)
 //
 VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 {
-	for (size_t i = 0; i < allUpdateables.size(); i++)
+	for (uint32_t i = 0; i < allUpdateables.size(); i++)
 	{
 		allUpdateables[i]->update(updateContext.getDeltaTime(), updateContext.getDeltaTicks(), updateContext.getTickTime());
 	}

@@ -42,7 +42,7 @@ static VkBool32 gltfProcessObject(IObjectSP& object, const GltfVisitor& visitor,
 {
 	// Process root node.
 
-    for (size_t i = 0; i < gltfScene.nodes.size(); i++)
+    for (uint32_t i = 0; i < gltfScene.nodes.size(); i++)
     {
     	auto* gltfNode = gltfScene.nodes[i];
 
@@ -144,13 +144,13 @@ ISceneSP VKTS_APIENTRY gltfLoad(const char* filename, const ISceneManagerSP& sce
     // Objects: Create out of every root node an object, that it can be moved around independently.
     //
 
-    for (size_t i = 0; i < gltfScene->nodes.size(); i++)
+    for (uint32_t i = 0; i < gltfScene->nodes.size(); i++)
     {
     	auto* gltfNode = gltfScene->nodes[i];
 
     	VkBool32 isRoot = VK_TRUE;
 
-        for (size_t k = 0; k < gltfScene->nodes.size(); k++)
+        for (uint32_t k = 0; k < gltfScene->nodes.size(); k++)
         {
         	if (k == i)
         	{
@@ -159,7 +159,7 @@ ISceneSP VKTS_APIENTRY gltfLoad(const char* filename, const ISceneManagerSP& sce
 
         	auto* testGltfNode = gltfScene->nodes[k];
 
-            for (size_t m = 0; m < testGltfNode->childrenPointer.size(); m++)
+            for (uint32_t m = 0; m < testGltfNode->childrenPointer.size(); m++)
             {
             	if (gltfNode == testGltfNode->childrenPointer[m])
             	{

@@ -73,23 +73,23 @@ public:
 
     virtual const IDeviceMemorySP& getDeviceMemory() const override;
 
-    virtual VkBool32 upload(const size_t offset, const VkMemoryMapFlags flags, const void* data, const size_t size) const override;
+    virtual VkBool32 upload(const uint32_t offset, const VkMemoryMapFlags flags, const void* data, const uint32_t size) const override;
 
-    virtual VkBool32 upload(const size_t offset, const VkMemoryMapFlags flags, const glm::mat4& mat) const override;
+    virtual VkBool32 upload(const uint32_t offset, const VkMemoryMapFlags flags, const glm::mat4& mat) const override;
 
-    virtual VkBool32 upload(const size_t offset, const VkMemoryMapFlags flags, const glm::mat3& mat) const override;
+    virtual VkBool32 upload(const uint32_t offset, const VkMemoryMapFlags flags, const glm::mat3& mat) const override;
 
-    virtual VkBool32 upload(const size_t offset, const VkMemoryMapFlags flags, const glm::mat2& mat) const override;
+    virtual VkBool32 upload(const uint32_t offset, const VkMemoryMapFlags flags, const glm::mat2& mat) const override;
 
-    virtual VkBool32 upload(const size_t offset, const VkMemoryMapFlags flags, const glm::vec4& vec) const override;
+    virtual VkBool32 upload(const uint32_t offset, const VkMemoryMapFlags flags, const glm::vec4& vec) const override;
 
-    virtual VkBool32 upload(const size_t offset, const VkMemoryMapFlags flags, const glm::vec3& vec) const override;
+    virtual VkBool32 upload(const uint32_t offset, const VkMemoryMapFlags flags, const glm::vec3& vec) const override;
 
-    virtual VkBool32 upload(const size_t offset, const VkMemoryMapFlags flags, const glm::vec2& vec) const override;
+    virtual VkBool32 upload(const uint32_t offset, const VkMemoryMapFlags flags, const glm::vec2& vec) const override;
 
-    virtual VkBool32 upload(const size_t offset, const VkMemoryMapFlags flags, const float scalar) const override;
+    virtual VkBool32 upload(const uint32_t offset, const VkMemoryMapFlags flags, const float scalar) const override;
 
-    virtual VkBool32 upload(const size_t offset, const VkMemoryMapFlags flags, const int32_t scalar) const override;
+    virtual VkBool32 upload(const uint32_t offset, const VkMemoryMapFlags flags, const int32_t scalar) const override;
 
     //
     // IDestroyable

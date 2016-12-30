@@ -71,7 +71,7 @@ public:
 
     virtual void visit(INode& node) const
     {
-    	for (size_t i = 0; i < node.getAnimations().size(); i++)
+    	for (uint32_t i = 0; i < node.getAnimations().size(); i++)
     	{
     		node.getAnimations()[i]->setCurrentTime(currentTime);
     	}

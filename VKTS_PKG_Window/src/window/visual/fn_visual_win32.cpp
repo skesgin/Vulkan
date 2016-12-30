@@ -387,7 +387,7 @@ VkBool32 VKTS_APIENTRY _visualDispatchMessages()
             ZeroMemory(&xinputState, sizeof(XINPUT_STATE));
             XInputGetState(i, &xinputState);
 
-            for (size_t index = 0; index < g_allWindows.size(); index++)
+            for (uint32_t index = 0; index < g_allWindows.size(); index++)
             {
                 g_allWindows.valueAt(index)->getGamepadInput(i).setButton(VKTS_GAMEPAD_A, xinputState.Gamepad.wButtons & XINPUT_GAMEPAD_A ? VK_TRUE : VK_FALSE);
                 g_allWindows.valueAt(index)->getGamepadInput(i).setButton(VKTS_GAMEPAD_B, xinputState.Gamepad.wButtons & XINPUT_GAMEPAD_B ? VK_TRUE : VK_FALSE);
@@ -427,7 +427,7 @@ VkBool32 VKTS_APIENTRY _visualDispatchMessages()
 
     //
 
-    for (size_t i = 0; i < g_allWindows.values().size(); i++)
+    for (uint32_t i = 0; i < g_allWindows.values().size(); i++)
     {
         if (g_allWindows.valueAt(i)->isInvisibleCursor())
         {
@@ -958,7 +958,7 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
             xoffset = dm.dmPosition.x;
             yoffset = dm.dmPosition.y;
 
-            for (size_t index = 0; index < g_allWindows.size(); index++)
+            for (uint32_t index = 0; index < g_allWindows.size(); index++)
             {
                 if (g_allWindows.valueAt(index).get())
                 {
@@ -983,7 +983,7 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
 NativeWindowSP VKTS_APIENTRY _visualGetWindow(const int32_t windowIndex)
 {
-    for (size_t index = 0; index < g_allWindows.size(); index++)
+    for (uint32_t index = 0; index < g_allWindows.size(); index++)
     {
         if (g_allWindows.valueAt(index).get())
         {

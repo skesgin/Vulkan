@@ -42,11 +42,11 @@ JsonDecoder::~JsonDecoder()
 
 //
 
-VkBool32 JsonDecoder::match(const std::string& token, size_t& index)
+VkBool32 JsonDecoder::match(const std::string& token, uint32_t& index)
 {
-	size_t length = token.length();
+	uint32_t length = (uint32_t)token.length();
 
-	if (jsonText.length() < index + length)
+	if ((uint32_t)jsonText.length() < index + length)
 	{
 		return VK_FALSE;
 	}
@@ -63,46 +63,46 @@ VkBool32 JsonDecoder::match(const std::string& token, size_t& index)
 
 //
 
-VkBool32 JsonDecoder::decodeWhitespace(size_t& index)
+VkBool32 JsonDecoder::decodeWhitespace(uint32_t& index)
 {
 	return match(JSON_Encode_character_tabulation, index) || match(JSON_Encode_line_feed, index) ||match(JSON_Encode_carriage_return, index) || match(JSON_space, index);
 }
 
 //
 
-VkBool32 JsonDecoder::decodeLeftSquareBracket(size_t& index)
+VkBool32 JsonDecoder::decodeLeftSquareBracket(uint32_t& index)
 {
 	return match(JSON_left_square_bracket, index);
 }
 
-VkBool32 JsonDecoder::decodeLeftCurlyBracket(size_t& index)
+VkBool32 JsonDecoder::decodeLeftCurlyBracket(uint32_t& index)
 {
 	return match(JSON_left_curly_bracket, index);
 }
 
-VkBool32 JsonDecoder::decodeRightSquareBracket(size_t& index)
+VkBool32 JsonDecoder::decodeRightSquareBracket(uint32_t& index)
 {
 	return match(JSON_right_square_bracket, index);
 }
 
-VkBool32 JsonDecoder::decodeRightCurlyBracket(size_t& index)
+VkBool32 JsonDecoder::decodeRightCurlyBracket(uint32_t& index)
 {
 	return match(JSON_right_curly_bracket, index);
 }
 
-VkBool32 JsonDecoder::decodeColon(size_t& index)
+VkBool32 JsonDecoder::decodeColon(uint32_t& index)
 {
 	return match(JSON_colon, index);
 }
 
-VkBool32 JsonDecoder::decodeComma(size_t& index)
+VkBool32 JsonDecoder::decodeComma(uint32_t& index)
 {
 	return match(JSON_comma, index);
 }
 
 //
 
-VkBool32 JsonDecoder::decodePlus(size_t& index, std::string& characters)
+VkBool32 JsonDecoder::decodePlus(uint32_t& index, std::string& characters)
 {
 	if (match(JSON_plus, index))
 	{
@@ -114,7 +114,7 @@ VkBool32 JsonDecoder::decodePlus(size_t& index, std::string& characters)
 	return VK_FALSE;
 }
 
-VkBool32 JsonDecoder::decodeMinus(size_t& index, std::string& characters)
+VkBool32 JsonDecoder::decodeMinus(uint32_t& index, std::string& characters)
 {
 	if (match(JSON_minus, index))
 	{
@@ -126,7 +126,7 @@ VkBool32 JsonDecoder::decodeMinus(size_t& index, std::string& characters)
 	return VK_FALSE;
 }
 
-VkBool32 JsonDecoder::decodePoint(size_t& index, std::string& characters)
+VkBool32 JsonDecoder::decodePoint(uint32_t& index, std::string& characters)
 {
 	if (match(JSON_point, index))
 	{
@@ -140,7 +140,7 @@ VkBool32 JsonDecoder::decodePoint(size_t& index, std::string& characters)
 
 //
 
-VkBool32 JsonDecoder::decodeHexadecimalDigit(size_t& index, std::string& characters, int32_t& value)
+VkBool32 JsonDecoder::decodeHexadecimalDigit(uint32_t& index, std::string& characters, int32_t& value)
 {
 	if (match(JSON_A, index) || match(JSON_B, index) || match(JSON_C, index) || match(JSON_D, index) || match(JSON_E, index) || match(JSON_F, index))
 	{
@@ -164,7 +164,7 @@ VkBool32 JsonDecoder::decodeHexadecimalDigit(size_t& index, std::string& charact
 
 //
 
-VkBool32 JsonDecoder::decodeDigit_0(size_t& index, std::string& characters, int32_t& value)
+VkBool32 JsonDecoder::decodeDigit_0(uint32_t& index, std::string& characters, int32_t& value)
 {
 	if (match(JSON_0, index))
 	{
@@ -178,7 +178,7 @@ VkBool32 JsonDecoder::decodeDigit_0(size_t& index, std::string& characters, int3
 	return VK_FALSE;
 }
 
-VkBool32 JsonDecoder::decodeDigit_1_9(size_t& index, std::string& characters, int32_t& value)
+VkBool32 JsonDecoder::decodeDigit_1_9(uint32_t& index, std::string& characters, int32_t& value)
 {
 	if (match(JSON_1, index) || match(JSON_2, index) || match(JSON_3, index) || match(JSON_4, index) || match(JSON_5, index) || match(JSON_6, index) || match(JSON_7, index) || match(JSON_8, index) || match(JSON_9, index))
 	{
@@ -192,12 +192,12 @@ VkBool32 JsonDecoder::decodeDigit_1_9(size_t& index, std::string& characters, in
 	return VK_FALSE;
 }
 
-VkBool32 JsonDecoder::decodeDigit(size_t& index, std::string& characters, int32_t& value)
+VkBool32 JsonDecoder::decodeDigit(uint32_t& index, std::string& characters, int32_t& value)
 {
 	return decodeDigit_0(index, characters, value) || decodeDigit_1_9(index, characters, value);
 }
 
-VkBool32 JsonDecoder::decodeExponent(size_t& index, std::string& characters)
+VkBool32 JsonDecoder::decodeExponent(uint32_t& index, std::string& characters)
 {
 	if (match(JSON_e, index) || match(JSON_E, index))
 	{
@@ -211,7 +211,7 @@ VkBool32 JsonDecoder::decodeExponent(size_t& index, std::string& characters)
 
 //
 
-VkBool32 JsonDecoder::decodeQuotationMark(size_t& index, std::string& characters)
+VkBool32 JsonDecoder::decodeQuotationMark(uint32_t& index, std::string& characters)
 {
 	if (match(JSON_quotation_mark, index))
 	{
@@ -223,7 +223,7 @@ VkBool32 JsonDecoder::decodeQuotationMark(size_t& index, std::string& characters
 	return VK_FALSE;
 }
 
-VkBool32 JsonDecoder::decodeReverseSolidus(size_t& index, std::string& characters)
+VkBool32 JsonDecoder::decodeReverseSolidus(uint32_t& index, std::string& characters)
 {
 	if (match(JSON_reverse_solidus, index))
 	{
@@ -235,7 +235,7 @@ VkBool32 JsonDecoder::decodeReverseSolidus(size_t& index, std::string& character
 	return VK_FALSE;
 }
 
-VkBool32 JsonDecoder::decodeSolidus(size_t& index, std::string& characters)
+VkBool32 JsonDecoder::decodeSolidus(uint32_t& index, std::string& characters)
 {
 	if (match(JSON_solidus, index))
 	{
@@ -247,7 +247,7 @@ VkBool32 JsonDecoder::decodeSolidus(size_t& index, std::string& characters)
 	return VK_FALSE;
 }
 
-VkBool32 JsonDecoder::decodeBackspace(size_t& index, std::string& characters)
+VkBool32 JsonDecoder::decodeBackspace(uint32_t& index, std::string& characters)
 {
 	if (match(JSON_Decode_backspace, index))
 	{
@@ -259,7 +259,7 @@ VkBool32 JsonDecoder::decodeBackspace(size_t& index, std::string& characters)
 	return VK_FALSE;
 }
 
-VkBool32 JsonDecoder::decodeFormFeed(size_t& index, std::string& characters)
+VkBool32 JsonDecoder::decodeFormFeed(uint32_t& index, std::string& characters)
 {
 	if (match(JSON_Decode_form_feed, index))
 	{
@@ -271,7 +271,7 @@ VkBool32 JsonDecoder::decodeFormFeed(size_t& index, std::string& characters)
 	return VK_FALSE;
 }
 
-VkBool32 JsonDecoder::decodeLineFeed(size_t& index, std::string& characters)
+VkBool32 JsonDecoder::decodeLineFeed(uint32_t& index, std::string& characters)
 {
 	if (match(JSON_Decode_line_feed, index))
 	{
@@ -283,7 +283,7 @@ VkBool32 JsonDecoder::decodeLineFeed(size_t& index, std::string& characters)
 	return VK_FALSE;
 }
 
-VkBool32 JsonDecoder::decodeCarriageReturn(size_t& index, std::string& characters)
+VkBool32 JsonDecoder::decodeCarriageReturn(uint32_t& index, std::string& characters)
 {
 	if (match(JSON_Decode_carriage_return, index))
 	{
@@ -295,7 +295,7 @@ VkBool32 JsonDecoder::decodeCarriageReturn(size_t& index, std::string& character
 	return VK_FALSE;
 }
 
-VkBool32 JsonDecoder::decodeCharacterTabulation(size_t& index, std::string& characters)
+VkBool32 JsonDecoder::decodeCharacterTabulation(uint32_t& index, std::string& characters)
 {
 	if (match(JSON_Decode_character_tabulation, index))
 	{
@@ -307,12 +307,12 @@ VkBool32 JsonDecoder::decodeCharacterTabulation(size_t& index, std::string& char
 	return VK_FALSE;
 }
 
-VkBool32 JsonDecoder::decodeHexadecimalNumber(size_t& index, std::string& characters)
+VkBool32 JsonDecoder::decodeHexadecimalNumber(uint32_t& index, std::string& characters)
 {
 	int32_t value = 0;
 	int32_t tempValue = 0;
 
-	size_t tempIndex = index;
+	uint32_t tempIndex = index;
 
 	if (!match(JSON_u, tempIndex))
 	{
@@ -343,11 +343,11 @@ VkBool32 JsonDecoder::decodeHexadecimalNumber(size_t& index, std::string& charac
 
 //
 
-VkBool32 JsonDecoder::decodeObject(size_t& index, JSONobjectSP& jsonObject)
+VkBool32 JsonDecoder::decodeObject(uint32_t& index, JSONobjectSP& jsonObject)
 {
 	JSONobjectSP tempJsonObject = JSONobjectSP(new JSONobject());
 
-	size_t tempIndex = index;
+	uint32_t tempIndex = index;
 
 	VkBool32 loop = VK_TRUE;
 
@@ -421,11 +421,11 @@ VkBool32 JsonDecoder::decodeObject(size_t& index, JSONobjectSP& jsonObject)
 	return VK_TRUE;
 }
 
-VkBool32 JsonDecoder::decodeArray(size_t& index, JSONarraySP& jsonArray)
+VkBool32 JsonDecoder::decodeArray(uint32_t& index, JSONarraySP& jsonArray)
 {
 	JSONarraySP tempJsonArray = JSONarraySP(new JSONarray());
 
-	size_t tempIndex = index;
+	uint32_t tempIndex = index;
 
 	VkBool32 loop = VK_TRUE;
 
@@ -484,12 +484,12 @@ VkBool32 JsonDecoder::decodeArray(size_t& index, JSONarraySP& jsonArray)
 	return VK_TRUE;
 }
 
-VkBool32 JsonDecoder::decodeNumber(size_t& index, JSONnumberSP& jsonNumber)
+VkBool32 JsonDecoder::decodeNumber(uint32_t& index, JSONnumberSP& jsonNumber)
 {
 	std::string tempString = "";
 	int32_t dummy;
 
-	size_t tempIndex = index;
+	uint32_t tempIndex = index;
 
 	VkBool32 isFloat = VK_FALSE;
 
@@ -577,12 +577,12 @@ VkBool32 JsonDecoder::decodeNumber(size_t& index, JSONnumberSP& jsonNumber)
 	return VK_TRUE;
 }
 
-VkBool32 JsonDecoder::decodeString(size_t& index, JSONstringSP& jsonString)
+VkBool32 JsonDecoder::decodeString(uint32_t& index, JSONstringSP& jsonString)
 {
 	std::string dummyString = "";
 	std::string tempString = "";
 
-	size_t tempIndex = index;
+	uint32_t tempIndex = index;
 
 	VkBool32 loop = VK_TRUE;
 
@@ -644,7 +644,7 @@ VkBool32 JsonDecoder::decodeString(size_t& index, JSONstringSP& jsonString)
 }
 
 
-VkBool32 JsonDecoder::decodeTrue(size_t& index, JSONtrueSP& jsonTrue)
+VkBool32 JsonDecoder::decodeTrue(uint32_t& index, JSONtrueSP& jsonTrue)
 {
 	VkBool32 result;
 
@@ -662,7 +662,7 @@ VkBool32 JsonDecoder::decodeTrue(size_t& index, JSONtrueSP& jsonTrue)
 	return result;
 }
 
-VkBool32 JsonDecoder::decodeFalse(size_t& index, JSONfalseSP& jsonFalse)
+VkBool32 JsonDecoder::decodeFalse(uint32_t& index, JSONfalseSP& jsonFalse)
 {
 	VkBool32 result;
 
@@ -680,7 +680,7 @@ VkBool32 JsonDecoder::decodeFalse(size_t& index, JSONfalseSP& jsonFalse)
 	return result;
 }
 
-VkBool32 JsonDecoder::decodeNull(size_t& index, JSONnullSP& jsonNull)
+VkBool32 JsonDecoder::decodeNull(uint32_t& index, JSONnullSP& jsonNull)
 {
 	VkBool32 result;
 
@@ -700,7 +700,7 @@ VkBool32 JsonDecoder::decodeNull(size_t& index, JSONnullSP& jsonNull)
 
 //
 
-VkBool32 JsonDecoder::decodeValue(size_t& index, JSONvalueSP& jsonValue)
+VkBool32 JsonDecoder::decodeValue(uint32_t& index, JSONvalueSP& jsonValue)
 {
 	JSONobjectSP jsonObject;
 	JSONarraySP jsonArray;
@@ -754,7 +754,7 @@ JSONvalueSP JsonDecoder::decode(const std::string& jsonText)
 {
 	this->jsonText = jsonText;
 
-	size_t index = 0;
+	uint32_t index = 0;
 	JSONvalueSP jsonValue;
 
 	if (!decodeValue(index, jsonValue))

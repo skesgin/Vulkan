@@ -33,7 +33,7 @@
 namespace vkts
 {
 
-IPipelineCacheSP VKTS_APIENTRY pipelineCreateCache(const VkDevice device, const VkPipelineCacheCreateFlags flags, const size_t initialDataSize, const void* initialData)
+IPipelineCacheSP VKTS_APIENTRY pipelineCreateCache(const VkDevice device, const VkPipelineCacheCreateFlags flags, const uint32_t initialDataSize, const void* initialData)
 {
     if (!device)
     {

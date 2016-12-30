@@ -77,9 +77,9 @@ public:
 
     virtual void getGetPhysicalDeviceImageFormatProperties(VkImageFormatProperties& imageFormatProperties, const VkFormat format, const VkImageType type, const VkImageTiling tiling, const VkImageUsageFlags usage, const VkImageCreateFlags flags) const override;
 
-    virtual VkDeviceSize getNonCoherentAlignmentSizeInBytes(const size_t currentSize) const override;
+    virtual VkDeviceSize getNonCoherentAlignmentSizeInBytes(const VkDeviceSize currentSize) const override;
 
-    virtual VkDeviceSize getUniformBufferAlignmentSizeInBytes(const size_t currentSize) const override;
+    virtual VkDeviceSize getUniformBufferAlignmentSizeInBytes(const VkDeviceSize currentSize) const override;
 
     virtual VkBool32 isImageTilingAvailable(const VkImageTiling imageTiling, const VkFormat format, const VkImageType type, const VkImageCreateFlags flags, const VkExtent3D& extent, const uint32_t mipLevels, const uint32_t arrayLayers, const VkSampleCountFlags sampleCounts, const VkDeviceSize resourceSize) override;
 

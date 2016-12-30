@@ -138,7 +138,7 @@ VkBool32 VKTS_APIENTRY _visualDispatchMessagesTouchpad()
 {
     struct input_event touchpadEvent;
 
-    ssize_t bytesRead;
+    int64_t bytesRead;
 
     VkBool32 keepPooling;
 

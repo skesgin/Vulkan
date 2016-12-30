@@ -67,7 +67,7 @@ public:
 
     virtual VkBool32 removeSubMesh(const ISubMeshSP& subMesh) override;
 
-    virtual size_t getNumberSubMeshes() const override;
+    virtual uint32_t getNumberSubMeshes() const override;
 
     virtual const SmartPointerVector<ISubMeshSP>& getSubMeshes() const override;
 

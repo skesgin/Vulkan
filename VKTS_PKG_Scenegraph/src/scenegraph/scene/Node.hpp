@@ -114,7 +114,7 @@ public:
 
     virtual IRenderNodeSP getRenderNode(const uint32_t index) const override;
 
-    virtual size_t getRenderNodeSize() const override;
+    virtual uint32_t getRenderNodeSize() const override;
 
     virtual void addRenderNode(const IRenderNodeSP& nodeData) override;
 
@@ -177,7 +177,7 @@ public:
 
     virtual VkBool32 removeChildNode(const INodeSP& childNode) override;
 
-    virtual size_t getNumberChildNodes() const override;
+    virtual uint32_t getNumberChildNodes() const override;
 
     virtual const SmartPointerVector<INodeSP>& getChildNodes() const override;
 
@@ -185,7 +185,7 @@ public:
 
     virtual VkBool32 removeMesh(const IMeshSP& mesh) override;
 
-    virtual size_t getNumberMeshes() const override;
+    virtual uint32_t getNumberMeshes() const override;
 
     virtual const SmartPointerVector<IMeshSP>& getMeshes() const override;
 
@@ -193,7 +193,7 @@ public:
 
     virtual VkBool32 removeCamera(const ICameraSP& camera) override;
 
-    virtual size_t getNumberCameras() const override;
+    virtual uint32_t getNumberCameras() const override;
 
     virtual const SmartPointerVector<ICameraSP>& getCameras() const override;
 
@@ -201,7 +201,7 @@ public:
 
     virtual VkBool32 removeLight(const ILightSP& light) override;
 
-    virtual size_t getNumberLights() const override;
+    virtual uint32_t getNumberLights() const override;
 
     virtual const SmartPointerVector<ILightSP>& getLights() const override;
 
@@ -209,7 +209,7 @@ public:
 
     virtual VkBool32 removeConstraint(const IConstraintSP& constraint) override;
 
-    virtual size_t getNumberConstraints() const override;
+    virtual uint32_t getNumberConstraints() const override;
 
     virtual const SmartPointerVector<IConstraintSP>& getConstraints() const override;
 
@@ -217,7 +217,7 @@ public:
 
     virtual VkBool32 removeAnimation(const IAnimationSP& animation) override;
 
-    virtual size_t getNumberAnimations() const override;
+    virtual uint32_t getNumberAnimations() const override;
 
     virtual const SmartPointerVector<IAnimationSP>& getAnimations() const override;
 
@@ -230,7 +230,7 @@ public:
 
     virtual VkBool32 removeParticleSystem(const IParticleSystemSP& particleSystem) override;
 
-    virtual size_t getNumberParticleSystems() const override;
+    virtual uint32_t getNumberParticleSystems() const override;
 
     virtual const SmartPointerVector<IParticleSystemSP>& getParticleSystems() const override;
 

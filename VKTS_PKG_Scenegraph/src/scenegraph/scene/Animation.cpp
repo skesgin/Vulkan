@@ -37,12 +37,12 @@ Animation::Animation() :
 Animation::Animation(const Animation& other) :
     IAnimation(), name(other.name + "_clone"), start(other.start), stop(other.stop), currentSection(other.currentSection), animationType(other.animationType), animationScale(other.animationScale), currentTime(other.currentTime), allChannels()
 {
-    for (size_t i = 0; i < other.allMarkers.size(); i++)
+    for (uint32_t i = 0; i < other.allMarkers.size(); i++)
     {
         allMarkers.append(other.allMarkers[i]->clone());
     }
 
-    for (size_t i = 0; i < other.allChannels.size(); i++)
+    for (uint32_t i = 0; i < other.allChannels.size(); i++)
     {
         allChannels.append(other.allChannels[i]->clone());
     }
@@ -232,7 +232,7 @@ VkBool32 Animation::removeMarker(const IMarkerSP& marker)
     return result;
 }
 
-size_t Animation::getNumberMarkers() const
+uint32_t Animation::getNumberMarkers() const
 {
     return allMarkers.size();
 }
@@ -252,7 +252,7 @@ VkBool32 Animation::removeChannel(const IChannelSP& channel)
     return allChannels.remove(channel);
 }
 
-size_t Animation::getNumberChannels() const
+uint32_t Animation::getNumberChannels() const
 {
     return allChannels.size();
 }
@@ -289,7 +289,7 @@ IAnimationSP Animation::clone() const
 
 void Animation::destroy()
 {
-    for (size_t i = 0; i < allChannels.size(); i++)
+    for (uint32_t i = 0; i < allChannels.size(); i++)
     {
         allChannels[i]->destroy();
     }

@@ -94,7 +94,7 @@ public:
 
     virtual void unmapMemory() override;
 
-    virtual VkResult upload(const VkDeviceSize offset, const VkMemoryMapFlags flags, const void* uploadData, const size_t uploadDataSize) override;
+    virtual VkResult upload(const VkDeviceSize offset, const VkMemoryMapFlags flags, const void* uploadData, const uint32_t uploadDataSize) override;
 
     //
     // IDestroyable

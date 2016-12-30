@@ -260,7 +260,7 @@ int main(int argc, char* argv[])
 
 		auto mipMaps = vkts::imageDataMipmap(imageTga, VK_TRUE, "test/general/crate_output.tga");
 
-		for (size_t i = 0; i < mipMaps.size(); i++)
+		for (uint32_t i = 0; i < mipMaps.size(); i++)
 		{
 			if (!vkts::imageDataSave(mipMaps[i]->getName().c_str(), mipMaps[i]))
 			{
@@ -297,7 +297,7 @@ int main(int argc, char* argv[])
 
 		if (cubeMaps.size() != 0)
 		{
-			for (size_t i = 0; i < cubeMaps.size(); i++)
+			for (uint32_t i = 0; i < cubeMaps.size(); i++)
 			{
 				vkts::imageDataSave(cubeMaps[i]->getName().c_str(), cubeMaps[i]);
 			}

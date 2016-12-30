@@ -173,7 +173,7 @@ VkResult CommandBuffers::reset()
 {
 	VkResult result = VK_SUCCESS;
 
-	for (size_t i = 0; i < allCommandBuffers.size(); i++)
+	for (uint32_t i = 0; i < allCommandBuffers.size(); i++)
 	{
 		result = vkResetCommandBuffer(allCommandBuffers[i], commandBufferResetFlags);
 

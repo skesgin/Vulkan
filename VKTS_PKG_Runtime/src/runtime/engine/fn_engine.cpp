@@ -235,7 +235,7 @@ VkBool32 VKTS_APIENTRY engineRun()
 
     int32_t index = 0;
 
-    for (size_t updateThreadIndex = 0; updateThreadIndex < g_allUpdateThreads.size(); updateThreadIndex++)
+    for (uint32_t updateThreadIndex = 0; updateThreadIndex < g_allUpdateThreads.size(); updateThreadIndex++)
     {
         const auto& currentUpdateThread = g_allUpdateThreads[updateThreadIndex];
 

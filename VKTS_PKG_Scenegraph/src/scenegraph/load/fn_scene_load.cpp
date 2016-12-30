@@ -241,7 +241,7 @@ static VkBool32 sceneLoadImageObjects(const char* directory, const char* filenam
 								logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Storing cached data for '%s'", finalImageDataFilename.c_str());
 
 								// Only cache mip maps sub levels.
-								for (size_t i = 1; i < allMipMaps.size(); i++)
+								for (uint32_t i = 1; i < allMipMaps.size(); i++)
 								{
 									cacheSaveImageData(allMipMaps[i]);
 								}
@@ -252,12 +252,12 @@ static VkBool32 sceneLoadImageObjects(const char* directory, const char* filenam
 							logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Using cached data for '%s'", finalImageDataFilename.c_str());
 						}
 
-						for (size_t i = 0; i < allMipMaps.size(); i++)
+						for (uint32_t i = 0; i < allMipMaps.size(); i++)
 						{
 							allMipMaps[i] = createDeviceImageData(sceneManager->getAssetManager(), allMipMaps[i]);
 						}
 
-						imageData = imageDataMerge(allMipMaps, finalImageDataFilename, (uint32_t)allMipMaps.size(), 1);
+						imageData = imageDataMerge(allMipMaps, finalImageDataFilename, allMipMaps.size(), 1);
 
 						if (!imageData.get())
 						{
@@ -311,7 +311,7 @@ static VkBool32 sceneLoadImageObjects(const char* directory, const char* filenam
 
 							if (allCubeMaps.size() == 0)
 							{
-								allCubeMaps = imageDataCubemap(imageData, (uint32_t)imageData->getHeight() / 2, finalImageDataFilename);
+								allCubeMaps = imageDataCubemap(imageData, imageData->getHeight() / 2, finalImageDataFilename);
 
 								if (allCubeMaps.size() == 0)
 								{
@@ -324,7 +324,7 @@ static VkBool32 sceneLoadImageObjects(const char* directory, const char* filenam
 								{
 									logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Storing cached data for '%s'", finalImageDataFilename.c_str());
 
-									for (size_t i = 0; i < allCubeMaps.size(); i++)
+									for (uint32_t i = 0; i < allCubeMaps.size(); i++)
 									{
 										cacheSaveImageData(allCubeMaps[i]);
 									}
@@ -335,12 +335,12 @@ static VkBool32 sceneLoadImageObjects(const char* directory, const char* filenam
 								logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Using cached data for '%s'", finalImageDataFilename.c_str());
 							}
 
-							for (size_t i = 0; i < allCubeMaps.size(); i++)
+							for (uint32_t i = 0; i < allCubeMaps.size(); i++)
 							{
 								allCubeMaps[i] = createDeviceImageData(sceneManager->getAssetManager(), allCubeMaps[i]);
 							}
 
-							imageData = imageDataMerge(allCubeMaps, finalImageDataFilename, 1, (uint32_t)allCubeMaps.size());
+							imageData = imageDataMerge(allCubeMaps, finalImageDataFilename, 1, allCubeMaps.size());
 
 							if (!imageData.get())
 							{
@@ -392,7 +392,7 @@ static VkBool32 sceneLoadImageObjects(const char* directory, const char* filenam
 								{
 									logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Storing cached data for '%s'", finalImageDataFilename.c_str());
 
-									for (size_t i = 0; i < allDiffuseCubeMaps.size(); i++)
+									for (uint32_t i = 0; i < allDiffuseCubeMaps.size(); i++)
 									{
 										if (allDiffuseCubeMaps[i]->getFormat() == VK_FORMAT_R32G32B32A32_SFLOAT)
 										{
@@ -412,12 +412,12 @@ static VkBool32 sceneLoadImageObjects(const char* directory, const char* filenam
 								logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Using cached data for '%s'", finalImageDataFilename.c_str());
 							}
 
-							for (size_t i = 0; i < allDiffuseCubeMaps.size(); i++)
+							for (uint32_t i = 0; i < allDiffuseCubeMaps.size(); i++)
 							{
 								allDiffuseCubeMaps[i] = createDeviceImageData(sceneManager->getAssetManager(), allDiffuseCubeMaps[i]);
 							}
 
-							auto diffuseImageData = imageDataMerge(allDiffuseCubeMaps, finalImageDataFilename, 1, (uint32_t)allDiffuseCubeMaps.size());
+							auto diffuseImageData = imageDataMerge(allDiffuseCubeMaps, finalImageDataFilename, 1, allDiffuseCubeMaps.size());
 
 							if (!diffuseImageData.get())
 							{
@@ -493,13 +493,13 @@ static VkBool32 sceneLoadImageObjects(const char* directory, const char* filenam
 									return VK_FALSE;
 								}
 
-								levelCount = (uint32_t)allCookTorranceCubeMaps.size() / 6;
+								levelCount = allCookTorranceCubeMaps.size() / 6;
 
 								if (cacheGetEnabled())
 								{
 									logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Storing cached data for '%s'", finalImageDataFilename.c_str());
 
-									for (size_t i = 0; i < allCookTorranceCubeMaps.size(); i++)
+									for (uint32_t i = 0; i < allCookTorranceCubeMaps.size(); i++)
 									{
 										if (allCookTorranceCubeMaps[i]->getFormat() == VK_FORMAT_R32G32B32A32_SFLOAT)
 										{
@@ -519,7 +519,7 @@ static VkBool32 sceneLoadImageObjects(const char* directory, const char* filenam
 								logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Using cached data for '%s'", finalImageDataFilename.c_str());
 							}
 
-							for (size_t i = 0; i < allCookTorranceCubeMaps.size(); i++)
+							for (uint32_t i = 0; i < allCookTorranceCubeMaps.size(); i++)
 							{
 								allCookTorranceCubeMaps[i] = createDeviceImageData(sceneManager->getAssetManager(), allCookTorranceCubeMaps[i]);
 							}
@@ -2076,9 +2076,9 @@ static VkBool32 sceneLoadSubMeshes(const char* directory, const char* filename, 
 
                 if (totalSize > 0)
                 {
-                    auto vertexBinaryBuffer = binaryBufferCreate((size_t)totalSize);
+                    auto vertexBinaryBuffer = binaryBufferCreate((uint32_t)totalSize);
 
-                    if (!vertexBinaryBuffer.get() || vertexBinaryBuffer->getSize() != (size_t)totalSize)
+                    if (!vertexBinaryBuffer.get() || vertexBinaryBuffer->getSize() != (uint32_t)totalSize)
                     {
                         logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create vertex binary buffer");
 
@@ -2153,7 +2153,7 @@ static VkBool32 sceneLoadSubMeshes(const char* directory, const char* filename, 
 
                 if (indices.size() > 0)
                 {
-                	size_t size = sizeof(int32_t) * subMesh->getNumberIndices();
+                	uint32_t size = sizeof(int32_t) * subMesh->getNumberIndices();
 
                     auto indicesBinaryBuffer = binaryBufferCreate(reinterpret_cast<const uint8_t*>(&indices[0]), size);
 
@@ -3875,7 +3875,7 @@ static VkBool32 sceneLoadObjects(const char* directory, const char* filename, co
             {
             	INodeSP targetNode;
 
-            	for (size_t i = 0; i < sceneManager->getAllObjects().values().size(); i++)
+            	for (uint32_t i = 0; i < sceneManager->getAllObjects().values().size(); i++)
             	{
             		if (!sceneManager->getAllObjects().values()[i]->getRootNode().get())
             		{
@@ -4549,21 +4549,21 @@ ISceneSP VKTS_APIENTRY sceneLoad(const char* filename, const ISceneManagerSP& sc
 
     // Gather all cameras and add to scene.
 
-    for (size_t i = 0; i < sceneManager->getAllCameras().values().size(); i++)
+    for (uint32_t i = 0; i < sceneManager->getAllCameras().values().size(); i++)
     {
     	scene->addCamera(sceneManager->getAllCameras().valueAt(i));
     }
 
     // Gather all lights and add to scene.
 
-    for (size_t i = 0; i < sceneManager->getAllLights().values().size(); i++)
+    for (uint32_t i = 0; i < sceneManager->getAllLights().values().size(); i++)
     {
     	scene->addLight(sceneManager->getAllLights().valueAt(i));
     }
 
     // Assign all objects to the particle system.
 
-    for (size_t i = 0; i < sceneManager->getAllParticleSystems().values().size(); i++)
+    for (uint32_t i = 0; i < sceneManager->getAllParticleSystems().values().size(); i++)
     {
     	const auto& currentParticleSystem = sceneManager->getAllParticleSystems().valueAt(i);
 

@@ -120,7 +120,7 @@ VkBool32 VKTS_APIENTRY imageDataIsSRGB(const VkFormat format)
     return VK_FALSE;
 }
 
-int32_t VKTS_APIENTRY imageDataGetBytesPerTexel(const VkFormat format)
+uint32_t VKTS_APIENTRY imageDataGetBytesPerTexel(const VkFormat format)
 {
     switch (format)
     {
@@ -190,7 +190,7 @@ int32_t VKTS_APIENTRY imageDataGetBytesPerTexel(const VkFormat format)
     return 0;
 }
 
-int32_t VKTS_APIENTRY imageDataGetBytesPerChannel(const VkFormat format)
+uint32_t VKTS_APIENTRY imageDataGetBytesPerChannel(const VkFormat format)
 {
     switch (format)
     {
@@ -220,7 +220,7 @@ int32_t VKTS_APIENTRY imageDataGetBytesPerChannel(const VkFormat format)
     return 0;
 }
 
-int32_t VKTS_APIENTRY imageDataGetNumberChannels(const VkFormat format)
+uint32_t VKTS_APIENTRY imageDataGetNumberChannels(const VkFormat format)
 {
     switch (format)
     {

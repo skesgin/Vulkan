@@ -50,7 +50,7 @@ private:
 public:
 
     ShaderModule() = delete;
-    ShaderModule(const std::string& name, const VkDevice device, const VkShaderModuleCreateFlags flags, const size_t codeSize, const void* code, const VkShaderModule shaderModule);
+    ShaderModule(const std::string& name, const VkDevice device, const VkShaderModuleCreateFlags flags, const uint32_t codeSize, const void* code, const VkShaderModule shaderModule);
     ShaderModule(const ShaderModule& other) = delete;
     ShaderModule(ShaderModule&& other) = delete;
     virtual ~ShaderModule();

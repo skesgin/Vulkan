@@ -36,7 +36,7 @@ namespace vkts
 
 static std::string g_baseDirectory = std::string("");
 
-static VkBool32 fileSave(const char* filename, const void* data, const size_t size)
+static VkBool32 fileSave(const char* filename, const void* data, const uint32_t size)
 {
     if (!filename || !data || size == 0)
     {
@@ -138,7 +138,7 @@ VkBool32 VKTS_APIENTRY fileSaveBinary(const char* filename, const IBinaryBufferS
     return fileSave(filename, buffer->getData(), buffer->getSize());
 }
 
-VkBool32 VKTS_APIENTRY fileSaveBinaryData(const char* filename, const void* data, const size_t size)
+VkBool32 VKTS_APIENTRY fileSaveBinaryData(const char* filename, const void* data, const uint32_t size)
 {
     if (!data || size == 0)
     {

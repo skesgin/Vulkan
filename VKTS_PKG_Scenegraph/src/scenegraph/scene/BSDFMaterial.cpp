@@ -37,7 +37,7 @@ BSDFMaterial::BSDFMaterial(const VkBool32 forwardRendering) :
 BSDFMaterial::BSDFMaterial(const BSDFMaterial& other) :
     IBSDFMaterial(), Material(other), fragmentShader(other.fragmentShader), attributes(other.attributes), allTextureObjects()
 {
-	for (size_t i = 0; i < other.allTextureObjects.size(); i++)
+	for (uint32_t i = 0; i < other.allTextureObjects.size(); i++)
 	{
 		addTextureObject(other.allTextureObjects[i]);
 	}
@@ -69,7 +69,7 @@ void BSDFMaterial::setName(const std::string& name)
 
 IRenderMaterialSP BSDFMaterial::getRenderMaterial(const uint32_t index) const
 {
-	if ((size_t)index >= materialData.size())
+	if (index >= materialData.size())
 	{
 		return IRenderMaterialSP();
 	}
@@ -113,9 +113,9 @@ void BSDFMaterial::addTextureObject(const ITextureObjectSP& textureObject)
     {
     	uint32_t offset = forwardRendering ? VKTS_BINDING_UNIFORM_SAMPLER_BSDF_FORWARD_FIRST : VKTS_BINDING_UNIFORM_SAMPLER_BSDF_DEFERRED_FIRST;
 
-    	for (size_t i = 0; i < materialData.size(); i++)
+    	for (uint32_t i = 0; i < materialData.size(); i++)
     	{
-        	materialData[i]->addDescriptorImageInfo((uint32_t)allTextureObjects.size(), offset, textureObject->getSampler()->getSampler(), textureObject->getImageObject()->getImageView()->getImageView(), textureObject->getImageObject()->getImage()->getImageLayout());
+        	materialData[i]->addDescriptorImageInfo(allTextureObjects.size(), offset, textureObject->getSampler()->getSampler(), textureObject->getImageObject()->getImageView()->getImageView(), textureObject->getImageObject()->getImage()->getImageLayout());
     	}
     }
 
@@ -127,7 +127,7 @@ VkBool32 BSDFMaterial::removeTextureObject(const ITextureObjectSP& textureObject
     return allTextureObjects.remove(textureObject);
 }
 
-size_t BSDFMaterial::getNumberTextureObjects() const
+uint32_t BSDFMaterial::getNumberTextureObjects() const
 {
     return allTextureObjects.size();
 }
@@ -139,7 +139,7 @@ const SmartPointerVector<ITextureObjectSP>& BSDFMaterial::getTextureObjects() co
 
 void BSDFMaterial::updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets, const uint32_t currentBuffer, const std::string& nodeName)
 {
-	if ((size_t)currentBuffer >= materialData.size())
+	if (currentBuffer >= materialData.size())
 	{
 		return;
 	}
@@ -165,7 +165,7 @@ void BSDFMaterial::drawRecursive(const ICommandBuffersSP& cmdBuffer, const IGrap
 
     //
 
-	if ((size_t)currentBuffer >= materialData.size())
+	if (currentBuffer >= materialData.size())
 	{
 		return;
 	}
@@ -204,7 +204,7 @@ void BSDFMaterial::destroy()
 		fragmentShader->destroy();
 	}
 
-	for (size_t i = 0; i < allTextureObjects.size(); i++)
+	for (uint32_t i = 0; i < allTextureObjects.size(); i++)
 	{
 		allTextureObjects[i]->destroy();
 	}

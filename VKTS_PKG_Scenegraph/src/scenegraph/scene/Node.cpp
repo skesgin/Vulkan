@@ -89,7 +89,7 @@ void Node::reset()
 
     //
 
-    for (size_t i = 0; i < nodeData.size(); i++)
+    for (uint32_t i = 0; i < nodeData.size(); i++)
     {
         if (nodeData[i].get())
         {
@@ -109,7 +109,7 @@ Node::Node() :
 Node::Node(const Node& other) :
     INode(), name(other.name + "_clone"), parentNode(other.parentNode), translate(other.translate), nodeRotationMode(other.nodeRotationMode), rotate(other.rotate), scale(other.scale), finalTranslate(other.finalTranslate), finalRotate(other.finalRotate), finalScale(other.finalScale), transformMatrix(other.transformMatrix), transformMatrixDirty(other.transformMatrixDirty), jointIndex(-1), joints(0), bindTranslate(other.bindTranslate), bindRotationMode(other.bindRotationMode), bindRotate(other.bindRotate), bindScale(other.bindScale), bindMatrix(other.bindMatrix), inverseBindMatrix(other.inverseBindMatrix), bindMatrixDirty(other.bindMatrixDirty), box(other.box), layers(other.layers), nodeData()
 {
-    for (size_t i = 0; i < other.nodeData.size(); i++)
+    for (uint32_t i = 0; i < other.nodeData.size(); i++)
     {
         if (other.nodeData[i].get())
         {
@@ -124,7 +124,7 @@ Node::Node(const Node& other) :
         }
     }
 
-    for (size_t i = 0; i < other.allChildNodes.size(); i++)
+    for (uint32_t i = 0; i < other.allChildNodes.size(); i++)
     {
         const auto& currentChildNode = other.allChildNodes[i];
 
@@ -147,7 +147,7 @@ Node::Node(const Node& other) :
         allChildNodes.append(cloneChildNode);
     }
 
-    for (size_t i = 0; i < other.allMeshes.size(); i++)
+    for (uint32_t i = 0; i < other.allMeshes.size(); i++)
     {
         const auto& currentMesh = other.allMeshes[i];
 
@@ -170,7 +170,7 @@ Node::Node(const Node& other) :
         allMeshes.append(cloneMesh);
     }
 
-    for (size_t i = 0; i < other.allCameras.size(); i++)
+    for (uint32_t i = 0; i < other.allCameras.size(); i++)
     {
         const auto& currentCamera = other.allCameras[i];
 
@@ -193,7 +193,7 @@ Node::Node(const Node& other) :
         allCameras.append(cloneCamera);
     }
 
-    for (size_t i = 0; i < other.allLights.size(); i++)
+    for (uint32_t i = 0; i < other.allLights.size(); i++)
     {
         const auto& currentLight = other.allLights[i];
 
@@ -216,7 +216,7 @@ Node::Node(const Node& other) :
         allLights.append(cloneLight);
     }
 
-    for (size_t i = 0; i < other.allConstraints.size(); i++)
+    for (uint32_t i = 0; i < other.allConstraints.size(); i++)
     {
         const auto& currentConstraint = other.allConstraints[i];
 
@@ -239,7 +239,7 @@ Node::Node(const Node& other) :
         allConstraints.append(cloneConstraint);
     }
 
-    for (size_t i = 0; i < other.allAnimations.size(); i++)
+    for (uint32_t i = 0; i < other.allAnimations.size(); i++)
     {
         const auto& currentAnimation = other.allAnimations[i];
 
@@ -327,7 +327,7 @@ void Node::setName(const std::string& name)
 
 IRenderNodeSP Node::getRenderNode(const uint32_t index) const
 {
-	if ((size_t)index >= nodeData.size())
+	if (index >= nodeData.size())
 	{
 		return IRenderNodeSP();
 	}
@@ -335,7 +335,7 @@ IRenderNodeSP Node::getRenderNode(const uint32_t index) const
 	return nodeData[index];
 }
 
-size_t Node::getRenderNodeSize() const
+uint32_t Node::getRenderNodeSize() const
 {
 	return nodeData.size();
 }
@@ -517,7 +517,7 @@ VkBool32 Node::removeChildNode(const INodeSP& childNode)
     return allChildNodes.remove(childNode);
 }
 
-size_t Node::getNumberChildNodes() const
+uint32_t Node::getNumberChildNodes() const
 {
     return allChildNodes.size();
 }
@@ -548,7 +548,7 @@ VkBool32 Node::removeMesh(const IMeshSP& mesh)
     return allMeshes.remove(mesh);
 }
 
-size_t Node::getNumberMeshes() const
+uint32_t Node::getNumberMeshes() const
 {
     return allMeshes.size();
 }
@@ -568,7 +568,7 @@ VkBool32 Node::removeCamera(const ICameraSP& camera)
     return allCameras.remove(camera);
 }
 
-size_t Node::getNumberCameras() const
+uint32_t Node::getNumberCameras() const
 {
     return allCameras.size();
 }
@@ -588,7 +588,7 @@ VkBool32 Node::removeLight(const ILightSP& light)
     return allLights.remove(light);
 }
 
-size_t Node::getNumberLights() const
+uint32_t Node::getNumberLights() const
 {
     return allLights.size();
 }
@@ -608,7 +608,7 @@ VkBool32 Node::removeConstraint(const IConstraintSP& constraint)
     return allConstraints.remove(constraint);
 }
 
-size_t Node::getNumberConstraints() const
+uint32_t Node::getNumberConstraints() const
 {
     return allConstraints.size();
 }
@@ -640,7 +640,7 @@ VkBool32 Node::removeAnimation(const IAnimationSP& animation)
     return result;
 }
 
-size_t Node::getNumberAnimations() const
+uint32_t Node::getNumberAnimations() const
 {
     return allAnimations.size();
 }
@@ -670,7 +670,7 @@ void Node::setCurrentAnimation(const int32_t currentAnimation)
 
 void Node::addParticleSystem(const IParticleSystemSP& particleSystem)
 {
-	size_t index = allParticleSystems.index(particleSystem);
+	uint32_t index = allParticleSystems.index(particleSystem);
 
 	if (index < allParticleSystems.size())
 	{
@@ -683,7 +683,7 @@ void Node::addParticleSystem(const IParticleSystemSP& particleSystem)
 
 VkBool32 Node::removeParticleSystem(const IParticleSystemSP& particleSystem)
 {
-	size_t index = allParticleSystems.index(particleSystem);
+	uint32_t index = allParticleSystems.index(particleSystem);
 
 	if (index == allParticleSystems.size())
 	{
@@ -696,7 +696,7 @@ VkBool32 Node::removeParticleSystem(const IParticleSystemSP& particleSystem)
     return allParticleSystemSeeds.removeAt(index);
 }
 
-size_t Node::getNumberParticleSystems() const
+uint32_t Node::getNumberParticleSystems() const
 {
 	return allParticleSystems.size();
 }
@@ -708,7 +708,7 @@ const SmartPointerVector<IParticleSystemSP>& Node::getParticleSystems() const
 
 VkBool32 Node::setParticleSystemSeed(const IParticleSystemSP& particleSystem, const uint32_t seed)
 {
-	size_t index = allParticleSystems.index(particleSystem);
+	uint32_t index = allParticleSystems.index(particleSystem);
 
 	if (index == allParticleSystems.size())
 	{
@@ -722,7 +722,7 @@ VkBool32 Node::setParticleSystemSeed(const IParticleSystemSP& particleSystem, co
 
 uint32_t Node::getParticleSystemSeed(const IParticleSystemSP& particleSystem) const
 {
-	size_t index = allParticleSystems.index(particleSystem);
+	uint32_t index = allParticleSystems.index(particleSystem);
 
 	if (index == allParticleSystems.size())
 	{
@@ -736,7 +736,7 @@ VkBool32 Node::getDirty() const
 {
 	VkBool32 total = VK_FALSE;
 
-	for (size_t i = 0; i < transformMatrixDirty.size(); i++)
+	for (uint32_t i = 0; i < transformMatrixDirty.size(); i++)
     {
 		total = total || transformMatrixDirty[i];
     }
@@ -746,12 +746,12 @@ VkBool32 Node::getDirty() const
 
 void Node::setDirty(const VkBool32 dirty)
 {
-    for (size_t i = 0; i < transformMatrixDirty.size(); i++)
+    for (uint32_t i = 0; i < transformMatrixDirty.size(); i++)
     {
     	transformMatrixDirty[i] = dirty;
     }
 
-    for (size_t i = 0; i < bindMatrixDirty.size(); i++)
+    for (uint32_t i = 0; i < bindMatrixDirty.size(); i++)
     {
     	bindMatrixDirty[i] = dirty;
     }
@@ -769,7 +769,7 @@ void Node::setTransformUniformBuffer(const IBufferObjectSP& transformUniformBuff
     this->transformMatrixDirty.resize(0);
     this->bindMatrixDirty.resize(0);
 
-    for (size_t i = 0; i < nodeData.size(); i++)
+    for (uint32_t i = 0; i < nodeData.size(); i++)
     {
         if (nodeData[i].get())
         {
@@ -791,7 +791,7 @@ void Node::setJointsUniformBuffer(const int32_t joints, const IBufferObjectSP& j
     this->transformMatrixDirty.resize(0);
     this->bindMatrixDirty.resize(0);
 
-    for (size_t i = 0; i < nodeData.size(); i++)
+    for (uint32_t i = 0; i < nodeData.size(); i++)
     {
         if (nodeData[i].get())
         {
@@ -809,7 +809,7 @@ Sphere Node::getBoundingSphere() const
 {
 	Sphere boundingSphere = transformMatrix * box.getSphere();
 
-	for (size_t i = 0; i < allChildNodes.size(); i++)
+	for (uint32_t i = 0; i < allChildNodes.size(); i++)
     {
 		boundingSphere += allChildNodes[i]->getBoundingSphere();
     }
@@ -869,7 +869,7 @@ INodeSP Node::findNodeRecursive(const std::string& searchName)
 		return INode::shared_from_this();
 	}
 
-    for (size_t i = 0; i < allChildNodes.size(); i++)
+    for (uint32_t i = 0; i < allChildNodes.size(); i++)
     {
     	auto result = allChildNodes[i]->findNodeRecursive(searchName);
 
@@ -919,12 +919,12 @@ void Node::updateParameterRecursive(const Parameter* parameter)
 
     //
 
-	for (size_t i = 0; i < allMeshes.size(); i++)
+	for (uint32_t i = 0; i < allMeshes.size(); i++)
 	{
 		allMeshes[i]->updateParameterRecursive(parameter);
 	}
 
-	for (size_t i = 0; i < allChildNodes.size(); i++)
+	for (uint32_t i = 0; i < allChildNodes.size(); i++)
 	{
 		allChildNodes[i]->updateParameterRecursive(parameter);
 	}
@@ -932,7 +932,7 @@ void Node::updateParameterRecursive(const Parameter* parameter)
 
 void Node::updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets, const uint32_t currentBuffer)
 {
-	if ((size_t)currentBuffer >= nodeData.size())
+	if (currentBuffer >= nodeData.size())
 	{
 		return;
 	}
@@ -944,12 +944,12 @@ void Node::updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCo
 
     //
 
-	for (size_t i = 0; i < allMeshes.size(); i++)
+	for (uint32_t i = 0; i < allMeshes.size(); i++)
 	{
 		allMeshes[i]->updateDescriptorSetsRecursive(allWriteDescriptorSetsCount, allWriteDescriptorSets, currentBuffer, name);
 	}
 
-	for (size_t i = 0; i < allChildNodes.size(); i++)
+	for (uint32_t i = 0; i < allChildNodes.size(); i++)
 	{
 		allChildNodes[i]->updateDescriptorSetsRecursive(allWriteDescriptorSetsCount, allWriteDescriptorSets, currentBuffer);
 	}
@@ -995,7 +995,7 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
 
         //
 
-        for (size_t i = 0; i < currentChannels.size(); i++)
+        for (uint32_t i = 0; i < currentChannels.size(); i++)
         {
             value = interpolate(currentTime, currentChannels[i]);
 
@@ -1074,7 +1074,7 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
 
     if (allConstraints.size() > 0)
     {
-    	for (size_t i = 0; i < allConstraints.size(); i++)
+    	for (uint32_t i = 0; i < allConstraints.size(); i++)
     	{
     		if (!allConstraints[i]->applyConstraint(*this))
     		{
@@ -1236,7 +1236,7 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
 
         	if (allCameras.size() > 0)
 			{
-				for (size_t i = 0; i < allCameras.size(); i++)
+				for (uint32_t i = 0; i < allCameras.size(); i++)
 				{
 					allCameras[i]->updateViewMatrix(this->transformMatrix);
 				}
@@ -1244,7 +1244,7 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
 
 			if (allLights.size() > 0)
 			{
-				for (size_t i = 0; i < allLights.size(); i++)
+				for (uint32_t i = 0; i < allLights.size(); i++)
 				{
 					allLights[i]->updateDirection(this->transformMatrix);
 				}
@@ -1252,7 +1252,7 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
 
 			if (allMeshes.size() > 0)
 			{
-				VkDeviceSize dynamicOffset = (VkDeviceSize)currentBuffer * transformUniformBuffer->getBuffer()->getSize() / transformUniformBuffer->getBufferCount();
+				uint32_t dynamicOffset = currentBuffer * (uint32_t)(transformUniformBuffer->getBuffer()->getSize() / transformUniformBuffer->getBufferCount());
 
 				// A mesh has to be rendered, so update with transform matrix from the node tree.
 
@@ -1268,7 +1268,7 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
         {
         	// Process armature.
 
-        	VkDeviceSize dynamicOffset = (VkDeviceSize)currentBuffer * jointsUniformBuffer->getBuffer()->getSize() / jointsUniformBuffer->getBufferCount();
+        	uint32_t dynamicOffset = currentBuffer * (uint32_t)(jointsUniformBuffer->getBuffer()->getSize() / jointsUniformBuffer->getBufferCount());
 
         	// Store parent matrix separately, as this allows to modify it without recalculating the bind matrices.
 
@@ -1291,9 +1291,9 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
 
 					if (currentJointsUniformBuffer.get())
 					{
-						VkDeviceSize dynamicOffset = (VkDeviceSize)currentBuffer * currentJointsUniformBuffer->getBuffer()->getSize() / currentJointsUniformBuffer->getBufferCount();
+						uint32_t dynamicOffset = currentBuffer * (uint32_t)(currentJointsUniformBuffer->getBuffer()->getSize() / currentJointsUniformBuffer->getBufferCount());
 
-						size_t offset = sizeof(float) * 16 + sizeof(float) * 12;
+						uint32_t offset = sizeof(float) * 16 + sizeof(float) * 12;
 
 						// Upload the joint matrices to blend them on the GPU.
 
@@ -1324,7 +1324,7 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
 
     // Process children.
 
-    for (size_t i = 0; i < allChildNodes.size(); i++)
+    for (uint32_t i = 0; i < allChildNodes.size(); i++)
     {
         allChildNodes[i]->updateTransformRecursive(deltaTime, deltaTicks, tickTime, currentBuffer, this->transformMatrix, this->transformMatrixDirty[currentBuffer], this->bindMatrix, this->bindMatrixDirty[currentBuffer], newArmatureNode);
     }
@@ -1353,12 +1353,12 @@ void Node::drawRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerV
 
     //
 
-	for (size_t i = 0; i < allMeshes.size(); i++)
+	for (uint32_t i = 0; i < allMeshes.size(); i++)
 	{
 		allMeshes[i]->drawRecursive(cmdBuffer, allGraphicsPipelines, currentBuffer, dynamicOffsetMappings, renderOverwrite, name);
 	}
 
-	for (size_t i = 0; i < allChildNodes.size(); i++)
+	for (uint32_t i = 0; i < allChildNodes.size(); i++)
 	{
 		allChildNodes[i]->drawRecursive(cmdBuffer, allGraphicsPipelines, currentBuffer, dynamicOffsetMappings, renderOverwrite);
 	}
@@ -1436,13 +1436,13 @@ INodeSP Node::clone() const
 
 void Node::destroy()
 {
-    for (size_t i = 0; i < allChildNodes.size(); i++)
+    for (uint32_t i = 0; i < allChildNodes.size(); i++)
     {
         allChildNodes[i]->destroy();
     }
     allChildNodes.clear();
 
-    for (size_t i = 0; i < allMeshes.size(); i++)
+    for (uint32_t i = 0; i < allMeshes.size(); i++)
     {
         allMeshes[i]->destroy();
     }
@@ -1452,7 +1452,7 @@ void Node::destroy()
 
     allConstraints.clear();
 
-    for (size_t i = 0; i < allAnimations.size(); i++)
+    for (uint32_t i = 0; i < allAnimations.size(); i++)
     {
         allAnimations[i]->destroy();
     }
@@ -1461,7 +1461,7 @@ void Node::destroy()
     allParticleSystems.clear();
     allParticleSystemSeeds.clear();
 
-    for (size_t i = 0; i < nodeData.size(); i++)
+    for (uint32_t i = 0; i < nodeData.size(); i++)
     {
         if (nodeData[i].get())
         {

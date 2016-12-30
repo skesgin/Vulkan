@@ -74,7 +74,7 @@ public:
 
     virtual void unmapMemory() = 0;
 
-    virtual VkResult upload(const VkDeviceSize offset, const VkMemoryMapFlags flags, const void* uploadData, const size_t uploadDataSize) = 0;
+    virtual VkResult upload(const VkDeviceSize offset, const VkMemoryMapFlags flags, const void* uploadData, const uint32_t uploadDataSize) = 0;
 
 };
 

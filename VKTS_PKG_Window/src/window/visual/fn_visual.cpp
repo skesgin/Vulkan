@@ -113,12 +113,12 @@ IVisualContextSP VKTS_APIENTRY visualCreateContext()
 		return IVisualContextSP();
 	}
 
-	for (size_t i = 0; i < _visualGetActiveDisplays().size(); i++)
+	for (uint32_t i = 0; i < _visualGetActiveDisplays().size(); i++)
 	{
 		currentVisualContext->attachDisplay(_visualGetActiveDisplays()[i]);
 	}
 
-	for (size_t i = 0; i < _visualGetActiveWindows().size(); i++)
+	for (uint32_t i = 0; i < _visualGetActiveWindows().size(); i++)
 	{
 		currentVisualContext->attachWindow(_visualGetActiveWindows()[i]);
 	}

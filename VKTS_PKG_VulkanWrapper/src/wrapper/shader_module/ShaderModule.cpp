@@ -29,7 +29,7 @@
 namespace vkts
 {
 
-ShaderModule::ShaderModule(const std::string& name, const VkDevice device, const VkShaderModuleCreateFlags flags, const size_t codeSize, const void* code, const VkShaderModule shaderModule) :
+ShaderModule::ShaderModule(const std::string& name, const VkDevice device, const VkShaderModuleCreateFlags flags, const uint32_t codeSize, const void* code, const VkShaderModule shaderModule) :
     IShaderModule(), name(name), device(device), shaderModuleCreateInfo{VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO, nullptr, flags, codeSize, nullptr}, shaderModule(shaderModule)
 {
     this->code = binaryBufferCreate((uint8_t*) code, codeSize);

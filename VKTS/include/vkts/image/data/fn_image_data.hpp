@@ -68,21 +68,21 @@ VKTS_APICALL VkBool32 VKTS_APIENTRY imageDataIsSRGB(const VkFormat format);
  *
  * @ThreadSafe
  */
-VKTS_APICALL int32_t VKTS_APIENTRY imageDataGetBytesPerTexel(const VkFormat format);
+VKTS_APICALL uint32_t VKTS_APIENTRY imageDataGetBytesPerTexel(const VkFormat format);
 
 /**
  * Only for supported and non compressed formats the bytes per channel is returned.
  *
  * @ThreadSafe
  */
-VKTS_APICALL int32_t VKTS_APIENTRY imageDataGetBytesPerChannel(const VkFormat format);
+VKTS_APICALL uint32_t VKTS_APIENTRY imageDataGetBytesPerChannel(const VkFormat format);
 
 /**
  * Only for supported and non compressed formats the number of channels is returned.
  *
  * @ThreadSafe
  */
-VKTS_APICALL int32_t VKTS_APIENTRY imageDataGetNumberChannels(const VkFormat format);
+VKTS_APICALL uint32_t VKTS_APIENTRY imageDataGetNumberChannels(const VkFormat format);
 
 /**
  * Only for supported and non compressed formats the number of channels is returned.

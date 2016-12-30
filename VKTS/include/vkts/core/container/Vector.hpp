@@ -40,12 +40,12 @@ protected:
 
     V* allData;
 
-    size_t topElement;
-    size_t allDataCount;
+    uint32_t topElement;
+    uint32_t allDataCount;
 
-    size_t getAllocSize()
+    uint32_t getAllocSize()
     {
-    	size_t tempAllDataCount = allDataCount * 2;
+    	uint32_t tempAllDataCount = allDataCount * 2;
 
     	return tempAllDataCount > 0 ? tempAllDataCount : 1;
     }
@@ -58,7 +58,7 @@ public:
 
     }
 
-    Vector(const size_t& allDataCount) :
+    Vector(const uint32_t& allDataCount) :
         allData(nullptr), topElement(0), allDataCount(0)
     {
         allData = new V[allDataCount];
@@ -82,7 +82,7 @@ public:
         	throw std::bad_alloc();
         }
 
-        for (size_t i = 0; i < other.allDataCount; i++)
+        for (uint32_t i = 0; i < other.allDataCount; i++)
         {
             allData[i] = other.allData[i];
         }
@@ -124,7 +124,7 @@ public:
         	throw std::bad_alloc();
         }
 
-        for (size_t i = 0; i < other.allDataCount; i++)
+        for (uint32_t i = 0; i < other.allDataCount; i++)
         {
             allData[i] = other.allData[i];
         }
@@ -195,7 +195,7 @@ public:
             	throw std::bad_alloc();
             }
 
-            for (size_t i = 0; i < getAllocSize(); i++)
+            for (uint32_t i = 0; i < getAllocSize(); i++)
             {
                 if (i < allDataCount)
                 {
@@ -214,7 +214,7 @@ public:
         topElement++;
     }
 
-    VkBool32 insert(const size_t index, const V& value)
+    VkBool32 insert(const uint32_t index, const V& value)
     {
         if (index > topElement)
         {
@@ -237,7 +237,7 @@ public:
             	throw std::bad_alloc();
             }
 
-            for (size_t i = 0; i < getAllocSize(); i++)
+            for (uint32_t i = 0; i < getAllocSize(); i++)
             {
                 if (i < allDataCount)
                 {
@@ -252,7 +252,7 @@ public:
             allDataCount = getAllocSize();
         }
 
-        for (size_t copyIndex = topElement; copyIndex >= index + 1; copyIndex--)
+        for (uint32_t copyIndex = topElement; copyIndex >= index + 1; copyIndex--)
         {
             allData[copyIndex] = allData[copyIndex - 1];
         }
@@ -265,7 +265,7 @@ public:
 
     VkBool32 remove(const V& value)
     {
-        for (size_t i = 0; i < topElement; i++)
+        for (uint32_t i = 0; i < topElement; i++)
         {
             if (allData[i] == value)
             {
@@ -276,7 +276,7 @@ public:
                     return VK_TRUE;
                 }
 
-                for (size_t copyIndex = i; copyIndex < topElement - 1;
+                for (uint32_t copyIndex = i; copyIndex < topElement - 1;
                         copyIndex++)
                 {
                     allData[copyIndex] = allData[copyIndex + 1];
@@ -291,7 +291,7 @@ public:
         return VK_FALSE;
     }
 
-    VkBool32 removeAt(const size_t index)
+    VkBool32 removeAt(const uint32_t index)
     {
         if (index >= topElement)
         {
@@ -303,7 +303,7 @@ public:
 
     VkBool32 contains(const V& value) const
     {
-        for (size_t i = 0; i < topElement; i++)
+        for (uint32_t i = 0; i < topElement; i++)
         {
             if (value == allData[i])
             {
@@ -314,7 +314,7 @@ public:
         return VK_FALSE;
     }
 
-    V& operator[](const size_t index)
+    V& operator[](const uint32_t index)
     {
     	if (index > topElement)
     	{
@@ -331,7 +331,7 @@ public:
         return allData[index];
     }
 
-    const V& operator[](const size_t index) const
+    const V& operator[](const uint32_t index) const
     {
     	if (index >= topElement)
     	{
@@ -346,14 +346,14 @@ public:
         return allData;
     }
 
-    size_t size() const
+    uint32_t size() const
     {
         return topElement;
     }
 
-    size_t index(const V& value) const
+    uint32_t index(const V& value) const
     {
-        for (size_t i = 0; i < topElement; i++)
+        for (uint32_t i = 0; i < topElement; i++)
         {
             if (value == allData[i])
             {

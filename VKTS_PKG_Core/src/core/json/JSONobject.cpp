@@ -63,7 +63,7 @@ const Vector<std::string>& JSONobject::getAllKeys() const
 	return allKeyValues.keys();
 }
 
-size_t JSONobject::size() const
+uint32_t JSONobject::size() const
 {
 	return allKeyValues.size();
 }
@@ -78,7 +78,7 @@ VkBool32 JSONobject::encode(std::string& jsonText, std::int32_t& spaces) const
 	{
 		doLineFeed(jsonText, spaces, 1);
 
-		for (size_t key = 0; key < allKeys.size(); key++)
+		for (uint32_t key = 0; key < allKeys.size(); key++)
 		{
 			JSONstring tempJSONstring(allKeys[key]);
 

@@ -48,7 +48,7 @@ void RenderSubMesh::draw(const ICommandBuffersSP& cmdBuffer, const SmartPointerV
     }
     else if (subMesh.getPhongMaterial().get())
     {
-		for (size_t i = 0; i < allGraphicsPipelines.size(); i++)
+		for (uint32_t i = 0; i < allGraphicsPipelines.size(); i++)
 		{
 			if (allGraphicsPipelines[i]->getVertexBufferType() == subMesh.getVertexBufferType())
 			{

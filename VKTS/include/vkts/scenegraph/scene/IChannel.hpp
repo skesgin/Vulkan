@@ -62,7 +62,7 @@ public:
 
     virtual VkBool32 removeEntry(const float key) = 0;
 
-    virtual size_t getNumberEntries() const = 0;
+    virtual uint32_t getNumberEntries() const = 0;
 
     virtual const std::vector<float>& getKeys() const = 0;
 

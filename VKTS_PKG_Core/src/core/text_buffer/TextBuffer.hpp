@@ -39,7 +39,7 @@ private:
 
     std::string text;
 
-    size_t pos;
+    uint32_t pos;
 
 public:
 
@@ -59,11 +59,11 @@ public:
 
     virtual const char* getString() const override;
 
-    virtual size_t getLength() const override;
+    virtual uint32_t getLength() const override;
 
     virtual VkBool32 seek(const int64_t offset, const VkTsSearch search) override;
 
-    virtual const char* gets(char* str, const size_t num) override;
+    virtual const char* gets(char* str, const uint32_t num) override;
 
     virtual VkBool32 puts(const char* str) override;
 

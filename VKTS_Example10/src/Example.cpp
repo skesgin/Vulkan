@@ -298,7 +298,7 @@ VkBool32 Example::buildFramebuffer(const int32_t usedBuffer)
 {
 	VkImageView imageViews[4];
 
-	for (size_t i = 0; i < 4; i++)
+	for (uint32_t i = 0; i < 4; i++)
 	{
 		imageViews[i] = allGBufferImageViews[i + 4* usedBuffer]->getImageView();
 	}
@@ -1624,15 +1624,15 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 
 	//
 
-	for (size_t i = 0; i < allStageImages.size(); i++)
+	for (uint32_t i = 0; i < allStageImages.size(); i++)
 	{
 		allStageImages[i]->destroy();
 	}
-	for (size_t i = 0; i < allStageBuffers.size(); i++)
+	for (uint32_t i = 0; i < allStageBuffers.size(); i++)
 	{
 		allStageBuffers[i]->destroy();
 	}
-	for (size_t i = 0; i < allStageDeviceMemories.size(); i++)
+	for (uint32_t i = 0; i < allStageDeviceMemories.size(); i++)
 	{
 		allStageDeviceMemories[i]->destroy();
 	}
@@ -1733,7 +1733,7 @@ void Example::terminateResources(const vkts::IUpdateThreadContext& updateContext
 				resolveGraphicsPipeline->destroy();
 			}
 
-			for (size_t i = 0; i < allGraphicsPipelines.size(); i++)
+			for (uint32_t i = 0; i < allGraphicsPipelines.size(); i++)
 			{
 				allGraphicsPipelines[i]->destroy();
 			}
@@ -1746,13 +1746,13 @@ void Example::terminateResources(const vkts::IUpdateThreadContext& updateContext
 			}
 
 
-			for (size_t i = 0; i < allGBufferImageViews.size(); i++)
+			for (uint32_t i = 0; i < allGBufferImageViews.size(); i++)
 			{
 				allGBufferImageViews[i]->destroy();
 			}
 			allGBufferImageViews.clear();
 
-			for (size_t i = 0; i < allGBufferTextures.size(); i++)
+			for (uint32_t i = 0; i < allGBufferTextures.size(); i++)
 			{
 				allGBufferTextures[i]->destroy();
 			}
@@ -1912,7 +1912,7 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 
 	//
 
-	for (size_t i = 0; i < allUpdateables.size(); i++)
+	for (uint32_t i = 0; i < allUpdateables.size(); i++)
 	{
 		allUpdateables[i]->update(updateContext.getDeltaTime(), updateContext.getDeltaTicks(), updateContext.getTickTime());
 	}
@@ -2303,7 +2303,7 @@ void Example::terminate(const vkts::IUpdateThreadContext& updateContext)
 				resolveFragmentShaderModule->destroy();
 			}
 
-			for (size_t i = 0; i < allBSDFVertexShaderModules.size(); i++)
+			for (uint32_t i = 0; i < allBSDFVertexShaderModules.size(); i++)
 			{
 				allBSDFVertexShaderModules[i]->destroy();
 			}

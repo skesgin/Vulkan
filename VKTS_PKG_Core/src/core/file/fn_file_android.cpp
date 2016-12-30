@@ -85,7 +85,7 @@ IBinaryBufferSP VKTS_APIENTRY _fileLoadBinary(const char* filename)
 
     const uint8_t* data = (const uint8_t*)AAsset_getBuffer(sourceAsset);
 
-	const size_t size = (size_t)AAsset_getLength(sourceAsset);
+	const uint32_t size = (uint32_t)AAsset_getLength(sourceAsset);
 
 	//
 

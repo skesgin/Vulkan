@@ -29,7 +29,7 @@
 namespace vkts
 {
 
-uint8_t* BinaryBuffer::copyData(const uint8_t* source, const size_t size) const
+uint8_t* BinaryBuffer::copyData(const uint8_t* source, const uint32_t size) const
 {
     if (!source || size == 0)
     {
@@ -53,7 +53,7 @@ BinaryBuffer::BinaryBuffer() :
 {
 }
 
-BinaryBuffer::BinaryBuffer(const size_t size) :
+BinaryBuffer::BinaryBuffer(const uint32_t size) :
     IBinaryBuffer(), data(nullptr), size(size), pos(0)
 {
     data = new uint8_t[this->size];
@@ -64,7 +64,7 @@ BinaryBuffer::BinaryBuffer(const size_t size) :
     }
 }
 
-BinaryBuffer::BinaryBuffer(const uint8_t* data, const size_t size) :
+BinaryBuffer::BinaryBuffer(const uint8_t* data, const uint32_t size) :
     IBinaryBuffer(), data(nullptr), size(size), pos(0)
 {
     this->data = copyData(data, size);
@@ -75,7 +75,7 @@ BinaryBuffer::BinaryBuffer(const uint8_t* data, const size_t size) :
     }
 }
 
-BinaryBuffer::BinaryBuffer(uint8_t* data, const size_t size) :
+BinaryBuffer::BinaryBuffer(uint8_t* data, const uint32_t size) :
     IBinaryBuffer(), data(data), size(size), pos(0)
 {
     if (!this->data || size == 0)
@@ -117,7 +117,7 @@ const uint8_t* BinaryBuffer::getByteData() const
     return data;
 }
 
-size_t BinaryBuffer::getSize() const
+uint32_t BinaryBuffer::getSize() const
 {
     return size;
 }
@@ -133,12 +133,12 @@ VkBool32 BinaryBuffer::seek(const int64_t offset, const VkTsSearch search)
     {
         case VKTS_SEARCH_ABSOLUTE:
         {
-            if (offset < 0 || static_cast<size_t>(offset) > size)
+            if (offset < 0 || offset > static_cast<int64_t>(size))
             {
                 return VK_FALSE;
             }
 
-            pos = (size_t)offset;
+            pos = static_cast<uint32_t>(offset);
 
             return VK_TRUE;
         }
@@ -147,20 +147,22 @@ VkBool32 BinaryBuffer::seek(const int64_t offset, const VkTsSearch search)
         {
             if (offset < 0)
             {
-                if (pos < static_cast<size_t>(-offset))
+                if (static_cast<int64_t>(pos) < -offset)
                 {
                     return VK_FALSE;
                 }
+
+                pos -= static_cast<uint32_t>(-offset);
             }
             else if (offset > 0)
             {
-                if (size - pos <= static_cast<size_t>(offset))
+                if (static_cast<int64_t>(size - pos) <= offset)
                 {
                     return VK_FALSE;
                 }
-            }
 
-            pos += (size_t)offset;
+                pos += static_cast<uint32_t>(offset);
+            }
 
             return VK_TRUE;
         }
@@ -170,7 +172,7 @@ VkBool32 BinaryBuffer::seek(const int64_t offset, const VkTsSearch search)
     return VK_FALSE;
 }
 
-size_t BinaryBuffer::read(void* ptr, const size_t sizeElement, const size_t countElement)
+uint32_t BinaryBuffer::read(void* ptr, const uint32_t sizeElement, const uint32_t countElement)
 {
     if (!data)
     {
@@ -187,11 +189,11 @@ size_t BinaryBuffer::read(void* ptr, const size_t sizeElement, const size_t coun
         return 0;
     }
 
-    size_t bytesRead = sizeElement * countElement;
+    uint32_t bytesRead = sizeElement * countElement;
 
     bytesRead = glm::min(bytesRead, size - pos);
 
-    size_t countElementRead = bytesRead / sizeElement;
+    uint32_t countElementRead = bytesRead / sizeElement;
 
     bytesRead = sizeElement * countElementRead;
 
@@ -202,7 +204,7 @@ size_t BinaryBuffer::read(void* ptr, const size_t sizeElement, const size_t coun
     return countElementRead;
 }
 
-size_t BinaryBuffer::write(const void* ptr, const size_t sizeElement, const size_t countElement)
+uint32_t BinaryBuffer::write(const void* ptr, const uint32_t sizeElement, const uint32_t countElement)
 {
     if (!data)
     {
@@ -214,7 +216,7 @@ size_t BinaryBuffer::write(const void* ptr, const size_t sizeElement, const size
         return 0;
     }
 
-    size_t bytesWrite = sizeElement * countElement;
+    uint32_t bytesWrite = sizeElement * countElement;
 
     if (pos + bytesWrite > size)
     {
@@ -234,7 +236,7 @@ size_t BinaryBuffer::write(const void* ptr, const size_t sizeElement, const size
         data = tempData;
     }
 
-    size_t countElementWrite = bytesWrite / sizeElement;
+    uint32_t countElementWrite = bytesWrite / sizeElement;
 
     bytesWrite = sizeElement * countElementWrite;
 

@@ -48,11 +48,11 @@ public:
 
     virtual const char* getString() const = 0;
 
-    virtual size_t getLength() const = 0;
+    virtual uint32_t getLength() const = 0;
 
     virtual VkBool32 seek(const int64_t offset, const VkTsSearch search) = 0;
 
-    virtual const char* gets(char* str, const size_t num) = 0;
+    virtual const char* gets(char* str, const uint32_t num) = 0;
 
     virtual VkBool32 puts(const char* str) = 0;
 

@@ -48,7 +48,7 @@ private:
 public:
 
     PipelineCache() = delete;
-    PipelineCache(const VkDevice device, const VkPipelineCacheCreateFlags flags, const size_t initialDataSize, const void* initialData, const VkPipelineCache pipelineCache);
+    PipelineCache(const VkDevice device, const VkPipelineCacheCreateFlags flags, const uint32_t initialDataSize, const void* initialData, const VkPipelineCache pipelineCache);
     PipelineCache(const PipelineCache& other) = delete;
     PipelineCache(PipelineCache&& other) = delete;
     virtual ~PipelineCache();

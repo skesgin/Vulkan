@@ -319,7 +319,7 @@ IImageObjectSP VKTS_APIENTRY imageObjectCreate(IImageSP& stageImage, IBufferSP& 
 				for (uint32_t mipLevel = 0; mipLevel < imageData->getMipLevels(); mipLevel++)
 				{
 					VkExtent3D currentExtent;
-					size_t currentOffset;
+					uint32_t currentOffset;
 					if (!imageData->getExtentAndOffset(currentExtent, currentOffset, mipLevel, arrayLayer))
 					{
 						return IImageObjectSP();

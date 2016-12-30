@@ -48,7 +48,7 @@ public:
     {
     }
 
-    SmartPointerMap(const size_t& allDataCount) :
+    SmartPointerMap(const uint32_t& allDataCount) :
         allKeys(allDataCount), allValues(allDataCount)
     {
     }
@@ -94,12 +94,12 @@ public:
         allValues.clear();
     }
 
-    size_t find(const K& key) const
+    uint32_t find(const K& key) const
     {
-        size_t start = 0;
-        size_t end = allKeys.size();
+        uint32_t start = 0;
+        uint32_t end = allKeys.size();
 
-        size_t result = 0;
+        uint32_t result = 0;
 
         while (start < end)
         {
@@ -129,7 +129,7 @@ public:
 
     VkBool32 set(const K& key, const V& value)
     {
-        for (size_t i = 0; i < allKeys.size(); i++)
+        for (uint32_t i = 0; i < allKeys.size(); i++)
         {
             if (key == allKeys[i])
             {
@@ -154,7 +154,7 @@ public:
 
     VkBool32 remove(const K& key)
     {
-        size_t index = find(key);
+        uint32_t index = find(key);
 
         if (index != allKeys.size())
         {
@@ -164,7 +164,7 @@ public:
         return VK_FALSE;
     }
 
-    VkBool32 removeAt(const size_t index)
+    VkBool32 removeAt(const uint32_t index)
     {
         if (index >= allKeys.size())
         {
@@ -184,7 +184,7 @@ public:
 
     V& operator[](const K& key)
     {
-        size_t index = find(key);
+        uint32_t index = find(key);
 
         if (index != allKeys.size())
         {
@@ -203,22 +203,22 @@ public:
         return allValues[find(key)];
     }
 
-    K& keyAt(const size_t index)
+    K& keyAt(const uint32_t index)
     {
         return allKeys[index];
     }
 
-    const K& keyAt(const size_t index) const
+    const K& keyAt(const uint32_t index) const
     {
         return allKeys[index];
     }
 
-    V& valueAt(const size_t index)
+    V& valueAt(const uint32_t index)
     {
         return allValues[index];
     }
 
-    const V& valueAt(const size_t index) const
+    const V& valueAt(const uint32_t index) const
     {
         return allValues[index];
     }
@@ -233,7 +233,7 @@ public:
         return allValues;
     }
 
-    size_t size() const
+    uint32_t size() const
     {
         return allKeys.size();
     }

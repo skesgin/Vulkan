@@ -52,13 +52,13 @@ public:
 
     virtual const uint8_t* getByteData() const = 0;
 
-    virtual size_t getSize() const = 0;
+    virtual uint32_t getSize() const = 0;
 
     virtual VkBool32 seek(const int64_t offset, const VkTsSearch search) = 0;
 
-    virtual size_t read(void* ptr, const size_t sizeElement, const size_t countElement) = 0;
+    virtual uint32_t read(void* ptr, const uint32_t sizeElement, const uint32_t countElement) = 0;
 
-    virtual size_t write(const void* ptr, const size_t sizeElement, const size_t countElement) = 0;
+    virtual uint32_t write(const void* ptr, const uint32_t sizeElement, const uint32_t countElement) = 0;
 
     virtual VkBool32 copy(void* data) const = 0;
 

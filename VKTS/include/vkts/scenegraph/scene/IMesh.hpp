@@ -54,7 +54,7 @@ public:
 
     virtual VkBool32 removeSubMesh(const ISubMeshSP& subMesh) = 0;
 
-    virtual size_t getNumberSubMeshes() const = 0;
+    virtual uint32_t getNumberSubMeshes() const = 0;
 
     virtual const SmartPointerVector<ISubMeshSP>& getSubMeshes() const = 0;
 

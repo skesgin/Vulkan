@@ -31,7 +31,7 @@ namespace vkts
 
 NativeDisplaySP VisualContext::getDisplay(int32_t displayIndex) const
 {
-    size_t index = allAttachedDisplays.find(displayIndex);
+    uint32_t index = allAttachedDisplays.find(displayIndex);
 
     if (index == allAttachedDisplays.size())
     {
@@ -43,7 +43,7 @@ NativeDisplaySP VisualContext::getDisplay(int32_t displayIndex) const
 
 NativeWindowSP VisualContext::getWindow(int32_t windowIndex) const
 {
-    size_t index = allAttachedWindows.find(windowIndex);
+    uint32_t index = allAttachedWindows.find(windowIndex);
 
     if (index == allAttachedWindows.size())
     {

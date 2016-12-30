@@ -59,7 +59,7 @@ VKTS_APICALL VkBool32 VKTS_APIENTRY fileSaveBinary(const char* filename, const I
  *
  * @ThreadSafe
  */
-VKTS_APICALL VkBool32 VKTS_APIENTRY fileSaveBinaryData(const char* filename, const void* data, const size_t size);
+VKTS_APICALL VkBool32 VKTS_APIENTRY fileSaveBinaryData(const char* filename, const void* data, const uint32_t size);
 
 /**
  *

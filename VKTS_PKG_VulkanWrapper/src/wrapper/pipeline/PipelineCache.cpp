@@ -29,7 +29,7 @@
 namespace vkts
 {
 
-PipelineCache::PipelineCache(const VkDevice device, const VkPipelineCacheCreateFlags flags, const size_t initialDataSize, const void* initialData, const VkPipelineCache pipelineCache) :
+PipelineCache::PipelineCache(const VkDevice device, const VkPipelineCacheCreateFlags flags, const uint32_t initialDataSize, const void* initialData, const VkPipelineCache pipelineCache) :
     IPipelineCache(), device(device), pipelineCacheCreateInfo{VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO, nullptr, flags, initialDataSize, initialData}, initialData(), pipelineCache(pipelineCache)
 {
     if (initialDataSize > 0)

@@ -29,7 +29,7 @@
 namespace vkts
 {
 
-size_t VKTS_APIENTRY serializeGetStructureTypeSize(const void* ptr)
+uint32_t VKTS_APIENTRY serializeGetStructureTypeSize(const void* ptr)
 {
     if (!ptr)
     {
@@ -151,7 +151,7 @@ IBinaryBufferSP VKTS_APIENTRY serializeStructureType(const void* ptr)
         return IBinaryBufferSP();
     }
 
-    size_t totalSize = 0;
+    uint32_t totalSize = 0;
 
     const VkTsStructureTypeHeader* sourceStructureTypeHeader = (const VkTsStructureTypeHeader*) ptr;
 
@@ -177,8 +177,8 @@ IBinaryBufferSP VKTS_APIENTRY serializeStructureType(const void* ptr)
 
     VkTsStructureTypeHeader* targetStructureTypeHeader = nullptr;
 
-    size_t currentSize = 0;
-    size_t currentOffset = 0;
+    uint32_t currentSize = 0;
+    uint32_t currentOffset = 0;
 
     while (sourceStructureTypeHeader)
     {

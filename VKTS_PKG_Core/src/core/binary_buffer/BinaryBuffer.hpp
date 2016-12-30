@@ -39,18 +39,18 @@ private:
 
     uint8_t* data;
 
-    size_t size;
+    uint32_t size;
 
-    size_t pos;
+    uint32_t pos;
 
-    uint8_t* copyData(const uint8_t* source, const size_t size) const;
+    uint8_t* copyData(const uint8_t* source, const uint32_t size) const;
 
 public:
 
     BinaryBuffer();
-    explicit BinaryBuffer(const size_t size);
-    BinaryBuffer(const uint8_t* data, const size_t size);
-    BinaryBuffer(uint8_t* data, const size_t size);
+    explicit BinaryBuffer(const uint32_t size);
+    BinaryBuffer(const uint8_t* data, const uint32_t size);
+    BinaryBuffer(uint8_t* data, const uint32_t size);
     BinaryBuffer(const BinaryBuffer& other) = delete;
     BinaryBuffer(BinaryBuffer&& other) = delete;
     virtual ~BinaryBuffer();
@@ -68,13 +68,13 @@ public:
 
     virtual const uint8_t* getByteData() const override;
 
-    virtual size_t getSize() const override;
+    virtual uint32_t getSize() const override;
 
     virtual VkBool32 seek(const int64_t offset, const VkTsSearch search) override;
 
-    virtual size_t read(void* ptr, const size_t sizeElement, const size_t countElement) override;
+    virtual uint32_t read(void* ptr, const uint32_t sizeElement, const uint32_t countElement) override;
 
-    virtual size_t write(const void* ptr, const size_t sizeElement, const size_t countElement) override;
+    virtual uint32_t write(const void* ptr, const uint32_t sizeElement, const uint32_t countElement) override;
 
     virtual VkBool32 copy(void* data) const override;
 

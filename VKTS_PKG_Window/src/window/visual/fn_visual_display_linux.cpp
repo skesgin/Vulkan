@@ -135,7 +135,7 @@ VkBool32 VKTS_APIENTRY _visualDispatchMessagesDisplay()
     {
         struct input_event keyEvent;
 
-		ssize_t numBytes;
+		int64_t numBytes;
 
 		do
 		{
@@ -177,7 +177,7 @@ VkBool32 VKTS_APIENTRY _visualDispatchMessagesDisplay()
     {
         struct input_event mouseEvent;
 
-		ssize_t numBytes;
+		int64_t numBytes;
 
 		do
 		{

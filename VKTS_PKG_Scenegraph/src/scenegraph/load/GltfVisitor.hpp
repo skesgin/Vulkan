@@ -73,22 +73,22 @@ enum GltfState {
 
 typedef struct _GltfBuffer {
 	IBinaryBufferSP binaryBuffer;
-	size_t byteLength;
+	uint32_t byteLength;
 } GltfBuffer;
 
 typedef struct _GltfBufferView {
 	GltfBuffer* buffer;
-    size_t byteOffset;
-    size_t byteLength;
+    uint32_t byteOffset;
+    uint32_t byteLength;
 } GltfBufferView;
 
 typedef struct _GltfAccessor {
 	GltfBufferView* bufferView;
-    size_t byteOffset;
-    size_t byteStride;
+    uint32_t byteOffset;
+    uint32_t byteStride;
     int32_t componentType;
     VkBool32 normalzed;
-    int32_t count;
+    uint32_t count;
     std::string type;
 
     Vector<int8_t> minByte;
@@ -190,8 +190,8 @@ private:
 	std::int32_t gltfIntegerArray[16];
 	float gltfFloatArray[16];
 
-	size_t arrayIndex;
-	size_t arraySize;
+	uint32_t arrayIndex;
+	uint32_t arraySize;
 	VkBool32 numberArray;
 
 	VkBool32 objectArray;
@@ -288,7 +288,7 @@ public:
 
 	//
 
-	const void* getBufferPointer(const GltfAccessor& accessor, const int32_t element) const;
+	const void* getBufferPointer(const GltfAccessor& accessor, const uint32_t element) const;
 
 };
 

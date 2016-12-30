@@ -36,13 +36,13 @@ namespace vkts
  *
  * @ThreadSafe
  */
-VKTS_APICALL VkDeviceSize VKTS_APIENTRY alignmentGetSizeInBytes(const size_t currentSize, const size_t alignment);
+VKTS_APICALL VkDeviceSize VKTS_APIENTRY alignmentGetSizeInBytes(const VkDeviceSize currentSize, const VkDeviceSize alignment);
 
 /**
  *
  * @ThreadSafe
  */
-VKTS_APICALL int32_t VKTS_APIENTRY alignmentGetOffsetInBytes(const VkTsVertexBufferType element, const VkTsVertexBufferType allElements);
+VKTS_APICALL uint32_t VKTS_APIENTRY alignmentGetOffsetInBytes(const VkTsVertexBufferType element, const VkTsVertexBufferType allElements);
 
 /**
  *

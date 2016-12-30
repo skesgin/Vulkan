@@ -50,7 +50,7 @@ public:
     {
     	IGraphicsPipelineSP graphicsPipeline;
 
-    	for (size_t i = 0; i < allGraphicsPipelines.size(); i++)
+    	for (uint32_t i = 0; i < allGraphicsPipelines.size(); i++)
     	{
     		if (allGraphicsPipelines[i]->getTessellationState())
     		{

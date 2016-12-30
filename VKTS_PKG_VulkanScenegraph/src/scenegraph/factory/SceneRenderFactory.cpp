@@ -206,11 +206,11 @@ VkBool32 SceneRenderFactory::prepareBSDFMaterial(const ISceneManagerSP& sceneMan
 		return VK_FALSE;
 	}
 
-    for (size_t i = 0; i < subMesh->getBSDFMaterial()->getNumberTextureObjects(); i++)
+    for (uint32_t i = 0; i < subMesh->getBSDFMaterial()->getNumberTextureObjects(); i++)
     {
     	uint32_t bindingStart = subMesh->getBSDFMaterial()->getForwardRendering() ? VKTS_BINDING_UNIFORM_SAMPLER_BSDF_FORWARD_FIRST : VKTS_BINDING_UNIFORM_SAMPLER_BSDF_DEFERRED_FIRST;
 
-		descriptorSetLayoutBinding[bindingCount].binding = bindingStart + (uint32_t)i;
+		descriptorSetLayoutBinding[bindingCount].binding = bindingStart + i;
 		descriptorSetLayoutBinding[bindingCount].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 		descriptorSetLayoutBinding[bindingCount].descriptorCount = 1;
 		descriptorSetLayoutBinding[bindingCount].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;

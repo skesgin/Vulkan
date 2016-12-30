@@ -106,10 +106,10 @@ IImageDataSP VKTS_APIENTRY imageDataLoadStb(const std::string& name, const IBina
 
     //
 
-    std::vector<size_t> allOffsets;
+    std::vector<uint32_t> allOffsets;
     allOffsets.push_back(0);
 
-	size_t totalSize = (size_t)(x * y * channels_in_file);
+	uint32_t totalSize = (uint32_t)(x * y * channels_in_file);
 
     return IImageDataSP(new ImageData(name, VK_IMAGE_TYPE_2D, format, { (uint32_t)x, (uint32_t)y, 1 }, 1, 1, allOffsets, &data[0], totalSize));
 }
@@ -128,7 +128,7 @@ VkBool32 VKTS_APIENTRY imageDataSaveStb(const std::string& name, const IImageDat
 	}
 
 	VkExtent3D currentExtent;
-	size_t currentOffset;
+	uint32_t currentOffset;
 	if (!imageData->getExtentAndOffset(currentExtent, currentOffset, mipLevel, arrayLayer))
 	{
 		return VK_FALSE;

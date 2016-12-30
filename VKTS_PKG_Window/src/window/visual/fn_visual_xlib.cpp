@@ -504,7 +504,7 @@ VkBool32 VKTS_APIENTRY _visualDispatchMessages()
 
     //
 
-    for (size_t i = 0; i < g_allWindows.values().size(); i++)
+    for (uint32_t i = 0; i < g_allWindows.values().size(); i++)
     {
         if (g_allWindows.valueAt(i)->isInvisibleCursor())
         {
@@ -1068,7 +1068,7 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
                         int32_t xoffset = crtcInfo->x;
                         int32_t yoffset = crtcInfo->y;
 
-                        for (size_t index = 0; index < g_allWindows.size(); index++)
+                        for (uint32_t index = 0; index < g_allWindows.size(); index++)
                         {
                             if (g_allWindows.valueAt(index).get())
                             {
@@ -1106,7 +1106,7 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
 NativeWindowSP VKTS_APIENTRY _visualGetWindow(const int32_t windowIndex)
 {
-    for (size_t index = 0; index < g_allWindows.size(); index++)
+    for (uint32_t index = 0; index < g_allWindows.size(); index++)
     {
         if (g_allWindows.valueAt(index).get())
         {
@@ -1208,7 +1208,7 @@ void VKTS_APIENTRY _visualTerminate()
 
 void VKTS_APIENTRY _visualGamepadSetButton(const int32_t gamepadIndex, const int32_t buttonIndex, const VkBool32 pressed)
 {
-    for (size_t index = 0; index < g_allWindows.size(); index++)
+    for (uint32_t index = 0; index < g_allWindows.size(); index++)
     {
         g_allWindows.valueAt(index)->getGamepadInput(gamepadIndex).setButton(buttonIndex, pressed);
     }
@@ -1216,7 +1216,7 @@ void VKTS_APIENTRY _visualGamepadSetButton(const int32_t gamepadIndex, const int
 
 void VKTS_APIENTRY _visualGamepadSetAxis(const int32_t gamepadIndex, const int32_t axisIndex, const float value)
 {
-    for (size_t index = 0; index < g_allWindows.size(); index++)
+    for (uint32_t index = 0; index < g_allWindows.size(); index++)
     {
         g_allWindows.valueAt(index)->getGamepadInput(gamepadIndex).setAxis(axisIndex, value);
     }
@@ -1226,7 +1226,7 @@ void VKTS_APIENTRY _visualGamepadSetAxis(const int32_t gamepadIndex, const int32
 
 void VKTS_APIENTRY _visualTouchpadSetLocationX(const int32_t slotIndex, const int32_t x, const int32_t rangeX, const int32_t rangeY)
 {
-    for (size_t index = 0; index < g_allWindows.size(); index++)
+    for (uint32_t index = 0; index < g_allWindows.size(); index++)
     {
     	if (g_allWindows.valueAt(index)->getNativeDisplay().lock()->getWidth() > g_allWindows.valueAt(index)->getNativeDisplay().lock()->getHeight() && rangeX > rangeY)
     	{
@@ -1241,7 +1241,7 @@ void VKTS_APIENTRY _visualTouchpadSetLocationX(const int32_t slotIndex, const in
 
 void VKTS_APIENTRY _visualTouchpadSetLocationY(const int32_t slotIndex, const int32_t y, const int32_t rangeX, const int32_t rangeY)
 {
-    for (size_t index = 0; index < g_allWindows.size(); index++)
+    for (uint32_t index = 0; index < g_allWindows.size(); index++)
     {
     	if (g_allWindows.valueAt(index)->getNativeDisplay().lock()->getWidth() > g_allWindows.valueAt(index)->getNativeDisplay().lock()->getHeight() && rangeX > rangeY)
     	{
@@ -1256,7 +1256,7 @@ void VKTS_APIENTRY _visualTouchpadSetLocationY(const int32_t slotIndex, const in
 
 void VKTS_APIENTRY _visualTouchpadSetPressed(const int32_t slotIndex, const VkBool32 pressed)
 {
-    for (size_t index = 0; index < g_allWindows.size(); index++)
+    for (uint32_t index = 0; index < g_allWindows.size(); index++)
     {
         g_allWindows.valueAt(index)->getTouchpadInput().setPressed(slotIndex, pressed);
     }

@@ -39,7 +39,7 @@ Scene::Scene() :
 Scene::Scene(const Scene& other) :
     IScene(), name(other.name + "_clone")
 {
-    for (size_t i = 0; i < other.allObjects.size(); i++)
+    for (uint32_t i = 0; i < other.allObjects.size(); i++)
     {
         const auto& currentObject = other.allObjects[i];
 
@@ -66,7 +66,7 @@ Scene::Scene(const Scene& other) :
         allObjects.append(cloneObject);
     }
 
-    for (size_t i = 0; i < other.allCameras.size(); i++)
+    for (uint32_t i = 0; i < other.allCameras.size(); i++)
     {
         const auto& currentCamera = other.allCameras[i];
 
@@ -93,7 +93,7 @@ Scene::Scene(const Scene& other) :
         allCameras.append(cloneCamera);
     }
 
-    for (size_t i = 0; i < other.allLights.size(); i++)
+    for (uint32_t i = 0; i < other.allLights.size(); i++)
     {
         const auto& currentLight = other.allLights[i];
 
@@ -158,7 +158,7 @@ VkBool32 Scene::removeObject(const IObjectSP& object)
 
 IObjectSP Scene::findObject(const std::string& name) const
 {
-    for (size_t i = 0; i < allObjects.size(); i++)
+    for (uint32_t i = 0; i < allObjects.size(); i++)
     {
     	if (allObjects[i]->getName() == name)
     	{
@@ -169,7 +169,7 @@ IObjectSP Scene::findObject(const std::string& name) const
     return IObjectSP();
 }
 
-size_t Scene::getNumberObjects() const
+uint32_t Scene::getNumberObjects() const
 {
     return allObjects.size();
 }
@@ -192,7 +192,7 @@ VkBool32 Scene::removeCamera(const ICameraSP& camera)
 
 ICameraSP Scene::findCamera(const std::string& name) const
 {
-    for (size_t i = 0; i < allCameras.size(); i++)
+    for (uint32_t i = 0; i < allCameras.size(); i++)
     {
     	if (allCameras[i]->getName() == name)
     	{
@@ -203,7 +203,7 @@ ICameraSP Scene::findCamera(const std::string& name) const
     return ICameraSP();
 }
 
-size_t Scene::getNumberCameras() const
+uint32_t Scene::getNumberCameras() const
 {
     return allCameras.size();
 }
@@ -226,7 +226,7 @@ VkBool32 Scene::removeLight(const ILightSP& light)
 
 ILightSP Scene::findLight(const std::string& name) const
 {
-    for (size_t i = 0; i < allLights.size(); i++)
+    for (uint32_t i = 0; i < allLights.size(); i++)
     {
     	if (allLights[i]->getName() == name)
     	{
@@ -237,7 +237,7 @@ ILightSP Scene::findLight(const std::string& name) const
     return ILightSP();
 }
 
-size_t Scene::getNumberLights() const
+uint32_t Scene::getNumberLights() const
 {
     return allLights.size();
 }
@@ -287,7 +287,7 @@ ITextureObjectSP Scene::getLut() const
     return lut;
 }
 
-void Scene::updateParameterRecursive(const Parameter* parameter, const uint32_t objectOffset, const uint32_t objectStep, const size_t objectLimit)
+void Scene::updateParameterRecursive(const Parameter* parameter, const uint32_t objectOffset, const uint32_t objectStep, const uint32_t objectLimit)
 {
 	if (parameter)
 	{
@@ -301,39 +301,39 @@ void Scene::updateParameterRecursive(const Parameter* parameter, const uint32_t 
         return;
     }
 
-    for (size_t i = (size_t) objectOffset; i < glm::min(allObjects.size(), objectLimit); i += (size_t) objectStep)
+    for (uint32_t i = objectOffset; i < glm::min(allObjects.size(), objectLimit); i += objectStep)
     {
         allObjects[i]->updateParameterRecursive(parameter);
     }
 }
 
-void Scene::updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets, const uint32_t currentBuffer, const uint32_t objectOffset, const uint32_t objectStep, const size_t objectLimit)
+void Scene::updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets, const uint32_t currentBuffer, const uint32_t objectOffset, const uint32_t objectStep, const uint32_t objectLimit)
 {
     if (objectStep == 0)
     {
         return;
     }
 
-    for (size_t i = (size_t) objectOffset; i < glm::min(allObjects.size(), objectLimit); i += (size_t) objectStep)
+    for (uint32_t i = objectOffset; i < glm::min(allObjects.size(), objectLimit); i += objectStep)
     {
         allObjects[i]->updateDescriptorSetsRecursive(allWriteDescriptorSetsCount, allWriteDescriptorSets, currentBuffer);
     }
 }
 
-void Scene::updateTransformRecursive(const double deltaTime, const uint64_t deltaTicks, const double tickTime, const uint32_t currentBuffer, const uint32_t objectOffset, const uint32_t objectStep, const size_t objectLimit)
+void Scene::updateTransformRecursive(const double deltaTime, const uint64_t deltaTicks, const double tickTime, const uint32_t currentBuffer, const uint32_t objectOffset, const uint32_t objectStep, const uint32_t objectLimit)
 {
     if (objectStep == 0)
     {
         return;
     }
 
-    for (size_t i = (size_t) objectOffset; i < glm::min(allObjects.size(), objectLimit); i += (size_t) objectStep)
+    for (uint32_t i = objectOffset; i < glm::min(allObjects.size(), objectLimit); i += objectStep)
     {
         allObjects[i]->updateTransformRecursive(deltaTime, deltaTicks, tickTime, currentBuffer);
     }
 }
 
-void Scene::drawRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const uint32_t currentBuffer, const std::map<uint32_t, VkTsDynamicOffset>& dynamicOffsetMappings, const OverwriteDraw* renderOverwrite, const uint32_t objectOffset, const uint32_t objectStep, const size_t objectLimit)
+void Scene::drawRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const uint32_t currentBuffer, const std::map<uint32_t, VkTsDynamicOffset>& dynamicOffsetMappings, const OverwriteDraw* renderOverwrite, const uint32_t objectOffset, const uint32_t objectStep, const uint32_t objectLimit)
 {
     const OverwriteDraw* currentOverwrite = renderOverwrite;
     while (currentOverwrite)
@@ -353,7 +353,7 @@ void Scene::drawRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointer
         return;
     }
 
-    for (size_t i = (size_t) objectOffset; i < glm::min(allObjects.size(), objectLimit); i += (size_t) objectStep)
+    for (uint32_t i = objectOffset; i < glm::min(allObjects.size(), objectLimit); i += objectStep)
     {
         allObjects[i]->drawRecursive(cmdBuffer, allGraphicsPipelines, currentBuffer, dynamicOffsetMappings, renderOverwrite);
     }
@@ -420,7 +420,7 @@ void Scene::destroy()
 		environment.reset();
 	}
 
-    for (size_t i = 0; i < allObjects.size(); i++)
+    for (uint32_t i = 0; i < allObjects.size(); i++)
     {
         allObjects[i]->destroy();
     }

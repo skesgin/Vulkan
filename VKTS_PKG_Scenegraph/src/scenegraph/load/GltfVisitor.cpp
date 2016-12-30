@@ -136,7 +136,7 @@ void GltfVisitor::visitBufferView(JSONobject& jsonObject)
 		return;
 	}
 
-	gltfBufferView.byteOffset = (size_t)gltfInteger;
+	gltfBufferView.byteOffset = (uint32_t)gltfInteger;
 
 	//
 
@@ -149,7 +149,7 @@ void GltfVisitor::visitBufferView(JSONobject& jsonObject)
 		return;
 	}
 
-	gltfBufferView.byteLength = (size_t)gltfInteger;
+	gltfBufferView.byteLength = (uint32_t)gltfInteger;
 }
 
 void GltfVisitor::visitAccessor(JSONobject& jsonObject)
@@ -188,7 +188,7 @@ void GltfVisitor::visitAccessor(JSONobject& jsonObject)
 		return;
 	}
 
-	gltfAccessor.byteOffset = (size_t)gltfInteger;
+	gltfAccessor.byteOffset = (uint32_t)gltfInteger;
 
 	//
 
@@ -233,7 +233,7 @@ void GltfVisitor::visitAccessor(JSONobject& jsonObject)
 		return;
 	}
 
-	gltfAccessor.count = gltfInteger;
+	gltfAccessor.count = (uint32_t)gltfInteger;
 
 	//
 
@@ -297,7 +297,7 @@ void GltfVisitor::visitAccessor(JSONobject& jsonObject)
 		return;
 	}
 
-	for (size_t i = 0; i < arraySize; i++)
+	for (uint32_t i = 0; i < arraySize; i++)
 	{
 		switch (gltfAccessor.componentType)
 		{
@@ -341,7 +341,7 @@ void GltfVisitor::visitAccessor(JSONobject& jsonObject)
 		return;
 	}
 
-	for (size_t i = 0; i < arraySize; i++)
+	for (uint32_t i = 0; i < arraySize; i++)
 	{
 		switch (gltfAccessor.componentType)
 		{
@@ -404,7 +404,7 @@ void GltfVisitor::visitAccessor(JSONobject& jsonObject)
 			return;
 		}
 
-		gltfAccessor.byteStride = (size_t)gltfInteger;
+		gltfAccessor.byteStride = (uint32_t)gltfInteger;
 	}
 }
 
@@ -1031,7 +1031,7 @@ void GltfVisitor::visitAnimation_Sampler(JSONobject& jsonObject)
 {
 	const auto& allKeys = jsonObject.getAllKeys();
 
-	for (size_t i = 0; i < allKeys.size(); i++)
+	for (uint32_t i = 0; i < allKeys.size(); i++)
 	{
 		gltfAnimation_Sampler.input = nullptr;
 		gltfAnimation_Sampler.interpolation = "LINEAR";
@@ -1609,9 +1609,9 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 			}
 
 			// Resolve children node and skeletons pointers.
-			for (size_t i = 0; i < allGltfNodes.values().size(); i++)
+			for (uint32_t i = 0; i < allGltfNodes.values().size(); i++)
 			{
-				for (size_t k = 0; k < allGltfNodes.valueAt(i).skeletons.size(); k++)
+				for (uint32_t k = 0; k < allGltfNodes.valueAt(i).skeletons.size(); k++)
 				{
 					std::string currentSkeletonName = allGltfNodes.valueAt(i).skeletons[k];
 
@@ -1626,14 +1626,14 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 			}
 
 			// Resolve joint name pointers.
-			for (size_t i = 0; i < allGltfSkins.values().size(); i++)
+			for (uint32_t i = 0; i < allGltfSkins.values().size(); i++)
 			{
-				for (size_t k = 0; k < allGltfSkins.valueAt(i).jointNames.size(); k++)
+				for (uint32_t k = 0; k < allGltfSkins.valueAt(i).jointNames.size(); k++)
 				{
 					std::string currentJointName = allGltfSkins.valueAt(i).jointNames[k];
 					GltfNode* currentJointNode = nullptr;
 
-					for (size_t m = 0; m < allGltfNodes.values().size(); m++)
+					for (uint32_t m = 0; m < allGltfNodes.values().size(); m++)
 					{
 						if (allGltfNodes.valueAt(m).jointName == currentJointName)
 						{
@@ -1766,7 +1766,7 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 	{
 		const auto& allKeys = jsonObject.getAllKeys();
 
-		for (size_t i = 0; i < allKeys.size(); i++)
+		for (uint32_t i = 0; i < allKeys.size(); i++)
 		{
 			gltfBuffer.binaryBuffer = IBinaryBufferSP();
 			gltfBuffer.byteLength = 0;
@@ -1792,7 +1792,7 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 	{
 		const auto& allKeys = jsonObject.getAllKeys();
 
-		for (size_t i = 0; i < allKeys.size(); i++)
+		for (uint32_t i = 0; i < allKeys.size(); i++)
 		{
 			memset(&gltfBufferView, 0, sizeof(GltfBufferView));
 
@@ -1817,7 +1817,7 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 	{
 		const auto& allKeys = jsonObject.getAllKeys();
 
-		for (size_t i = 0; i < allKeys.size(); i++)
+		for (uint32_t i = 0; i < allKeys.size(); i++)
 		{
 			gltfAccessor.bufferView = nullptr;
 			gltfAccessor.byteOffset = 0;
@@ -1861,7 +1861,7 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 	{
 		const auto& allKeys = jsonObject.getAllKeys();
 
-		for (size_t i = 0; i < allKeys.size(); i++)
+		for (uint32_t i = 0; i < allKeys.size(); i++)
 		{
 			gltfMesh.primitives.clear();
 
@@ -1886,7 +1886,7 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 	{
 		const auto& allKeys = jsonObject.getAllKeys();
 
-		for (size_t i = 0; i < allKeys.size(); i++)
+		for (uint32_t i = 0; i < allKeys.size(); i++)
 		{
 			for (int32_t k = 0; k < 16; k++)
 			{
@@ -1925,7 +1925,7 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 	{
 		const auto& allKeys = jsonObject.getAllKeys();
 
-		for (size_t i = 0; i < allKeys.size(); i++)
+		for (uint32_t i = 0; i < allKeys.size(); i++)
 		{
 			gltfNode.children.clear();
 			gltfNode.skeletons.clear();
@@ -1988,7 +1988,7 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 	{
 		const auto& allKeys = jsonObject.getAllKeys();
 
-		for (size_t i = 0; i < allKeys.size(); i++)
+		for (uint32_t i = 0; i < allKeys.size(); i++)
 		{
 			gltfAnimation.samplers.clear();
 			gltfAnimation.channels.clear();
@@ -2014,7 +2014,7 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 	{
 		const auto& allKeys = jsonObject.getAllKeys();
 
-		for (size_t i = 0; i < allKeys.size(); i++)
+		for (uint32_t i = 0; i < allKeys.size(); i++)
 		{
 			gltfScene.nodes.clear();
 
@@ -2158,7 +2158,7 @@ const GltfScene* GltfVisitor::getDefaultScene() const
 	return defaultScene;
 }
 
-const void* GltfVisitor::getBufferPointer(const GltfAccessor& accessor, const int32_t element) const
+const void* GltfVisitor::getBufferPointer(const GltfAccessor& accessor, const uint32_t element) const
 {
 	if (accessor.bufferView == nullptr)
 	{
@@ -2183,7 +2183,7 @@ const void* GltfVisitor::getBufferPointer(const GltfAccessor& accessor, const in
 
 	//
 
-	size_t bytesPerComponent = 0;
+	uint32_t bytesPerComponent = 0;
 
 	switch (accessor.componentType)
 	{
@@ -2206,7 +2206,7 @@ const void* GltfVisitor::getBufferPointer(const GltfAccessor& accessor, const in
 
 	//
 
-	size_t componentsPerType = 0;
+	uint32_t componentsPerType = 0;
 
 	if (accessor.type == "SCALAR")
 	{
@@ -2239,9 +2239,9 @@ const void* GltfVisitor::getBufferPointer(const GltfAccessor& accessor, const in
 
 	//
 
-	size_t elementSize = bytesPerComponent * componentsPerType + accessor.byteStride;
+	uint32_t elementSize = bytesPerComponent * componentsPerType + accessor.byteStride;
 
-	size_t totalOffset = elementSize * (size_t)element + accessor.byteOffset + accessor.bufferView->byteOffset;
+	uint32_t totalOffset = elementSize * element + accessor.byteOffset + accessor.bufferView->byteOffset;
 
 	if (totalOffset >= accessor.bufferView->byteLength)
 	{

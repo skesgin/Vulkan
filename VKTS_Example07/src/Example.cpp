@@ -1040,9 +1040,9 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 	{
 		allBuildCommandTasks.clear();
 
-		for (uint64_t i = 0; i < VKTS_NUMBER_TASKS; i++)
+		for (uint32_t i = 0; i < VKTS_NUMBER_TASKS; i++)
 		{
-			auto currentBuildCommandTask = IBuildCommandTaskSP(new BuildCommandTask(i, updateContext, contextObject, allGraphicsPipelines, scene, swapchainImagesCount, dynamicOffsets, (uint32_t)i, VKTS_NUMBER_TASKS));
+			auto currentBuildCommandTask = IBuildCommandTaskSP(new BuildCommandTask(i, updateContext, contextObject, allGraphicsPipelines, scene, swapchainImagesCount, dynamicOffsets, i, VKTS_NUMBER_TASKS));
 
 			if (!currentBuildCommandTask.get())
 			{
@@ -1189,7 +1189,7 @@ void Example::terminateResources(const vkts::IUpdateThreadContext& updateContext
 				depthTexture->destroy();
 			}
 
-			for (size_t i = 0; i < allGraphicsPipelines.size(); i++)
+			for (uint32_t i = 0; i < allGraphicsPipelines.size(); i++)
 			{
 				allGraphicsPipelines[i]->destroy();
 			}
@@ -1330,7 +1330,7 @@ VkBool32 Example::init(const vkts::IUpdateThreadContext& updateContext)
 //
 VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 {
-	for (size_t i = 0; i < allUpdateables.size(); i++)
+	for (uint32_t i = 0; i < allUpdateables.size(); i++)
 	{
 		allUpdateables[i]->update(updateContext.getDeltaTime(), updateContext.getDeltaTicks(), updateContext.getTickTime());
 	}
@@ -1447,7 +1447,7 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 	    commandBufferInheritanceInfo.queryFlags = 0;
 	    commandBufferInheritanceInfo.pipelineStatistics = 0;
 
-		for (size_t i = 0; i < allBuildCommandTasks.size(); i++)
+		for (uint32_t i = 0; i < allBuildCommandTasks.size(); i++)
 		{
 			// Set the current info.
 			allBuildCommandTasks[i]->setCommandBufferInheritanceInfo(&commandBufferInheritanceInfo);
@@ -1459,7 +1459,7 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 			updateContext.sendTask(allBuildCommandTasks[i]);
 		}
 
-		for (size_t i = 0; i < allBuildCommandTasks.size(); i++)
+		for (uint32_t i = 0; i < allBuildCommandTasks.size(); i++)
 		{
 			vkts::ITaskSP executedTask;
 
@@ -1471,9 +1471,9 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 			}
 
 			// If available, add secondary command buffer to list to be executed later.
-			if (allBuildCommandTasks[executedTask->getID()]->getCommandBuffer() != VK_NULL_HANDLE)
+			if (allBuildCommandTasks[(uint32_t)executedTask->getID()]->getCommandBuffer() != VK_NULL_HANDLE)
 			{
-				secondaryCmdBuffers[commandBufferCount] = allBuildCommandTasks[executedTask->getID()]->getCommandBuffer();
+				secondaryCmdBuffers[commandBufferCount] = allBuildCommandTasks[(uint32_t)executedTask->getID()]->getCommandBuffer();
 
 				commandBufferCount++;
 			}

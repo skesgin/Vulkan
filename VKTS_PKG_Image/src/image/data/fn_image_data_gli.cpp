@@ -249,7 +249,7 @@ IImageDataSP VKTS_APIENTRY imageDataLoadGli(const std::string& name, const IBina
         return IImageDataSP();
     }
 
-    auto texture = gli::load((char const *)buffer->getData(), (std::size_t)buffer->getSize());
+    auto texture = gli::load((char const *)buffer->getData(), (std::uint32_t)buffer->getSize());
     if (texture.empty())
     {
     	return IImageDataSP();
@@ -276,35 +276,35 @@ IImageDataSP VKTS_APIENTRY imageDataLoadGli(const std::string& name, const IBina
 
     //
 
-    std::vector<size_t> allOffsets;
+    std::vector<uint32_t> allOffsets;
 
-    size_t offset = 0;
-	for (size_t arrayLayer = texture.base_layer(); arrayLayer <= texture.max_layer(); arrayLayer++)
+    uint32_t offset = 0;
+	for (uint32_t arrayLayer = (uint32_t)texture.base_layer(); arrayLayer <= (uint32_t)texture.max_layer(); arrayLayer++)
 	{
-		for (size_t face = texture.base_face(); face <= texture.max_face(); face++)
+		for (uint32_t face = (uint32_t)texture.base_face(); face <= (uint32_t)texture.max_face(); face++)
 		{
-			for (size_t mipLevel = texture.base_level(); mipLevel <= texture.max_level(); mipLevel++)
+			for (uint32_t mipLevel = (uint32_t)texture.base_level(); mipLevel <= (uint32_t)texture.max_level(); mipLevel++)
 			{
 				allOffsets.push_back(offset);
 
-				offset += texture.size(mipLevel);
+				offset += (uint32_t)texture.size(mipLevel);
 			}
 		}
 	}
-	size_t totalSize = offset;
+	uint32_t totalSize = offset;
 
     std::vector<uint8_t> data(totalSize);
 
     offset = 0;
-	for (size_t arrayLayer = texture.base_layer(); arrayLayer <= texture.max_layer(); arrayLayer++)
+	for (uint32_t arrayLayer = (uint32_t)texture.base_layer(); arrayLayer <= (uint32_t)texture.max_layer(); arrayLayer++)
 	{
-		for (size_t face = texture.base_face(); face <= texture.max_face(); face++)
+		for (uint32_t face = (uint32_t)texture.base_face(); face <= (uint32_t)texture.max_face(); face++)
 		{
-			for (size_t mipLevel = texture.base_level(); mipLevel <= texture.max_level(); mipLevel++)
+			for (uint32_t mipLevel = (uint32_t)texture.base_level(); mipLevel <= (uint32_t)texture.max_level(); mipLevel++)
 			{
 				memcpy(&data[offset], texture.data(arrayLayer, face, mipLevel), texture.size(mipLevel));
 
-				offset += texture.size(mipLevel);
+				offset += (uint32_t)texture.size(mipLevel);
 			}
 		}
 	}
@@ -327,7 +327,7 @@ VkBool32 VKTS_APIENTRY imageDataSaveGli(const std::string& name, const IImageDat
 	}
 
 	VkExtent3D currentExtent;
-	size_t currentOffset;
+	uint32_t currentOffset;
 	if (!imageData->getExtentAndOffset(currentExtent, currentOffset, mipLevel, arrayLayer))
 	{
 		return VK_FALSE;

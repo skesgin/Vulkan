@@ -104,7 +104,7 @@ VkBool32 VKTS_APIENTRY _visualDispatchMessagesGamepad()
 {
     struct js_event joystickEvent;
 
-    ssize_t bytesRead;
+    int64_t bytesRead;
 
     VkBool32 keepPooling;
 

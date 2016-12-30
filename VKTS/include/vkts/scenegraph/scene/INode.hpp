@@ -53,7 +53,7 @@ public:
 
     virtual IRenderNodeSP getRenderNode(const uint32_t index) const = 0;
 
-    virtual size_t getRenderNodeSize() const = 0;
+    virtual uint32_t getRenderNodeSize() const = 0;
 
     virtual void addRenderNode(const IRenderNodeSP& renderNode) = 0;
 
@@ -116,7 +116,7 @@ public:
 
     virtual VkBool32 removeChildNode(const std::shared_ptr<INode>& childNode) = 0;
 
-    virtual size_t getNumberChildNodes() const = 0;
+    virtual uint32_t getNumberChildNodes() const = 0;
 
     virtual const SmartPointerVector<std::shared_ptr<INode>>& getChildNodes() const = 0;
 
@@ -124,7 +124,7 @@ public:
 
     virtual VkBool32 removeMesh(const IMeshSP& mesh) = 0;
 
-    virtual size_t getNumberMeshes() const = 0;
+    virtual uint32_t getNumberMeshes() const = 0;
 
     virtual const SmartPointerVector<IMeshSP>& getMeshes() const = 0;
 
@@ -132,7 +132,7 @@ public:
 
     virtual VkBool32 removeCamera(const ICameraSP& camera) = 0;
 
-    virtual size_t getNumberCameras() const = 0;
+    virtual uint32_t getNumberCameras() const = 0;
 
     virtual const SmartPointerVector<ICameraSP>& getCameras() const = 0;
 
@@ -140,7 +140,7 @@ public:
 
     virtual VkBool32 removeLight(const ILightSP& light) = 0;
 
-    virtual size_t getNumberLights() const = 0;
+    virtual uint32_t getNumberLights() const = 0;
 
     virtual const SmartPointerVector<ILightSP>& getLights() const = 0;
 
@@ -148,7 +148,7 @@ public:
 
     virtual VkBool32 removeConstraint(const IConstraintSP& constraint) = 0;
 
-    virtual size_t getNumberConstraints() const = 0;
+    virtual uint32_t getNumberConstraints() const = 0;
 
     virtual const SmartPointerVector<IConstraintSP>& getConstraints() const = 0;
 
@@ -156,7 +156,7 @@ public:
 
     virtual VkBool32 removeAnimation(const IAnimationSP& animation) = 0;
 
-    virtual size_t getNumberAnimations() const = 0;
+    virtual uint32_t getNumberAnimations() const = 0;
 
     virtual const SmartPointerVector<IAnimationSP>& getAnimations() const = 0;
 
@@ -169,7 +169,7 @@ public:
 
     virtual VkBool32 removeParticleSystem(const IParticleSystemSP& particleSystem) = 0;
 
-    virtual size_t getNumberParticleSystems() const = 0;
+    virtual uint32_t getNumberParticleSystems() const = 0;
 
     virtual const SmartPointerVector<IParticleSystemSP>& getParticleSystems() const = 0;
 

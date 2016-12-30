@@ -371,7 +371,7 @@ int main(int argc, char* argv[])
 	uint32_t queueIndex = 0;
 	VkBool32 supported;
 
-	for (uint32_t currentQueueFamilyIndex = 0; currentQueueFamilyIndex < (uint32_t)physicalDeviceQueueFamilyPropertiesCount; currentQueueFamilyIndex++)
+	for (uint32_t currentQueueFamilyIndex = 0; currentQueueFamilyIndex < physicalDeviceQueueFamilyPropertiesCount; currentQueueFamilyIndex++)
 	{
 		result = vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, currentQueueFamilyIndex, surface->getSurface(), &supported);
 

@@ -68,7 +68,7 @@ const IDeviceMemorySP& BufferObject::getDeviceMemory() const
     return deviceMemory;
 }
 
-VkBool32 BufferObject::upload(const size_t offset, const VkMemoryMapFlags flags, const void* data, const size_t size) const
+VkBool32 BufferObject::upload(const uint32_t offset, const VkMemoryMapFlags flags, const void* data, const uint32_t size) const
 {
     if (!data || size == 0)
     {
@@ -89,44 +89,44 @@ VkBool32 BufferObject::upload(const size_t offset, const VkMemoryMapFlags flags,
     return VK_TRUE;
 }
 
-VkBool32 BufferObject::upload(const size_t offset, const VkMemoryMapFlags flags, const glm::mat4& mat) const
+VkBool32 BufferObject::upload(const uint32_t offset, const VkMemoryMapFlags flags, const glm::mat4& mat) const
 {
     return upload(offset, flags, glm::value_ptr(mat), sizeof(float) * 16);
 }
 
-VkBool32 BufferObject::upload(const size_t offset, const VkMemoryMapFlags flags, const glm::mat3& mat) const
+VkBool32 BufferObject::upload(const uint32_t offset, const VkMemoryMapFlags flags, const glm::mat3& mat) const
 {
     // Only upload relevant columns and rows.
     return upload(offset, flags, glm::value_ptr(glm::mat4(mat)), sizeof(float) * 11);
 }
 
-VkBool32 BufferObject::upload(const size_t offset, const VkMemoryMapFlags flags, const glm::mat2& mat) const
+VkBool32 BufferObject::upload(const uint32_t offset, const VkMemoryMapFlags flags, const glm::mat2& mat) const
 {
     // Only upload relevant columns and rows.
     return upload(offset, flags, glm::value_ptr(glm::mat4(mat)), sizeof(float) * 6);
 }
 
-VkBool32 BufferObject::upload(const size_t offset, const VkMemoryMapFlags flags, const glm::vec4& vec) const
+VkBool32 BufferObject::upload(const uint32_t offset, const VkMemoryMapFlags flags, const glm::vec4& vec) const
 {
     return upload(offset, flags, glm::value_ptr(vec), sizeof(float) * 4);
 }
 
-VkBool32 BufferObject::upload(const size_t offset, const VkMemoryMapFlags flags, const glm::vec3& vec) const
+VkBool32 BufferObject::upload(const uint32_t offset, const VkMemoryMapFlags flags, const glm::vec3& vec) const
 {
     return upload(offset, flags, glm::value_ptr(vec), sizeof(float) * 3);
 }
 
-VkBool32 BufferObject::upload(const size_t offset, const VkMemoryMapFlags flags, const glm::vec2& vec) const
+VkBool32 BufferObject::upload(const uint32_t offset, const VkMemoryMapFlags flags, const glm::vec2& vec) const
 {
     return upload(offset, flags, glm::value_ptr(vec), sizeof(float) * 2);
 }
 
-VkBool32 BufferObject::upload(const size_t offset, const VkMemoryMapFlags flags, const float scalar) const
+VkBool32 BufferObject::upload(const uint32_t offset, const VkMemoryMapFlags flags, const float scalar) const
 {
     return upload(offset, flags, &scalar, sizeof(float));
 }
 
-VkBool32 BufferObject::upload(const size_t offset, const VkMemoryMapFlags flags, const int32_t scalar) const
+VkBool32 BufferObject::upload(const uint32_t offset, const VkMemoryMapFlags flags, const int32_t scalar) const
 {
     return upload(offset, flags, &scalar, sizeof(int32_t));
 }

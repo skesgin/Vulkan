@@ -29,19 +29,19 @@
 namespace vkts
 {
 
-VkDeviceSize VKTS_APIENTRY alignmentGetSizeInBytes(const size_t currentSize, const size_t alignment)
+VkDeviceSize VKTS_APIENTRY alignmentGetSizeInBytes(const VkDeviceSize currentSize, const VkDeviceSize alignment)
 {
     if (currentSize == 0 || alignment == 0)
     {
         return 0;
     }
 
-    return VkDeviceSize((currentSize / alignment) * alignment + ((currentSize % alignment) > 0 ? alignment : 0));
+    return (currentSize / alignment) * alignment + ((currentSize % alignment) > 0 ? alignment : 0);
 }
 
-int32_t VKTS_APIENTRY alignmentGetOffsetInBytes(const VkTsVertexBufferType element, const VkTsVertexBufferType allElements)
+uint32_t VKTS_APIENTRY alignmentGetOffsetInBytes(const VkTsVertexBufferType element, const VkTsVertexBufferType allElements)
 {
-    int32_t result = 0;
+    uint32_t result = 0;
 
     if (allElements & VKTS_VERTEX_BUFFER_TYPE_VERTEX)
     {
@@ -50,7 +50,7 @@ int32_t VKTS_APIENTRY alignmentGetOffsetInBytes(const VkTsVertexBufferType eleme
             return result;
         }
 
-        result += 4 * sizeof(float);
+        result += 4 * (uint32_t)sizeof(float);
     }
 
     if (allElements & VKTS_VERTEX_BUFFER_TYPE_NORMAL)
@@ -60,7 +60,7 @@ int32_t VKTS_APIENTRY alignmentGetOffsetInBytes(const VkTsVertexBufferType eleme
             return result;
         }
 
-        result += 3 * sizeof(float);
+        result += 3 * (uint32_t)sizeof(float);
     }
 
     if (allElements & VKTS_VERTEX_BUFFER_TYPE_BITANGENT)
@@ -70,7 +70,7 @@ int32_t VKTS_APIENTRY alignmentGetOffsetInBytes(const VkTsVertexBufferType eleme
             return result;
         }
 
-        result += 3 * sizeof(float);
+        result += 3 * (uint32_t)sizeof(float);
     }
 
     if (allElements & VKTS_VERTEX_BUFFER_TYPE_TANGENT)
@@ -80,7 +80,7 @@ int32_t VKTS_APIENTRY alignmentGetOffsetInBytes(const VkTsVertexBufferType eleme
             return result;
         }
 
-        result += 3 * sizeof(float);
+        result += 3 * (uint32_t)sizeof(float);
     }
 
     if (allElements & VKTS_VERTEX_BUFFER_TYPE_TEXCOORD)
@@ -90,7 +90,7 @@ int32_t VKTS_APIENTRY alignmentGetOffsetInBytes(const VkTsVertexBufferType eleme
             return result;
         }
 
-        result += 2 * sizeof(float);
+        result += 2 * (uint32_t)sizeof(float);
     }
 
     if (allElements & VKTS_VERTEX_BUFFER_TYPE_BONE_INDICES0)
@@ -100,7 +100,7 @@ int32_t VKTS_APIENTRY alignmentGetOffsetInBytes(const VkTsVertexBufferType eleme
             return result;
         }
 
-        result += 4 * sizeof(float);
+        result += 4 * (uint32_t)sizeof(float);
     }
 
     if (allElements & VKTS_VERTEX_BUFFER_TYPE_BONE_INDICES1)
@@ -110,7 +110,7 @@ int32_t VKTS_APIENTRY alignmentGetOffsetInBytes(const VkTsVertexBufferType eleme
             return result;
         }
 
-        result += 4 * sizeof(float);
+        result += 4 * (uint32_t)sizeof(float);
     }
 
     if (allElements & VKTS_VERTEX_BUFFER_TYPE_BONE_WEIGHTS0)
@@ -120,7 +120,7 @@ int32_t VKTS_APIENTRY alignmentGetOffsetInBytes(const VkTsVertexBufferType eleme
             return result;
         }
 
-        result += 4 * sizeof(float);
+        result += 4 * (uint32_t)sizeof(float);
     }
 
     if (allElements & VKTS_VERTEX_BUFFER_TYPE_BONE_WEIGHTS1)
@@ -130,7 +130,7 @@ int32_t VKTS_APIENTRY alignmentGetOffsetInBytes(const VkTsVertexBufferType eleme
             return result;
         }
 
-        result += 4 * sizeof(float);
+        result += 4 * (uint32_t)sizeof(float);
     }
 
     if (allElements & VKTS_VERTEX_BUFFER_TYPE_BONE_NUMBERS)
@@ -140,7 +140,7 @@ int32_t VKTS_APIENTRY alignmentGetOffsetInBytes(const VkTsVertexBufferType eleme
             return result;
         }
 
-        result += 1 * sizeof(float);
+        result += 1 * (uint32_t)sizeof(float);
     }
 
     return -1;
@@ -152,52 +152,52 @@ uint32_t VKTS_APIENTRY alignmentGetStrideInBytes(const VkTsVertexBufferType allE
 
     if (allElements & VKTS_VERTEX_BUFFER_TYPE_VERTEX)
     {
-        result += 4 * sizeof(float);
+        result += 4 * (uint32_t)sizeof(float);
     }
 
     if (allElements & VKTS_VERTEX_BUFFER_TYPE_NORMAL)
     {
-        result += 3 * sizeof(float);
+        result += 3 * (uint32_t)sizeof(float);
     }
 
     if (allElements & VKTS_VERTEX_BUFFER_TYPE_BITANGENT)
     {
-        result += 3 * sizeof(float);
+        result += 3 * (uint32_t)sizeof(float);
     }
 
     if (allElements & VKTS_VERTEX_BUFFER_TYPE_TANGENT)
     {
-        result += 3 * sizeof(float);
+        result += 3 * (uint32_t)sizeof(float);
     }
 
     if (allElements & VKTS_VERTEX_BUFFER_TYPE_TEXCOORD)
     {
-        result += 2 * sizeof(float);
+        result += 2 * (uint32_t)sizeof(float);
     }
 
     if (allElements & VKTS_VERTEX_BUFFER_TYPE_BONE_INDICES0)
     {
-        result += 4 * sizeof(float);
+        result += 4 * (uint32_t)sizeof(float);
     }
 
     if (allElements & VKTS_VERTEX_BUFFER_TYPE_BONE_INDICES1)
     {
-        result += 4 * sizeof(float);
+        result += 4 * (uint32_t)sizeof(float);
     }
 
     if (allElements & VKTS_VERTEX_BUFFER_TYPE_BONE_WEIGHTS0)
     {
-        result += 4 * sizeof(float);
+        result += 4 * (uint32_t)sizeof(float);
     }
 
     if (allElements & VKTS_VERTEX_BUFFER_TYPE_BONE_WEIGHTS1)
     {
-        result += 4 * sizeof(float);
+        result += 4 * (uint32_t)sizeof(float);
     }
 
     if (allElements & VKTS_VERTEX_BUFFER_TYPE_BONE_NUMBERS)
     {
-        result += 1 * sizeof(float);
+        result += 1 * (uint32_t)sizeof(float);
     }
 
     return result;

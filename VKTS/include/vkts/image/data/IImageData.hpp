@@ -67,7 +67,7 @@ public:
 
     virtual const uint8_t* getByteData() const = 0;
 
-    virtual size_t getSize() const = 0;
+    virtual uint32_t getSize() const = 0;
 
     /**
      * Copy image data pixels into the given data pointer.
@@ -87,13 +87,13 @@ public:
 
     virtual VkBool32 isSRGB() const = 0;
 
-    virtual int32_t getBytesPerTexel() const = 0;
+    virtual uint32_t getBytesPerTexel() const = 0;
 
-    virtual int32_t getBytesPerChannel() const = 0;
+    virtual uint32_t getBytesPerChannel() const = 0;
 
-    virtual int32_t getNumberChannels() const = 0;
+    virtual uint32_t getNumberChannels() const = 0;
 
-    virtual const std::vector<size_t>& getAllOffsets() const = 0;
+    virtual const std::vector<uint32_t>& getAllOffsets() const = 0;
 
     virtual void setTexel(const glm::vec4& rgba, const uint32_t x, const uint32_t y, const uint32_t z, const uint32_t mipLevel, const uint32_t arrayLayer) = 0;
 
@@ -103,7 +103,7 @@ public:
 
     virtual glm::vec4 getSampleCubeMap(const float x, const float y, const float z, const VkFilter filter, const uint32_t mipLevel) const = 0;
 
-    virtual VkBool32 getExtentAndOffset(VkExtent3D& currentExtent, size_t& currentOffset, const uint32_t mipLevel, const uint32_t arrayLayer) const = 0;
+    virtual VkBool32 getExtentAndOffset(VkExtent3D& currentExtent, uint32_t& currentOffset, const uint32_t mipLevel, const uint32_t arrayLayer) const = 0;
 };
 
 typedef std::shared_ptr<IImageData> IImageDataSP;

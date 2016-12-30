@@ -36,7 +36,7 @@ namespace vkts
  *
  * @ThreadSafe
  */
-VKTS_APICALL IShaderModuleSP VKTS_APIENTRY shaderModuleCreate(const std::string& name, const VkDevice device, const VkShaderModuleCreateFlags flags, const size_t codeSize, const uint32_t* code);
+VKTS_APICALL IShaderModuleSP VKTS_APIENTRY shaderModuleCreate(const std::string& name, const VkDevice device, const VkShaderModuleCreateFlags flags, const uint32_t codeSize, const uint32_t* code);
 
 }
 

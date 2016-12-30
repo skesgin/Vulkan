@@ -86,7 +86,7 @@ public:
 
     virtual VkBool32 removeTextureObject(const ITextureObjectSP& textureObject) override;
 
-    virtual size_t getNumberTextureObjects() const override;
+    virtual uint32_t getNumberTextureObjects() const override;
 
     virtual const SmartPointerVector<ITextureObjectSP>& getTextureObjects() const override;
 

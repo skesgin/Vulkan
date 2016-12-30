@@ -50,7 +50,7 @@ public:
 
 	const SmartPointerVector<JSONvalueSP>& getAllValues() const;
 
-	size_t size() const;
+	uint32_t size() const;
 
 
 	virtual VkBool32 encode(std::string& jsonText, std::int32_t& spaces) const;

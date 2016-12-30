@@ -1768,25 +1768,25 @@ void Example::terminateResources(const vkts::IUpdateThreadContext& updateContext
 				}
 			}
 
-			for (size_t i = 0; i < allShadowGraphicsPipelines.size(); i++)
+			for (uint32_t i = 0; i < allShadowGraphicsPipelines.size(); i++)
 			{
 				allShadowGraphicsPipelines[i]->destroy();
 			}
 			allShadowGraphicsPipelines.clear();
 
-			for (size_t i = 0; i < allBlendGraphicsPipelines.size(); i++)
+			for (uint32_t i = 0; i < allBlendGraphicsPipelines.size(); i++)
 			{
 				allBlendGraphicsPipelines[i]->destroy();
 			}
 			allBlendGraphicsPipelines.clear();
 
-			for (size_t i = 0; i < allBlendCwGraphicsPipelines.size(); i++)
+			for (uint32_t i = 0; i < allBlendCwGraphicsPipelines.size(); i++)
 			{
 				allBlendCwGraphicsPipelines[i]->destroy();
 			}
 			allBlendCwGraphicsPipelines.clear();
 
-			for (size_t i = 0; i < allOpaqueGraphicsPipelines.size(); i++)
+			for (uint32_t i = 0; i < allOpaqueGraphicsPipelines.size(); i++)
 			{
 				allOpaqueGraphicsPipelines[i]->destroy();
 			}
@@ -1959,7 +1959,7 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 {
 	if (sceneLoaded)
 	{
-		for (size_t i = 0; i < allUpdateables.size(); i++)
+		for (uint32_t i = 0; i < allUpdateables.size(); i++)
 		{
 			allUpdateables[i]->update(updateContext.getDeltaTime(), updateContext.getDeltaTicks(), updateContext.getTickTime());
 		}

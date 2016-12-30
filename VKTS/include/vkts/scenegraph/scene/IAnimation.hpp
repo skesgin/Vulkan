@@ -82,7 +82,7 @@ public:
 
     virtual VkBool32 removeMarker(const IMarkerSP& marker) = 0;
 
-    virtual size_t getNumberMarkers() const = 0;
+    virtual uint32_t getNumberMarkers() const = 0;
 
     virtual const SmartPointerVector<IMarkerSP>& getMarkers() const = 0;
 
@@ -90,7 +90,7 @@ public:
 
     virtual VkBool32 removeChannel(const IChannelSP& channel) = 0;
 
-    virtual size_t getNumberChannels() const = 0;
+    virtual uint32_t getNumberChannels() const = 0;
 
     virtual const SmartPointerVector<IChannelSP>& getChannels() const = 0;
 

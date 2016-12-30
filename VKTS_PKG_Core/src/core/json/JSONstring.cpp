@@ -56,7 +56,7 @@ VkBool32 JSONstring::encode(std::string& jsonText, std::int32_t& spaces) const
 {
 	jsonText += JSON_quotation_mark;
 
-	for (size_t i = 0; i < getValue().length(); i++)
+	for (uint32_t i = 0; i < getValue().length(); i++)
 	{
 		char c = getValue()[i];
 

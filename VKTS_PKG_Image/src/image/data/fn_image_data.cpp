@@ -40,7 +40,7 @@ static PFN_imageDataSaveFunction g_saveFunction = nullptr;
 static VkBool32 g_saveFallback = VK_TRUE;
 
 template<typename T>
-static void imageDataSwapRedBlueChannel(const size_t numberChannels, T* data, const size_t length)
+static void imageDataSwapRedBlueChannel(const uint32_t numberChannels, T* data, const uint32_t length)
 {
     if (!(numberChannels == 3 || numberChannels == 4) || !data || length == 0)
     {
@@ -49,7 +49,7 @@ static void imageDataSwapRedBlueChannel(const size_t numberChannels, T* data, co
 
     T copyChannel;
 
-    for (size_t i = 0; i < length; i++)
+    for (uint32_t i = 0; i < length; i++)
     {
         copyChannel = data[i * numberChannels + 0];
         data[i * numberChannels + 0] = data[i * numberChannels + 2];
@@ -58,16 +58,16 @@ static void imageDataSwapRedBlueChannel(const size_t numberChannels, T* data, co
 }
 
 template<typename T>
-static void imageDataConvertRGBtoRGBA(const T alpha, T* targetData, const T* sourceData, const size_t length)
+static void imageDataConvertRGBtoRGBA(const T alpha, T* targetData, const T* sourceData, const uint32_t length)
 {
     if (!targetData || !sourceData || length == 0)
     {
         return;
     }
 
-    for (size_t i = 0; i < length; i++)
+    for (uint32_t i = 0; i < length; i++)
     {
-        for (size_t k = 0; k < 3; k++)
+        for (uint32_t k = 0; k < 3; k++)
         {
             targetData[i * 4 + k] = sourceData[i * 3 + k];
         }
@@ -157,7 +157,7 @@ static IImageDataSP imageDataLoadTga(const std::string& name, const IBinaryBuffe
     uint16_t offsetIndexColorMap;
     uint16_t lengthColorMap;
     uint16_t bitsPerPixelColorMap;
-    size_t numberChannelsColorMap = 0;
+    uint32_t numberChannelsColorMap = 0;
 
     if (hasColorMap)
     {
@@ -222,7 +222,7 @@ static IImageDataSP imageDataLoadTga(const std::string& name, const IBinaryBuffe
         return IImageDataSP();
     }
 
-    size_t numberChannels = bitsPerPixel / 8;
+    uint32_t numberChannels = bitsPerPixel / 8;
 
     // move file pointer to beginning of targa data
     if (!buffer->seek(1, VKTS_SEARCH_RELATVE))
@@ -363,7 +363,7 @@ static IImageDataSP imageDataLoadTga(const std::string& name, const IBinaryBuffe
         format = VK_FORMAT_R8G8B8A8_UNORM;
     }
 
-    std::vector<size_t> allOffsets{0};
+    std::vector<uint32_t> allOffsets{0};
 
     return IImageDataSP(new ImageData(name, VK_IMAGE_TYPE_2D, format, { width, height, depth }, 1, 1, allOffsets, data.get(), width * height * depth * numberChannels));
 }
@@ -442,7 +442,7 @@ static IImageDataSP imageDataLoadHdr(const std::string& name, const IBinaryBuffe
     }
 
     int32_t depth = 1;
-    size_t numberChannels = 3;
+    uint32_t numberChannels = 3;
 
     std::unique_ptr<float[]> data = std::unique_ptr<float[]>(new float[width * height * depth * numberChannels]);
 
@@ -574,7 +574,7 @@ static IImageDataSP imageDataLoadHdr(const std::string& name, const IBinaryBuffe
         y--;
     }
 
-    std::vector<size_t> allOffsets{0};
+    std::vector<uint32_t> allOffsets{0};
 
     return IImageDataSP(new ImageData(name, VK_IMAGE_TYPE_2D, VK_FORMAT_R32G32B32_SFLOAT, { (uint32_t)width, (uint32_t)height, (uint32_t)depth }, 1, 1, allOffsets, reinterpret_cast<const uint8_t*>(&data[0]), width * height * depth * numberChannels * sizeof(float)));
 }
@@ -672,14 +672,14 @@ IImageDataSP VKTS_APIENTRY imageDataLoadRaw(const char* filename, const uint32_t
         return IImageDataSP();
     }
 
-    size_t expectedSize = (size_t)width * (size_t)height * (size_t)imageDataGetBytesPerChannel(format) * (size_t)imageDataGetNumberChannels(format);
+    uint32_t expectedSize = width * height * imageDataGetBytesPerChannel(format) * imageDataGetNumberChannels(format);
 
     if (buffer->getSize() != expectedSize)
     {
         return IImageDataSP();
     }
 
-    std::vector<size_t> allOffsets{0};
+    std::vector<uint32_t> allOffsets{0};
 
     return IImageDataSP(new ImageData(filename, VK_IMAGE_TYPE_2D, format, { width, height, 1 }, 1, 1, allOffsets, buffer->getByteData(), expectedSize));
 }
@@ -715,16 +715,16 @@ static IBinaryBufferSP imageDataSaveTga(const IImageDataSP& imageData, const uin
         return IBinaryBufferSP();
     }
 
-    size_t numberChannels = bitsPerPixel / 8;
+    uint32_t numberChannels = bitsPerPixel / 8;
 
 	VkExtent3D currentExtent;
-	size_t offset;
+	uint32_t offset;
     if (!imageData->getExtentAndOffset(currentExtent, offset, mipLevel, arrayLayer))
     {
     	return IBinaryBufferSP();
     }
 
-    size_t size = currentExtent.width * currentExtent.height * currentExtent.depth * numberChannels + 18;
+    uint32_t size = currentExtent.width * currentExtent.height * currentExtent.depth * numberChannels + 18;
 
     // 18 bytes is the size of the header.
     IBinaryBufferSP buffer = binaryBufferCreate(size);
@@ -820,7 +820,7 @@ static IBinaryBufferSP imageDataSaveHdr(const IImageDataSP& imageData, const uin
 
 
 	VkExtent3D currentExtent;
-	size_t offset;
+	uint32_t offset;
     if (!imageData->getExtentAndOffset(currentExtent, offset, mipLevel, arrayLayer))
     {
     	return IBinaryBufferSP();
@@ -833,9 +833,9 @@ static IBinaryBufferSP imageDataSaveHdr(const IImageDataSP& imageData, const uin
         return IBinaryBufferSP();
     }
 
-    size_t numberChannels = 3;
+    uint32_t numberChannels = 3;
 
-    size_t size = (currentExtent.width * currentExtent.height * currentExtent.depth) * 4 * sizeof(uint8_t) + VKTS_HDR_HEADER_SIZE + strlen(tempBuffer);
+    uint32_t size = (currentExtent.width * currentExtent.height * currentExtent.depth) * 4 * (uint32_t)sizeof(uint8_t) + VKTS_HDR_HEADER_SIZE + (uint32_t)strlen(tempBuffer);
 
     // 52 bytes is the size of the header. RGB, where each channel is 4 bytes, is encoded in total of 4 bytes.
     IBinaryBufferSP buffer = binaryBufferCreate(size);
@@ -852,7 +852,7 @@ static IBinaryBufferSP imageDataSaveHdr(const IImageDataSP& imageData, const uin
     }
 
     // Resolution
-    if (buffer->write(tempBuffer, 1, strlen(tempBuffer)) != strlen(tempBuffer))
+    if (buffer->write(tempBuffer, 1, (uint32_t)strlen(tempBuffer)) != (uint32_t)strlen(tempBuffer))
     {
         return IBinaryBufferSP();
     }
@@ -941,14 +941,14 @@ VkBool32 VKTS_APIENTRY imageDataSave(const char* filename, const IImageDataSP& i
     else if (lowerCaseExtension == ".data")
     {
     	VkExtent3D currentExtent;
-    	size_t offset;
+    	uint32_t offset;
 
     	if (!imageData->getExtentAndOffset(currentExtent, offset, mipLevel, arrayLayer))
         {
         	return VK_FALSE;
         }
 
-    	size_t currentSize = (size_t)currentExtent.width * (size_t)currentExtent.height * (size_t)imageData->getNumberChannels() * (size_t)imageData->getBytesPerChannel();
+    	uint32_t currentSize = currentExtent.width * currentExtent.height * imageData->getNumberChannels() * imageData->getBytesPerChannel();
 
         return fileSaveBinaryData(filename, &imageData->getByteData()[offset], currentSize);
     }
@@ -1095,7 +1095,7 @@ IImageDataSP VKTS_APIENTRY imageDataCreate(const std::string& name, const uint32
 
     memset(&data[0], 0, (width * height * depth * numberChannels * bytesPerChannel));
 
-    std::vector<size_t> allOffsets{0};
+    std::vector<uint32_t> allOffsets{0};
 
     return IImageDataSP(new ImageData(name, imageType, format, { width, height, depth }, 1, 1, allOffsets, &data[0], width * height * depth * numberChannels * bytesPerChannel));
 }
@@ -1530,7 +1530,7 @@ IImageDataSP VKTS_APIENTRY imageDataConvert(const IImageDataSP& sourceImage, con
 
     //
 
-    size_t targetDataSize = sourceImage->getWidth() * sourceImage->getHeight() * sourceImage->getDepth() * targetNumberChannels * targetBytesPerChannel;
+    uint32_t targetDataSize = sourceImage->getWidth() * sourceImage->getHeight() * sourceImage->getDepth() * targetNumberChannels * targetBytesPerChannel;
 
     std::unique_ptr<uint8_t[]> targetData = std::unique_ptr<uint8_t[]>(new uint8_t[targetDataSize]);
 
@@ -1634,7 +1634,7 @@ IImageDataSP VKTS_APIENTRY imageDataConvert(const IImageDataSP& sourceImage, con
         }
     }
 
-    std::vector<size_t> allOffsets{0};
+    std::vector<uint32_t> allOffsets{0};
 
     return IImageDataSP(new ImageData(name, sourceImage->getImageType(), targetFormat, sourceImage->getExtent3D(), 1, 1, allOffsets, &targetData[0], sourceImage->getWidth() * sourceImage->getHeight() * sourceImage->getDepth() * targetNumberChannels * targetBytesPerChannel));
 }
@@ -1661,13 +1661,13 @@ IImageDataSP VKTS_APIENTRY imageDataMerge(const SmartPointerVector<IImageDataSP>
         return IImageDataSP();
     }
 
-    size_t totalSize = 0;
+    uint32_t totalSize = 0;
 
     VkImageType imageType;
     VkFormat format;
     VkExtent3D extent;
 
-    for (size_t i = 0; i < sourceImages.size(); i++)
+    for (uint32_t i = 0; i < sourceImages.size(); i++)
     {
     	if (!sourceImages[i].get())
     	{
@@ -1704,11 +1704,11 @@ IImageDataSP VKTS_APIENTRY imageDataMerge(const SmartPointerVector<IImageDataSP>
 
     //
 
-    std::vector<size_t> allOffsets;
+    std::vector<uint32_t> allOffsets;
 
-    size_t offset = 0;
+    uint32_t offset = 0;
 
-    for (size_t i = 0; i < sourceImages.size(); i++)
+    for (uint32_t i = 0; i < sourceImages.size(); i++)
     {
     	allOffsets.push_back(offset);
 

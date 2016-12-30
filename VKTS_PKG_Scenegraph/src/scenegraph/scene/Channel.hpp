@@ -82,7 +82,7 @@ public:
 
     virtual VkBool32 removeEntry(const float key) override;
 
-    virtual size_t getNumberEntries() const override;
+    virtual uint32_t getNumberEntries() const override;
 
     virtual const std::vector<float>& getKeys() const override;
 

@@ -177,7 +177,7 @@ RenderMaterial::RenderMaterial(const RenderMaterial& other) :
 		}
 
 
-		for (size_t i = 0; i < other.allDescriptorPools.size(); i++)
+		for (uint32_t i = 0; i < other.allDescriptorPools.size(); i++)
 		{
 			auto currentDescriptorPool = descriptorPoolCreate(other.allDescriptorPools.valueAt(i)->getDevice(), other.allDescriptorPools.valueAt(i)->getFlags(), other.allDescriptorPools.valueAt(i)->getMaxSets(), other.allDescriptorPools.valueAt(i)->getPoolSizeCount(), other.allDescriptorPools.valueAt(i)->getPoolSizes());
 
@@ -358,13 +358,13 @@ IRenderMaterialSP RenderMaterial::create(const VkBool32 createData) const
 
 void RenderMaterial::destroy()
 {
-    for (size_t i = 0; i < allDescriptorSets.size(); i++)
+    for (uint32_t i = 0; i < allDescriptorSets.size(); i++)
     {
         allDescriptorSets.valueAt(i)->destroy();
     }
     allDescriptorSets.clear();
 
-    for (size_t i = 0; i < allDescriptorPools.size(); i++)
+    for (uint32_t i = 0; i < allDescriptorPools.size(); i++)
     {
     	allDescriptorPools.valueAt(i)->destroy();
     }

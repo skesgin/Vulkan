@@ -80,7 +80,7 @@ void Channel::setTargetTransformElement(VkTsTargetTransformElement targetTransfo
 
 VkBool32 Channel::addEntry(const float key, const float value, const glm::vec4& handles, const VkTsInterpolator interpolator)
 {
-    size_t index = 0;
+    uint32_t index = 0;
 
     while (index < allKeys.size())
     {
@@ -118,7 +118,7 @@ VkBool32 Channel::addEntry(const float key, const float value, const glm::vec4& 
 
 VkBool32 Channel::removeEntry(const float key)
 {
-    size_t index = 0;
+    uint32_t index = 0;
 
     while (index < allKeys.size())
     {
@@ -142,9 +142,9 @@ VkBool32 Channel::removeEntry(const float key)
     return VK_FALSE;
 }
 
-size_t Channel::getNumberEntries() const
+uint32_t Channel::getNumberEntries() const
 {
-    return allKeys.size();
+    return (uint32_t)allKeys.size();
 }
 
 const std::vector<float>& Channel::getKeys() const

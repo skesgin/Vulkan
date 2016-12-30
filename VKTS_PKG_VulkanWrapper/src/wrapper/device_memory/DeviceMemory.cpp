@@ -174,7 +174,7 @@ void DeviceMemory::unmapMemory()
     }
 }
 
-VkResult DeviceMemory::upload(const VkDeviceSize offset, const VkMemoryMapFlags flags, const void* uploadData, const size_t uploadDataSize)
+VkResult DeviceMemory::upload(const VkDeviceSize offset, const VkMemoryMapFlags flags, const void* uploadData, const uint32_t uploadDataSize)
 {
     auto result = mapMemory(offset, uploadDataSize, flags);
 

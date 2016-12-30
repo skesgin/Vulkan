@@ -53,7 +53,7 @@ const SmartPointerVector<JSONvalueSP>& JSONarray::getAllValues() const
 	return allValues;
 }
 
-size_t JSONarray::size() const
+uint32_t JSONarray::size() const
 {
 	return allValues.size();
 }
@@ -68,7 +68,7 @@ VkBool32 JSONarray::encode(std::string& jsonText, std::int32_t& spaces) const
 	{
 		doLineFeed(jsonText, spaces, 1);
 
-		for (size_t i = 0; i < allValues.size(); i++)
+		for (uint32_t i = 0; i < allValues.size(); i++)
 		{
 			if (!allValues[i]->encode(jsonText, spaces))
 			{

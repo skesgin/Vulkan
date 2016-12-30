@@ -199,7 +199,7 @@ int32_t ImageData::getCubeMapFace(float& s, float& t, const float x, const float
 	return faceLayer;
 }
 
-ImageData::ImageData(const std::string& name, const VkImageType imageType, const VkFormat& format, const VkExtent3D& extent, const uint32_t mipLevels, const uint32_t arrayLayers, const std::vector<size_t>& allOffsets, const uint8_t* data, const size_t size) :
+ImageData::ImageData(const std::string& name, const VkImageType imageType, const VkFormat& format, const VkExtent3D& extent, const uint32_t mipLevels, const uint32_t arrayLayers, const std::vector<uint32_t>& allOffsets, const uint8_t* data, const uint32_t size) :
     IImageData(), name(name), imageType(imageType), format(format), extent(extent), mipLevels(mipLevels), arrayLayers(arrayLayers), allOffsets(allOffsets)
 {
     buffer = binaryBufferCreate(data, size);
@@ -217,7 +217,7 @@ ImageData::ImageData(const std::string& name, const VkImageType imageType, const
     numberChannels = imageDataGetNumberChannels(format);
 }
 
-ImageData::ImageData(const std::string& name, const VkImageType imageType, const VkFormat& format, const VkExtent3D& extent, const uint32_t mipLevels, const uint32_t arrayLayers, const std::vector<size_t>& allOffsets, const IBinaryBufferSP& buffer) :
+ImageData::ImageData(const std::string& name, const VkImageType imageType, const VkFormat& format, const VkExtent3D& extent, const uint32_t mipLevels, const uint32_t arrayLayers, const std::vector<uint32_t>& allOffsets, const IBinaryBufferSP& buffer) :
     IImageData(), name(name), imageType(imageType), format(format), extent(extent), mipLevels(mipLevels), arrayLayers(arrayLayers), buffer(buffer), allOffsets(allOffsets)
 {
     if (!this->buffer.get() || !this->buffer->getData())
@@ -302,7 +302,7 @@ const uint8_t* ImageData::getByteData() const
     return (const uint8_t*)getData();
 }
 
-size_t ImageData::getSize() const
+uint32_t ImageData::getSize() const
 {
     if (buffer.get())
     {
@@ -322,7 +322,7 @@ VkBool32 ImageData::copy(void* data, const uint32_t mipLevel, const uint32_t arr
     //
 
 	VkExtent3D currentExtent;
-	size_t offset;
+	uint32_t offset;
 
     getExtentAndOffset(currentExtent, offset, mipLevel, arrayLayer);
 
@@ -336,7 +336,7 @@ VkBool32 ImageData::copy(void* data, const uint32_t mipLevel, const uint32_t arr
 
     if (BLOCK)
     {
-    	size_t nextOffset;
+    	uint32_t nextOffset;
 
     	if (!getExtentAndOffset(currentExtent, nextOffset, mipLevel + 1, arrayLayer))
     	{
@@ -386,7 +386,7 @@ VkBool32 ImageData::upload(const void* data, const uint32_t mipLevel, const uint
     }
 
 	VkExtent3D currentExtent;
-	size_t offset;
+	uint32_t offset;
 
     getExtentAndOffset(currentExtent, offset, mipLevel, arrayLayer);
 
@@ -408,7 +408,7 @@ VkBool32 ImageData::upload(const void* data, const uint32_t mipLevel, const uint
 
     if (BLOCK)
     {
-    	size_t nextOffset;
+    	uint32_t nextOffset;
 
     	if (!getExtentAndOffset(currentExtent, nextOffset, mipLevel + 1, arrayLayer))
     	{
@@ -465,22 +465,22 @@ VkBool32 ImageData::isSRGB() const
     return SRGB;
 }
 
-int32_t ImageData::getBytesPerTexel() const
+uint32_t ImageData::getBytesPerTexel() const
 {
 	return imageDataGetBytesPerTexel(format);
 }
 
-int32_t ImageData::getBytesPerChannel() const
+uint32_t ImageData::getBytesPerChannel() const
 {
     return bytesPerChannel;
 }
 
-int32_t ImageData::getNumberChannels() const
+uint32_t ImageData::getNumberChannels() const
 {
     return numberChannels;
 }
 
-const std::vector<size_t>& ImageData::getAllOffsets() const
+const std::vector<uint32_t>& ImageData::getAllOffsets() const
 {
     return allOffsets;
 }
@@ -493,7 +493,7 @@ void ImageData::setTexel(const glm::vec4& rgba, const uint32_t x, const uint32_t
     }
 
 	VkExtent3D currentExtent;
-	size_t offset;
+	uint32_t offset;
 
     if (!getExtentAndOffset(currentExtent, offset, mipLevel, arrayLayer))
     {
@@ -502,15 +502,15 @@ void ImageData::setTexel(const glm::vec4& rgba, const uint32_t x, const uint32_t
 
     //
 
-    buffer->seek((uint32_t)offset + numberChannels * bytesPerChannel * x + numberChannels * bytesPerChannel * y * extent.width + numberChannels * bytesPerChannel * z * extent.width * extent.height, VKTS_SEARCH_ABSOLUTE);
+    buffer->seek((int64_t)(offset + numberChannels * bytesPerChannel * x + numberChannels * bytesPerChannel * y * extent.width + numberChannels * bytesPerChannel * z * extent.width * extent.height), VKTS_SEARCH_ABSOLUTE);
 
     if (UNORM)
     {
         uint8_t texelStart[4];
 
-        for (int32_t currentChannelIndex = 0; currentChannelIndex < numberChannels; currentChannelIndex++)
+        for (uint32_t currentChannelIndex = 0; currentChannelIndex < numberChannels; currentChannelIndex++)
         {
-        	int32_t currentTargetChannelIndex = currentChannelIndex;
+        	uint32_t currentTargetChannelIndex = currentChannelIndex;
 
             if (format == VK_FORMAT_B8G8R8_UNORM || format == VK_FORMAT_B8G8R8A8_UNORM || format == VK_FORMAT_B8G8R8_SRGB || format == VK_FORMAT_B8G8R8A8_SRGB)
             {
@@ -533,7 +533,7 @@ void ImageData::setTexel(const glm::vec4& rgba, const uint32_t x, const uint32_t
     {
         float texelStart[4];
 
-        for (int32_t currentChannelIndex = 0; currentChannelIndex < numberChannels; currentChannelIndex++)
+        for (uint32_t currentChannelIndex = 0; currentChannelIndex < numberChannels; currentChannelIndex++)
         {
             texelStart[currentChannelIndex] = rgba[currentChannelIndex];
         }
@@ -550,13 +550,13 @@ glm::vec4 ImageData::getTexel(const uint32_t x, const uint32_t y, const uint32_t
     }
 
 	VkExtent3D currentExtent{0, 0, 0};
-	size_t offset = 0;
+	uint32_t offset = 0;
 
     getExtentAndOffset(currentExtent, offset, mipLevel, arrayLayer);
 
     //
 
-    buffer->seek((uint32_t)offset + numberChannels * bytesPerChannel * x + numberChannels * bytesPerChannel * y * extent.width + numberChannels * bytesPerChannel * z * extent.width * extent.height, VKTS_SEARCH_ABSOLUTE);
+    buffer->seek((int64_t)(offset + numberChannels * bytesPerChannel * x + numberChannels * bytesPerChannel * y * extent.width + numberChannels * bytesPerChannel * z * extent.width * extent.height), VKTS_SEARCH_ABSOLUTE);
 
     glm::vec4 result(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -566,9 +566,9 @@ glm::vec4 ImageData::getTexel(const uint32_t x, const uint32_t y, const uint32_t
 
         buffer->read(texelStart, 1, numberChannels);
 
-        for (int32_t currentChannelIndex = 0; currentChannelIndex < numberChannels; currentChannelIndex++)
+        for (uint32_t currentChannelIndex = 0; currentChannelIndex < numberChannels; currentChannelIndex++)
         {
-        	int32_t currentTargetChannelIndex = currentChannelIndex;
+        	uint32_t currentTargetChannelIndex = currentChannelIndex;
 
             if (format == VK_FORMAT_B8G8R8_UNORM || format == VK_FORMAT_B8G8R8A8_UNORM || format == VK_FORMAT_B8G8R8_SRGB || format == VK_FORMAT_B8G8R8A8_SRGB)
             {
@@ -591,7 +591,7 @@ glm::vec4 ImageData::getTexel(const uint32_t x, const uint32_t y, const uint32_t
 
         buffer->read(texelStart, sizeof(float), numberChannels);
 
-        for (int32_t currentChannelIndex = 0; currentChannelIndex < numberChannels; currentChannelIndex++)
+        for (uint32_t currentChannelIndex = 0; currentChannelIndex < numberChannels; currentChannelIndex++)
         {
             result[currentChannelIndex] = texelStart[currentChannelIndex];
         }
@@ -815,7 +815,7 @@ glm::vec4 ImageData::getSampleCubeMap(const float x, const float y, const float 
 	return result * 0.25f;
 }
 
-VkBool32 ImageData::getExtentAndOffset(VkExtent3D& currentExtent, size_t& currentOffset, const uint32_t mipLevel, const uint32_t arrayLayer) const
+VkBool32 ImageData::getExtentAndOffset(VkExtent3D& currentExtent, uint32_t& currentOffset, const uint32_t mipLevel, const uint32_t arrayLayer) const
 {
 	if (mipLevel >= mipLevels || arrayLayer >= arrayLayers)
 	{

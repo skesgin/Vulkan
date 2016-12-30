@@ -37,7 +37,7 @@ Mesh::Mesh() :
 Mesh::Mesh(const Mesh& other) :
     IMesh(), name(other.name + "_clone"), allSubMeshes(), displace(other.displace), box(other.box)
 {
-    for (size_t i = 0; i < other.allSubMeshes.size(); i++)
+    for (uint32_t i = 0; i < other.allSubMeshes.size(); i++)
     {
         auto currentSubMesh = other.allSubMeshes[i]->clone();
 
@@ -88,7 +88,7 @@ VkBool32 Mesh::removeSubMesh(const ISubMeshSP& subMesh)
     return allSubMeshes.remove(subMesh);
 }
 
-size_t Mesh::getNumberSubMeshes() const
+uint32_t Mesh::getNumberSubMeshes() const
 {
     return allSubMeshes.size();
 }
@@ -127,7 +127,7 @@ void Mesh::updateParameterRecursive(const Parameter* parameter)
 
 	//
 
-    for (size_t i = 0; i < allSubMeshes.size(); i++)
+    for (uint32_t i = 0; i < allSubMeshes.size(); i++)
     {
         allSubMeshes[i]->updateParameterRecursive(parameter);
     }
@@ -135,7 +135,7 @@ void Mesh::updateParameterRecursive(const Parameter* parameter)
 
 void Mesh::updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets, const uint32_t currentBuffer, const std::string& nodeName)
 {
-    for (size_t i = 0; i < allSubMeshes.size(); i++)
+    for (uint32_t i = 0; i < allSubMeshes.size(); i++)
     {
         allSubMeshes[i]->updateDescriptorSetsRecursive(allWriteDescriptorSetsCount, allWriteDescriptorSets, currentBuffer, nodeName);
     }
@@ -158,7 +158,7 @@ void Mesh::drawRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerV
 
     //
 
-    for (size_t i = 0; i < allSubMeshes.size(); i++)
+    for (uint32_t i = 0; i < allSubMeshes.size(); i++)
     {
         allSubMeshes[i]->drawRecursive(cmdBuffer, allGraphicsPipelines, currentBuffer, dynamicOffsetMappings, renderOverwrite, nodeName);
     }
@@ -186,7 +186,7 @@ IMeshSP Mesh::clone() const
 
 void Mesh::destroy()
 {
-    for (size_t i = 0; i < allSubMeshes.size(); i++)
+    for (uint32_t i = 0; i < allSubMeshes.size(); i++)
     {
         allSubMeshes[i]->destroy();
     }

@@ -306,7 +306,7 @@ IFontSP VKTS_APIENTRY loadFont(const char* filename, const IGuiManagerSP& guiMan
 						return IFontSP();
 					}
 
-					imageData = imageDataMerge(mipMappedImageData, imageData->getName(), (uint32_t)mipMappedImageData.size(), 1);
+					imageData = imageDataMerge(mipMappedImageData, imageData->getName(), mipMappedImageData.size(), 1);
 
 					if (!imageData.get())
 					{

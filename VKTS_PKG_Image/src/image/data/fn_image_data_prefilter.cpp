@@ -138,13 +138,13 @@ SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterCookTorrance(co
 
     for (uint32_t side = 0; side < 6; side++)
     {
-        uint32_t roughnessSamples = (uint32_t)(result.size() / 6);
+        uint32_t roughnessSamples = result.size() / 6;
 
         uint32_t samples = 1 << m;
 
     	for (uint32_t roughnessSampleIndex = 0; roughnessSampleIndex < roughnessSamples; roughnessSampleIndex++)
     	{
-    		uint32_t length = (uint32_t)sourceImage->getWidth() / (1 << roughnessSampleIndex);
+    		uint32_t length = sourceImage->getWidth() / (1 << roughnessSampleIndex);
 
     		// 0.5 as step goes form -1.0 to 1.0 and not just 0.0 to 1.0
     		float step = 2.0f / (float)length;
@@ -263,11 +263,11 @@ SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterOrenNayar(const
 
     for (uint32_t side = 0; side < 6; side++)
     {
-        uint32_t roughnessSamples = (uint32_t)(result.size() / 6);
+        uint32_t roughnessSamples = result.size() / 6;
 
         uint32_t samples = 1 << m;
 
-        uint32_t length = (uint32_t)sourceImage->getWidth();
+        uint32_t length = sourceImage->getWidth();
 
         // 0.5 as step goes form -1.0 to 1.0 and not just 0.0 to 1.0
     	float step = 2.0f / (float)length;
@@ -376,7 +376,7 @@ SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterLambert(const I
     {
         uint32_t samples = 1 << m;
 
-        uint32_t length = (uint32_t)sourceImage->getWidth();
+        uint32_t length = sourceImage->getWidth();
 
         // 0.5 as step goes form -1.0 to 1.0 and not just 0.0 to 1.0
     	float step = 2.0f / (float)length;

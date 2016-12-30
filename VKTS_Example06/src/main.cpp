@@ -293,7 +293,7 @@ int main(int argc, char* argv[])
 
 	std::vector<VkBool32> supportFilter;
 
-	result = vkts::wsiGetPhysicalDeviceSurfaceSupport(physicalDevice->getPhysicalDevice(), surface->getSurface(), (uint32_t) physicalDevice->getAllQueueFamilyProperties().size(), supportFilter);
+	result = vkts::wsiGetPhysicalDeviceSurfaceSupport(physicalDevice->getPhysicalDevice(), surface->getSurface(), (uint32_t)physicalDevice->getAllQueueFamilyProperties().size(), supportFilter);
 
 	if (result != VK_SUCCESS || supportFilter.size() == 0)
 	{

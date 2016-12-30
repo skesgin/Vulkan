@@ -79,7 +79,7 @@ public:
 
     virtual IObjectSP findObject(const std::string& name) const override;
 
-    virtual size_t getNumberObjects() const override;
+    virtual uint32_t getNumberObjects() const override;
 
     virtual const SmartPointerVector<IObjectSP>& getObjects() const override;
 
@@ -90,7 +90,7 @@ public:
 
     virtual ICameraSP findCamera(const std::string& name) const override;
 
-    virtual size_t getNumberCameras() const override;
+    virtual uint32_t getNumberCameras() const override;
 
     virtual const SmartPointerVector<ICameraSP>& getCameras() const override;
 
@@ -101,7 +101,7 @@ public:
 
     virtual ILightSP findLight(const std::string& name) const override;
 
-    virtual size_t getNumberLights() const override;
+    virtual uint32_t getNumberLights() const override;
 
     virtual const SmartPointerVector<ILightSP>& getLights() const override;
 
@@ -124,13 +124,13 @@ public:
 
     //
 
-    virtual void updateParameterRecursive(const Parameter* parameter, const uint32_t objectOffset = 0, const uint32_t objectStep = 1, const size_t objectLimit = SIZE_MAX) override;
+    virtual void updateParameterRecursive(const Parameter* parameter, const uint32_t objectOffset = 0, const uint32_t objectStep = 1, const uint32_t objectLimit = UINT32_MAX) override;
 
-    virtual void updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets, const uint32_t currentBuffer, const uint32_t objectOffset = 0, const uint32_t objectStep = 1, const size_t objectLimit = SIZE_MAX) override;
+    virtual void updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets, const uint32_t currentBuffer, const uint32_t objectOffset = 0, const uint32_t objectStep = 1, const uint32_t objectLimit = UINT32_MAX) override;
 
-    virtual void updateTransformRecursive(const double deltaTime, const uint64_t deltaTicks, const double tickTime, const uint32_t currentBuffer = 0, const uint32_t objectOffset = 0, const uint32_t objectStep = 1, const size_t objectLimit = SIZE_MAX) override;
+    virtual void updateTransformRecursive(const double deltaTime, const uint64_t deltaTicks, const double tickTime, const uint32_t currentBuffer = 0, const uint32_t objectOffset = 0, const uint32_t objectStep = 1, const uint32_t objectLimit = UINT32_MAX) override;
 
-    virtual void drawRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const uint32_t currentBuffer, const std::map<uint32_t, VkTsDynamicOffset>& dynamicOffsetMappings, const OverwriteDraw* renderOverwrite, const uint32_t objectOffset = 0, const uint32_t objectStep = 1, const size_t objectLimit = SIZE_MAX) override;
+    virtual void drawRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const uint32_t currentBuffer, const std::map<uint32_t, VkTsDynamicOffset>& dynamicOffsetMappings, const OverwriteDraw* renderOverwrite, const uint32_t objectOffset = 0, const uint32_t objectStep = 1, const uint32_t objectLimit = UINT32_MAX) override;
 
     //
     // ICloneable

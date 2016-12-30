@@ -107,7 +107,7 @@ IBinaryBufferSP VKTS_APIENTRY _fileLoadBinary(const char* filename)
         return IBinaryBufferSP();
     }
 
-    size_t size = static_cast<size_t>(length);
+    uint32_t size = static_cast<uint32_t>(length);
 
     if (size == 0)
     {
