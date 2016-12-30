@@ -69,11 +69,9 @@ VkBool32 Frustum::isVisible(const glm::vec4& pointWorld) const
 
 VkBool32 Frustum::isVisible(const Sphere& sphereWorld) const
 {
-	float distance;
-
 	for (auto& currentSide : sidesWorld)
 	{
-		distance = currentSide.distance(sphereWorld.getCenter());
+		float distance = currentSide.distance(sphereWorld.getCenter());
 
 		if (distance + sphereWorld.getRadius() < 0.0f)
 		{

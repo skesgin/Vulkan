@@ -48,7 +48,7 @@ private:
 public:
 
 	LimitConstraint() = delete;
-	LimitConstraint(const enum LimitConstraintType type);
+	explicit LimitConstraint(const enum LimitConstraintType type);
 	LimitConstraint(const LimitConstraint& other);
 	LimitConstraint(LimitConstraint&& other) = delete;
     virtual ~LimitConstraint();

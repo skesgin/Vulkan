@@ -508,11 +508,9 @@ void ImageData::setTexel(const glm::vec4& rgba, const uint32_t x, const uint32_t
     {
         uint8_t texelStart[4];
 
-        int32_t currentTargetChannelIndex;
-
         for (int32_t currentChannelIndex = 0; currentChannelIndex < numberChannels; currentChannelIndex++)
         {
-            currentTargetChannelIndex = currentChannelIndex;
+        	int32_t currentTargetChannelIndex = currentChannelIndex;
 
             if (format == VK_FORMAT_B8G8R8_UNORM || format == VK_FORMAT_B8G8R8A8_UNORM || format == VK_FORMAT_B8G8R8_SRGB || format == VK_FORMAT_B8G8R8A8_SRGB)
             {
@@ -568,11 +566,9 @@ glm::vec4 ImageData::getTexel(const uint32_t x, const uint32_t y, const uint32_t
 
         buffer->read(texelStart, 1, numberChannels);
 
-        int32_t currentTargetChannelIndex;
-
         for (int32_t currentChannelIndex = 0; currentChannelIndex < numberChannels; currentChannelIndex++)
         {
-            currentTargetChannelIndex = currentChannelIndex;
+        	int32_t currentTargetChannelIndex = currentChannelIndex;
 
             if (format == VK_FORMAT_B8G8R8_UNORM || format == VK_FORMAT_B8G8R8A8_UNORM || format == VK_FORMAT_B8G8R8_SRGB || format == VK_FORMAT_B8G8R8A8_SRGB)
             {
@@ -639,13 +635,9 @@ glm::vec4 ImageData::getSample(const float x, const VkFilter filterX, const VkSa
 
 	//
 
-	float currentWeightX;
-	float currentWeightY;
-	float currentWeightZ;
-
 	for (uint32_t currentZ = 0; currentZ < (uint32_t)filterZ + 1; currentZ++)
 	{
-		currentWeightZ = 1.0f;
+		float currentWeightZ = 1.0f;
 
 		//
 
@@ -676,7 +668,7 @@ glm::vec4 ImageData::getSample(const float x, const VkFilter filterX, const VkSa
 
 		for (uint32_t currentY = 0; currentY < (uint32_t)filterY + 1; currentY++)
 		{
-			currentWeightY = 1.0f;
+			float currentWeightY = 1.0f;
 
 			//
 
@@ -707,7 +699,7 @@ glm::vec4 ImageData::getSample(const float x, const VkFilter filterX, const VkSa
 
 			for (uint32_t currentX = 0; currentX < (uint32_t)filterX + 1; currentX++)
 			{
-				currentWeightX = 1.0f;
+				float currentWeightX = 1.0f;
 
 				//
 
@@ -796,13 +788,13 @@ glm::vec4 ImageData::getSampleCubeMap(const float x, const float y, const float 
 			result += getSample(s, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, t - stepT, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, 0.5, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, mipLevel, faceLayer);
 			result += getSample(s - stepS, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, t - stepT, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, 0.5, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, mipLevel, faceLayer);
 		}
-		else if (fractionT >= 0.5f)
+		else
 		{
 			result += getSample(s, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, t + stepT, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, 0.5, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, mipLevel, faceLayer);
 			result += getSample(s - stepS, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, t + stepT, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, 0.5, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, mipLevel, faceLayer);
 		}
 	}
-	else if (fractionS >= 0.5f)
+	else
 	{
 		result += getSample(s + stepS, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, t, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, 0.5, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, mipLevel, faceLayer);
 
@@ -811,7 +803,7 @@ glm::vec4 ImageData::getSampleCubeMap(const float x, const float y, const float 
 			result += getSample(s, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, t - stepT, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, 0.5, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, mipLevel, faceLayer);
 			result += getSample(s + stepS, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, t - stepT, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, 0.5, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, mipLevel, faceLayer);
 		}
-		else if (fractionT >= 0.5f)
+		else
 		{
 			result += getSample(s, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, t + stepT, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, 0.5, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, mipLevel, faceLayer);
 			result += getSample(s + stepS, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, t + stepT, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, 0.5, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, mipLevel, faceLayer);

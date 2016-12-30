@@ -43,7 +43,7 @@ public:
 
 	GuiRenderFactory() = delete;
 
-	GuiRenderFactory(const IRenderPassSP& renderPass);
+	explicit GuiRenderFactory(const IRenderPassSP& renderPass);
 
     virtual ~GuiRenderFactory();
 

@@ -83,7 +83,7 @@ protected:
 public:
 
     GuiManager() = delete;
-    GuiManager(const IAssetManagerSP& assetManager);
+    explicit GuiManager(const IAssetManagerSP& assetManager);
     GuiManager(const GuiManager& other) = delete;
     GuiManager(GuiManager&& other) = delete;
     virtual ~GuiManager();

@@ -88,7 +88,7 @@ Aabb::Aabb(const float* vertices, const uint32_t numberVertices, const uint32_t 
 
 		for (uint32_t i = 0; i < numberVertices; i++)
 		{
-			const float* v = (const float*)(&p[i * stride]);
+			const float* v = (const float*)((const void *)&p[i * stride]);
 
 			glm::vec4 currentVertex = glm::vec4(v[0], v[1], v[2], v[3]);
 

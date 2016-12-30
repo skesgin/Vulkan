@@ -238,7 +238,7 @@ public:
 
 	GltfVisitor() = delete;
 
-	GltfVisitor(const std::string& directory);
+	explicit GltfVisitor(const std::string& directory);
 
 	virtual ~GltfVisitor();
 

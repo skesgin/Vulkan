@@ -43,7 +43,7 @@ public:
 
 	GuiFactory() = delete;
 
-	GuiFactory(const IGuiRenderFactorySP& guiRenderFactory);
+	explicit GuiFactory(const IGuiRenderFactorySP& guiRenderFactory);
 
     virtual ~GuiFactory();
 

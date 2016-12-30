@@ -2191,7 +2191,6 @@ const void* GltfVisitor::getBufferPointer(const GltfAccessor& accessor, const in
 		case 5121:
 			bytesPerComponent = 1;
 			break;
-			break;
 		case 5122:
 		case 5123:
 			bytesPerComponent = 2;

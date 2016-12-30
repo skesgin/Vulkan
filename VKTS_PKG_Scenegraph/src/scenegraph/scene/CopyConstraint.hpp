@@ -48,7 +48,7 @@ private:
 public:
 
 	CopyConstraint() = delete;
-	CopyConstraint(const enum CopyConstraintType type);
+	explicit CopyConstraint(const enum CopyConstraintType type);
 	CopyConstraint(const CopyConstraint& other);
 	CopyConstraint(CopyConstraint&& other) = delete;
     virtual ~CopyConstraint();

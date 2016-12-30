@@ -106,7 +106,7 @@ protected:
 public:
 
     SceneManager() = delete;
-    SceneManager(const IAssetManagerSP& assetManager);
+    explicit SceneManager(const IAssetManagerSP& assetManager);
     SceneManager(const SceneManager& other) = delete;
     SceneManager(SceneManager&& other) = delete;
     virtual ~SceneManager();

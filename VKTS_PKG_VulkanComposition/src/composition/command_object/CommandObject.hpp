@@ -48,7 +48,7 @@ private:
 public:
 
     CommandObject() = delete;
-    CommandObject(const ICommandBuffersSP& cmdBuffer);
+    explicit CommandObject(const ICommandBuffersSP& cmdBuffer);
     CommandObject(const CommandObject& other) = delete;
     CommandObject(CommandObject&& other) = delete;
     virtual ~CommandObject();

@@ -43,7 +43,7 @@ public:
 
 	SceneFactory() = delete;
 
-	SceneFactory(const ISceneRenderFactorySP& sceneRenderFactory);
+	explicit SceneFactory(const ISceneRenderFactorySP& sceneRenderFactory);
 
     virtual ~SceneFactory();
 

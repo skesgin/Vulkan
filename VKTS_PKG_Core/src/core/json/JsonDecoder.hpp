@@ -43,7 +43,7 @@ private:
 
 	//
 
-	VkBool32 match(const std::string token, size_t& index);
+	VkBool32 match(const std::string& token, size_t& index);
 
 	//
 

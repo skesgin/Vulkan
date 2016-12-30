@@ -62,7 +62,7 @@ private:
 public:
 
     Font() = delete;
-    Font(const VkBool32 distanceField);
+    explicit Font(const VkBool32 distanceField);
     Font(const Font& other) = delete;
     Font(Font&& other) = delete;
     virtual ~Font();

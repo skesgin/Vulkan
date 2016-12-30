@@ -44,8 +44,8 @@ private:
 public:
 
     TextBuffer();
-    TextBuffer(const char* text);
-    TextBuffer(const std::string& text);
+    explicit TextBuffer(const char* text);
+    explicit TextBuffer(const std::string& text);
     TextBuffer(const TextBuffer& other);
     TextBuffer(TextBuffer&& other) = delete;
     virtual ~TextBuffer();

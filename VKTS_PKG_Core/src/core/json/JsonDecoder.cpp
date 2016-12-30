@@ -42,7 +42,7 @@ JsonDecoder::~JsonDecoder()
 
 //
 
-VkBool32 JsonDecoder::match(const std::string token, size_t& index)
+VkBool32 JsonDecoder::match(const std::string& token, size_t& index)
 {
 	size_t length = token.length();
 

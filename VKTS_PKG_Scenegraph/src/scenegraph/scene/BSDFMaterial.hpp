@@ -47,7 +47,8 @@ protected:
 
 public:
 
-    BSDFMaterial(const VkBool32 forwardRendering);
+    BSDFMaterial() = delete;
+    explicit BSDFMaterial(const VkBool32 forwardRendering);
     BSDFMaterial(const BSDFMaterial& other);
     BSDFMaterial(BSDFMaterial&& other) = delete;
     virtual ~BSDFMaterial();

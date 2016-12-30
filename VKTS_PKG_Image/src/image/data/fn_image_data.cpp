@@ -400,10 +400,9 @@ static IImageDataSP imageDataLoadHdr(const std::string& name, const IBinaryBuffe
 
     // Variables
     char currentChar = 0;
-    char oldChar = 0;
     while (VK_TRUE)
     {
-        oldChar = currentChar;
+    	char oldChar = currentChar;
 
         if (buffer->read(&currentChar, 1, 1) != 1)
         {
@@ -475,11 +474,9 @@ static IImageDataSP imageDataLoadHdr(const std::string& name, const IBinaryBuffe
         {
 			// New RLE decoding
 
-        	int32_t currentX = 0;
-
         	for (int32_t channel = 0; channel < 4; channel++)
 			{
-    			currentX = 0;
+        		int32_t currentX = 0;
 
 				while (currentX < width)
 				{
