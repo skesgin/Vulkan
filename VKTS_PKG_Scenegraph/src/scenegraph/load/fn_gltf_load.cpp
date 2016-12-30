@@ -76,26 +76,75 @@ static VkBool32 gltfProcessNode(INodeSP& node, const GltfVisitor& visitor, const
 
     if (gltfNode.skin)
     {
-    	// Process skin.
+    	// Process skin, so this is an armature node.
 
     	if (!sceneFactory->getSceneRenderFactory()->prepareJointsUniformBuffer(sceneManager, node, (int32_t)gltfNode.skin->jointNodes.size()))
     	{
             return VK_FALSE;
     	}
 
-    	// TODO: Use bind matrix for this node.
+		glm::mat4 matrix;
+
+		for (uint32_t i = 0; i < 16; i++)
+		{
+			matrix[i / 4][i % 4] = gltfNode.skin->bindShapeMatrix[i];
+		}
+
+		node->setTranslate(decomposeTranslate(matrix));
+		node->setRotate(decomposeRotateRzRyRx(matrix));
+		node->setScale(decomposeScale(matrix));
     }
 
     if (gltfNode.jointName != "")
     {
-    	// Process jointName.
+    	// Process jointName, so this is a joint node.
 
-    	// TODO: Gather joint index and inverse bind matrix.
+    	if (!node->getParentNode().get())
+    	{
+    		return VK_FALSE;
+    	}
+
+    	auto currentParentNode = node->getParentNode();
+
+    	while (currentParentNode.get())
+    	{
+    		if (currentParentNode->isArmature())
+    		{
+    			break;
+    		}
+
+    		currentParentNode = currentParentNode->getParentNode();
+    	}
+
+    	if (!currentParentNode.get())
+    	{
+    		return VK_FALSE;
+    	}
+
+    	//
+
+    	const auto& armatureGltfNode = visitor.getAllGltfNodes()[currentParentNode->getName()];
+
+    	if (!armatureGltfNode.skin)
+    	{
+    		return VK_FALSE;
+    	}
+
+    	auto jointIndex = armatureGltfNode.skin->jointNames.index(node->getName());
+
+    	if (jointIndex == armatureGltfNode.skin->jointNames.size())
+    	{
+    		return VK_FALSE;
+    	}
+
+    	node->setJointIndex((int32_t)jointIndex);
+
+    	//
+
+    	// Not using inverse bind matrix, as calculated by the engine.
     }
 
-	// Process meshes.
-
-	// TODO: Implement meshes.
+	// TODO: Process meshes.
 
 	// Process children.
     for (uint32_t i = 0; i < gltfNode.childrenPointer.size(); i++)
@@ -126,7 +175,27 @@ static VkBool32 gltfProcessNode(INodeSP& node, const GltfVisitor& visitor, const
 	// Process skeletons.
     for (uint32_t i = 0; i < gltfNode.skeletonsPointer.size(); i++)
     {
-    	// TODO: Implement skeletons.
+        auto childNode = sceneFactory->createNode(sceneManager);
+
+        if (!childNode.get())
+        {
+            return VK_FALSE;
+        }
+
+        childNode->setName(gltfNode.skeletons[i]);
+
+        childNode->setParentNode(node);
+
+        //
+
+        node->addChildNode(childNode);
+
+        //
+
+        if (!gltfProcessNode(childNode, visitor, *(gltfNode.skeletonsPointer[i]), sceneManager, sceneFactory))
+        {
+        	return VK_FALSE;
+        }
     }
 
 	return VK_TRUE;
