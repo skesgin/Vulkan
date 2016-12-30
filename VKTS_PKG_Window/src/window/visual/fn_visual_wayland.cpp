@@ -779,7 +779,7 @@ VkBool32 VKTS_APIENTRY _visualDispatchMessages()
 
 int32_t VKTS_APIENTRY _visualGetNumberDisplays()
 {
-    return g_allDisplays.size();
+    return (int32_t)g_allDisplays.size();
 }
 
 INativeDisplayWP VKTS_APIENTRY _visualCreateDefaultDisplay()

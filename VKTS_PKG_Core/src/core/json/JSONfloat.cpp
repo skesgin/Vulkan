@@ -60,7 +60,7 @@ void JSONfloat::setValue(float value)
 	this->floatValue = value;
 }
 
-VkBool32 JSONfloat::encode(std::string& jsonText, std::int32_t& spaces) const
+VkBool32 JSONfloat::encode(std::string& jsonText, int32_t& spaces) const
 {
 	char buffer[2048];
 

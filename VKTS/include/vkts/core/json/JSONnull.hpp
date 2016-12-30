@@ -40,7 +40,7 @@ public:
 	JSONnull();
 	virtual ~JSONnull();
 
-	virtual VkBool32 encode(std::string& jsonText, std::int32_t& spaces) const;
+	virtual VkBool32 encode(std::string& jsonText, int32_t& spaces) const;
 
 	virtual void visit(JsonVisitor& jsonVisitor);
 

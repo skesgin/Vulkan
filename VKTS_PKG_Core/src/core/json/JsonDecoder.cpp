@@ -613,10 +613,6 @@ VkBool32 JsonDecoder::decodeString(uint32_t& index, JSONstringSP& jsonString)
 				return VK_FALSE;
 			}
 		}
-		else if (((int32_t)jsonText[tempIndex] >= JSON_C0_start && (int32_t)jsonText[tempIndex] <= JSON_C0_end) || ((int32_t)jsonText[tempIndex] >= JSON_C1_start && (int32_t)jsonText[tempIndex] <= JSON_C1_end))
-		{
-			return VK_FALSE;
-		}
 		else
 		{
 			tempString += jsonText.substr(tempIndex, 1);

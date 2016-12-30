@@ -249,7 +249,7 @@ IImageDataSP VKTS_APIENTRY imageDataLoadGli(const std::string& name, const IBina
         return IImageDataSP();
     }
 
-    auto texture = gli::load((char const *)buffer->getData(), (std::uint32_t)buffer->getSize());
+    auto texture = gli::load((char const *)buffer->getData(), (uint32_t)buffer->getSize());
     if (texture.empty())
     {
     	return IImageDataSP();

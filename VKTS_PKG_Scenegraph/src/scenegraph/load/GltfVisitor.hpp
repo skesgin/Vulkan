@@ -185,9 +185,9 @@ private:
 
 	VkBool32 gltfBool;
 	std::string gltfString;
-	std::int32_t gltfInteger;
+	int32_t gltfInteger;
 	float gltfFloat;
-	std::int32_t gltfIntegerArray[16];
+	int32_t gltfIntegerArray[16];
 	float gltfFloatArray[16];
 
 	uint32_t arrayIndex;

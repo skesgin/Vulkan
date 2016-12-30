@@ -74,13 +74,13 @@ VkBool32 VKTS_APIENTRY _visualInitTouchpad(const VkInstance instance, const VkPh
 	{
 		if (eventNumber < 10)
 		{
-			eventFilename[16] = '0' + (char)eventNumber;
+			eventFilename[16] = (char)('0' + eventNumber);
 			eventFilename[17] = 0;
 		}
 		else
 		{
-			eventFilename[16] = '0' + (char)(eventNumber / 10);
-			eventFilename[17] = '0' + (char)(eventNumber % 10);
+			eventFilename[16] = (char)('0' + eventNumber / 10);
+			eventFilename[17] = (char)('0' + eventNumber % 10);
 			eventFilename[18] = 0;
 		}
 

@@ -43,7 +43,7 @@ void JSONarray::addValue(const JSONvalueSP& value)
 	allValues.append(value);
 }
 
-JSONvalueSP JSONarray::getValueAt(std::int32_t index) const
+JSONvalueSP JSONarray::getValueAt(int32_t index) const
 {
 	return allValues[index];
 }
@@ -58,7 +58,7 @@ uint32_t JSONarray::size() const
 	return allValues.size();
 }
 
-VkBool32 JSONarray::encode(std::string& jsonText, std::int32_t& spaces) const
+VkBool32 JSONarray::encode(std::string& jsonText, int32_t& spaces) const
 {
 	jsonText += JSON_left_square_bracket;
 

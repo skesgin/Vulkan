@@ -46,14 +46,14 @@ public:
 
 	void addValue(const JSONvalueSP& value);
 
-	JSONvalueSP getValueAt(std::int32_t index) const;
+	JSONvalueSP getValueAt(int32_t index) const;
 
 	const SmartPointerVector<JSONvalueSP>& getAllValues() const;
 
 	uint32_t size() const;
 
 
-	virtual VkBool32 encode(std::string& jsonText, std::int32_t& spaces) const;
+	virtual VkBool32 encode(std::string& jsonText, int32_t& spaces) const;
 
 	virtual void visit(JsonVisitor& jsonVisitor);
 

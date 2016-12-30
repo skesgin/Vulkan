@@ -576,7 +576,7 @@ static IImageDataSP imageDataLoadHdr(const std::string& name, const IBinaryBuffe
 
     std::vector<uint32_t> allOffsets{0};
 
-    return IImageDataSP(new ImageData(name, VK_IMAGE_TYPE_2D, VK_FORMAT_R32G32B32_SFLOAT, { (uint32_t)width, (uint32_t)height, (uint32_t)depth }, 1, 1, allOffsets, reinterpret_cast<const uint8_t*>(&data[0]), width * height * depth * numberChannels * sizeof(float)));
+    return IImageDataSP(new ImageData(name, VK_IMAGE_TYPE_2D, VK_FORMAT_R32G32B32_SFLOAT, { (uint32_t)width, (uint32_t)height, (uint32_t)depth }, 1, 1, allOffsets, reinterpret_cast<const uint8_t*>(&data[0]), width * height * depth * numberChannels * (uint32_t)sizeof(float)));
 }
 
 void VKTS_APIENTRY imageDataSetLoadFunction(const PFN_imageDataLoadFunction loadFunction, const VkBool32 fallback)

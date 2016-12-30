@@ -177,7 +177,7 @@ SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterCookTorrance(co
     					glm::vec2 randomPoint = randomHammersley(sampleIndex, m);
 
     					// N = V
-    					auto currentColorCookTorrance = renderCookTorrance(sourceImage, VK_FILTER_LINEAR, 0, randomPoint, basis, scanVector, scanVector, roughness);
+    					auto currentColorCookTorrance = renderCookTorrance(sourceImage, VK_FILTER_LINEAR, 0, randomPoint, basis, scanVector, roughness);
 
     					if (!std::isnan(currentColorCookTorrance.x) && !std::isnan(currentColorCookTorrance.y) && !std::isnan(currentColorCookTorrance.z))
     					{

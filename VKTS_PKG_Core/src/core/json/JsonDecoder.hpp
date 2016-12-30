@@ -64,11 +64,11 @@ private:
 	VkBool32 decodeMinus(uint32_t& index, std::string& characters);
 	VkBool32 decodePoint(uint32_t& index, std::string& characters);
 
-	VkBool32 decodeHexadecimalDigit(uint32_t& index, std::string& characters, std::int32_t& value);
+	VkBool32 decodeHexadecimalDigit(uint32_t& index, std::string& characters, int32_t& value);
 
-	VkBool32 decodeDigit_0(uint32_t& index, std::string& characters, std::int32_t& value);
-	VkBool32 decodeDigit_1_9(uint32_t& index, std::string& characters, std::int32_t& value);
-	VkBool32 decodeDigit(uint32_t& index, std::string& characters, std::int32_t& value);
+	VkBool32 decodeDigit_0(uint32_t& index, std::string& characters, int32_t& value);
+	VkBool32 decodeDigit_1_9(uint32_t& index, std::string& characters, int32_t& value);
+	VkBool32 decodeDigit(uint32_t& index, std::string& characters, int32_t& value);
 
 	VkBool32 decodeExponent(uint32_t& index, std::string& characters);
 

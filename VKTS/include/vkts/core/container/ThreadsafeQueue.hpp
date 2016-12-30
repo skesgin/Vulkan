@@ -143,11 +143,11 @@ public:
         return allElements.empty();
     }
 
-    std::int32_t size() const
+    uint32_t size() const
     {
         std::lock_guard<std::mutex> queueLock(queueMutex);
 
-        return allElements.size();
+        return (uint32_t)allElements.size();
     }
 
 };

@@ -102,10 +102,10 @@ static const std::string JSON_9 = "9";
 
 static const std::string JSON_u = "u";
 
-static const std::int32_t JSON_C0_start = 0x00;
-static const std::int32_t JSON_C0_end = 0x1F;
-static const std::int32_t JSON_C1_start = 0x7F;
-static const std::int32_t JSON_C1_end = 0x9F;
+static const int32_t JSON_C0_start = 0x00;
+static const int32_t JSON_C0_end = 0x1F;
+static const int32_t JSON_C1_start = 0x7F;
+static const int32_t JSON_C1_end = 0x9F;
 
 }
 

@@ -233,7 +233,7 @@ IRenderFontSP GuiRenderFactory::createRenderFont(const IGuiManagerSP& guiManager
 
     if (font.isDistanceField())
     {
-    	pushConstantRange[0].size += 1 * sizeof(float);
+    	pushConstantRange[0].size += 1 * (uint32_t)sizeof(float);
     }
 
 	VkDescriptorSetLayout setLayouts[1];

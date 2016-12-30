@@ -38,7 +38,7 @@ JSONfalse::~JSONfalse()
 {
 }
 
-VkBool32 JSONfalse::encode(std::string& jsonText, std::int32_t& spaces) const
+VkBool32 JSONfalse::encode(std::string& jsonText, int32_t& spaces) const
 {
 	jsonText += JSON_false;
 

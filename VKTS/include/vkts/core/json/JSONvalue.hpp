@@ -44,7 +44,7 @@ protected:
 
 public:
 
-	virtual VkBool32 encode(std::string& jsonText, std::int32_t& spaces) const = 0;
+	virtual VkBool32 encode(std::string& jsonText, int32_t& spaces) const = 0;
 
 	virtual void visit(JsonVisitor& jsonVisitor) = 0;
 

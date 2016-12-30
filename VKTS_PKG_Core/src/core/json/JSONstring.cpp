@@ -52,18 +52,13 @@ void JSONstring::setValue(const std::string& value)
 	this->value = value;
 }
 
-VkBool32 JSONstring::encode(std::string& jsonText, std::int32_t& spaces) const
+VkBool32 JSONstring::encode(std::string& jsonText, int32_t& spaces) const
 {
 	jsonText += JSON_quotation_mark;
 
 	for (uint32_t i = 0; i < getValue().length(); i++)
 	{
 		char c = getValue()[i];
-
-		if (((int32_t)c >= JSON_C0_start && (int32_t)c <= JSON_C0_end) || ((int32_t)c >= JSON_C1_start && (int32_t)c <= JSON_C1_end))
-		{
-			return VK_FALSE;
-		}
 
 		if (c == JSON_quotation_mark[0])
 		{

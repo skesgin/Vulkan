@@ -59,7 +59,7 @@ void JSONinteger::setValue(int32_t value)
 	this->integerValue = value;
 }
 
-VkBool32 JSONinteger::encode(std::string& jsonText, std::int32_t& spaces) const
+VkBool32 JSONinteger::encode(std::string& jsonText, int32_t& spaces) const
 {
 	char buffer[2048];
 

@@ -38,7 +38,7 @@ JSONtrue::~JSONtrue()
 {
 }
 
-VkBool32 JSONtrue::encode(std::string& jsonText, std::int32_t& spaces) const
+VkBool32 JSONtrue::encode(std::string& jsonText, int32_t& spaces) const
 {
 	jsonText += JSON_true;
 
