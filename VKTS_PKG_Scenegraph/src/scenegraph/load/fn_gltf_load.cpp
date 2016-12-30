@@ -33,7 +33,101 @@ namespace vkts
 
 static VkBool32 gltfProcessNode(INodeSP& node, const GltfVisitor& visitor, const GltfNode& gltfNode, const ISceneManagerSP& sceneManager, const ISceneFactorySP& sceneFactory)
 {
-	// TODO: Implement glTF scene load.
+	node->setNodeRotationMode(VKTS_EULER_XYZ);
+
+	//
+
+	if (gltfNode.useMatrix)
+	{
+		// Process matrix.
+
+		glm::mat4 matrix;
+
+		for (uint32_t i = 0; i < 16; i++)
+		{
+			matrix[i / 4][i % 4] = gltfNode.matrix[i];
+		}
+
+		node->setTranslate(decomposeTranslate(matrix));
+		node->setRotate(decomposeRotateRzRyRx(matrix));
+		node->setScale(decomposeScale(matrix));
+	}
+	else
+	{
+		// Process translation, rotation and scale.
+
+		if (gltfNode.useTranslation)
+		{
+			node->setTranslate(glm::vec3(gltfNode.translation[0], gltfNode.translation[1], gltfNode.translation[2]));
+		}
+
+		if (gltfNode.useRotation)
+		{
+			Quat quat(gltfNode.rotation[0], gltfNode.rotation[1], gltfNode.rotation[2], gltfNode.rotation[3]);
+
+			node->setRotate(decomposeRotateRzRyRx(quat.mat4()));
+		}
+
+		if (gltfNode.useScale)
+		{
+			node->setScale(glm::vec3(gltfNode.scale[0], gltfNode.scale[1], gltfNode.scale[2]));
+		}
+	}
+
+    if (gltfNode.skin)
+    {
+    	// Process skin.
+
+    	if (!sceneFactory->getSceneRenderFactory()->prepareJointsUniformBuffer(sceneManager, node, (int32_t)gltfNode.skin->jointNodes.size()))
+    	{
+            return VK_FALSE;
+    	}
+
+    	// TODO: Use bind matrix for this node.
+    }
+
+    if (gltfNode.jointName != "")
+    {
+    	// Process jointName.
+
+    	// TODO: Gather joint index and inverse bind matrix.
+    }
+
+	// Process meshes.
+
+	// TODO: Implement meshes.
+
+	// Process children.
+    for (uint32_t i = 0; i < gltfNode.childrenPointer.size(); i++)
+    {
+        auto childNode = sceneFactory->createNode(sceneManager);
+
+        if (!childNode.get())
+        {
+            return VK_FALSE;
+        }
+
+        childNode->setName(gltfNode.children[i]);
+
+        childNode->setParentNode(node);
+
+        //
+
+        node->addChildNode(childNode);
+
+        //
+
+        if (!gltfProcessNode(childNode, visitor, *(gltfNode.childrenPointer[i]), sceneManager, sceneFactory))
+        {
+        	return VK_FALSE;
+        }
+    }
+
+	// Process skeletons.
+    for (uint32_t i = 0; i < gltfNode.skeletonsPointer.size(); i++)
+    {
+    	// TODO: Implement skeletons.
+    }
 
 	return VK_TRUE;
 }
@@ -169,6 +263,19 @@ ISceneSP VKTS_APIENTRY gltfLoad(const char* filename, const ISceneManagerSP& sce
             	}
             }
 
+            if (isRoot)
+            {
+                for (uint32_t m = 0; m < testGltfNode->skeletonsPointer.size(); m++)
+                {
+                	if (gltfNode == testGltfNode->skeletonsPointer[m])
+                	{
+                		isRoot = VK_FALSE;
+
+                		break;
+                	}
+                }
+            }
+
             if (!isRoot)
             {
             	break;
@@ -211,6 +318,8 @@ ISceneSP VKTS_APIENTRY gltfLoad(const char* filename, const ISceneManagerSP& sce
 
         scene->addObject(currentObject);
     }
+
+    // TODO: Process animations.
 
     return scene;
 }
