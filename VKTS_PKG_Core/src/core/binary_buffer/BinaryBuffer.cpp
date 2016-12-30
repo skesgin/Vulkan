@@ -156,7 +156,7 @@ VkBool32 BinaryBuffer::seek(const int64_t offset, const VkTsSearch search)
             }
             else if (offset > 0)
             {
-                if (static_cast<int64_t>(size - pos) <= offset)
+                if (static_cast<int64_t>(size - pos) < offset)
                 {
                     return VK_FALSE;
                 }

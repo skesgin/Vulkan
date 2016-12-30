@@ -68,7 +68,7 @@ VkBool32 TextBuffer::seek(const int64_t offset, const VkTsSearch search)
     {
         case VKTS_SEARCH_ABSOLUTE:
         {
-            if (offset < 0 || offset > static_cast<int64_t>(text.length() + 1))
+            if (offset < 0 || offset > static_cast<int64_t>(text.length()))
             {
                 return VK_FALSE;
             }
@@ -82,7 +82,7 @@ VkBool32 TextBuffer::seek(const int64_t offset, const VkTsSearch search)
         {
             if (offset < 0)
             {
-                if (-offset > static_cast<int64_t>(pos))
+                if (static_cast<int64_t>(pos) < -offset)
                 {
                     return VK_FALSE;
                 }
@@ -91,7 +91,7 @@ VkBool32 TextBuffer::seek(const int64_t offset, const VkTsSearch search)
             }
             else if (offset > 0)
             {
-                if (offset >= static_cast<int64_t>(text.length() + 1 - pos))
+                if (static_cast<int64_t>(text.length() - pos) < offset)
                 {
                     return VK_FALSE;
                 }
@@ -114,7 +114,7 @@ const char* TextBuffer::gets(char* str, const uint32_t num)
         return nullptr;
     }
 
-    if (pos == text.length() + 1)
+    if (pos >= (uint32_t)text.length())
     {
         return nullptr;
     }
@@ -125,21 +125,33 @@ const char* TextBuffer::gets(char* str, const uint32_t num)
     {
         str[strIndex] = text.c_str()[pos];
 
-        if (pos == text.length() + 1)
-        {
-            return str;
-        }
-        else if (str[strIndex] == '\n')
+        pos++;
+
+        // End of line.
+        if (str[strIndex] == '\n')
         {
             str[strIndex] = '\0';
-
-            pos++;
 
             return str;
         }
 
         strIndex++;
-        pos++;
+
+        // Not enough space in target buffer.
+        if (strIndex == num)
+        {
+            str[strIndex - 1] = '\0';
+
+            return str;
+        }
+
+        // End of buffer.
+        if (pos == (uint32_t)text.length())
+        {
+			str[strIndex] = '\0';
+
+			return str;
+        }
     }
 
     return str;
@@ -152,11 +164,11 @@ VkBool32 TextBuffer::puts(const char* str)
         return VK_FALSE;
     }
 
-    if (pos == (uint32_t)text.length() + 1)
+    if (pos >= (uint32_t)text.length())
     {
         text.append(str);
 
-        pos = (uint32_t)text.length() + 1;
+        pos = (uint32_t)text.length();
 
         return VK_TRUE;
     }
@@ -169,8 +181,13 @@ VkBool32 TextBuffer::puts(const char* str)
     {
         text[pos] = str[strIndex];
 
-        strIndex++;
         pos++;
+        strIndex++;
+    }
+
+    if (strIndex == strLen)
+    {
+    	return VK_TRUE;
     }
 
     while (strIndex < strLen)
@@ -180,7 +197,7 @@ VkBool32 TextBuffer::puts(const char* str)
         strIndex++;
     }
 
-    pos = (uint32_t)text.length() + 1;
+    pos = (uint32_t)text.length();
 
     return VK_TRUE;
 }
