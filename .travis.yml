@@ -5,7 +5,9 @@ env:
   - VISUAL="-DVKTS_WSI=VKTS_DISPLAY_VISUAL"
 sudo: required
 dist: xenial
-compiler: gcc
+compiler:
+  - gcc
+  - clang
 os: linux
 
 before_install:
