@@ -60,7 +60,7 @@ public:
 
     virtual uint32_t write(const void* ptr, const uint32_t sizeElement, const uint32_t countElement) = 0;
 
-    virtual VkBool32 copy(void* data) const = 0;
+    virtual VkBool32 copy(void* data, const uint32_t dataSize) const = 0;
 
 };
 

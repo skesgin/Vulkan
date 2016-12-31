@@ -247,11 +247,16 @@ uint32_t BinaryBuffer::write(const void* ptr, const uint32_t sizeElement, const 
     return countElementWrite;
 }
 
-VkBool32 BinaryBuffer::copy(void* data) const
+VkBool32 BinaryBuffer::copy(void* data, const uint32_t dataSize) const
 {
     if (!data || !getData())
     {
         return VK_FALSE;
+    }
+
+    if (dataSize < getSize())
+    {
+    	return VK_FALSE;
     }
 
     memcpy(data, getData(), getSize());

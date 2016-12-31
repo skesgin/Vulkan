@@ -76,7 +76,7 @@ public:
 
     virtual uint32_t write(const void* ptr, const uint32_t sizeElement, const uint32_t countElement) override;
 
-    virtual VkBool32 copy(void* data) const override;
+    virtual VkBool32 copy(void* data, const uint32_t dataSize) const override;
 
     //
     // ICloneable
