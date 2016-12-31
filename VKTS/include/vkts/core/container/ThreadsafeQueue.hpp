@@ -82,7 +82,6 @@ public:
             return *this;
         }
 
-        std::lock_guard<std::mutex> queueLock(queueMutex);
         std::lock_guard<std::mutex> queueLockOther(other.queueMutex);
 
         allElements = other.allElements;
@@ -97,7 +96,6 @@ public:
             return *this;
         }
 
-        std::lock_guard<std::mutex> queueLock(queueMutex);
         std::lock_guard<std::mutex> queueLockOther(other.queueMutex);
 
         allElements = std::move(other.allElements);
