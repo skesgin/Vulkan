@@ -236,7 +236,7 @@ static IImageDataSP imageDataLoadTga(const std::string& name, const IBinaryBuffe
     {
         // Create color map space.
 
-        colorMap = std::shared_ptr<uint8_t>(new uint8_t[lengthColorMap * numberChannelsColorMap], [](uint8_t* ptr){delete[] ptr;});
+        colorMap = std::shared_ptr<uint8_t>(new uint8_t[(uint32_t)lengthColorMap * numberChannelsColorMap], [](uint8_t* ptr){delete[] ptr;});
 
         if (!colorMap.get())
         {
@@ -256,7 +256,9 @@ static IImageDataSP imageDataLoadTga(const std::string& name, const IBinaryBuffe
         }
     }
 
-    std::shared_ptr<uint8_t> data = std::shared_ptr<uint8_t>(new uint8_t[width * height * depth * numberChannels], [](uint8_t* ptr){delete[] ptr;});
+    uint32_t widthHeightDepth = (uint32_t)width * (uint32_t)height * (uint32_t)depth;
+
+    std::shared_ptr<uint8_t> data = std::shared_ptr<uint8_t>(new uint8_t[widthHeightDepth * numberChannels], [](uint8_t* ptr){delete[] ptr;});
 
     // verify memory allocation
     if (!data.get())
@@ -266,7 +268,7 @@ static IImageDataSP imageDataLoadTga(const std::string& name, const IBinaryBuffe
 
     if (imageType == 1 || imageType == 2 || imageType == 3)
     {
-        if (buffer->read(data.get(), 1, width * height * depth * numberChannels) != width * height * depth * numberChannels)
+        if (buffer->read(data.get(), 1, widthHeightDepth * numberChannels) != widthHeightDepth * numberChannels)
         {
             return IImageDataSP();
         }
@@ -274,9 +276,9 @@ static IImageDataSP imageDataLoadTga(const std::string& name, const IBinaryBuffe
     else
     {
         // RLE encoded
-        int32_t pixelsRead = 0;
+        uint32_t pixelsRead = 0;
 
-        while (pixelsRead < width * height * depth)
+        while (pixelsRead < widthHeightDepth)
         {
             uint8_t amount;
 
@@ -296,9 +298,9 @@ static IImageDataSP imageDataLoadTga(const std::string& name, const IBinaryBuffe
                     return IImageDataSP();
                 }
 
-                for (uint8_t i = 1; i < amount; i++)
+                for (uint32_t i = 1; i < (uint32_t)amount; i++)
                 {
-                    for (uint8_t k = 0; k < numberChannels; k++)
+                    for (uint32_t k = 0; k < numberChannels; k++)
                     {
                         data.get()[(pixelsRead + i) * numberChannels + k] = data.get()[pixelsRead * numberChannels + k];
                     }
@@ -310,20 +312,20 @@ static IImageDataSP imageDataLoadTga(const std::string& name, const IBinaryBuffe
 
                 amount++;
 
-                if (buffer->read(&data.get()[pixelsRead * numberChannels], 1, amount * numberChannels) != amount * numberChannels)
+                if (buffer->read(&data.get()[pixelsRead * numberChannels], 1, (uint32_t)amount * numberChannels) != (uint32_t)amount * numberChannels)
                 {
                     return IImageDataSP();
                 }
             }
 
-            pixelsRead += amount;
+            pixelsRead += (uint32_t)amount;
         }
     }
 
     // swap the color if necessary
     if (bitsPerPixel == 24 || bitsPerPixel == 32)
     {
-        imageDataSwapRedBlueChannel(numberChannels, data.get(), width * height * depth);
+        imageDataSwapRedBlueChannel(numberChannels, data.get(), widthHeightDepth);
     }
 
     if (hasColorMap)
@@ -332,7 +334,7 @@ static IImageDataSP imageDataLoadTga(const std::string& name, const IBinaryBuffe
 
         std::shared_ptr<uint8_t> lookUp = data;
 
-        data = std::shared_ptr<uint8_t>(new uint8_t[width * height * depth * numberChannelsColorMap], [](uint8_t* ptr){ delete[] ptr; });
+        data = std::shared_ptr<uint8_t>(new uint8_t[widthHeightDepth * numberChannelsColorMap], [](uint8_t* ptr){ delete[] ptr; });
 
         if (!data.get())
         {
@@ -341,11 +343,11 @@ static IImageDataSP imageDataLoadTga(const std::string& name, const IBinaryBuffe
 
         // Copy color values from the color map into the image data.
 
-        for (int32_t i = 0; i < width * height * depth; i++)
+        for (uint32_t i = 0; i < widthHeightDepth; i++)
         {
-            for (int32_t k = 0; k < static_cast<int32_t>(numberChannelsColorMap); k++)
+            for (uint32_t k = 0; k < numberChannelsColorMap; k++)
             {
-                data.get()[i * numberChannelsColorMap + k] = colorMap.get()[(offsetIndexColorMap + lookUp.get()[i]) * numberChannelsColorMap + k];
+                data.get()[i * numberChannelsColorMap + k] = colorMap.get()[(offsetIndexColorMap + (uint32_t)(lookUp.get()[i])) * numberChannelsColorMap + k];
             }
         }
 
@@ -365,7 +367,7 @@ static IImageDataSP imageDataLoadTga(const std::string& name, const IBinaryBuffe
 
     std::vector<uint32_t> allOffsets{0};
 
-    return IImageDataSP(new ImageData(name, VK_IMAGE_TYPE_2D, format, { width, height, depth }, 1, 1, allOffsets, data.get(), width * height * depth * numberChannels));
+    return IImageDataSP(new ImageData(name, VK_IMAGE_TYPE_2D, format, { (uint32_t)width, (uint32_t)height, (uint32_t)depth }, 1, 1, allOffsets, data.get(), widthHeightDepth * numberChannels));
 }
 
 static IImageDataSP imageDataLoadHdr(const std::string& name, const IBinaryBufferSP& buffer)
@@ -783,22 +785,23 @@ static IBinaryBufferSP imageDataSaveTga(const IImageDataSP& imageData, const uin
     }
 
     //
+    uint32_t widthHeightDepth = (uint32_t)width * (uint32_t)height * (uint32_t)depth;
 
-    std::unique_ptr<uint8_t[]> data = std::unique_ptr<uint8_t[]>(new uint8_t[width * height * depth * numberChannels]);
+    std::unique_ptr<uint8_t[]> data = std::unique_ptr<uint8_t[]>(new uint8_t[widthHeightDepth * numberChannels]);
 
     if (!data.get())
     {
         return IBinaryBufferSP();
     }
 
-    memcpy(&data[0], &(imageData->getByteData()[offset]), width * height * depth * numberChannels);
+    memcpy(&data[0], &(imageData->getByteData()[offset]), widthHeightDepth * numberChannels);
 
     if (imageData->getFormat() == VK_FORMAT_R8G8B8_UNORM || imageData->getFormat() == VK_FORMAT_R8G8B8A8_UNORM)
     {
-        imageDataSwapRedBlueChannel(numberChannels, &data[0], width * height * depth);
+        imageDataSwapRedBlueChannel(numberChannels, &data[0], widthHeightDepth);
     }
 
-    if (buffer->write(&data[0], 1, width * height * depth * numberChannels) != width * height * depth * numberChannels)
+    if (buffer->write(&data[0], 1, widthHeightDepth * numberChannels) != widthHeightDepth * numberChannels)
     {
         return IBinaryBufferSP();
     }

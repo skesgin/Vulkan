@@ -235,9 +235,7 @@ IImageObjectSP VKTS_APIENTRY imageObjectCreate(IImageSP& stageImage, IBufferSP& 
     {
         if (contextObject->getPhysicalDevice()->isImageTilingAvailable(VK_IMAGE_TILING_LINEAR, imageData->getFormat(), imageData->getImageType(), imageCreateInfo.flags, imageData->getExtent3D(), imageData->getMipLevels(), imageData->getArrayLayers(), imageCreateInfo.samples, imageData->getSize()))
         {
-            VkImageCreateInfo stageImageCreateInfo;
-
-            memcpy(&stageImageCreateInfo, &imageCreateInfo, sizeof(VkImageCreateInfo));
+            VkImageCreateInfo stageImageCreateInfo(imageCreateInfo);
 
             stageImageCreateInfo.tiling = VK_IMAGE_TILING_LINEAR;
             stageImageCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT;

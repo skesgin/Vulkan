@@ -182,11 +182,11 @@ IBinaryBufferSP VKTS_APIENTRY serializeStructureType(const void* ptr)
 
     while (sourceStructureTypeHeader)
     {
-        targetStructureTypeHeader = (VkTsStructureTypeHeader*) &data[currentOffset];
+        targetStructureTypeHeader = (VkTsStructureTypeHeader*)&data[currentOffset];
 
         currentSize = serializeGetStructureTypeSize(sourceStructureTypeHeader);
 
-        memcpy(targetStructureTypeHeader, sourceStructureTypeHeader, currentSize);
+        memcpy((void*)targetStructureTypeHeader, (void*)sourceStructureTypeHeader, currentSize);
 
         currentOffset += currentSize;
 
@@ -195,7 +195,7 @@ IBinaryBufferSP VKTS_APIENTRY serializeStructureType(const void* ptr)
             targetStructureTypeHeader->pNext = &data[currentOffset];
         }
 
-        sourceStructureTypeHeader = (const VkTsStructureTypeHeader*) sourceStructureTypeHeader->pNext;
+        sourceStructureTypeHeader = (const VkTsStructureTypeHeader*)sourceStructureTypeHeader->pNext;
     }
 
     return binaryBufferCreate(&data[0], totalSize);

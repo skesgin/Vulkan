@@ -107,6 +107,11 @@ VkResult DeviceMemory::mapMemory(const VkDeviceSize offset, const VkDeviceSize s
         return VK_ERROR_MEMORY_MAP_FAILED;
     }
 
+	if (offset + size > getAllocationSize() && !VK_WHOLE_SIZE)
+	{
+		return VK_ERROR_MEMORY_MAP_FAILED;
+	}
+
     if (mapped)
     {
         unmapMemory();

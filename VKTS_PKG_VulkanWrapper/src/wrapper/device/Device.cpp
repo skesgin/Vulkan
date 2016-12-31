@@ -44,7 +44,7 @@ Device::Device(const VkPhysicalDevice physicalDevice, const VkDeviceCreateFlags 
 
     if (enabledFeatures)
     {
-        memcpy(&physicalDeviceFeatures, enabledFeatures, sizeof(VkPhysicalDeviceFeatures));
+        physicalDeviceFeatures = *enabledFeatures;
 
         deviceCreateInfo.pEnabledFeatures = &physicalDeviceFeatures;
     }
