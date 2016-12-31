@@ -36,13 +36,20 @@ VkBool32 VKTS_APIENTRY parseSkipBuffer(const char* buffer)
         return VK_TRUE;
     }
 
+    if (strlen(buffer) == 0)
+    {
+    	// No content, just skip.
+
+    	return VK_TRUE;
+    }
+
     if (strncmp(buffer, "#", 1) == 0)
     {
         // Comment, just skip.
 
         return VK_TRUE;
     }
-    else if (strncmp(buffer, " ", 1) == 0 || strncmp(buffer, "\t", 1) == 0 || strncmp(buffer, "\r", 1) == 0 || strncmp(buffer, "\n", 1) == 0 || strlen(buffer) == 0)
+    else if (strncmp(buffer, " ", 1) == 0 || strncmp(buffer, "\t", 1) == 0 || strncmp(buffer, "\r", 1) == 0 || strncmp(buffer, "\n", 1) == 0)
     {
         // Empty line, just skip.
 
@@ -78,6 +85,11 @@ VkBool32 VKTS_APIENTRY parseIsToken(const char* buffer, const char* token)
         return VK_FALSE;
     }
 
+    if (strlen(buffer) <= strlen(token))
+    {
+    	return VK_FALSE;
+    }
+
     if (!(buffer[strlen(token)] == ' ' || buffer[strlen(token)] == '\t' || buffer[strlen(token)] == '\n' || buffer[strlen(token)] == '\r' || buffer[strlen(token)] == '\0'))
     {
         return VK_FALSE;
@@ -91,16 +103,21 @@ VkBool32 VKTS_APIENTRY parseIsToken(const char* buffer, const char* token)
     return VK_FALSE;
 }
 
-VkBool32 VKTS_APIENTRY parseString(const char* buffer, char* string)
+VkBool32 VKTS_APIENTRY parseString(const char* buffer, char* string, const uint32_t stringSize)
 {
-    if (!buffer)
+    if (!buffer || !string)
     {
         return VK_FALSE;
     }
 
+    if (stringSize > VKTS_MAX_TOKEN_CHARS)
+    {
+    	return VK_FALSE;
+    }
+
     char token[VKTS_MAX_TOKEN_CHARS + 1];
 
-    if (sscanf(buffer, "%s %s", token, string) != 2)
+    if (sscanf(buffer, "%256s %256s", token, string) != 2)
     {
         return VK_FALSE;
     }
@@ -108,16 +125,21 @@ VkBool32 VKTS_APIENTRY parseString(const char* buffer, char* string)
     return VK_TRUE;
 }
 
-VkBool32 VKTS_APIENTRY parseStringTuple(const char* buffer, char* string0, char* string1)
+VkBool32 VKTS_APIENTRY parseStringTuple(const char* buffer, char* string0, const uint32_t string0Size, char* string1, const uint32_t string1Size)
 {
-    if (!buffer)
+    if (!buffer || !string0 || !string1)
     {
         return VK_FALSE;
     }
 
+    if (string0Size > VKTS_MAX_TOKEN_CHARS || string1Size > VKTS_MAX_TOKEN_CHARS)
+    {
+    	return VK_FALSE;
+    }
+
     char token[VKTS_MAX_TOKEN_CHARS + 1];
 
-    if (sscanf(buffer, "%s %s %s", token, string0, string1) != 3)
+    if (sscanf(buffer, "%256s %256s %256s", token, string0, string1) != 3)
     {
         return VK_FALSE;
     }
@@ -125,16 +147,21 @@ VkBool32 VKTS_APIENTRY parseStringTuple(const char* buffer, char* string0, char*
     return VK_TRUE;
 }
 
-VkBool32 VKTS_APIENTRY parseStringFloat(const char* buffer, char* string, float* scalar)
+VkBool32 VKTS_APIENTRY parseStringFloat(const char* buffer, char* string, const uint32_t stringSize, float* scalar)
 {
-    if (!buffer)
+    if (!buffer || !string || !scalar)
     {
         return VK_FALSE;
     }
 
+    if (stringSize > VKTS_MAX_TOKEN_CHARS)
+    {
+    	return VK_FALSE;
+    }
+
     char token[VKTS_MAX_TOKEN_CHARS + 1];
 
-    if (sscanf(buffer, "%s %s %f", token, string, scalar) != 3)
+    if (sscanf(buffer, "%256s %256s %f", token, string, scalar) != 3)
     {
         return VK_FALSE;
     }
@@ -142,18 +169,23 @@ VkBool32 VKTS_APIENTRY parseStringFloat(const char* buffer, char* string, float*
     return VK_TRUE;
 }
 
-VkBool32 VKTS_APIENTRY parseStringBool(const char* buffer, char* string, VkBool32* scalar)
+VkBool32 VKTS_APIENTRY parseStringBool(const char* buffer, char* string, const uint32_t stringSize, VkBool32* scalar)
 {
-    if (!buffer)
+    if (!buffer || !string || !scalar)
     {
         return VK_FALSE;
+    }
+
+    if (stringSize > VKTS_MAX_TOKEN_CHARS)
+    {
+    	return VK_FALSE;
     }
 
     char token[VKTS_MAX_TOKEN_CHARS + 1];
 
     char value[VKTS_MAX_TOKEN_CHARS + 1];
 
-    if (sscanf(buffer, "%s %s %s", token, string, value) != 3)
+    if (sscanf(buffer, "%256s %256s %256s", token, string, value) != 3)
     {
         return VK_FALSE;
     }
@@ -176,7 +208,7 @@ VkBool32 VKTS_APIENTRY parseStringBool(const char* buffer, char* string, VkBool3
 
 VkBool32 VKTS_APIENTRY parseBool(const char* buffer, VkBool32* scalar)
 {
-    if (!buffer)
+    if (!buffer || !scalar)
     {
         return VK_FALSE;
     }
@@ -185,7 +217,7 @@ VkBool32 VKTS_APIENTRY parseBool(const char* buffer, VkBool32* scalar)
 
     char value[VKTS_MAX_TOKEN_CHARS + 1];
 
-    if (sscanf(buffer, "%s %s", token, value) != 2)
+    if (sscanf(buffer, "%256s %256s", token, value) != 2)
     {
         return VK_FALSE;
     }
@@ -208,7 +240,7 @@ VkBool32 VKTS_APIENTRY parseBool(const char* buffer, VkBool32* scalar)
 
 VkBool32 VKTS_APIENTRY parseBoolTriple(const char* buffer, VkBool32* scalar0, VkBool32* scalar1, VkBool32* scalar2)
 {
-    if (!buffer)
+    if (!buffer || !scalar0 || !scalar1 || !scalar2)
     {
         return VK_FALSE;
     }
@@ -219,7 +251,7 @@ VkBool32 VKTS_APIENTRY parseBoolTriple(const char* buffer, VkBool32* scalar0, Vk
     char value1[VKTS_MAX_TOKEN_CHARS + 1];
     char value2[VKTS_MAX_TOKEN_CHARS + 1];
 
-    if (sscanf(buffer, "%s %s %s %s", token, value0, value1, value2) != 4)
+    if (sscanf(buffer, "%256s %256s %256s %256s", token, value0, value1, value2) != 4)
     {
         return VK_FALSE;
     }
@@ -268,14 +300,14 @@ VkBool32 VKTS_APIENTRY parseBoolTriple(const char* buffer, VkBool32* scalar0, Vk
 
 VkBool32 VKTS_APIENTRY parseFloat(const char* buffer, float* scalar)
 {
-    if (!buffer)
+    if (!buffer || !scalar)
     {
         return VK_FALSE;
     }
 
     char token[VKTS_MAX_TOKEN_CHARS + 1];
 
-    if (sscanf(buffer, "%s %f", token, scalar) != 2)
+    if (sscanf(buffer, "%256s %f", token, scalar) != 2)
     {
         return VK_FALSE;
     }
@@ -285,14 +317,14 @@ VkBool32 VKTS_APIENTRY parseFloat(const char* buffer, float* scalar)
 
 VkBool32 VKTS_APIENTRY parseVec2(const char* buffer, float vec2[2])
 {
-    if (!buffer)
+    if (!buffer || !vec2)
     {
         return VK_FALSE;
     }
 
     char token[VKTS_MAX_TOKEN_CHARS + 1];
 
-    if (sscanf(buffer, "%s %f %f", token, &vec2[0], &vec2[1]) != 3)
+    if (sscanf(buffer, "%256s %f %f", token, &vec2[0], &vec2[1]) != 3)
     {
         return VK_FALSE;
     }
@@ -302,14 +334,14 @@ VkBool32 VKTS_APIENTRY parseVec2(const char* buffer, float vec2[2])
 
 VkBool32 VKTS_APIENTRY parseVec3(const char* buffer, float vec3[3])
 {
-    if (!buffer)
+    if (!buffer || !vec3)
     {
         return VK_FALSE;
     }
 
     char token[VKTS_MAX_TOKEN_CHARS + 1];
 
-    if (sscanf(buffer, "%s %f %f %f", token, &vec3[0], &vec3[1], &vec3[2]) != 4)
+    if (sscanf(buffer, "%256s %f %f %f", token, &vec3[0], &vec3[1], &vec3[2]) != 4)
     {
         return VK_FALSE;
     }
@@ -319,14 +351,14 @@ VkBool32 VKTS_APIENTRY parseVec3(const char* buffer, float vec3[3])
 
 VkBool32 VKTS_APIENTRY parseVec4(const char* buffer, float vec4[4])
 {
-    if (!buffer)
+    if (!buffer || !vec4)
     {
         return VK_FALSE;
     }
 
     char token[VKTS_MAX_TOKEN_CHARS + 1];
 
-    if (sscanf(buffer, "%s %f %f %f %f", token, &vec4[0], &vec4[1], &vec4[2], &vec4[3]) != 5)
+    if (sscanf(buffer, "%256s %f %f %f %f", token, &vec4[0], &vec4[1], &vec4[2], &vec4[3]) != 5)
     {
         return VK_FALSE;
     }
@@ -336,14 +368,14 @@ VkBool32 VKTS_APIENTRY parseVec4(const char* buffer, float vec4[4])
 
 VkBool32 VKTS_APIENTRY parseVec6(const char* buffer, float vec6[6])
 {
-    if (!buffer)
+    if (!buffer || !vec6)
     {
         return VK_FALSE;
     }
 
     char token[VKTS_MAX_TOKEN_CHARS + 1];
 
-    if (sscanf(buffer, "%s %f %f %f %f %f %f", token, &vec6[0], &vec6[1], &vec6[2], &vec6[3], &vec6[4], &vec6[5]) != 7)
+    if (sscanf(buffer, "%256s %f %f %f %f %f %f", token, &vec6[0], &vec6[1], &vec6[2], &vec6[3], &vec6[4], &vec6[5]) != 7)
     {
         return VK_FALSE;
     }
@@ -353,14 +385,14 @@ VkBool32 VKTS_APIENTRY parseVec6(const char* buffer, float vec6[6])
 
 VkBool32 VKTS_APIENTRY parseVec8(const char* buffer, float vec8[8])
 {
-    if (!buffer)
+    if (!buffer || !vec8)
     {
         return VK_FALSE;
     }
 
     char token[VKTS_MAX_TOKEN_CHARS + 1];
 
-    if (sscanf(buffer, "%s %f %f %f %f %f %f %f %f", token, &vec8[0], &vec8[1], &vec8[2], &vec8[3], &vec8[4], &vec8[5], &vec8[6], &vec8[7]) != 9)
+    if (sscanf(buffer, "%256s %f %f %f %f %f %f %f %f", token, &vec8[0], &vec8[1], &vec8[2], &vec8[3], &vec8[4], &vec8[5], &vec8[6], &vec8[7]) != 9)
     {
         return VK_FALSE;
     }
@@ -370,14 +402,14 @@ VkBool32 VKTS_APIENTRY parseVec8(const char* buffer, float vec8[8])
 
 VkBool32 VKTS_APIENTRY parseInt(const char* buffer, int32_t* scalar)
 {
-    if (!buffer)
+    if (!buffer || !scalar)
     {
         return VK_FALSE;
     }
 
     char token[VKTS_MAX_TOKEN_CHARS + 1];
 
-    if (sscanf(buffer, "%s %d", token, scalar) != 2)
+    if (sscanf(buffer, "%256s %d", token, scalar) != 2)
     {
         return VK_FALSE;
     }
@@ -387,14 +419,14 @@ VkBool32 VKTS_APIENTRY parseInt(const char* buffer, int32_t* scalar)
 
 VkBool32 VKTS_APIENTRY parseIVec3(const char* buffer, int32_t ivec3[3])
 {
-    if (!buffer)
+    if (!buffer || !ivec3)
     {
         return VK_FALSE;
     }
 
     char token[VKTS_MAX_TOKEN_CHARS + 1];
 
-    if (sscanf(buffer, "%s %d %d %d", token, &ivec3[0], &ivec3[1], &ivec3[2]) != 4)
+    if (sscanf(buffer, "%256s %d %d %d", token, &ivec3[0], &ivec3[1], &ivec3[2]) != 4)
     {
         return VK_FALSE;
     }
@@ -404,14 +436,14 @@ VkBool32 VKTS_APIENTRY parseIVec3(const char* buffer, int32_t ivec3[3])
 
 VkBool32 VKTS_APIENTRY parseUIntHex(const char* buffer, uint32_t* scalar)
 {
-    if (!buffer)
+    if (!buffer || !scalar)
     {
         return VK_FALSE;
     }
 
     char token[VKTS_MAX_TOKEN_CHARS + 1];
 
-    if (sscanf(buffer, "%s %x", token, scalar) != 2)
+    if (sscanf(buffer, "%256s %x", token, scalar) != 2)
     {
         return VK_FALSE;
     }

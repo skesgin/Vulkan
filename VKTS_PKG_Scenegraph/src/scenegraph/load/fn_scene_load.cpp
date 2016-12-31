@@ -68,7 +68,7 @@ static VkBool32 sceneLoadImageObjects(const char* directory, const char* filenam
         }
         if (parseIsToken(buffer, "name"))
         {
-            if (!parseString(buffer, sdata))
+            if (!parseString(buffer, sdata, VKTS_MAX_TOKEN_CHARS))
             {
             	logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Invalid name");
 
@@ -110,7 +110,7 @@ static VkBool32 sceneLoadImageObjects(const char* directory, const char* filenam
         }
         else if (parseIsToken(buffer, "image_data"))
         {
-            if (!parseString(buffer, sdata))
+            if (!parseString(buffer, sdata, VKTS_MAX_TOKEN_CHARS))
             {
                 return VK_FALSE;
             }
@@ -613,7 +613,7 @@ static VkBool32 sceneLoadImageObjects(const char* directory, const char* filenam
 
             if (!imageObject.get())
             {
-            	logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No memory image for '%s'", sdata);
+            	logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No memory image for '%s'", sdata, VKTS_MAX_TOKEN_CHARS);
 
                 return VK_FALSE;
             }
@@ -671,21 +671,21 @@ static VkBool32 sceneLoadTextureObjects(const char* directory, const char* filen
 
         if (parseIsToken(buffer, "image_library"))
         {
-            if (!parseString(buffer, sdata))
+            if (!parseString(buffer, sdata, VKTS_MAX_TOKEN_CHARS))
             {
                 return VK_FALSE;
             }
 
             if (!sceneLoadImageObjects(directory, sdata, sceneManager, sceneFactory))
             {
-                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load images: '%s'", sdata);
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load images: '%s'", sdata, VKTS_MAX_TOKEN_CHARS);
 
                 return VK_FALSE;
             }
         }
         else if (parseIsToken(buffer, "name"))
         {
-            if (!parseString(buffer, sdata))
+            if (!parseString(buffer, sdata, VKTS_MAX_TOKEN_CHARS))
             {
                 return VK_FALSE;
             }
@@ -725,7 +725,7 @@ static VkBool32 sceneLoadTextureObjects(const char* directory, const char* filen
         }
         else if (parseIsToken(buffer, "image"))
         {
-            if (!parseString(buffer, sdata))
+            if (!parseString(buffer, sdata, VKTS_MAX_TOKEN_CHARS))
             {
                 return VK_FALSE;
             }
@@ -753,7 +753,7 @@ static VkBool32 sceneLoadTextureObjects(const char* directory, const char* filen
 
 			if (!imageObject.get())
 			{
-				logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Memory image not found: '%s'", sdata);
+				logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Memory image not found: '%s'", sdata, VKTS_MAX_TOKEN_CHARS);
 
 				return VK_FALSE;
 			}
@@ -895,21 +895,21 @@ static VkBool32 sceneLoadMaterials(const char* directory, const char* filename, 
 
         if (parseIsToken(buffer, "texture_library"))
         {
-            if (!parseString(buffer, sdata))
+            if (!parseString(buffer, sdata, VKTS_MAX_TOKEN_CHARS))
             {
                 return VK_FALSE;
             }
 
             if (!sceneLoadTextureObjects(directory, sdata, sceneManager, sceneFactory))
             {
-                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load textureObjects: '%s'", sdata);
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load textureObjects: '%s'", sdata, VKTS_MAX_TOKEN_CHARS);
 
                 return VK_FALSE;
             }
         }
         else if (parseIsToken(buffer, "shading"))
         {
-            if (!parseStringBool(buffer, sdata, &bdata))
+            if (!parseStringBool(buffer, sdata, VKTS_MAX_TOKEN_CHARS, &bdata))
             {
                 return VK_FALSE;
             }
@@ -944,14 +944,14 @@ static VkBool32 sceneLoadMaterials(const char* directory, const char* filename, 
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Unknown shading: '%s'", sdata);
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Unknown shading: '%s'", sdata, VKTS_MAX_TOKEN_CHARS);
 
                 return VK_FALSE;
             }
         }
         else if (parseIsToken(buffer, "name"))
         {
-            if (!parseString(buffer, sdata))
+            if (!parseString(buffer, sdata, VKTS_MAX_TOKEN_CHARS))
             {
                 return VK_FALSE;
             }
@@ -1095,7 +1095,7 @@ static VkBool32 sceneLoadMaterials(const char* directory, const char* filename, 
         }
         else if (parseIsToken(buffer, "emissive_texture"))
         {
-            if (!parseString(buffer, sdata))
+            if (!parseString(buffer, sdata, VKTS_MAX_TOKEN_CHARS))
             {
                 return VK_FALSE;
             }
@@ -1120,7 +1120,7 @@ static VkBool32 sceneLoadMaterials(const char* directory, const char* filename, 
         }
         else if (parseIsToken(buffer, "alpha_texture"))
         {
-            if (!parseString(buffer, sdata))
+            if (!parseString(buffer, sdata, VKTS_MAX_TOKEN_CHARS))
             {
                 return VK_FALSE;
             }
@@ -1145,7 +1145,7 @@ static VkBool32 sceneLoadMaterials(const char* directory, const char* filename, 
         }
         else if (parseIsToken(buffer, "displacement_texture"))
         {
-            if (!parseString(buffer, sdata))
+            if (!parseString(buffer, sdata, VKTS_MAX_TOKEN_CHARS))
             {
                 return VK_FALSE;
             }
@@ -1170,7 +1170,7 @@ static VkBool32 sceneLoadMaterials(const char* directory, const char* filename, 
         }
         else if (parseIsToken(buffer, "normal_texture"))
         {
-            if (!parseString(buffer, sdata))
+            if (!parseString(buffer, sdata, VKTS_MAX_TOKEN_CHARS))
             {
                 return VK_FALSE;
             }
@@ -1345,7 +1345,7 @@ static VkBool32 sceneLoadMaterials(const char* directory, const char* filename, 
         }
         else if (parseIsToken(buffer, "phong_ambient_texture"))
         {
-            if (!parseString(buffer, sdata))
+            if (!parseString(buffer, sdata, VKTS_MAX_TOKEN_CHARS))
             {
                 return VK_FALSE;
             }
@@ -1370,7 +1370,7 @@ static VkBool32 sceneLoadMaterials(const char* directory, const char* filename, 
         }
         else if (parseIsToken(buffer, "phong_diffuse_texture"))
         {
-            if (!parseString(buffer, sdata))
+            if (!parseString(buffer, sdata, VKTS_MAX_TOKEN_CHARS))
             {
                 return VK_FALSE;
             }
@@ -1395,7 +1395,7 @@ static VkBool32 sceneLoadMaterials(const char* directory, const char* filename, 
         }
         else if (parseIsToken(buffer, "phong_specular_texture"))
         {
-            if (!parseString(buffer, sdata))
+            if (!parseString(buffer, sdata, VKTS_MAX_TOKEN_CHARS))
             {
                 return VK_FALSE;
             }
@@ -1420,7 +1420,7 @@ static VkBool32 sceneLoadMaterials(const char* directory, const char* filename, 
         }
         else if (parseIsToken(buffer, "phong_specular_shininess_texture"))
         {
-            if (!parseString(buffer, sdata))
+            if (!parseString(buffer, sdata, VKTS_MAX_TOKEN_CHARS))
             {
                 return VK_FALSE;
             }
@@ -1445,7 +1445,7 @@ static VkBool32 sceneLoadMaterials(const char* directory, const char* filename, 
         }
         else if (parseIsToken(buffer, "phong_mirror_texture"))
         {
-            if (!parseString(buffer, sdata))
+            if (!parseString(buffer, sdata, VKTS_MAX_TOKEN_CHARS))
             {
                 return VK_FALSE;
             }
@@ -1470,7 +1470,7 @@ static VkBool32 sceneLoadMaterials(const char* directory, const char* filename, 
         }
         else if (parseIsToken(buffer, "phong_mirror_reflectivity_texture"))
         {
-            if (!parseString(buffer, sdata))
+            if (!parseString(buffer, sdata, VKTS_MAX_TOKEN_CHARS))
             {
                 return VK_FALSE;
             }
@@ -1495,7 +1495,7 @@ static VkBool32 sceneLoadMaterials(const char* directory, const char* filename, 
         }
         else if (parseIsToken(buffer, "fragment_shader"))
         {
-            if (!parseString(buffer, sdata))
+            if (!parseString(buffer, sdata, VKTS_MAX_TOKEN_CHARS))
             {
                 return VK_FALSE;
             }
@@ -1514,7 +1514,7 @@ static VkBool32 sceneLoadMaterials(const char* directory, const char* filename, 
 
 					if (!shaderBinary.get())
 					{
-						logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load fragment shader: '%s'", sdata);
+						logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load fragment shader: '%s'", sdata, VKTS_MAX_TOKEN_CHARS);
 
 						return VK_FALSE;
 					}
@@ -1565,7 +1565,7 @@ static VkBool32 sceneLoadMaterials(const char* directory, const char* filename, 
         }
         else if (parseIsToken(buffer, "add_texture"))
         {
-            if (!parseString(buffer, sdata))
+            if (!parseString(buffer, sdata, VKTS_MAX_TOKEN_CHARS))
             {
                 return VK_FALSE;
             }
@@ -1648,21 +1648,21 @@ static VkBool32 sceneLoadSubMeshes(const char* directory, const char* filename, 
 
         if (parseIsToken(buffer, "material_library"))
         {
-            if (!parseString(buffer, sdata))
+            if (!parseString(buffer, sdata, VKTS_MAX_TOKEN_CHARS))
             {
                 return VK_FALSE;
             }
 
             if (!sceneLoadMaterials(directory, sdata, sceneManager, sceneFactory))
             {
-                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load materials: '%s'", sdata);
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load materials: '%s'", sdata, VKTS_MAX_TOKEN_CHARS);
 
                 return VK_FALSE;
             }
         }
         else if (parseIsToken(buffer, "name"))
         {
-            if (!parseString(buffer, sdata))
+            if (!parseString(buffer, sdata, VKTS_MAX_TOKEN_CHARS))
             {
                 return VK_FALSE;
             }
@@ -1671,7 +1671,7 @@ static VkBool32 sceneLoadSubMeshes(const char* directory, const char* filename, 
 
             if (!subMesh.get())
             {
-                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Sub mesh not created: '%s'", sdata);
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Sub mesh not created: '%s'", sdata, VKTS_MAX_TOKEN_CHARS);
 
                 return VK_FALSE;
             }
@@ -1880,7 +1880,7 @@ static VkBool32 sceneLoadSubMeshes(const char* directory, const char* filename, 
         }
         else if (parseIsToken(buffer, "material"))
         {
-            if (!parseString(buffer, sdata))
+            if (!parseString(buffer, sdata, VKTS_MAX_TOKEN_CHARS))
             {
                 return VK_FALSE;
             }
@@ -1903,7 +1903,7 @@ static VkBool32 sceneLoadSubMeshes(const char* directory, const char* filename, 
                     }
                     else
                     {
-                        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Material not found: '%s'", sdata);
+                        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Material not found: '%s'", sdata, VKTS_MAX_TOKEN_CHARS);
 
                         return VK_FALSE;
                     }
@@ -2266,21 +2266,21 @@ static VkBool32 sceneLoadMeshes(const char* directory, const char* filename, con
 
         if (parseIsToken(buffer, "submesh_library"))
         {
-            if (!parseString(buffer, sdata))
+            if (!parseString(buffer, sdata, VKTS_MAX_TOKEN_CHARS))
             {
                 return VK_FALSE;
             }
 
             if (!sceneLoadSubMeshes(directory, sdata, sceneManager, sceneFactory))
             {
-                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load sub meshes: '%s'", sdata);
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load sub meshes: '%s'", sdata, VKTS_MAX_TOKEN_CHARS);
 
                 return VK_FALSE;
             }
         }
         else if (parseIsToken(buffer, "name"))
         {
-            if (!parseString(buffer, sdata))
+            if (!parseString(buffer, sdata, VKTS_MAX_TOKEN_CHARS))
             {
                 return VK_FALSE;
             }
@@ -2289,7 +2289,7 @@ static VkBool32 sceneLoadMeshes(const char* directory, const char* filename, con
 
             if (!mesh.get())
             {
-                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Mesh not created: '%s'", sdata);
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Mesh not created: '%s'", sdata, VKTS_MAX_TOKEN_CHARS);
 
                 return VK_FALSE;
             }
@@ -2300,7 +2300,7 @@ static VkBool32 sceneLoadMeshes(const char* directory, const char* filename, con
         }
         else if (parseIsToken(buffer, "submesh"))
         {
-            if (!parseString(buffer, sdata))
+            if (!parseString(buffer, sdata, VKTS_MAX_TOKEN_CHARS))
             {
                 return VK_FALSE;
             }
@@ -2311,7 +2311,7 @@ static VkBool32 sceneLoadMeshes(const char* directory, const char* filename, con
 
                 if (!subMesh.get())
                 {
-                    logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Sub mesh not found: '%s'", sdata);
+                    logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Sub mesh not found: '%s'", sdata, VKTS_MAX_TOKEN_CHARS);
 
                     return VK_FALSE;
                 }
@@ -2428,7 +2428,7 @@ static VkBool32 sceneLoadChannels(const char* directory, const char* filename, c
                 sceneManager->addChannel(optimizedChannel);
         	}
 
-            if (!parseString(buffer, sdata))
+            if (!parseString(buffer, sdata, VKTS_MAX_TOKEN_CHARS))
             {
                 return VK_FALSE;
             }
@@ -2437,7 +2437,7 @@ static VkBool32 sceneLoadChannels(const char* directory, const char* filename, c
 
             if (!channel.get())
             {
-                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Channel not created: '%s'", sdata);
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Channel not created: '%s'", sdata, VKTS_MAX_TOKEN_CHARS);
 
                 return VK_FALSE;
             }
@@ -2448,7 +2448,7 @@ static VkBool32 sceneLoadChannels(const char* directory, const char* filename, c
         }
         else if (parseIsToken(buffer, "target_transform"))
         {
-            if (!parseString(buffer, sdata))
+            if (!parseString(buffer, sdata, VKTS_MAX_TOKEN_CHARS))
             {
                 return VK_FALSE;
             }
@@ -2473,7 +2473,7 @@ static VkBool32 sceneLoadChannels(const char* directory, const char* filename, c
                 }
                 else
                 {
-                    logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Unknown target transform: '%s'", sdata);
+                    logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Unknown target transform: '%s'", sdata, VKTS_MAX_TOKEN_CHARS);
 
                     return VK_FALSE;
                 }
@@ -2487,7 +2487,7 @@ static VkBool32 sceneLoadChannels(const char* directory, const char* filename, c
         }
         else if (parseIsToken(buffer, "target_element"))
         {
-            if (!parseString(buffer, sdata))
+            if (!parseString(buffer, sdata, VKTS_MAX_TOKEN_CHARS))
             {
                 return VK_FALSE;
             }
@@ -2512,7 +2512,7 @@ static VkBool32 sceneLoadChannels(const char* directory, const char* filename, c
                 }
                 else
                 {
-                    logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Unknown target transform element: '%s'", sdata);
+                    logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Unknown target transform element: '%s'", sdata, VKTS_MAX_TOKEN_CHARS);
 
                     return VK_FALSE;
                 }
@@ -2528,7 +2528,7 @@ static VkBool32 sceneLoadChannels(const char* directory, const char* filename, c
         {
             char token[VKTS_MAX_TOKEN_CHARS + 1];
 
-            auto numberItems = sscanf(buffer, "%s %f %f %s %f %f %f %f", token, &fdata[0], &fdata[1], sdata, &fdata[2], &fdata[3], &fdata[4], &fdata[5]);
+            auto numberItems = sscanf(buffer, "%256s %f %f %256s %f %f %f %f", token, &fdata[0], &fdata[1], sdata, &fdata[2], &fdata[3], &fdata[4], &fdata[5]);
 
             if (numberItems != 4 && numberItems != 8)
             {
@@ -2561,7 +2561,7 @@ static VkBool32 sceneLoadChannels(const char* directory, const char* filename, c
                 }
                 else
                 {
-                    logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Unknown interpolator: '%s'", sdata);
+                    logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Unknown interpolator: '%s'", sdata, VKTS_MAX_TOKEN_CHARS);
 
                     return VK_FALSE;
                 }
@@ -2642,21 +2642,21 @@ static VkBool32 sceneLoadAnimations(const char* directory, const char* filename,
 
         if (parseIsToken(buffer, "channel_library"))
         {
-            if (!parseString(buffer, sdata))
+            if (!parseString(buffer, sdata, VKTS_MAX_TOKEN_CHARS))
             {
                 return VK_FALSE;
             }
 
             if (!sceneLoadChannels(directory, sdata, sceneManager, sceneFactory))
             {
-                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load channels: '%s'", sdata);
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load channels: '%s'", sdata, VKTS_MAX_TOKEN_CHARS);
 
                 return VK_FALSE;
             }
         }
         else if (parseIsToken(buffer, "name"))
         {
-            if (!parseString(buffer, sdata))
+            if (!parseString(buffer, sdata, VKTS_MAX_TOKEN_CHARS))
             {
                 return VK_FALSE;
             }
@@ -2665,7 +2665,7 @@ static VkBool32 sceneLoadAnimations(const char* directory, const char* filename,
 
             if (!animation.get())
             {
-                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Animation not created: '%s'", sdata);
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Animation not created: '%s'", sdata, VKTS_MAX_TOKEN_CHARS);
 
                 return VK_FALSE;
             }
@@ -2712,7 +2712,7 @@ static VkBool32 sceneLoadAnimations(const char* directory, const char* filename,
         }
         else if (parseIsToken(buffer, "marker"))
         {
-            if (!parseStringFloat(buffer, sdata, fdata))
+            if (!parseStringFloat(buffer, sdata, VKTS_MAX_TOKEN_CHARS, fdata))
             {
                 return VK_FALSE;
             }
@@ -2740,7 +2740,7 @@ static VkBool32 sceneLoadAnimations(const char* directory, const char* filename,
         }
         else if (parseIsToken(buffer, "channel"))
         {
-            if (!parseString(buffer, sdata))
+            if (!parseString(buffer, sdata, VKTS_MAX_TOKEN_CHARS))
             {
                 return VK_FALSE;
             }
@@ -2751,7 +2751,7 @@ static VkBool32 sceneLoadAnimations(const char* directory, const char* filename,
 
                 if (!channel.get())
                 {
-                    logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Channel not found: '%s'", sdata);
+                    logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Channel not found: '%s'", sdata, VKTS_MAX_TOKEN_CHARS);
 
                     return VK_FALSE;
                 }
@@ -2811,7 +2811,7 @@ static VkBool32 sceneLoadParticleSystems(const char* directory, const char* file
 
         if (parseIsToken(buffer, "name"))
         {
-            if (!parseString(buffer, sdata))
+            if (!parseString(buffer, sdata, VKTS_MAX_TOKEN_CHARS))
             {
                 return VK_FALSE;
             }
@@ -2820,7 +2820,7 @@ static VkBool32 sceneLoadParticleSystems(const char* directory, const char* file
 
             if (!particleSystem.get())
             {
-                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Particle System not created: '%s'", sdata);
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Particle System not created: '%s'", sdata, VKTS_MAX_TOKEN_CHARS);
 
                 return VK_FALSE;
             }
@@ -2921,7 +2921,7 @@ static VkBool32 sceneLoadParticleSystems(const char* directory, const char* file
         }
         else if (parseIsToken(buffer, "emission_emit_from"))
         {
-            if (!parseString(buffer, sdata))
+            if (!parseString(buffer, sdata, VKTS_MAX_TOKEN_CHARS))
             {
                 return VK_FALSE;
             }
@@ -2938,7 +2938,7 @@ static VkBool32 sceneLoadParticleSystems(const char* directory, const char* file
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Unknown emit type '%s'", sdata);
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Unknown emit type '%s'", sdata, VKTS_MAX_TOKEN_CHARS);
 
                 return VK_FALSE;
             }
@@ -3082,7 +3082,7 @@ static VkBool32 sceneLoadParticleSystems(const char* directory, const char* file
         }
         else if (parseIsToken(buffer, "render_type"))
         {
-            if (!parseString(buffer, sdata))
+            if (!parseString(buffer, sdata, VKTS_MAX_TOKEN_CHARS))
             {
                 return VK_FALSE;
             }
@@ -3099,7 +3099,7 @@ static VkBool32 sceneLoadParticleSystems(const char* directory, const char* file
             }
             else
             {
-                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Unknown render type '%s'", sdata);
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Unknown render type '%s'", sdata, VKTS_MAX_TOKEN_CHARS);
 
                 return VK_FALSE;
             }
@@ -3117,7 +3117,7 @@ static VkBool32 sceneLoadParticleSystems(const char* directory, const char* file
         }
         else if (parseIsToken(buffer, "render_object"))
         {
-            if (!parseString(buffer, sdata))
+            if (!parseString(buffer, sdata, VKTS_MAX_TOKEN_CHARS))
             {
                 return VK_FALSE;
             }
@@ -3178,7 +3178,7 @@ static VkBool32 sceneLoadCameras(const char* directory, const char* filename, co
 
         if (parseIsToken(buffer, "name"))
         {
-            if (!parseString(buffer, sdata))
+            if (!parseString(buffer, sdata, VKTS_MAX_TOKEN_CHARS))
             {
                 return VK_FALSE;
             }
@@ -3187,7 +3187,7 @@ static VkBool32 sceneLoadCameras(const char* directory, const char* filename, co
 
             if (!camera.get())
             {
-                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Camera not created: '%s'", sdata);
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Camera not created: '%s'", sdata, VKTS_MAX_TOKEN_CHARS);
 
                 return VK_FALSE;
             }
@@ -3200,7 +3200,7 @@ static VkBool32 sceneLoadCameras(const char* directory, const char* filename, co
         }
         else if (parseIsToken(buffer, "type"))
         {
-            if (!parseString(buffer, sdata))
+            if (!parseString(buffer, sdata, VKTS_MAX_TOKEN_CHARS))
             {
                 return VK_FALSE;
             }
@@ -3217,7 +3217,7 @@ static VkBool32 sceneLoadCameras(const char* directory, const char* filename, co
                 }
                 else
                 {
-                    logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Invalid camera type '%s'", sdata);
+                    logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Invalid camera type '%s'", sdata, VKTS_MAX_TOKEN_CHARS);
 
                     return VK_FALSE;
                 }
@@ -3347,7 +3347,7 @@ static VkBool32 sceneLoadLights(const char* directory, const char* filename, con
 
         if (parseIsToken(buffer, "name"))
         {
-            if (!parseString(buffer, sdata))
+            if (!parseString(buffer, sdata, VKTS_MAX_TOKEN_CHARS))
             {
                 return VK_FALSE;
             }
@@ -3356,7 +3356,7 @@ static VkBool32 sceneLoadLights(const char* directory, const char* filename, con
 
             if (!light.get())
             {
-                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Light not created: '%s'", sdata);
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Light not created: '%s'", sdata, VKTS_MAX_TOKEN_CHARS);
 
                 return VK_FALSE;
             }
@@ -3367,7 +3367,7 @@ static VkBool32 sceneLoadLights(const char* directory, const char* filename, con
         }
         else if (parseIsToken(buffer, "type"))
         {
-            if (!parseString(buffer, sdata))
+            if (!parseString(buffer, sdata, VKTS_MAX_TOKEN_CHARS))
             {
                 return VK_FALSE;
             }
@@ -3388,7 +3388,7 @@ static VkBool32 sceneLoadLights(const char* directory, const char* filename, con
                 }
                 else
                 {
-                    logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Invalid  light type '%s'", sdata);
+                    logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Invalid  light type '%s'", sdata, VKTS_MAX_TOKEN_CHARS);
 
                     return VK_FALSE;
                 }
@@ -3402,7 +3402,7 @@ static VkBool32 sceneLoadLights(const char* directory, const char* filename, con
         }
         else if (parseIsToken(buffer, "falloff"))
         {
-            if (!parseString(buffer, sdata))
+            if (!parseString(buffer, sdata, VKTS_MAX_TOKEN_CHARS))
             {
                 return VK_FALSE;
             }
@@ -3423,7 +3423,7 @@ static VkBool32 sceneLoadLights(const char* directory, const char* filename, con
                 }
                 else
                 {
-                    logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Invalid fall off type '%s'", sdata);
+                    logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Invalid fall off type '%s'", sdata, VKTS_MAX_TOKEN_CHARS);
 
                     return VK_FALSE;
                 }
@@ -3571,77 +3571,77 @@ static VkBool32 sceneLoadObjects(const char* directory, const char* filename, co
 
         if (parseIsToken(buffer, "mesh_library"))
         {
-            if (!parseString(buffer, sdata0))
+            if (!parseString(buffer, sdata0, VKTS_MAX_TOKEN_CHARS))
             {
                 return VK_FALSE;
             }
 
             if (!sceneLoadMeshes(directory, sdata0, sceneManager, sceneFactory))
             {
-                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load meshes: '%s'", sdata0);
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load meshes: '%s'", sdata0, VKTS_MAX_TOKEN_CHARS);
 
                 return VK_FALSE;
             }
         }
         else if (parseIsToken(buffer, "animation_library"))
         {
-            if (!parseString(buffer, sdata0))
+            if (!parseString(buffer, sdata0, VKTS_MAX_TOKEN_CHARS))
             {
                 return VK_FALSE;
             }
 
             if (!sceneLoadAnimations(directory, sdata0, sceneManager, sceneFactory))
             {
-                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load animations: '%s'", sdata0);
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load animations: '%s'", sdata0, VKTS_MAX_TOKEN_CHARS);
 
                 return VK_FALSE;
             }
         }
         else if (parseIsToken(buffer, "camera_library"))
         {
-            if (!parseString(buffer, sdata0))
+            if (!parseString(buffer, sdata0, VKTS_MAX_TOKEN_CHARS))
             {
                 return VK_FALSE;
             }
 
             if (!sceneLoadCameras(directory, sdata0, sceneManager, sceneFactory))
             {
-                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load cameras: '%s'", sdata0);
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load cameras: '%s'", sdata0, VKTS_MAX_TOKEN_CHARS);
 
                 return VK_FALSE;
             }
         }
         else if (parseIsToken(buffer, "light_library"))
         {
-            if (!parseString(buffer, sdata0))
+            if (!parseString(buffer, sdata0, VKTS_MAX_TOKEN_CHARS))
             {
                 return VK_FALSE;
             }
 
             if (!sceneLoadLights(directory, sdata0, sceneManager, sceneFactory))
             {
-                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load lights: '%s'", sdata0);
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load lights: '%s'", sdata0, VKTS_MAX_TOKEN_CHARS);
 
                 return VK_FALSE;
             }
         }
         else if (parseIsToken(buffer, "particle_system_library"))
         {
-            if (!parseString(buffer, sdata0))
+            if (!parseString(buffer, sdata0, VKTS_MAX_TOKEN_CHARS))
             {
                 return VK_FALSE;
             }
 
             if (!sceneLoadParticleSystems(directory, sdata0, sceneManager, sceneFactory))
             {
-                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load particles: '%s'", sdata0);
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load particles: '%s'", sdata0, VKTS_MAX_TOKEN_CHARS);
 
                 return VK_FALSE;
             }
         }
         else if (parseIsToken(buffer, "name"))
         {
-            if (!parseString(buffer, sdata0))
+            if (!parseString(buffer, sdata0, VKTS_MAX_TOKEN_CHARS))
             {
                 return VK_FALSE;
             }
@@ -3650,7 +3650,7 @@ static VkBool32 sceneLoadObjects(const char* directory, const char* filename, co
 
             if (!object.get())
             {
-                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Object not created: '%s'", sdata0);
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Object not created: '%s'", sdata0, VKTS_MAX_TOKEN_CHARS);
 
                 return VK_FALSE;
             }
@@ -3661,7 +3661,7 @@ static VkBool32 sceneLoadObjects(const char* directory, const char* filename, co
         }
         else if (parseIsToken(buffer, "node"))
         {
-            if (!parseStringTuple(buffer, sdata0, sdata1))
+            if (!parseStringTuple(buffer, sdata0, VKTS_MAX_TOKEN_CHARS, sdata1, VKTS_MAX_TOKEN_CHARS))
             {
                 return VK_FALSE;
             }
@@ -3672,7 +3672,7 @@ static VkBool32 sceneLoadObjects(const char* directory, const char* filename, co
 
                 if (!node.get())
                 {
-                    logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Node not created: '%s'", sdata0);
+                    logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Node not created: '%s'", sdata0, VKTS_MAX_TOKEN_CHARS);
 
                     return VK_FALSE;
                 }
@@ -3732,7 +3732,7 @@ static VkBool32 sceneLoadObjects(const char* directory, const char* filename, co
         }
         else if (parseIsToken(buffer, "particle_system"))
         {
-            if (!parseString(buffer, sdata0))
+            if (!parseString(buffer, sdata0, VKTS_MAX_TOKEN_CHARS))
             {
                 return VK_FALSE;
             }
@@ -3747,7 +3747,7 @@ static VkBool32 sceneLoadObjects(const char* directory, const char* filename, co
                 }
                 else
                 {
-                    logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Particle system not found: '%s'", sdata0);
+                    logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Particle system not found: '%s'", sdata0, VKTS_MAX_TOKEN_CHARS);
 
                     return VK_FALSE;
                 }
@@ -3788,7 +3788,7 @@ static VkBool32 sceneLoadObjects(const char* directory, const char* filename, co
         }
         else if (parseIsToken(buffer, "constraint"))
         {
-            if (!parseString(buffer, sdata0))
+            if (!parseString(buffer, sdata0, VKTS_MAX_TOKEN_CHARS))
             {
                 return VK_FALSE;
             }
@@ -3866,7 +3866,7 @@ static VkBool32 sceneLoadObjects(const char* directory, const char* filename, co
         }
         else if (parseIsToken(buffer, "target"))
         {
-            if (!parseString(buffer, sdata0))
+            if (!parseString(buffer, sdata0, VKTS_MAX_TOKEN_CHARS))
             {
                 return VK_FALSE;
             }
@@ -4137,7 +4137,7 @@ static VkBool32 sceneLoadObjects(const char* directory, const char* filename, co
             {
             	if (!sceneFactory->getSceneRenderFactory()->prepareJointsUniformBuffer(sceneManager, node, idata))
             	{
-                    logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create joint uniform buffer for node: '%s'", sdata0);
+                    logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create joint uniform buffer for node: '%s'", sdata0, VKTS_MAX_TOKEN_CHARS);
 
                     return VK_FALSE;
             	}
@@ -4205,7 +4205,7 @@ static VkBool32 sceneLoadObjects(const char* directory, const char* filename, co
         }
         else if (parseIsToken(buffer, "mesh"))
         {
-            if (!parseString(buffer, sdata0))
+            if (!parseString(buffer, sdata0, VKTS_MAX_TOKEN_CHARS))
             {
                 return VK_FALSE;
             }
@@ -4214,7 +4214,7 @@ static VkBool32 sceneLoadObjects(const char* directory, const char* filename, co
             {
             	if (!sceneFactory->getSceneRenderFactory()->prepareTransformUniformBuffer(sceneManager, node))
             	{
-                    logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create uniform buffer for node: '%s'", sdata0);
+                    logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create uniform buffer for node: '%s'", sdata0, VKTS_MAX_TOKEN_CHARS);
 
                     return VK_FALSE;
             	}
@@ -4225,7 +4225,7 @@ static VkBool32 sceneLoadObjects(const char* directory, const char* filename, co
 
                 if (!mesh.get())
                 {
-                    logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Mesh not found: '%s'", sdata0);
+                    logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Mesh not found: '%s'", sdata0, VKTS_MAX_TOKEN_CHARS);
 
                     return VK_FALSE;
                 }
@@ -4241,7 +4241,7 @@ static VkBool32 sceneLoadObjects(const char* directory, const char* filename, co
         }
         else if (parseIsToken(buffer, "camera"))
         {
-            if (!parseString(buffer, sdata0))
+            if (!parseString(buffer, sdata0, VKTS_MAX_TOKEN_CHARS))
             {
                 return VK_FALSE;
             }
@@ -4252,7 +4252,7 @@ static VkBool32 sceneLoadObjects(const char* directory, const char* filename, co
 
                 if (!camera.get())
                 {
-                    logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Camera not found: '%s'", sdata0);
+                    logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Camera not found: '%s'", sdata0, VKTS_MAX_TOKEN_CHARS);
 
                     return VK_FALSE;
                 }
@@ -4268,7 +4268,7 @@ static VkBool32 sceneLoadObjects(const char* directory, const char* filename, co
         }
         else if (parseIsToken(buffer, "light"))
         {
-            if (!parseString(buffer, sdata0))
+            if (!parseString(buffer, sdata0, VKTS_MAX_TOKEN_CHARS))
             {
                 return VK_FALSE;
             }
@@ -4279,7 +4279,7 @@ static VkBool32 sceneLoadObjects(const char* directory, const char* filename, co
 
                 if (!light.get())
                 {
-                    logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Light not found: '%s'", sdata0);
+                    logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Light not found: '%s'", sdata0, VKTS_MAX_TOKEN_CHARS);
 
                     return VK_FALSE;
                 }
@@ -4295,7 +4295,7 @@ static VkBool32 sceneLoadObjects(const char* directory, const char* filename, co
         }
         else if (parseIsToken(buffer, "animation"))
         {
-            if (!parseString(buffer, sdata0))
+            if (!parseString(buffer, sdata0, VKTS_MAX_TOKEN_CHARS))
             {
                 return VK_FALSE;
             }
@@ -4306,7 +4306,7 @@ static VkBool32 sceneLoadObjects(const char* directory, const char* filename, co
 
                 if (!animation.get())
                 {
-                    logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Animation not found: '%s'", sdata0);
+                    logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Animation not found: '%s'", sdata0, VKTS_MAX_TOKEN_CHARS);
 
                     return VK_FALSE;
                 }
@@ -4369,7 +4369,7 @@ ISceneSP VKTS_APIENTRY sceneLoad(const char* filename, const ISceneManagerSP& sc
 
         if (parseIsToken(buffer, "scene_name"))
         {
-            if (!parseString(buffer, sdata))
+            if (!parseString(buffer, sdata, VKTS_MAX_TOKEN_CHARS))
             {
                 return ISceneSP();
             }
@@ -4378,21 +4378,21 @@ ISceneSP VKTS_APIENTRY sceneLoad(const char* filename, const ISceneManagerSP& sc
         }
         else if (parseIsToken(buffer, "object_library"))
         {
-            if (!parseString(buffer, sdata))
+            if (!parseString(buffer, sdata, VKTS_MAX_TOKEN_CHARS))
             {
                 return ISceneSP();
             }
 
             if (!sceneLoadObjects(directory, sdata, sceneManager, sceneFactory))
             {
-                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load objects: '%s'", sdata);
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load objects: '%s'", sdata, VKTS_MAX_TOKEN_CHARS);
 
                 return ISceneSP();
             }
         }
         else if (parseIsToken(buffer, "object"))
         {
-            if (!parseString(buffer, sdata))
+            if (!parseString(buffer, sdata, VKTS_MAX_TOKEN_CHARS))
             {
                 return ISceneSP();
             }
@@ -4401,7 +4401,7 @@ ISceneSP VKTS_APIENTRY sceneLoad(const char* filename, const ISceneManagerSP& sc
 
             if (!object.get())
             {
-                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Object not found: '%s'", sdata);
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Object not found: '%s'", sdata, VKTS_MAX_TOKEN_CHARS);
 
                 return ISceneSP();
             }
@@ -4410,7 +4410,7 @@ ISceneSP VKTS_APIENTRY sceneLoad(const char* filename, const ISceneManagerSP& sc
         }
         else if (parseIsToken(buffer, "name"))
         {
-            if (!parseString(buffer, sdata))
+            if (!parseString(buffer, sdata, VKTS_MAX_TOKEN_CHARS))
             {
                 return ISceneSP();
             }
@@ -4482,7 +4482,7 @@ ISceneSP VKTS_APIENTRY sceneLoad(const char* filename, const ISceneManagerSP& sc
         }
         else if (parseIsToken(buffer, "environment"))
         {
-            if (!parseString(buffer, sdata))
+            if (!parseString(buffer, sdata, VKTS_MAX_TOKEN_CHARS))
             {
                 return ISceneSP();
             }
@@ -4491,7 +4491,7 @@ ISceneSP VKTS_APIENTRY sceneLoad(const char* filename, const ISceneManagerSP& sc
         }
         else if (parseIsToken(buffer, "texture"))
         {
-            if (!parseString(buffer, sdata))
+            if (!parseString(buffer, sdata, VKTS_MAX_TOKEN_CHARS))
             {
                 return ISceneSP();
             }

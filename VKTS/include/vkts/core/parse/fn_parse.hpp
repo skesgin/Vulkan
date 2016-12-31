@@ -38,13 +38,13 @@ VKTS_APICALL void VKTS_APIENTRY parseUnknownBuffer(const char* buffer);
 
 VKTS_APICALL VkBool32 VKTS_APIENTRY parseIsToken(const char* buffer, const char* token);
 
-VKTS_APICALL VkBool32 VKTS_APIENTRY parseString(const char* buffer, char* string);
+VKTS_APICALL VkBool32 VKTS_APIENTRY parseString(const char* buffer, char* string, const uint32_t stringSize);
 
-VKTS_APICALL VkBool32 VKTS_APIENTRY parseStringTuple(const char* buffer, char* string0, char* string1);
+VKTS_APICALL VkBool32 VKTS_APIENTRY parseStringTuple(const char* buffer, char* string0, const uint32_t string0Size, char* string1, const uint32_t string1Size);
 
-VKTS_APICALL VkBool32 VKTS_APIENTRY parseStringFloat(const char* buffer, char* string, float* scalar);
+VKTS_APICALL VkBool32 VKTS_APIENTRY parseStringFloat(const char* buffer, char* string, const uint32_t stringSize, float* scalar);
 
-VKTS_APICALL VkBool32 VKTS_APIENTRY parseStringBool(const char* buffer, char* string, VkBool32* scalar);
+VKTS_APICALL VkBool32 VKTS_APIENTRY parseStringBool(const char* buffer, char* string, const uint32_t stringSize, VkBool32* scalar);
 
 VKTS_APICALL VkBool32 VKTS_APIENTRY parseBool(const char* buffer, VkBool32* scalar);
 

@@ -988,8 +988,6 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
 
         //
 
-        float value = 0.0f;
-
         Quat quaternion;
         VkBool32 quaternionDirty = VK_FALSE;
 
@@ -997,7 +995,7 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
 
         for (uint32_t i = 0; i < currentChannels.size(); i++)
         {
-            value = interpolate(currentTime, currentChannels[i]);
+        	float value = interpolate(currentTime, currentChannels[i]);
 
             if (currentChannels[i]->getTargetTransform() == VKTS_TARGET_TRANSFORM_TRANSLATE)
             {

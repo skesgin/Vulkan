@@ -76,7 +76,6 @@ static float interpolateBezier(const uint32_t currentIndex, const float key, con
     float ot3;
 
     float currentKey = key;
-    float newKey;
 
     bool doBinarySearch = true;
 
@@ -91,7 +90,7 @@ static float interpolateBezier(const uint32_t currentIndex, const float key, con
         ot2 = ot * ot;
         ot3 = ot2 * ot;
 
-        newKey = ot3 * beforeKey + 3.0f * ot2 * t * beforeRightHandleKey + 3.0f * ot * t2 * afterLeftHandleKey + t3 * afterKey;
+        float newKey = ot3 * beforeKey + 3.0f * ot2 * t * beforeRightHandleKey + 3.0f * ot * t2 * afterLeftHandleKey + t3 * afterKey;
 
         if (newKey > key + VKTS_BEZIER_TOLERANCE || newKey < key - VKTS_BEZIER_TOLERANCE)
         {
