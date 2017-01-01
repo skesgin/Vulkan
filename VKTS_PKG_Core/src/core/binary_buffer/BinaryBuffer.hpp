@@ -37,20 +37,16 @@ class BinaryBuffer: public IBinaryBuffer
 
 private:
 
-    uint8_t* data;
-
-    uint32_t size;
+    std::vector<uint8_t> data;
 
     uint32_t pos;
-
-    uint8_t* copyData(const uint8_t* source, const uint32_t size) const;
 
 public:
 
     BinaryBuffer();
     explicit BinaryBuffer(const uint32_t size);
     BinaryBuffer(const uint8_t* data, const uint32_t size);
-    BinaryBuffer(uint8_t* data, const uint32_t size);
+    explicit BinaryBuffer(const std::vector<uint8_t>& data);
     BinaryBuffer(const BinaryBuffer& other) = delete;
     BinaryBuffer(BinaryBuffer&& other) = delete;
     virtual ~BinaryBuffer();

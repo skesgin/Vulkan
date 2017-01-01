@@ -110,22 +110,10 @@ ITextBufferSP VKTS_APIENTRY fileLoadText(const char* filename)
         return ITextBufferSP();
     }
 
-    auto data = new char[buffer->getSize() + 1];
+    std::string text((const char*)buffer->getData(), buffer->getSize());
 
-    if (!data)
-    {
-        return ITextBufferSP();
-    }
-
-    memset(data, 0, buffer->getSize() + 1);
-
-    memcpy(data, buffer->getData(), buffer->getSize());
-
-    auto text = ITextBufferSP(new TextBuffer(data));
-
-    delete[] data;
-
-    return text;
+    // Text is moved.
+    return ITextBufferSP(new TextBuffer(text));
 }
 
 VkBool32 VKTS_APIENTRY fileSaveBinary(const char* filename, const IBinaryBufferSP& buffer)

@@ -44,7 +44,7 @@ TextBuffer::TextBuffer(const char* text) :
 }
 
 TextBuffer::TextBuffer(const std::string& text) :
-    ITextBuffer(), text(text), pos(0)
+    ITextBuffer(), text(std::move(text)), pos(0)
 {
 }
 
@@ -208,7 +208,8 @@ VkBool32 TextBuffer::puts(const char* str)
 
 ITextBufferSP TextBuffer::clone() const
 {
-    return ITextBufferSP(new TextBuffer(text));
+	// If character pointer is passed, the text is copied.
+    return ITextBufferSP(new TextBuffer(text.c_str()));
 }
 
 } /* namespace vkts */

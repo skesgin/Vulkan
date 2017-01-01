@@ -116,20 +116,13 @@ IBinaryBufferSP VKTS_APIENTRY _fileLoadBinary(const char* filename)
         return IBinaryBufferSP();
     }
 
-    auto data = new uint8_t[size];
+    std::vector<uint8_t> data(size);
 
-    if (!data)
-    {
-        fclose(file);
-
-        return IBinaryBufferSP();
-    }
-
-    memset(data, 0, size);
+    memset(&data[0], 0, size);
 
     rewind(file);
 
-    auto elementsRead = fread(data, 1, size, file);
+    auto elementsRead = fread(&data[0], 1, size, file);
 
     fclose(file);
 
@@ -137,25 +130,16 @@ IBinaryBufferSP VKTS_APIENTRY _fileLoadBinary(const char* filename)
 
     if (elementsRead != size)
     {
-        delete[] data;
-
         return IBinaryBufferSP();
     }
 
-    auto buffer = IBinaryBufferSP(new BinaryBuffer(data, size));
+    auto buffer = IBinaryBufferSP(new BinaryBuffer(data));
 
     //
 
-	if (!buffer.get())
+	if (!buffer.get() || buffer->getSize() != size)
 	{
-	    delete[] data;
-
 	    return IBinaryBufferSP();
-	}
-
-	if  (buffer->getSize() != size)
-	{
-		return IBinaryBufferSP();
 	}
 
 	//
