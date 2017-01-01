@@ -65,4 +65,24 @@ IBinaryBufferSP VKTS_APIENTRY binaryBufferCreate(const uint8_t* data, const uint
     return result;
 }
 
+IBinaryBufferSP VKTS_APIENTRY binaryBufferCreate(const void* data, const uint32_t size)
+{
+	return binaryBufferCreate((const uint8_t*)data, size);
+}
+
+IBinaryBufferSP VKTS_APIENTRY binaryBufferCreate(const uint32_t* data, const uint32_t size)
+{
+	return binaryBufferCreate((const void*)data, size);
+}
+
+IBinaryBufferSP VKTS_APIENTRY binaryBufferCreate(const uint64_t* data, const uint32_t size)
+{
+	return binaryBufferCreate((const void*)data, size);
+}
+
+IBinaryBufferSP VKTS_APIENTRY binaryBufferCreate(const float* data, const uint32_t size)
+{
+	return binaryBufferCreate((const void*)data, size);
+}
+
 }

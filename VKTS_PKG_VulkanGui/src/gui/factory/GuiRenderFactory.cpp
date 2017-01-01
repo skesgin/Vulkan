@@ -65,7 +65,7 @@ IRenderFontSP GuiRenderFactory::createRenderFont(const IGuiManagerSP& guiManager
 		1.0f, 1.0f, 0.0f, 1.0f,
     };
 
-    auto binaryBuffer = binaryBufferCreate((const uint8_t*)vertexData, sizeof(vertexData));
+    auto binaryBuffer = binaryBufferCreate(vertexData, sizeof(vertexData));
 
     if (!binaryBuffer.get())
     {

@@ -644,7 +644,7 @@ VkBool32 Example::buildScene(const vkts::ICommandObjectSP& commandObject)
 														-1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f,
 														1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f };
 
-		auto vertexBinaryBuffer = vkts::binaryBufferCreate((const uint8_t*)vertices, sizeof(vertices));
+		auto vertexBinaryBuffer = vkts::binaryBufferCreate(vertices, sizeof(vertices));
 
 		if (!vertexBinaryBuffer.get())
 		{

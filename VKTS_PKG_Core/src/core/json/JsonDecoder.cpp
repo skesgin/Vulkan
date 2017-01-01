@@ -510,8 +510,6 @@ VkBool32 JsonDecoder::decodeNumber(uint32_t& index, JSONnumberSP& jsonNumber)
 
 		while (loop)
 		{
-			loop = VK_FALSE;
-
 			loop = decodeDigit(tempIndex, tempString, dummy);
 		}
 	}
@@ -533,8 +531,6 @@ VkBool32 JsonDecoder::decodeNumber(uint32_t& index, JSONnumberSP& jsonNumber)
 
 		while (loop)
 		{
-			loop = VK_FALSE;
-
 			loop = decodeDigit(tempIndex, tempString, dummy);
 		}
 	}
@@ -555,8 +551,6 @@ VkBool32 JsonDecoder::decodeNumber(uint32_t& index, JSONnumberSP& jsonNumber)
 
 		while (loop)
 		{
-			loop = VK_FALSE;
-
 			loop = decodeDigit(tempIndex, tempString, dummy);
 		}
 	}
