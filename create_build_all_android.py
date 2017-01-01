@@ -35,13 +35,23 @@ print("Creating and building all Android projects")
 
 #
 
+currentValidate = ""
+
+for x in range(1, len(sys.argv)):
+    if sys.argv[x] == 'validate':
+        currentValidate = " validate"
+    
+option = currentValidate 
+
+#
+
 allBuildThreads = []
 
 allVKTS = os.listdir()
 
 for package in allVKTS:
     if package.startswith("VKTS_PKG"):
-        currentBuildThread = BuildThread(package, "")
+        currentBuildThread = BuildThread(package, option)
         allBuildThreads.append(currentBuildThread)
         currentBuildThread.start()
 
@@ -60,8 +70,8 @@ for example in allExamples:
         os.chdir(example)
         os.chdir("Android")
 
-        exec(open("create_project.py").read())
-        exec(open("build_project.py").read())
+        subprocess.call("create_project.py", shell=True)
+        subprocess.call("build_project.py %s" % (option), shell=True)
 
         os.chdir("../..")
 
