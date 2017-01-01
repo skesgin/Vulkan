@@ -256,9 +256,9 @@ int main(int argc, char* argv[])
 	physicalDevice->getPhysicalDeviceFeatures(physicalDeviceFeatures);
 
 	// Check, if geometry shader is available.
-	if (!physicalDeviceFeatures.geometryShader)
+	if (!physicalDeviceFeatures.geometryShader || !physicalDeviceFeatures.fragmentStoresAndAtomics)
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Physical device not capable of geometry shaders.");
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Physical device not capable of geometry shaders and/or fragment stores and atomics.");
 
 		terminateApp();
 
@@ -268,6 +268,7 @@ int main(int argc, char* argv[])
 	// Only enable needed features.
 	memset(&physicalDeviceFeatures, 0, sizeof(physicalDeviceFeatures));
 	physicalDeviceFeatures.geometryShader = VK_TRUE;
+	physicalDeviceFeatures.fragmentStoresAndAtomics = VK_TRUE;
 
 	//
 
