@@ -177,7 +177,7 @@ int main(int argc, char* argv[])
 	vkts::IUpdateThreadSP b = vkts::IUpdateThreadSP(new Test("b", visualContext));
 	vkts::IUpdateThreadSP c = vkts::IUpdateThreadSP(new Test("c", visualContext));
 
-	if (!a.get() || !b.get() || !b.get())
+	if (!a.get() || !b.get() || !c.get())
 	{
 		printf("Test: Could not create test application.");
 

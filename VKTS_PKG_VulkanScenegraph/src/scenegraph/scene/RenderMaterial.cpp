@@ -115,7 +115,6 @@ void RenderMaterial::bindDescriptorSets(const ICommandBuffersSP& cmdBuffer, cons
     //
 
     const auto& currentBindingPresent = allBindingPresent.at(nodeName);
-    uint32_t index = 0;
     for (const auto& currentBinding : currentBindingPresent)
     {
     	if (currentBinding.second)
@@ -129,8 +128,6 @@ void RenderMaterial::bindDescriptorSets(const ICommandBuffersSP& cmdBuffer, cons
 	    		localDynamicOffsets.push_back(currentOffset->second.stride * currentBuffer + currentOffset->second.offset);
 			}
     	}
-
-		index++;
     }
 
     vkCmdBindDescriptorSets(cmdBuffer->getCommandBuffer(0), VK_PIPELINE_BIND_POINT_GRAPHICS, layout, 0, 1, &currentDescriptorSets->getDescriptorSets()[0], localDynamicOffsetCount, &localDynamicOffsets[0]);

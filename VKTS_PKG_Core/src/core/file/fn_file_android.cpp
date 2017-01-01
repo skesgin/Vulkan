@@ -93,7 +93,7 @@ IBinaryBufferSP VKTS_APIENTRY _fileLoadBinary(const char* filename)
 
 	AAsset_close(sourceAsset);
 
-	if (!buffer.get() || (buffer.get() && buffer->getSize() != size))
+	if (!buffer.get() || buffer->getSize() != size)
 	{
 	    return IBinaryBufferSP();
 	}

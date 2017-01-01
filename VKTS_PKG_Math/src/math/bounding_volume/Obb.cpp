@@ -56,12 +56,8 @@ Obb::Obb(const glm::vec4& min, const glm::vec4& max) :
 }
 
 Obb::Obb(const glm::vec4 corners[8]) :
-	corners()
+	corners{corners[0], corners[1], corners[2], corners[3], corners[4], corners[5], corners[6], corners[7]}
 {
-	for (int32_t i = 0; i < 8; i++)
-	{
-		this->corners[i] = corners[i];
-	}
 }
 
 Obb::~Obb()

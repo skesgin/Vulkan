@@ -389,20 +389,20 @@ VkBool32 VKTS_APIENTRY _visualDispatchMessages()
 
             for (uint32_t index = 0; index < g_allWindows.size(); index++)
             {
-                g_allWindows.valueAt(index)->getGamepadInput(i).setButton(VKTS_GAMEPAD_A, xinputState.Gamepad.wButtons & XINPUT_GAMEPAD_A ? VK_TRUE : VK_FALSE);
-                g_allWindows.valueAt(index)->getGamepadInput(i).setButton(VKTS_GAMEPAD_B, xinputState.Gamepad.wButtons & XINPUT_GAMEPAD_B ? VK_TRUE : VK_FALSE);
-                g_allWindows.valueAt(index)->getGamepadInput(i).setButton(VKTS_GAMEPAD_X, xinputState.Gamepad.wButtons & XINPUT_GAMEPAD_X ? VK_TRUE : VK_FALSE);
-                g_allWindows.valueAt(index)->getGamepadInput(i).setButton(VKTS_GAMEPAD_Y, xinputState.Gamepad.wButtons & XINPUT_GAMEPAD_Y ? VK_TRUE : VK_FALSE);
-                g_allWindows.valueAt(index)->getGamepadInput(i).setButton(VKTS_GAMEPAD_LEFT_SHOULDER, xinputState.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER ? VK_TRUE : VK_FALSE);
-                g_allWindows.valueAt(index)->getGamepadInput(i).setButton(VKTS_GAMEPAD_RIGHT_SHOULDER, xinputState.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER ? VK_TRUE : VK_FALSE);
-                g_allWindows.valueAt(index)->getGamepadInput(i).setButton(VKTS_GAMEPAD_BACK, xinputState.Gamepad.wButtons & XINPUT_GAMEPAD_BACK ? VK_TRUE : VK_FALSE);
-                g_allWindows.valueAt(index)->getGamepadInput(i).setButton(VKTS_GAMEPAD_START, xinputState.Gamepad.wButtons & XINPUT_GAMEPAD_START ? VK_TRUE : VK_FALSE);
-                g_allWindows.valueAt(index)->getGamepadInput(i).setButton(VKTS_GAMEPAD_LEFT_THUMB, xinputState.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_THUMB ? VK_TRUE : VK_FALSE);
-                g_allWindows.valueAt(index)->getGamepadInput(i).setButton(VKTS_GAMEPAD_RIGHT_THUMB, xinputState.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB ? VK_TRUE : VK_FALSE);
-                g_allWindows.valueAt(index)->getGamepadInput(i).setButton(VKTS_GAMEPAD_DPAD_LEFT, xinputState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT ? VK_TRUE : VK_FALSE);
-                g_allWindows.valueAt(index)->getGamepadInput(i).setButton(VKTS_GAMEPAD_DPAD_RIGHT, xinputState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT ? VK_TRUE : VK_FALSE);
-                g_allWindows.valueAt(index)->getGamepadInput(i).setButton(VKTS_GAMEPAD_DPAD_DOWN, xinputState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN ? VK_TRUE : VK_FALSE);
-                g_allWindows.valueAt(index)->getGamepadInput(i).setButton(VKTS_GAMEPAD_DPAD_UP, xinputState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP ? VK_TRUE : VK_FALSE);
+                g_allWindows.valueAt(index)->getGamepadInput(i).setButton(VKTS_GAMEPAD_A, (xinputState.Gamepad.wButtons & XINPUT_GAMEPAD_A) ? VK_TRUE : VK_FALSE);
+                g_allWindows.valueAt(index)->getGamepadInput(i).setButton(VKTS_GAMEPAD_B, (xinputState.Gamepad.wButtons & XINPUT_GAMEPAD_B) ? VK_TRUE : VK_FALSE);
+                g_allWindows.valueAt(index)->getGamepadInput(i).setButton(VKTS_GAMEPAD_X, (xinputState.Gamepad.wButtons & XINPUT_GAMEPAD_X) ? VK_TRUE : VK_FALSE);
+                g_allWindows.valueAt(index)->getGamepadInput(i).setButton(VKTS_GAMEPAD_Y, (xinputState.Gamepad.wButtons & XINPUT_GAMEPAD_Y) ? VK_TRUE : VK_FALSE);
+                g_allWindows.valueAt(index)->getGamepadInput(i).setButton(VKTS_GAMEPAD_LEFT_SHOULDER, (xinputState.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) ? VK_TRUE : VK_FALSE);
+                g_allWindows.valueAt(index)->getGamepadInput(i).setButton(VKTS_GAMEPAD_RIGHT_SHOULDER, (xinputState.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) ? VK_TRUE : VK_FALSE);
+                g_allWindows.valueAt(index)->getGamepadInput(i).setButton(VKTS_GAMEPAD_BACK, (xinputState.Gamepad.wButtons & XINPUT_GAMEPAD_BACK) ? VK_TRUE : VK_FALSE);
+                g_allWindows.valueAt(index)->getGamepadInput(i).setButton(VKTS_GAMEPAD_START, (xinputState.Gamepad.wButtons & XINPUT_GAMEPAD_START) ? VK_TRUE : VK_FALSE);
+                g_allWindows.valueAt(index)->getGamepadInput(i).setButton(VKTS_GAMEPAD_LEFT_THUMB, (xinputState.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_THUMB) ? VK_TRUE : VK_FALSE);
+                g_allWindows.valueAt(index)->getGamepadInput(i).setButton(VKTS_GAMEPAD_RIGHT_THUMB, (xinputState.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB) ? VK_TRUE : VK_FALSE);
+                g_allWindows.valueAt(index)->getGamepadInput(i).setButton(VKTS_GAMEPAD_DPAD_LEFT, (xinputState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) ? VK_TRUE : VK_FALSE);
+                g_allWindows.valueAt(index)->getGamepadInput(i).setButton(VKTS_GAMEPAD_DPAD_RIGHT, (xinputState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) ? VK_TRUE : VK_FALSE);
+                g_allWindows.valueAt(index)->getGamepadInput(i).setButton(VKTS_GAMEPAD_DPAD_DOWN, (xinputState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) ? VK_TRUE : VK_FALSE);
+                g_allWindows.valueAt(index)->getGamepadInput(i).setButton(VKTS_GAMEPAD_DPAD_UP, (xinputState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) ? VK_TRUE : VK_FALSE);
 
                 axisValue = glm::clamp((float)xinputState.Gamepad.sThumbLX / 32767, -1.0f, 1.0f);
                 g_allWindows.valueAt(index)->getGamepadInput(i).setAxis(VKTS_GAMEPAD_LEFT_STICK_X, axisValue);

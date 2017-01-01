@@ -177,14 +177,13 @@ IBinaryBufferSP VKTS_APIENTRY serializeStructureType(const void* ptr)
 
     VkTsStructureTypeHeader* targetStructureTypeHeader = nullptr;
 
-    uint32_t currentSize = 0;
     uint32_t currentOffset = 0;
 
     while (sourceStructureTypeHeader)
     {
         targetStructureTypeHeader = (VkTsStructureTypeHeader*)&data[currentOffset];
 
-        currentSize = serializeGetStructureTypeSize(sourceStructureTypeHeader);
+        uint32_t currentSize = serializeGetStructureTypeSize(sourceStructureTypeHeader);
 
         memcpy((void*)targetStructureTypeHeader, (void*)sourceStructureTypeHeader, currentSize);
 

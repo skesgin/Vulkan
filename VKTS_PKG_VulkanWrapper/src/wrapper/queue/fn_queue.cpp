@@ -50,7 +50,7 @@ VkBool32 VKTS_APIENTRY queueGetFamilyIndex(const std::vector<VkQueueFamilyProper
     {
         if ((allQueueFamilyProperties[queueFamilyIndexWalker].queueFlags & queueFlags) && allQueueFamilyProperties[queueFamilyIndexWalker].queueCount > queueIndex)
         {
-            if (!filter || (filter && (*filter)[queueFamilyIndexWalker]))
+            if (!filter || (*filter)[queueFamilyIndexWalker])
             {
                 queueFamilyIndex = queueFamilyIndexWalker;
 

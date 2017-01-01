@@ -229,7 +229,7 @@ INativeDisplayWP VKTS_APIENTRY _visualCreateDefaultDisplay()
 
     if (!currentDisplayContainer)
     {
-        _visualDestroyDisplay(currentDisplayContainer->display);
+        _visualDestroyDisplay(g_defaultDisplay);
 
         return INativeDisplayWP();
     }

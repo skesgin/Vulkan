@@ -62,8 +62,6 @@ VkBool32 VKTS_APIENTRY _visualInitTouchpad(const VkInstance instance, const VkPh
 	char eventFilename[256];
 	int eventNumber;
 
-	int fileDescriptor;
-
     // Detect touchpad.
 
 	uint64_t eventBits;
@@ -84,7 +82,7 @@ VkBool32 VKTS_APIENTRY _visualInitTouchpad(const VkInstance instance, const VkPh
 			eventFilename[18] = 0;
 		}
 
-		fileDescriptor = open(eventFilename, O_RDONLY | O_NONBLOCK);
+		int fileDescriptor = open(eventFilename, O_RDONLY | O_NONBLOCK);
 
 		if (fileDescriptor < 0)
 		{
@@ -138,8 +136,6 @@ VkBool32 VKTS_APIENTRY _visualDispatchMessagesTouchpad()
 {
     struct input_event touchpadEvent;
 
-    int64_t bytesRead;
-
     VkBool32 keepPooling;
 
 	if (touchpadFile != -1)
@@ -150,7 +146,7 @@ VkBool32 VKTS_APIENTRY _visualDispatchMessagesTouchpad()
 
 		while (keepPooling)
 		{
-			bytesRead = read(touchpadFile, &touchpadEvent, sizeof(touchpadEvent));
+			int64_t bytesRead = read(touchpadFile, &touchpadEvent, sizeof(touchpadEvent));
 
 			if (bytesRead == -1 || bytesRead != sizeof(touchpadEvent))
 			{

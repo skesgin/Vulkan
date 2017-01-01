@@ -139,8 +139,6 @@ uint32_t VKTS_APIENTRY alignmentGetOffsetInBytes(const VkTsVertexBufferType elem
         {
             return result;
         }
-
-        result += 1 * (uint32_t)sizeof(float);
     }
 
     return -1;

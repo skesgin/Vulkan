@@ -49,8 +49,6 @@ VkBool32 VKTS_APIENTRY _visualInitDisplay(const VkInstance instance, const VkPhy
 	char eventFilename[256];
 	int eventNumber;
 
-	int fileDescriptor;
-
     // Detect keyboard and mouse.
     
 	uint64_t eventBits;
@@ -71,7 +69,7 @@ VkBool32 VKTS_APIENTRY _visualInitDisplay(const VkInstance instance, const VkPhy
 			eventFilename[18] = 0;
 		}
 
-		fileDescriptor = open(eventFilename, O_RDONLY | O_NONBLOCK);
+		int fileDescriptor = open(eventFilename, O_RDONLY | O_NONBLOCK);
 		
 		if (fileDescriptor < 0)
 		{

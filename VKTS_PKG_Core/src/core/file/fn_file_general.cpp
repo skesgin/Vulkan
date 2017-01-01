@@ -146,7 +146,7 @@ IBinaryBufferSP VKTS_APIENTRY _fileLoadBinary(const char* filename)
 
     //
 
-	if (!buffer.get() || (buffer.get() && buffer->getSize() != size))
+	if (!buffer.get() || buffer->getSize() != size)
 	{
 	    delete[] data;
 
