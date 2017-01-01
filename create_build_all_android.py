@@ -51,7 +51,7 @@ allVKTS = os.listdir()
 
 for package in allVKTS:
     if package.startswith("VKTS_PKG"):
-        currentBuildThread = BuildThread(package, option)
+        currentBuildThread = BuildThread(package, "")
         allBuildThreads.append(currentBuildThread)
         currentBuildThread.start()
 

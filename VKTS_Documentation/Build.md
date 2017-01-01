@@ -60,8 +60,8 @@ Execute for Linux:
 - Display build: `python3 create_build_all_make.py VKTS_DISPLAY_VISUAL`  
 
 Execute for Android under Windows:
-- Default build: `create_build_all_Android.py`  
-- Validate build: `create_build_all_Android.py validate`  
+- Default build: `create_build_all_android.py`  
+- Validate build: `create_build_all_android.py validate`  
   
   
 Also, a global CMake file can be generated for all VKTS packages and Vulkan examples:
