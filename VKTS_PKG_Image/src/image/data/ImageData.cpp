@@ -207,6 +207,8 @@ ImageData::ImageData(const std::string& name, const VkImageType imageType, const
     if (!buffer.get() || buffer->getSize() != size)
     {
         reset();
+
+        return;
     }
 
     BLOCK = imageDataIsBLOCK(format);
@@ -223,6 +225,8 @@ ImageData::ImageData(const std::string& name, const VkImageType imageType, const
     if (!this->buffer.get() || !this->buffer->getData())
     {
         reset();
+
+        return;
     }
 
     BLOCK = imageDataIsBLOCK(format);

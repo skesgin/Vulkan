@@ -100,9 +100,9 @@ void BinaryBuffer::reset()
     if (data)
     {
         delete[] data;
-    }
 
-    data = nullptr;
+        data = nullptr;
+    }
 
     pos = 0;
 }
@@ -270,7 +270,7 @@ VkBool32 BinaryBuffer::copy(void* data, const uint32_t dataSize) const
 
 IBinaryBufferSP BinaryBuffer::clone() const
 {
-	auto result = IBinaryBufferSP(new BinaryBuffer(data, size));
+	auto result = IBinaryBufferSP(new BinaryBuffer((const uint8_t*)data, size));
 
 	if (result.get() && result->getSize() != size)
 	{
