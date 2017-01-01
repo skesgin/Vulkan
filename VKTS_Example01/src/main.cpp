@@ -242,16 +242,7 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 
-	std::unique_ptr<VkPhysicalDevice[]> allPhysicalDevices = std::unique_ptr<VkPhysicalDevice[]>(new VkPhysicalDevice[physicalDeviceCount]);
-
-	if (!allPhysicalDevices.get())
-	{
-		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create physical devices array.");
-
-		terminateApp();
-
-		return -1;
-	}
+	std::vector<VkPhysicalDevice> allPhysicalDevices(physicalDeviceCount);
 
 	result = vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, &allPhysicalDevices[0]);
 
@@ -353,18 +344,9 @@ int main(int argc, char* argv[])
 
 	vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &physicalDeviceQueueFamilyPropertiesCount, nullptr);
 
-	std::unique_ptr<VkQueueFamilyProperties[]> queueFamilyProperties(new VkQueueFamilyProperties[physicalDeviceQueueFamilyPropertiesCount]);
+	std::vector<VkQueueFamilyProperties> queueFamilyProperties(physicalDeviceQueueFamilyPropertiesCount);
 
-	if (!queueFamilyProperties.get())
-	{
-		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not get queue family properties.");
-
-		terminateApp();
-
-		return -1;
-	}
-
-	vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &physicalDeviceQueueFamilyPropertiesCount, queueFamilyProperties.get());
+	vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &physicalDeviceQueueFamilyPropertiesCount, &queueFamilyProperties[0]);
 
 	queueFamilyIndex = physicalDeviceQueueFamilyPropertiesCount;
 

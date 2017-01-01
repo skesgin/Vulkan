@@ -76,12 +76,7 @@ IPhysicalDeviceSP VKTS_APIENTRY physicalDeviceCreate(const VkInstance instance, 
         return IPhysicalDeviceSP();
     }
 
-    auto physicalDevices = std::unique_ptr<VkPhysicalDevice[]>(new VkPhysicalDevice[physicalDeviceCount]);
-
-    if (!physicalDevices.get())
-    {
-        return IPhysicalDeviceSP();
-    }
+    std::vector<VkPhysicalDevice> physicalDevices(physicalDeviceCount);
 
     result = vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, &physicalDevices[0]);
 

@@ -164,12 +164,7 @@ IBinaryBufferSP VKTS_APIENTRY serializeStructureType(const void* ptr)
 
     //
 
-    std::unique_ptr<uint8_t[]> data = std::unique_ptr<uint8_t[]>(new uint8_t[totalSize]);
-
-    if (!data.get())
-    {
-        return IBinaryBufferSP();
-    }
+    std::vector<uint8_t> data(totalSize);
 
     //
 

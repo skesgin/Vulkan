@@ -280,14 +280,7 @@ ISwapchainSP VKTS_APIENTRY wsiSwapchainCreate(const VkPhysicalDevice physicalDev
         return ISwapchainSP();
     }
 
-    std::unique_ptr<VkSurfaceFormatKHR[]> surfaceFormats = std::unique_ptr <VkSurfaceFormatKHR[]>(new VkSurfaceFormatKHR[surfaceFormatsCount]);
-
-    if (!surfaceFormats.get())
-    {
-        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create surface formats.");
-
-        return ISwapchainSP();
-    }
+    std::vector<VkSurfaceFormatKHR> surfaceFormats(surfaceFormatsCount);
 
     result = vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &surfaceFormatsCount, &surfaceFormats[0]);
 

@@ -371,14 +371,7 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 		return VK_FALSE;
 	}
 
-	std::unique_ptr<VkPresentModeKHR[]> surfacePresentModes = std::unique_ptr<VkPresentModeKHR[]>(new VkPresentModeKHR[surfacePresentModesCount]);
-
-	if (!surfacePresentModes.get())
-	{
-		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not get surface present modes.");
-
-		return VK_FALSE;
-	}
+	std::vector<VkPresentModeKHR> surfacePresentModes(surfacePresentModesCount);
 
 	result = vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface->getSurface(), &surfacePresentModesCount, &surfacePresentModes[0]);
 
@@ -403,14 +396,7 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 		return VK_FALSE;
 	}
 
-	std::unique_ptr<VkSurfaceFormatKHR[]> surfaceFormats = std::unique_ptr<VkSurfaceFormatKHR[]>(new VkSurfaceFormatKHR[surfaceFormatsCount]);
-
-	if (!surfaceFormats.get())
-	{
-		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create surface formats.");
-
-		return VK_FALSE;
-	}
+	std::vector<VkSurfaceFormatKHR> surfaceFormats(surfaceFormatsCount);
 
 	result = vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface->getSurface(), &surfaceFormatsCount, &surfaceFormats[0]);
 

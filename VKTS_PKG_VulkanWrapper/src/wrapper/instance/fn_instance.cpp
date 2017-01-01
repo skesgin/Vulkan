@@ -53,12 +53,7 @@ VkBool32 VKTS_APIENTRY instanceExtensionsAvailable(const uint32_t extensionCount
         return VK_FALSE;
     }
 
-    std::unique_ptr<VkExtensionProperties[]> allExtensionProperties = std::unique_ptr<VkExtensionProperties[]>(new VkExtensionProperties[globalExtensionPropertiesCount]);
-
-    if (!allExtensionProperties.get())
-    {
-        return VK_FALSE;
-    }
+    std::vector<VkExtensionProperties> allExtensionProperties(globalExtensionPropertiesCount);
 
     result = vkEnumerateInstanceExtensionProperties(nullptr, &globalExtensionPropertiesCount, &allExtensionProperties[0]);
 

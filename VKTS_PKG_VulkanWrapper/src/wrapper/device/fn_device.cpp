@@ -58,12 +58,7 @@ VkBool32 VKTS_APIENTRY deviceExtensionsAvailable(const VkPhysicalDevice physical
         return VK_FALSE;
     }
 
-    std::unique_ptr<VkExtensionProperties[]> allExtensionProperties = std::unique_ptr<VkExtensionProperties[]>(new VkExtensionProperties[physicalDeviceExtensionPropertiesCount]);
-
-    if (!allExtensionProperties.get())
-    {
-        return VK_FALSE;
-    }
+    std::vector<VkExtensionProperties> allExtensionProperties(physicalDeviceExtensionPropertiesCount);
 
     result = vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &physicalDeviceExtensionPropertiesCount, &allExtensionProperties[0]);
 
