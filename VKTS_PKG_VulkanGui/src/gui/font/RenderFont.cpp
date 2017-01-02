@@ -112,6 +112,14 @@ void RenderFont::draw(const ICommandBuffersSP& cmdBuffer, const glm::mat4& viewP
 
 	for (auto c : text)
 	{
+		// Wait for line break.
+		if (c == '\r')
+		{
+			lastCharacter = nullptr;
+
+			continue;
+		}
+
 		// Line break.
 		if (c == '\n')
 		{

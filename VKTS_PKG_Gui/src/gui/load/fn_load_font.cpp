@@ -107,17 +107,9 @@ static VkBool32 fontExtractValue(const char* buffer, const char* parameter, char
 
     	if (!end)
     	{
-    		end = strstr(start, "\r");
+			strcpy(value, start);
 
-			if (!end)
-			{
-				end = strstr(start, "\n");
-
-				if (!end)
-				{
-					return VK_FALSE;
-				}
-			}
+			return VK_TRUE;
     	}
     }
 

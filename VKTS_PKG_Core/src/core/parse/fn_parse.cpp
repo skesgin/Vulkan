@@ -68,7 +68,11 @@ void VKTS_APIENTRY parseUnknownBuffer(const char* buffer)
 
     std::string unknown(buffer);
 
-    if (unknown.length() > 0 && (unknown[unknown.length() - 1] == '\r' || unknown[unknown.length() - 1] == '\n'))
+    if (unknown.length() >= 2 && unknown[unknown.length() - 2] == '\r')
+    {
+        logPrint(VKTS_LOG_WARNING, __FILE__, __LINE__, "Could not parse line '%s'", unknown.substr(0, unknown.length() - 2).c_str());
+    }
+    else if (unknown.length() >= 1 && unknown[unknown.length() - 1] == '\n')
     {
         logPrint(VKTS_LOG_WARNING, __FILE__, __LINE__, "Could not parse line '%s'", unknown.substr(0, unknown.length() - 1).c_str());
     }
@@ -90,7 +94,7 @@ VkBool32 VKTS_APIENTRY parseIsToken(const char* buffer, const char* token)
     	return VK_FALSE;
     }
 
-    if (!(buffer[strlen(token)] == ' ' || buffer[strlen(token)] == '\t' || buffer[strlen(token)] == '\n' || buffer[strlen(token)] == '\r' || buffer[strlen(token)] == '\0'))
+    if (!(buffer[strlen(token)] == ' ' || buffer[strlen(token)] == '\t' || buffer[strlen(token)] == '\r' || buffer[strlen(token)] == '\n' || buffer[strlen(token)] == '\0'))
     {
         return VK_FALSE;
     }

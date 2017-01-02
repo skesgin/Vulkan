@@ -128,7 +128,18 @@ const char* TextBuffer::gets(char* str, const uint32_t num)
         pos++;
 
         // End of line.
-        if (str[strIndex] == '\n')
+        if (str[strIndex] == '\r')
+        {
+            str[strIndex] = '\0';
+
+            if (pos < (uint32_t)text.length() && text.c_str()[pos] == '\n')
+            {
+            	pos++;
+            }
+
+            return str;
+        }
+        else if (str[strIndex] == '\n')
         {
             str[strIndex] = '\0';
 

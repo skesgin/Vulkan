@@ -396,8 +396,16 @@ static IImageDataSP imageDataLoadHdr(const std::string& name, const IBinaryBuffe
         }
 
         // Empty line indicates end of header
-        if (currentChar == '\n' && oldChar == '\n')
+        if ((currentChar == '\r' || currentChar == '\n') && oldChar == '\n')
         {
+        	if (currentChar == '\r')
+        	{
+                if (buffer->read(&currentChar, 1, 1) != 1)
+                {
+                    return IImageDataSP();
+                }
+        	}
+
             break;
         }
     }
@@ -413,11 +421,22 @@ static IImageDataSP imageDataLoadHdr(const std::string& name, const IBinaryBuffe
 
         tempBuffer[charIndex++] = currentChar;
 
-        if (currentChar == '\n')
+        if (currentChar == '\r' || currentChar == '\n')
         {
-            break;
+        	if (currentChar == '\r')
+        	{
+                if (buffer->read(&currentChar, 1, 1) != 1)
+                {
+                    return IImageDataSP();
+                }
+
+                tempBuffer[charIndex++] = currentChar;
+        	}
+
+        	break;
         }
     }
+    tempBuffer[charIndex++] = '\0';
 
     int32_t width;
     int32_t height;
