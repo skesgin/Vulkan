@@ -144,7 +144,38 @@ static VkBool32 gltfProcessNode(INodeSP& node, const GltfVisitor& visitor, const
     	// Not using inverse bind matrix, as calculated by the engine.
     }
 
-	// TODO: Process meshes.
+    // Process meshes.
+    if (gltfNode.meshes.size() > 0)
+    {
+        auto mesh = sceneFactory->createMesh(sceneManager);
+
+        if (!mesh.get())
+        {
+            return VK_FALSE;
+        }
+
+        mesh->setName(node->getName() + "_Mesh");
+
+        sceneManager->addMesh(mesh);
+
+        //
+
+        for (uint32_t i = 0; i < gltfNode.meshes.size(); i++)
+        {
+        	// TODO: Create and process sub meshes.
+        }
+
+        //
+
+        auto currentMesh = sceneManager->useMesh(mesh->getName());
+
+        if (!currentMesh.get())
+        {
+            return VK_FALSE;
+        }
+
+        node->addMesh(currentMesh);
+    }
 
 	// Process children.
     for (uint32_t i = 0; i < gltfNode.childrenPointer.size(); i++)
