@@ -573,9 +573,18 @@ static VkBool32 sceneLoadImageObjects(const char* directory, const char* filenam
 
 									return VK_FALSE;
 								}
-
-								sceneManager->addImageData(lutImageData);
 							}
+
+							lutImageData = createDeviceImageData(sceneManager->getAssetManager(), lutImageData);
+
+							if (!lutImageData.get())
+							{
+								logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not modify BSDF lut");
+
+								return VK_FALSE;
+							}
+
+							sceneManager->addImageData(lutImageData);
 
 							//
 
