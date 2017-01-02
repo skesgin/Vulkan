@@ -281,11 +281,28 @@ VkBool32 SceneRenderFactory::prepareBSDFMaterial(const ISceneManagerSP& sceneMan
     //
     //
 
+	VkPushConstantRange pushConstantRange[1];
+
+	pushConstantRange[0].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+	pushConstantRange[0].offset = 0;
+	pushConstantRange[0].size = sizeof(int32_t) + sizeof(float);
+
+	uint32_t finalPushConstantRangeCount = 0;
+	VkPushConstantRange* finalPushConstantRange = nullptr;
+
+	if (subMesh->getBSDFMaterial()->getForwardRendering())
+	{
+		finalPushConstantRangeCount = 1;
+		finalPushConstantRange = pushConstantRange;
+	}
+
+	//
+
 	VkDescriptorSetLayout setLayouts[1];
 
 	setLayouts[0] = subMesh->getDescriptorSetLayout()->getDescriptorSetLayout();
 
-	auto pipelineLayout = pipelineCreateLayout(sceneManager->getContextObject()->getDevice()->getDevice(), 0, 1, setLayouts, 0, nullptr);
+	auto pipelineLayout = pipelineCreateLayout(sceneManager->getContextObject()->getDevice()->getDevice(), 0, 1, setLayouts, finalPushConstantRangeCount, finalPushConstantRange);
 
 	if (!pipelineLayout.get())
 	{

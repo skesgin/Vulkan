@@ -27,7 +27,7 @@
 #include "Example.hpp"
 
 Example::Example(const vkts::IContextObjectSP& contextObject, const int32_t windowIndex, const vkts::IVisualContextSP& visualContext, const vkts::ISurfaceSP& surface) :
-		IUpdateThread(), contextObject(contextObject), windowIndex(windowIndex), visualContext(visualContext), surface(surface), showStats(VK_TRUE), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), environmentDescriptorSetLayout(nullptr), resolveDescriptorSetLayout(nullptr), resolveDescriptorPool(nullptr), resolveDescriptorSet(nullptr), vertexViewProjectionUniformBuffer(nullptr), environmentVertexViewProjectionUniformBuffer(nullptr), resolveFragmentLightsUniformBuffer(nullptr), resolveFragmentMatricesUniformBuffer(nullptr), allBSDFVertexShaderModules(), envVertexShaderModule(nullptr), envFragmentShaderModule(nullptr), resolveVertexShaderModule(nullptr), resolveFragmentShaderModule(nullptr), environmentPipelineLayout(nullptr), resolvePipelineLayout(nullptr), guiRenderFactory(nullptr), guiManager(nullptr), guiFactory(nullptr), font(nullptr), renderFactory(nullptr), sceneManager(nullptr), sceneFactory(nullptr), scene(nullptr), environmentRenderFactory(nullptr), environmentSceneManager(nullptr), environmentSceneFactory(nullptr), environmentScene(nullptr), screenPlaneVertexBuffer(nullptr), swapchain(nullptr), renderPass(nullptr), gbufferRenderPass(nullptr), allGraphicsPipelines(), resolveGraphicsPipeline(nullptr), allGBufferTextures(), depthTexture(), allGBufferImageViews(), depthStencilImageView(), gbufferSampler(nullptr), swapchainImagesCount(0), swapchainImageView(), gbufferFramebuffer(), framebuffer(), cmdBuffer(), cmdBufferFence(), rebuildCmdBufferCounter(0), fps(0), ram(0), cpuUsageApp(0.0f), processors(0)
+		IUpdateThread(), contextObject(contextObject), windowIndex(windowIndex), visualContext(visualContext), surface(surface), showStats(VK_TRUE), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), environmentDescriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), environmentVertexViewProjectionUniformBuffer(nullptr), fragmentLightsUniformBuffer(nullptr), fragmentMatricesUniformBuffer(nullptr), allBSDFVertexShaderModules(), envVertexShaderModule(nullptr), envFragmentShaderModule(nullptr), environmentPipelineLayout(nullptr), guiRenderFactory(nullptr), guiManager(nullptr), guiFactory(nullptr), font(nullptr), renderFactory(nullptr), sceneManager(nullptr), sceneFactory(nullptr), scene(nullptr), environmentRenderFactory(nullptr), environmentSceneManager(nullptr), environmentSceneFactory(nullptr), environmentScene(nullptr), swapchain(nullptr), renderPass(nullptr), allGraphicsPipelines(), depthTexture(), depthStencilImageView(), swapchainImagesCount(0), swapchainImageView(), framebuffer(), cmdBuffer(), cmdBufferFence(), rebuildCmdBufferCounter(0), fps(0), ram(0), cpuUsageApp(0.0f), processors(0)
 {
 	processors = glm::min(vkts::processorGetNumber(), VKTS_MAX_CORES);
 
@@ -114,9 +114,6 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 	scissor.offset.y = 0;
 	scissor.extent = swapchain->getImageExtent();
 
-    //
-    // Gbuffer pass.
-    //
 
 	VkClearColorValue clearColorValue{};
 
@@ -130,62 +127,15 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 	clearDepthStencilValue.depth = 1.0f;
 	clearDepthStencilValue.stencil = 0;
 
-	VkClearValue clearValues[4]{};
+	VkClearValue clearValues[2]{};
 
 	clearValues[0].color = clearColorValue;
-	clearValues[1].color = clearColorValue;
-	clearValues[2].color = clearColorValue;
-	clearValues[3].depthStencil = clearDepthStencilValue;
+	clearValues[1].depthStencil = clearDepthStencilValue;
 
 
 	VkRenderPassBeginInfo renderPassBeginInfo{};
 
 	renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-
-	renderPassBeginInfo.renderPass = gbufferRenderPass->getRenderPass();
-	renderPassBeginInfo.framebuffer = gbufferFramebuffer[usedBuffer]->getFramebuffer();
-	renderPassBeginInfo.renderArea.offset.x = 0;
-	renderPassBeginInfo.renderArea.offset.y = 0;
-	renderPassBeginInfo.renderArea.extent = swapchain->getImageExtent();
-	renderPassBeginInfo.clearValueCount = 4;
-	renderPassBeginInfo.pClearValues = clearValues;
-
-	cmdBuffer[usedBuffer]->cmdBeginRenderPass(&renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-	vkCmdSetViewport(cmdBuffer[usedBuffer]->getCommandBuffer(), 0, 1, &viewport);
-
-	vkCmdSetScissor(cmdBuffer[usedBuffer]->getCommandBuffer(), 0, 1, &scissor);
-
-	if (scene.get())
-	{
-		vkts::SmartPointerVector<vkts::IGraphicsPipelineSP> empty;
-
-		scene->drawRecursive(cmdBuffer[usedBuffer], empty, usedBuffer, dynamicOffsets);
-	}
-
-	cmdBuffer[usedBuffer]->cmdEndRenderPass();
-
-	//
-	// Barrier, that GBuffer can be read.
-	//
-
-	VkImageSubresourceRange colorSubresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
-
-	for (uint32_t i = 0; i < 3; i++)
-	{
-		allGBufferTextures[i + 4 * usedBuffer]->getImage()->cmdPipelineBarrier(cmdBuffer[usedBuffer]->getCommandBuffer(), VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, colorSubresourceRange);
-	}
-
-	VkImageSubresourceRange depthSubresourceRange = {VK_IMAGE_ASPECT_DEPTH_BIT, 0, 1, 0, 1};
-
-	allGBufferTextures[3 + 4 * usedBuffer]->getImage()->cmdPipelineBarrier(cmdBuffer[usedBuffer]->getCommandBuffer(), VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, depthSubresourceRange);
-
-    //
-    // Default pass.
-    //
-
-	clearValues[0].color = clearColorValue;
-	clearValues[1].depthStencil = clearDepthStencilValue;
 
 	memset(&renderPassBeginInfo, 0, sizeof(VkRenderPassBeginInfo));
 
@@ -205,40 +155,24 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 
 	vkCmdSetScissor(cmdBuffer[usedBuffer]->getCommandBuffer(), 0, 1, &scissor);
 
-	// Render cube map.
-
 	vkCmdPushConstants(cmdBuffer[usedBuffer]->getCommandBuffer(), allGraphicsPipelines[0]->getLayout(), VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(int32_t), &toneMapping);
 	vkCmdPushConstants(cmdBuffer[usedBuffer]->getCommandBuffer(), allGraphicsPipelines[0]->getLayout(), VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(int32_t), sizeof(float), &exposure);
+
+	// Render cube map.
 
 	if (environmentScene.get())
 	{
 		environmentScene->drawRecursive(cmdBuffer[usedBuffer], allGraphicsPipelines, usedBuffer, dynamicOffsets);
 	}
 
-	//
-	// Render main scene by resolving content.
-	//
+	// Render main scene.
 
-	vkCmdBindPipeline(cmdBuffer[usedBuffer]->getCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, resolveGraphicsPipeline->getPipeline());
+	if (scene.get())
+	{
+		vkts::SmartPointerVector<vkts::IGraphicsPipelineSP> empty;
 
-	const uint32_t dynamicOffsetCount = 2;
-	uint32_t dynamicOffsets[dynamicOffsetCount]{};
-
-	vkCmdBindDescriptorSets(cmdBuffer[usedBuffer]->getCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, resolvePipelineLayout->getPipelineLayout(), 0, 1, resolveDescriptorSet->getDescriptorSets(), dynamicOffsetCount, dynamicOffsets);
-
-	//
-
-	vkCmdPushConstants(cmdBuffer[usedBuffer]->getCommandBuffer(), resolvePipelineLayout->getPipelineLayout(), VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(int32_t), &toneMapping);
-	vkCmdPushConstants(cmdBuffer[usedBuffer]->getCommandBuffer(), resolvePipelineLayout->getPipelineLayout(), VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(int32_t), sizeof(float), &exposure);
-
-	//
-
-	VkDeviceSize offsets[1] = { 0 };
-	VkBuffer buffers[1] = { screenPlaneVertexBuffer->getBuffer()->getBuffer() };
-
-	vkCmdBindVertexBuffers(cmdBuffer[usedBuffer]->getCommandBuffer(), 0, 1, buffers, offsets);
-
-	vkCmdDraw(cmdBuffer[usedBuffer]->getCommandBuffer(), 4, 1, 0, 0);
+		scene->drawRecursive(cmdBuffer[usedBuffer], empty, usedBuffer, dynamicOffsets);
+	}
 
 	// Render font.
 
@@ -272,17 +206,6 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 
     swapchain->cmdPipelineBarrier(cmdBuffer[usedBuffer]->getCommandBuffer(), VK_ACCESS_MEMORY_READ_BIT, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, usedBuffer);
 
-	//
-	// Barrier, that GBuffer can be written.
-	//
-
-	for (uint32_t i = 0; i < 3; i++)
-	{
-		allGBufferTextures[i + 4 * usedBuffer]->getImage()->cmdPipelineBarrier(cmdBuffer[usedBuffer]->getCommandBuffer(), VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, colorSubresourceRange);
-	}
-
-	allGBufferTextures[3 + 4 * usedBuffer]->getImage()->cmdPipelineBarrier(cmdBuffer[usedBuffer]->getCommandBuffer(), VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, depthSubresourceRange);
-
     //
 
 	result = cmdBuffer[usedBuffer]->endCommandBuffer();
@@ -299,21 +222,7 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 
 VkBool32 Example::buildFramebuffer(const int32_t usedBuffer)
 {
-	VkImageView imageViews[4];
-
-	for (uint32_t i = 0; i < 4; i++)
-	{
-		imageViews[i] = allGBufferImageViews[i + 4* usedBuffer]->getImageView();
-	}
-
-	gbufferFramebuffer[usedBuffer] = vkts::framebufferCreate(contextObject->getDevice()->getDevice(), 0, gbufferRenderPass->getRenderPass(), 4, imageViews, swapchain->getImageExtent().width, swapchain->getImageExtent().height, 1);
-
-	if (!gbufferFramebuffer[usedBuffer].get())
-	{
-		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create frame buffer.");
-
-		return VK_FALSE;
-	}
+	VkImageView imageViews[2];
 
 	//
 
@@ -381,6 +290,9 @@ VkBool32 Example::updateDescriptorSets(const int32_t usedBuffer)
 
 	memset(descriptorBufferInfos, 0, sizeof(descriptorBufferInfos));
 
+	memset(descriptorImageInfos, 0, sizeof(descriptorImageInfos));
+
+
 	descriptorBufferInfos[0].buffer = vertexViewProjectionUniformBuffer->getBuffer()->getBuffer();
 	descriptorBufferInfos[0].offset = 0;
 	descriptorBufferInfos[0].range = vertexViewProjectionUniformBuffer->getBuffer()->getSize() / vertexViewProjectionUniformBuffer->getBufferCount();
@@ -410,130 +322,100 @@ VkBool32 Example::updateDescriptorSets(const int32_t usedBuffer)
 	writeDescriptorSets[2].dstBinding = VKTS_BINDING_UNIFORM_BUFFER_BONE_TRANSFORM;
 
 
-	for (uint32_t i = 3; i < VKTS_BINDING_UNIFORM_BSDF_DEFERRED_TOTAL_BINDING_COUNT; i++)
+	// Diffuse/lambert.
+	descriptorImageInfos[0].sampler = scene->getDiffuseEnvironment()->getSampler()->getSampler();
+	descriptorImageInfos[0].imageView = scene->getDiffuseEnvironment()->getImageObject()->getImageView()->getImageView();
+	descriptorImageInfos[0].imageLayout = scene->getDiffuseEnvironment()->getImageObject()->getImage()->getImageLayout();
+
+	writeDescriptorSets[3].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+
+	writeDescriptorSets[3].dstSet = VK_NULL_HANDLE;	// Defined later.
+	writeDescriptorSets[3].dstBinding = VKTS_BINDING_UNIFORM_SAMPLER_BSDF_DIFFUSE;
+	writeDescriptorSets[3].dstArrayElement = 0;
+	writeDescriptorSets[3].descriptorCount = 1;
+	writeDescriptorSets[3].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+	writeDescriptorSets[3].pImageInfo = &descriptorImageInfos[0];
+	writeDescriptorSets[3].pBufferInfo = nullptr;
+	writeDescriptorSets[3].pTexelBufferView = nullptr;
+
+	// Specular/Cook-Torrance.
+	descriptorImageInfos[1].sampler = scene->getSpecularEnvironment()->getSampler()->getSampler();
+	descriptorImageInfos[1].imageView = scene->getSpecularEnvironment()->getImageObject()->getImageView()->getImageView();
+	descriptorImageInfos[1].imageLayout = scene->getSpecularEnvironment()->getImageObject()->getImage()->getImageLayout();
+
+	writeDescriptorSets[4].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+
+	writeDescriptorSets[4].dstSet = VK_NULL_HANDLE;	// Defined later.
+	writeDescriptorSets[4].dstBinding = VKTS_BINDING_UNIFORM_SAMPLER_BSDF_SPECULAR;
+	writeDescriptorSets[4].dstArrayElement = 0;
+	writeDescriptorSets[4].descriptorCount = 1;
+	writeDescriptorSets[4].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+	writeDescriptorSets[4].pImageInfo = &descriptorImageInfos[1];
+	writeDescriptorSets[4].pBufferInfo = nullptr;
+	writeDescriptorSets[4].pTexelBufferView = nullptr;
+
+	//Lut
+	descriptorImageInfos[2].sampler = scene->getLut()->getSampler()->getSampler();
+	descriptorImageInfos[2].imageView = scene->getLut()->getImageObject()->getImageView()->getImageView();
+	descriptorImageInfos[2].imageLayout = scene->getLut()->getImageObject()->getImage()->getImageLayout();
+
+	writeDescriptorSets[5].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+
+	writeDescriptorSets[5].dstSet = VK_NULL_HANDLE;	// Defined later.
+	writeDescriptorSets[5].dstBinding = VKTS_BINDING_UNIFORM_SAMPLER_BSDF_LUT;
+	writeDescriptorSets[5].dstArrayElement = 0;
+	writeDescriptorSets[5].descriptorCount = 1;
+	writeDescriptorSets[5].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+	writeDescriptorSets[5].pImageInfo = &descriptorImageInfos[2];
+	writeDescriptorSets[5].pBufferInfo = nullptr;
+	writeDescriptorSets[5].pTexelBufferView = nullptr;
+
+	// Dynamic lights.
+	descriptorBufferInfos[1].buffer = fragmentLightsUniformBuffer->getBuffer()->getBuffer();
+	descriptorBufferInfos[1].offset = 0;
+	descriptorBufferInfos[1].range = fragmentLightsUniformBuffer->getBuffer()->getSize() / fragmentLightsUniformBuffer->getBufferCount();
+
+	writeDescriptorSets[6].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+
+	writeDescriptorSets[6].dstSet = VK_NULL_HANDLE;	// Defined later.
+	writeDescriptorSets[6].dstBinding = VKTS_BINDING_UNIFORM_BUFFER_LIGHT;
+	writeDescriptorSets[6].dstArrayElement = 0;
+	writeDescriptorSets[6].descriptorCount = 1;
+	writeDescriptorSets[6].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+	writeDescriptorSets[6].pImageInfo = nullptr;
+	writeDescriptorSets[6].pBufferInfo = &descriptorBufferInfos[1];
+	writeDescriptorSets[6].pTexelBufferView = nullptr;
+
+	// Inverse matrix.
+	descriptorBufferInfos[2].buffer = fragmentMatricesUniformBuffer->getBuffer()->getBuffer();
+	descriptorBufferInfos[2].offset = 0;
+	descriptorBufferInfos[2].range = fragmentMatricesUniformBuffer->getBuffer()->getSize() / fragmentMatricesUniformBuffer->getBufferCount();
+
+	writeDescriptorSets[7].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+
+	writeDescriptorSets[7].dstSet = VK_NULL_HANDLE;	// Defined later.
+	writeDescriptorSets[7].dstBinding = VKTS_BINDING_UNIFORM_BUFFER_BSDF_INVERSE;
+	writeDescriptorSets[7].dstArrayElement = 0;
+	writeDescriptorSets[7].descriptorCount = 1;
+	writeDescriptorSets[7].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+	writeDescriptorSets[7].pImageInfo = nullptr;
+	writeDescriptorSets[7].pBufferInfo = &descriptorBufferInfos[2];
+	writeDescriptorSets[7].pTexelBufferView = nullptr;
+
+
+	for (uint32_t i = 8; i < VKTS_BINDING_UNIFORM_BSDF_FORWARD_TOTAL_BINDING_COUNT; i++)
 	{
 		writeDescriptorSets[i].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 
-		writeDescriptorSets[i].dstBinding = VKTS_BINDING_UNIFORM_SAMPLER_BSDF_DEFERRED_FIRST + (i - 3);
+		writeDescriptorSets[i].dstBinding = VKTS_BINDING_UNIFORM_SAMPLER_BSDF_FORWARD_FIRST + (i - 8);
 	}
-
-	//
-	//
-
-	memset(resolveDescriptorBufferInfos, 0, sizeof(resolveDescriptorBufferInfos));
-
-	memset(resolveDescriptorImageInfos, 0, sizeof(resolveDescriptorImageInfos));
-
-	memset(resolveWriteDescriptorSets, 0, sizeof(resolveWriteDescriptorSets));
-
-	for (uint32_t i = 0; i < 4; i++)
-	{
-		resolveDescriptorImageInfos[i].sampler = gbufferSampler->getSampler();
-		resolveDescriptorImageInfos[i].imageView = allGBufferImageViews[i + 4 * usedBuffer]->getImageView();
-		resolveDescriptorImageInfos[i].imageLayout = VK_IMAGE_LAYOUT_GENERAL;
-
-		resolveWriteDescriptorSets[i].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-
-		resolveWriteDescriptorSets[i].dstSet = resolveDescriptorSet->getDescriptorSets()[0];
-		resolveWriteDescriptorSets[i].dstBinding = i;
-		resolveWriteDescriptorSets[i].dstArrayElement = 0;
-		resolveWriteDescriptorSets[i].descriptorCount = 1;
-		resolveWriteDescriptorSets[i].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		resolveWriteDescriptorSets[i].pImageInfo = &resolveDescriptorImageInfos[i];
-		resolveWriteDescriptorSets[i].pBufferInfo = nullptr;
-		resolveWriteDescriptorSets[i].pTexelBufferView = nullptr;
-	}
-
-	// Diffuse/lambert.
-	resolveDescriptorImageInfos[4].sampler = scene->getDiffuseEnvironment()->getSampler()->getSampler();
-	resolveDescriptorImageInfos[4].imageView = scene->getDiffuseEnvironment()->getImageObject()->getImageView()->getImageView();
-	resolveDescriptorImageInfos[4].imageLayout = scene->getDiffuseEnvironment()->getImageObject()->getImage()->getImageLayout();
-
-	resolveWriteDescriptorSets[4].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-
-	resolveWriteDescriptorSets[4].dstSet = resolveDescriptorSet->getDescriptorSets()[0];
-	resolveWriteDescriptorSets[4].dstBinding = 4;
-	resolveWriteDescriptorSets[4].dstArrayElement = 0;
-	resolveWriteDescriptorSets[4].descriptorCount = 1;
-	resolveWriteDescriptorSets[4].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	resolveWriteDescriptorSets[4].pImageInfo = &resolveDescriptorImageInfos[4];
-	resolveWriteDescriptorSets[4].pBufferInfo = nullptr;
-	resolveWriteDescriptorSets[4].pTexelBufferView = nullptr;
-
-	// Specular/Cook-Torrance.
-	resolveDescriptorImageInfos[5].sampler = scene->getSpecularEnvironment()->getSampler()->getSampler();
-	resolveDescriptorImageInfos[5].imageView = scene->getSpecularEnvironment()->getImageObject()->getImageView()->getImageView();
-	resolveDescriptorImageInfos[5].imageLayout = scene->getSpecularEnvironment()->getImageObject()->getImage()->getImageLayout();
-
-	resolveWriteDescriptorSets[5].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-
-	resolveWriteDescriptorSets[5].dstSet = resolveDescriptorSet->getDescriptorSets()[0];
-	resolveWriteDescriptorSets[5].dstBinding = 5;
-	resolveWriteDescriptorSets[5].dstArrayElement = 0;
-	resolveWriteDescriptorSets[5].descriptorCount = 1;
-	resolveWriteDescriptorSets[5].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	resolveWriteDescriptorSets[5].pImageInfo = &resolveDescriptorImageInfos[5];
-	resolveWriteDescriptorSets[5].pBufferInfo = nullptr;
-	resolveWriteDescriptorSets[5].pTexelBufferView = nullptr;
-
-	//Lut
-	resolveDescriptorImageInfos[6].sampler = scene->getLut()->getSampler()->getSampler();
-	resolveDescriptorImageInfos[6].imageView = scene->getLut()->getImageObject()->getImageView()->getImageView();
-	resolveDescriptorImageInfos[6].imageLayout = scene->getLut()->getImageObject()->getImage()->getImageLayout();
-
-	resolveWriteDescriptorSets[6].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-
-	resolveWriteDescriptorSets[6].dstSet = resolveDescriptorSet->getDescriptorSets()[0];
-	resolveWriteDescriptorSets[6].dstBinding = 6;
-	resolveWriteDescriptorSets[6].dstArrayElement = 0;
-	resolveWriteDescriptorSets[6].descriptorCount = 1;
-	resolveWriteDescriptorSets[6].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	resolveWriteDescriptorSets[6].pImageInfo = &resolveDescriptorImageInfos[6];
-	resolveWriteDescriptorSets[6].pBufferInfo = nullptr;
-	resolveWriteDescriptorSets[6].pTexelBufferView = nullptr;
-
-	// Dynamic lights.
-	resolveDescriptorBufferInfos[0].buffer = resolveFragmentLightsUniformBuffer->getBuffer()->getBuffer();
-	resolveDescriptorBufferInfos[0].offset = 0;
-	resolveDescriptorBufferInfos[0].range = resolveFragmentLightsUniformBuffer->getBuffer()->getSize() / resolveFragmentLightsUniformBuffer->getBufferCount();
-
-	resolveWriteDescriptorSets[7].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-
-	resolveWriteDescriptorSets[7].dstSet = resolveDescriptorSet->getDescriptorSets()[0];
-	resolveWriteDescriptorSets[7].dstBinding = 7;
-	resolveWriteDescriptorSets[7].dstArrayElement = 0;
-	resolveWriteDescriptorSets[7].descriptorCount = 1;
-	resolveWriteDescriptorSets[7].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-	resolveWriteDescriptorSets[7].pImageInfo = nullptr;
-	resolveWriteDescriptorSets[7].pBufferInfo = &resolveDescriptorBufferInfos[0];
-	resolveWriteDescriptorSets[7].pTexelBufferView = nullptr;
-
-	// Inverse matrix.
-	resolveDescriptorBufferInfos[1].buffer = resolveFragmentMatricesUniformBuffer->getBuffer()->getBuffer();
-	resolveDescriptorBufferInfos[1].offset = 0;
-	resolveDescriptorBufferInfos[1].range = resolveFragmentMatricesUniformBuffer->getBuffer()->getSize() / resolveFragmentMatricesUniformBuffer->getBufferCount();
-
-	resolveWriteDescriptorSets[8].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-
-	resolveWriteDescriptorSets[8].dstSet = resolveDescriptorSet->getDescriptorSets()[0];
-	resolveWriteDescriptorSets[8].dstBinding = 8;
-	resolveWriteDescriptorSets[8].dstArrayElement = 0;
-	resolveWriteDescriptorSets[8].descriptorCount = 1;
-	resolveWriteDescriptorSets[8].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-	resolveWriteDescriptorSets[8].pImageInfo = nullptr;
-	resolveWriteDescriptorSets[8].pBufferInfo = &resolveDescriptorBufferInfos[1];
-	resolveWriteDescriptorSets[8].pTexelBufferView = nullptr;
-
-	//
-
-	resolveDescriptorSet->updateDescriptorSets(VKTS_BSDF_DESCRIPTOR_SET_COUNT, resolveWriteDescriptorSets, 0, nullptr);
 
 	return VK_TRUE;
 }
 
 VkBool32 Example::buildScene(const vkts::ICommandObjectSP& commandObject)
 {
-	renderFactory = vkts::sceneRenderFactoryCreate(vkts::IDescriptorSetLayoutSP(), gbufferRenderPass, VKTS_MAX_NUMBER_BUFFERS);
+	renderFactory = vkts::sceneRenderFactoryCreate(vkts::IDescriptorSetLayoutSP(), renderPass, VKTS_MAX_NUMBER_BUFFERS);
 
 	if (!renderFactory.get())
 	{
@@ -637,30 +519,6 @@ VkBool32 Example::buildScene(const vkts::ICommandObjectSP& commandObject)
 		environmentScene->getObjects()[0]->setScale(glm::vec3(10.0f, 10.0f, 10.0f));
 
 		vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Number objects: %d", environmentScene->getNumberObjects());
-
-		//
-		// Full screen plane for later resolving GBuffer.
-		//
-
-		// Window clip origin is upper left, but the image is already upside down.
-		static const float vertices[4 * (4 + 2)] = {	-1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-														1.0f, -1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-														-1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-														1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f };
-
-		auto vertexBinaryBuffer = vkts::binaryBufferCreate(vertices, sizeof(vertices));
-
-		if (!vertexBinaryBuffer.get())
-		{
-	        return VK_FALSE;
-		}
-
-	    screenPlaneVertexBuffer = vkts::createVertexBufferObject(sceneManager->getAssetManager(), vertexBinaryBuffer);
-
-	    if (!screenPlaneVertexBuffer.get())
-	    {
-	        return VK_FALSE;
-	    }
 	}
 
 	// Sorted by binding
@@ -690,20 +548,6 @@ VkBool32 Example::buildSwapchainImageView(const int32_t usedBuffer)
 	return VK_TRUE;
 }
 
-VkBool32 Example::buildGBufferSampler()
-{
-	gbufferSampler = vkts::samplerCreate(contextObject->getDevice()->getDevice(), 0, VK_FILTER_LINEAR, VK_FILTER_LINEAR, VK_SAMPLER_MIPMAP_MODE_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, 0.0f, VK_FALSE, 1.0f, VK_FALSE, VK_COMPARE_OP_NEVER, 0.0f, 0.0f, VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK, VK_FALSE);
-
-	if (!gbufferSampler.get())
-	{
-		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create sampler.");
-
-		return VK_FALSE;
-	}
-
-	return VK_TRUE;
-}
-
 VkBool32 Example::buildDepthStencilImageView()
 {
 	VkComponentMapping componentMapping = { VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY };
@@ -717,43 +561,6 @@ VkBool32 Example::buildDepthStencilImageView()
 
 		return VK_FALSE;
 	}
-
-	return VK_TRUE;
-}
-
-VkBool32 Example::buildGBufferImageView(const int32_t usedBuffer)
-{
-	VkComponentMapping componentMapping = { VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY };
-	VkImageSubresourceRange imageSubresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
-
-	for (uint32_t i = 0; i < 3; i++)
-	{
-		auto currentImageView = vkts::imageViewCreate(contextObject->getDevice()->getDevice(), 0, allGBufferTextures[i + 4 * usedBuffer]->getImage()->getImage(), VK_IMAGE_VIEW_TYPE_2D, allGBufferTextures[i + 4 * usedBuffer]->getImage()->getFormat(), componentMapping, imageSubresourceRange);
-
-		if (!currentImageView.get())
-		{
-			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create color attachment view.");
-
-			return VK_FALSE;
-		}
-
-		allGBufferImageViews.append(currentImageView);
-	}
-
-	//
-
-	imageSubresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
-
-	auto currentImageView = vkts::imageViewCreate(contextObject->getDevice()->getDevice(), 0, allGBufferTextures[3 + 4 * usedBuffer]->getImage()->getImage(), VK_IMAGE_VIEW_TYPE_2D, allGBufferTextures[3]->getImage()->getFormat(), componentMapping, imageSubresourceRange);
-
-	if (!currentImageView.get())
-	{
-		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create depth attachment view.");
-
-		return VK_FALSE;
-	}
-
-	allGBufferImageViews.append(currentImageView);
 
 	return VK_TRUE;
 }
@@ -788,63 +595,6 @@ VkBool32 Example::buildDepthTexture(const vkts::ICommandBuffersSP& cmdBuffer)
 
 		return VK_FALSE;
 	}
-
-	return VK_TRUE;
-}
-
-VkBool32 Example::buildGBufferTexture(const vkts::ICommandBuffersSP& cmdBuffer)
-{
-	VkImageCreateInfo imageCreateInfo{};
-
-	imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-
-	imageCreateInfo.flags = 0;
-	imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
-	imageCreateInfo.format = VK_FORMAT_R8G8B8A8_UNORM;
-	imageCreateInfo.extent = {swapchain->getImageExtent().width, swapchain->getImageExtent().height, 1};
-	imageCreateInfo.mipLevels = 1;
-	imageCreateInfo.arrayLayers = 1;
-	imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-	imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-	imageCreateInfo.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-	imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-	imageCreateInfo.queueFamilyIndexCount = 0;
-	imageCreateInfo.pQueueFamilyIndices = nullptr;
-	imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-
-	VkImageSubresourceRange subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
-
-	for (uint32_t i = 0; i < 3; i++)
-	{
-		auto currentTexture = vkts::imageObjectCreate(contextObject, cmdBuffer, "GBuffer" + std::to_string(i), imageCreateInfo, 0, VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, subresourceRange, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-
-		if (!currentTexture.get())
-		{
-			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create GBuffer texture.");
-
-			return VK_FALSE;
-		}
-
-		allGBufferTextures.append(currentTexture);
-	}
-
-	//
-
-	imageCreateInfo.format = VK_FORMAT_D16_UNORM;
-	imageCreateInfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-
-	subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
-
-	auto currentTexture = vkts::imageObjectCreate(contextObject, cmdBuffer, "GBufferDepth", imageCreateInfo, 0, VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, subresourceRange, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-
-	if (!currentTexture.get())
-	{
-		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create GBuffer depth texture.");
-
-		return VK_FALSE;
-	}
-
-	allGBufferTextures.append(currentTexture);
 
 	return VK_TRUE;
 }
@@ -914,77 +664,6 @@ VkBool32 Example::buildPipeline()
 
 	allGraphicsPipelines.append(pipeline);
 
-	//
-
-    vkts::DefaultGraphicsPipeline resolveGP;
-
-    resolveGP.getPipelineShaderStageCreateInfo(0).stage = VK_SHADER_STAGE_VERTEX_BIT;
-    resolveGP.getPipelineShaderStageCreateInfo(0).module = resolveVertexShaderModule->getShaderModule();
-
-    resolveGP.getPipelineShaderStageCreateInfo(1).stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-    resolveGP.getPipelineShaderStageCreateInfo(1).module = resolveFragmentShaderModule->getShaderModule();
-
-
-	vertexBufferType = VKTS_VERTEX_BUFFER_TYPE_VERTEX | VKTS_VERTEX_BUFFER_TYPE_TEXCOORD;
-
-	resolveGP.getVertexInputBindingDescription(0).binding = VKTS_BINDING_VERTEX_BUFFER;
-	resolveGP.getVertexInputBindingDescription(0).stride = vkts::alignmentGetStrideInBytes(vertexBufferType);
-	resolveGP.getVertexInputBindingDescription(0).inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-
-	resolveGP.getVertexInputAttributeDescription(0).location = 0;
-	resolveGP.getVertexInputAttributeDescription(0).binding = VKTS_BINDING_VERTEX_BUFFER;
-	resolveGP.getVertexInputAttributeDescription(0).format = VK_FORMAT_R32G32B32A32_SFLOAT;
-	resolveGP.getVertexInputAttributeDescription(0).offset = vkts::alignmentGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_VERTEX, vertexBufferType);
-
-	resolveGP.getVertexInputAttributeDescription(1).location = 1;
-	resolveGP.getVertexInputAttributeDescription(1).binding = VKTS_BINDING_VERTEX_BUFFER;
-	resolveGP.getVertexInputAttributeDescription(1).format = VK_FORMAT_R32G32_SFLOAT;
-	resolveGP.getVertexInputAttributeDescription(1).offset = vkts::alignmentGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_TEXCOORD, vertexBufferType);
-
-	resolveGP.getPipelineInputAssemblyStateCreateInfo().topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
-
-	resolveGP.getViewports(0).x = 0.0f;
-	resolveGP.getViewports(0).y = 0.0f;
-	resolveGP.getViewports(0).width = (float) swapchain->getImageExtent().width;
-	resolveGP.getViewports(0).height = (float) swapchain->getImageExtent().height;
-	resolveGP.getViewports(0).minDepth = 0.0f;
-	resolveGP.getViewports(0).maxDepth = 1.0f;
-
-
-	resolveGP.getScissors(0).offset.x = 0;
-	resolveGP.getScissors(0).offset.y = 0;
-	resolveGP.getScissors(0).extent = swapchain->getImageExtent();
-
-
-	resolveGP.getPipelineDepthStencilStateCreateInfo().depthTestEnable = VK_TRUE;
-	resolveGP.getPipelineDepthStencilStateCreateInfo().depthWriteEnable = VK_TRUE;
-	resolveGP.getPipelineDepthStencilStateCreateInfo().depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
-
-
-	resolveGP.getPipelineMultisampleStateCreateInfo();
-
-
-	resolveGP.getPipelineColorBlendAttachmentState(0).blendEnable = VK_FALSE;
-	resolveGP.getPipelineColorBlendAttachmentState(0).colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-
-
-	resolveGP.getDynamicState(0) = VK_DYNAMIC_STATE_VIEWPORT;
-	resolveGP.getDynamicState(1) = VK_DYNAMIC_STATE_SCISSOR;
-
-
-	resolveGP.getGraphicsPipelineCreateInfo().layout = resolvePipelineLayout->getPipelineLayout();
-	resolveGP.getGraphicsPipelineCreateInfo().renderPass = renderPass->getRenderPass();
-
-
-	resolveGraphicsPipeline = vkts::pipelineCreateGraphics(contextObject->getDevice()->getDevice(), VK_NULL_HANDLE, resolveGP.getGraphicsPipelineCreateInfo(), vertexBufferType);
-
-	if (!resolveGraphicsPipeline.get())
-	{
-		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create graphics pipeline.");
-
-		return VK_FALSE;
-	}
-
 	return VK_TRUE;
 }
 
@@ -1044,70 +723,6 @@ VkBool32 Example::buildRenderPass()
 		return VK_FALSE;
 	}
 
-	//
-
-	//Create G-Buffer render pass.
-
-	VkAttachmentDescription gbufferAttachmentDescription[4]{};
-
-	for (uint32_t i = 0; i < 3; i++)
-	{
-		gbufferAttachmentDescription[i].flags = 0;
-		gbufferAttachmentDescription[i].format = VK_FORMAT_R8G8B8A8_UNORM;
-		gbufferAttachmentDescription[i].samples = VK_SAMPLE_COUNT_1_BIT;
-		gbufferAttachmentDescription[i].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-		gbufferAttachmentDescription[i].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-		gbufferAttachmentDescription[i].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-		gbufferAttachmentDescription[i].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-		gbufferAttachmentDescription[i].initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-		gbufferAttachmentDescription[i].finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-	}
-
-	gbufferAttachmentDescription[3].flags = 0;
-	gbufferAttachmentDescription[3].format = VK_FORMAT_D16_UNORM;
-	gbufferAttachmentDescription[3].samples = VK_SAMPLE_COUNT_1_BIT;
-	gbufferAttachmentDescription[3].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-	gbufferAttachmentDescription[3].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-	gbufferAttachmentDescription[3].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-	gbufferAttachmentDescription[3].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-	gbufferAttachmentDescription[3].initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-	gbufferAttachmentDescription[3].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-	VkAttachmentReference gbufferColorAttachmentReference[3];
-
-	for (uint32_t i = 0; i < 3; i++)
-	{
-		gbufferColorAttachmentReference[i].attachment = i;
-		gbufferColorAttachmentReference[i].layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-	}
-
-	VkAttachmentReference gbufferDeptStencilAttachmentReference;
-
-	gbufferDeptStencilAttachmentReference.attachment = 3;
-	gbufferDeptStencilAttachmentReference.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-	VkSubpassDescription gbufferSubpassDescription{};
-
-	gbufferSubpassDescription.flags = 0;
-	gbufferSubpassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-	gbufferSubpassDescription.inputAttachmentCount = 0;
-	gbufferSubpassDescription.pInputAttachments = nullptr;
-	gbufferSubpassDescription.colorAttachmentCount = 3;
-	gbufferSubpassDescription.pColorAttachments = gbufferColorAttachmentReference;
-	gbufferSubpassDescription.pResolveAttachments = nullptr;
-	gbufferSubpassDescription.pDepthStencilAttachment = &gbufferDeptStencilAttachmentReference;
-	gbufferSubpassDescription.preserveAttachmentCount = 0;
-	gbufferSubpassDescription.pPreserveAttachments = nullptr;
-
-	gbufferRenderPass = vkts::renderPassCreate(contextObject->getDevice()->getDevice(), 0, 4, gbufferAttachmentDescription, 1, &gbufferSubpassDescription, 0, nullptr);
-
-	if (!gbufferRenderPass.get())
-	{
-		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create render pass.");
-
-		return VK_FALSE;
-	}
-
 	return VK_TRUE;
 }
 
@@ -1135,55 +750,6 @@ VkBool32 Example::buildPipelineLayout()
 
 		return VK_FALSE;
 	}
-
-	//
-
-	setLayouts[0] = resolveDescriptorSetLayout->getDescriptorSetLayout();
-
-	resolvePipelineLayout = vkts::pipelineCreateLayout(contextObject->getDevice()->getDevice(), 0, 1, setLayouts, 1, pushConstantRange);
-
-	if (!resolvePipelineLayout.get())
-	{
-		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create pipeline layout.");
-
-		return VK_FALSE;
-	}
-
-	return VK_TRUE;
-}
-
-VkBool32 Example::buildDescriptorSets()
-{
-	const auto allDescriptorSetLayouts = resolveDescriptorSetLayout->getDescriptorSetLayout();
-
-    resolveDescriptorSet = vkts::descriptorSetsCreate(contextObject->getDevice()->getDevice(), resolveDescriptorPool->getDescriptorPool(), 1, &allDescriptorSetLayouts);
-
-    if (!resolveDescriptorSet.get())
-    {
-    	vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create descriptor sets.");
-
-        return VK_FALSE;
-    }
-
-	return VK_TRUE;
-}
-
-VkBool32 Example::buildDescriptorSetPool()
-{
-    VkDescriptorPoolSize descriptorPoolSize[2]{};
-
-	descriptorPoolSize[0].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	descriptorPoolSize[0].descriptorCount = 7;
-
-	descriptorPoolSize[1].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-	descriptorPoolSize[1].descriptorCount = 2;
-
-	resolveDescriptorPool = vkts::descriptorPoolCreate(contextObject->getDevice()->getDevice(), VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT, 1, 2, descriptorPoolSize);
-
-    if (!resolveDescriptorPool.get())
-    {
-        return VK_FALSE;
-    }
 
 	return VK_TRUE;
 }
@@ -1213,40 +779,6 @@ VkBool32 Example::buildDescriptorSetLayout()
 	environmentDescriptorSetLayout = vkts::descriptorSetLayoutCreate(contextObject->getDevice()->getDevice(), 0, 3, descriptorSetLayoutBinding);
 
 	if (!environmentDescriptorSetLayout.get())
-	{
-		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create descriptor set layout.");
-
-		return VK_FALSE;
-	}
-
-	//
-
-	VkDescriptorSetLayoutBinding resolveDescriptorSetLayoutBinding[VKTS_BSDF_DESCRIPTOR_SET_COUNT]{};
-
-	for (uint32_t binding = 0; binding < VKTS_BSDF_DESCRIPTOR_SET_COUNT - 2; binding++)
-	{
-		resolveDescriptorSetLayoutBinding[binding].binding = binding;
-		resolveDescriptorSetLayoutBinding[binding].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		resolveDescriptorSetLayoutBinding[binding].descriptorCount = 1;
-		resolveDescriptorSetLayoutBinding[binding].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-		resolveDescriptorSetLayoutBinding[binding].pImmutableSamplers = nullptr;
-	}
-
-	resolveDescriptorSetLayoutBinding[VKTS_BSDF_DESCRIPTOR_SET_COUNT - 2].binding = VKTS_BSDF_DESCRIPTOR_SET_COUNT - 2;
-	resolveDescriptorSetLayoutBinding[VKTS_BSDF_DESCRIPTOR_SET_COUNT - 2].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-	resolveDescriptorSetLayoutBinding[VKTS_BSDF_DESCRIPTOR_SET_COUNT - 2].descriptorCount = 1;
-	resolveDescriptorSetLayoutBinding[VKTS_BSDF_DESCRIPTOR_SET_COUNT - 2].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-	resolveDescriptorSetLayoutBinding[VKTS_BSDF_DESCRIPTOR_SET_COUNT - 2].pImmutableSamplers = nullptr;
-
-	resolveDescriptorSetLayoutBinding[VKTS_BSDF_DESCRIPTOR_SET_COUNT - 1].binding = VKTS_BSDF_DESCRIPTOR_SET_COUNT - 1;
-	resolveDescriptorSetLayoutBinding[VKTS_BSDF_DESCRIPTOR_SET_COUNT - 1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-	resolveDescriptorSetLayoutBinding[VKTS_BSDF_DESCRIPTOR_SET_COUNT - 1].descriptorCount = 1;
-	resolveDescriptorSetLayoutBinding[VKTS_BSDF_DESCRIPTOR_SET_COUNT - 1].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-	resolveDescriptorSetLayoutBinding[VKTS_BSDF_DESCRIPTOR_SET_COUNT - 1].pImmutableSamplers = nullptr;
-
-	resolveDescriptorSetLayout = vkts::descriptorSetLayoutCreate(contextObject->getDevice()->getDevice(), 0, VKTS_BSDF_DESCRIPTOR_SET_COUNT, resolveDescriptorSetLayoutBinding);
-
-	if (!resolveDescriptorSetLayout.get())
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create descriptor set layout.");
 
@@ -1290,44 +822,6 @@ VkBool32 Example::buildShader()
 	envFragmentShaderModule = vkts::shaderModuleCreate(VKTS_ENV_FRAGMENT_SHADER_NAME, contextObject->getDevice()->getDevice(), 0, fragmentShaderBinary->getSize(), (uint32_t*)fragmentShaderBinary->getData());
 
 	if (!envFragmentShaderModule.get())
-	{
-		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create fragment shader module.");
-
-		return VK_FALSE;
-	}
-
-	//
-
-	vertexShaderBinary = vkts::fileLoadBinary(VKTS_RESOLVE_VERTEX_SHADER_NAME);
-
-	if (!vertexShaderBinary.get())
-	{
-		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load vertex shader: '%s'", VKTS_RESOLVE_VERTEX_SHADER_NAME);
-
-		return VK_FALSE;
-	}
-
-	resolveVertexShaderModule = vkts::shaderModuleCreate(VKTS_RESOLVE_VERTEX_SHADER_NAME, contextObject->getDevice()->getDevice(), 0, vertexShaderBinary->getSize(), (uint32_t*)vertexShaderBinary->getData());
-
-	if (!resolveVertexShaderModule.get())
-	{
-		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create vertex shader module.");
-
-		return VK_FALSE;
-	}
-
-	fragmentShaderBinary = vkts::fileLoadBinary(VKTS_RESOLVE_FRAGMENT_SHADER_NAME);
-
-	if (!fragmentShaderBinary.get())
-	{
-		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load vertex shader: '%s'", VKTS_RESOLVE_FRAGMENT_SHADER_NAME);
-
-		return VK_FALSE;
-	}
-
-	resolveFragmentShaderModule = vkts::shaderModuleCreate(VKTS_RESOLVE_FRAGMENT_SHADER_NAME, contextObject->getDevice()->getDevice(), 0, fragmentShaderBinary->getSize(), (uint32_t*)fragmentShaderBinary->getData());
-
-	if (!resolveFragmentShaderModule.get())
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create fragment shader module.");
 
@@ -1457,9 +951,9 @@ VkBool32 Example::buildUniformBuffers()
 
 	bufferCreateInfo.size = vkts::alignmentGetSizeInBytes(VKTS_MAX_LIGHTS * 4 * sizeof(float) * 2 + sizeof(int32_t), 16);
 
-	resolveFragmentLightsUniformBuffer = vkts::bufferObjectCreate(contextObject, bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, VKTS_MAX_NUMBER_BUFFERS);
+	fragmentLightsUniformBuffer = vkts::bufferObjectCreate(contextObject, bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, VKTS_MAX_NUMBER_BUFFERS);
 
-	if (!resolveFragmentLightsUniformBuffer.get())
+	if (!fragmentLightsUniformBuffer.get())
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create fragment uniform buffer.");
 
@@ -1469,9 +963,9 @@ VkBool32 Example::buildUniformBuffers()
 
 	bufferCreateInfo.size = vkts::alignmentGetSizeInBytes(16 * sizeof(float) * 2, 16);
 
-	resolveFragmentMatricesUniformBuffer = vkts::bufferObjectCreate(contextObject, bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, VKTS_MAX_NUMBER_BUFFERS);
+	fragmentMatricesUniformBuffer = vkts::bufferObjectCreate(contextObject, bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, VKTS_MAX_NUMBER_BUFFERS);
 
-	if (!resolveFragmentMatricesUniformBuffer.get())
+	if (!fragmentMatricesUniformBuffer.get())
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create fragment uniform buffer.");
 
@@ -1517,7 +1011,6 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
     }
 
     swapchainImageView = vkts::SmartPointerVector<vkts::IImageViewSP>(swapchainImagesCount);
-    gbufferFramebuffer = vkts::SmartPointerVector<vkts::IFramebufferSP>(swapchainImagesCount);
     framebuffer = vkts::SmartPointerVector<vkts::IFramebufferSP>(swapchainImagesCount);
     cmdBuffer = vkts::SmartPointerVector<vkts::ICommandBuffersSP>(swapchainImagesCount);
     rebuildCmdBufferCounter = swapchainImagesCount;
@@ -1587,16 +1080,6 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 
 		return VK_FALSE;
 	}
-
-    for (uint32_t i = 0; i < swapchainImagesCount; i++)
-    {
-		if (!buildGBufferTexture(updateCmdBuffer))
-		{
-			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not build texture.");
-
-			return VK_FALSE;
-		}
-    }
 
 	if (!buildDepthTexture(updateCmdBuffer))
 	{
@@ -1691,20 +1174,7 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 
 	//
 
-    for (uint32_t i = 0; i < swapchainImagesCount; i++)
-    {
-		if (!buildGBufferImageView(i))
-		{
-			return VK_FALSE;
-		}
-    }
-
 	if (!buildDepthStencilImageView())
-	{
-		return VK_FALSE;
-	}
-
-	if (!buildGBufferSampler())
 	{
 		return VK_FALSE;
 	}
@@ -1735,7 +1205,7 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 
 		if (scene.get())
 		{
-			scene->updateDescriptorSetsRecursive(VKTS_BINDING_UNIFORM_BSDF_DEFERRED_TOTAL_BINDING_COUNT, writeDescriptorSets, i);
+			scene->updateDescriptorSetsRecursive(VKTS_BINDING_UNIFORM_BSDF_FORWARD_TOTAL_BINDING_COUNT, writeDescriptorSets, i);
 		}
 
 		if (environmentScene.get())
@@ -1777,11 +1247,6 @@ void Example::terminateResources(const vkts::IUpdateThreadContext& updateContext
 		        	cmdBufferFence[i]->destroy();
 		        }
 
-		        if (gbufferFramebuffer[i].get())
-				{
-					gbufferFramebuffer[i]->destroy();
-				}
-
 				if (framebuffer[i].get())
 				{
 					framebuffer[i]->destroy();
@@ -1815,10 +1280,6 @@ void Example::terminateResources(const vkts::IUpdateThreadContext& updateContext
 				scene->destroy();
 			}
 
-			if (resolveGraphicsPipeline.get())
-			{
-				resolveGraphicsPipeline->destroy();
-			}
 
 			for (uint32_t i = 0; i < allGraphicsPipelines.size(); i++)
 			{
@@ -1827,30 +1288,10 @@ void Example::terminateResources(const vkts::IUpdateThreadContext& updateContext
 			allGraphicsPipelines.clear();
 
 
-			if (gbufferSampler.get())
-			{
-				gbufferSampler->destroy();
-			}
-
-
-			for (uint32_t i = 0; i < allGBufferImageViews.size(); i++)
-			{
-				allGBufferImageViews[i]->destroy();
-			}
-			allGBufferImageViews.clear();
-
-
 			if (depthStencilImageView.get())
 			{
 				depthStencilImageView->destroy();
 			}
-
-
-			for (uint32_t i = 0; i < allGBufferTextures.size(); i++)
-			{
-				allGBufferTextures[i]->destroy();
-			}
-			allGBufferTextures.clear();
 
 
 			if (depthTexture.get())
@@ -1862,11 +1303,6 @@ void Example::terminateResources(const vkts::IUpdateThreadContext& updateContext
 			if (renderPass.get())
 			{
 				renderPass->destroy();
-			}
-
-			if (gbufferRenderPass.get())
-			{
-				gbufferRenderPass->destroy();
 			}
 		}
 	}
@@ -1938,20 +1374,6 @@ VkBool32 Example::init(const vkts::IUpdateThreadContext& updateContext)
 	if (!buildDescriptorSetLayout())
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not build descriptor set layout.");
-
-		return VK_FALSE;
-	}
-
-	if (!buildDescriptorSetPool())
-	{
-		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not build descriptor set pool.");
-
-		return VK_FALSE;
-	}
-
-	if (!buildDescriptorSets())
-	{
-		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not build descriptor sets.");
 
 		return VK_FALSE;
 	}
@@ -2088,7 +1510,7 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 
 			int32_t lightCount = glm::min((int32_t)scene->getLights().size(), VKTS_MAX_LIGHTS);
 
-			if (!resolveFragmentLightsUniformBuffer->upload(dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_LIGHT].stride * (VkDeviceSize)currentBuffer + VKTS_MAX_LIGHTS * 4 * sizeof(float) * 2, 0, lightCount))
+			if (!fragmentLightsUniformBuffer->upload(dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_LIGHT].stride * (VkDeviceSize)currentBuffer + VKTS_MAX_LIGHTS * 4 * sizeof(float) * 2, 0, lightCount))
 			{
 				vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not upload lights.");
 
@@ -2097,14 +1519,14 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 
 			for (int32_t i = 0; i < lightCount; i++)
 			{
-				if (!resolveFragmentLightsUniformBuffer->upload(dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_LIGHT].stride * (VkDeviceSize)currentBuffer + i * 4 * sizeof(float), 0, scene->getLights()[i]->getDirection()))
+				if (!fragmentLightsUniformBuffer->upload(dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_LIGHT].stride * (VkDeviceSize)currentBuffer + i * 4 * sizeof(float), 0, scene->getLights()[i]->getDirection()))
 				{
 					vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not upload lights.");
 
 					return VK_FALSE;
 				}
 
-				if (!resolveFragmentLightsUniformBuffer->upload(dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_LIGHT].stride * (VkDeviceSize)currentBuffer + i * 4 * sizeof(float) + VKTS_MAX_LIGHTS * 4 * sizeof(float), 0, glm::vec4(scene->getLights()[i]->getColor(), 1.0)))
+				if (!fragmentLightsUniformBuffer->upload(dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_LIGHT].stride * (VkDeviceSize)currentBuffer + i * 4 * sizeof(float) + VKTS_MAX_LIGHTS * 4 * sizeof(float), 0, glm::vec4(scene->getLights()[i]->getColor(), 1.0)))
 				{
 					vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not upload lights.");
 
@@ -2145,7 +1567,7 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 
 			return VK_FALSE;
 		}
-		if (!resolveFragmentMatricesUniformBuffer->upload(dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_BSDF_INVERSE].stride * (VkDeviceSize)currentBuffer + 0 * sizeof(float) * 16, 0, inverseProjectionMatrix))
+		if (!fragmentMatricesUniformBuffer->upload(dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_BSDF_INVERSE].stride * (VkDeviceSize)currentBuffer + 0 * sizeof(float) * 16, 0, inverseProjectionMatrix))
 		{
 			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not upload matrices.");
 
@@ -2160,7 +1582,7 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 
 			return VK_FALSE;
 		}
-		if (!resolveFragmentMatricesUniformBuffer->upload(dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_BSDF_INVERSE].stride * (VkDeviceSize)currentBuffer + 1 * sizeof(float) * 16, 0, inverseViewMatrix))
+		if (!fragmentMatricesUniformBuffer->upload(dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_BSDF_INVERSE].stride * (VkDeviceSize)currentBuffer + 1 * sizeof(float) * 16, 0, inverseViewMatrix))
 		{
 			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not upload matrices.");
 
@@ -2339,11 +1761,6 @@ void Example::terminate(const vkts::IUpdateThreadContext& updateContext)
 
 			//
 
-			if (screenPlaneVertexBuffer.get())
-			{
-				screenPlaneVertexBuffer->destroy();
-			}
-
 			if (environmentSceneFactory.get())
 			{
 				environmentSceneFactory.reset();
@@ -2391,11 +1808,6 @@ void Example::terminate(const vkts::IUpdateThreadContext& updateContext)
 				swapchain->destroy();
 			}
 
-			if (resolvePipelineLayout.get())
-			{
-				resolvePipelineLayout->destroy();
-			}
-
 			if (environmentPipelineLayout.get())
 			{
 				environmentPipelineLayout->destroy();
@@ -2411,30 +1823,20 @@ void Example::terminate(const vkts::IUpdateThreadContext& updateContext)
 				envFragmentShaderModule->destroy();
 			}
 
-			if (resolveVertexShaderModule.get())
-			{
-				resolveVertexShaderModule->destroy();
-			}
-
-			if (resolveFragmentShaderModule.get())
-			{
-				resolveFragmentShaderModule->destroy();
-			}
-
 			for (uint32_t i = 0; i < allBSDFVertexShaderModules.size(); i++)
 			{
 				allBSDFVertexShaderModules[i]->destroy();
 			}
 			allBSDFVertexShaderModules.clear();
 
-			if (resolveFragmentLightsUniformBuffer.get())
+			if (fragmentLightsUniformBuffer.get())
 			{
-				resolveFragmentLightsUniformBuffer->destroy();
+				fragmentLightsUniformBuffer->destroy();
 			}
 
-			if (resolveFragmentMatricesUniformBuffer.get())
+			if (fragmentMatricesUniformBuffer.get())
 			{
-				resolveFragmentMatricesUniformBuffer->destroy();
+				fragmentMatricesUniformBuffer->destroy();
 			}
 
 			if (environmentVertexViewProjectionUniformBuffer.get())
@@ -2445,21 +1847,6 @@ void Example::terminate(const vkts::IUpdateThreadContext& updateContext)
 			if (vertexViewProjectionUniformBuffer.get())
 			{
 				vertexViewProjectionUniformBuffer->destroy();
-			}
-
-			if (resolveDescriptorSet.get())
-			{
-				resolveDescriptorSet->destroy();
-			}
-
-			if (resolveDescriptorPool.get())
-			{
-				resolveDescriptorPool->destroy();
-			}
-
-			if (resolveDescriptorSetLayout.get())
-			{
-				resolveDescriptorSetLayout->destroy();
 			}
 
 			if (environmentDescriptorSetLayout.get())

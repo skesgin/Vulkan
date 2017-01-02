@@ -27,7 +27,6 @@
 #ifndef EXAMPLE_HPP_
 #define EXAMPLE_HPP_
 
-// TODO: Implement PBR forward renderer.
 // TODO: Add MSAA for PBR.
 
 #include <vkts/vkts.hpp>
@@ -61,12 +60,9 @@
 #define VKTS_ENV_VERTEX_SHADER_NAME "shader/SPIR/V/environment.vert.spv"
 #define VKTS_ENV_FRAGMENT_SHADER_NAME "shader/SPIR/V/environment.frag.spv"
 
-#define VKTS_RESOLVE_VERTEX_SHADER_NAME "shader/SPIR/V/texture_ndc.vert.spv"
-#define VKTS_RESOLVE_FRAGMENT_SHADER_NAME "shader/SPIR/V/resolve_bsdf.frag.spv"
 
-
-//#define VKTS_SCENE_NAME "buster_drone/buster_drone.vkts"
-#define VKTS_SCENE_NAME "scifi_helmet/scifi_helmet.vkts"
+#define VKTS_SCENE_NAME "buster_drone/buster_drone.vkts"
+//#define VKTS_SCENE_NAME "scifi_helmet/scifi_helmet.vkts"
 
 #define VKTS_ENVIRONMENT_SCENE_NAME "primitives/sphere.vkts"
 
@@ -76,7 +72,7 @@
 
 #define VKTS_OUTPUT_BUFFER_SIZE 1024
 
-#define VKTS_BSDF_DESCRIPTOR_SET_COUNT (7 + 1 + 1)
+#define VKTS_BSDF_DESCRIPTOR_SET_COUNT (11 + 1 + 1 + 1)
 
 class Example: public vkts::IUpdateThread
 {
@@ -104,38 +100,28 @@ private:
     vkts::ISemaphoreSP renderingCompleteSemaphore;
 
 	vkts::IDescriptorSetLayoutSP environmentDescriptorSetLayout;
-	vkts::IDescriptorSetLayoutSP resolveDescriptorSetLayout;
-
-	vkts::IDescriptorPoolSP resolveDescriptorPool;
-	vkts::IDescriptorSetsSP resolveDescriptorSet;
 
     VkDescriptorBufferInfo environmentDescriptorBufferInfos[1];
-    VkDescriptorBufferInfo descriptorBufferInfos[1];
+    VkDescriptorBufferInfo descriptorBufferInfos[1 + 1 + 1];
     VkDescriptorImageInfo environmentDescriptorImageInfos[1];
-    VkDescriptorBufferInfo resolveDescriptorBufferInfos[1 + 1];
-    VkDescriptorImageInfo resolveDescriptorImageInfos[VKTS_BSDF_DESCRIPTOR_SET_COUNT];
+    VkDescriptorImageInfo descriptorImageInfos[VKTS_BSDF_DESCRIPTOR_SET_COUNT];
 
-    VkWriteDescriptorSet writeDescriptorSets[VKTS_BINDING_UNIFORM_BSDF_DEFERRED_TOTAL_BINDING_COUNT];
+    VkWriteDescriptorSet writeDescriptorSets[VKTS_BINDING_UNIFORM_BSDF_FORWARD_TOTAL_BINDING_COUNT];
     VkWriteDescriptorSet environmentWriteDescriptorSets[VKTS_ENVIRONMENT_DESCRIPTOR_SET_COUNT];
-    VkWriteDescriptorSet resolveWriteDescriptorSets[VKTS_BSDF_DESCRIPTOR_SET_COUNT];
 
     std::map<uint32_t, VkTsDynamicOffset> dynamicOffsets;
 
     vkts::IBufferObjectSP vertexViewProjectionUniformBuffer;
 	vkts::IBufferObjectSP environmentVertexViewProjectionUniformBuffer;
-	vkts::IBufferObjectSP resolveFragmentLightsUniformBuffer;
-	vkts::IBufferObjectSP resolveFragmentMatricesUniformBuffer;
+	vkts::IBufferObjectSP fragmentLightsUniformBuffer;
+	vkts::IBufferObjectSP fragmentMatricesUniformBuffer;
 
 	vkts::SmartPointerVector<vkts::IShaderModuleSP> allBSDFVertexShaderModules;
 
 	vkts::IShaderModuleSP envVertexShaderModule;
 	vkts::IShaderModuleSP envFragmentShaderModule;
 
-	vkts::IShaderModuleSP resolveVertexShaderModule;
-	vkts::IShaderModuleSP resolveFragmentShaderModule;
-
 	vkts::IPipelineLayoutSP environmentPipelineLayout;
-	vkts::IPipelineLayoutSP resolvePipelineLayout;
 
     vkts::IGuiRenderFactorySP guiRenderFactory;
 	vkts::IGuiManagerSP guiManager;
@@ -152,28 +138,20 @@ private:
 	vkts::ISceneFactorySP environmentSceneFactory;
 	vkts::ISceneSP environmentScene;
 
-	vkts::IBufferObjectSP screenPlaneVertexBuffer;
-
 	vkts::ISwapchainSP swapchain;
 
 	vkts::IRenderPassSP renderPass;
-	vkts::IRenderPassSP gbufferRenderPass;
 
 	vkts::SmartPointerVector<vkts::IGraphicsPipelineSP> allGraphicsPipelines;
-	vkts::IGraphicsPipelineSP resolveGraphicsPipeline;
 
-	vkts::SmartPointerVector<vkts::IImageObjectSP> allGBufferTextures;
 	vkts::IImageObjectSP depthTexture;
 
-	vkts::SmartPointerVector<vkts::IImageViewSP> allGBufferImageViews;
 	vkts::IImageViewSP depthStencilImageView;
-	vkts::ISamplerSP gbufferSampler;
 
     uint32_t swapchainImagesCount;
 
     vkts::SmartPointerVector<vkts::IImageViewSP> swapchainImageView;
 
-    vkts::SmartPointerVector<vkts::IFramebufferSP> gbufferFramebuffer;
     vkts::SmartPointerVector<vkts::IFramebufferSP> framebuffer;
 
     vkts::SmartPointerVector<vkts::ICommandBuffersSP> cmdBuffer;
@@ -198,25 +176,15 @@ private:
 
 	VkBool32 buildSwapchainImageView(const int32_t usedBuffer);
 
-	VkBool32 buildGBufferSampler();
-
 	VkBool32 buildDepthStencilImageView();
 
-	VkBool32 buildGBufferImageView(const int32_t usedBuffer);
-
 	VkBool32 buildDepthTexture(const vkts::ICommandBuffersSP& cmdBuffer);
-
-	VkBool32 buildGBufferTexture(const vkts::ICommandBuffersSP& cmdBuffer);
 
 	VkBool32 buildPipeline();
 
 	VkBool32 buildRenderPass();
 
 	VkBool32 buildPipelineLayout();
-
-	VkBool32 buildDescriptorSets();
-
-	VkBool32 buildDescriptorSetPool();
 
 	VkBool32 buildDescriptorSetLayout();
 
