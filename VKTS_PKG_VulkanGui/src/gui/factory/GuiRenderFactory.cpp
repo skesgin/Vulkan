@@ -289,6 +289,17 @@ IRenderFontSP GuiRenderFactory::createRenderFont(const IGuiManagerSP& guiManager
     gp.getScissors(0).offset.y = 0;
     gp.getScissors(0).extent = {1, 1};
 
+    for (uint32_t i = 0; i < renderPass->getAttachmentCount(); i++)
+    {
+    	if (imageDataIsDepthStencil(renderPass->getAttachments()[i].format))
+    	{
+    		gp.getPipelineDepthStencilStateCreateInfo().depthTestEnable = VK_TRUE;
+    		gp.getPipelineDepthStencilStateCreateInfo().depthWriteEnable = VK_TRUE;
+    		gp.getPipelineDepthStencilStateCreateInfo().depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
+
+    		break;
+    	}
+    }
 
     gp.getPipelineMultisampleStateCreateInfo();
 

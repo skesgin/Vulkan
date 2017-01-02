@@ -36,6 +36,13 @@ typedef IImageDataSP (VKTS_APIENTRY *PFN_imageDataLoadFunction)(const char* file
 typedef VkBool32 (VKTS_APIENTRY *PFN_imageDataSaveFunction)(const char* filename, const IImageDataSP& imageData, const uint32_t mipLevel, const uint32_t arrayLayer);
 
 /**
+ *
+ *
+ * @ThreadSafe
+ */
+VKTS_APICALL VkBool32 VKTS_APIENTRY imageDataIsDepthStencil(const VkFormat format);
+
+/**
  * Only supported BLOCKs are returned as true.
  *
  * @ThreadSafe
