@@ -461,6 +461,7 @@ VkBool32 SceneRenderFactory::prepareBSDFMaterial(const ISceneManagerSP& sceneMan
 	gp.getScissors(0).offset.y = 0;
 	gp.getScissors(0).extent = {1, 1};
 
+	gp.getPipelineRasterizationStateCreateInfo();
 
 	gp.getPipelineMultisampleStateCreateInfo();
 

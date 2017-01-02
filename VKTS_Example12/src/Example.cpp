@@ -637,7 +637,10 @@ VkBool32 Example::buildPipeline()
     gp.getScissors(0).extent = swapchain->getImageExtent();
 
 
+	gp.getPipelineRasterizationStateCreateInfo();
+
     gp.getPipelineMultisampleStateCreateInfo();
+
     gp.getPipelineDepthStencilStateCreateInfo();
 
 

@@ -832,7 +832,10 @@ VkBool32 Example::buildPipeline()
     gp.getScissors(0).extent = swapchain->getImageExtent();
 
 
+	gp.getPipelineRasterizationStateCreateInfo();
+
     gp.getPipelineMultisampleStateCreateInfo();
+
     gp.getPipelineDepthStencilStateCreateInfo();
 
 
@@ -900,6 +903,8 @@ VkBool32 Example::buildPipeline()
 	resolveGP.getScissors(0).offset.y = 0;
 	resolveGP.getScissors(0).extent = swapchain->getImageExtent();
 
+
+	resolveGP.getPipelineRasterizationStateCreateInfo();
 
 	resolveGP.getPipelineMultisampleStateCreateInfo();
 

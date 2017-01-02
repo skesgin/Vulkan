@@ -301,6 +301,8 @@ IRenderFontSP GuiRenderFactory::createRenderFont(const IGuiManagerSP& guiManager
     	}
     }
 
+    gp.getPipelineRasterizationStateCreateInfo();
+
     gp.getPipelineMultisampleStateCreateInfo();
 
 
