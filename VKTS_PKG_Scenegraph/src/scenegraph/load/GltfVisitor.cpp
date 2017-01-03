@@ -1423,7 +1423,7 @@ void GltfVisitor::visit(JSONarray& jsonArray)
 		{
 			for (int32_t i = 0; i < (int32_t)jsonArray.size(); i++)
 			{
-				memset(&gltfChannel, 0, sizeof(GltfPrimitive));
+				memset(&gltfChannel, 0, sizeof(GltfChannel));
 
 				jsonArray.getValueAt(i)->visit(*this);
 

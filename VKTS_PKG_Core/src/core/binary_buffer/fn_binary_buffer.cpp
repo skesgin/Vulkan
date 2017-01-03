@@ -31,6 +31,23 @@
 namespace vkts
 {
 
+IBinaryBufferSP VKTS_APIENTRY binaryBufferCreate(const std::vector<uint8_t>& data)
+{
+    if (data.size() == 0)
+    {
+        return IBinaryBufferSP();
+    }
+
+    auto result = IBinaryBufferSP(new BinaryBuffer(data));
+
+	if (result.get() && result->getSize() != (uint32_t)data.size())
+	{
+		return IBinaryBufferSP();
+	}
+
+    return result;
+}
+
 IBinaryBufferSP VKTS_APIENTRY binaryBufferCreate(const uint32_t size)
 {
     if (size == 0)

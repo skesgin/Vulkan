@@ -222,6 +222,16 @@ Quat& Quat::operator =(const Quat& other)
     return *this;
 }
 
+Quat& Quat::operator =(const Quat&& other)
+{
+    this->x = other.x;
+    this->y = other.y;
+    this->z = other.z;
+    this->w = other.w;
+
+    return *this;
+}
+
 glm::vec3 Quat::operator *(const glm::vec3& other) const
 {
     auto result = *this * Quat(other) * conjugate(*this);

@@ -232,11 +232,6 @@ static void _visualRevertFullscreen(const INativeDisplayWP& display)
                     }
 
                     XRRFreeOutputInfo(outputInfo);
-
-                    if (found)
-                    {
-                        break;
-                    }
                 }
 
                 XRRFreeCrtcInfo(crtcInfo);

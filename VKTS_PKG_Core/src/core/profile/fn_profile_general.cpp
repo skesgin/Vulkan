@@ -153,7 +153,7 @@ VkBool32 VKTS_APIENTRY _profileInit()
 
 VkBool32 VKTS_APIENTRY _profileGetCpuUsage(float& usage, const uint32_t cpu)
 {
-	if (cpu >= processorGetNumber())
+	if (cpu >= processorGetNumber() || cpu >= VKTS_MAX_QUERY_CPU)
 	{
 		return VK_FALSE;
 	}

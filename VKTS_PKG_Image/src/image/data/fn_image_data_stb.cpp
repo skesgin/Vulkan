@@ -90,8 +90,8 @@ IImageDataSP VKTS_APIENTRY imageDataLoadStb(const std::string& name, const IBina
 	int y;
 	int channels_in_file;
 
-    auto data = stbi_load_from_memory((stbi_uc const*)buffer->getData(), (int)buffer->getSize(), &x, &y, &channels_in_file, 0);
-    if (!data)
+    std::unique_ptr<stbi_uc[]> data = std::unique_ptr<stbi_uc[]>(stbi_load_from_memory((stbi_uc const*)buffer->getData(), (int)buffer->getSize(), &x, &y, &channels_in_file, 0));
+    if (!data.get())
     {
     	return IImageDataSP();
     }
@@ -99,8 +99,6 @@ IImageDataSP VKTS_APIENTRY imageDataLoadStb(const std::string& name, const IBina
     VkFormat format = imageDataTranslateFormat(channels_in_file);
     if (format == VK_FORMAT_UNDEFINED)
     {
-    	free(data);
-
     	return IImageDataSP();
     }
 
@@ -111,7 +109,7 @@ IImageDataSP VKTS_APIENTRY imageDataLoadStb(const std::string& name, const IBina
 
 	uint32_t totalSize = (uint32_t)(x * y * channels_in_file);
 
-    return IImageDataSP(new ImageData(name, VK_IMAGE_TYPE_2D, format, { (uint32_t)x, (uint32_t)y, 1 }, 1, 1, allOffsets, &data[0], totalSize));
+    return IImageDataSP(new ImageData(name, VK_IMAGE_TYPE_2D, format, { (uint32_t)x, (uint32_t)y, 1 }, 1, 1, allOffsets, (uint8_t*)&data[0], totalSize));
 }
 
 VkBool32 VKTS_APIENTRY imageDataSaveStb(const std::string& name, const IImageDataSP& imageData, const uint32_t mipLevel, const uint32_t arrayLayer)

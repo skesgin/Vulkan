@@ -135,11 +135,7 @@ uint32_t VKTS_APIENTRY serializeGetStructureTypeSize(const void* ptr)
 
         default:
             logPrint(VKTS_LOG_WARNING, __FILE__, __LINE__, "Structure type not found 0x%x", structureTypeHeader->sType);
-
-            return 0;
     }
-
-    logPrint(VKTS_LOG_WARNING, __FILE__, __LINE__, "Structure type not found 0x%x", structureTypeHeader->sType);
 
     return 0;
 }
@@ -192,7 +188,7 @@ IBinaryBufferSP VKTS_APIENTRY serializeStructureType(const void* ptr)
         sourceStructureTypeHeader = (const VkTsStructureTypeHeader*)sourceStructureTypeHeader->pNext;
     }
 
-    return binaryBufferCreate(&data[0], totalSize);
+    return binaryBufferCreate(data);
 }
 
 }

@@ -88,6 +88,8 @@ public:
 
     Quat& operator =(const Quat& other);
 
+    Quat& operator =(const Quat&& other);
+
 
     glm::vec3 operator *(const glm::vec3& other) const;
 

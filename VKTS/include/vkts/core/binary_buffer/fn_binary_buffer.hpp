@@ -36,6 +36,12 @@ namespace vkts
  *
  * @ThreadSafe
  */
+VKTS_APICALL IBinaryBufferSP VKTS_APIENTRY binaryBufferCreate(const std::vector<uint8_t>& data);
+
+/**
+ *
+ * @ThreadSafe
+ */
 VKTS_APICALL IBinaryBufferSP VKTS_APIENTRY binaryBufferCreate(const uint32_t size);
 
 /**
