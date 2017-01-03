@@ -84,7 +84,7 @@ This example uses the exported Cycles materials from Blender to render the diffu
 [VKTS_Example11](VKTS_Example11) - Voxel-global illumination (WIP).  
 ![VKTS_Example11](VKTS_Documentation/screenshots/VKTS_Example11.png)  
       
-This example is not finsihed yet.  
+This example is not finished yet.  
   
 [VKTS_Example12](VKTS_Example12) - Forward real-time PBR using HDR images and MSAA.  
 ![VKTS_Example12](VKTS_Documentation/screenshots/VKTS_Example12.png)  
