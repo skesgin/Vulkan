@@ -464,6 +464,16 @@ VkBool32 SceneRenderFactory::prepareBSDFMaterial(const ISceneManagerSP& sceneMan
 	gp.getPipelineRasterizationStateCreateInfo();
 
 	gp.getPipelineMultisampleStateCreateInfo();
+	if (subMesh->getBSDFMaterial()->getForwardRendering())
+	{
+		for (uint32_t i = 0; i < renderPass->getAttachmentCount(); i++)
+		{
+			if (renderPass->getAttachments()[i].samples > gp.getPipelineMultisampleStateCreateInfo().rasterizationSamples)
+			{
+				gp.getPipelineMultisampleStateCreateInfo().rasterizationSamples = renderPass->getAttachments()[i].samples;
+			}
+		}
+	}
 
 	gp.getPipelineDepthStencilStateCreateInfo().depthTestEnable = VK_TRUE;
 	gp.getPipelineDepthStencilStateCreateInfo().depthWriteEnable = VK_TRUE;

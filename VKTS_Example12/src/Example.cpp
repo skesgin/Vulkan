@@ -27,7 +27,7 @@
 #include "Example.hpp"
 
 Example::Example(const vkts::IContextObjectSP& contextObject, const int32_t windowIndex, const vkts::IVisualContextSP& visualContext, const vkts::ISurfaceSP& surface) :
-		IUpdateThread(), contextObject(contextObject), windowIndex(windowIndex), visualContext(visualContext), surface(surface), showStats(VK_TRUE), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), environmentDescriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), environmentVertexViewProjectionUniformBuffer(nullptr), fragmentLightsUniformBuffer(nullptr), fragmentMatricesUniformBuffer(nullptr), allBSDFVertexShaderModules(), envVertexShaderModule(nullptr), envFragmentShaderModule(nullptr), environmentPipelineLayout(nullptr), guiRenderFactory(nullptr), guiManager(nullptr), guiFactory(nullptr), font(nullptr), renderFactory(nullptr), sceneManager(nullptr), sceneFactory(nullptr), scene(nullptr), environmentRenderFactory(nullptr), environmentSceneManager(nullptr), environmentSceneFactory(nullptr), environmentScene(nullptr), swapchain(nullptr), renderPass(nullptr), allGraphicsPipelines(), depthTexture(), depthStencilImageView(), swapchainImagesCount(0), swapchainImageView(), framebuffer(), cmdBuffer(), cmdBufferFence(), rebuildCmdBufferCounter(0), fps(0), ram(0), cpuUsageApp(0.0f), processors(0)
+		IUpdateThread(), contextObject(contextObject), windowIndex(windowIndex), visualContext(visualContext), surface(surface), showStats(VK_TRUE), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), environmentDescriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), environmentVertexViewProjectionUniformBuffer(nullptr), fragmentLightsUniformBuffer(nullptr), fragmentMatricesUniformBuffer(nullptr), allBSDFVertexShaderModules(), envVertexShaderModule(nullptr), envFragmentShaderModule(nullptr), environmentPipelineLayout(nullptr), guiRenderFactory(nullptr), guiManager(nullptr), guiFactory(nullptr), font(nullptr), renderFactory(nullptr), sceneManager(nullptr), sceneFactory(nullptr), scene(nullptr), environmentRenderFactory(nullptr), environmentSceneManager(nullptr), environmentSceneFactory(nullptr), environmentScene(nullptr), swapchain(nullptr), renderPass(nullptr), allGraphicsPipelines(), depthTexture(), msaaColorTexture(), msaaDepthTexture(), depthStencilImageView(), msaaColorImageView(), msaaDepthStencilImageView(), swapchainImagesCount(0), swapchainImageView(), framebuffer(), cmdBuffer(), cmdBufferFence(), rebuildCmdBufferCounter(0), fps(0), ram(0), cpuUsageApp(0.0f), processors(0)
 {
 	processors = glm::min(vkts::processorGetNumber(), VKTS_MAX_CORES);
 
@@ -127,10 +127,12 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 	clearDepthStencilValue.depth = 1.0f;
 	clearDepthStencilValue.stencil = 0;
 
-	VkClearValue clearValues[2]{};
+	VkClearValue clearValues[4]{};
 
 	clearValues[0].color = clearColorValue;
 	clearValues[1].depthStencil = clearDepthStencilValue;
+	clearValues[2].color = clearColorValue;
+	clearValues[3].depthStencil = clearDepthStencilValue;
 
 
 	VkRenderPassBeginInfo renderPassBeginInfo{};
@@ -146,7 +148,7 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 	renderPassBeginInfo.renderArea.offset.x = 0;
 	renderPassBeginInfo.renderArea.offset.y = 0;
 	renderPassBeginInfo.renderArea.extent = swapchain->getImageExtent();
-	renderPassBeginInfo.clearValueCount = 2;
+	renderPassBeginInfo.clearValueCount = 4;
 	renderPassBeginInfo.pClearValues = clearValues;
 
 	cmdBuffer[usedBuffer]->cmdBeginRenderPass(&renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
@@ -222,14 +224,14 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 
 VkBool32 Example::buildFramebuffer(const int32_t usedBuffer)
 {
-	VkImageView imageViews[2];
-
-	//
+	VkImageView imageViews[4];
 
 	imageViews[0] = swapchainImageView[usedBuffer]->getImageView();
 	imageViews[1] = depthStencilImageView->getImageView();
+	imageViews[2] = msaaColorImageView->getImageView();
+	imageViews[3] = msaaDepthStencilImageView->getImageView();
 
-	framebuffer[usedBuffer] = vkts::framebufferCreate(contextObject->getDevice()->getDevice(), 0, renderPass->getRenderPass(), 2, imageViews, swapchain->getImageExtent().width, swapchain->getImageExtent().height, 1);
+	framebuffer[usedBuffer] = vkts::framebufferCreate(contextObject->getDevice()->getDevice(), 0, renderPass->getRenderPass(), 4, imageViews, swapchain->getImageExtent().width, swapchain->getImageExtent().height, 1);
 
 	if (!framebuffer[usedBuffer].get())
 	{
@@ -548,6 +550,40 @@ VkBool32 Example::buildSwapchainImageView(const int32_t usedBuffer)
 	return VK_TRUE;
 }
 
+VkBool32 Example::buildMSAADepthStencilImageView()
+{
+	VkComponentMapping componentMapping = { VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY };
+	VkImageSubresourceRange imageSubresourceRange = { VK_IMAGE_ASPECT_DEPTH_BIT, 0, 1, 0, 1 };
+
+	msaaDepthStencilImageView = vkts::imageViewCreate(contextObject->getDevice()->getDevice(), 0, msaaDepthTexture->getImage()->getImage(), VK_IMAGE_VIEW_TYPE_2D, msaaDepthTexture->getImage()->getFormat(), componentMapping, imageSubresourceRange);
+
+	if (!msaaDepthStencilImageView.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create MSAA depth attachment view.");
+
+		return VK_FALSE;
+	}
+
+	return VK_TRUE;
+}
+
+VkBool32 Example::buildMSAAColorImageView()
+{
+	VkComponentMapping componentMapping = { VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY };
+	VkImageSubresourceRange imageSubresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
+
+	msaaColorImageView = vkts::imageViewCreate(contextObject->getDevice()->getDevice(), 0, msaaColorTexture->getImage()->getImage(), VK_IMAGE_VIEW_TYPE_2D, msaaColorTexture->getImage()->getFormat(), componentMapping, imageSubresourceRange);
+
+	if (!msaaColorImageView.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create MSAA color attachment view.");
+
+		return VK_FALSE;
+	}
+
+	return VK_TRUE;
+}
+
 VkBool32 Example::buildDepthStencilImageView()
 {
 	VkComponentMapping componentMapping = { VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY };
@@ -558,6 +594,74 @@ VkBool32 Example::buildDepthStencilImageView()
 	if (!depthStencilImageView.get())
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create depth attachment view.");
+
+		return VK_FALSE;
+	}
+
+	return VK_TRUE;
+}
+
+VkBool32 Example::buildMSAADepthTexture(const vkts::ICommandBuffersSP& cmdBuffer)
+{
+	VkImageCreateInfo imageCreateInfo{};
+
+	imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+
+	imageCreateInfo.flags = 0;
+	imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
+	imageCreateInfo.format = VK_FORMAT_D16_UNORM;
+	imageCreateInfo.extent = {swapchain->getImageExtent().width, swapchain->getImageExtent().height, 1};
+	imageCreateInfo.mipLevels = 1;
+	imageCreateInfo.arrayLayers = 1;
+	imageCreateInfo.samples = VKTS_SAMPLE_COUNT_BIT;
+	imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+	imageCreateInfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+	imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+	imageCreateInfo.queueFamilyIndexCount = 0;
+	imageCreateInfo.pQueueFamilyIndices = nullptr;
+	imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+
+	VkImageSubresourceRange subresourceRange = { VK_IMAGE_ASPECT_DEPTH_BIT, 0, 1, 0, 1 };
+
+	msaaDepthTexture = vkts::imageObjectCreate(contextObject, cmdBuffer, "MSAADepthTexture", imageCreateInfo, 0, VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, subresourceRange, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+	if (!msaaDepthTexture.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create depth texture.");
+
+		return VK_FALSE;
+	}
+
+	return VK_TRUE;
+}
+
+VkBool32 Example::buildMSAAColorTexture(const vkts::ICommandBuffersSP& cmdBuffer)
+{
+	VkImageCreateInfo imageCreateInfo{};
+
+	imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+
+	imageCreateInfo.flags = 0;
+	imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
+	imageCreateInfo.format = swapchain->getImageFormat();
+	imageCreateInfo.extent = {swapchain->getImageExtent().width, swapchain->getImageExtent().height, 1};
+	imageCreateInfo.mipLevels = 1;
+	imageCreateInfo.arrayLayers = 1;
+	imageCreateInfo.samples = VKTS_SAMPLE_COUNT_BIT;
+	imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+	imageCreateInfo.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+	imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+	imageCreateInfo.queueFamilyIndexCount = 0;
+	imageCreateInfo.pQueueFamilyIndices = nullptr;
+	imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+
+	VkImageSubresourceRange subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
+
+	msaaColorTexture = vkts::imageObjectCreate(contextObject, cmdBuffer, "MSAAColorTexture", imageCreateInfo, 0, VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, subresourceRange, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+	if (!msaaColorTexture.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create msaa color texture.");
 
 		return VK_FALSE;
 	}
@@ -639,7 +743,7 @@ VkBool32 Example::buildPipeline()
 
 	gp.getPipelineRasterizationStateCreateInfo();
 
-    gp.getPipelineMultisampleStateCreateInfo();
+	gp.getPipelineMultisampleStateCreateInfo().rasterizationSamples = VKTS_SAMPLE_COUNT_BIT;
 
     gp.getPipelineDepthStencilStateCreateInfo();
 
@@ -672,12 +776,12 @@ VkBool32 Example::buildPipeline()
 
 VkBool32 Example::buildRenderPass()
 {
-	VkAttachmentDescription attachmentDescription[2]{};
+	VkAttachmentDescription attachmentDescription[4]{};
 
 	attachmentDescription[0].flags = 0;
 	attachmentDescription[0].format = swapchain->getImageFormat();
 	attachmentDescription[0].samples = VK_SAMPLE_COUNT_1_BIT;
-	attachmentDescription[0].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+	attachmentDescription[0].loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 	attachmentDescription[0].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 	attachmentDescription[0].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 	attachmentDescription[0].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
@@ -687,37 +791,69 @@ VkBool32 Example::buildRenderPass()
 	attachmentDescription[1].flags = 0;
 	attachmentDescription[1].format = VK_FORMAT_D16_UNORM;
 	attachmentDescription[1].samples = VK_SAMPLE_COUNT_1_BIT;
-	attachmentDescription[1].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-	attachmentDescription[1].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+	attachmentDescription[1].loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+	attachmentDescription[1].storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 	attachmentDescription[1].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 	attachmentDescription[1].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 	attachmentDescription[1].initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 	attachmentDescription[1].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
-	VkAttachmentReference colorAttachmentReference{};
+	attachmentDescription[2].flags = 0;
+	attachmentDescription[2].format = swapchain->getImageFormat();	// Later request same format for MSAA image.
+	attachmentDescription[2].samples = VKTS_SAMPLE_COUNT_BIT;
+	attachmentDescription[2].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+	attachmentDescription[2].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+	attachmentDescription[2].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+	attachmentDescription[2].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+	attachmentDescription[2].initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+	attachmentDescription[2].finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
-	colorAttachmentReference.attachment = 0;
+	attachmentDescription[3].flags = 0;
+	attachmentDescription[3].format = VK_FORMAT_D16_UNORM;
+	attachmentDescription[3].samples = VKTS_SAMPLE_COUNT_BIT;
+	attachmentDescription[3].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+	attachmentDescription[3].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+	attachmentDescription[3].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+	attachmentDescription[3].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+	attachmentDescription[3].initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+	attachmentDescription[3].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+	VkAttachmentReference resolveAttachmentReference[2];
+
+	resolveAttachmentReference[0].attachment = 0;
+	resolveAttachmentReference[0].layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+	resolveAttachmentReference[1].attachment = 1;
+	resolveAttachmentReference[1].layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+	VkAttachmentReference colorAttachmentReference;
+
+	colorAttachmentReference.attachment = 2;
 	colorAttachmentReference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
 	VkAttachmentReference deptStencilAttachmentReference;
 
-	deptStencilAttachmentReference.attachment = 1;
+	deptStencilAttachmentReference.attachment = 3;
 	deptStencilAttachmentReference.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
-	VkSubpassDescription subpassDescription{};
+	//
 
-	subpassDescription.flags = 0;
-	subpassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-	subpassDescription.inputAttachmentCount = 0;
-	subpassDescription.pInputAttachments = nullptr;
-	subpassDescription.colorAttachmentCount = 1;
-	subpassDescription.pColorAttachments = &colorAttachmentReference;
-	subpassDescription.pResolveAttachments = nullptr;
-	subpassDescription.pDepthStencilAttachment = &deptStencilAttachmentReference;
-	subpassDescription.preserveAttachmentCount = 0;
-	subpassDescription.pPreserveAttachments = nullptr;
+	VkSubpassDescription subpassDescription[1]{};
 
-	renderPass = vkts::renderPassCreate( contextObject->getDevice()->getDevice(), 0, 2, attachmentDescription, 1, &subpassDescription, 0, nullptr);
+	subpassDescription[0].flags = 0;
+	subpassDescription[0].pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+	subpassDescription[0].inputAttachmentCount = 0;
+	subpassDescription[0].pInputAttachments = nullptr;
+	subpassDescription[0].colorAttachmentCount = 1;
+	subpassDescription[0].pColorAttachments = &colorAttachmentReference;
+	subpassDescription[0].pResolveAttachments = resolveAttachmentReference;
+	subpassDescription[0].pDepthStencilAttachment = &deptStencilAttachmentReference;
+	subpassDescription[0].preserveAttachmentCount = 0;
+	subpassDescription[0].pPreserveAttachments = nullptr;
+
+    //
+
+	renderPass = vkts::renderPassCreate( contextObject->getDevice()->getDevice(), 0, 4, attachmentDescription, 1, subpassDescription, 0, nullptr);
 
 	if (!renderPass.get())
 	{
@@ -1084,6 +1220,20 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 		return VK_FALSE;
 	}
 
+	if (!buildMSAAColorTexture(updateCmdBuffer))
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not build MSAA color texture.");
+
+		return VK_FALSE;
+	}
+
+	if (!buildMSAADepthTexture(updateCmdBuffer))
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not build MSAA depth texture.");
+
+		return VK_FALSE;
+	}
+
 	if (!buildDepthTexture(updateCmdBuffer))
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not build depth texture.");
@@ -1176,6 +1326,16 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 	updateCmdBuffer->destroy();
 
 	//
+
+	if (!buildMSAAColorImageView())
+	{
+		return VK_FALSE;
+	}
+
+	if (!buildMSAADepthStencilImageView())
+	{
+		return VK_FALSE;
+	}
 
 	if (!buildDepthStencilImageView())
 	{
@@ -1296,10 +1456,31 @@ void Example::terminateResources(const vkts::IUpdateThreadContext& updateContext
 				depthStencilImageView->destroy();
 			}
 
+			if (msaaDepthStencilImageView.get())
+			{
+				msaaDepthStencilImageView->destroy();
+			}
+
+			if (msaaColorImageView.get())
+			{
+				msaaColorImageView->destroy();
+			}
+
 
 			if (depthTexture.get())
 			{
 				depthTexture->destroy();
+			}
+
+
+			if (msaaDepthTexture.get())
+			{
+				msaaDepthTexture->destroy();
+			}
+
+			if (msaaColorTexture.get())
+			{
+				msaaColorTexture->destroy();
 			}
 
 

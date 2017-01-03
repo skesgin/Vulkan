@@ -60,7 +60,7 @@ class ExportVKTS(bpy.types.Operator, ExportHelper):
     filter_glob = StringProperty(default="*.vkts", options={'HIDDEN'})
 
     use_forward = BoolProperty(
-            name="Use Forward",
+            name="Use forward rendering (Cycles only)",
             description="Export Cycles materials for forward rendering",
             default=False,
             )

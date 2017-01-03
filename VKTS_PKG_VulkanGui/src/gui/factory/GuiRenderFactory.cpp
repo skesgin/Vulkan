@@ -304,7 +304,13 @@ IRenderFontSP GuiRenderFactory::createRenderFont(const IGuiManagerSP& guiManager
     gp.getPipelineRasterizationStateCreateInfo();
 
     gp.getPipelineMultisampleStateCreateInfo();
-
+	for (uint32_t i = 0; i < renderPass->getAttachmentCount(); i++)
+	{
+		if (renderPass->getAttachments()[i].samples > gp.getPipelineMultisampleStateCreateInfo().rasterizationSamples)
+		{
+			gp.getPipelineMultisampleStateCreateInfo().rasterizationSamples = renderPass->getAttachments()[i].samples;
+		}
+	}
 
     gp.getPipelineColorBlendAttachmentState(0).blendEnable = VK_TRUE;
     gp.getPipelineColorBlendAttachmentState(0).srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;

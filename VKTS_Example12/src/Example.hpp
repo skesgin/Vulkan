@@ -27,14 +27,14 @@
 #ifndef EXAMPLE_HPP_
 #define EXAMPLE_HPP_
 
-// TODO: Add MSAA for PBR.
-
 #include <vkts/vkts.hpp>
 
 #define VKTS_EXAMPLE_NAME "Example12"
 
 #define VKTS_NUMBER_DYNAMIC_UNIFORM_BUFFERS 3
 #define VKTS_MAX_NUMBER_BUFFERS 3
+
+#define VKTS_SAMPLE_COUNT_BIT VK_SAMPLE_COUNT_4_BIT
 
 #define VKTS_NUMBER_BUFFERS 2
 
@@ -62,7 +62,6 @@
 
 
 #define VKTS_SCENE_NAME "buster_drone/buster_drone.vkts"
-//#define VKTS_SCENE_NAME "scifi_helmet/scifi_helmet.vkts"
 
 #define VKTS_ENVIRONMENT_SCENE_NAME "primitives/sphere.vkts"
 
@@ -145,8 +144,12 @@ private:
 	vkts::SmartPointerVector<vkts::IGraphicsPipelineSP> allGraphicsPipelines;
 
 	vkts::IImageObjectSP depthTexture;
+	vkts::IImageObjectSP msaaColorTexture;
+	vkts::IImageObjectSP msaaDepthTexture;
 
 	vkts::IImageViewSP depthStencilImageView;
+	vkts::IImageViewSP msaaColorImageView;
+	vkts::IImageViewSP msaaDepthStencilImageView;
 
     uint32_t swapchainImagesCount;
 
@@ -176,7 +179,15 @@ private:
 
 	VkBool32 buildSwapchainImageView(const int32_t usedBuffer);
 
+	VkBool32 buildMSAADepthStencilImageView();
+
+	VkBool32 buildMSAAColorImageView();
+
 	VkBool32 buildDepthStencilImageView();
+
+	VkBool32 buildMSAADepthTexture(const vkts::ICommandBuffersSP& cmdBuffer);
+
+	VkBool32 buildMSAAColorTexture(const vkts::ICommandBuffersSP& cmdBuffer);
 
 	VkBool32 buildDepthTexture(const vkts::ICommandBuffersSP& cmdBuffer);
 

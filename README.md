@@ -61,13 +61,13 @@ This example loads another scene modeled in Blender. This scene has a node tree,
       
 This example loads and renders a skeletal animated character modeled in Blender. Also, the scene can be cotrolled with a gamepad.    
       
-[VKTS_Example07](VKTS_Example07) - Multi-threaded terrain rendering using normal and displacement mapping.
+[VKTS_Example07](VKTS_Example07) - Multi-threaded terrain rendering using normal and displacement mapping.  
 ![VKTS_Example07](VKTS_Documentation/screenshots/VKTS_Example07.png)  
       
 The terrain scene has 64 patches, which are processed in parallel by several threads. Only if a patch is visible by the camera, it is added to the secondary command buffers. After all patches are processed, the primary command buffer is drawing the terrain by executing the above secondary command buffers.      
   
-[VKTS_Example08](VKTS_Example08) - Calculating and drawing of the Mandelbrot set using the core Vulkan API.
-![VKTS_Example08](VKTS_Documentation/screenshots/VKTS_Example08.png)
+[VKTS_Example08](VKTS_Example08) - Calculating and drawing of the Mandelbrot set using the core Vulkan API.  
+![VKTS_Example08](VKTS_Documentation/screenshots/VKTS_Example08.png)  
       
 This example uses only the core Vulkan API, so no extensions are activated. A compute shader is calculating the Mandelbrot set and is storing the values into an offscreen image. As soon as the compute shader is done, the final image is saved as a TGA image to the file system.  
     
@@ -77,9 +77,20 @@ This example uses only the core Vulkan API, so no extensions are activated. A co
 This example renders into an offscreen framebuffer, writing only the depth value as the shadow map. In the following command, this depth texture is used to generate shadows. The spaceship does have transparent elements, so first the opaque and then the transparent elements are drawed. This content is also rendered into an offscreen multisample framebuffer, which is finally resolved to the visible window.
   
 [VKTS_Example10](VKTS_Example10) - Deferred real-time physically based rendering (PBR).  
-![VKTS_Example10](VKTS_Documentation/screenshots/VKTS_Example10.png)  
+![VKTS_Example10](VKTS_Documentation/screenshots/VKTS_Example10.png) ![VKTS_Example10](VKTS_Documentation/screenshots/VKTS_Example10_a.png)  
       
 This example uses the exported Cycles materials from Blender to render the diffuse and specular shader into an offscreen G-Buffer. The environment is pre-filtered and stored in several textures and cube maps. This allows to do image based lighting and to resolve the PBR materials in real-time. This example uses no anti-aliasing, which could be either done in a post process or using a multi-sample G-Buffer.  
+  
+[VKTS_Example11](VKTS_Example11) - Voxel-global illumination (WIP).  
+![VKTS_Example11](VKTS_Documentation/screenshots/VKTS_Example11.png)  
+      
+This example is not finsihed yet.  
+  
+[VKTS_Example12](VKTS_Example12) - Forward real-time PBR using HDR images and MSAA.  
+![VKTS_Example12](VKTS_Documentation/screenshots/VKTS_Example12.png)  
+      
+This example is based on Example 10, but a forward PBR renderer is used. Furthermore, the environment is a HDR image and 
+used for the image based lighting. Finally, this example uses MSAA for anti-aliasing.
   
   
 VKTS test programs:
