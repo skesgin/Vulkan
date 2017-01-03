@@ -79,7 +79,10 @@ VkBool32 VKTS_APIENTRY _fileCreateDirectory(const char* directory)
 			continue;
 		}
 
-		mkdir(targetDirectory.c_str(), S_IRWXU | S_IRWXG | (S_IROTH | S_IXOTH));
+		if (mkdir(targetDirectory.c_str(), S_IRWXU | S_IRWXG | (S_IROTH | S_IXOTH)) != 0)
+		{
+			return VK_FALSE;
+		}
 	}
 
 	return VK_TRUE;

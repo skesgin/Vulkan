@@ -76,6 +76,21 @@ const uint8_t* BinaryBuffer::getByteData() const
     return &data[0];
 }
 
+const void* BinaryBuffer::getCurrentData() const
+{
+	return static_cast<const void*>(getCurrentByteData());
+}
+
+const uint8_t* BinaryBuffer::getCurrentByteData() const
+{
+    if (pos >= getSize())
+    {
+        return nullptr;
+    }
+
+    return &data[pos];
+}
+
 uint32_t BinaryBuffer::getSize() const
 {
     return (uint32_t)data.size();

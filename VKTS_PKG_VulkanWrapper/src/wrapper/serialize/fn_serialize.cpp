@@ -160,35 +160,38 @@ IBinaryBufferSP VKTS_APIENTRY serializeStructureType(const void* ptr)
 
     //
 
-    std::vector<uint8_t> data(totalSize);
+    auto binaryBuffer = binaryBufferCreate(totalSize);
+
+    if (!binaryBuffer.get())
+    {
+    	return IBinaryBufferSP();
+    }
+
+    binaryBuffer->seek(0, VKTS_SEARCH_ABSOLUTE);
 
     //
 
-    sourceStructureTypeHeader = (const VkTsStructureTypeHeader*) ptr;
+    sourceStructureTypeHeader = (const VkTsStructureTypeHeader*)ptr;
 
     VkTsStructureTypeHeader* targetStructureTypeHeader = nullptr;
 
-    uint32_t currentOffset = 0;
-
     while (sourceStructureTypeHeader)
     {
-        targetStructureTypeHeader = (VkTsStructureTypeHeader*)&data[currentOffset];
+        targetStructureTypeHeader = (VkTsStructureTypeHeader*)binaryBuffer->getCurrentData();
 
         uint32_t currentSize = serializeGetStructureTypeSize(sourceStructureTypeHeader);
 
-        memcpy((void*)targetStructureTypeHeader, (void*)sourceStructureTypeHeader, currentSize);
-
-        currentOffset += currentSize;
+        binaryBuffer->write((void*)sourceStructureTypeHeader, 1, currentSize);
 
         if (sourceStructureTypeHeader->pNext)
         {
-            targetStructureTypeHeader->pNext = &data[currentOffset];
+            targetStructureTypeHeader->pNext = binaryBuffer->getCurrentData();
         }
 
         sourceStructureTypeHeader = (const VkTsStructureTypeHeader*)sourceStructureTypeHeader->pNext;
     }
 
-    return binaryBufferCreate(data);
+    return binaryBuffer;
 }
 
 }

@@ -39,6 +39,8 @@ static int32_t g_barrierGeneration = 0;
 
 VkBool32 VKTS_APIENTRY barrierInit()
 {
+	std::lock_guard<std::mutex> barrierLockGuard(g_barrierMutex);
+
     g_barrierExecutingUpdateThreads = 0;
 
     g_barrierGeneration = 0;

@@ -355,15 +355,15 @@ IRenderMaterialSP RenderMaterial::create(const VkBool32 createData) const
 
 void RenderMaterial::destroy()
 {
-    for (uint32_t i = 0; i < allDescriptorSets.size(); i++)
+    for (uint32_t i = 0; i < allDescriptorSets.values().size(); i++)
     {
-        allDescriptorSets.valueAt(i)->destroy();
+        allDescriptorSets.values()[i]->destroy();
     }
     allDescriptorSets.clear();
 
-    for (uint32_t i = 0; i < allDescriptorPools.size(); i++)
+    for (uint32_t i = 0; i < allDescriptorPools.values().size(); i++)
     {
-    	allDescriptorPools.valueAt(i)->destroy();
+    	allDescriptorPools.values()[i]->destroy();
     }
     allDescriptorPools.clear();
 

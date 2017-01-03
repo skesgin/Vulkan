@@ -52,6 +52,10 @@ public:
 
     virtual const uint8_t* getByteData() const = 0;
 
+    virtual const void* getCurrentData() const = 0;
+
+    virtual const uint8_t* getCurrentByteData() const = 0;
+
     virtual uint32_t getSize() const = 0;
 
     virtual VkBool32 seek(const int64_t offset, const VkTsSearch search) = 0;
