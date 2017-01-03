@@ -448,7 +448,7 @@ VkBool32 Example::updateDescriptorSets(const int32_t usedBuffer)
 	resolveWriteDescriptorSets[4].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 
 	resolveWriteDescriptorSets[4].dstSet = resolveDescriptorSet->getDescriptorSets()[0];
-	resolveWriteDescriptorSets[4].dstBinding = 4;
+	resolveWriteDescriptorSets[4].dstBinding = VKTS_BINDING_UNIFORM_SAMPLER_BSDF_DEFERRED_DIFFUSE;
 	resolveWriteDescriptorSets[4].dstArrayElement = 0;
 	resolveWriteDescriptorSets[4].descriptorCount = 1;
 	resolveWriteDescriptorSets[4].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
@@ -464,7 +464,7 @@ VkBool32 Example::updateDescriptorSets(const int32_t usedBuffer)
 	resolveWriteDescriptorSets[5].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 
 	resolveWriteDescriptorSets[5].dstSet = resolveDescriptorSet->getDescriptorSets()[0];
-	resolveWriteDescriptorSets[5].dstBinding = 5;
+	resolveWriteDescriptorSets[5].dstBinding = VKTS_BINDING_UNIFORM_SAMPLER_BSDF_DEFERRED_SPECULAR;
 	resolveWriteDescriptorSets[5].dstArrayElement = 0;
 	resolveWriteDescriptorSets[5].descriptorCount = 1;
 	resolveWriteDescriptorSets[5].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
@@ -480,7 +480,7 @@ VkBool32 Example::updateDescriptorSets(const int32_t usedBuffer)
 	resolveWriteDescriptorSets[6].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 
 	resolveWriteDescriptorSets[6].dstSet = resolveDescriptorSet->getDescriptorSets()[0];
-	resolveWriteDescriptorSets[6].dstBinding = 6;
+	resolveWriteDescriptorSets[6].dstBinding = VKTS_BINDING_UNIFORM_SAMPLER_BSDF_DEFERRED_LUT;
 	resolveWriteDescriptorSets[6].dstArrayElement = 0;
 	resolveWriteDescriptorSets[6].descriptorCount = 1;
 	resolveWriteDescriptorSets[6].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
@@ -496,7 +496,7 @@ VkBool32 Example::updateDescriptorSets(const int32_t usedBuffer)
 	resolveWriteDescriptorSets[7].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 
 	resolveWriteDescriptorSets[7].dstSet = resolveDescriptorSet->getDescriptorSets()[0];
-	resolveWriteDescriptorSets[7].dstBinding = 7;
+	resolveWriteDescriptorSets[7].dstBinding = VKTS_BINDING_UNIFORM_BUFFER_BSDF_DEFERRED_LIGHT;
 	resolveWriteDescriptorSets[7].dstArrayElement = 0;
 	resolveWriteDescriptorSets[7].descriptorCount = 1;
 	resolveWriteDescriptorSets[7].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
@@ -512,7 +512,7 @@ VkBool32 Example::updateDescriptorSets(const int32_t usedBuffer)
 	resolveWriteDescriptorSets[8].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 
 	resolveWriteDescriptorSets[8].dstSet = resolveDescriptorSet->getDescriptorSets()[0];
-	resolveWriteDescriptorSets[8].dstBinding = 8;
+	resolveWriteDescriptorSets[8].dstBinding = VKTS_BINDING_UNIFORM_BUFFER_BSDF_DEFERRED_INVERSE;
 	resolveWriteDescriptorSets[8].dstArrayElement = 0;
 	resolveWriteDescriptorSets[8].descriptorCount = 1;
 	resolveWriteDescriptorSets[8].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
@@ -663,7 +663,7 @@ VkBool32 Example::buildScene(const vkts::ICommandObjectSP& commandObject)
 	dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_VIEWPROJECTION] = VkTsDynamicOffset{0, (uint32_t)contextObject->getPhysicalDevice()->getUniformBufferAlignmentSizeInBytes(vkts::alignmentGetSizeInBytes(16 * sizeof(float) * 2, 16))};
 	dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_TRANSFORM] = VkTsDynamicOffset{0, (uint32_t)sceneFactory->getSceneRenderFactory()->getTransformUniformBufferAlignmentSize(sceneManager)};
 	dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_BONE_TRANSFORM] = VkTsDynamicOffset{0, (uint32_t)sceneFactory->getSceneRenderFactory()->getJointsUniformBufferAlignmentSize(sceneManager)};
-	dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_BSDF_INVERSE] = VkTsDynamicOffset{0, (uint32_t)contextObject->getPhysicalDevice()->getUniformBufferAlignmentSizeInBytes(vkts::alignmentGetSizeInBytes(16 * sizeof(float) * 2, 16))};
+	dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_BSDF_DEFERRED_INVERSE] = VkTsDynamicOffset{0, (uint32_t)contextObject->getPhysicalDevice()->getUniformBufferAlignmentSizeInBytes(vkts::alignmentGetSizeInBytes(16 * sizeof(float) * 2, 16))};
 	dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_LIGHT] = VkTsDynamicOffset{0, (uint32_t)contextObject->getPhysicalDevice()->getUniformBufferAlignmentSizeInBytes(vkts::alignmentGetSizeInBytes(VKTS_MAX_LIGHTS * 4 * sizeof(float) * 2 + sizeof(int32_t), 16))};
 
 	return VK_TRUE;
@@ -1997,7 +1997,7 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 
 			return VK_FALSE;
 		}
-		if (!resolveFragmentMatricesUniformBuffer->upload(dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_BSDF_INVERSE].stride * (VkDeviceSize)currentBuffer + 0 * sizeof(float) * 16, 0, inverseProjectionMatrix))
+		if (!resolveFragmentMatricesUniformBuffer->upload(dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_BSDF_DEFERRED_INVERSE].stride * (VkDeviceSize)currentBuffer + 0 * sizeof(float) * 16, 0, inverseProjectionMatrix))
 		{
 			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not upload matrices.");
 
@@ -2012,7 +2012,7 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 
 			return VK_FALSE;
 		}
-		if (!resolveFragmentMatricesUniformBuffer->upload(dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_BSDF_INVERSE].stride * (VkDeviceSize)currentBuffer + 1 * sizeof(float) * 16, 0, inverseViewMatrix))
+		if (!resolveFragmentMatricesUniformBuffer->upload(dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_BSDF_DEFERRED_INVERSE].stride * (VkDeviceSize)currentBuffer + 1 * sizeof(float) * 16, 0, inverseViewMatrix))
 		{
 			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not upload matrices.");
 
