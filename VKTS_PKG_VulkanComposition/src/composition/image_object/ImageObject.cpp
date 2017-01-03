@@ -79,20 +79,11 @@ const IDeviceMemorySP& ImageObject::getDeviceMemory() const
 
 void ImageObject::destroy()
 {
-    if (imageView.get())
-    {
-        imageView->destroy();
-    }
+	imageView.reset();
 
-    if (image.get())
-    {
-        image->destroy();
-    }
+    image.reset();
 
-    if (deviceMemory.get())
-    {
-        deviceMemory->destroy();
-    }
+    deviceMemory.reset();
 }
 
 } /* namespace vkts */

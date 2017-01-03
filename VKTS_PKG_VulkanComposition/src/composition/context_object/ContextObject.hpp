@@ -45,10 +45,12 @@ private:
 
     IQueueSP queue;
 
+    VkBool32 manage;
+
 public:
 
     ContextObject() = delete;
-    ContextObject(const IInstanceSP& instance, const IPhysicalDeviceSP& physicalDevice, const IDeviceSP& device, const IQueueSP& queue);
+    ContextObject(const IInstanceSP& instance, const IPhysicalDeviceSP& physicalDevice, const IDeviceSP& device, const IQueueSP& queue, const VkBool32 manage);
     ContextObject(const ContextObject& other) = delete;
     ContextObject(ContextObject&& other) = delete;
     virtual ~ContextObject();

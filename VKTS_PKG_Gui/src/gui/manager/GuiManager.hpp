@@ -37,7 +37,7 @@ class GuiManager: public IGuiManager
 
 protected:
 
-    const IAssetManagerSP assetManager;
+    IAssetManagerSP assetManager;
 
 
     template<class S, class T>

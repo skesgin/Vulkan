@@ -137,20 +137,11 @@ VkBool32 BufferObject::upload(const uint32_t offset, const VkMemoryMapFlags flag
 
 void BufferObject::destroy()
 {
-    if (bufferView.get())
-    {
-        bufferView->destroy();
-    }
+	bufferView.reset();
 
-    if (buffer.get())
-    {
-        buffer->destroy();
-    }
+	buffer.reset();
 
-    if (deviceMemory.get())
-    {
-        deviceMemory->destroy();
-    }
+    deviceMemory.reset();
 }
 
 } /* namespace vkts */

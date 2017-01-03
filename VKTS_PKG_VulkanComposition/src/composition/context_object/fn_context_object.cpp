@@ -30,14 +30,14 @@
 namespace vkts
 {
 
-IContextObjectSP VKTS_APIENTRY contextObjectCreate(const IInstanceSP& instance, const IPhysicalDeviceSP& physicalDevice, const IDeviceSP& device, const IQueueSP& queue)
+IContextObjectSP VKTS_APIENTRY contextObjectCreate(const IInstanceSP& instance, const IPhysicalDeviceSP& physicalDevice, const IDeviceSP& device, const IQueueSP& queue, const VkBool32 manage)
 {
     if (!instance.get() || !physicalDevice.get() || !device.get() || !queue.get())
     {
         return IContextObjectSP();
     }
 
-    auto newInstance = new ContextObject(instance, physicalDevice, device, queue);
+    auto newInstance = new ContextObject(instance, physicalDevice, device, queue, manage);
 
     if (!newInstance)
     {

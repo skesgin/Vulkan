@@ -36,7 +36,7 @@ namespace vkts
  *
  * @ThreadSafe
  */
-VKTS_APICALL IContextObjectSP VKTS_APIENTRY contextObjectCreate(const IInstanceSP& instance, const IPhysicalDeviceSP& physicalDevice, const IDeviceSP& device, const IQueueSP& queue);
+VKTS_APICALL IContextObjectSP VKTS_APIENTRY contextObjectCreate(const IInstanceSP& instance, const IPhysicalDeviceSP& physicalDevice, const IDeviceSP& device, const IQueueSP& queue, const VkBool32 manage = VK_TRUE);
 
 }
 

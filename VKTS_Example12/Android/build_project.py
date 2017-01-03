@@ -54,29 +54,19 @@ copy("../../VKTS_Binaries/shader/SPIR/V/bsdf_skinning.vert.spv", "./assets/shade
 copy("../../VKTS_Binaries/shader/SPIR/V/environment.vert.spv", "./assets/shader/SPIR/V/")
 copy("../../VKTS_Binaries/shader/SPIR/V/environment.frag.spv", "./assets/shader/SPIR/V/")
 
-copy("../../VKTS_Binaries/shader/SPIR/V/texture_ndc.vert.spv", "./assets/shader/SPIR/V/")
-copy("../../VKTS_Binaries/shader/SPIR/V/resolve_bsdf.frag.spv", "./assets/shader/SPIR/V/")
-
 copy("../../VKTS_Binaries/font/*.fnt", "./assets/font/")
 copy("../../VKTS_Binaries/font/*.tga", "./assets/font/")
 
 copy("../../VKTS_Binaries/buster_drone/*.spv", "./assets/buster_drone/")
 copy("../../VKTS_Binaries/buster_drone/*.vkts", "./assets/buster_drone/")
 copy("../../VKTS_Binaries/buster_drone/*.tga", "./assets/buster_drone/")
-
-copy("../../VKTS_Binaries/scifi_helmet/*.spv", "./assets/scifi_helmet/")
-copy("../../VKTS_Binaries/scifi_helmet/*.vkts", "./assets/scifi_helmet/")
-copy("../../VKTS_Binaries/scifi_helmet/*.tga", "./assets/scifi_helmet/")
-copy("../../VKTS_Binaries/scifi_helmet/*.hdr", "./assets/scifi_helmet/")
+copy("../../VKTS_Binaries/buster_drone/*.hdr", "./assets/buster_drone/")
 
 copy("../../VKTS_Binaries/primitives/*.vkts", "./assets/primitives/")
 
 copy("../../VKTS_Binaries/texture/BSDF_LUT_512_8.data", "./assets/texture/")
 
-copy("../../VKTS_Binaries/cache/buster_drone/*.tga", "./assets/cache/buster_drone/")
-
-copy("../../VKTS_Binaries/cache/scifi_helmet/*.tga", "./assets/cache/scifi_helmet/")
-copy("../../VKTS_Binaries/cache/scifi_helmet/*.hdr", "./assets/cache/scifi_helmet/")
+copy("../../VKTS_Binaries/cache/buster_drone/*.hdr", "./assets/cache/buster_drone/")
 
 print("Building project")
 

@@ -78,33 +78,10 @@ void CommandObject::addStageDeviceMemory(const IDeviceMemorySP& stageDeviceMemor
 
 void CommandObject::destroy()
 {
-    // Stage resources have to be deleted.
-
-    for (uint32_t i = 0; i < allStageImages.size(); i++)
-    {
-        if (allStageImages[i].get())
-        {
-            allStageImages[i]->destroy();
-        }
-    }
     allStageImages.clear();
 
-    for (uint32_t i = 0; i < allStageBuffers.size(); i++)
-    {
-        if (allStageBuffers[i].get())
-        {
-            allStageBuffers[i]->destroy();
-        }
-    }
     allStageBuffers.clear();
 
-    for (uint32_t i = 0; i < allStageDeviceMemories.size(); i++)
-    {
-        if (allStageDeviceMemories[i].get())
-        {
-            allStageDeviceMemories[i]->destroy();
-        }
-    }
     allStageDeviceMemories.clear();
 }
 

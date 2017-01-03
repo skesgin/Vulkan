@@ -29,8 +29,8 @@
 namespace vkts
 {
 
-ContextObject::ContextObject(const IInstanceSP& instance, const IPhysicalDeviceSP& physicalDevice, const IDeviceSP& device, const IQueueSP& queue) :
-    IContextObject(), instance(instance), physicalDevice(physicalDevice), device(device), queue(queue)
+ContextObject::ContextObject(const IInstanceSP& instance, const IPhysicalDeviceSP& physicalDevice, const IDeviceSP& device, const IQueueSP& queue, const VkBool32 manage) :
+    IContextObject(), instance(instance), physicalDevice(physicalDevice), device(device), queue(queue), manage(manage)
 {
 }
 
@@ -59,7 +59,10 @@ void ContextObject::destroyInstance()
 
     if (instance.get())
     {
-        instance->destroy();
+    	if (manage)
+    	{
+    		instance->destroy();
+    	}
 
         instance.reset();
     }
@@ -81,9 +84,12 @@ void ContextObject::destroyDevice()
 
     if (device.get())
     {
-        device->destroy();
+    	if (manage)
+    	{
+    		device->destroy();
+    	}
 
-        device.reset();
+    	device.reset();
     }
 }
 

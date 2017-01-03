@@ -267,8 +267,6 @@ VkBool32 AssetManager::removeFragmentShaderModule(const IShaderModuleSP& shaderM
 
 void AssetManager::destroy()
 {
-    // Only free resources, but do not destroy them.
-
     allTextureObjects.clear();
 
     allImageObjects.clear();
@@ -280,13 +278,6 @@ void AssetManager::destroy()
     allVertexShaderModules.clear();
 
     allFragmentShaderModules.clear();
-
-    // Stage resources have to be deleted.
-
-    if (commandObject.get())
-    {
-    	commandObject->destroy();
-    }
 }
 
 } /* namespace vkts */

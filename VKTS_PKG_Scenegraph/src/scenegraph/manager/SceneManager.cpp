@@ -552,8 +552,6 @@ VkBool32 SceneManager::removeFragmentShaderModule(const IShaderModuleSP& shaderM
 
 void SceneManager::destroy()
 {
-    // Only free resources, but do not destroy them.
-
     allObjects.clear();
 
     allCameras.clear();
@@ -571,14 +569,12 @@ void SceneManager::destroy()
     allChannels.clear();
 
     allBSDFMaterials.clear();
+    allUsedBSDFMaterials.clear();
 
     allPhongMaterials.clear();
+    allUsedPhongMaterials.clear();
 
-
-    if (assetManager.get())
-    {
-    	assetManager->destroy();
-    }
+    assetManager.reset();
 }
 
 } /* namespace vkts */

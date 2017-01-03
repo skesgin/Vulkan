@@ -37,7 +37,7 @@ class SceneManager: public ISceneManager
 
 protected:
 
-    const IAssetManagerSP assetManager;
+    IAssetManagerSP assetManager;
 
 
     SmartPointerMap<std::string, IObjectSP> allObjects;

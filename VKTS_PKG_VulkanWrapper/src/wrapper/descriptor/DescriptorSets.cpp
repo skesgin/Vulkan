@@ -97,14 +97,15 @@ void DescriptorSets::updateDescriptorSets(const uint32_t writeCount,
 
 void DescriptorSets::destroy()
 {
+	// Destroyed in the layout class.
     allSetLayouts.clear();
 
     if (allDescriptorSets.size() > 0)
     {
         vkFreeDescriptorSets(device, descriptorSetAllocateInfo.descriptorPool, (uint32_t) allDescriptorSets.size(), &allDescriptorSets[0]);
-    }
 
-    allDescriptorSets.clear();
+        allDescriptorSets.clear();
+    }
 }
 
 } /* namespace vkts */

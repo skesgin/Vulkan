@@ -69,13 +69,9 @@ const ISamplerSP& TextureObject::getSampler() const
 
 void TextureObject::destroy()
 {
-	// Sampler can be used by several texture objects, so just reset.
 	sampler.reset();
 
-    if (imageObject.get())
-    {
-    	imageObject->destroy();
-    }
+    imageObject.reset();
 }
 
 } /* namespace vkts */

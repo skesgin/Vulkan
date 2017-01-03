@@ -164,12 +164,7 @@ VkBool32 GuiManager::removeFragmentShaderModule(const IShaderModuleSP& shaderMod
 
 void GuiManager::destroy()
 {
-    // Only free resources, but do not destroy them.
-
-    if (assetManager.get())
-    {
-    	assetManager->destroy();
-    }
+	assetManager.reset();
 }
 
 } /* namespace vkts */
