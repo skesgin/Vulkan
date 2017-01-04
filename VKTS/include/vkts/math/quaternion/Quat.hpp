@@ -49,6 +49,7 @@ public:
     Quat();
     Quat(const float x, const float y, const float z, const float w);
     Quat(const Quat& other);
+    Quat(Quat&& other);
     Quat(const glm::vec3& other);
     Quat(const glm::vec4& other);
     ~Quat();
@@ -88,7 +89,7 @@ public:
 
     Quat& operator =(const Quat& other);
 
-    Quat& operator =(const Quat&& other);
+    Quat& operator =(Quat&& other);
 
 
     glm::vec3 operator *(const glm::vec3& other) const;

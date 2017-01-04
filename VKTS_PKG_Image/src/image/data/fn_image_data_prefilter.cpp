@@ -82,7 +82,7 @@ VKTS_APICALL glm::vec3 VKTS_APIENTRY imageDataGetScanVector(const uint32_t x, co
 
 SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterCookTorrance(const IImageDataSP& sourceImage, const uint32_t m, const std::string& name)
 {
-    if (name.size() == 0 || !sourceImage.get() || sourceImage->getArrayLayers() != 6 || sourceImage->getDepth() != 1 || sourceImage->getWidth() != sourceImage->getHeight() || m == 0 || m > 32 || sourceImage->getWidth() < 2)
+    if (name.size() == 0 || !sourceImage.get() || sourceImage->getArrayLayers() != 6 || sourceImage->getDepth() != 1 || sourceImage->getWidth() != sourceImage->getHeight() || m == 0 || m > 31 || sourceImage->getWidth() < 2)
     {
         return SmartPointerVector<IImageDataSP>();
     }
@@ -207,7 +207,7 @@ SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterCookTorrance(co
 
 SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterOrenNayar(const IImageDataSP& sourceImage, const uint32_t m, const std::string& name)
 {
-    if (name.size() == 0 || !sourceImage.get() || sourceImage->getArrayLayers() != 6 || sourceImage->getDepth() != 1 || sourceImage->getWidth() != sourceImage->getHeight() || m == 0 || m > 32 || sourceImage->getWidth() < 2)
+    if (name.size() == 0 || !sourceImage.get() || sourceImage->getArrayLayers() != 6 || sourceImage->getDepth() != 1 || sourceImage->getWidth() != sourceImage->getHeight() || m == 0 || m > 31 || sourceImage->getWidth() < 2)
     {
         return SmartPointerVector<IImageDataSP>();
     }
@@ -331,7 +331,7 @@ SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterOrenNayar(const
 
 SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterLambert(const IImageDataSP& sourceImage, const uint32_t m, const std::string& name)
 {
-    if (name.size() == 0 || !sourceImage.get() || sourceImage->getArrayLayers() != 6 || sourceImage->getDepth() != 1 || sourceImage->getWidth() != sourceImage->getHeight() || m == 0 || m > 32)
+    if (name.size() == 0 || !sourceImage.get() || sourceImage->getArrayLayers() != 6 || sourceImage->getDepth() != 1 || sourceImage->getWidth() != sourceImage->getHeight() || m == 0 || m > 31)
     {
         return SmartPointerVector<IImageDataSP>();
     }
@@ -433,7 +433,7 @@ SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterLambert(const I
 
 IImageDataSP VKTS_APIENTRY imageDataEnvironmentBRDF(const uint32_t length, const uint32_t m, const std::string& name)
 {
-	if (name.size() == 0 || length <= 1 || m == 0 || m > 32)
+	if (name.size() == 0 || length <= 1 || m == 0 || m > 31)
 	{
 		return IImageDataSP();
 	}

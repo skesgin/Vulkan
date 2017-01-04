@@ -34,6 +34,8 @@
 namespace vkts
 {
 
+static std::mutex g_fileMutex;
+
 static std::string g_baseDirectory = std::string("");
 
 static VkBool32 fileSave(const char* filename, const void* data, const uint32_t size)
@@ -42,6 +44,8 @@ static VkBool32 fileSave(const char* filename, const void* data, const uint32_t 
     {
         return VK_FALSE;
     }
+
+	std::lock_guard<std::mutex> fileLockGuard(g_fileMutex);
 
     //
 
@@ -74,6 +78,8 @@ static VkBool32 fileSave(const char* filename, const void* data, const uint32_t 
 
 VkBool32 VKTS_APIENTRY fileInit()
 {
+	std::lock_guard<std::mutex> fileLockGuard(g_fileMutex);
+
     return _fileInit();
 }
 
@@ -93,6 +99,8 @@ const char* VKTS_APIENTRY _fileGetBaseDirectory()
 
 IBinaryBufferSP VKTS_APIENTRY fileLoadBinary(const char* filename)
 {
+	std::lock_guard<std::mutex> fileLockGuard(g_fileMutex);
+
 	return _fileLoadBinary(filename);
 }
 
@@ -152,6 +160,8 @@ VkBool32 VKTS_APIENTRY fileCreateDirectory(const char* directory)
 	{
 		return VK_FALSE;
 	}
+
+	std::lock_guard<std::mutex> fileLockGuard(g_fileMutex);
 
 	return _fileCreateDirectory(directory);
 }

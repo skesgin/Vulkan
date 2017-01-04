@@ -56,6 +56,11 @@ Quat::Quat(const Quat& other) :
 {
 }
 
+Quat::Quat(Quat&& other) :
+    x(other.x), y(other.y), z(other.z), w(other.w)
+{
+}
+
 Quat::Quat(const glm::vec3& other) :
     x(other.x), y(other.y), z(other.z), w(0.0f)
 {
@@ -222,7 +227,7 @@ Quat& Quat::operator =(const Quat& other)
     return *this;
 }
 
-Quat& Quat::operator =(const Quat&& other)
+Quat& Quat::operator =(Quat&& other)
 {
     this->x = other.x;
     this->y = other.y;

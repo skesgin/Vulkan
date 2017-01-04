@@ -117,6 +117,8 @@ Node::Node(const Node& other) :
 
     		if (!currentNodeData.get())
     		{
+    			reset();
+
     			return;
     		}
 
@@ -1254,11 +1256,17 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
 
 				// A mesh has to be rendered, so update with transform matrix from the node tree.
 
-				transformUniformBuffer->upload(dynamicOffset + 0, 0, this->transformMatrix);
+				if (!transformUniformBuffer->upload(dynamicOffset + 0, 0, this->transformMatrix))
+				{
+					return;
+				}
 
 				auto transformNormalMatrix = glm::transpose(glm::inverse(glm::mat3(this->transformMatrix)));
 
-				transformUniformBuffer->upload(dynamicOffset + sizeof(float) * 16, 0, transformNormalMatrix);
+				if (!transformUniformBuffer->upload(dynamicOffset + sizeof(float) * 16, 0, transformNormalMatrix))
+				{
+					return;
+				}
 			}
         }
 
@@ -1270,11 +1278,17 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
 
         	// Store parent matrix separately, as this allows to modify it without recalculating the bind matrices.
 
-			jointsUniformBuffer->upload(dynamicOffset + 0, 0, parentTransformMatrix);
+			if (!jointsUniformBuffer->upload(dynamicOffset + 0, 0, parentTransformMatrix))
+			{
+				return;
+			}
 
             auto transformNormalMatrix = glm::transpose(glm::inverse(glm::mat3(parentTransformMatrix)));
 
-            jointsUniformBuffer->upload(dynamicOffset + sizeof(float) * 16, 0, transformNormalMatrix);
+            if (!jointsUniformBuffer->upload(dynamicOffset + sizeof(float) * 16, 0, transformNormalMatrix))
+            {
+            	return;
+            }
         }
 
         if (isJoint())
@@ -1295,11 +1309,17 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
 
 						// Upload the joint matrices to blend them on the GPU.
 
-						currentJointsUniformBuffer->upload(dynamicOffset + offset + jointIndex * sizeof(float) * 16, 0, this->transformMatrix);
+						if (!currentJointsUniformBuffer->upload(dynamicOffset + offset + jointIndex * sizeof(float) * 16, 0, this->transformMatrix))
+						{
+							return;
+						}
 
 						auto transformNormalMatrix = glm::transpose(glm::inverse(glm::mat3(this->transformMatrix)));
 
-						currentJointsUniformBuffer->upload(dynamicOffset + offset + VKTS_MAX_JOINTS * sizeof(float) * 16 + jointIndex * sizeof(float) * 12, 0, transformNormalMatrix);
+						if (!currentJointsUniformBuffer->upload(dynamicOffset + offset + VKTS_MAX_JOINTS * sizeof(float) * 16 + jointIndex * sizeof(float) * 12, 0, transformNormalMatrix))
+						{
+							return;
+						}
 					}
 				}
 				else

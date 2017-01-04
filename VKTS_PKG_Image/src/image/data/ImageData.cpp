@@ -506,7 +506,10 @@ void ImageData::setTexel(const glm::vec4& rgba, const uint32_t x, const uint32_t
 
     //
 
-    buffer->seek((int64_t)(offset + numberChannels * bytesPerChannel * x + numberChannels * bytesPerChannel * y * extent.width + numberChannels * bytesPerChannel * z * extent.width * extent.height), VKTS_SEARCH_ABSOLUTE);
+    if (!buffer->seek((int64_t)offset + (int64_t)numberChannels * (int64_t)bytesPerChannel * (int64_t)x + (int64_t)numberChannels * (int64_t)bytesPerChannel * (int64_t)y * (int64_t)extent.width + (int64_t)numberChannels * (int64_t)bytesPerChannel * (int64_t)z * (int64_t)extent.width * (int64_t)extent.height, VKTS_SEARCH_ABSOLUTE))
+    {
+    	return;
+    }
 
     if (UNORM)
     {
@@ -560,7 +563,10 @@ glm::vec4 ImageData::getTexel(const uint32_t x, const uint32_t y, const uint32_t
 
     //
 
-    buffer->seek((int64_t)(offset + numberChannels * bytesPerChannel * x + numberChannels * bytesPerChannel * y * extent.width + numberChannels * bytesPerChannel * z * extent.width * extent.height), VKTS_SEARCH_ABSOLUTE);
+    if (!buffer->seek((int64_t)offset + (int64_t)numberChannels * (int64_t)bytesPerChannel * (int64_t)x + (int64_t)numberChannels * (int64_t)bytesPerChannel * (int64_t)y * (int64_t)extent.width + (int64_t)numberChannels * (int64_t)bytesPerChannel * (int64_t)z * (int64_t)extent.width * (int64_t)extent.height, VKTS_SEARCH_ABSOLUTE))
+    {
+    	 return glm::vec4(NAN, NAN, NAN, NAN);
+    }
 
     glm::vec4 result(0.0f, 0.0f, 0.0f, 1.0f);
 

@@ -167,7 +167,10 @@ IBinaryBufferSP VKTS_APIENTRY serializeStructureType(const void* ptr)
     	return IBinaryBufferSP();
     }
 
-    binaryBuffer->seek(0, VKTS_SEARCH_ABSOLUTE);
+    if (!binaryBuffer->seek(0, VKTS_SEARCH_ABSOLUTE))
+    {
+    	return IBinaryBufferSP();
+    }
 
     //
 

@@ -231,13 +231,18 @@ int main(int argc, char* argv[])
 			vkts::logPrint(VKTS_LOG_WARNING, __FILE__, __LINE__, "Test: Could not save created text file.");
 		}
 
-		createdTextBuffer->seek(0, VKTS_SEARCH_ABSOLUTE);
-
-		char buffer[256];
-
-		while (createdTextBuffer->gets(buffer, 256))
+		if (createdTextBuffer->seek(0, VKTS_SEARCH_ABSOLUTE))
 		{
-			vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Test: Created text line: '%s'", buffer);
+			char buffer[256];
+
+			while (createdTextBuffer->gets(buffer, 256))
+			{
+				vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Test: Created text line: '%s'", buffer);
+			}
+		}
+		else
+		{
+			vkts::logPrint(VKTS_LOG_WARNING, __FILE__, __LINE__, "Test: Could not seek created text.");
 		}
 	}
 	else

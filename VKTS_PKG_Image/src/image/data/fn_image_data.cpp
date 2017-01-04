@@ -515,7 +515,10 @@ static IImageDataSP imageDataLoadHdr(const std::string& name, const IBinaryBuffe
         {
         	// Old RLE decoding
 
-            buffer->seek(-4, VKTS_SEARCH_RELATVE);
+        	if (!buffer->seek(-4, VKTS_SEARCH_RELATVE))
+        	{
+        		return IImageDataSP();
+        	}
 
             int32_t rshift = 0;
             int32_t currentX = 0;
