@@ -417,64 +417,64 @@ VkBool32 Example::updateDescriptorSets(const int32_t usedBuffer)
 
 VkBool32 Example::buildScene(const vkts::ICommandObjectSP& commandObject)
 {
-	renderFactory = vkts::sceneRenderFactoryCreate(vkts::IDescriptorSetLayoutSP(), renderPass, VKTS_MAX_NUMBER_BUFFERS);
-
-	if (!renderFactory.get())
+	if (!scene.get() || !environmentScene.get())
 	{
-		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create data factory.");
+		renderFactory = vkts::sceneRenderFactoryCreate(vkts::IDescriptorSetLayoutSP(), renderPass, VKTS_MAX_NUMBER_BUFFERS);
 
-		return VK_FALSE;
-	}
+		if (!renderFactory.get())
+		{
+			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create data factory.");
 
-	//
+			return VK_FALSE;
+		}
 
-	sceneFactory = vkts::sceneFactoryCreate(renderFactory);
+		//
 
-	if (!sceneFactory.get())
-	{
-		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create factory.");
+		sceneFactory = vkts::sceneFactoryCreate(renderFactory);
 
-		return VK_FALSE;
-	}
+		if (!sceneFactory.get())
+		{
+			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create factory.");
 
-	//
+			return VK_FALSE;
+		}
 
-	sceneManager = vkts::sceneManagerCreate(VK_FALSE, contextObject, commandObject);
+		//
 
-	if (!sceneManager.get())
-	{
-		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create cache.");
+		sceneManager = vkts::sceneManagerCreate(VK_FALSE, contextObject, commandObject);
 
-		return VK_FALSE;
-	}
+		if (!sceneManager.get())
+		{
+			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create cache.");
 
-	//
+			return VK_FALSE;
+		}
 
-	if (allBSDFVertexShaderModules.size() == 4)
-	{
-		sceneManager->addVertexShaderModule(VKTS_VERTEX_BUFFER_TYPE_VERTEX | VKTS_VERTEX_BUFFER_TYPE_NORMAL | VKTS_VERTEX_BUFFER_TYPE_TEXCOORD, allBSDFVertexShaderModules[0]);
-		sceneManager->addVertexShaderModule(VKTS_VERTEX_BUFFER_TYPE_VERTEX | VKTS_VERTEX_BUFFER_TYPE_NORMAL, allBSDFVertexShaderModules[1]);
-		sceneManager->addVertexShaderModule(VKTS_VERTEX_BUFFER_TYPE_VERTEX | VKTS_VERTEX_BUFFER_TYPE_TANGENTS | VKTS_VERTEX_BUFFER_TYPE_TEXCOORD, allBSDFVertexShaderModules[2]);
-		sceneManager->addVertexShaderModule(VKTS_VERTEX_BUFFER_TYPE_VERTEX | VKTS_VERTEX_BUFFER_TYPE_TANGENTS | VKTS_VERTEX_BUFFER_TYPE_TEXCOORD | VKTS_VERTEX_BUFFER_TYPE_BONES, allBSDFVertexShaderModules[3]);
-	}
+		//
 
-	//
+		if (allBSDFVertexShaderModules.size() == 4)
+		{
+			sceneManager->addVertexShaderModule(VKTS_VERTEX_BUFFER_TYPE_VERTEX | VKTS_VERTEX_BUFFER_TYPE_NORMAL | VKTS_VERTEX_BUFFER_TYPE_TEXCOORD, allBSDFVertexShaderModules[0]);
+			sceneManager->addVertexShaderModule(VKTS_VERTEX_BUFFER_TYPE_VERTEX | VKTS_VERTEX_BUFFER_TYPE_NORMAL, allBSDFVertexShaderModules[1]);
+			sceneManager->addVertexShaderModule(VKTS_VERTEX_BUFFER_TYPE_VERTEX | VKTS_VERTEX_BUFFER_TYPE_TANGENTS | VKTS_VERTEX_BUFFER_TYPE_TEXCOORD, allBSDFVertexShaderModules[2]);
+			sceneManager->addVertexShaderModule(VKTS_VERTEX_BUFFER_TYPE_VERTEX | VKTS_VERTEX_BUFFER_TYPE_TANGENTS | VKTS_VERTEX_BUFFER_TYPE_TEXCOORD | VKTS_VERTEX_BUFFER_TYPE_BONES, allBSDFVertexShaderModules[3]);
+		}
 
-	scene = vkts::sceneLoad(VKTS_SCENE_NAME, sceneManager, sceneFactory);
+		//
 
-	if (!scene.get())
-	{
-		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load scene.");
+		scene = vkts::sceneLoad(VKTS_SCENE_NAME, sceneManager, sceneFactory);
 
-		return VK_FALSE;
-	}
+		if (!scene.get())
+		{
+			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load scene.");
 
-	vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Number objects: %d", scene->getNumberObjects());
+			return VK_FALSE;
+		}
 
-	//
+		vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Number objects: %d", scene->getNumberObjects());
 
-	if (!environmentSceneManager.get() && !environmentScene.get())
-	{
+		//
+
 		environmentRenderFactory = vkts::sceneRenderFactoryCreate(environmentDescriptorSetLayout, vkts::IRenderPassSP(), VKTS_MAX_NUMBER_BUFFERS);
 
 		if (!environmentRenderFactory.get())
@@ -521,14 +521,54 @@ VkBool32 Example::buildScene(const vkts::ICommandObjectSP& commandObject)
 		environmentScene->getObjects()[0]->setScale(glm::vec3(10.0f, 10.0f, 10.0f));
 
 		vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Number objects: %d", environmentScene->getNumberObjects());
+
+		// Sorted by binding
+		dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_VIEWPROJECTION] = VkTsDynamicOffset{0, (uint32_t)contextObject->getPhysicalDevice()->getUniformBufferAlignmentSizeInBytes(vkts::alignmentGetSizeInBytes(16 * sizeof(float) * 2, 16))};
+		dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_TRANSFORM] = VkTsDynamicOffset{0, (uint32_t)sceneFactory->getSceneRenderFactory()->getTransformUniformBufferAlignmentSize(sceneManager)};
+		dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_BONE_TRANSFORM] = VkTsDynamicOffset{0, (uint32_t)sceneFactory->getSceneRenderFactory()->getJointsUniformBufferAlignmentSize(sceneManager)};
+		dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_BSDF_FORWARD_INVERSE] = VkTsDynamicOffset{0, (uint32_t)contextObject->getPhysicalDevice()->getUniformBufferAlignmentSizeInBytes(vkts::alignmentGetSizeInBytes(16 * sizeof(float) * 2, 16))};
+		dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_LIGHT] = VkTsDynamicOffset{0, (uint32_t)contextObject->getPhysicalDevice()->getUniformBufferAlignmentSizeInBytes(vkts::alignmentGetSizeInBytes(VKTS_MAX_LIGHTS * 4 * sizeof(float) * 2 + sizeof(int32_t), 16))};
 	}
 
-	// Sorted by binding
-	dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_VIEWPROJECTION] = VkTsDynamicOffset{0, (uint32_t)contextObject->getPhysicalDevice()->getUniformBufferAlignmentSizeInBytes(vkts::alignmentGetSizeInBytes(16 * sizeof(float) * 2, 16))};
-	dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_TRANSFORM] = VkTsDynamicOffset{0, (uint32_t)sceneFactory->getSceneRenderFactory()->getTransformUniformBufferAlignmentSize(sceneManager)};
-	dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_BONE_TRANSFORM] = VkTsDynamicOffset{0, (uint32_t)sceneFactory->getSceneRenderFactory()->getJointsUniformBufferAlignmentSize(sceneManager)};
-	dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_BSDF_FORWARD_INVERSE] = VkTsDynamicOffset{0, (uint32_t)contextObject->getPhysicalDevice()->getUniformBufferAlignmentSizeInBytes(vkts::alignmentGetSizeInBytes(16 * sizeof(float) * 2, 16))};
-	dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_LIGHT] = VkTsDynamicOffset{0, (uint32_t)contextObject->getPhysicalDevice()->getUniformBufferAlignmentSizeInBytes(vkts::alignmentGetSizeInBytes(VKTS_MAX_LIGHTS * 4 * sizeof(float) * 2 + sizeof(int32_t), 16))};
+	//
+	// Free resources.
+	//
+
+	if (sceneFactory.get())
+	{
+		sceneFactory.reset();
+	}
+
+	if (sceneManager.get())
+	{
+		sceneManager->destroy();
+
+		sceneManager.reset();
+	}
+
+	if (renderFactory.get())
+	{
+		renderFactory.reset();
+	}
+
+	//
+
+	if (environmentSceneFactory.get())
+	{
+		environmentSceneFactory.reset();
+	}
+
+	if (environmentSceneManager.get())
+	{
+		environmentSceneManager->destroy();
+
+		environmentSceneManager.reset();
+	}
+
+	if (environmentRenderFactory.get())
+	{
+		environmentRenderFactory.reset();
+	}
 
 	return VK_TRUE;
 }
@@ -1421,29 +1461,6 @@ void Example::terminateResources(const vkts::IUpdateThreadContext& updateContext
 				}
 			}
 
-			if (sceneFactory.get())
-			{
-				sceneFactory.reset();
-			}
-
-			if (sceneManager.get())
-			{
-				sceneManager->destroy();
-
-				sceneManager.reset();
-			}
-
-			if (renderFactory.get())
-			{
-				renderFactory.reset();
-			}
-
-			if (scene.get())
-			{
-				scene->destroy();
-			}
-
-
 			for (uint32_t i = 0; i < allGraphicsPipelines.size(); i++)
 			{
 				allGraphicsPipelines[i]->destroy();
@@ -1944,6 +1961,28 @@ void Example::terminate(const vkts::IUpdateThreadContext& updateContext)
 			}
 
 			//
+
+			if (sceneFactory.get())
+			{
+				sceneFactory.reset();
+			}
+
+			if (sceneManager.get())
+			{
+				sceneManager->destroy();
+
+				sceneManager.reset();
+			}
+
+			if (renderFactory.get())
+			{
+				renderFactory.reset();
+			}
+
+			if (scene.get())
+			{
+				scene->destroy();
+			}
 
 			if (environmentSceneFactory.get())
 			{

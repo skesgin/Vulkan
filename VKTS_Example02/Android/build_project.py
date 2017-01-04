@@ -48,7 +48,7 @@ print("Building project")
 
 os.chdir("jni")
 
-subprocess.call("ndk-build", shell=True)
+subprocess.call("ndk-build -j", shell=True)
 
 os.chdir("..")
 

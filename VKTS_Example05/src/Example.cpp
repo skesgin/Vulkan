@@ -275,6 +275,27 @@ VkBool32 Example::buildScene(const vkts::ICommandObjectSP& commandObject)
 	dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_TRANSFORM] = VkTsDynamicOffset{0, (uint32_t)sceneFactory->getSceneRenderFactory()->getTransformUniformBufferAlignmentSize(sceneManager)};
 	dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_LIGHT] = VkTsDynamicOffset{0, (uint32_t)contextObject->getPhysicalDevice()->getUniformBufferAlignmentSizeInBytes(vkts::alignmentGetSizeInBytes(3 * sizeof(float), 16))};
 
+	//
+	// Free resources.
+	//
+
+	if (sceneFactory.get())
+	{
+		sceneFactory.reset();
+	}
+
+	if (sceneManager.get())
+	{
+		sceneManager->destroy();
+
+		sceneManager.reset();
+	}
+
+	if (renderFactory.get())
+	{
+		renderFactory.reset();
+	}
+
 	return VK_TRUE;
 }
 

@@ -2496,7 +2496,27 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 		dynamicOffsetsShadowPass[VKTS_BINDING_UNIFORM_BUFFER_LIGHT] = dynamicOffsetsColorPass[VKTS_BINDING_UNIFORM_BUFFER_LIGHT];
 		dynamicOffsetsShadowPass[VKTS_BINDING_UNIFORM_BUFFER_SHADOW]= dynamicOffsetsColorPass[VKTS_BINDING_UNIFORM_BUFFER_SHADOW];
 
+
 		//
+		// Free resources.
+		//
+
+		if (sceneFactory.get())
+		{
+			sceneFactory.reset();
+		}
+
+		if (sceneManager.get())
+		{
+			sceneManager->destroy();
+
+			sceneManager.reset();
+		}
+
+		if (renderFactory.get())
+		{
+			renderFactory.reset();
+		}
 
 		// Destroys the load task.
 		loadTask = ILoadTaskSP();

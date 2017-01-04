@@ -21,7 +21,7 @@ class BuildThread (threading.Thread):
 
         directory = os.getcwd() + "/" + self.buildDirectory + "/Android/jni"
 
-        subprocess.call("ndk-build -C %s" % (directory), shell=True)
+        subprocess.call("ndk-build -C %s -j" % (directory), shell=True)
 
         print("Finished '%s'." % (self.buildDirectory))
         
