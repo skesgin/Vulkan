@@ -1631,6 +1631,7 @@ static VkBool32 sceneLoadSubMeshes(const char* directory, const char* filename, 
     char sdata[VKTS_MAX_TOKEN_CHARS + 1];
     float fdata[8];
     int32_t idata[3];
+    VkBool32 bdata;
 
     auto subMesh = ISubMeshSP();
 
@@ -1686,6 +1687,24 @@ static VkBool32 sceneLoadSubMeshes(const char* directory, const char* filename, 
             }
 
             subMesh->setName(sdata);
+        }
+        else if (parseIsToken(buffer, "double_sided"))
+        {
+            if (!parseBool(buffer, &bdata))
+            {
+                return VK_FALSE;
+            }
+
+            if (subMesh.get())
+            {
+            	subMesh->setDoubleSided(bdata);
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No sub mesh");
+
+                return VK_FALSE;
+            }
         }
         else if (parseIsToken(buffer, "vertex"))
         {

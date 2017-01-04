@@ -462,6 +462,10 @@ VkBool32 SceneRenderFactory::prepareBSDFMaterial(const ISceneManagerSP& sceneMan
 	gp.getScissors(0).extent = {1, 1};
 
 	gp.getPipelineRasterizationStateCreateInfo();
+	if (!subMesh->getDoubleSided())
+	{
+		gp.getPipelineRasterizationStateCreateInfo().cullMode = VK_CULL_MODE_BACK_BIT;
+	}
 
 	gp.getPipelineMultisampleStateCreateInfo();
 	if (subMesh->getBSDFMaterial()->getForwardRendering())

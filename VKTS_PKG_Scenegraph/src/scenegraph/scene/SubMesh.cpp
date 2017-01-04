@@ -30,12 +30,12 @@ namespace vkts
 {
 
 SubMesh::SubMesh() :
-    ISubMesh(), name(""), vertexBuffer(), vertexBufferType(0), numberVertices(0), indicesVertexBuffer(), numberIndices(0), primitiveTopology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST), bsdfMaterial(), descriptorSetLayout(), pipelineLayout(), graphicsPipeline(), phongMaterial(), vertexOffset(-1), normalOffset(-1), bitangentOffset(-1), tangentOffset(-1), texcoordOffset(-1), boneIndices0Offset(-1), boneIndices1Offset(-1), boneWeights0Offset(-1), boneWeights1Offset(-1), numberBonesOffset(-1), strideInBytes(0), box(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)), subMeshData()
+    ISubMesh(), name(""), vertexBuffer(), vertexBufferType(0), numberVertices(0), indicesVertexBuffer(), numberIndices(0), primitiveTopology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST), bsdfMaterial(), descriptorSetLayout(), pipelineLayout(), graphicsPipeline(), phongMaterial(), vertexOffset(-1), normalOffset(-1), bitangentOffset(-1), tangentOffset(-1), texcoordOffset(-1), boneIndices0Offset(-1), boneIndices1Offset(-1), boneWeights0Offset(-1), boneWeights1Offset(-1), numberBonesOffset(-1), strideInBytes(0), box(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)), doubleSided(VK_FALSE), subMeshData()
 {
 }
 
 SubMesh::SubMesh(const SubMesh& other) :
-    ISubMesh(), name(other.name + "_clone"), vertexBuffer(other.vertexBuffer), vertexBufferType(other.vertexBufferType), numberVertices(other.numberVertices), indicesVertexBuffer(other.indicesVertexBuffer), numberIndices(other.numberIndices), primitiveTopology(other.primitiveTopology), bsdfMaterial(), descriptorSetLayout(other.descriptorSetLayout), pipelineLayout(other.pipelineLayout), graphicsPipeline(other.graphicsPipeline), phongMaterial(), vertexOffset(other.vertexOffset), normalOffset(other.normalOffset), bitangentOffset(other.bitangentOffset), tangentOffset(other.tangentOffset), texcoordOffset(other.texcoordOffset), boneIndices0Offset(other.boneIndices0Offset), boneIndices1Offset(other.boneIndices1Offset), boneWeights0Offset(other.boneWeights0Offset), boneWeights1Offset(other.boneWeights1Offset), numberBonesOffset(other.numberBonesOffset), strideInBytes(other.strideInBytes), box(other.box), subMeshData(other.subMeshData)
+    ISubMesh(), name(other.name + "_clone"), vertexBuffer(other.vertexBuffer), vertexBufferType(other.vertexBufferType), numberVertices(other.numberVertices), indicesVertexBuffer(other.indicesVertexBuffer), numberIndices(other.numberIndices), primitiveTopology(other.primitiveTopology), bsdfMaterial(), descriptorSetLayout(other.descriptorSetLayout), pipelineLayout(other.pipelineLayout), graphicsPipeline(other.graphicsPipeline), phongMaterial(), vertexOffset(other.vertexOffset), normalOffset(other.normalOffset), bitangentOffset(other.bitangentOffset), tangentOffset(other.tangentOffset), texcoordOffset(other.texcoordOffset), boneIndices0Offset(other.boneIndices0Offset), boneIndices1Offset(other.boneIndices1Offset), boneWeights0Offset(other.boneWeights0Offset), boneWeights1Offset(other.boneWeights1Offset), numberBonesOffset(other.numberBonesOffset), strideInBytes(other.strideInBytes), box(other.box), doubleSided(other.doubleSided), subMeshData(other.subMeshData)
 {
     if (other.bsdfMaterial.get())
     {
@@ -309,6 +309,16 @@ VkBool32 SubMesh::hasBones() const
 const Aabb& SubMesh::getAABB() const
 {
 	return box;
+}
+
+VkBool32 SubMesh::getDoubleSided() const
+{
+	return doubleSided;
+}
+
+void SubMesh::setDoubleSided(const VkBool32 doubleSided)
+{
+	this->doubleSided = doubleSided;
 }
 
 void SubMesh::updateParameterRecursive(const Parameter* parameter)

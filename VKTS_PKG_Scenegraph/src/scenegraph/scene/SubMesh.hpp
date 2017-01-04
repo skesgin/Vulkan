@@ -78,6 +78,8 @@ private:
 
     Aabb box;
 
+    VkBool32 doubleSided;
+
     IRenderSubMeshSP subMeshData;
 
 public:
@@ -196,6 +198,10 @@ public:
     virtual VkBool32 hasBones() const override;
 
     virtual const Aabb& getAABB() const override;
+
+    virtual VkBool32 getDoubleSided() const override;
+
+    virtual void setDoubleSided(const VkBool32 doubleSided) override;
 
     virtual void updateParameterRecursive(const Parameter* parameter) override;
 

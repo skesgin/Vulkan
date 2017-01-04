@@ -1859,6 +1859,10 @@ def saveMeshes(context, filepath, materialsLibraryName, subMeshLibraryName):
                 fw_subMesh("name %s\n" % friendlyName(subMeshName))
                 fw_subMesh("\n")
 
+                if mesh.show_double_sided:
+                    fw_subMesh("double_sided true\n")
+                    fw_subMesh("\n")
+
                 # Store only the vertices used by this material and faces.
                 for vertIndex in indices:
                     vert = indexToVertex[vertIndex]
