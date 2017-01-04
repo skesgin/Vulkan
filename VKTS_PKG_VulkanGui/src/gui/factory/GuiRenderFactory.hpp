@@ -39,11 +39,13 @@ private:
 
     const IRenderPassSP renderPass;
 
+    const IPipelineCacheSP pipelineCache;
+
 public:
 
 	GuiRenderFactory() = delete;
 
-	explicit GuiRenderFactory(const IRenderPassSP& renderPass);
+	explicit GuiRenderFactory(const IRenderPassSP& renderPass, const IPipelineCacheSP& pipelineCache);
 
     virtual ~GuiRenderFactory();
 

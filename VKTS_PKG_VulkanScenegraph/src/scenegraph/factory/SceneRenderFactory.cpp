@@ -33,8 +33,8 @@
 namespace vkts
 {
 
-SceneRenderFactory::SceneRenderFactory(const IDescriptorSetLayoutSP& descriptorSetLayout, const IRenderPassSP& renderPass, const VkDeviceSize bufferCount) :
-	ISceneRenderFactory(), descriptorSetLayout(descriptorSetLayout), renderPass(renderPass), bufferCount(bufferCount)
+SceneRenderFactory::SceneRenderFactory(const IDescriptorSetLayoutSP& descriptorSetLayout, const IRenderPassSP& renderPass, const IPipelineCacheSP& pipelineCache, const VkDeviceSize bufferCount) :
+	ISceneRenderFactory(), descriptorSetLayout(descriptorSetLayout), renderPass(renderPass), pipelineCache(pipelineCache), bufferCount(bufferCount)
 {
 }
 
@@ -502,8 +502,18 @@ VkBool32 SceneRenderFactory::prepareBSDFMaterial(const ISceneManagerSP& sceneMan
 	gp.getGraphicsPipelineCreateInfo().layout = currentPipelineLayout->getPipelineLayout();
 	gp.getGraphicsPipelineCreateInfo().renderPass = renderPass->getRenderPass();
 
+	//
 
-	auto pipeline = pipelineCreateGraphics(sceneManager->getContextObject()->getDevice()->getDevice(), VK_NULL_HANDLE, gp.getGraphicsPipelineCreateInfo(), vertexBufferType);
+	VkPipelineCache pipelineCache = VK_NULL_HANDLE;
+
+	if (this->pipelineCache.get())
+	{
+		pipelineCache = this->pipelineCache->getPipelineCache();
+	}
+
+	//
+
+	auto pipeline = pipelineCreateGraphics(sceneManager->getContextObject()->getDevice()->getDevice(), pipelineCache, gp.getGraphicsPipelineCreateInfo(), vertexBufferType);
 
 	if (!pipeline.get())
 	{

@@ -491,7 +491,7 @@ const std::vector<uint32_t>& ImageData::getAllOffsets() const
 
 void ImageData::setTexel(const glm::vec4& rgba, const uint32_t x, const uint32_t y, const uint32_t z, const uint32_t mipLevel, const uint32_t arrayLayer)
 {
-    if (x >= extent.width || y >= extent.height || z >= extent.depth || mipLevel >= mipLevels || arrayLayer >= arrayLayers || BLOCK)
+    if (x >= extent.width || y >= extent.height || z >= extent.depth || mipLevel >= mipLevels || arrayLayer >= arrayLayers || BLOCK || !getData())
     {
         return;
     }
@@ -551,7 +551,7 @@ void ImageData::setTexel(const glm::vec4& rgba, const uint32_t x, const uint32_t
 
 glm::vec4 ImageData::getTexel(const uint32_t x, const uint32_t y, const uint32_t z, const uint32_t mipLevel, const uint32_t arrayLayer) const
 {
-    if (x >= extent.width || y >= extent.height || z >= extent.depth || mipLevel >= mipLevels || arrayLayer >= arrayLayers || BLOCK)
+    if (x >= extent.width || y >= extent.height || z >= extent.depth || mipLevel >= mipLevels || arrayLayer >= arrayLayers || BLOCK || !getData())
     {
         return glm::vec4(NAN, NAN, NAN, NAN);
     }
@@ -839,6 +839,16 @@ VkBool32 ImageData::getExtentAndOffset(VkExtent3D& currentExtent, uint32_t& curr
 	currentOffset = allOffsets[arrayLayer * mipLevels + mipLevel];
 
 	return VK_TRUE;
+}
+
+void ImageData::freeHostMemory()
+{
+	if (buffer.get())
+	{
+		buffer->reset();
+	}
+
+	buffer = IBinaryBufferSP();
 }
 
 } /* namespace vkts */

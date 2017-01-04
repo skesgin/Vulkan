@@ -84,6 +84,8 @@ public:
 
     virtual VkBool32 removeImageData(const IImageDataSP& imageData) = 0;
 
+    virtual const SmartPointerMap<std::string, IImageDataSP>& getAllImageDatas() const = 0;
+
     //
 
     virtual IShaderModuleSP useVertexShaderModule(const VkTsVertexBufferType vertexBufferType) const = 0;

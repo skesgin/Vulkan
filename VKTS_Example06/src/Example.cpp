@@ -226,7 +226,7 @@ VkBool32 Example::updateDescriptorSets()
 
 VkBool32 Example::buildScene(const vkts::ICommandObjectSP& commandObject)
 {
-	renderFactory = vkts::sceneRenderFactoryCreate(descriptorSetLayout, vkts::IRenderPassSP(), VKTS_MAX_NUMBER_BUFFERS);
+	renderFactory = vkts::sceneRenderFactoryCreate(descriptorSetLayout, vkts::IRenderPassSP(), vkts::IPipelineCacheSP(), VKTS_MAX_NUMBER_BUFFERS);
 
 	if (!renderFactory.get())
 	{

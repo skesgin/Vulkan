@@ -27,7 +27,7 @@
 #include "Example.hpp"
 
 Example::Example(const vkts::IContextObjectSP& contextObject, const int32_t windowIndex, const vkts::IVisualContextSP& visualContext, const vkts::ISurfaceSP& surface) :
-		IUpdateThread(), contextObject(contextObject), windowIndex(windowIndex), visualContext(visualContext), surface(surface), showStats(VK_TRUE), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), environmentDescriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), environmentVertexViewProjectionUniformBuffer(nullptr), fragmentLightsUniformBuffer(nullptr), fragmentMatricesUniformBuffer(nullptr), allBSDFVertexShaderModules(), envVertexShaderModule(nullptr), envFragmentShaderModule(nullptr), environmentPipelineLayout(nullptr), guiRenderFactory(nullptr), guiManager(nullptr), guiFactory(nullptr), font(nullptr), renderFactory(nullptr), sceneManager(nullptr), sceneFactory(nullptr), scene(nullptr), environmentRenderFactory(nullptr), environmentSceneManager(nullptr), environmentSceneFactory(nullptr), environmentScene(nullptr), swapchain(nullptr), renderPass(nullptr), allGraphicsPipelines(), depthTexture(), msaaColorTexture(), msaaDepthTexture(), depthStencilImageView(), msaaColorImageView(), msaaDepthStencilImageView(), swapchainImagesCount(0), swapchainImageView(), framebuffer(), cmdBuffer(), cmdBufferFence(), rebuildCmdBufferCounter(0), fps(0), ram(0), cpuUsageApp(0.0f), processors(0)
+		IUpdateThread(), contextObject(contextObject), windowIndex(windowIndex), visualContext(visualContext), surface(surface), showStats(VK_TRUE), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), pipelineCache(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), environmentDescriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), environmentVertexViewProjectionUniformBuffer(nullptr), fragmentLightsUniformBuffer(nullptr), fragmentMatricesUniformBuffer(nullptr), allBSDFVertexShaderModules(), envVertexShaderModule(nullptr), envFragmentShaderModule(nullptr), environmentPipelineLayout(nullptr), guiRenderFactory(nullptr), guiManager(nullptr), guiFactory(nullptr), font(nullptr), renderFactory(nullptr), sceneManager(nullptr), sceneFactory(nullptr), scene(nullptr), environmentRenderFactory(nullptr), environmentSceneManager(nullptr), environmentSceneFactory(nullptr), environmentScene(nullptr), swapchain(nullptr), renderPass(nullptr), allGraphicsPipelines(), depthTexture(), msaaColorTexture(), msaaDepthTexture(), depthStencilImageView(), msaaColorImageView(), msaaDepthStencilImageView(), swapchainImagesCount(0), swapchainImageView(), framebuffer(), cmdBuffer(), cmdBufferFence(), rebuildCmdBufferCounter(0), fps(0), ram(0), cpuUsageApp(0.0f), processors(0)
 {
 	processors = glm::min(vkts::processorGetNumber(), VKTS_MAX_CORES);
 
@@ -419,7 +419,7 @@ VkBool32 Example::buildScene(const vkts::ICommandObjectSP& commandObject)
 {
 	if (!scene.get() || !environmentScene.get())
 	{
-		renderFactory = vkts::sceneRenderFactoryCreate(vkts::IDescriptorSetLayoutSP(), renderPass, VKTS_MAX_NUMBER_BUFFERS);
+		renderFactory = vkts::sceneRenderFactoryCreate(vkts::IDescriptorSetLayoutSP(), renderPass, pipelineCache, VKTS_MAX_NUMBER_BUFFERS);
 
 		if (!renderFactory.get())
 		{
@@ -462,7 +462,7 @@ VkBool32 Example::buildScene(const vkts::ICommandObjectSP& commandObject)
 
 		//
 
-		scene = vkts::sceneLoad(VKTS_SCENE_NAME, sceneManager, sceneFactory);
+		scene = vkts::sceneLoad(VKTS_SCENE_NAME, sceneManager, sceneFactory, VK_TRUE);
 
 		if (!scene.get())
 		{
@@ -475,7 +475,7 @@ VkBool32 Example::buildScene(const vkts::ICommandObjectSP& commandObject)
 
 		//
 
-		environmentRenderFactory = vkts::sceneRenderFactoryCreate(environmentDescriptorSetLayout, vkts::IRenderPassSP(), VKTS_MAX_NUMBER_BUFFERS);
+		environmentRenderFactory = vkts::sceneRenderFactoryCreate(environmentDescriptorSetLayout, vkts::IRenderPassSP(), pipelineCache, VKTS_MAX_NUMBER_BUFFERS);
 
 		if (!environmentRenderFactory.get())
 		{
@@ -508,7 +508,7 @@ VkBool32 Example::buildScene(const vkts::ICommandObjectSP& commandObject)
 
 		//
 
-		environmentScene = vkts::sceneLoad(VKTS_ENVIRONMENT_SCENE_NAME, environmentSceneManager, environmentSceneFactory);
+		environmentScene = vkts::sceneLoad(VKTS_ENVIRONMENT_SCENE_NAME, environmentSceneManager, environmentSceneFactory, VK_TRUE);
 
 		if (!environmentScene.get() || environmentScene->getNumberObjects() == 0)
 		{
@@ -1287,7 +1287,7 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 
 	if (!font.get())
 	{
-		guiRenderFactory = vkts::guiRenderFactoryCreate(renderPass);
+		guiRenderFactory = vkts::guiRenderFactoryCreate(renderPass, pipelineCache);
 		if (!guiRenderFactory.get())
 		{
 			return VK_FALSE;
@@ -1532,6 +1532,18 @@ VkBool32 Example::init(const vkts::IUpdateThreadContext& updateContext)
 	if (!commandPool.get())
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not get command pool.");
+
+		return VK_FALSE;
+	}
+
+
+	//
+
+	pipelineCache = vkts::pipelineCreateCache(contextObject->getDevice()->getDevice(), 0);
+
+	if (!pipelineCache.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create pipeline cache.");
 
 		return VK_FALSE;
 	}
@@ -2086,6 +2098,11 @@ void Example::terminate(const vkts::IUpdateThreadContext& updateContext)
 	        {
 	            imageAcquiredSemaphore->destroy();
 	        }
+
+			if (pipelineCache.get())
+			{
+				pipelineCache->destroy();
+			}
 
 			if (commandPool.get())
 			{

@@ -35,7 +35,7 @@ namespace vkts
 
 IPipelineCacheSP VKTS_APIENTRY pipelineCreateCache(const VkDevice device, const VkPipelineCacheCreateFlags flags, const uint32_t initialDataSize, const void* initialData)
 {
-    if (!device)
+    if (!device || (initialDataSize > 0 && initialData == nullptr))
     {
         return IPipelineCacheSP();
     }

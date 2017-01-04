@@ -104,6 +104,9 @@ public:
     virtual glm::vec4 getSampleCubeMap(const float x, const float y, const float z, const VkFilter filter, const uint32_t mipLevel) const = 0;
 
     virtual VkBool32 getExtentAndOffset(VkExtent3D& currentExtent, uint32_t& currentOffset, const uint32_t mipLevel, const uint32_t arrayLayer) const = 0;
+
+    virtual void freeHostMemory() = 0;
+
 };
 
 typedef std::shared_ptr<IImageData> IImageDataSP;

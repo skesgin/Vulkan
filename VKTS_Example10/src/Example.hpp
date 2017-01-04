@@ -95,6 +95,7 @@ private:
 	vkts::SmartPointerVector<vkts::IUpdateableSP> allUpdateables;
 
 	vkts::ICommandPoolSP commandPool;
+	vkts::IPipelineCacheSP pipelineCache;
 
     vkts::ISemaphoreSP imageAcquiredSemaphore;
     vkts::ISemaphoreSP renderingCompleteSemaphore;

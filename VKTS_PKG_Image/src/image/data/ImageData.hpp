@@ -133,6 +133,8 @@ public:
 
     virtual VkBool32 getExtentAndOffset(VkExtent3D& currentExtent, uint32_t& currentOffset, const uint32_t mipLevel, const uint32_t arrayLayer) const override;
 
+    virtual void freeHostMemory() override;
+
 };
 
 } /* namespace vkts */

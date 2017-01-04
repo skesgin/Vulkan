@@ -73,7 +73,7 @@ VkBool32 LoadTask::execute()
 
 	//
 
-	renderFactory = vkts::sceneRenderFactoryCreate(descriptorSetLayout, vkts::IRenderPassSP(), VKTS_MAX_NUMBER_BUFFERS);
+	renderFactory = vkts::sceneRenderFactoryCreate(descriptorSetLayout, vkts::IRenderPassSP(), vkts::IPipelineCacheSP(), VKTS_MAX_NUMBER_BUFFERS);
 
 	if (!renderFactory.get())
 	{
@@ -110,7 +110,7 @@ VkBool32 LoadTask::execute()
 
 	//
 
-	scene = vkts::sceneLoad(VKTS_SCENE_NAME, sceneManager, sceneFactory);
+	scene = vkts::sceneLoad(VKTS_SCENE_NAME, sceneManager, sceneFactory, VK_TRUE);
 
 	if (!scene.get())
 	{

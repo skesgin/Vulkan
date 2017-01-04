@@ -39,8 +39,8 @@
 namespace vkts
 {
 
-GuiRenderFactory::GuiRenderFactory(const IRenderPassSP& renderPass) :
-	IGuiRenderFactory(), renderPass(renderPass)
+GuiRenderFactory::GuiRenderFactory(const IRenderPassSP& renderPass, const IPipelineCacheSP& pipelineCache) :
+	IGuiRenderFactory(), renderPass(renderPass), pipelineCache(pipelineCache)
 {
 }
 
@@ -329,8 +329,18 @@ IRenderFontSP GuiRenderFactory::createRenderFont(const IGuiManagerSP& guiManager
     gp.getGraphicsPipelineCreateInfo().layout = pipelineLayout->getPipelineLayout();
     gp.getGraphicsPipelineCreateInfo().renderPass = renderPass->getRenderPass();
 
+    //
 
-    auto graphicsPipeline = pipelineCreateGraphics(guiManager->getContextObject()->getDevice()->getDevice(), VK_NULL_HANDLE, gp.getGraphicsPipelineCreateInfo(), VKTS_VERTEX_BUFFER_TYPE_VERTEX);
+    VkPipelineCache pipelineCache = VK_NULL_HANDLE;
+
+    if (this->pipelineCache.get())
+    {
+    	pipelineCache = this->pipelineCache->getPipelineCache();
+    }
+
+    //
+
+    auto graphicsPipeline = pipelineCreateGraphics(guiManager->getContextObject()->getDevice()->getDevice(), pipelineCache, gp.getGraphicsPipelineCreateInfo(), VKTS_VERTEX_BUFFER_TYPE_VERTEX);
 
     if (!graphicsPipeline.get())
     {

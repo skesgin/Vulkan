@@ -194,6 +194,10 @@ VkBool32 AssetManager::removeImageData(const IImageDataSP& imageData)
     return remove(imageData->getName(), allImageDatas);
 }
 
+const SmartPointerMap<std::string, IImageDataSP>& AssetManager::getAllImageDatas() const
+{
+	return allImageDatas;
+}
 
 //
 

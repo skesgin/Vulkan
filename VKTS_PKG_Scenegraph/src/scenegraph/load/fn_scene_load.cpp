@@ -4357,7 +4357,7 @@ static VkBool32 sceneLoadObjects(const char* directory, const char* filename, co
     return VK_TRUE;
 }
 
-ISceneSP VKTS_APIENTRY sceneLoad(const char* filename, const ISceneManagerSP& sceneManager, const ISceneFactorySP& sceneFactory)
+ISceneSP VKTS_APIENTRY sceneLoad(const char* filename, const ISceneManagerSP& sceneManager, const ISceneFactorySP& sceneFactory, const VkBool32 freeHostMemory)
 {
     if (!filename || !sceneManager.get() || !sceneFactory.get())
     {
@@ -4601,6 +4601,17 @@ ISceneSP VKTS_APIENTRY sceneLoad(const char* filename, const ISceneManagerSP& sc
     	{
     		currentParticleSystem->setRenderObject(currentObject);
     	}
+    }
+
+    //
+    // Free host memory if wanted.
+    //
+    if (freeHostMemory)
+    {
+        for (uint32_t i = 0; i < sceneManager->getAllImageDatas().values().size(); i++)
+        {
+        	sceneManager->getAllImageDatas().values()[i]->freeHostMemory();
+        }
     }
 
     return scene;

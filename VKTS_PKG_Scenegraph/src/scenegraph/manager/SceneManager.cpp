@@ -514,6 +514,11 @@ VkBool32 SceneManager::removeImageData(const IImageDataSP& imageData)
     return assetManager->removeImageData(imageData);
 }
 
+const SmartPointerMap<std::string, IImageDataSP>& SceneManager::getAllImageDatas() const
+{
+	return assetManager->getAllImageDatas();
+}
+
 //
 
 IShaderModuleSP SceneManager::useVertexShaderModule(const VkTsVertexBufferType vertexBufferType) const

@@ -36,7 +36,7 @@ namespace vkts
  *
  * @ThreadSafe
  */
-VKTS_APICALL ISceneSP VKTS_APIENTRY sceneLoad(const char* filename, const ISceneManagerSP& sceneManager, const ISceneFactorySP& sceneFactory);
+VKTS_APICALL ISceneSP VKTS_APIENTRY sceneLoad(const char* filename, const ISceneManagerSP& sceneManager, const ISceneFactorySP& sceneFactory, const VkBool32 freeHostMemory = VK_FALSE);
 
 }
 

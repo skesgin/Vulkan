@@ -150,6 +150,8 @@ public:
 
     virtual VkBool32 removeImageData(const IImageDataSP& imageData) override;
 
+    virtual const SmartPointerMap<std::string, IImageDataSP>& getAllImageDatas() const override;
+
     //
 
     virtual IShaderModuleSP useVertexShaderModule(const VkTsVertexBufferType vertexBufferType) const override;

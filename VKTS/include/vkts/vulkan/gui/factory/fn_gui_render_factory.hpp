@@ -36,7 +36,7 @@ namespace vkts
  *
  * @ThreadSafe
  */
-VKTS_APICALL IGuiRenderFactorySP VKTS_APIENTRY guiRenderFactoryCreate(const IRenderPassSP& renderPass);
+VKTS_APICALL IGuiRenderFactorySP VKTS_APIENTRY guiRenderFactoryCreate(const IRenderPassSP& renderPass, const IPipelineCacheSP& pipelineCache);
 
 }
 

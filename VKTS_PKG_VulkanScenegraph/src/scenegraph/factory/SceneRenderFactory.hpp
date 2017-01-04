@@ -41,13 +41,15 @@ private:
 
     const IRenderPassSP renderPass;
 
+    const IPipelineCacheSP pipelineCache;
+
     const VkDeviceSize bufferCount;
 
 public:
 
 	SceneRenderFactory() = delete;
 
-	SceneRenderFactory(const IDescriptorSetLayoutSP& descriptorSetLayout, const IRenderPassSP& renderPass, const VkDeviceSize bufferCount);
+	SceneRenderFactory(const IDescriptorSetLayoutSP& descriptorSetLayout, const IRenderPassSP& renderPass, const IPipelineCacheSP& pipelineCache, const VkDeviceSize bufferCount);
 
     virtual ~SceneRenderFactory();
 

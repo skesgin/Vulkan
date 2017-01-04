@@ -267,7 +267,7 @@ static VkBool32 gltfProcessObject(IObjectSP& object, const GltfVisitor& visitor,
 	return VK_TRUE;
 }
 
-ISceneSP VKTS_APIENTRY gltfLoad(const char* filename, const ISceneManagerSP& sceneManager, const ISceneFactorySP& sceneFactory)
+ISceneSP VKTS_APIENTRY gltfLoad(const char* filename, const ISceneManagerSP& sceneManager, const ISceneFactorySP& sceneFactory, const VkBool32 freeHostMemory)
 {
     if (!filename || !sceneManager.get() || !sceneFactory.get())
     {

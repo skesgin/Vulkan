@@ -31,9 +31,9 @@
 namespace vkts
 {
 
-IGuiRenderFactorySP VKTS_APIENTRY guiRenderFactoryCreate(const IRenderPassSP& renderPass)
+IGuiRenderFactorySP VKTS_APIENTRY guiRenderFactoryCreate(const IRenderPassSP& renderPass, const IPipelineCacheSP& pipelineCache)
 {
-    return IGuiRenderFactorySP(new GuiRenderFactory(renderPass));
+    return IGuiRenderFactorySP(new GuiRenderFactory(renderPass, pipelineCache));
 }
 
 }
