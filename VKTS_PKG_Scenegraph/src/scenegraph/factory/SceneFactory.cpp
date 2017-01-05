@@ -47,8 +47,8 @@
 namespace vkts
 {
 
-SceneFactory::SceneFactory(const ISceneRenderFactorySP& sceneRenderFactory) :
-	ISceneFactory(), sceneRenderFactory(sceneRenderFactory)
+SceneFactory::SceneFactory(const ISceneRenderFactorySP& sceneRenderFactory, const VkBool32 gpu) :
+	ISceneFactory(), sceneRenderFactory(sceneRenderFactory), gpu(gpu)
 {
 }
 
@@ -228,6 +228,13 @@ IObjectSP SceneFactory::createObject(const ISceneManagerSP& sceneManager)
 ISceneSP SceneFactory::createScene(const ISceneManagerSP& sceneManager)
 {
 	return ISceneSP(new Scene());
+}
+
+//
+
+VkBool32 SceneFactory::useGPU() const
+{
+	return gpu;
 }
 
 } /* namespace vkts */

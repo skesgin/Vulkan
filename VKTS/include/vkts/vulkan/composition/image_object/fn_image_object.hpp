@@ -44,6 +44,13 @@ VKTS_APICALL IImageObjectSP VKTS_APIENTRY imageObjectCreate(IImageSP& stageImage
  */
 VKTS_APICALL IImageObjectSP VKTS_APIENTRY imageObjectCreate(const IContextObjectSP& contextObject, const ICommandBuffersSP& cmdBuffer, const std::string& name, const VkImageCreateInfo& imageCreateInfo, const VkAccessFlags srcAccessMask, const VkAccessFlags dstAccessMask, const VkImageLayout newLayout, const VkImageSubresourceRange& subresourceRange, const VkMemoryPropertyFlags memoryPropertyFlags);
 
+
+/**
+ *
+ * @ThreadSafe
+ */
+VKTS_APICALL vkts::IImageDataSP VKTS_APIENTRY imageObjectGetDeviceImageData(const IContextObjectSP& contextObject, const ICommandBuffersSP& cmdBuffer, const std::string& name, const IImageSP& image);
+
 }
 
 #endif /* VKTS_FN_IMAGE_OBJECT_HPP_ */

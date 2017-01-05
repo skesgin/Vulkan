@@ -76,6 +76,10 @@ public:
 
     virtual const SmartPointerVector<ITextureObjectSP>& getTextureObjects() const = 0;
 
+    virtual VkBool32 isTransparent() const = 0;
+
+    virtual void setTransparent(const VkBool32 transparent) = 0;
+
     //
 
     virtual void updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets, const uint32_t currentBuffer, const std::string& nodeName) = 0;

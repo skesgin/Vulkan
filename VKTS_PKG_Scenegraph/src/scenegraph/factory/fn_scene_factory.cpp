@@ -31,9 +31,9 @@
 namespace vkts
 {
 
-ISceneFactorySP VKTS_APIENTRY sceneFactoryCreate(const ISceneRenderFactorySP& sceneRenderFactory)
+ISceneFactorySP VKTS_APIENTRY sceneFactoryCreate(const ISceneRenderFactorySP& sceneRenderFactory, const VkBool32 useGPU)
 {
-    return ISceneFactorySP(new SceneFactory(sceneRenderFactory));
+    return ISceneFactorySP(new SceneFactory(sceneRenderFactory, useGPU));
 }
 
 }

@@ -45,6 +45,8 @@ protected:
 
     SmartPointerVector<ITextureObjectSP> allTextureObjects;
 
+    VkBool32 transparent;
+
 public:
 
     BSDFMaterial() = delete;
@@ -89,6 +91,11 @@ public:
     virtual uint32_t getNumberTextureObjects() const override;
 
     virtual const SmartPointerVector<ITextureObjectSP>& getTextureObjects() const override;
+
+
+    virtual VkBool32 isTransparent() const override;
+
+    virtual void setTransparent(const VkBool32 transparent) override;
 
     //
 

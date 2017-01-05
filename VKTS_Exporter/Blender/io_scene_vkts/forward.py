@@ -307,5 +307,5 @@ forwardOutAssignGLSL = """
     
     //
 
-	ob_fragColor = vec4(color, 1.0);
+	ob_fragColor = vec4(color, Alpha_0);
 """

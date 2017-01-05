@@ -174,25 +174,25 @@ VKTS_APICALL SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataCubemap(con
  *
  * @ThreadSafe
  */
-VKTS_APICALL SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterCookTorrance(const IImageDataSP& sourceImage, const uint32_t m, const std::string& name);
+VKTS_APICALL SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterCookTorrance(const IImageDataSP& sourceImage, const uint32_t samples, const std::string& name);
 
 /**
  *
  * @ThreadSafe
  */
-VKTS_APICALL SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterOrenNayar(const IImageDataSP& sourceImage, const uint32_t m, const std::string& name);
+VKTS_APICALL SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterOrenNayar(const IImageDataSP& sourceImage, const uint32_t samples, const std::string& name);
 
 /**
  *
  * @ThreadSafe
  */
-VKTS_APICALL SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterLambert(const IImageDataSP& sourceImage, const uint32_t m, const std::string& name);
+VKTS_APICALL SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterLambert(const IImageDataSP& sourceImage, const uint32_t samples, const std::string& name);
 
 /**
  *
  * @ThreadSafe
  */
-VKTS_APICALL IImageDataSP VKTS_APIENTRY imageDataEnvironmentBRDF(const uint32_t length, const uint32_t m, const std::string& name);
+VKTS_APICALL IImageDataSP VKTS_APIENTRY imageDataEnvironmentBRDF(const uint32_t length, const uint32_t samples, const std::string& name);
 
 }
 

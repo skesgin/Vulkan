@@ -93,6 +93,10 @@ public:
 
     virtual ISceneSP createScene(const ISceneManagerSP& sceneManager) = 0;
 
+    //
+
+    virtual VkBool32 useGPU() const = 0;
+
 };
 
 typedef std::shared_ptr<ISceneFactory> ISceneFactorySP;

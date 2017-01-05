@@ -305,7 +305,7 @@ int main(int argc, char* argv[])
 
 	uint32_t queueFamilyIndex;
 
-	if (!vkts::queueGetFamilyIndex(physicalDevice->getAllQueueFamilyProperties(), VK_QUEUE_GRAPHICS_BIT, 0, &supportFilter, queueFamilyIndex))
+	if (!vkts::queueGetFamilyIndex(physicalDevice->getAllQueueFamilyProperties(), VK_QUEUE_GRAPHICS_BIT | VK_QUEUE_COMPUTE_BIT, 0, &supportFilter, queueFamilyIndex))
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not find queue family index.");
 

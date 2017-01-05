@@ -542,7 +542,7 @@ VkBool32 Example::buildScene(const vkts::ICommandObjectSP& commandObject)
 
 		//
 
-		sceneFactory = vkts::sceneFactoryCreate(renderFactory);
+		sceneFactory = vkts::sceneFactoryCreate(renderFactory, VK_TRUE);
 
 		if (!sceneFactory.get())
 		{

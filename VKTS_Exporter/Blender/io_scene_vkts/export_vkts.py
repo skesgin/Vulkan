@@ -675,6 +675,7 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName, use
                 if isinstance(currentNode, bpy.types.ShaderNodeGroup) and currentNode.node_tree.name == 'PBR':
                     # PBR
 
+                    alphaInputName = "Alpha_%d" % alphaCounter
                     emissiveInputName = "Emissive_%d" % emissiveCounter
                     ambientOcclusionInputName = "AmbientOcclusion_%d" % ambientOcclusionCounter
                     roughnessInputName = "Roughness_%d" % roughnessCounter
@@ -683,6 +684,7 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName, use
                     normalInputName = "Normal_%d" % normalCounter
                     colorInputName = "Color_%d" % colorCounter
 
+                    alphaCounter += 1
                     emissiveCounter += 1
                     ambientOcclusionCounter += 1
                     roughnessCounter += 1
@@ -691,6 +693,7 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName, use
                     normalCounter += 1
                     colorCounter += 1
                     
+                    alphaInputParameterName = "Alpha_Dummy"
                     emissiveInputParameterName = "Emissive_Dummy"
                     ambientOcclusionInputParameterName = "AmbientOcclusion_Dummy"
                     roughnessInputParameterName = "Roughness_Dummy"
@@ -705,7 +708,7 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName, use
 
                     #                    
 
-                    currentMain = pbrMain % (emissiveInputName, emissiveInputParameterName, ambientOcclusionInputName, ambientOcclusionInputParameterName, roughnessInputName, roughnessInputParameterName, metallicInputName, metallicInputParameterName, maskInputName, maskInputParameterName, normalInputName, normalInputParameterName, colorInputName, colorInputParameterName)
+                    currentMain = pbrMain % (alphaInputName, alphaInputParameterName, emissiveInputName, emissiveInputParameterName, ambientOcclusionInputName, ambientOcclusionInputParameterName, roughnessInputName, roughnessInputParameterName, metallicInputName, metallicInputParameterName, maskInputName, maskInputParameterName, normalInputName, normalInputParameterName, colorInputName, colorInputParameterName)
 
                     #
 
@@ -727,6 +730,25 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName, use
                     #
                         
                     currentFragmentGLSL = currentFragmentGLSL.replace("#previousMain#", currentMain)
+
+                    #
+                    
+                    if use_forward:
+                        for currentSocket in currentNode.inputs:
+                            if currentSocket.name == "Alpha":
+
+                                writeAlpha = False
+
+                                if len(currentSocket.links) > 0:
+                                    writeAlpha = True
+                                elif currentSocket.default_value < 1.0:
+                                    writeAlpha = True
+
+                                if writeAlpha:
+                                    fw("transparent true\n")
+                                    fw("\n") 
+
+                                break   
 
                 elif isinstance(currentNode, bpy.types.ShaderNodeCombineRGB):
                     # Combine color.

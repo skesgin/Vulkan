@@ -52,35 +52,28 @@ float VKTS_APIENTRY randomNormal(const float mean, const float standardDeviation
 	return mean + standardDeviation * (sqrtf(-2.0f * logf(x1)) * cosf(2.0f * VKTS_MATH_PI * x2));
 }
 
-glm::vec2 VKTS_APIENTRY randomHammersley(const uint32_t sample, const uint32_t m)
+// see http://holger.dammertz.org/stuff/notes_HammersleyOnHemisphere.html
+glm::vec2 VKTS_APIENTRY randomHammersley(const uint32_t i, const uint32_t n)
 {
-	uint32_t revertSample;
-
-	// Check, if m is in the allowed range, as only 32bit unsigned integer is supported.
-	if (m == 0 || m > 32)
+	if (n == 0)
 	{
-		throw std::out_of_range("0 < m < 32");
+		throw std::out_of_range("n = 0");
 	}
 
-	// If not all bits are used: Check, if sample is out of bounds.
-	if (m < 32 && sample >= (uint32_t)(1 << m))
+	if (i >= n)
 	{
-		throw std::out_of_range("Sample out of bounds");
+		throw std::out_of_range("i >= n");
 	}
 
-	// Revert bits by swapping blockwise. Lower bits are moved up and higher bits down.
-	revertSample = (sample << 16u) | (sample >> 16u);
-	revertSample = ((revertSample & 0x00ff00ffu) << 8u) | ((revertSample & 0xff00ff00u) >> 8u);
-	revertSample = ((revertSample & 0x0f0f0f0fu) << 4u) | ((revertSample & 0xf0f0f0f0u) >> 4u);
-	revertSample = ((revertSample & 0x33333333u) << 2u) | ((revertSample & 0xccccccccu) >> 2u);
-	revertSample = ((revertSample & 0x55555555u) << 1u) | ((revertSample & 0xaaaaaaaau) >> 1u);
+    uint32_t bits = i;
 
-	// Shift back, as only m bits are used.
-	revertSample = revertSample >> (32 - m);
+    bits = (bits << 16u) | (bits >> 16u);
+    bits = ((bits & 0x55555555u) << 1u) | ((bits & 0xAAAAAAAAu) >> 1u);
+    bits = ((bits & 0x33333333u) << 2u) | ((bits & 0xCCCCCCCCu) >> 2u);
+    bits = ((bits & 0x0F0F0F0Fu) << 4u) | ((bits & 0xF0F0F0F0u) >> 4u);
+    bits = ((bits & 0x00FF00FFu) << 8u) | ((bits & 0xFF00FF00u) >> 8u);
 
-	float binaryFractionFactor = 1.0f / (powf(2.0f, (float)m) - 1.0f);
-
-	return glm::vec2((float)revertSample * binaryFractionFactor, (float)sample * binaryFractionFactor);
+    return glm::vec2((float)i / (float)n, (float)bits * 2.3283064365386963e-10);
 }
 
 }

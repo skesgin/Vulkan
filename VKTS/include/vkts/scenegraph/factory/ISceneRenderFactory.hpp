@@ -60,6 +60,11 @@ public:
     virtual VkBool32 prepareJointsUniformBuffer(const ISceneManagerSP& sceneManager, const INodeSP& node, const int32_t joints) = 0;
     virtual VkDeviceSize getJointsUniformBufferAlignmentSize(const ISceneManagerSP& sceneManager) const = 0;
 
+    //
+
+    virtual SmartPointerVector<IImageDataSP> prefilterLambert(const ISceneManagerSP& sceneManager, const IImageDataSP& sourceImage, const uint32_t samples, const std::string& name) const = 0;
+    virtual SmartPointerVector<IImageDataSP> prefilterCookTorrance(const ISceneManagerSP& sceneManager, const IImageDataSP& sourceImage, const uint32_t samples, const std::string& name) const = 0;
+
 };
 
 typedef std::shared_ptr<ISceneRenderFactory> ISceneRenderFactorySP;

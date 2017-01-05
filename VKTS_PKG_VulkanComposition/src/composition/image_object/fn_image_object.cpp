@@ -428,4 +428,293 @@ IImageObjectSP VKTS_APIENTRY imageObjectCreate(const IContextObjectSP& contextOb
     return IImageObjectSP(newInstance);
 }
 
+vkts::IImageDataSP VKTS_APIENTRY imageObjectGetDeviceImageData(const IContextObjectSP& contextObject, const ICommandBuffersSP& cmdBuffer, const std::string& name, const IImageSP& image)
+{
+	VkResult result;
+
+	auto fence = fenceCreate(contextObject->getDevice()->getDevice(), 0);
+
+	if (!fence.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create fence.");
+
+		return vkts::IImageDataSP();
+	}
+
+	//
+
+	auto imageData = imageDataCreate(name, image->getWidth(), image->getHeight(), 1, 1.0f, 0.0f, 0.0f, 1.0f, VK_IMAGE_TYPE_2D, image->getFormat());
+
+	// Check, if we can use a linear tiled image for staging.
+	if (contextObject->getPhysicalDevice()->isImageTilingAvailable(VK_IMAGE_TILING_LINEAR, imageData->getFormat(), imageData->getImageType(), 0, imageData->getExtent3D(), imageData->getMipLevels(), 1, VK_SAMPLE_COUNT_1_BIT, imageData->getSize()))
+	{
+		cmdBuffer->reset();
+
+
+		result = cmdBuffer->beginCommandBuffer(0, VK_NULL_HANDLE, 0, VK_NULL_HANDLE, VK_FALSE, 0, 0);
+
+		if (result != VK_SUCCESS)
+		{
+			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not begin command buffer.");
+
+			return vkts::IImageDataSP();
+		}
+
+		//
+
+		vkts::IImageSP stageImage;
+		vkts::IDeviceMemorySP stageDeviceMemory;
+
+		VkImageSubresourceRange imageSubresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
+
+        VkImageCreateInfo stageImageCreateInfo(image->getImageCreateInfo());
+
+        stageImageCreateInfo.tiling = VK_IMAGE_TILING_LINEAR;
+        stageImageCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+        stageImageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+
+        if (!imageObjectPrepare(stageImage, stageDeviceMemory, contextObject, cmdBuffer, stageImageCreateInfo, 0, VK_ACCESS_TRANSFER_WRITE_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, imageSubresourceRange, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT))
+        {
+            logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not prepare staging image.");
+
+            return vkts::IImageDataSP();
+        }
+
+		// Prepare stage image for final layout etc.
+		stageImage->cmdPipelineBarrier(cmdBuffer->getCommandBuffer(), VK_ACCESS_TRANSFER_WRITE_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, imageSubresourceRange);
+
+		VkImageCopy imageCopy;
+
+		imageCopy.srcSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1};
+		imageCopy.srcOffset = {0, 0, 0};
+		imageCopy.dstSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1};
+		imageCopy.dstOffset = {0, 0, 0};
+		imageCopy.extent = { imageData->getWidth(), imageData->getHeight(), 1u };
+
+		// Copy form device to host visible image / memory. This command also sets the needed barriers.
+		image->copyImage(cmdBuffer->getCommandBuffer(), stageImage, imageCopy);
+
+		stageImage->cmdPipelineBarrier(cmdBuffer->getCommandBuffer(), VK_ACCESS_HOST_READ_BIT, VK_IMAGE_LAYOUT_GENERAL, imageSubresourceRange);
+
+		result = cmdBuffer->endCommandBuffer();
+
+		if (result != VK_SUCCESS)
+		{
+			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not end command buffer.");
+
+			return VK_FALSE;
+		}
+
+
+		VkSubmitInfo submitInfo{};
+
+		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+		submitInfo.waitSemaphoreCount = 0;
+		submitInfo.pWaitSemaphores = nullptr;
+		submitInfo.commandBufferCount = 1;
+		submitInfo.pCommandBuffers = cmdBuffer->getCommandBuffers();
+		submitInfo.signalSemaphoreCount = 0;
+		submitInfo.pSignalSemaphores = nullptr;
+
+		result = contextObject->getQueue()->submit(1, &submitInfo, fence->getFence());
+
+		if (result != VK_SUCCESS)
+		{
+			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not submit queue.");
+
+			return vkts::IImageDataSP();
+		}
+
+		//
+
+		result = fence->waitForFence(UINT64_MAX);
+
+		if (result != VK_SUCCESS)
+		{
+			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not wait for fence.");
+
+			return vkts::IImageDataSP();
+		}
+
+		//
+		// Copy pixel data from device memory into image data memory.
+		//
+
+		VkImageSubresource imageSubresource;
+
+		imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		imageSubresource.mipLevel = 0;
+		imageSubresource.arrayLayer = 0;
+
+		VkSubresourceLayout subresourceLayout;
+
+		stageImage->getImageSubresourceLayout(subresourceLayout, imageSubresource);
+
+		//
+
+		result = stageDeviceMemory->mapMemory(0, VK_WHOLE_SIZE, 0);
+
+		if (result != VK_SUCCESS)
+		{
+			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not map memory.");
+
+			return vkts::IImageDataSP();
+		}
+
+		imageData->upload(stageDeviceMemory->getMemory(), 0, 0, subresourceLayout);
+
+		if (!(stageDeviceMemory->getMemoryPropertyFlags() & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT))
+		{
+			result = stageDeviceMemory->invalidateMappedMemoryRanges(0, VK_WHOLE_SIZE);
+
+			if (result != VK_SUCCESS)
+			{
+				vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not invalidate memory.");
+
+				return VK_FALSE;
+			}
+		}
+
+		stageDeviceMemory->unmapMemory();
+
+		// Stage image and device memory are automatically destroyed.
+	}
+	else
+	{
+		// As an alternative, use the buffer.
+
+		vkts::IBufferSP stageBuffer;
+		vkts::IDeviceMemorySP stageDeviceMemory;
+
+		VkBufferCreateInfo bufferCreateInfo{};
+
+        bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+        bufferCreateInfo.size = imageData->getSize();
+        bufferCreateInfo.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+        bufferCreateInfo.flags = 0;
+        bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        bufferCreateInfo.queueFamilyIndexCount = 0;
+        bufferCreateInfo.pQueueFamilyIndices = nullptr;
+
+        if (!imageObjectPrepare(stageBuffer, stageDeviceMemory, contextObject, bufferCreateInfo, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT))
+        {
+    		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create buffer.");
+
+			return vkts::IImageDataSP();
+        }
+
+
+		//
+
+		cmdBuffer->reset();
+
+
+		result = cmdBuffer->beginCommandBuffer(0, VK_NULL_HANDLE, 0, VK_NULL_HANDLE, VK_FALSE, 0, 0);
+
+		if (result != VK_SUCCESS)
+		{
+			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not begin command buffer.");
+
+			return vkts::IImageDataSP();
+		}
+
+		VkBufferImageCopy bufferImageCopy;
+
+		bufferImageCopy.bufferOffset = 0;
+		bufferImageCopy.bufferRowLength = imageData->getWidth() * imageData->getBytesPerTexel();
+		bufferImageCopy.bufferImageHeight = imageData->getHeight();
+		bufferImageCopy.imageSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1};
+		bufferImageCopy.imageOffset = {0, 0, 0};
+		bufferImageCopy.imageExtent = {imageData->getWidth(), imageData->getHeight(), 1};
+
+		image->copyImageToBuffer(cmdBuffer->getCommandBuffer(), stageBuffer, bufferImageCopy);
+
+
+		result = cmdBuffer->endCommandBuffer();
+
+		if (result != VK_SUCCESS)
+		{
+			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not end command buffer.");
+
+			return VK_FALSE;
+		}
+
+
+		VkSubmitInfo submitInfo{};
+
+		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+		submitInfo.waitSemaphoreCount = 0;
+		submitInfo.pWaitSemaphores = nullptr;
+		submitInfo.commandBufferCount = 1;
+		submitInfo.pCommandBuffers = cmdBuffer->getCommandBuffers();
+		submitInfo.signalSemaphoreCount = 0;
+		submitInfo.pSignalSemaphores = nullptr;
+
+		result = contextObject->getQueue()->submit(1, &submitInfo, fence->getFence());
+
+		if (result != VK_SUCCESS)
+		{
+			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not submit queue.");
+
+			return vkts::IImageDataSP();
+		}
+
+		//
+
+		result = fence->waitForFence(UINT64_MAX);
+
+		if (result != VK_SUCCESS)
+		{
+			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not wait for fence.");
+
+			return vkts::IImageDataSP();
+		}
+
+		//
+		// Copy pixel data from device memory into image data memory.
+		//
+
+		VkSubresourceLayout subresourceLayout;
+
+		subresourceLayout.offset = 0;
+		subresourceLayout.size = stageBuffer->getSize();
+		subresourceLayout.rowPitch = imageData->getBytesPerTexel() * imageData->getWidth();
+		subresourceLayout.arrayPitch = 0;
+		subresourceLayout.depthPitch = 0;
+
+		result = stageDeviceMemory->mapMemory(0, VK_WHOLE_SIZE, 0);
+
+		if (result != VK_SUCCESS)
+		{
+			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not map memory.");
+
+			return vkts::IImageDataSP();
+		}
+
+		imageData->upload(stageDeviceMemory->getMemory(), 0, 0, subresourceLayout);
+
+		if (!(stageDeviceMemory->getMemoryPropertyFlags() & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT))
+		{
+			result = stageDeviceMemory->invalidateMappedMemoryRanges(0, VK_WHOLE_SIZE);
+
+			if (result != VK_SUCCESS)
+			{
+				vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not invalidate memory.");
+
+				return VK_FALSE;
+			}
+		}
+
+		stageDeviceMemory->unmapMemory();
+
+		// Stage image and device memory are automatically destroyed.
+	}
+
+	// Fence is automatically destroyed.
+
+	return imageData;
+}
+
 }

@@ -379,7 +379,14 @@ static VkBool32 sceneLoadImageObjects(const char* directory, const char* filenam
 
 							if (allDiffuseCubeMaps.size() == 0)
 							{
-								allDiffuseCubeMaps = imageDataPrefilterLambert(imageData, VKTS_BSDF_M_CUBE_MAP, finalImageDataFilename);
+								if (sceneFactory->useGPU())
+								{
+									allDiffuseCubeMaps = sceneFactory->getSceneRenderFactory()->prefilterLambert(sceneManager, imageData, VKTS_BSDF_SAMPLES_CUBE_MAP, finalImageDataFilename);
+								}
+								else
+								{
+									allDiffuseCubeMaps = imageDataPrefilterLambert(imageData, VKTS_BSDF_SAMPLES_CUBE_MAP, finalImageDataFilename);
+								}
 
 								if (allDiffuseCubeMaps.size() == 0)
 								{
@@ -484,7 +491,14 @@ static VkBool32 sceneLoadImageObjects(const char* directory, const char* filenam
 
 							if (allCookTorranceCubeMaps.size() == 0)
 							{
-								allCookTorranceCubeMaps = imageDataPrefilterCookTorrance(imageData, VKTS_BSDF_M_CUBE_MAP, finalImageDataFilename);
+								if (sceneFactory->useGPU())
+								{
+									allCookTorranceCubeMaps = sceneFactory->getSceneRenderFactory()->prefilterCookTorrance(sceneManager, imageData, VKTS_BSDF_SAMPLES_CUBE_MAP, finalImageDataFilename);
+								}
+								else
+								{
+									allCookTorranceCubeMaps = imageDataPrefilterCookTorrance(imageData, VKTS_BSDF_SAMPLES_CUBE_MAP, finalImageDataFilename);
+								}
 
 								if (allCookTorranceCubeMaps.size() == 0)
 								{
@@ -550,7 +564,7 @@ static VkBool32 sceneLoadImageObjects(const char* directory, const char* filenam
 							// BSDF environment look up table generation.
 							//
 
-							auto lutImageObjectName = "BSDF_LUT_" + std::to_string(VKTS_BSDF_LENGTH) + "_" + std::to_string(VKTS_BSDF_M);
+							auto lutImageObjectName = "BSDF_LUT_" + std::to_string(VKTS_BSDF_LENGTH) + "_" + std::to_string(VKTS_BSDF_SAMPLES);
 
 							auto lutImageFilename = "texture/" + lutImageObjectName + ".data";
 
@@ -558,7 +572,7 @@ static VkBool32 sceneLoadImageObjects(const char* directory, const char* filenam
 
 							if (!lutImageData.get())
 							{
-								lutImageData = imageDataEnvironmentBRDF(VKTS_BSDF_LENGTH, VKTS_BSDF_M, "BSDF_LUT.data");
+								lutImageData = imageDataEnvironmentBRDF(VKTS_BSDF_LENGTH, VKTS_BSDF_SAMPLES, "BSDF_LUT.data");
 
 								if (!lutImageData.get())
 								{
@@ -831,7 +845,7 @@ static VkBool32 sceneLoadTextureObjects(const char* directory, const char* filen
 
                 //
 
-            	auto lutName = "BSDF_LUT_" + std::to_string(VKTS_BSDF_LENGTH) + "_" + std::to_string(VKTS_BSDF_M);
+            	auto lutName = "BSDF_LUT_" + std::to_string(VKTS_BSDF_LENGTH) + "_" + std::to_string(VKTS_BSDF_SAMPLES);
 
                 imageObject = sceneManager->useImageObject(lutName);
 
@@ -994,6 +1008,10 @@ static VkBool32 sceneLoadMaterials(const char* directory, const char* filename, 
             if (phongMaterial.get())
             {
             	phongMaterial->setTransparent(bdata);
+            }
+            else if (bsdfMaterial.get())
+            {
+            	bsdfMaterial->setTransparent(bdata);
             }
             else
             {
@@ -4559,7 +4577,7 @@ ISceneSP VKTS_APIENTRY sceneLoad(const char* filename, const ISceneManagerSP& sc
 
                 //
 
-                textureObject = sceneManager->useTextureObject("BSDF_LUT_" + std::to_string(VKTS_BSDF_LENGTH) + "_" + std::to_string(VKTS_BSDF_M));
+                textureObject = sceneManager->useTextureObject("BSDF_LUT_" + std::to_string(VKTS_BSDF_LENGTH) + "_" + std::to_string(VKTS_BSDF_SAMPLES));
 
                 if (!textureObject.get())
                 {

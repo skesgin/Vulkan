@@ -45,6 +45,8 @@ private:
 
     const VkDeviceSize bufferCount;
 
+    SmartPointerVector<IImageDataSP> prefilter(const ISceneManagerSP& sceneManager, const IImageDataSP& sourceImage, const uint32_t samples, const std::string& name, const VkBool32 useLambert) const;
+
 public:
 
 	SceneRenderFactory() = delete;
@@ -69,6 +71,12 @@ public:
     virtual VkDeviceSize getTransformUniformBufferAlignmentSize(const ISceneManagerSP& sceneManager) const override;
     virtual VkBool32 prepareJointsUniformBuffer(const ISceneManagerSP& sceneManager, const INodeSP& node, const int32_t joints) override;
     virtual VkDeviceSize getJointsUniformBufferAlignmentSize(const ISceneManagerSP& sceneManager) const override;
+
+    //
+
+    virtual SmartPointerVector<IImageDataSP> prefilterLambert(const ISceneManagerSP& sceneManager, const IImageDataSP& sourceImage, const uint32_t samples, const std::string& name) const override;
+    virtual SmartPointerVector<IImageDataSP> prefilterCookTorrance(const ISceneManagerSP& sceneManager, const IImageDataSP& sourceImage, const uint32_t samples, const std::string& name) const override;
+
 };
 
 } /* namespace vkts */

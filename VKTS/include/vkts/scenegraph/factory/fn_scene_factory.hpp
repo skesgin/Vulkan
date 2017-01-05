@@ -36,7 +36,7 @@ namespace vkts
  *
  * @ThreadSafe
  */
-VKTS_APICALL ISceneFactorySP VKTS_APIENTRY sceneFactoryCreate(const ISceneRenderFactorySP& sceneRenderFactory);
+VKTS_APICALL ISceneFactorySP VKTS_APIENTRY sceneFactoryCreate(const ISceneRenderFactorySP& sceneRenderFactory, const VkBool32 useGPU = VK_FALSE);
 
 }
 

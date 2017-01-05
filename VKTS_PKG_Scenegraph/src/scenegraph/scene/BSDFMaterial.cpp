@@ -30,12 +30,12 @@ namespace vkts
 {
 
 BSDFMaterial::BSDFMaterial(const VkBool32 forwardRendering) :
-    IBSDFMaterial(), Material(forwardRendering, VK_FALSE, ""), fragmentShader(nullptr), attributes(VKTS_VERTEX_BUFFER_TYPE_VERTEX | VKTS_VERTEX_BUFFER_TYPE_NORMAL), allTextureObjects()
+    IBSDFMaterial(), Material(forwardRendering, VK_FALSE, ""), fragmentShader(nullptr), attributes(VKTS_VERTEX_BUFFER_TYPE_VERTEX | VKTS_VERTEX_BUFFER_TYPE_NORMAL), allTextureObjects(), transparent(VK_FALSE)
 {
 }
 
 BSDFMaterial::BSDFMaterial(const BSDFMaterial& other) :
-    IBSDFMaterial(), Material(other), fragmentShader(other.fragmentShader), attributes(other.attributes), allTextureObjects()
+    IBSDFMaterial(), Material(other), fragmentShader(other.fragmentShader), attributes(other.attributes), allTextureObjects(), transparent(other.transparent)
 {
 	for (uint32_t i = 0; i < other.allTextureObjects.size(); i++)
 	{
@@ -135,6 +135,16 @@ uint32_t BSDFMaterial::getNumberTextureObjects() const
 const SmartPointerVector<ITextureObjectSP>& BSDFMaterial::getTextureObjects() const
 {
     return allTextureObjects;
+}
+
+VkBool32 BSDFMaterial::isTransparent() const
+{
+	return transparent;
+}
+
+void BSDFMaterial::setTransparent(const VkBool32 transparent)
+{
+	this->transparent = transparent;
 }
 
 void BSDFMaterial::updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets, const uint32_t currentBuffer, const std::string& nodeName)

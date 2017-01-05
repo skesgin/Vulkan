@@ -41,8 +41,8 @@
 #include <vkts/entity/vkts_entity.hpp>
 
 #define VKTS_BSDF_LENGTH 512
-#define VKTS_BSDF_M 8
-#define VKTS_BSDF_M_CUBE_MAP 10
+#define VKTS_BSDF_SAMPLES 256
+#define VKTS_BSDF_SAMPLES_CUBE_MAP 1024
 
 #define VKTS_CONVERT_BEZIER VK_TRUE
 #define VKTS_CONVERT_SAMPLING (1.0f/60.0f)

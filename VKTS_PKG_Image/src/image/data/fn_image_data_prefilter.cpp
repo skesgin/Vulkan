@@ -80,9 +80,9 @@ VKTS_APICALL glm::vec3 VKTS_APIENTRY imageDataGetScanVector(const uint32_t x, co
 	return glm::normalize(scanVector);
 }
 
-SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterCookTorrance(const IImageDataSP& sourceImage, const uint32_t m, const std::string& name)
+SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterCookTorrance(const IImageDataSP& sourceImage, const uint32_t samples, const std::string& name)
 {
-    if (name.size() == 0 || !sourceImage.get() || sourceImage->getArrayLayers() != 6 || sourceImage->getDepth() != 1 || sourceImage->getWidth() != sourceImage->getHeight() || m == 0 || m > 31 || sourceImage->getWidth() < 2)
+    if (name.size() == 0 || !sourceImage.get() || sourceImage->getArrayLayers() != 6 || sourceImage->getDepth() != 1 || sourceImage->getWidth() != sourceImage->getHeight() || samples == 0 || sourceImage->getWidth() < 2)
     {
         return SmartPointerVector<IImageDataSP>();
     }
@@ -136,12 +136,10 @@ SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterCookTorrance(co
     // Cook torrance specular.
     //
 
+    uint32_t roughnessSamples = result.size() / 6;
+
     for (uint32_t side = 0; side < 6; side++)
     {
-        uint32_t roughnessSamples = result.size() / 6;
-
-        uint32_t samples = 1 << m;
-
     	for (uint32_t roughnessSampleIndex = 0; roughnessSampleIndex < roughnessSamples; roughnessSampleIndex++)
     	{
     		uint32_t length = sourceImage->getWidth() / (1 << roughnessSampleIndex);
@@ -174,7 +172,7 @@ SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterCookTorrance(co
 
     				for (uint32_t sampleIndex = 0; sampleIndex < samples; sampleIndex++)
     				{
-    					glm::vec2 randomPoint = randomHammersley(sampleIndex, m);
+    					glm::vec2 randomPoint = randomHammersley(sampleIndex, samples);
 
     					// N = V
     					auto currentColorCookTorrance = renderCookTorrance(sourceImage, VK_FILTER_LINEAR, 0, randomPoint, basis, scanVector, roughness);
@@ -205,9 +203,9 @@ SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterCookTorrance(co
     return result;
 }
 
-SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterOrenNayar(const IImageDataSP& sourceImage, const uint32_t m, const std::string& name)
+SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterOrenNayar(const IImageDataSP& sourceImage, const uint32_t samples, const std::string& name)
 {
-    if (name.size() == 0 || !sourceImage.get() || sourceImage->getArrayLayers() != 6 || sourceImage->getDepth() != 1 || sourceImage->getWidth() != sourceImage->getHeight() || m == 0 || m > 31 || sourceImage->getWidth() < 2)
+    if (name.size() == 0 || !sourceImage.get() || sourceImage->getArrayLayers() != 6 || sourceImage->getDepth() != 1 || sourceImage->getWidth() != sourceImage->getHeight() || samples == 0 || sourceImage->getWidth() < 2)
     {
         return SmartPointerVector<IImageDataSP>();
     }
@@ -261,20 +259,16 @@ SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterOrenNayar(const
     // Oren-Nayar diffuse.
     //
 
+    uint32_t roughnessSamples = result.size() / 6;
+
+    uint32_t length = sourceImage->getWidth();
+
+    // 0.5 as step goes form -1.0 to 1.0 and not just 0.0 to 1.0
+	float step = 2.0f / (float)length;
+	float offset = step * 0.5f;
+
     for (uint32_t side = 0; side < 6; side++)
     {
-        uint32_t roughnessSamples = result.size() / 6;
-
-        uint32_t samples = 1 << m;
-
-        uint32_t length = sourceImage->getWidth();
-
-        // 0.5 as step goes form -1.0 to 1.0 and not just 0.0 to 1.0
-    	float step = 2.0f / (float)length;
-    	float offset = step * 0.5f;
-
-    	//
-
     	glm::vec3 scanVector;
 
     	for (uint32_t y = 0; y < length; y++)
@@ -297,7 +291,7 @@ SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterOrenNayar(const
 
     				for (uint32_t sampleIndex = 0; sampleIndex < samples; sampleIndex++)
     				{
-    					glm::vec2 randomPoint = randomHammersley(sampleIndex, m);
+    					glm::vec2 randomPoint = randomHammersley(sampleIndex, samples);
 
     					// N = V
     					auto currentColorOrenNayar = renderOrenNayar(sourceImage, VK_FILTER_LINEAR, 0, randomPoint, basis, scanVector, scanVector, roughness);
@@ -329,9 +323,9 @@ SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterOrenNayar(const
     return result;
 }
 
-SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterLambert(const IImageDataSP& sourceImage, const uint32_t m, const std::string& name)
+SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterLambert(const IImageDataSP& sourceImage, const uint32_t samples, const std::string& name)
 {
-    if (name.size() == 0 || !sourceImage.get() || sourceImage->getArrayLayers() != 6 || sourceImage->getDepth() != 1 || sourceImage->getWidth() != sourceImage->getHeight() || m == 0 || m > 31)
+    if (name.size() == 0 || !sourceImage.get() || sourceImage->getArrayLayers() != 6 || sourceImage->getDepth() != 1 || sourceImage->getWidth() != sourceImage->getHeight() || samples == 0)
     {
         return SmartPointerVector<IImageDataSP>();
     }
@@ -372,18 +366,14 @@ SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterLambert(const I
     // Lambert diffuse.
     //
 
+    uint32_t length = sourceImage->getWidth();
+
+    // 0.5 as step goes form -1.0 to 1.0 and not just 0.0 to 1.0
+	float step = 2.0f / (float)length;
+	float offset = step * 0.5f;
+
     for (uint32_t side = 0; side < 6; side++)
     {
-        uint32_t samples = 1 << m;
-
-        uint32_t length = sourceImage->getWidth();
-
-        // 0.5 as step goes form -1.0 to 1.0 and not just 0.0 to 1.0
-    	float step = 2.0f / (float)length;
-    	float offset = step * 0.5f;
-
-    	//
-
     	glm::vec3 scanVector;
 
     	for (uint32_t y = 0; y < length; y++)
@@ -402,7 +392,7 @@ SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterLambert(const I
 
     			for (uint32_t sampleIndex = 0; sampleIndex < samples; sampleIndex++)
     			{
-    				glm::vec2 randomPoint = randomHammersley(sampleIndex, m);
+    				glm::vec2 randomPoint = randomHammersley(sampleIndex, samples);
 
     				auto currentColorLambert = renderLambert(sourceImage, VK_FILTER_LINEAR, 0, randomPoint, basis);
 
@@ -431,9 +421,9 @@ SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataPrefilterLambert(const I
     return result;
 }
 
-IImageDataSP VKTS_APIENTRY imageDataEnvironmentBRDF(const uint32_t length, const uint32_t m, const std::string& name)
+IImageDataSP VKTS_APIENTRY imageDataEnvironmentBRDF(const uint32_t length, const uint32_t samples, const std::string& name)
 {
-	if (name.size() == 0 || length <= 1 || m == 0 || m > 31)
+	if (name.size() == 0 || length <= 1 || samples == 0)
 	{
 		return IImageDataSP();
 	}
@@ -450,7 +440,7 @@ IImageDataSP VKTS_APIENTRY imageDataEnvironmentBRDF(const uint32_t length, const
     auto sourceImageName = sourceImageFilename.substr(0, dotIndex);
     auto sourceImageExtension = sourceImageFilename.substr(dotIndex);
 
-    std::string targetImageFilename = sourceImageName + "_" + std::to_string(length) + "_" + std::to_string(m) + sourceImageExtension;
+    std::string targetImageFilename = sourceImageName + "_" + std::to_string(length) + "_" + std::to_string(samples) + sourceImageExtension;
 
     auto currentTargetImage = imageDataCreate(targetImageFilename, length, length, 1, 0.0f, 0.0f, 0.0f, 0.0f, VK_IMAGE_TYPE_2D, VK_FORMAT_R32G32_SFLOAT);
 
@@ -460,8 +450,6 @@ IImageDataSP VKTS_APIENTRY imageDataEnvironmentBRDF(const uint32_t length, const
 	}
 
 	//
-
-	uint32_t samples = 1 << m;
 
 	for (uint32_t y = 0; y < length; y++)
 	{
@@ -477,7 +465,7 @@ IImageDataSP VKTS_APIENTRY imageDataEnvironmentBRDF(const uint32_t length, const
 
 			for (uint32_t sampleIndex = 0; sampleIndex < samples; sampleIndex++)
 			{
-				glm::vec2 randomPoint = randomHammersley(sampleIndex, m);
+				glm::vec2 randomPoint = randomHammersley(sampleIndex, samples);
 
 				// Specular
 				outputCookTorrance += renderIntegrateCookTorrance(randomPoint, NdotV, V, roughness);

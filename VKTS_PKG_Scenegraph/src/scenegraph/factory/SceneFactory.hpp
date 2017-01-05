@@ -39,11 +39,13 @@ private:
 
 	const ISceneRenderFactorySP sceneRenderFactory;
 
+	const VkBool32 gpu;
+
 public:
 
 	SceneFactory() = delete;
 
-	explicit SceneFactory(const ISceneRenderFactorySP& sceneRenderFactory);
+	SceneFactory(const ISceneRenderFactorySP& sceneRenderFactory, const VkBool32 gpu);
 
     virtual ~SceneFactory();
 
@@ -96,6 +98,10 @@ public:
     //
 
     virtual ISceneSP createScene(const ISceneManagerSP& sceneManager) override;
+
+    //
+
+    virtual VkBool32 useGPU() const override;
 
 };
 

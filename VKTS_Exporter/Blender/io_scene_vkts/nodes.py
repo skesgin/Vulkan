@@ -156,6 +156,7 @@ pbrMain = """#previousMain#
     // PBR start
 
     // In
+    float %s = %s;
     vec4 %s = %s;
     float %s = %s;
     float %s = %s;
