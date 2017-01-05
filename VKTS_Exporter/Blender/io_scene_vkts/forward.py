@@ -166,15 +166,9 @@ vec3 iblCookTorrance(vec3 N, vec3 V, float roughness, vec3 F0)
     // Lighted and visible
     if (NdotL > 0.0 && NdotV >= 0.0)
     {
-        int levels = textureQueryLevels(u_specularCubemap); 
-    
-        float scaledRoughness = roughness * float(levels);
-        
-        float rLow = floor(scaledRoughness);
-        float rHigh = ceil(scaledRoughness);    
-        float rFraction = scaledRoughness - rLow;
-        
-        vec3 prefilteredColor = mix(colorToLinear(textureLod(u_specularCubemap, L, rLow).rgb), colorToLinear(textureLod(u_specularCubemap, L, rHigh).rgb), rFraction);
+        float scaledRoughness = roughness * float(textureQueryLevels(u_specularCubemap) - 1);
+
+        vec3 prefilteredColor = colorToLinear(textureLod(u_specularCubemap, L, scaledRoughness).rgb);
 
         vec2 envBRDF = texture(u_lut, vec2(NdotV, roughness)).rg;
         
