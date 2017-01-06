@@ -480,6 +480,9 @@ vkts::IImageDataSP VKTS_APIENTRY imageObjectGetDeviceImageData(const IContextObj
             return vkts::IImageDataSP();
         }
 
+		// Prepare source image for final layout etc.
+		image->cmdPipelineBarrier(cmdBuffer->getCommandBuffer(), VK_ACCESS_TRANSFER_READ_BIT, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, imageSubresourceRange);
+
 		// Prepare stage image for final layout etc.
 		stageImage->cmdPipelineBarrier(cmdBuffer->getCommandBuffer(), VK_ACCESS_TRANSFER_WRITE_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, imageSubresourceRange);
 

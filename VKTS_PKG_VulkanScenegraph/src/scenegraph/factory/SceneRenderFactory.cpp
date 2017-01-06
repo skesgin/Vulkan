@@ -30,7 +30,7 @@
 #include "../scene/RenderNode.hpp"
 #include "../scene/RenderSubMesh.hpp"
 
-#define VKTS_LOCAL_SIZE 16
+#define VKTS_MIN_IMAGE_SIZE 16u
 
 #define VKTS_LAMBERT_COMPUTE_SHADER_NAME "shader/SPIR/V/prefilter_lambert.comp.spv"
 #define VKTS_COOKTORRANCE_COMPUTE_SHADER_NAME "shader/SPIR/V/prefilter_cooktorrance.comp.spv"
@@ -730,39 +730,6 @@ SmartPointerVector<IImageDataSP> SceneRenderFactory::prefilter(const ISceneManag
 
     //
 
-    auto targetImage = imageCreate(sceneManager->getContextObject()->getDevice()->getDevice(), 0, VK_IMAGE_TYPE_2D, VK_FORMAT_R32G32B32A32_SFLOAT, {sourceImage->getWidth(), sourceImage->getHeight(), 1}, 1, 1, VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_STORAGE_BIT, VK_SHARING_MODE_EXCLUSIVE, 0, nullptr, VK_IMAGE_LAYOUT_UNDEFINED, 0);
-
-
-	VkMemoryRequirements memoryRequirements;
-
-	targetImage->getImageMemoryRequirements(memoryRequirements);
-
-	VkPhysicalDeviceMemoryProperties physicalDeviceMemoryProperties;
-
-	sceneManager->getContextObject()->getPhysicalDevice()->getPhysicalDeviceMemoryProperties(physicalDeviceMemoryProperties);
-
-	auto targetDeviceMemory = deviceMemoryCreate(sceneManager->getContextObject()->getDevice()->getDevice(), memoryRequirements, VK_MAX_MEMORY_TYPES, physicalDeviceMemoryProperties.memoryTypes, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-
-	if (!targetDeviceMemory.get())
-	{
-		return SmartPointerVector<IImageDataSP>();
-	}
-
-	if (vkBindImageMemory(sceneManager->getContextObject()->getDevice()->getDevice(), targetImage->getImage(), targetDeviceMemory->getDeviceMemory(), 0) != VK_SUCCESS)
-	{
-		return SmartPointerVector<IImageDataSP>();
-	}
-
-
-	auto targetImageView = imageViewCreate(sceneManager->getContextObject()->getDevice()->getDevice(), 0, targetImage->getImage(), VK_IMAGE_VIEW_TYPE_2D, targetImage->getFormat(), { VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_G, VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_A }, { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 });
-
-	if (!targetImageView.get())
-	{
-		return SmartPointerVector<IImageDataSP>();
-	}
-
-    //
-
 	VkDescriptorSetLayoutBinding descriptorSetLayoutBinding[2]{};
 
 	descriptorSetLayoutBinding[0].binding = 0;
@@ -812,49 +779,11 @@ SmartPointerVector<IImageDataSP> SceneRenderFactory::prefilter(const ISceneManag
 
 	//
 
-	VkDescriptorImageInfo descriptorImageInfo[2]{};
-
-	descriptorImageInfo[0].sampler = VK_NULL_HANDLE;
-	descriptorImageInfo[0].imageView = targetImageView->getImageView();
-	descriptorImageInfo[0].imageLayout = VK_IMAGE_LAYOUT_GENERAL;
-
-	descriptorImageInfo[1].sampler = sourceTextureObject->getSampler()->getSampler();
-	descriptorImageInfo[1].imageView = sourceTextureObject->getImageObject()->getImageView()->getImageView();
-	descriptorImageInfo[1].imageLayout = VK_IMAGE_LAYOUT_GENERAL;
-
-	VkWriteDescriptorSet writeDescriptorSet[2]{};
-
-	writeDescriptorSet[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-
-	writeDescriptorSet[0].dstSet = descriptorSet->getDescriptorSets()[0];
-	writeDescriptorSet[0].dstBinding = 0;
-	writeDescriptorSet[0].dstArrayElement = 0;
-	writeDescriptorSet[0].descriptorCount = 1;
-	writeDescriptorSet[0].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
-	writeDescriptorSet[0].pImageInfo = &descriptorImageInfo[0];
-	writeDescriptorSet[0].pBufferInfo = nullptr;
-	writeDescriptorSet[0].pTexelBufferView = nullptr;
-
-	writeDescriptorSet[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-
-	writeDescriptorSet[1].dstSet = descriptorSet->getDescriptorSets()[0];
-	writeDescriptorSet[1].dstBinding = 1;
-	writeDescriptorSet[1].dstArrayElement = 0;
-	writeDescriptorSet[1].descriptorCount = 1;
-	writeDescriptorSet[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	writeDescriptorSet[1].pImageInfo = &descriptorImageInfo[1];
-	writeDescriptorSet[1].pBufferInfo = nullptr;
-	writeDescriptorSet[1].pTexelBufferView = nullptr;
-
-	descriptorSet->updateDescriptorSets( 2, writeDescriptorSet, 0, nullptr);
-
-	//
-
     VkPushConstantRange pushConstantRange[1]{};
 
     pushConstantRange[0].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
     pushConstantRange[0].offset = 0;
-    pushConstantRange[0].size = sizeof(uint32_t) + sizeof(uint32_t);
+    pushConstantRange[0].size = sizeof(uint32_t) + sizeof(uint32_t) + sizeof(uint32_t);
     if (!useLambert)
     {
     	pushConstantRange[0].size += sizeof(float);
@@ -923,26 +852,99 @@ SmartPointerVector<IImageDataSP> SceneRenderFactory::prefilter(const ISceneManag
 	//
 	//
 
-	SmartPointerVector<IImageDataSP> result;
+	uint32_t roughnessSamples = 1;
 
-    for (uint32_t side = 0; side < 6; side++)
-    {
-    	uint32_t roughnessSamples = 1;
+	if (!useLambert)
+	{
+		roughnessSamples = (uint32_t)resultNames.size() / 6;
+	}
 
-    	if (!useLambert)
-    	{
-    		roughnessSamples = (uint32_t)resultNames.size() / 6;
-    	}
+	SmartPointerMap<std::string, IImageDataSP> tempResult;
 
-    	for (uint32_t roughnessSampleIndex = 0; roughnessSampleIndex < roughnessSamples; roughnessSampleIndex++)
-    	{
-    		float roughness = 0.0f;
+	for (uint32_t roughnessSampleIndex = 0; roughnessSampleIndex < roughnessSamples; roughnessSampleIndex++)
+	{
+		uint32_t imageLength = sourceImage->getWidth() / (1 << roughnessSampleIndex);
 
-    		if (!useLambert)
-    		{
-    			roughness = (float)roughnessSampleIndex / (float)(roughnessSamples - 1);
-    		}
+	    auto targetImage = imageCreate(sceneManager->getContextObject()->getDevice()->getDevice(), 0, VK_IMAGE_TYPE_2D, VK_FORMAT_R32G32B32A32_SFLOAT, {glm::max(imageLength, VKTS_MIN_IMAGE_SIZE), glm::max(imageLength, VKTS_MIN_IMAGE_SIZE), 1}, 1, 1, VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_STORAGE_BIT, VK_SHARING_MODE_EXCLUSIVE, 0, nullptr, VK_IMAGE_LAYOUT_UNDEFINED, 0);
 
+
+		VkMemoryRequirements memoryRequirements;
+
+		targetImage->getImageMemoryRequirements(memoryRequirements);
+
+		VkPhysicalDeviceMemoryProperties physicalDeviceMemoryProperties;
+
+		sceneManager->getContextObject()->getPhysicalDevice()->getPhysicalDeviceMemoryProperties(physicalDeviceMemoryProperties);
+
+		auto targetDeviceMemory = deviceMemoryCreate(sceneManager->getContextObject()->getDevice()->getDevice(), memoryRequirements, VK_MAX_MEMORY_TYPES, physicalDeviceMemoryProperties.memoryTypes, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+		if (!targetDeviceMemory.get())
+		{
+			return SmartPointerVector<IImageDataSP>();
+		}
+
+		if (vkBindImageMemory(sceneManager->getContextObject()->getDevice()->getDevice(), targetImage->getImage(), targetDeviceMemory->getDeviceMemory(), 0) != VK_SUCCESS)
+		{
+			return SmartPointerVector<IImageDataSP>();
+		}
+
+
+		auto targetImageView = imageViewCreate(sceneManager->getContextObject()->getDevice()->getDevice(), 0, targetImage->getImage(), VK_IMAGE_VIEW_TYPE_2D, targetImage->getFormat(), { VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_G, VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_A }, { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 });
+
+		if (!targetImageView.get())
+		{
+			return SmartPointerVector<IImageDataSP>();
+		}
+
+		//
+
+		VkDescriptorImageInfo descriptorImageInfo[2]{};
+
+		descriptorImageInfo[0].sampler = VK_NULL_HANDLE;
+		descriptorImageInfo[0].imageView = targetImageView->getImageView();
+		descriptorImageInfo[0].imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+
+		descriptorImageInfo[1].sampler = sourceTextureObject->getSampler()->getSampler();
+		descriptorImageInfo[1].imageView = sourceTextureObject->getImageObject()->getImageView()->getImageView();
+		descriptorImageInfo[1].imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+
+		VkWriteDescriptorSet writeDescriptorSet[2]{};
+
+		writeDescriptorSet[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+
+		writeDescriptorSet[0].dstSet = descriptorSet->getDescriptorSets()[0];
+		writeDescriptorSet[0].dstBinding = 0;
+		writeDescriptorSet[0].dstArrayElement = 0;
+		writeDescriptorSet[0].descriptorCount = 1;
+		writeDescriptorSet[0].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+		writeDescriptorSet[0].pImageInfo = &descriptorImageInfo[0];
+		writeDescriptorSet[0].pBufferInfo = nullptr;
+		writeDescriptorSet[0].pTexelBufferView = nullptr;
+
+		writeDescriptorSet[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+
+		writeDescriptorSet[1].dstSet = descriptorSet->getDescriptorSets()[0];
+		writeDescriptorSet[1].dstBinding = 1;
+		writeDescriptorSet[1].dstArrayElement = 0;
+		writeDescriptorSet[1].descriptorCount = 1;
+		writeDescriptorSet[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		writeDescriptorSet[1].pImageInfo = &descriptorImageInfo[1];
+		writeDescriptorSet[1].pBufferInfo = nullptr;
+		writeDescriptorSet[1].pTexelBufferView = nullptr;
+
+		descriptorSet->updateDescriptorSets( 2, writeDescriptorSet, 0, nullptr);
+
+		//
+
+		float roughness = 0.0f;
+
+		if (!useLambert)
+		{
+			roughness = (float)roughnessSampleIndex / (float)(roughnessSamples - 1);
+		}
+
+		for (uint32_t side = 0; side < 6; side++)
+		{
         	if (sceneManager->getAssetManager()->getCommandObject()->getCommandBuffer()->beginCommandBuffer(0, VK_NULL_HANDLE, 0, VK_NULL_HANDLE, VK_FALSE, 0, 0) != VK_SUCCESS)
         	{
         		return SmartPointerVector<IImageDataSP>();
@@ -960,12 +962,16 @@ SmartPointerVector<IImageDataSP> SceneRenderFactory::prefilter(const ISceneManag
 
         	vkCmdPushConstants(sceneManager->getAssetManager()->getCommandObject()->getCommandBuffer()->getCommandBuffer(), pipelineLayout->getPipelineLayout(), VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(uint32_t), &samples);
         	vkCmdPushConstants(sceneManager->getAssetManager()->getCommandObject()->getCommandBuffer()->getCommandBuffer(), pipelineLayout->getPipelineLayout(), VK_SHADER_STAGE_COMPUTE_BIT, sizeof(uint32_t), sizeof(uint32_t), &side);
+        	vkCmdPushConstants(sceneManager->getAssetManager()->getCommandObject()->getCommandBuffer()->getCommandBuffer(), pipelineLayout->getPipelineLayout(), VK_SHADER_STAGE_COMPUTE_BIT, 2 * sizeof(uint32_t), sizeof(uint32_t), &imageLength);
         	if (!useLambert)
         	{
-        		vkCmdPushConstants(sceneManager->getAssetManager()->getCommandObject()->getCommandBuffer()->getCommandBuffer(), pipelineLayout->getPipelineLayout(), VK_SHADER_STAGE_COMPUTE_BIT, 2 * sizeof(uint32_t), sizeof(float), &roughness);
+        		vkCmdPushConstants(sceneManager->getAssetManager()->getCommandObject()->getCommandBuffer()->getCommandBuffer(), pipelineLayout->getPipelineLayout(), VK_SHADER_STAGE_COMPUTE_BIT, 3 * sizeof(uint32_t), sizeof(float), &roughness);
         	}
 
-        	vkCmdDispatch(sceneManager->getAssetManager()->getCommandObject()->getCommandBuffer()->getCommandBuffer(), sourceImage->getWidth() / VKTS_LOCAL_SIZE, sourceImage->getWidth() / VKTS_LOCAL_SIZE, 1);
+        	vkCmdDispatch(sceneManager->getAssetManager()->getCommandObject()->getCommandBuffer()->getCommandBuffer(), targetImage->getWidth(), targetImage->getHeight(), 1u);
+
+    		// Prepare target image for final layout etc.
+    		targetImage->cmdPipelineBarrier(sceneManager->getAssetManager()->getCommandObject()->getCommandBuffer()->getCommandBuffer(), VK_ACCESS_TRANSFER_READ_BIT, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, imageSubresourceRange);
 
         	//
 
@@ -1005,6 +1011,26 @@ SmartPointerVector<IImageDataSP> SceneRenderFactory::prefilter(const ISceneManag
 
     		auto currentImageData = imageObjectGetDeviceImageData(sceneManager->getContextObject(), sceneManager->getAssetManager()->getCommandObject()->getCommandBuffer(), resultNames[side * roughnessSamples + roughnessSampleIndex], targetImage);
 
+    		if (imageLength != currentImageData->getWidth())
+    		{
+    			auto tempImageData = imageDataCreate(currentImageData->getName(), imageLength, imageLength, 1, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), currentImageData->getImageType(), currentImageData->getFormat());
+
+    			if (!tempImageData.get())
+    			{
+    				return SmartPointerVector<IImageDataSP>();
+    			}
+
+    			for (uint32_t y = 0; y < imageLength; y++)
+    			{
+        			for (uint32_t x = 0; x < imageLength; x++)
+        			{
+        				tempImageData->setTexel(currentImageData->getTexel(x, x, 0, 0, 0), x, y, 0, 0, 0);
+        			}
+    			}
+
+    			currentImageData = tempImageData;
+    		}
+
     		currentImageData = imageDataConvert(currentImageData, sourceImage->getFormat(), currentImageData->getName());
 
     		if (!currentImageData.get())
@@ -1012,13 +1038,20 @@ SmartPointerVector<IImageDataSP> SceneRenderFactory::prefilter(const ISceneManag
     			return SmartPointerVector<IImageDataSP>();
     		}
 
-    		result.append(currentImageData);
+    		tempResult[resultNames[side * roughnessSamples + roughnessSampleIndex]] = currentImageData;
     	}
     }
 
 	if (sceneManager->getAssetManager()->getCommandObject()->getCommandBuffer()->beginCommandBuffer(0, VK_NULL_HANDLE, 0, VK_NULL_HANDLE, VK_FALSE, 0, 0) != VK_SUCCESS)
 	{
 		return SmartPointerVector<IImageDataSP>();
+	}
+
+	SmartPointerVector<IImageDataSP> result;
+
+	for (uint32_t i = 0; i < (uint32_t)resultNames.size(); i++)
+	{
+		result.append(tempResult[resultNames[i]]);
 	}
 
     return result;

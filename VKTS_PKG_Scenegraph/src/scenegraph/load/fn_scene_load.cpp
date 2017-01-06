@@ -381,11 +381,11 @@ static VkBool32 sceneLoadImageObjects(const char* directory, const char* filenam
 							{
 								if (sceneFactory->useGPU())
 								{
-									allDiffuseCubeMaps = sceneFactory->getSceneRenderFactory()->prefilterLambert(sceneManager, imageData, VKTS_BSDF_SAMPLES_CUBE_MAP, finalImageDataFilename);
+									allDiffuseCubeMaps = sceneFactory->getSceneRenderFactory()->prefilterLambert(sceneManager, imageData, VKTS_BSDF_SAMPLES_GPU_CUBE_MAP, finalImageDataFilename);
 								}
 								else
 								{
-									allDiffuseCubeMaps = imageDataPrefilterLambert(imageData, VKTS_BSDF_SAMPLES_CUBE_MAP, finalImageDataFilename);
+									allDiffuseCubeMaps = imageDataPrefilterLambert(imageData, VKTS_BSDF_SAMPLES_CPU_CUBE_MAP, finalImageDataFilename);
 								}
 
 								if (allDiffuseCubeMaps.size() == 0)
@@ -493,11 +493,11 @@ static VkBool32 sceneLoadImageObjects(const char* directory, const char* filenam
 							{
 								if (sceneFactory->useGPU())
 								{
-									allCookTorranceCubeMaps = sceneFactory->getSceneRenderFactory()->prefilterCookTorrance(sceneManager, imageData, VKTS_BSDF_SAMPLES_CUBE_MAP, finalImageDataFilename);
+									allCookTorranceCubeMaps = sceneFactory->getSceneRenderFactory()->prefilterCookTorrance(sceneManager, imageData, VKTS_BSDF_SAMPLES_GPU_CUBE_MAP, finalImageDataFilename);
 								}
 								else
 								{
-									allCookTorranceCubeMaps = imageDataPrefilterCookTorrance(imageData, VKTS_BSDF_SAMPLES_CUBE_MAP, finalImageDataFilename);
+									allCookTorranceCubeMaps = imageDataPrefilterCookTorrance(imageData, VKTS_BSDF_SAMPLES_CPU_CUBE_MAP, finalImageDataFilename);
 								}
 
 								if (allCookTorranceCubeMaps.size() == 0)
