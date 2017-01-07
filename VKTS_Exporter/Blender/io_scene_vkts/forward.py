@@ -58,12 +58,7 @@ layout (binding = 7) uniform samplerCube u_diffuseCubemap;"""
 
 forwardGeneralFunctionsGLSL = """vec3 reinhardTonemap(vec3 c)
 {
-    if (u_bufferParameter.toneMap > 0)
-    {
-        return c / (1.0 + c) * (1.0 + c / (u_bufferParameter.white * u_bufferParameter.white));
-    }
-    
-    return c;
+    return c / (1.0 + c) * (1.0 + c / (u_bufferParameter.white * u_bufferParameter.white));
 }
 
 vec3 colorToLinear(vec3 c)
@@ -127,7 +122,12 @@ vec3 lambert(vec3 L, vec3 lightColor, vec3 N, vec3 baseColor)
 
 vec3 iblLambert(vec3 N, vec3 baseColor)
 {
-    return baseColor * colorToLinear(reinhardTonemap(texture(u_diffuseCubemap, N).rgb * u_bufferParameter.strength));
+    if (u_bufferParameter.toneMap > 0)
+    {
+        return baseColor * texture(u_diffuseCubemap, N).rgb * u_bufferParameter.strength;    
+    }
+
+    return baseColor * colorToLinear(texture(u_diffuseCubemap, N).rgb * u_bufferParameter.strength);
 }
 
 vec3 cookTorrance(vec3 L, vec3 lightColor, vec3 N, vec3 V, float roughness, vec3 F0)
@@ -169,7 +169,15 @@ vec3 iblCookTorrance(vec3 N, vec3 V, float roughness, vec3 F0)
     {
         float scaledRoughness = roughness * float(textureQueryLevels(u_specularCubemap) - 1);
 
-        vec3 prefilteredColor = colorToLinear(reinhardTonemap(textureLod(u_specularCubemap, L, scaledRoughness).rgb * u_bufferParameter.strength));
+        vec3 prefilteredColor;
+        if (u_bufferParameter.toneMap > 0)
+        {
+            prefilteredColor = textureLod(u_specularCubemap, L, scaledRoughness).rgb * u_bufferParameter.strength;
+        }
+        else
+        {
+            prefilteredColor = colorToLinear(textureLod(u_specularCubemap, L, scaledRoughness).rgb * u_bufferParameter.strength);
+        }
 
         vec2 envBRDF = texture(u_lut, vec2(NdotV, roughness)).rg;
         
@@ -292,8 +300,15 @@ forwardOutAssignGLSL = """
         }                
         
         //
+
+        color = mix(colorLambert, colorCookTorrance, metallic) + emissiveColor;
         
-        color = colorToNonLinear(mix(colorLambert, colorCookTorrance, metallic) + emissiveColor);
+        if (u_bufferParameter.toneMap > 0)
+        {
+            color = reinhardTonemap(color);
+        }
+
+        color = colorToNonLinear(color);
     }
     else
     {
