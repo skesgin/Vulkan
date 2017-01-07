@@ -64,7 +64,7 @@ copy("../../VKTS_Binaries/buster_drone/*.hdr", "./assets/buster_drone/")
 
 copy("../../VKTS_Binaries/primitives/*.vkts", "./assets/primitives/")
 
-copy("../../VKTS_Binaries/texture/BSDF_LUT_512_8.data", "./assets/texture/")
+copy("../../VKTS_Binaries/texture/BSDF_LUT_512_256.data", "./assets/texture/")
 
 copy("../../VKTS_Binaries/cache/buster_drone/*.hdr", "./assets/cache/buster_drone/")
 

@@ -66,7 +66,7 @@ copy("../../VKTS_Binaries/material_probes/*.tga", "./assets/material_probes/")
 
 copy("../../VKTS_Binaries/primitives/*.vkts", "./assets/primitives/")
 
-copy("../../VKTS_Binaries/texture/BSDF_LUT_512_8.data", "./assets/texture/")
+copy("../../VKTS_Binaries/texture/BSDF_LUT_512_256.data", "./assets/texture/")
 
 copy("../../VKTS_Binaries/cache/material_probes/*.tga", "./assets/cache/material_probes/")
 
