@@ -53,6 +53,10 @@ private:
 
     ITextureObjectSP lut;
 
+    float environmentStrength;
+
+    float maxLuminance;
+
 public:
 
     Scene();
@@ -121,6 +125,14 @@ public:
     virtual void setLut(const ITextureObjectSP& environment) override;
 
     virtual ITextureObjectSP getLut() const override;
+
+    virtual void setEnvironmentStrength(const float environmentStrength) override;
+
+    virtual float getEnvironmentStrength() const override;
+
+    virtual void setMaxLuminance(const float maxLuminance) override;
+
+    virtual float getMaxLuminance() const override;
 
     //
 

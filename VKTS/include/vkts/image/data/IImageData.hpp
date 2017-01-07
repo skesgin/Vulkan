@@ -107,6 +107,8 @@ public:
 
     virtual void freeHostMemory() = 0;
 
+    virtual float gatherMaxLuminance(const uint32_t mipLevel = 0, const uint32_t arrayLayer = 0)  const = 0;
+
 };
 
 typedef std::shared_ptr<IImageData> IImageDataSP;

@@ -4535,6 +4535,15 @@ ISceneSP VKTS_APIENTRY sceneLoad(const char* filename, const ISceneManagerSP& sc
 
             // Nothing for now.
         }
+        else if (parseIsToken(buffer, "environment_strength"))
+        {
+            if (!parseFloat(buffer, &fdata[0]))
+            {
+                return ISceneSP();
+            }
+
+            scene->setEnvironmentStrength(fdata[0]);
+        }
         else if (parseIsToken(buffer, "texture"))
         {
             if (!parseString(buffer, sdata, VKTS_MAX_TOKEN_CHARS))
@@ -4555,6 +4564,19 @@ ISceneSP VKTS_APIENTRY sceneLoad(const char* filename, const ISceneManagerSP& sc
             }
 
             scene->setEnvironment(textureObject);
+
+            // Setting the maximum luminance
+            if (textureObject->getImageObject()->getImageData()->isSFLOAT())
+            {
+            	float maxLuminance = 0.0f;
+
+            	for (uint32_t side = 0; side < 6; side++)
+            	{
+            		maxLuminance = glm::max(maxLuminance, textureObject->getImageObject()->getImageData()->gatherMaxLuminance(0, side));
+            	}
+
+            	scene->setMaxLuminance(textureObject->getImageObject()->getImageData()->gatherMaxLuminance());
+            }
 
             //
 

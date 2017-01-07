@@ -48,18 +48,19 @@ layout (binding = 6, std140) uniform _u_bufferMatrices {
 
 layout(push_constant) uniform _u_bufferParameter {
         int toneMap;
-        float exposure;
+        float strength;
+        float white;
 } u_bufferParameter;"""
 
 forwardGeneralTextureGLSL = """layout (binding = 9) uniform sampler2D u_lut;
 layout (binding = 8) uniform samplerCube u_specularCubemap;
 layout (binding = 7) uniform samplerCube u_diffuseCubemap;"""
 
-forwardGeneralFunctionsGLSL = """vec3 basicTonemap(vec3 c)
+forwardGeneralFunctionsGLSL = """vec3 reinhardTonemap(vec3 c)
 {
-    if (u_bufferParameter.toneMap != 0)
+    if (u_bufferParameter.toneMap > 0)
     {
-        return c * u_bufferParameter.exposure / (1.0 + c / u_bufferParameter.exposure);
+        return c / (1.0 + c) * (1.0 + c / (u_bufferParameter.white * u_bufferParameter.white));
     }
     
     return c;
@@ -126,7 +127,7 @@ vec3 lambert(vec3 L, vec3 lightColor, vec3 N, vec3 baseColor)
 
 vec3 iblLambert(vec3 N, vec3 baseColor)
 {
-    return baseColor * colorToLinear(texture(u_diffuseCubemap, N).rgb);
+    return baseColor * colorToLinear(reinhardTonemap(texture(u_diffuseCubemap, N).rgb * u_bufferParameter.strength));
 }
 
 vec3 cookTorrance(vec3 L, vec3 lightColor, vec3 N, vec3 V, float roughness, vec3 F0)
@@ -168,7 +169,7 @@ vec3 iblCookTorrance(vec3 N, vec3 V, float roughness, vec3 F0)
     {
         float scaledRoughness = roughness * float(textureQueryLevels(u_specularCubemap) - 1);
 
-        vec3 prefilteredColor = colorToLinear(textureLod(u_specularCubemap, L, scaledRoughness).rgb);
+        vec3 prefilteredColor = colorToLinear(reinhardTonemap(textureLod(u_specularCubemap, L, scaledRoughness).rgb * u_bufferParameter.strength));
 
         vec2 envBRDF = texture(u_lut, vec2(NdotV, roughness)).rg;
         
@@ -292,7 +293,7 @@ forwardOutAssignGLSL = """
         
         //
         
-        color = colorToNonLinear(basicTonemap(mix(colorLambert, colorCookTorrance, metallic) + emissiveColor));
+        color = colorToNonLinear(mix(colorLambert, colorCookTorrance, metallic) + emissiveColor);
     }
     else
     {

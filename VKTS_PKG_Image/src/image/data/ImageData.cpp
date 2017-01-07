@@ -851,4 +851,27 @@ void ImageData::freeHostMemory()
 	buffer = IBinaryBufferSP();
 }
 
+float ImageData::gatherMaxLuminance(const uint32_t mipLevel, const uint32_t arrayLayer) const
+{
+	if (!getData() || mipLevel >= getMipLevels() || arrayLayer >= getArrayLayers())
+	{
+		return 0.0f;
+	}
+
+	float maxLuminance = 0.0;
+
+	for (uint32_t z = 0; z < getDepth(); z++)
+	{
+		for (uint32_t y = 0; y < getHeight(); y++)
+		{
+			for (uint32_t x = 0; x < getWidth(); x++)
+			{
+				maxLuminance = glm::max(maxLuminance, glm::dot(glm::vec3(getTexel(x, y, z, mipLevel, arrayLayer)), glm::vec3(0.2126f, 0.7152f, 0.0722f)));
+			}
+		}
+	}
+
+	return maxLuminance;
+}
+
 } /* namespace vkts */

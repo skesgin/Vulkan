@@ -32,7 +32,7 @@ namespace vkts
 {
 
 Scene::Scene() :
-    IScene(), name(""), allObjects(), allCameras(), allLights(), environment(nullptr), diffuseEnvironment(nullptr), specularEnvironment(nullptr), lut(nullptr)
+    IScene(), name(""), allObjects(), allCameras(), allLights(), environment(nullptr), diffuseEnvironment(nullptr), specularEnvironment(nullptr), lut(nullptr), environmentStrength(1.0f), maxLuminance(1.0f)
 {
 }
 
@@ -124,6 +124,8 @@ Scene::Scene(const Scene& other) :
     diffuseEnvironment = other.diffuseEnvironment;
     specularEnvironment = other.specularEnvironment;
     lut = other.lut;
+    environmentStrength = other.environmentStrength;
+    maxLuminance = other.maxLuminance;
 }
 
 Scene::~Scene()
@@ -285,6 +287,26 @@ void Scene::setLut(const ITextureObjectSP& lut)
 ITextureObjectSP Scene::getLut() const
 {
     return lut;
+}
+
+void Scene::setEnvironmentStrength(const float environmentStrength)
+{
+    this->environmentStrength = environmentStrength;
+}
+
+float Scene::getEnvironmentStrength() const
+{
+    return environmentStrength;
+}
+
+void Scene::setMaxLuminance(const float maxLuminance)
+{
+    this->maxLuminance = maxLuminance;
+}
+
+float Scene::getMaxLuminance() const
+{
+    return maxLuminance;
 }
 
 void Scene::updateParameterRecursive(const Parameter* parameter, const uint32_t objectOffset, const uint32_t objectStep, const uint32_t objectLimit)

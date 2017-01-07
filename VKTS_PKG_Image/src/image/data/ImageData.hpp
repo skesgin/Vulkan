@@ -135,6 +135,8 @@ public:
 
     virtual void freeHostMemory() override;
 
+    virtual float gatherMaxLuminance(const uint32_t mipLevel = 0, const uint32_t arrayLayer = 0)  const override;
+
 };
 
 } /* namespace vkts */

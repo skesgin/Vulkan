@@ -40,8 +40,6 @@
 
 #define VKTS_MAX_LIGHTS 16
 
-#define VKTS_EXPOSURE 2.5f
-
 #define VKTS_FONT_DISTANCE_FIELD VK_TRUE
 #define VKTS_FONT_NAME "font/Arial_32.fnt"
 #define VKTS_FONT_DF_NAME "font/Arial_32_DF.fnt"

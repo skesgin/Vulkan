@@ -53,7 +53,8 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 		}
 	}
 
-	float exposure = VKTS_EXPOSURE;
+	float strength = 1.0f;
+	float white = 1.0f;
 
 	//
 
@@ -205,7 +206,8 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 	// Render cube map.
 
 	vkCmdPushConstants(cmdBuffer[usedBuffer]->getCommandBuffer(), allGraphicsPipelines[0]->getLayout(), VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(int32_t), &toneMapping);
-	vkCmdPushConstants(cmdBuffer[usedBuffer]->getCommandBuffer(), allGraphicsPipelines[0]->getLayout(), VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(int32_t), sizeof(float), &exposure);
+	vkCmdPushConstants(cmdBuffer[usedBuffer]->getCommandBuffer(), allGraphicsPipelines[0]->getLayout(), VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(int32_t), sizeof(float), &strength);
+	vkCmdPushConstants(cmdBuffer[usedBuffer]->getCommandBuffer(), allGraphicsPipelines[0]->getLayout(), VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(int32_t) + sizeof(float), sizeof(float), &white);
 
 	if (environmentScene.get())
 	{
@@ -226,7 +228,8 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 	//
 
 	vkCmdPushConstants(cmdBuffer[usedBuffer]->getCommandBuffer(), resolvePipelineLayout->getPipelineLayout(), VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(int32_t), &toneMapping);
-	vkCmdPushConstants(cmdBuffer[usedBuffer]->getCommandBuffer(), resolvePipelineLayout->getPipelineLayout(), VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(int32_t), sizeof(float), &exposure);
+	vkCmdPushConstants(cmdBuffer[usedBuffer]->getCommandBuffer(), resolvePipelineLayout->getPipelineLayout(), VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(int32_t), sizeof(float), &strength);
+	vkCmdPushConstants(cmdBuffer[usedBuffer]->getCommandBuffer(), resolvePipelineLayout->getPipelineLayout(), VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(int32_t) + sizeof(float), sizeof(float), &white);
 
 	//
 
@@ -1091,7 +1094,7 @@ VkBool32 Example::buildPipelineLayout()
 
 	pushConstantRange[0].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 	pushConstantRange[0].offset = 0;
-	pushConstantRange[0].size = sizeof(int32_t) + sizeof(float);
+	pushConstantRange[0].size = sizeof(int32_t) + sizeof(float) + sizeof(float);
 
 	//
 

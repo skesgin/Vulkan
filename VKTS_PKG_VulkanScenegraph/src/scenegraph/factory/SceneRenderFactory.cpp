@@ -290,7 +290,7 @@ VkBool32 SceneRenderFactory::prepareBSDFMaterial(const ISceneManagerSP& sceneMan
 
 	pushConstantRange[0].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 	pushConstantRange[0].offset = 0;
-	pushConstantRange[0].size = sizeof(int32_t) + sizeof(float);
+	pushConstantRange[0].size = sizeof(int32_t) + sizeof(float) + sizeof(float);
 
 	uint32_t finalPushConstantRangeCount = 0;
 	VkPushConstantRange* finalPushConstantRange = nullptr;

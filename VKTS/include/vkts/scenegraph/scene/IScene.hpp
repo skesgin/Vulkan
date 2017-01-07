@@ -103,6 +103,14 @@ public:
 
     virtual ITextureObjectSP getLut() const = 0;
 
+    virtual void setEnvironmentStrength(const float environmentStrength) = 0;
+
+    virtual float getEnvironmentStrength() const = 0;
+
+    virtual void setMaxLuminance(const float maxLuminance) = 0;
+
+    virtual float getMaxLuminance() const = 0;
+
     //
 
     virtual void updateParameterRecursive(const Parameter* parameter, const uint32_t objectOffset = 0, const uint32_t objectStep = 1, const uint32_t objectLimit = UINT32_MAX) = 0;

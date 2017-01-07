@@ -42,8 +42,6 @@
 
 #define VKTS_MAX_LIGHTS 16
 
-#define VKTS_EXPOSURE 10.0f
-
 #define VKTS_FONT_DISTANCE_FIELD VK_TRUE
 #define VKTS_FONT_NAME "font/Arial_32.fnt"
 #define VKTS_FONT_DF_NAME "font/Arial_32_DF.fnt"
@@ -169,6 +167,8 @@ private:
     float cpuUsageApp;
     uint32_t processors;
     float cpuUsage[VKTS_MAX_CORES];
+
+    float maxLuminance;
 
 	VkBool32 buildCmdBuffer(const int32_t usedBuffer);
 
