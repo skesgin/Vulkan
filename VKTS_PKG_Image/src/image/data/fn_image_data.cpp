@@ -351,7 +351,7 @@ static IImageDataSP imageDataLoadTga(const std::string& name, const IBinaryBuffe
 
     std::vector<uint32_t> allOffsets{0};
 
-    return IImageDataSP(new ImageData(name, VK_IMAGE_TYPE_2D, format, { (uint32_t)width, (uint32_t)height, (uint32_t)depth }, 1, 1, allOffsets, &data[0], widthHeightDepth * numberChannels));
+    return IImageDataSP(new ImageData(name, VK_IMAGE_TYPE_2D, format, { (uint32_t)width, (uint32_t)height, (uint32_t)depth }, 1, 1, allOffsets, &data[0], widthHeightDepth * numberChannels, 1.0f));
 }
 
 static IImageDataSP imageDataLoadHdr(const std::string& name, const IBinaryBufferSP& buffer)
@@ -455,6 +455,8 @@ static IImageDataSP imageDataLoadHdr(const std::string& name, const IBinaryBuffe
     std::vector<uint8_t> scanline(width * 4);
 
     float rgb[3] = {0.0f, 0.0f, 0.0f};
+
+    float maxLuminance = 0.0;
 
     int32_t y = height - 1;
     while (y >= 0)
@@ -560,6 +562,8 @@ static IImageDataSP imageDataLoadHdr(const std::string& name, const IBinaryBuffe
             }
     	}
 
+        maxLuminance = glm::max(maxLuminance, glm::dot(glm::vec3(rgb[0], rgb[1], rgb[2]), glm::vec3(0.2126f, 0.7152f, 0.0722f)));
+
         for (int32_t x = 0; x < width; x++)
         {
             imageDataConvertRGBEtoRGB(rgb, &scanline[x * 4]);
@@ -574,7 +578,7 @@ static IImageDataSP imageDataLoadHdr(const std::string& name, const IBinaryBuffe
 
     std::vector<uint32_t> allOffsets{0};
 
-    return IImageDataSP(new ImageData(name, VK_IMAGE_TYPE_2D, VK_FORMAT_R32G32B32_SFLOAT, { (uint32_t)width, (uint32_t)height, (uint32_t)depth }, 1, 1, allOffsets, reinterpret_cast<const uint8_t*>(&data[0]), width * height * depth * numberChannels * (uint32_t)sizeof(float)));
+    return IImageDataSP(new ImageData(name, VK_IMAGE_TYPE_2D, VK_FORMAT_R32G32B32_SFLOAT, { (uint32_t)width, (uint32_t)height, (uint32_t)depth }, 1, 1, allOffsets, reinterpret_cast<const uint8_t*>(&data[0]), width * height * depth * numberChannels * (uint32_t)sizeof(float), maxLuminance));
 }
 
 void VKTS_APIENTRY imageDataSetLoadFunction(const PFN_imageDataLoadFunction loadFunction, const VkBool32 fallback)
@@ -679,7 +683,7 @@ IImageDataSP VKTS_APIENTRY imageDataLoadRaw(const char* filename, const uint32_t
 
     std::vector<uint32_t> allOffsets{0};
 
-    return IImageDataSP(new ImageData(filename, VK_IMAGE_TYPE_2D, format, { width, height, 1 }, 1, 1, allOffsets, buffer->getByteData(), expectedSize));
+    return IImageDataSP(new ImageData(filename, VK_IMAGE_TYPE_2D, format, { width, height, 1 }, 1, 1, allOffsets, buffer->getByteData(), expectedSize, 1.0f));
 }
 
 static IBinaryBufferSP imageDataSaveTga(const IImageDataSP& imageData, const uint32_t mipLevel, const uint32_t arrayLayer)
@@ -1084,7 +1088,7 @@ IImageDataSP VKTS_APIENTRY imageDataCreate(const std::string& name, const uint32
 
     std::vector<uint32_t> allOffsets{0};
 
-    return IImageDataSP(new ImageData(name, imageType, format, { width, height, depth }, 1, 1, allOffsets, &data[0], width * height * depth * numberChannels * bytesPerChannel));
+    return IImageDataSP(new ImageData(name, imageType, format, { width, height, depth }, 1, 1, allOffsets, &data[0], width * height * depth * numberChannels * bytesPerChannel, 1.0f));
 }
 
 IImageDataSP VKTS_APIENTRY imageDataCreate(const std::string& name, const uint32_t width, const uint32_t height, const uint32_t depth, const glm::vec4& color, const VkImageType imageType, const VkFormat& format)
@@ -1618,7 +1622,7 @@ IImageDataSP VKTS_APIENTRY imageDataConvert(const IImageDataSP& sourceImage, con
 
     std::vector<uint32_t> allOffsets{0};
 
-    return IImageDataSP(new ImageData(name, sourceImage->getImageType(), targetFormat, sourceImage->getExtent3D(), 1, 1, allOffsets, &targetData[0], sourceImage->getWidth() * sourceImage->getHeight() * sourceImage->getDepth() * targetNumberChannels * targetBytesPerChannel));
+    return IImageDataSP(new ImageData(name, sourceImage->getImageType(), targetFormat, sourceImage->getExtent3D(), 1, 1, allOffsets, &targetData[0], sourceImage->getWidth() * sourceImage->getHeight() * sourceImage->getDepth() * targetNumberChannels * targetBytesPerChannel, sourceImage->getMaxLuminance()));
 }
 
 IImageDataSP VKTS_APIENTRY imageDataCopy(const IImageDataSP& sourceImage, const std::string& name)
@@ -1628,7 +1632,7 @@ IImageDataSP VKTS_APIENTRY imageDataCopy(const IImageDataSP& sourceImage, const 
         return IImageDataSP();
     }
 
-    return IImageDataSP(new ImageData(name, sourceImage->getImageType(), sourceImage->getFormat(), sourceImage->getExtent3D(), sourceImage->getMipLevels(), sourceImage->getArrayLayers(), sourceImage->getAllOffsets(), (const uint8_t*) sourceImage->getData(), sourceImage->getSize()));
+    return IImageDataSP(new ImageData(name, sourceImage->getImageType(), sourceImage->getFormat(), sourceImage->getExtent3D(), sourceImage->getMipLevels(), sourceImage->getArrayLayers(), sourceImage->getAllOffsets(), (const uint8_t*) sourceImage->getData(), sourceImage->getSize(), sourceImage->getMaxLuminance()));
 }
 
 IImageDataSP VKTS_APIENTRY imageDataMerge(const SmartPointerVector<IImageDataSP>& sourceImages, const std::string& name, const uint32_t mipLevels, const uint32_t arrayLayers)
@@ -1690,6 +1694,8 @@ IImageDataSP VKTS_APIENTRY imageDataMerge(const SmartPointerVector<IImageDataSP>
 
     uint32_t offset = 0;
 
+    float maxLuminance = 0.0f;
+
     for (uint32_t i = 0; i < sourceImages.size(); i++)
     {
     	allOffsets.push_back(offset);
@@ -1697,9 +1703,11 @@ IImageDataSP VKTS_APIENTRY imageDataMerge(const SmartPointerVector<IImageDataSP>
         mergedImageData->write(sourceImages[i]->getData(), 1, sourceImages[i]->getSize());
 
         offset += sourceImages[i]->getSize();
+
+        maxLuminance = glm::max(maxLuminance, sourceImages[i]->getMaxLuminance());
     }
 
-    return IImageDataSP(new ImageData(name, imageType, format, extent, mipLevels, arrayLayers, allOffsets, mergedImageData));
+    return IImageDataSP(new ImageData(name, imageType, format, extent, mipLevels, arrayLayers, allOffsets, mergedImageData, maxLuminance));
 }
 
 }

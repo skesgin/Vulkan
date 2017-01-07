@@ -55,6 +55,8 @@ void ImageData::reset()
     numberChannels = 0;
 
     allOffsets.clear();
+
+    maxLuminance = 1.0f;
 }
 
 int32_t ImageData::getTexelLocation(float& fraction, const float a, const int32_t size, const VkSamplerAddressMode addressMode) const
@@ -199,8 +201,8 @@ int32_t ImageData::getCubeMapFace(float& s, float& t, const float x, const float
 	return faceLayer;
 }
 
-ImageData::ImageData(const std::string& name, const VkImageType imageType, const VkFormat& format, const VkExtent3D& extent, const uint32_t mipLevels, const uint32_t arrayLayers, const std::vector<uint32_t>& allOffsets, const uint8_t* data, const uint32_t size) :
-    IImageData(), name(name), imageType(imageType), format(format), extent(extent), mipLevels(mipLevels), arrayLayers(arrayLayers), allOffsets(allOffsets)
+ImageData::ImageData(const std::string& name, const VkImageType imageType, const VkFormat& format, const VkExtent3D& extent, const uint32_t mipLevels, const uint32_t arrayLayers, const std::vector<uint32_t>& allOffsets, const uint8_t* data, const uint32_t size, const float maxLuminance) :
+    IImageData(), name(name), imageType(imageType), format(format), extent(extent), mipLevels(mipLevels), arrayLayers(arrayLayers), allOffsets(allOffsets), maxLuminance(maxLuminance)
 {
     buffer = binaryBufferCreate(data, size);
 
@@ -219,8 +221,8 @@ ImageData::ImageData(const std::string& name, const VkImageType imageType, const
     numberChannels = imageDataGetNumberChannels(format);
 }
 
-ImageData::ImageData(const std::string& name, const VkImageType imageType, const VkFormat& format, const VkExtent3D& extent, const uint32_t mipLevels, const uint32_t arrayLayers, const std::vector<uint32_t>& allOffsets, const IBinaryBufferSP& buffer) :
-    IImageData(), name(name), imageType(imageType), format(format), extent(extent), mipLevels(mipLevels), arrayLayers(arrayLayers), buffer(buffer), allOffsets(allOffsets)
+ImageData::ImageData(const std::string& name, const VkImageType imageType, const VkFormat& format, const VkExtent3D& extent, const uint32_t mipLevels, const uint32_t arrayLayers, const std::vector<uint32_t>& allOffsets, const IBinaryBufferSP& buffer, const float maxLuminance) :
+    IImageData(), name(name), imageType(imageType), format(format), extent(extent), mipLevels(mipLevels), arrayLayers(arrayLayers), buffer(buffer), allOffsets(allOffsets), maxLuminance(maxLuminance)
 {
     if (!this->buffer.get() || !this->buffer->getData())
     {
@@ -851,26 +853,37 @@ void ImageData::freeHostMemory()
 	buffer = IBinaryBufferSP();
 }
 
-float ImageData::gatherMaxLuminance(const uint32_t mipLevel, const uint32_t arrayLayer) const
+VkBool32 ImageData::updateMaxLuminance()
 {
-	if (!getData() || mipLevel >= getMipLevels() || arrayLayer >= getArrayLayers())
+	if (!getData())
 	{
-		return 0.0f;
+		return VK_FALSE;
 	}
 
-	float maxLuminance = 0.0;
+	maxLuminance = 0.0;
 
-	for (uint32_t z = 0; z < getDepth(); z++)
+	for (uint32_t arrayLayer = 0; arrayLayer < getArrayLayers(); arrayLayer++)
 	{
-		for (uint32_t y = 0; y < getHeight(); y++)
+		for (uint32_t mipLevel = 0; mipLevel < getMipLevels(); mipLevel++)
 		{
-			for (uint32_t x = 0; x < getWidth(); x++)
+			for (uint32_t z = 0; z < getDepth(); z++)
 			{
-				maxLuminance = glm::max(maxLuminance, glm::dot(glm::vec3(getTexel(x, y, z, mipLevel, arrayLayer)), glm::vec3(0.2126f, 0.7152f, 0.0722f)));
+				for (uint32_t y = 0; y < getHeight(); y++)
+				{
+					for (uint32_t x = 0; x < getWidth(); x++)
+					{
+						maxLuminance = glm::max(maxLuminance, glm::dot(glm::vec3(getTexel(x, y, z, mipLevel, arrayLayer)), glm::vec3(0.2126f, 0.7152f, 0.0722f)));
+					}
+				}
 			}
 		}
 	}
 
+	return VK_TRUE;
+}
+
+float ImageData::getMaxLuminance() const
+{
 	return maxLuminance;
 }
 

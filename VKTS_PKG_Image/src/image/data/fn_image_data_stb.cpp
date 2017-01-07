@@ -109,7 +109,14 @@ IImageDataSP VKTS_APIENTRY imageDataLoadStb(const std::string& name, const IBina
 
 	uint32_t totalSize = (uint32_t)(x * y * channels_in_file);
 
-    return IImageDataSP(new ImageData(name, VK_IMAGE_TYPE_2D, format, { (uint32_t)x, (uint32_t)y, 1 }, 1, 1, allOffsets, (uint8_t*)&data[0], totalSize));
+	auto result = IImageDataSP(new ImageData(name, VK_IMAGE_TYPE_2D, format, { (uint32_t)x, (uint32_t)y, 1 }, 1, 1, allOffsets, (uint8_t*)&data[0], totalSize, 1.0f));
+
+	if (result.get() && result->isSFLOAT())
+	{
+		result->updateMaxLuminance();
+	}
+
+    return result;
 }
 
 VkBool32 VKTS_APIENTRY imageDataSaveStb(const std::string& name, const IImageDataSP& imageData, const uint32_t mipLevel, const uint32_t arrayLayer)

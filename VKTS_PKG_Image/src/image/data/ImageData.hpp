@@ -56,6 +56,8 @@ private:
 
     std::vector<uint32_t> allOffsets;
 
+    float maxLuminance;
+
     void reset();
 
     int32_t getTexelLocation(float& fraction, const float a, const int32_t size, const VkSamplerAddressMode addressMode) const;
@@ -65,8 +67,8 @@ private:
 public:
 
     ImageData() = delete;
-    ImageData(const std::string& name, const VkImageType imageType, const VkFormat& format, const VkExtent3D& extent, const uint32_t mipLevels, const uint32_t arrayLayers, const std::vector<uint32_t>& allOffsets, const uint8_t* data, const uint32_t size);
-    ImageData(const std::string& name, const VkImageType imageType, const VkFormat& format, const VkExtent3D& extent, const uint32_t mipLevels, const uint32_t arrayLayers, const std::vector<uint32_t>& allOffsets, const IBinaryBufferSP& buffer);
+    ImageData(const std::string& name, const VkImageType imageType, const VkFormat& format, const VkExtent3D& extent, const uint32_t mipLevels, const uint32_t arrayLayers, const std::vector<uint32_t>& allOffsets, const uint8_t* data, const uint32_t size, const float maxLuminance);
+    ImageData(const std::string& name, const VkImageType imageType, const VkFormat& format, const VkExtent3D& extent, const uint32_t mipLevels, const uint32_t arrayLayers, const std::vector<uint32_t>& allOffsets, const IBinaryBufferSP& buffer, const float maxLuminance);
     ImageData(const ImageData& other) = delete;
     ImageData(ImageData&& other) = delete;
     virtual ~ImageData();
@@ -135,7 +137,9 @@ public:
 
     virtual void freeHostMemory() override;
 
-    virtual float gatherMaxLuminance(const uint32_t mipLevel = 0, const uint32_t arrayLayer = 0)  const override;
+    virtual VkBool32 updateMaxLuminance() override;
+
+    virtual float getMaxLuminance() const override;
 
 };
 

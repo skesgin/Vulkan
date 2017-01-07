@@ -4568,14 +4568,7 @@ ISceneSP VKTS_APIENTRY sceneLoad(const char* filename, const ISceneManagerSP& sc
             // Setting the maximum luminance
             if (textureObject->getImageObject()->getImageData()->isSFLOAT())
             {
-            	float maxLuminance = 0.0f;
-
-            	for (uint32_t side = 0; side < 6; side++)
-            	{
-            		maxLuminance = glm::max(maxLuminance, textureObject->getImageObject()->getImageData()->gatherMaxLuminance(0, side));
-            	}
-
-            	scene->setMaxLuminance(textureObject->getImageObject()->getImageData()->gatherMaxLuminance());
+            	scene->setMaxLuminance(textureObject->getImageObject()->getImageData()->getMaxLuminance());
             }
 
             //

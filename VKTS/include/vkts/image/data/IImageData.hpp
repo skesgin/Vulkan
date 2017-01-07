@@ -107,7 +107,9 @@ public:
 
     virtual void freeHostMemory() = 0;
 
-    virtual float gatherMaxLuminance(const uint32_t mipLevel = 0, const uint32_t arrayLayer = 0)  const = 0;
+    virtual VkBool32 updateMaxLuminance() = 0;
+
+    virtual float getMaxLuminance() const = 0;
 
 };
 

@@ -309,7 +309,7 @@ IImageDataSP VKTS_APIENTRY imageDataLoadGli(const std::string& name, const IBina
 		}
 	}
 
-    return IImageDataSP(new ImageData(name, imageType, format, { (uint32_t)texture.extent().x, (uint32_t)texture.extent().y, (uint32_t)texture.extent().z }, mipLevels, arrayLayers, allOffsets, &data[0], totalSize));
+    return IImageDataSP(new ImageData(name, imageType, format, { (uint32_t)texture.extent().x, (uint32_t)texture.extent().y, (uint32_t)texture.extent().z }, mipLevels, arrayLayers, allOffsets, &data[0], totalSize, 1.0f));
 }
 
 VkBool32 VKTS_APIENTRY imageDataSaveGli(const std::string& name, const IImageDataSP& imageData, const uint32_t mipLevel, const uint32_t arrayLayer)
