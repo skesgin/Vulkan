@@ -223,7 +223,7 @@ VkBool32 VKTS_APIENTRY _profileApplicationGetCpuUsage(float& usage)
 	
 	//
 	
-	usage = (float)((buffer.tms_stime - g_lastKernelTime) + (buffer.tms_utime - g_lastUserTime) / deltaTime);
+	usage = 100.0f * (float)(buffer.tms_stime - g_lastKernelTime + buffer.tms_utime - g_lastUserTime) / (float)deltaTime;
 	
 	//
 	
