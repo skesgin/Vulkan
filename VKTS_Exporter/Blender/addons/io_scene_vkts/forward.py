@@ -49,7 +49,7 @@ layout (binding = 6, std140) uniform _u_bufferMatrices {
 layout(push_constant) uniform _u_bufferParameter {
         int toneMap;
         float strength;
-        float white;
+        float maxLuminance;
 } u_bufferParameter;"""
 
 forwardGeneralTextureGLSL = """layout (binding = 9) uniform sampler2D u_lut;
@@ -60,7 +60,7 @@ forwardGeneralFunctionsGLSL = """vec3 reinhardTonemap(vec3 c)
 {
     float L = dot(c, vec3(0.2126, 0.7152, 0.0722));
 
-    return c * 1.0 / (1.0 + L) * (1.0 + L / (u_bufferParameter.white * u_bufferParameter.white));
+    return c * 1.0 / (1.0 + L) * (1.0 + L / (u_bufferParameter.maxLuminance * u_bufferParameter.maxLuminance));
 }
 
 vec3 colorToLinear(vec3 c)

@@ -45,16 +45,21 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 {
 	int32_t toneMapping = 0;
 
+	float strength = 1.0f;
+
+	float maxLuminance = 1.0f;
+
 	if (scene.get())
 	{
 		if (scene->getEnvironment()->getImageObject()->getImageData()->isSFLOAT())
 		{
 			toneMapping = 1;
 		}
-	}
 
-	float strength = 1.0f;
-	float white = 1.0f;
+		strength = scene->getEnvironmentStrength();
+
+		maxLuminance = scene->getMaxLuminance();
+	}
 
 	//
 
@@ -207,7 +212,7 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 
 	vkCmdPushConstants(cmdBuffer[usedBuffer]->getCommandBuffer(), allGraphicsPipelines[0]->getLayout(), VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(int32_t), &toneMapping);
 	vkCmdPushConstants(cmdBuffer[usedBuffer]->getCommandBuffer(), allGraphicsPipelines[0]->getLayout(), VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(int32_t), sizeof(float), &strength);
-	vkCmdPushConstants(cmdBuffer[usedBuffer]->getCommandBuffer(), allGraphicsPipelines[0]->getLayout(), VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(int32_t) + sizeof(float), sizeof(float), &white);
+	vkCmdPushConstants(cmdBuffer[usedBuffer]->getCommandBuffer(), allGraphicsPipelines[0]->getLayout(), VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(int32_t) + sizeof(float), sizeof(float), &maxLuminance);
 
 	if (environmentScene.get())
 	{
@@ -229,7 +234,7 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 
 	vkCmdPushConstants(cmdBuffer[usedBuffer]->getCommandBuffer(), resolvePipelineLayout->getPipelineLayout(), VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(int32_t), &toneMapping);
 	vkCmdPushConstants(cmdBuffer[usedBuffer]->getCommandBuffer(), resolvePipelineLayout->getPipelineLayout(), VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(int32_t), sizeof(float), &strength);
-	vkCmdPushConstants(cmdBuffer[usedBuffer]->getCommandBuffer(), resolvePipelineLayout->getPipelineLayout(), VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(int32_t) + sizeof(float), sizeof(float), &white);
+	vkCmdPushConstants(cmdBuffer[usedBuffer]->getCommandBuffer(), resolvePipelineLayout->getPipelineLayout(), VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(int32_t) + sizeof(float), sizeof(float), &maxLuminance);
 
 	//
 

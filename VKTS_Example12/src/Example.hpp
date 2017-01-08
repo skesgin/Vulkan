@@ -168,8 +168,6 @@ private:
     uint32_t processors;
     float cpuUsage[VKTS_MAX_CORES];
 
-    float maxLuminance;
-
 	VkBool32 buildCmdBuffer(const int32_t usedBuffer);
 
 	VkBool32 buildFramebuffer(const int32_t usedBuffer);
