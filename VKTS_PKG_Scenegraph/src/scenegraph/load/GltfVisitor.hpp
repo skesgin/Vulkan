@@ -87,7 +87,7 @@ typedef struct _GltfAccessor {
     uint32_t byteOffset;
     uint32_t byteStride;
     int32_t componentType;
-    VkBool32 normalzed;
+    VkBool32 normalized;
     uint32_t count;
     std::string type;
 

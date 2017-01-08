@@ -31,6 +31,13 @@
 namespace vkts
 {
 
+static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visitor, const GltfPrimitive& gltfPrimitive, const ISceneManagerSP& sceneManager, const ISceneFactorySP& sceneFactory)
+{
+	// TODO: Process sub mesh.
+
+	return VK_TRUE;
+}
+
 static VkBool32 gltfProcessNode(INodeSP& node, const GltfVisitor& visitor, const GltfNode& gltfNode, const ISceneManagerSP& sceneManager, const ISceneFactorySP& sceneFactory)
 {
 	node->setNodeRotationMode(VKTS_EULER_XYZ);
@@ -145,7 +152,7 @@ static VkBool32 gltfProcessNode(INodeSP& node, const GltfVisitor& visitor, const
     }
 
     // Process meshes.
-    if (gltfNode.meshes.size() > 0)
+    for (uint32_t i = 0; i < gltfNode.meshes.size(); i++)
     {
         auto mesh = sceneFactory->createMesh(sceneManager);
 
@@ -154,15 +161,37 @@ static VkBool32 gltfProcessNode(INodeSP& node, const GltfVisitor& visitor, const
             return VK_FALSE;
         }
 
-        mesh->setName(node->getName() + "_Mesh");
+        mesh->setName(node->getName() + "_Mesh_" + std::to_string(i));
 
         sceneManager->addMesh(mesh);
 
         //
 
-        for (uint32_t i = 0; i < gltfNode.meshes.size(); i++)
+        for (uint32_t k = 0; k < gltfNode.meshes[i]->primitives.size(); k++)
         {
-        	// TODO: Create and process sub meshes.
+            auto subMesh = sceneFactory->createSubMesh(sceneManager);
+
+            if (!subMesh.get())
+            {
+                return VK_FALSE;
+            }
+
+            subMesh->setName(node->getName() + "_SubMesh_" + std::to_string(k));
+
+            sceneManager->addSubMesh(subMesh);
+
+            //
+
+            if (!gltfProcessSubMesh(subMesh, visitor, gltfNode.meshes[i]->primitives[k], sceneManager, sceneFactory))
+            {
+            	return VK_FALSE;
+            }
+
+            //
+
+            auto currentSubMesh = sceneManager->useSubMesh(subMesh->getName());
+
+            mesh->addSubMesh(currentSubMesh);
         }
 
         //

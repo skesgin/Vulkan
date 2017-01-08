@@ -388,7 +388,7 @@ void GltfVisitor::visitAccessor(JSONobject& jsonObject)
 			return;
 		}
 
-		gltfAccessor.normalzed = gltfBool;
+		gltfAccessor.normalized = gltfBool;
 	}
 
 	//
@@ -1823,7 +1823,7 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 			gltfAccessor.byteOffset = 0;
 			gltfAccessor.byteStride = 0;
 			gltfAccessor.componentType = 0;
-			gltfAccessor.normalzed = VK_FALSE;
+			gltfAccessor.normalized = VK_FALSE;
 			gltfAccessor.count = 0;
 			gltfAccessor.type = "";
 
