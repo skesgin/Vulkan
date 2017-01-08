@@ -1121,7 +1121,7 @@ IImageDataSP VKTS_APIENTRY imageDataCreate(const std::string& name, const uint32
 
 IImageDataSP VKTS_APIENTRY imageDataConvert(const IImageDataSP& sourceImage, const VkFormat targetFormat, const std::string& name, const VkBool32 srgbConversion)
 {
-    if (!sourceImage.get() || sourceImage->getMipLevels() != 1)
+    if (!sourceImage.get() || sourceImage->getMipLevels() != 1 || sourceImage->getArrayLayers() != 1)
     {
         return IImageDataSP();
     }
