@@ -289,11 +289,18 @@ IAnimationSP Animation::clone() const
 
 void Animation::destroy()
 {
-    for (uint32_t i = 0; i < allChannels.size(); i++)
-    {
-        allChannels[i]->destroy();
-    }
-    allChannels.clear();
+	try
+	{
+	    for (uint32_t i = 0; i < allChannels.size(); i++)
+	    {
+	        allChannels[i]->destroy();
+	    }
+	    allChannels.clear();
+	}
+	catch(const std::exception& e)
+	{
+    	logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Catched exception '%s'", e.what());
+	}
 }
 
 } /* namespace vkts */

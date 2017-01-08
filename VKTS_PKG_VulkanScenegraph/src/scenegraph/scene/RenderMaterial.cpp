@@ -355,27 +355,34 @@ IRenderMaterialSP RenderMaterial::create(const VkBool32 createData) const
 
 void RenderMaterial::destroy()
 {
-    for (uint32_t i = 0; i < allDescriptorSets.values().size(); i++)
-    {
-        allDescriptorSets.values()[i]->destroy();
-    }
-    allDescriptorSets.clear();
+	try
+	{
+	    for (uint32_t i = 0; i < allDescriptorSets.values().size(); i++)
+	    {
+	        allDescriptorSets.values()[i]->destroy();
+	    }
+	    allDescriptorSets.clear();
 
-    for (uint32_t i = 0; i < allDescriptorPools.values().size(); i++)
-    {
-    	allDescriptorPools.values()[i]->destroy();
-    }
-    allDescriptorPools.clear();
+	    for (uint32_t i = 0; i < allDescriptorPools.values().size(); i++)
+	    {
+	    	allDescriptorPools.values()[i]->destroy();
+	    }
+	    allDescriptorPools.clear();
 
-    allBindingPresent.clear();
+	    allBindingPresent.clear();
 
-    memset(writeDescriptorSets, 0, sizeof(writeDescriptorSets));
-    memset(descriptorImageInfos, 0, sizeof(descriptorImageInfos));
+	    memset(writeDescriptorSets, 0, sizeof(writeDescriptorSets));
+	    memset(descriptorImageInfos, 0, sizeof(descriptorImageInfos));
 
-    nodeName = "";
+	    nodeName = "";
 
-    descriptorSets = IDescriptorSetsSP();
-    descriptorPool = IDescriptorPoolSP();
+	    descriptorSets = IDescriptorSetsSP();
+	    descriptorPool = IDescriptorPoolSP();
+	}
+	catch(const std::exception& e)
+	{
+    	logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Catched exception '%s'", e.what());
+	}
 }
 
 } /* namespace vkts */

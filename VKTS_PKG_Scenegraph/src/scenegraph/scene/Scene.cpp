@@ -414,43 +414,51 @@ ISceneSP Scene::clone() const
 
 void Scene::destroy()
 {
-	if (lut.get())
+	try
 	{
-		lut->destroy();
 
-		lut.reset();
+		if (lut.get())
+		{
+			lut->destroy();
+
+			lut.reset();
+		}
+
+		if (specularEnvironment.get())
+		{
+			specularEnvironment->destroy();
+
+			specularEnvironment.reset();
+		}
+
+		if (diffuseEnvironment.get())
+		{
+			diffuseEnvironment->destroy();
+
+			diffuseEnvironment.reset();
+		}
+
+		if (environment.get())
+		{
+			environment->destroy();
+
+			environment.reset();
+		}
+
+	    for (uint32_t i = 0; i < allObjects.size(); i++)
+	    {
+	        allObjects[i]->destroy();
+	    }
+	    allObjects.clear();
+
+	    allCameras.clear();
+
+	    allLights.clear();
 	}
-
-	if (specularEnvironment.get())
+	catch(const std::exception& e)
 	{
-		specularEnvironment->destroy();
-
-		specularEnvironment.reset();
+    	logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Catched exception '%s'", e.what());
 	}
-
-	if (diffuseEnvironment.get())
-	{
-		diffuseEnvironment->destroy();
-
-		diffuseEnvironment.reset();
-	}
-
-	if (environment.get())
-	{
-		environment->destroy();
-
-		environment.reset();
-	}
-
-    for (uint32_t i = 0; i < allObjects.size(); i++)
-    {
-        allObjects[i]->destroy();
-    }
-    allObjects.clear();
-
-    allCameras.clear();
-
-    allLights.clear();
 }
 
 } /* namespace vkts */

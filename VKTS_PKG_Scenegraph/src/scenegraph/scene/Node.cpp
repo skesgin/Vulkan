@@ -1454,38 +1454,45 @@ INodeSP Node::clone() const
 
 void Node::destroy()
 {
-    for (uint32_t i = 0; i < allChildNodes.size(); i++)
-    {
-        allChildNodes[i]->destroy();
-    }
-    allChildNodes.clear();
+	try
+	{
+	    for (uint32_t i = 0; i < allChildNodes.size(); i++)
+	    {
+	        allChildNodes[i]->destroy();
+	    }
+	    allChildNodes.clear();
 
-    for (uint32_t i = 0; i < allMeshes.size(); i++)
-    {
-        allMeshes[i]->destroy();
-    }
-    allMeshes.clear();
+	    for (uint32_t i = 0; i < allMeshes.size(); i++)
+	    {
+	        allMeshes[i]->destroy();
+	    }
+	    allMeshes.clear();
 
-    allLights.clear();
+	    allLights.clear();
 
-    allConstraints.clear();
+	    allConstraints.clear();
 
-    for (uint32_t i = 0; i < allAnimations.size(); i++)
-    {
-        allAnimations[i]->destroy();
-    }
-    allAnimations.clear();
+	    for (uint32_t i = 0; i < allAnimations.size(); i++)
+	    {
+	        allAnimations[i]->destroy();
+	    }
+	    allAnimations.clear();
 
-    allParticleSystems.clear();
-    allParticleSystemSeeds.clear();
+	    allParticleSystems.clear();
+	    allParticleSystemSeeds.clear();
 
-    for (uint32_t i = 0; i < nodeData.size(); i++)
-    {
-        if (nodeData[i].get())
-        {
-        	nodeData[i]->destroy();
-        }
-    }
+	    for (uint32_t i = 0; i < nodeData.size(); i++)
+	    {
+	        if (nodeData[i].get())
+	        {
+	        	nodeData[i]->destroy();
+	        }
+	    }
+	}
+	catch(const std::exception& e)
+	{
+    	logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Catched exception '%s'", e.what());
+	}
 }
 
 } /* namespace vkts */

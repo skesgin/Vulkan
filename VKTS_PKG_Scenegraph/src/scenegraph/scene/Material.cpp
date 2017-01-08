@@ -31,14 +31,21 @@ namespace vkts
 
 void Material::destroyMaterial()
 {
-	for (uint32_t i = 0; i < materialData.size(); i++)
+	try
 	{
-		if (materialData[i].get())
+		for (uint32_t i = 0; i < materialData.size(); i++)
 		{
-			materialData[i]->destroy();
+			if (materialData[i].get())
+			{
+				materialData[i]->destroy();
+			}
 		}
+		materialData.clear();
 	}
-	materialData.clear();
+	catch(const std::exception& e)
+	{
+    	logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Catched exception '%s'", e.what());
+	}
 }
 
 Material::Material(const VkBool32 forwardRendering, const VkBool32 createData, const std::string& name) :

@@ -209,17 +209,24 @@ IBSDFMaterialSP BSDFMaterial::clone() const
 
 void BSDFMaterial::destroy()
 {
-	if (fragmentShader.get())
+	try
 	{
-		fragmentShader->destroy();
-	}
+		if (fragmentShader.get())
+		{
+			fragmentShader->destroy();
+		}
 
-	for (uint32_t i = 0; i < allTextureObjects.size(); i++)
+		for (uint32_t i = 0; i < allTextureObjects.size(); i++)
+		{
+			allTextureObjects[i]->destroy();
+		}
+
+		destroyMaterial();
+	}
+	catch(const std::exception& e)
 	{
-		allTextureObjects[i]->destroy();
+    	logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Catched exception '%s'", e.what());
 	}
-
-	destroyMaterial();
 }
 
 } /* namespace vkts */

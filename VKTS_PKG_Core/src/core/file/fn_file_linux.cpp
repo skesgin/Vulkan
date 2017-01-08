@@ -74,14 +74,9 @@ VkBool32 VKTS_APIENTRY _fileCreateDirectory(const char* directory)
 			foldersToCreate = "";
 		}
 
-		if (stat(targetDirectory.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode))
-		{
-			continue;
-		}
-
 		if (mkdir(targetDirectory.c_str(), S_IRWXU | S_IRWXG | (S_IROTH | S_IXOTH)) != 0)
 		{
-			return VK_FALSE;
+			continue;
 		}
 	}
 

@@ -186,11 +186,18 @@ IMeshSP Mesh::clone() const
 
 void Mesh::destroy()
 {
-    for (uint32_t i = 0; i < allSubMeshes.size(); i++)
-    {
-        allSubMeshes[i]->destroy();
-    }
-    allSubMeshes.clear();
+	try
+	{
+	    for (uint32_t i = 0; i < allSubMeshes.size(); i++)
+	    {
+	        allSubMeshes[i]->destroy();
+	    }
+	    allSubMeshes.clear();
+	}
+	catch(const std::exception& e)
+	{
+    	logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Catched exception '%s'", e.what());
+	}
 }
 
 } /* namespace vkts */

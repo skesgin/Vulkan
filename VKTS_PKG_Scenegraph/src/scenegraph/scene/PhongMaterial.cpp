@@ -370,61 +370,69 @@ IPhongMaterialSP PhongMaterial::clone() const
 
 void PhongMaterial::destroy()
 {
-    if (emissive.get())
-    {
-        emissive->destroy();
-    }
+	try
+	{
 
-    if (alpha.get())
-    {
-        alpha->destroy();
-    }
+	    if (emissive.get())
+	    {
+	        emissive->destroy();
+	    }
 
-    if (displacement.get())
-    {
-        displacement->destroy();
-    }
+	    if (alpha.get())
+	    {
+	        alpha->destroy();
+	    }
 
-    if (normal.get())
-    {
-        normal->destroy();
-    }
+	    if (displacement.get())
+	    {
+	        displacement->destroy();
+	    }
 
-    transparent = VK_FALSE;
+	    if (normal.get())
+	    {
+	        normal->destroy();
+	    }
 
-    if (ambient.get())
-    {
-    	ambient->destroy();
-    }
+	    transparent = VK_FALSE;
 
-    if (diffuse.get())
-    {
-    	diffuse->destroy();
-    }
+	    if (ambient.get())
+	    {
+	    	ambient->destroy();
+	    }
 
-    if (specular.get())
-    {
-    	specular->destroy();
-    }
+	    if (diffuse.get())
+	    {
+	    	diffuse->destroy();
+	    }
 
-    if (specularShininess.get())
-    {
-    	specularShininess->destroy();
-    }
+	    if (specular.get())
+	    {
+	    	specular->destroy();
+	    }
 
-    if (mirror.get())
-    {
-    	mirror->destroy();
-    }
+	    if (specularShininess.get())
+	    {
+	    	specularShininess->destroy();
+	    }
 
-    if (mirrorReflectivity.get())
-    {
-    	mirrorReflectivity->destroy();
-    }
+	    if (mirror.get())
+	    {
+	    	mirror->destroy();
+	    }
 
-    //
+	    if (mirrorReflectivity.get())
+	    {
+	    	mirrorReflectivity->destroy();
+	    }
 
-    destroyMaterial();
+	    //
+
+	    destroyMaterial();
+	}
+	catch(const std::exception& e)
+	{
+    	logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Catched exception '%s'", e.what());
+	}
 }
 
 } /* namespace vkts */
