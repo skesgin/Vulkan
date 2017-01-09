@@ -40,7 +40,7 @@ VKTS_APICALL void VKTS_APIENTRY cacheSetEnabled(const VkBool32 enabled);
  *
  * @ThreadSafe
  */
-VKTS_APICALL VkBool32 VKTS_APIENTRY cacheSaveImageData(const IImageDataSP& imageData);
+VKTS_APICALL VkBool32 VKTS_APIENTRY cacheSaveImageData(const IImageDataSP& imageData, const std::string& filename = "");
 
 /**
  *

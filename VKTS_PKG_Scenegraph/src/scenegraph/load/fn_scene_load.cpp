@@ -284,26 +284,34 @@ static VkBool32 sceneLoadImageObjects(const char* directory, const char* filenam
 						auto sourceImageName = finalImageDataFilename.substr(0, dotIndex);
 						auto sourceImageExtension = finalImageDataFilename.substr(dotIndex);
 
-						if (imageData->getArrayLayers() != 6)
+						if (imageData->getArrayLayers() % 6 != 0)
 						{
 							SmartPointerVector<IImageDataSP> allCubeMaps;
 
 							if (cacheGetEnabled())
 							{
-								for (uint32_t layer = 0; layer < 6; layer++)
+								uint32_t levelCount = (uint32_t)log2f((float)(imageData->getHeight()));
+
+								if (cacheGetEnabled())
 								{
-									auto targetImageFilename = sourceImageName + "_LAYER" + std::to_string(layer) + sourceImageExtension;
-
-									auto targetImage = cacheLoadImageData(targetImageFilename.c_str());
-
-									if (!targetImage.get())
+									for (uint32_t layer = 0; layer < 6; layer++)
 									{
-										allCubeMaps.clear();
+										for (uint32_t level = 0; level < levelCount; level++)
+										{
+											auto targetImageFilename = sourceImageName + "_LEVEL" + std::to_string(level) + "_LAYER" + std::to_string(layer) + sourceImageExtension;
 
-										break;
+											auto targetImageData = cacheLoadImageData(targetImageFilename.c_str());
+
+											if (!targetImageData.get())
+											{
+												allCubeMaps.clear();
+
+												break;
+											}
+
+											allCubeMaps.append(targetImageData);
+										}
 									}
-
-									allCubeMaps.append(targetImage);
 								}
 							}
 
@@ -311,22 +319,43 @@ static VkBool32 sceneLoadImageObjects(const char* directory, const char* filenam
 
 							if (allCubeMaps.size() == 0)
 							{
-								allCubeMaps = imageDataCubemap(imageData, imageData->getHeight() / 2, finalImageDataFilename);
+								auto oldAllCubeMaps = imageDataCubemap(imageData, imageData->getHeight() / 2, finalImageDataFilename);
 
-								if (allCubeMaps.size() == 0)
+								if (oldAllCubeMaps.size() != 6)
 								{
 									logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create cube maps for '%s'", finalImageDataFilename.c_str());
 
 									return VK_FALSE;
 								}
 
+						        for (uint32_t layer = 0; layer < 6; layer++)
+						        {
+									auto tempMipMaps = imageDataMipmap(oldAllCubeMaps[layer], VK_FALSE, finalImageDataFilename);
+
+									if (tempMipMaps.size() == 0)
+									{
+										logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create mip maps for '%s'", finalImageDataFilename.c_str());
+
+										return VK_FALSE;
+									}
+
+									for (uint32_t mipLevel = 0; mipLevel < tempMipMaps.size(); mipLevel++)
+									{
+										allCubeMaps.append(tempMipMaps[mipLevel]);
+									}
+						        }
+
 								if (cacheGetEnabled())
 								{
 									logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Storing cached data for '%s'", finalImageDataFilename.c_str());
 
+									uint32_t mipLevels = allCubeMaps.size() / 6;
+
 									for (uint32_t i = 0; i < allCubeMaps.size(); i++)
 									{
-										cacheSaveImageData(allCubeMaps[i]);
+										auto targetImageFilename = sourceImageName + "_LEVEL" + std::to_string(i % mipLevels) + "_LAYER" + std::to_string(i / mipLevels) + sourceImageExtension;
+
+										cacheSaveImageData(allCubeMaps[i], targetImageFilename);
 									}
 								}
 							}
@@ -340,7 +369,7 @@ static VkBool32 sceneLoadImageObjects(const char* directory, const char* filenam
 								allCubeMaps[i] = createDeviceImageData(sceneManager->getAssetManager(), allCubeMaps[i]);
 							}
 
-							imageData = imageDataMerge(allCubeMaps, finalImageDataFilename, 1, allCubeMaps.size());
+							imageData = imageDataMerge(allCubeMaps, finalImageDataFilename, allCubeMaps.size() / 6, 6);
 
 							if (!imageData.get())
 							{
@@ -765,13 +794,6 @@ static VkBool32 sceneLoadTextureObjects(const char* directory, const char* filen
 
             //
 
-            if (preFiltered && environment)
-            {
-                // The pre-filtered images are stored in the mip map layers.
-
-            	mipMap = VK_TRUE;
-            }
-
             imageObject = sceneManager->useImageObject(sdata);
 
 			if (!imageObject.get())
@@ -812,7 +834,7 @@ static VkBool32 sceneLoadTextureObjects(const char* directory, const char* filen
     				return VK_FALSE;
     			}
 
-                textureObject = createTextureObject(sceneManager->getAssetManager(), textureObjectName + "_LAMBERT", mipMap, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_REPEAT, imageObject);
+                textureObject = createTextureObject(sceneManager->getAssetManager(), textureObjectName + "_LAMBERT", VK_FALSE, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_REPEAT, imageObject);
 
                 if (!textureObject.get())
                 {
@@ -834,7 +856,7 @@ static VkBool32 sceneLoadTextureObjects(const char* directory, const char* filen
     				return VK_FALSE;
     			}
 
-    			textureObject = createTextureObject(sceneManager->getAssetManager(), textureObjectName + "_COOKTORRANCE", mipMap, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_REPEAT, imageObject);
+    			textureObject = createTextureObject(sceneManager->getAssetManager(), textureObjectName + "_COOKTORRANCE", VK_TRUE, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_REPEAT, imageObject);
 
                 if (!textureObject.get())
                 {

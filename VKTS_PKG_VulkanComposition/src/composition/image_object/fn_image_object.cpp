@@ -346,7 +346,7 @@ IImageObjectSP VKTS_APIENTRY imageObjectCreate(IImageSP& stageImage, IBufferSP& 
 
     imageViewCreateInfo.flags = 0;
     imageViewCreateInfo.image = image->getImage();
-    imageViewCreateInfo.viewType = image->getArrayLayers() == 6 ? VK_IMAGE_VIEW_TYPE_CUBE : VK_IMAGE_VIEW_TYPE_2D;
+    imageViewCreateInfo.viewType = (image->getFlags() & VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT) ? VK_IMAGE_VIEW_TYPE_CUBE : VK_IMAGE_VIEW_TYPE_2D;
     imageViewCreateInfo.format = image->getFormat();
     imageViewCreateInfo.components = {VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY};
     imageViewCreateInfo.subresourceRange = subresourceRange;
@@ -400,7 +400,7 @@ IImageObjectSP VKTS_APIENTRY imageObjectCreate(const IContextObjectSP& contextOb
 
     imageViewCreateInfo.flags = 0;
     imageViewCreateInfo.image = image->getImage();
-    imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+    imageViewCreateInfo.viewType = (image->getFlags() & VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT) ? VK_IMAGE_VIEW_TYPE_CUBE : VK_IMAGE_VIEW_TYPE_2D;
     imageViewCreateInfo.format = image->getFormat();
     imageViewCreateInfo.components = {VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY};
     imageViewCreateInfo.subresourceRange = subresourceRange;

@@ -2609,6 +2609,13 @@ def save(operator,
         fw("\n")
         fw("texture %s\n" % (currentEnvironmentTexture))
         fw("\n")
+        
+        if context.scene.world.use_nodes:    
+            for currentNode in context.scene.world.node_tree.nodes:
+                if isinstance(currentNode, bpy.types.ShaderNodeBackground):
+                    fw("environment_strength %f\n" % (currentNode.inputs[1].default_value))
+                    fw("\n")
+                    break
     
     file.close()
 

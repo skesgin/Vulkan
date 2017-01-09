@@ -30,10 +30,10 @@
 #include "../scene/RenderNode.hpp"
 #include "../scene/RenderSubMesh.hpp"
 
-#define VKTS_MIN_IMAGE_SIZE 16u
+#define VKTS_PREFILTER_VERTEX_SHADER_NAME "shader/SPIR/V/prefilter.vert.spv"
 
-#define VKTS_LAMBERT_COMPUTE_SHADER_NAME "shader/SPIR/V/prefilter_lambert.comp.spv"
-#define VKTS_COOKTORRANCE_COMPUTE_SHADER_NAME "shader/SPIR/V/prefilter_cooktorrance.comp.spv"
+#define VKTS_LAMBERT_FRAGMENT_SHADER_NAME "shader/SPIR/V/prefilter_lambert.frag.spv"
+#define VKTS_COOKTORRANCE_FRAGMENT_SHADER_NAME "shader/SPIR/V/prefilter_cooktorrance.frag.spv"
 
 namespace vkts
 {
@@ -684,30 +684,46 @@ SmartPointerVector<IImageDataSP> SceneRenderFactory::prefilter(const ISceneManag
     }
 
     //
-    // Prepare compute path.
+    // Prepare render path.
     //
 
-    const char* filename = VKTS_LAMBERT_COMPUTE_SHADER_NAME;
+    const char* vertexFilename = VKTS_PREFILTER_VERTEX_SHADER_NAME;
+
+    auto vertexShaderBinary = fileLoadBinary(vertexFilename);
+
+	if (!vertexShaderBinary.get())
+	{
+		return SmartPointerVector<IImageDataSP>();
+	}
+
+	auto vertexShaderModule = shaderModuleCreate(vertexFilename, sceneManager->getContextObject()->getDevice()->getDevice(), 0, vertexShaderBinary->getSize(), (const uint32_t*)vertexShaderBinary->getData());
+
+	if (!vertexShaderModule.get())
+	{
+		return SmartPointerVector<IImageDataSP>();
+	}
+
+
+    const char* fragmentFilename = VKTS_LAMBERT_FRAGMENT_SHADER_NAME;
 
     if (!useLambert)
     {
-    	filename = VKTS_COOKTORRANCE_COMPUTE_SHADER_NAME;
+    	fragmentFilename = VKTS_COOKTORRANCE_FRAGMENT_SHADER_NAME;
     }
 
-    auto computeShaderBinary = fileLoadBinary(filename);
+    auto fragmentShaderBinary = fileLoadBinary(fragmentFilename);
 
-	if (!computeShaderBinary.get())
+	if (!fragmentShaderBinary.get())
 	{
 		return SmartPointerVector<IImageDataSP>();
 	}
 
-	auto computeShaderModule = shaderModuleCreate(filename, sceneManager->getContextObject()->getDevice()->getDevice(), 0, computeShaderBinary->getSize(), (const uint32_t*)computeShaderBinary->getData());
+	auto fragmentShaderModule = shaderModuleCreate(fragmentFilename, sceneManager->getContextObject()->getDevice()->getDevice(), 0, fragmentShaderBinary->getSize(), (const uint32_t*)fragmentShaderBinary->getData());
 
-	if (!computeShaderModule.get())
+	if (!fragmentShaderModule.get())
 	{
 		return SmartPointerVector<IImageDataSP>();
 	}
-
 	//
 
 	auto sourceImageObject = createImageObject(sceneManager->getAssetManager(), "DummyCubeMap", sourceImage, VK_TRUE);
@@ -719,7 +735,7 @@ SmartPointerVector<IImageDataSP> SceneRenderFactory::prefilter(const ISceneManag
 
     sceneManager->addImageObject(sourceImageObject);
 
-	auto sourceTextureObject = createTextureObject(sceneManager->getAssetManager(), "DummyCubeMap", VK_FALSE, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_REPEAT, sourceImageObject);
+	auto sourceTextureObject = createTextureObject(sceneManager->getAssetManager(), "DummyCubeMap", VK_TRUE, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_REPEAT, sourceImageObject);
 
     if (!sourceTextureObject.get())
     {
@@ -730,21 +746,15 @@ SmartPointerVector<IImageDataSP> SceneRenderFactory::prefilter(const ISceneManag
 
     //
 
-	VkDescriptorSetLayoutBinding descriptorSetLayoutBinding[2]{};
+	VkDescriptorSetLayoutBinding descriptorSetLayoutBinding[1]{};
 
 	descriptorSetLayoutBinding[0].binding = 0;
-	descriptorSetLayoutBinding[0].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+	descriptorSetLayoutBinding[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 	descriptorSetLayoutBinding[0].descriptorCount = 1;
-	descriptorSetLayoutBinding[0].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+	descriptorSetLayoutBinding[0].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 	descriptorSetLayoutBinding[0].pImmutableSamplers = nullptr;
 
-	descriptorSetLayoutBinding[1].binding = 1;
-	descriptorSetLayoutBinding[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	descriptorSetLayoutBinding[1].descriptorCount = 1;
-	descriptorSetLayoutBinding[1].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
-	descriptorSetLayoutBinding[1].pImmutableSamplers = nullptr;
-
-	auto descriptorSetLayout = descriptorSetLayoutCreate(sceneManager->getContextObject()->getDevice()->getDevice(), 0, 2, descriptorSetLayoutBinding);
+	auto descriptorSetLayout = descriptorSetLayoutCreate(sceneManager->getContextObject()->getDevice()->getDevice(), 0, 1, descriptorSetLayoutBinding);
 
 	if (!descriptorSetLayout.get())
 	{
@@ -752,15 +762,12 @@ SmartPointerVector<IImageDataSP> SceneRenderFactory::prefilter(const ISceneManag
 	}
 
 
-    VkDescriptorPoolSize descriptorPoolSize[2]{};
+    VkDescriptorPoolSize descriptorPoolSize[1]{};
 
-    descriptorPoolSize[0].type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+    descriptorPoolSize[0].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     descriptorPoolSize[0].descriptorCount = 1;
 
-    descriptorPoolSize[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    descriptorPoolSize[1].descriptorCount = 1;
-
-    auto descriptorPool = descriptorPoolCreate(sceneManager->getContextObject()->getDevice()->getDevice(), VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT, 1, 2, descriptorPoolSize);
+    auto descriptorPool = descriptorPoolCreate(sceneManager->getContextObject()->getDevice()->getDevice(), VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT, 1, 1, descriptorPoolSize);
 
     if (!descriptorPool.get())
     {
@@ -779,40 +786,130 @@ SmartPointerVector<IImageDataSP> SceneRenderFactory::prefilter(const ISceneManag
 
 	//
 
-    VkPushConstantRange pushConstantRange[1]{};
+    VkPushConstantRange pushConstantRange[2]{};
 
-    pushConstantRange[0].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+    pushConstantRange[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
     pushConstantRange[0].offset = 0;
-    pushConstantRange[0].size = sizeof(uint32_t) + sizeof(uint32_t) + sizeof(uint32_t);
+    pushConstantRange[0].size = sizeof(float) * 4 * 4;
+
+    pushConstantRange[1].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    pushConstantRange[1].offset = pushConstantRange[0].size;
+    pushConstantRange[1].size = sizeof(uint32_t);
     if (!useLambert)
     {
-    	pushConstantRange[0].size += sizeof(float);
+    	pushConstantRange[1].size += sizeof(float);
     }
 
 	const VkDescriptorSetLayout currentDescriptorSet = descriptorSetLayout->getDescriptorSetLayout();
 
-	auto pipelineLayout = pipelineCreateLayout(sceneManager->getContextObject()->getDevice()->getDevice(), 0, 1, &currentDescriptorSet, 1, pushConstantRange);
+	auto pipelineLayout = pipelineCreateLayout(sceneManager->getContextObject()->getDevice()->getDevice(), 0, 1, &currentDescriptorSet, 2, pushConstantRange);
 
 	if (!pipelineLayout.get())
 	{
 		return SmartPointerVector<IImageDataSP>();
 	}
 
+	//
+	// Render pass
+	//
 
-	DefaultComputePipeline computePipeline;
+	VkAttachmentDescription attachmentDescription{};
 
-	computePipeline.getPipelineShaderStageCreateInfo().module = computeShaderModule->getShaderModule();
+	attachmentDescription.flags = 0;
+	attachmentDescription.format = VK_FORMAT_R32G32B32A32_SFLOAT;
+	attachmentDescription.samples = VK_SAMPLE_COUNT_1_BIT;
+	attachmentDescription.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+	attachmentDescription.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+	attachmentDescription.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+	attachmentDescription.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+	attachmentDescription.initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+	attachmentDescription.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
-	computePipeline.getComputePipelineCreateInfo().layout = pipelineLayout->getPipelineLayout();
+	VkAttachmentReference colorAttachmentReference{};
 
-	auto pipeline = pipelineCreateCompute(sceneManager->getContextObject()->getDevice()->getDevice(), VK_NULL_HANDLE, computePipeline.getComputePipelineCreateInfo());
+	colorAttachmentReference.attachment = 0;
+	colorAttachmentReference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
-	if (!pipeline.get())
+	VkSubpassDescription subpassDescription{};
+
+	subpassDescription.flags = 0;
+	subpassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+	subpassDescription.inputAttachmentCount = 0;
+	subpassDescription.pInputAttachments = nullptr;
+	subpassDescription.colorAttachmentCount = 1;
+	subpassDescription.pColorAttachments = &colorAttachmentReference;
+	subpassDescription.pResolveAttachments = nullptr;
+	subpassDescription.pDepthStencilAttachment = nullptr;
+	subpassDescription.preserveAttachmentCount = 0;
+	subpassDescription.pPreserveAttachments = nullptr;
+
+	auto renderPass = vkts::renderPassCreate(sceneManager->getContextObject()->getDevice()->getDevice(), 0, 1, &attachmentDescription, 1, &subpassDescription, 0, nullptr);
+
+	if (!renderPass.get())
 	{
 		return SmartPointerVector<IImageDataSP>();
 	}
 
+	//
+	// Graphics pipeline setup
+	//
+
+    DefaultGraphicsPipeline gp;
+
+    gp.getPipelineShaderStageCreateInfo(0).stage = VK_SHADER_STAGE_VERTEX_BIT;
+    gp.getPipelineShaderStageCreateInfo(0).module = vertexShaderModule->getShaderModule();
+
+    gp.getPipelineShaderStageCreateInfo(1).stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+    gp.getPipelineShaderStageCreateInfo(1).module = fragmentShaderModule->getShaderModule();
+
+
+    gp.getPipelineInputAssemblyStateCreateInfo().topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
+
+
+    gp.getViewports(0).x = 0.0f;
+    gp.getViewports(0).y = 0.0f;
+    gp.getViewports(0).width = 1.0f;
+    gp.getViewports(0).height = 1.0f;
+    gp.getViewports(0).minDepth = 0.0f;
+    gp.getViewports(0).maxDepth = 1.0f;
+
+
+    gp.getScissors(0).offset.x = 0;
+    gp.getScissors(0).offset.y = 0;
+    gp.getScissors(0).extent = {1, 1};
+
+
+    gp.getPipelineRasterizationStateCreateInfo();
+
+    gp.getPipelineMultisampleStateCreateInfo();
+
+    gp.getPipelineColorBlendAttachmentState(0).colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+
+    gp.getDynamicState(0) = VK_DYNAMIC_STATE_VIEWPORT;
+    gp.getDynamicState(1) = VK_DYNAMIC_STATE_SCISSOR;
+
+
+    gp.getGraphicsPipelineCreateInfo().layout = pipelineLayout->getPipelineLayout();
+    gp.getGraphicsPipelineCreateInfo().renderPass = renderPass->getRenderPass();
+
     //
+
+    VkPipelineCache pipelineCache = VK_NULL_HANDLE;
+
+    if (this->pipelineCache.get())
+    {
+    	pipelineCache = this->pipelineCache->getPipelineCache();
+    }
+
+    //
+
+    auto graphicsPipeline = pipelineCreateGraphics(sceneManager->getContextObject()->getDevice()->getDevice(), pipelineCache, gp.getGraphicsPipelineCreateInfo(), 0);
+
+    if (!graphicsPipeline.get())
+    {
+    	return SmartPointerVector<IImageDataSP>();
+    }
+
     //
     //
 
@@ -861,54 +958,66 @@ SmartPointerVector<IImageDataSP> SceneRenderFactory::prefilter(const ISceneManag
 
 	SmartPointerMap<std::string, IImageDataSP> tempResult;
 
+	if (sceneManager->getAssetManager()->getCommandObject()->getCommandBuffer()->beginCommandBuffer(0, VK_NULL_HANDLE, 0, VK_NULL_HANDLE, VK_FALSE, 0, 0) != VK_SUCCESS)
+	{
+		return SmartPointerVector<IImageDataSP>();
+	}
+
 	for (uint32_t roughnessSampleIndex = 0; roughnessSampleIndex < roughnessSamples; roughnessSampleIndex++)
 	{
 		uint32_t imageLength = sourceImage->getWidth() / (1 << roughnessSampleIndex);
 
-	    auto targetImage = imageCreate(sceneManager->getContextObject()->getDevice()->getDevice(), 0, VK_IMAGE_TYPE_2D, VK_FORMAT_R32G32B32A32_SFLOAT, {glm::max(imageLength, VKTS_MIN_IMAGE_SIZE), glm::max(imageLength, VKTS_MIN_IMAGE_SIZE), 1}, 1, 1, VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_STORAGE_BIT, VK_SHARING_MODE_EXCLUSIVE, 0, nullptr, VK_IMAGE_LAYOUT_UNDEFINED, 0);
+		VkImageCreateInfo imageCreateInfo{};
 
+		imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 
-		VkMemoryRequirements memoryRequirements;
+		imageCreateInfo.flags = 0;
+		imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
+		imageCreateInfo.format = VK_FORMAT_R32G32B32A32_SFLOAT;
+		imageCreateInfo.extent = {imageLength, imageLength, 1};
+		imageCreateInfo.mipLevels = 1;
+		imageCreateInfo.arrayLayers = 1;
+		imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+		imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+		imageCreateInfo.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+		imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+		imageCreateInfo.queueFamilyIndexCount = 0;
+		imageCreateInfo.pQueueFamilyIndices = nullptr;
+		imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
-		targetImage->getImageMemoryRequirements(memoryRequirements);
+		VkImageSubresourceRange subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
 
-		VkPhysicalDeviceMemoryProperties physicalDeviceMemoryProperties;
+		auto targetImageObject = imageObjectCreate(sceneManager->getContextObject(), sceneManager->getAssetManager()->getCommandObject()->getCommandBuffer(), "DummyBuffer", imageCreateInfo, 0, VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, subresourceRange, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-		sceneManager->getContextObject()->getPhysicalDevice()->getPhysicalDeviceMemoryProperties(physicalDeviceMemoryProperties);
-
-		auto targetDeviceMemory = deviceMemoryCreate(sceneManager->getContextObject()->getDevice()->getDevice(), memoryRequirements, VK_MAX_MEMORY_TYPES, physicalDeviceMemoryProperties.memoryTypes, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-
-		if (!targetDeviceMemory.get())
+		if (!targetImageObject.get())
 		{
-			return SmartPointerVector<IImageDataSP>();
+			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create GBuffer texture.");
+
+			return VK_FALSE;
 		}
 
-		if (vkBindImageMemory(sceneManager->getContextObject()->getDevice()->getDevice(), targetImage->getImage(), targetDeviceMemory->getDeviceMemory(), 0) != VK_SUCCESS)
-		{
-			return SmartPointerVector<IImageDataSP>();
-		}
+		//
+		// Framebuffer
+		//
 
+		auto imageView = targetImageObject->getImageView()->getImageView();
 
-		auto targetImageView = imageViewCreate(sceneManager->getContextObject()->getDevice()->getDevice(), 0, targetImage->getImage(), VK_IMAGE_VIEW_TYPE_2D, targetImage->getFormat(), { VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_G, VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_A }, { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 });
+		auto framebuffer = framebufferCreate(sceneManager->getContextObject()->getDevice()->getDevice(), 0, renderPass->getRenderPass(), 1, &imageView, imageLength, imageLength, 1);
 
-		if (!targetImageView.get())
+		if (!framebuffer.get())
 		{
 			return SmartPointerVector<IImageDataSP>();
 		}
 
 		//
 
-		VkDescriptorImageInfo descriptorImageInfo[2]{};
+		VkDescriptorImageInfo descriptorImageInfo[1]{};
 
-		descriptorImageInfo[0].sampler = VK_NULL_HANDLE;
-		descriptorImageInfo[0].imageView = targetImageView->getImageView();
+		descriptorImageInfo[0].sampler = sourceTextureObject->getSampler()->getSampler();
+		descriptorImageInfo[0].imageView = sourceTextureObject->getImageObject()->getImageView()->getImageView();
 		descriptorImageInfo[0].imageLayout = VK_IMAGE_LAYOUT_GENERAL;
 
-		descriptorImageInfo[1].sampler = sourceTextureObject->getSampler()->getSampler();
-		descriptorImageInfo[1].imageView = sourceTextureObject->getImageObject()->getImageView()->getImageView();
-		descriptorImageInfo[1].imageLayout = VK_IMAGE_LAYOUT_GENERAL;
-
-		VkWriteDescriptorSet writeDescriptorSet[2]{};
+		VkWriteDescriptorSet writeDescriptorSet[1]{};
 
 		writeDescriptorSet[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 
@@ -916,23 +1025,12 @@ SmartPointerVector<IImageDataSP> SceneRenderFactory::prefilter(const ISceneManag
 		writeDescriptorSet[0].dstBinding = 0;
 		writeDescriptorSet[0].dstArrayElement = 0;
 		writeDescriptorSet[0].descriptorCount = 1;
-		writeDescriptorSet[0].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+		writeDescriptorSet[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 		writeDescriptorSet[0].pImageInfo = &descriptorImageInfo[0];
 		writeDescriptorSet[0].pBufferInfo = nullptr;
 		writeDescriptorSet[0].pTexelBufferView = nullptr;
 
-		writeDescriptorSet[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-
-		writeDescriptorSet[1].dstSet = descriptorSet->getDescriptorSets()[0];
-		writeDescriptorSet[1].dstBinding = 1;
-		writeDescriptorSet[1].dstArrayElement = 0;
-		writeDescriptorSet[1].descriptorCount = 1;
-		writeDescriptorSet[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		writeDescriptorSet[1].pImageInfo = &descriptorImageInfo[1];
-		writeDescriptorSet[1].pBufferInfo = nullptr;
-		writeDescriptorSet[1].pTexelBufferView = nullptr;
-
-		descriptorSet->updateDescriptorSets( 2, writeDescriptorSet, 0, nullptr);
+		descriptorSet->updateDescriptorSets(1, writeDescriptorSet, 0, nullptr);
 
 		//
 
@@ -945,33 +1043,146 @@ SmartPointerVector<IImageDataSP> SceneRenderFactory::prefilter(const ISceneManag
 
 		for (uint32_t side = 0; side < 6; side++)
 		{
-        	if (sceneManager->getAssetManager()->getCommandObject()->getCommandBuffer()->beginCommandBuffer(0, VK_NULL_HANDLE, 0, VK_NULL_HANDLE, VK_FALSE, 0, 0) != VK_SUCCESS)
-        	{
-        		return SmartPointerVector<IImageDataSP>();
-        	}
+        	VkImageSubresourceRange imageSubresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
+
+        	targetImageObject->getImage()->cmdPipelineBarrier(sceneManager->getAssetManager()->getCommandObject()->getCommandBuffer()->getCommandBuffer(), VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_COLOR_ATTACHMENT_READ_BIT, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, imageSubresourceRange);
+
+            //
+
+        	VkClearColorValue clearColorValue{};
+
+        	clearColorValue.float32[0] = 0.0f;
+        	clearColorValue.float32[1] = 0.0f;
+        	clearColorValue.float32[2] = 1.0f;
+        	clearColorValue.float32[3] = 1.0f;
+
+        	VkClearValue clearValues[1] = {clearColorValue};
+
+        	VkRenderPassBeginInfo renderPassBeginInfo{};
+
+        	renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+        	renderPassBeginInfo.renderPass = renderPass->getRenderPass();
+        	renderPassBeginInfo.framebuffer = framebuffer->getFramebuffer();
+        	renderPassBeginInfo.renderArea.offset.x = 0;
+        	renderPassBeginInfo.renderArea.offset.y = 0;
+        	renderPassBeginInfo.renderArea.extent = {imageLength, imageLength};
+        	renderPassBeginInfo.clearValueCount = 1;
+        	renderPassBeginInfo.pClearValues = clearValues;
+
+        	sceneManager->getAssetManager()->getCommandObject()->getCommandBuffer()->cmdBeginRenderPass(&renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
         	//
 
-        	vkCmdBindPipeline(sceneManager->getAssetManager()->getCommandObject()->getCommandBuffer()->getCommandBuffer(), VK_PIPELINE_BIND_POINT_COMPUTE, pipeline->getPipeline());
+        	vkCmdBindPipeline(sceneManager->getAssetManager()->getCommandObject()->getCommandBuffer()->getCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline->getPipeline());
 
-        	vkCmdBindDescriptorSets(sceneManager->getAssetManager()->getCommandObject()->getCommandBuffer()->getCommandBuffer(), VK_PIPELINE_BIND_POINT_COMPUTE, pipelineLayout->getPipelineLayout(), 0, 1, descriptorSet->getDescriptorSets(), 0, nullptr);
+        	//
 
-        	VkImageSubresourceRange imageSubresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
+        	VkViewport viewport{};
 
-        	targetImage->cmdPipelineBarrier(sceneManager->getAssetManager()->getCommandObject()->getCommandBuffer()->getCommandBuffer(), VK_ACCESS_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL, imageSubresourceRange);
+        	viewport.x = 0.0f;
+        	viewport.y = 0.0f;
+        	viewport.width = (float)imageLength;
+        	viewport.height = (float)imageLength;
+        	viewport.minDepth = 0.0f;
+        	viewport.maxDepth = 1.0f;
 
-        	vkCmdPushConstants(sceneManager->getAssetManager()->getCommandObject()->getCommandBuffer()->getCommandBuffer(), pipelineLayout->getPipelineLayout(), VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(uint32_t), &samples);
-        	vkCmdPushConstants(sceneManager->getAssetManager()->getCommandObject()->getCommandBuffer()->getCommandBuffer(), pipelineLayout->getPipelineLayout(), VK_SHADER_STAGE_COMPUTE_BIT, sizeof(uint32_t), sizeof(uint32_t), &side);
-        	vkCmdPushConstants(sceneManager->getAssetManager()->getCommandObject()->getCommandBuffer()->getCommandBuffer(), pipelineLayout->getPipelineLayout(), VK_SHADER_STAGE_COMPUTE_BIT, 2 * sizeof(uint32_t), sizeof(uint32_t), &imageLength);
-        	if (!useLambert)
+        	vkCmdSetViewport(sceneManager->getAssetManager()->getCommandObject()->getCommandBuffer()->getCommandBuffer(), 0, 1, &viewport);
+
+
+        	VkRect2D scissor{};
+
+        	scissor.offset.x = 0;
+        	scissor.offset.y = 0;
+        	scissor.extent = {imageLength, imageLength};
+
+        	vkCmdSetScissor(sceneManager->getAssetManager()->getCommandObject()->getCommandBuffer()->getCommandBuffer(), 0, 1, &scissor);
+
+        	//
+
+        	vkCmdBindDescriptorSets(sceneManager->getAssetManager()->getCommandObject()->getCommandBuffer()->getCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout->getPipelineLayout(), 0, 1, descriptorSet->getDescriptorSets(), 0, nullptr);
+
+        	//
+        	//
+
+        	// Push side normals.
+        	float normals[(3 + 1) * 4]{};
+
+        	for (uint32_t normalIndex = 0; normalIndex < 4; normalIndex++)
         	{
-        		vkCmdPushConstants(sceneManager->getAssetManager()->getCommandObject()->getCommandBuffer()->getCommandBuffer(), pipelineLayout->getPipelineLayout(), VK_SHADER_STAGE_COMPUTE_BIT, 3 * sizeof(uint32_t), sizeof(float), &roughness);
+				glm::vec3 currentNormal = glm::vec3(0.0f, 0.0f, 0.0f);
+
+				float s = (float)(normalIndex % 2) * 2.0f - 1.0f;
+				float t = (float)(normalIndex / 2) * 2.0f - 1.0f;
+
+				switch (side)
+				{
+					case 0:
+						currentNormal.x = 1.0f;
+
+						currentNormal.y = -t;
+						currentNormal.z = -s;
+						break;
+					case 1:
+						currentNormal.x = -1.0f;
+
+						currentNormal.y = -t;
+						currentNormal.z = s;
+						break;
+					case 2:
+						currentNormal.y = 1.0f;
+
+						currentNormal.x = s;
+						currentNormal.z = t;
+						break;
+					case 3:
+						currentNormal.y = -1.0f;
+
+						currentNormal.x = s;
+						currentNormal.z = -t;
+						break;
+					case 4:
+						currentNormal.z = 1.0f;
+
+						currentNormal.x = s;
+						currentNormal.y = -t;
+						break;
+					case 5:
+						currentNormal.z = -1.0f;
+
+						currentNormal.x = -s;
+						currentNormal.y = -t;
+						break;
+					default:
+						return SmartPointerVector<IImageDataSP>();
+				}
+
+				currentNormal = glm::normalize(currentNormal);
+
+				normals[normalIndex * 4 + 0] = currentNormal.x;
+				normals[normalIndex * 4 + 1] = currentNormal.y;
+				normals[normalIndex * 4 + 2] = currentNormal.z;
+				normals[normalIndex * 4 + 3] = 0.0f;
         	}
 
-        	vkCmdDispatch(sceneManager->getAssetManager()->getCommandObject()->getCommandBuffer()->getCommandBuffer(), targetImage->getWidth(), targetImage->getHeight(), 1u);
+        	vkCmdPushConstants(sceneManager->getAssetManager()->getCommandObject()->getCommandBuffer()->getCommandBuffer(), pipelineLayout->getPipelineLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(normals), normals);
+
+        	//
+        	//
+
+
+        	vkCmdPushConstants(sceneManager->getAssetManager()->getCommandObject()->getCommandBuffer()->getCommandBuffer(), pipelineLayout->getPipelineLayout(), VK_SHADER_STAGE_FRAGMENT_BIT, pushConstantRange[0].size, sizeof(uint32_t), &samples);
+        	if (!useLambert)
+        	{
+        		vkCmdPushConstants(sceneManager->getAssetManager()->getCommandObject()->getCommandBuffer()->getCommandBuffer(), pipelineLayout->getPipelineLayout(), VK_SHADER_STAGE_FRAGMENT_BIT, pushConstantRange[0].size + sizeof(uint32_t), sizeof(float), &roughness);
+        	}
+
+        	// Draw.
+        	vkCmdDraw(sceneManager->getAssetManager()->getCommandObject()->getCommandBuffer()->getCommandBuffer(), 4, 1, 0, 0);
+
+        	sceneManager->getAssetManager()->getCommandObject()->getCommandBuffer()->cmdEndRenderPass();
 
     		// Prepare target image for final layout etc.
-    		targetImage->cmdPipelineBarrier(sceneManager->getAssetManager()->getCommandObject()->getCommandBuffer()->getCommandBuffer(), VK_ACCESS_TRANSFER_READ_BIT, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, imageSubresourceRange);
+        	targetImageObject->getImage()->cmdPipelineBarrier(sceneManager->getAssetManager()->getCommandObject()->getCommandBuffer()->getCommandBuffer(), VK_ACCESS_TRANSFER_READ_BIT, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, imageSubresourceRange);
 
         	//
 
@@ -1009,27 +1220,7 @@ SmartPointerVector<IImageDataSP> SceneRenderFactory::prefilter(const ISceneManag
     			return SmartPointerVector<IImageDataSP>();
     		}
 
-    		auto currentImageData = imageObjectGetDeviceImageData(sceneManager->getContextObject(), sceneManager->getAssetManager()->getCommandObject()->getCommandBuffer(), resultNames[side * roughnessSamples + roughnessSampleIndex], targetImage);
-
-    		if (imageLength != currentImageData->getWidth())
-    		{
-    			auto tempImageData = imageDataCreate(currentImageData->getName(), imageLength, imageLength, 1, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), currentImageData->getImageType(), currentImageData->getFormat());
-
-    			if (!tempImageData.get())
-    			{
-    				return SmartPointerVector<IImageDataSP>();
-    			}
-
-    			for (uint32_t y = 0; y < imageLength; y++)
-    			{
-        			for (uint32_t x = 0; x < imageLength; x++)
-        			{
-        				tempImageData->setTexel(currentImageData->getTexel(x, x, 0, 0, 0), x, y, 0, 0, 0);
-        			}
-    			}
-
-    			currentImageData = tempImageData;
-    		}
+    		auto currentImageData = imageObjectGetDeviceImageData(sceneManager->getContextObject(), sceneManager->getAssetManager()->getCommandObject()->getCommandBuffer(), resultNames[side * roughnessSamples + roughnessSampleIndex], targetImageObject->getImage());
 
     		currentImageData = imageDataConvert(currentImageData, sourceImage->getFormat(), currentImageData->getName());
 
@@ -1039,13 +1230,13 @@ SmartPointerVector<IImageDataSP> SceneRenderFactory::prefilter(const ISceneManag
     		}
 
     		tempResult[resultNames[side * roughnessSamples + roughnessSampleIndex]] = currentImageData;
-    	}
-    }
 
-	if (sceneManager->getAssetManager()->getCommandObject()->getCommandBuffer()->beginCommandBuffer(0, VK_NULL_HANDLE, 0, VK_NULL_HANDLE, VK_FALSE, 0, 0) != VK_SUCCESS)
-	{
-		return SmartPointerVector<IImageDataSP>();
-	}
+    		if (sceneManager->getAssetManager()->getCommandObject()->getCommandBuffer()->beginCommandBuffer(0, VK_NULL_HANDLE, 0, VK_NULL_HANDLE, VK_FALSE, 0, 0) != VK_SUCCESS)
+    		{
+    			return SmartPointerVector<IImageDataSP>();
+    		}
+		}
+    }
 
 	SmartPointerVector<IImageDataSP> result;
 

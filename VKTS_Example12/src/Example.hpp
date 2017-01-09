@@ -60,6 +60,7 @@
 
 
 #define VKTS_SCENE_NAME "buster_drone/buster_drone.vkts"
+//#define VKTS_SCENE_NAME "cerberus/cerberus.vkts"
 
 #define VKTS_ENVIRONMENT_SCENE_NAME "primitives/sphere.vkts"
 

@@ -156,6 +156,20 @@ ITextureObjectSP VKTS_APIENTRY createTextureObject(const IAssetManagerSP& assetM
         return ITextureObjectSP();
     }
 
+    float maxLod = 0.0f;
+
+    if (mipmap)
+    {
+    	if (imageObject->getImageData()->getMipLevels() > 1)
+    	{
+    		maxLod = (float)(imageObject->getImageData()->getMipLevels() - 1);
+    	}
+    	else
+    	{
+    		maxLod = glm::max(log2f((float)imageObject->getImageData()->getDepth()), glm::max(log2f((float)imageObject->getImageData()->getWidth()), log2f((float)imageObject->getImageData()->getHeight())));
+    	}
+    }
+
     //
 
 	VkSamplerCreateInfo samplerCreateInfo{};
@@ -165,7 +179,7 @@ ITextureObjectSP VKTS_APIENTRY createTextureObject(const IAssetManagerSP& assetM
 	samplerCreateInfo.flags = 0;
 	samplerCreateInfo.magFilter = filter;
 	samplerCreateInfo.minFilter = filter;
-	samplerCreateInfo.mipmapMode = mipmap && imageObject->getImage()->getMipLevels() > 1 ? VK_SAMPLER_MIPMAP_MODE_LINEAR : VK_SAMPLER_MIPMAP_MODE_NEAREST;
+	samplerCreateInfo.mipmapMode = mipmap ? VK_SAMPLER_MIPMAP_MODE_LINEAR : VK_SAMPLER_MIPMAP_MODE_NEAREST;
 	samplerCreateInfo.addressModeU = samplerAddressMode;
 	samplerCreateInfo.addressModeV = samplerAddressMode;
 	samplerCreateInfo.addressModeW = samplerAddressMode;
@@ -174,7 +188,7 @@ ITextureObjectSP VKTS_APIENTRY createTextureObject(const IAssetManagerSP& assetM
 	samplerCreateInfo.compareEnable = VK_FALSE;
 	samplerCreateInfo.compareOp = VK_COMPARE_OP_NEVER;
 	samplerCreateInfo.minLod = 0.0f;
-	samplerCreateInfo.maxLod = mipmap ? (float)(imageObject->getImageData()->getMipLevels() - 1) : 0.0f;
+	samplerCreateInfo.maxLod = maxLod;
 	samplerCreateInfo.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
 	samplerCreateInfo.unnormalizedCoordinates = VK_FALSE;
 

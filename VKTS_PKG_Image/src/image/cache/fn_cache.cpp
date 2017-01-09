@@ -78,23 +78,30 @@ void VKTS_APIENTRY cacheSetEnabled(const VkBool32 enabled)
 	g_cacheEnabled = enabled;
 }
 
-VkBool32 VKTS_APIENTRY cacheSaveImageData(const IImageDataSP& imageData)
+VkBool32 VKTS_APIENTRY cacheSaveImageData(const IImageDataSP& imageData, const std::string& filename)
 {
 	if (!imageData.get())
 	{
 		return VK_FALSE;
 	}
 
+	std::string finalFilename = imageData->getName();
+
+	if (filename != "")
+	{
+		finalFilename = filename;
+	}
+
 	//
 
-	if (!fileCreateDirectory(cacheGetDirectory(imageData->getName().c_str()).c_str()))
+	if (!fileCreateDirectory(cacheGetDirectory(finalFilename.c_str()).c_str()))
 	{
 		return VK_FALSE;
 	}
 
 	//
 
-	std::string cacheFilename = cacheGetFilename(imageData->getName().c_str());
+	std::string cacheFilename = cacheGetFilename(finalFilename.c_str());
 
 	if (!imageDataSave(cacheFilename.c_str(), imageData))
 	{
