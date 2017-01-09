@@ -30,6 +30,8 @@
 #include "../scene/RenderNode.hpp"
 #include "../scene/RenderSubMesh.hpp"
 
+#define VKTS_MIN_IMAGE_SIZE 16u
+
 #define VKTS_PREFILTER_VERTEX_SHADER_NAME "shader/SPIR/V/prefilter.vert.spv"
 
 #define VKTS_LAMBERT_FRAGMENT_SHADER_NAME "shader/SPIR/V/prefilter_lambert.frag.spv"
@@ -965,7 +967,8 @@ SmartPointerVector<IImageDataSP> SceneRenderFactory::prefilter(const ISceneManag
 
 	for (uint32_t roughnessSampleIndex = 0; roughnessSampleIndex < roughnessSamples; roughnessSampleIndex++)
 	{
-		uint32_t imageLength = sourceImage->getWidth() / (1 << roughnessSampleIndex);
+		uint32_t imageOriginalLength = sourceImage->getWidth() / (1 << roughnessSampleIndex);
+		uint32_t imageMinimumLength = glm::max(imageOriginalLength, VKTS_MIN_IMAGE_SIZE);
 
 		VkImageCreateInfo imageCreateInfo{};
 
@@ -974,7 +977,7 @@ SmartPointerVector<IImageDataSP> SceneRenderFactory::prefilter(const ISceneManag
 		imageCreateInfo.flags = 0;
 		imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
 		imageCreateInfo.format = VK_FORMAT_R32G32B32A32_SFLOAT;
-		imageCreateInfo.extent = {imageLength, imageLength, 1};
+		imageCreateInfo.extent = {imageMinimumLength, imageMinimumLength, 1};
 		imageCreateInfo.mipLevels = 1;
 		imageCreateInfo.arrayLayers = 1;
 		imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -1002,7 +1005,7 @@ SmartPointerVector<IImageDataSP> SceneRenderFactory::prefilter(const ISceneManag
 
 		auto imageView = targetImageObject->getImageView()->getImageView();
 
-		auto framebuffer = framebufferCreate(sceneManager->getContextObject()->getDevice()->getDevice(), 0, renderPass->getRenderPass(), 1, &imageView, imageLength, imageLength, 1);
+		auto framebuffer = framebufferCreate(sceneManager->getContextObject()->getDevice()->getDevice(), 0, renderPass->getRenderPass(), 1, &imageView, imageMinimumLength, imageMinimumLength, 1);
 
 		if (!framebuffer.get())
 		{
@@ -1065,7 +1068,7 @@ SmartPointerVector<IImageDataSP> SceneRenderFactory::prefilter(const ISceneManag
         	renderPassBeginInfo.framebuffer = framebuffer->getFramebuffer();
         	renderPassBeginInfo.renderArea.offset.x = 0;
         	renderPassBeginInfo.renderArea.offset.y = 0;
-        	renderPassBeginInfo.renderArea.extent = {imageLength, imageLength};
+        	renderPassBeginInfo.renderArea.extent = {imageOriginalLength, imageOriginalLength};
         	renderPassBeginInfo.clearValueCount = 1;
         	renderPassBeginInfo.pClearValues = clearValues;
 
@@ -1081,8 +1084,8 @@ SmartPointerVector<IImageDataSP> SceneRenderFactory::prefilter(const ISceneManag
 
         	viewport.x = 0.0f;
         	viewport.y = 0.0f;
-        	viewport.width = (float)imageLength;
-        	viewport.height = (float)imageLength;
+        	viewport.width = (float)imageOriginalLength;
+        	viewport.height = (float)imageOriginalLength;
         	viewport.minDepth = 0.0f;
         	viewport.maxDepth = 1.0f;
 
@@ -1093,7 +1096,7 @@ SmartPointerVector<IImageDataSP> SceneRenderFactory::prefilter(const ISceneManag
 
         	scissor.offset.x = 0;
         	scissor.offset.y = 0;
-        	scissor.extent = {imageLength, imageLength};
+        	scissor.extent = {imageOriginalLength, imageOriginalLength};
 
         	vkCmdSetScissor(sceneManager->getAssetManager()->getCommandObject()->getCommandBuffer()->getCommandBuffer(), 0, 1, &scissor);
 
@@ -1221,6 +1224,28 @@ SmartPointerVector<IImageDataSP> SceneRenderFactory::prefilter(const ISceneManag
     		}
 
     		auto currentImageData = imageObjectGetDeviceImageData(sceneManager->getContextObject(), sceneManager->getAssetManager()->getCommandObject()->getCommandBuffer(), resultNames[side * roughnessSamples + roughnessSampleIndex], targetImageObject->getImage());
+
+
+    		if (imageOriginalLength != imageMinimumLength)
+    		{
+    			auto tempImageData = imageDataCreate(currentImageData->getName(), imageOriginalLength, imageOriginalLength, 1, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), currentImageData->getImageType(), currentImageData->getFormat());
+
+    			if (!tempImageData.get())
+    			{
+    				return SmartPointerVector<IImageDataSP>();
+    			}
+
+    			for (uint32_t y = 0; y < imageOriginalLength; y++)
+    			{
+        			for (uint32_t x = 0; x < imageOriginalLength; x++)
+        			{
+        				tempImageData->setTexel(currentImageData->getTexel(x, x, 0, 0, 0), x, y, 0, 0, 0);
+        			}
+    			}
+
+    			currentImageData = tempImageData;
+    		}
+
 
     		currentImageData = imageDataConvert(currentImageData, sourceImage->getFormat(), currentImageData->getName());
 
