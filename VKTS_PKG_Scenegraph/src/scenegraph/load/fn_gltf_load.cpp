@@ -33,7 +33,102 @@ namespace vkts
 
 static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visitor, const GltfPrimitive& gltfPrimitive, const ISceneManagerSP& sceneManager, const ISceneFactorySP& sceneFactory)
 {
-	// TODO: Process sub mesh.
+	if (!gltfPrimitive.position)
+	{
+		return VK_FALSE;
+	}
+
+	subMesh->setNumberVertices((int32_t)gltfPrimitive.position->count);
+
+	uint32_t totalSize = 0;
+	uint32_t strideInBytes = 0;
+
+    VkTsVertexBufferType vertexBufferType = 0;
+
+    //
+
+    subMesh->setVertexOffset(strideInBytes);
+    strideInBytes += 4 * sizeof(float);
+
+    totalSize += 4 * sizeof(float) * subMesh->getNumberVertices();
+
+    vertexBufferType |= VKTS_VERTEX_BUFFER_TYPE_VERTEX;
+
+	if (gltfPrimitive.normal)
+	{
+		// TODO: Process normal.
+	}
+
+	if (gltfPrimitive.binormal)
+	{
+		// TODO: Process binormal.
+	}
+
+	if (gltfPrimitive.tangent)
+	{
+		// TODO: Process tangent.
+	}
+
+	if (gltfPrimitive.texCoord)
+	{
+		// TODO: Process texCoord.
+	}
+
+	if (gltfPrimitive.joint)
+	{
+		// TODO: Process joint.
+	}
+
+	if (gltfPrimitive.weight)
+	{
+		// TODO: Process weight.
+	}
+
+	// TODO: Create buffer and Write data.
+
+	//
+	// Indices
+	//
+
+	if (gltfPrimitive.indices)
+	{
+		subMesh->setNumberIndices((int32_t)gltfPrimitive.indices->count);
+	}
+	else
+	{
+		// TODO: Create own indices list.
+
+		subMesh->setNumberIndices((int32_t)gltfPrimitive.position->count);
+	}
+
+	// TODO: Create buffer and Write data.
+
+	switch (gltfPrimitive.mode)
+	{
+		case 0:
+			subMesh->setPrimitiveTopology(VK_PRIMITIVE_TOPOLOGY_POINT_LIST);
+			break;
+		case 1:
+			subMesh->setPrimitiveTopology(VK_PRIMITIVE_TOPOLOGY_LINE_LIST);
+			break;
+		case 2:
+			return VK_FALSE;
+			break;
+		case 3:
+			subMesh->setPrimitiveTopology(VK_PRIMITIVE_TOPOLOGY_LINE_STRIP);
+			break;
+		case 4:
+			subMesh->setPrimitiveTopology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
+			break;
+		case 5:
+			subMesh->setPrimitiveTopology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP);
+			break;
+		case 6:
+			subMesh->setPrimitiveTopology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_FAN);
+			break;
+		default:
+			return VK_FALSE;
+	}
 
 	return VK_TRUE;
 }
