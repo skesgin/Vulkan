@@ -47,6 +47,11 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 
     //
 
+    if (!visitor.isFloat(gltfPrimitive.position->componentType) || !(visitor.getComponentsPerType(gltfPrimitive.position->type) == 3 || visitor.getComponentsPerType(gltfPrimitive.position->type) == 4))
+    {
+    	return VK_FALSE;
+    }
+
     subMesh->setVertexOffset(strideInBytes);
     strideInBytes += 4 * sizeof(float);
 
@@ -56,35 +61,303 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 
 	if (gltfPrimitive.normal)
 	{
-		// TODO: Process normal.
+        if (gltfPrimitive.normal->count != gltfPrimitive.position->count)
+        {
+            logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Normal has different size");
+
+            return VK_FALSE;
+        }
+
+        if (!visitor.isFloat(gltfPrimitive.normal->componentType) || !(visitor.getComponentsPerType(gltfPrimitive.normal->type) == 3))
+        {
+        	return VK_FALSE;
+        }
+
+        subMesh->setNormalOffset(strideInBytes);
+        strideInBytes += 3 * sizeof(float);
+
+        totalSize += 3 * sizeof(float) * subMesh->getNumberVertices();
+
+        vertexBufferType |= VKTS_VERTEX_BUFFER_TYPE_NORMAL;
 	}
 
-	if (gltfPrimitive.binormal)
-	{
-		// TODO: Process binormal.
-	}
+    if (gltfPrimitive.normal && gltfPrimitive.binormal && gltfPrimitive.tangent)
+    {
+        if (gltfPrimitive.binormal->count != gltfPrimitive.position->count)
+        {
+            logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Bitangent has different size");
 
-	if (gltfPrimitive.tangent)
-	{
-		// TODO: Process tangent.
-	}
+            return VK_FALSE;
+        }
+
+        if (!visitor.isFloat(gltfPrimitive.binormal->componentType) || !(visitor.getComponentsPerType(gltfPrimitive.binormal->type) == 3))
+        {
+        	return VK_FALSE;
+        }
+
+        subMesh->setBitangentOffset(strideInBytes);
+        strideInBytes += 3 * sizeof(float);
+
+        totalSize += 3 * sizeof(float) * subMesh->getNumberVertices();
+
+        //
+
+        if (gltfPrimitive.tangent->count != gltfPrimitive.position->count)
+        {
+            logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Tangent has different size");
+
+            return VK_FALSE;
+        }
+
+        if (!visitor.isFloat(gltfPrimitive.tangent->componentType) || !(visitor.getComponentsPerType(gltfPrimitive.tangent->type) == 3))
+        {
+        	return VK_FALSE;
+        }
+
+        subMesh->setTangentOffset(strideInBytes);
+        strideInBytes += 3 * sizeof(float);
+
+        totalSize += 3 * sizeof(float) * subMesh->getNumberVertices();
+
+        //
+
+        vertexBufferType |= VKTS_VERTEX_BUFFER_TYPE_TANGENTS;
+    }
 
 	if (gltfPrimitive.texCoord)
 	{
-		// TODO: Process texCoord.
+        if (gltfPrimitive.texCoord->count != gltfPrimitive.position->count)
+        {
+            logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Texture coordinate has different size");
+
+            return VK_FALSE;
+        }
+
+        if (!visitor.isFloat(gltfPrimitive.texCoord->componentType) || !(visitor.getComponentsPerType(gltfPrimitive.texCoord->type) == 2))
+        {
+        	return VK_FALSE;
+        }
+
+        subMesh->setTexcoordOffset(strideInBytes);
+        strideInBytes += 2 * sizeof(float);
+
+        totalSize += 2 * sizeof(float) * subMesh->getNumberVertices();
+
+        vertexBufferType |= VKTS_VERTEX_BUFFER_TYPE_TEXCOORD;
 	}
 
-	if (gltfPrimitive.joint)
-	{
-		// TODO: Process joint.
-	}
+    if (gltfPrimitive.joint && gltfPrimitive.weight)
+    {
+        if (gltfPrimitive.joint->count != gltfPrimitive.position->count)
+        {
+            logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Joint has different size");
 
-	if (gltfPrimitive.weight)
-	{
-		// TODO: Process weight.
-	}
+            return VK_FALSE;
+        }
 
-	// TODO: Create buffer and Write data.
+        if (!visitor.isFloat(gltfPrimitive.joint->componentType) || !(visitor.getComponentsPerType(gltfPrimitive.joint->type) == 4))
+        {
+        	return VK_FALSE;
+        }
+
+        subMesh->setBoneIndices0Offset(strideInBytes);
+        strideInBytes += 4 * sizeof(float);
+
+        totalSize += 4 * sizeof(float) * subMesh->getNumberVertices();
+
+        //
+
+        subMesh->setBoneIndices1Offset(strideInBytes);
+        strideInBytes += 4 * sizeof(float);
+
+        totalSize += 4 * sizeof(float) * subMesh->getNumberVertices();
+
+        //
+        //
+
+        if (gltfPrimitive.weight->count != gltfPrimitive.position->count)
+        {
+            logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Weight has different size");
+
+            return VK_FALSE;
+        }
+
+        if (!visitor.isFloat(gltfPrimitive.weight->componentType) || !(visitor.getComponentsPerType(gltfPrimitive.weight->type) == 4))
+        {
+        	return VK_FALSE;
+        }
+
+        subMesh->setBoneWeights0Offset(strideInBytes);
+        strideInBytes += 4 * sizeof(float);
+
+        totalSize += 4 * sizeof(float) * subMesh->getNumberVertices();
+
+        //
+
+        subMesh->setBoneWeights1Offset(strideInBytes);
+        strideInBytes += 4 * sizeof(float);
+
+        totalSize += 4 * sizeof(float) * subMesh->getNumberVertices();
+
+        //
+        //
+
+        subMesh->setNumberBonesOffset(strideInBytes);
+        strideInBytes += 1 * sizeof(float);
+
+        totalSize += 1 * sizeof(float) * subMesh->getNumberVertices();
+
+        vertexBufferType |= VKTS_VERTEX_BUFFER_TYPE_BONES;
+    }
+
+    subMesh->setStrideInBytes(strideInBytes);
+
+    if (totalSize > 0)
+    {
+        auto vertexBinaryBuffer = binaryBufferCreate((uint32_t)totalSize);
+
+        if (!vertexBinaryBuffer.get() || vertexBinaryBuffer->getSize() != (uint32_t)totalSize)
+        {
+            logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create vertex binary buffer");
+
+            return VK_FALSE;
+        }
+
+        for (int32_t currentVertexElement = 0; currentVertexElement < subMesh->getNumberVertices(); currentVertexElement++)
+        {
+        	const float* currentFloatData = nullptr;
+
+            if (vertexBufferType & VKTS_VERTEX_BUFFER_TYPE_VERTEX)
+            {
+            	float vertex[4] = {0.0f, 0.0f, 0.0f, 1.0f};
+
+            	currentFloatData = visitor.getFloatPointer(*gltfPrimitive.position, currentVertexElement);
+
+            	if (!currentFloatData)
+            	{
+            		return VK_FALSE;
+            	}
+
+            	for (uint32_t i = 0; i < visitor.getComponentsPerType(gltfPrimitive.position->type); i++)
+            	{
+            		vertex[i] = currentFloatData[i];
+            	}
+
+                vertexBinaryBuffer->write((const void*)vertex, 1, 4 * sizeof(float));
+            }
+            if (vertexBufferType & VKTS_VERTEX_BUFFER_TYPE_NORMAL)
+            {
+            	currentFloatData = visitor.getFloatPointer(*gltfPrimitive.normal, currentVertexElement);
+
+            	if (!currentFloatData)
+            	{
+            		return VK_FALSE;
+            	}
+
+                vertexBinaryBuffer->write((const void*)currentFloatData, 1, 3 * sizeof(float));
+            }
+            if (vertexBufferType & VKTS_VERTEX_BUFFER_TYPE_BITANGENT)
+            {
+            	currentFloatData = visitor.getFloatPointer(*gltfPrimitive.binormal, currentVertexElement);
+
+            	if (!currentFloatData)
+            	{
+            		return VK_FALSE;
+            	}
+
+                vertexBinaryBuffer->write((const void*)currentFloatData, 1, 3 * sizeof(float));
+            }
+            if (vertexBufferType & VKTS_VERTEX_BUFFER_TYPE_TANGENT)
+            {
+            	currentFloatData = visitor.getFloatPointer(*gltfPrimitive.tangent, currentVertexElement);
+
+            	if (!currentFloatData)
+            	{
+            		return VK_FALSE;
+            	}
+
+                vertexBinaryBuffer->write((const void*)currentFloatData, 1, 3 * sizeof(float));
+            }
+            if (vertexBufferType & VKTS_VERTEX_BUFFER_TYPE_TEXCOORD)
+            {
+            	currentFloatData = visitor.getFloatPointer(*gltfPrimitive.texCoord, currentVertexElement);
+
+            	if (!currentFloatData)
+            	{
+            		return VK_FALSE;
+            	}
+
+                vertexBinaryBuffer->write((const void*)currentFloatData, 1, 2 * sizeof(float));
+            }
+            if (vertexBufferType & VKTS_VERTEX_BUFFER_TYPE_BONE_INDICES0)
+            {
+            	currentFloatData = visitor.getFloatPointer(*gltfPrimitive.joint, currentVertexElement);
+
+            	if (!currentFloatData)
+            	{
+            		return VK_FALSE;
+            	}
+
+                vertexBinaryBuffer->write((const void*)currentFloatData, 1, 4 * sizeof(float));
+            }
+            if (vertexBufferType & VKTS_VERTEX_BUFFER_TYPE_BONE_INDICES1)
+            {
+            	float boneIndices1[4] = {-1.0f, -1.0f, -1.0f, -1.0f};
+
+            	// Do not change, as data not given.
+
+                vertexBinaryBuffer->write((const void*)boneIndices1, 1, 4 * sizeof(float));
+            }
+            if (vertexBufferType & VKTS_VERTEX_BUFFER_TYPE_BONE_WEIGHTS0)
+            {
+            	currentFloatData = visitor.getFloatPointer(*gltfPrimitive.weight, currentVertexElement);
+
+            	if (!currentFloatData)
+            	{
+            		return VK_FALSE;
+            	}
+
+                vertexBinaryBuffer->write((const void*)currentFloatData, 1, 4 * sizeof(float));
+            }
+            if (vertexBufferType & VKTS_VERTEX_BUFFER_TYPE_BONE_WEIGHTS1)
+            {
+            	float boneWeights1[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+
+            	// Do not change, as data not given.
+
+                vertexBinaryBuffer->write((const void*)boneWeights1, 1, 4 * sizeof(float));
+            }
+            if (vertexBufferType & VKTS_VERTEX_BUFFER_TYPE_BONE_NUMBERS)
+            {
+            	float numberBones[1] = {4};
+
+            	// Do not change, as data not given.
+
+                vertexBinaryBuffer->write((const void*)numberBones, 1, 1 * sizeof(float));
+            }
+        }
+
+        //
+
+        auto vertexBuffer = createVertexBufferObject(sceneManager->getAssetManager(), vertexBinaryBuffer);
+
+        if (!vertexBuffer.get())
+        {
+            logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create vertex buffer");
+
+            return VK_FALSE;
+        }
+
+        //
+
+        subMesh->setVertexBuffer(vertexBuffer, vertexBufferType, Aabb((const float*)vertexBinaryBuffer->getData(), subMesh->getNumberVertices(), subMesh->getStrideInBytes()));
+    }
+    else
+    {
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Sub mesh incomplete");
+
+        return VK_FALSE;
+    }
 
 	//
 	// Indices
@@ -92,16 +365,84 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 
 	if (gltfPrimitive.indices)
 	{
+		if (visitor.getComponentsPerType(gltfPrimitive.indices->type) != 1)
+		{
+			return VK_FALSE;
+		}
+
 		subMesh->setNumberIndices((int32_t)gltfPrimitive.indices->count);
 	}
 	else
 	{
-		// TODO: Create own indices list.
-
 		subMesh->setNumberIndices((int32_t)gltfPrimitive.position->count);
 	}
 
-	// TODO: Create buffer and Write data.
+	uint32_t size = sizeof(int32_t) * subMesh->getNumberIndices();
+
+    auto indicesBinaryBuffer = binaryBufferCreate(size);
+
+    if (!indicesBinaryBuffer.get() || indicesBinaryBuffer->getSize() != size)
+    {
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create indices binary buffer");
+
+        return VK_FALSE;
+    }
+
+    for (uint32_t i = 0; i < (uint32_t)subMesh->getNumberIndices(); i++)
+    {
+    	int32_t index = (int32_t)i;
+
+    	if (gltfPrimitive.indices)
+    	{
+    		const void* currentVoidPointer = visitor.getBufferPointer(*gltfPrimitive.indices, i);
+
+    		if (!currentVoidPointer)
+    		{
+    			return VK_FALSE;
+    		}
+
+    		switch (gltfPrimitive.indices->componentType)
+    		{
+    			case 5120:
+    				index = (int32_t)*((const int8_t*)currentVoidPointer);
+    				break;
+    			case 5121:
+    				index = (int32_t)*((const uint8_t*)currentVoidPointer);
+    				break;
+    			case 5122:
+    				index = (int32_t)*((const int16_t*)currentVoidPointer);
+    				break;
+    			case 5123:
+    				index = (int32_t)*((const uint16_t*)currentVoidPointer);
+    				break;
+    			case 5125:
+    				index = (int32_t)*((const uint32_t*)currentVoidPointer);
+    				break;
+    			case 5126:
+    				index = (int32_t)*((const float*)currentVoidPointer);
+    				break;
+    			default:
+    				return VK_FALSE;
+    		}
+    	}
+
+    	indicesBinaryBuffer->write((const void*)&index, 1, sizeof(int32_t));
+    }
+
+    //
+
+    auto indexVertexBuffer = createIndexBufferObject(sceneManager->getAssetManager(), indicesBinaryBuffer);
+
+    if (!indexVertexBuffer.get())
+    {
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create indices vertex buffer");
+
+        return VK_FALSE;
+    }
+
+    //
+
+    subMesh->setIndexBuffer(indexVertexBuffer);
 
 	switch (gltfPrimitive.mode)
 	{
@@ -353,6 +694,176 @@ static VkBool32 gltfProcessNode(INodeSP& node, const GltfVisitor& visitor, const
         }
     }
 
+    //
+    // Process animations.
+    //
+
+    IAnimationSP animation;
+
+    for (uint32_t animationIndex = 0; animationIndex < visitor.getAllGltfAnimations().values().size(); animationIndex++)
+    {
+    	const auto& gltfAnimation = visitor.getAllGltfAnimations().values()[animationIndex];
+
+    	for (uint32_t channelIndex = 0; channelIndex < gltfAnimation.channels.size(); channelIndex++)
+    	{
+    		if (gltfAnimation.channels[channelIndex].targetNode == &gltfNode)
+    		{
+    			const auto& gltfChannel = gltfAnimation.channels[channelIndex];
+
+    			if (!gltfChannel.sampler)
+    			{
+    				return VK_FALSE;
+    			}
+
+    			if (!animation.get())
+    			{
+    	            animation = sceneFactory->createAnimation(sceneManager);
+
+    	            if (!animation.get())
+    	            {
+    	                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Animation not created: '%s'", visitor.getAllGltfAnimations().keys()[animationIndex].c_str(), VKTS_MAX_TOKEN_CHARS);
+
+    	                return VK_FALSE;
+    	            }
+
+    	            animation->setName(visitor.getAllGltfAnimations().keys()[animationIndex]);
+
+    	            sceneManager->addAnimation(animation);
+    			}
+
+                //
+
+                auto* timeAccessor = gltfChannel.sampler->input;
+                auto* targetAccessor = gltfChannel.sampler->output;
+
+                if (!timeAccessor || !targetAccessor)
+                {
+                	return VK_FALSE;
+                }
+
+                if (timeAccessor->minFloat.size() == 0 || timeAccessor->maxFloat.size() == 0)
+                {
+                	return VK_FALSE;
+                }
+
+				if (timeAccessor->count != targetAccessor->count)
+				{
+                	return VK_FALSE;
+				}
+
+				if (!visitor.isFloat(timeAccessor->componentType) || !visitor.isFloat(targetAccessor->componentType))
+				{
+                	return VK_FALSE;
+				}
+
+                //
+
+                if (1 != visitor.getComponentsPerType(timeAccessor->type))
+                {
+                	return VK_FALSE;
+                }
+
+
+                VkTsTargetTransform targetTransform;
+
+                uint32_t targetTransformElementCount = 0;
+
+                if (gltfChannel.targetPath == "translation")
+                {
+                	targetTransform = VKTS_TARGET_TRANSFORM_TRANSLATE;
+
+                	targetTransformElementCount = 3;
+                }
+                else if (gltfChannel.targetPath == "rotation")
+                {
+                	targetTransform = VKTS_TARGET_TRANSFORM_QUATERNION_ROTATE;
+
+                	targetTransformElementCount = 4;
+                }
+                else if (gltfChannel.targetPath == "scale")
+                {
+                	targetTransform = VKTS_TARGET_TRANSFORM_SCALE;
+
+                	targetTransformElementCount = 3;
+                }
+                else
+                {
+                	return VK_FALSE;
+                }
+
+                if (targetTransformElementCount != visitor.getComponentsPerType(targetAccessor->type))
+                {
+                	return VK_FALSE;
+                }
+
+                //
+
+                VkTsInterpolator interpolator;
+
+                if (gltfChannel.sampler->interpolation == "STEP")
+                {
+                	interpolator = VKTS_INTERPOLATOR_CONSTANT;
+                }
+                else if (gltfChannel.sampler->interpolation == "LINEAR")
+                {
+                	interpolator = VKTS_INTERPOLATOR_LINEAR;
+                }
+                else
+                {
+                	return VK_FALSE;
+                }
+
+                //
+
+                animation->setStart(glm::min(animation->getStart(), timeAccessor->minFloat[0]));
+                animation->setStop(glm::max(animation->getStop(), timeAccessor->maxFloat[0]));
+
+    			//
+    			// Process channel.
+    			//
+
+                for (uint32_t targetTransformElementIndex = 0; targetTransformElementIndex < targetTransformElementCount; targetTransformElementIndex++)
+                {
+					auto channel = sceneFactory->createChannel(sceneManager);
+
+					std::string channelName = node->getName() + "_" + animation->getName() + "_" + gltfChannel.targetPath + "_" + std::to_string(targetTransformElementIndex);
+
+					if (!channel.get())
+					{
+						logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Channel not created: '%s'", channelName.c_str(), VKTS_MAX_TOKEN_CHARS);
+
+						return VK_FALSE;
+					}
+
+					channel->setName(channelName);
+
+					channel->setTargetTransform(targetTransform);
+
+					channel->setTargetTransformElement((VkTsTargetTransformElement)targetTransformElementIndex);
+
+					//
+
+					sceneManager->addChannel(channel);
+
+					//
+
+					for (uint32_t entryIndex = 0; entryIndex < gltfChannel.sampler->input->count; entryIndex++)
+					{
+						const float* key = visitor.getFloatPointer(*gltfChannel.sampler->input, entryIndex);
+						const float* value = visitor.getFloatPointer(*gltfChannel.sampler->output, entryIndex);
+
+						if (!key || !value)
+						{
+							return VK_FALSE;
+						}
+
+						channel->addEntry(*key, value[targetTransformElementIndex], glm::vec4(*key - 0.1f, value[targetTransformElementIndex], *key + 0.1f, *value), interpolator);
+					}
+                }
+    		}
+    	}
+    }
+
 	return VK_TRUE;
 }
 
@@ -543,7 +1054,16 @@ ISceneSP VKTS_APIENTRY gltfLoad(const char* filename, const ISceneManagerSP& sce
         scene->addObject(currentObject);
     }
 
-    // TODO: Process animations.
+    //
+    // Free host memory if wanted.
+    //
+    if (freeHostMemory)
+    {
+        for (uint32_t i = 0; i < sceneManager->getAllImageDatas().values().size(); i++)
+        {
+        	sceneManager->getAllImageDatas().values()[i]->freeHostMemory();
+        }
+    }
 
     return scene;
 }

@@ -150,6 +150,12 @@ VKTS_APICALL IImageDataSP VKTS_APIENTRY imageDataConvert(const IImageDataSP& sou
  *
  * @ThreadSafe
  */
+VKTS_APICALL IImageDataSP VKTS_APIENTRY imageDataMirror(const IImageDataSP& sourceImage, const VkBool32 mirror[3], const std::string& name);
+
+/**
+ *
+ * @ThreadSafe
+ */
 VKTS_APICALL IImageDataSP VKTS_APIENTRY imageDataCopy(const IImageDataSP& sourceImage, const std::string& name);
 
 /**

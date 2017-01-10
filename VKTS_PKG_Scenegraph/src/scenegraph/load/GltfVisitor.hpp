@@ -288,7 +288,35 @@ public:
 
 	//
 
+	VkBool32 isByte(const int32_t componentType) const;
+
+	VkBool32 isUnsignedByte(const int32_t componentType) const;
+
+	VkBool32 isShort(const int32_t componentType) const;
+
+	VkBool32 isUnsignedShort(const int32_t componentType) const;
+
+	VkBool32 isUnsignedInt(const int32_t componentType) const;
+
+	VkBool32 isFloat(const int32_t componentType) const;
+
+	uint32_t getBytesPerComponent(const int32_t componentType) const;
+
+	uint32_t getComponentsPerType(const std::string& type) const;
+
 	const void* getBufferPointer(const GltfAccessor& accessor, const uint32_t element) const;
+
+	const int8_t* getBytePointer(const GltfAccessor& accessor, const uint32_t element) const;
+
+	const uint8_t* getUnsignedBytePointer(const GltfAccessor& accessor, const uint32_t element) const;
+
+	const int16_t* getShortPointer(const GltfAccessor& accessor, const uint32_t element) const;
+
+	const uint16_t* getUnsignedShortPointer(const GltfAccessor& accessor, const uint32_t element) const;
+
+	const uint32_t* getUnsignedIntPointer(const GltfAccessor& accessor, const uint32_t element) const;
+
+	const float* getFloatPointer(const GltfAccessor& accessor, const uint32_t element) const;
 
 };
 

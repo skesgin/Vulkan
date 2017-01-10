@@ -2158,6 +2158,84 @@ const GltfScene* GltfVisitor::getDefaultScene() const
 	return defaultScene;
 }
 
+VkBool32 GltfVisitor::isByte(const int32_t componentType) const
+{
+	return (VkBool32)(componentType == 5120);
+}
+
+VkBool32 GltfVisitor::isUnsignedByte(const int32_t componentType) const
+{
+	return (VkBool32)(componentType == 5121);
+}
+
+VkBool32 GltfVisitor::isShort(const int32_t componentType) const
+{
+	return (VkBool32)(componentType == 5122);
+}
+
+VkBool32 GltfVisitor::isUnsignedShort(const int32_t componentType) const
+{
+	return (VkBool32)(componentType == 5123);
+}
+
+VkBool32 GltfVisitor::isUnsignedInt(const int32_t componentType) const
+{
+	return (VkBool32)(componentType == 5125);
+}
+
+VkBool32 GltfVisitor::isFloat(const int32_t componentType) const
+{
+	return (VkBool32)(componentType == 5126);
+}
+
+uint32_t GltfVisitor::getBytesPerComponent(const int32_t componentType) const
+{
+	switch (componentType)
+	{
+		case 5120:
+		case 5121:
+			return 1;
+		case 5122:
+		case 5123:
+			return 2;
+		case 5125:
+		case 5126:
+			return 4;
+	}
+
+	return 0;
+}
+
+uint32_t GltfVisitor::getComponentsPerType(const std::string& type) const
+{
+	if (type == "SCALAR")
+	{
+		return 1;
+	}
+	else if (type == "VEC2")
+	{
+		return 2;
+	}
+	else if (type == "VEC3")
+	{
+		return 3;
+	}
+	else if (type == "VEC4" || type == "MAT2")
+	{
+		return 4;
+	}
+	else if (type == "MAT3")
+	{
+		return 9;
+	}
+	else if (type == "MAT4")
+	{
+		return 16;
+	}
+
+	return 0;
+}
+
 const void* GltfVisitor::getBufferPointer(const GltfAccessor& accessor, const uint32_t element) const
 {
 	if (accessor.bufferView == nullptr)
@@ -2183,56 +2261,18 @@ const void* GltfVisitor::getBufferPointer(const GltfAccessor& accessor, const ui
 
 	//
 
-	uint32_t bytesPerComponent = 0;
+	uint32_t bytesPerComponent = getBytesPerComponent(accessor.componentType);
 
-	switch (accessor.componentType)
+	if (bytesPerComponent == 0)
 	{
-		case 5120:
-		case 5121:
-			bytesPerComponent = 1;
-			break;
-		case 5122:
-		case 5123:
-			bytesPerComponent = 2;
-			break;
-		case 5125:
-		case 5126:
-			bytesPerComponent = 4;
-			break;
-
-		default:
-			return nullptr;
+		return nullptr;
 	}
 
 	//
 
-	uint32_t componentsPerType = 0;
+	uint32_t componentsPerType = getComponentsPerType(accessor.type);
 
-	if (accessor.type == "SCALAR")
-	{
-		componentsPerType = 1;
-	}
-	else if (accessor.type == "VEC2")
-	{
-		componentsPerType = 2;
-	}
-	else if (accessor.type == "VEC3")
-	{
-		componentsPerType = 3;
-	}
-	else if (accessor.type == "VEC4" || accessor.type == "MAT2")
-	{
-		componentsPerType = 4;
-	}
-	else if (accessor.type == "MAT3")
-	{
-		componentsPerType = 9;
-	}
-	else if (accessor.type == "MAT4")
-	{
-		componentsPerType = 16;
-	}
-	else
+	if (componentsPerType == 0)
 	{
 		return nullptr;
 	}
@@ -2241,22 +2281,16 @@ const void* GltfVisitor::getBufferPointer(const GltfAccessor& accessor, const ui
 
 	uint32_t elementSize = bytesPerComponent * componentsPerType + accessor.byteStride;
 
-	uint32_t totalOffset = elementSize * element + accessor.byteOffset + accessor.bufferView->byteOffset;
+	uint32_t localOffset = elementSize * element + accessor.byteOffset;
 
-	if (totalOffset >= accessor.bufferView->byteLength)
-	{
-		return nullptr;
-	}
-	if (elementSize + totalOffset > accessor.bufferView->byteLength)
+	if (localOffset >= accessor.bufferView->byteLength || (localOffset + elementSize) > accessor.bufferView->byteLength)
 	{
 		return nullptr;
 	}
 
-	if (totalOffset >= accessor.bufferView->buffer->byteLength)
-	{
-		return nullptr;
-	}
-	if (elementSize + totalOffset > accessor.bufferView->buffer->byteLength)
+	uint32_t totalOffset = localOffset + accessor.bufferView->byteOffset;
+
+	if (totalOffset >= accessor.bufferView->buffer->byteLength || (totalOffset + elementSize) > accessor.bufferView->buffer->byteLength)
 	{
 		return nullptr;
 	}
@@ -2264,6 +2298,66 @@ const void* GltfVisitor::getBufferPointer(const GltfAccessor& accessor, const ui
 	//
 
 	return (const void*)&(accessor.bufferView->buffer->binaryBuffer->getByteData()[totalOffset]);
+}
+
+const int8_t* GltfVisitor::getBytePointer(const GltfAccessor& accessor, const uint32_t element) const
+{
+	if (!isByte(accessor.componentType))
+	{
+		return nullptr;
+	}
+
+	return (const int8_t* )getBufferPointer(accessor, element);
+}
+
+const uint8_t* GltfVisitor::getUnsignedBytePointer(const GltfAccessor& accessor, const uint32_t element) const
+{
+	if (!isUnsignedByte(accessor.componentType))
+	{
+		return nullptr;
+	}
+
+	return (const uint8_t* )getBufferPointer(accessor, element);
+}
+
+const int16_t* GltfVisitor::getShortPointer(const GltfAccessor& accessor, const uint32_t element) const
+{
+	if (!isShort(accessor.componentType))
+	{
+		return nullptr;
+	}
+
+	return (const int16_t* )getBufferPointer(accessor, element);
+}
+
+const uint16_t* GltfVisitor::getUnsignedShortPointer(const GltfAccessor& accessor, const uint32_t element) const
+{
+	if (!isUnsignedShort(accessor.componentType))
+	{
+		return nullptr;
+	}
+
+	return (const uint16_t* )getBufferPointer(accessor, element);
+}
+
+const uint32_t* GltfVisitor::getUnsignedIntPointer(const GltfAccessor& accessor, const uint32_t element) const
+{
+	if (!isUnsignedInt(accessor.componentType))
+	{
+		return nullptr;
+	}
+
+	return (const uint32_t* )getBufferPointer(accessor, element);
+}
+
+const float* GltfVisitor::getFloatPointer(const GltfAccessor& accessor, const uint32_t element) const
+{
+	if (!isFloat(accessor.componentType))
+	{
+		return nullptr;
+	}
+
+	return (const float* )getBufferPointer(accessor, element);
 }
 
 }

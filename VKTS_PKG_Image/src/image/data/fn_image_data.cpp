@@ -1625,6 +1625,43 @@ IImageDataSP VKTS_APIENTRY imageDataConvert(const IImageDataSP& sourceImage, con
     return IImageDataSP(new ImageData(name, sourceImage->getImageType(), targetFormat, sourceImage->getExtent3D(), 1, 1, allOffsets, &targetData[0], sourceImage->getWidth() * sourceImage->getHeight() * sourceImage->getDepth() * targetNumberChannels * targetBytesPerChannel, sourceImage->getMaxLuminance()));
 }
 
+IImageDataSP VKTS_APIENTRY imageDataMirror(const IImageDataSP& sourceImage, const VkBool32 mirror[3], const std::string& name)
+{
+    if (!sourceImage.get() || sourceImage->getMipLevels() != 1 || sourceImage->getArrayLayers() != 1 || !mirror)
+    {
+        return IImageDataSP();
+    }
+
+    if (!mirror[0] && !mirror[1] && !mirror[2])
+    {
+    	return imageDataCopy(sourceImage, name);
+    }
+
+    auto mirrorImage = imageDataCreate(name, sourceImage->getWidth(), sourceImage->getHeight(), sourceImage->getDepth(), sourceImage->getImageType(), sourceImage->getFormat());
+
+    if (!mirrorImage)
+    {
+    	return IImageDataSP();
+    }
+
+    for (int32_t z = 0; z < (int32_t)sourceImage->getDepth(); z++)
+    {
+        for (int32_t y = 0; y < (int32_t)sourceImage->getHeight(); y++)
+        {
+            for (int32_t x = 0; x < (int32_t)sourceImage->getWidth(); x++)
+            {
+            	int32_t xTarget = mirror[0] ? (sourceImage->getWidth() - 1 - x) : x;
+            	int32_t yTarget = mirror[1] ? (sourceImage->getHeight() - 1 - y) : y;
+            	int32_t zTarget = mirror[2] ? (sourceImage->getDepth() - 1 - z) : z;
+
+            	mirrorImage->setTexel(sourceImage->getTexel((uint32_t)x, (uint32_t)y, (uint32_t)z, 0, 0), (uint32_t)xTarget, (uint32_t)yTarget, (uint32_t)zTarget, 0, 0);
+            }
+        }
+    }
+
+    return mirrorImage;
+}
+
 IImageDataSP VKTS_APIENTRY imageDataCopy(const IImageDataSP& sourceImage, const std::string& name)
 {
     if (!sourceImage.get())
