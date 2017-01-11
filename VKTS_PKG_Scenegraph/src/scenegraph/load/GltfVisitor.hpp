@@ -42,6 +42,7 @@ enum GltfState {
 	GltfState_Buffers,
 	GltfState_BufferViews,
 	GltfState_Accessors,
+	GltfState_Images,
 	GltfState_Meshes,
 	GltfState_Skins,
 	GltfState_Nodes,
@@ -51,6 +52,7 @@ enum GltfState {
 	GltfState_Buffer,
 	GltfState_BufferView,
 	GltfState_Accessor,
+	GltfState_Image,
 	GltfState_Mesh,
 	GltfState_Skin,
 	GltfState_Node,
@@ -117,6 +119,10 @@ typedef struct _GltfPrimitive {
 	GltfAccessor* indices;
 	int32_t mode;
 } GltfPrimitive;
+
+typedef struct _GltfImage {
+	IImageDataSP imageData;
+} GltfImage;
 
 typedef struct _GltfMesh {
 	Vector<GltfPrimitive> primitives;
@@ -200,6 +206,7 @@ private:
 	GltfBufferView gltfBufferView;
 	GltfAccessor gltfAccessor;
 	GltfPrimitive gltfPrimitive;
+	GltfImage gltfImage;
 	GltfMesh gltfMesh;
 	GltfSkin gltfSkin;
 	GltfNode gltfNode;
@@ -211,6 +218,7 @@ private:
 	Map<std::string, GltfBuffer> allGltfBuffers;
 	Map<std::string, GltfBufferView> allGltfBufferViews;
 	Map<std::string, GltfAccessor> allGltfAccessors;
+	Map<std::string, GltfImage> allGltfImages;
 	Map<std::string, GltfMesh> allGltfMeshes;
 	Map<std::string, GltfSkin> allGltfSkins;
 	Map<std::string, GltfNode> allGltfNodes;
@@ -221,6 +229,7 @@ private:
 	void visitBuffer(JSONobject& jsonObject);
 	void visitBufferView(JSONobject& jsonObject);
 	void visitAccessor(JSONobject& jsonObject);
+	void visitImage(JSONobject& jsonObject);
 	void visitMesh(JSONobject& jsonObject);
 	void visitSkin(JSONobject& jsonObject);
 	void visitNode(JSONobject& jsonObject);
@@ -271,6 +280,8 @@ public:
 	const Map<std::string, GltfBufferView>& getAllGltfBufferViews() const;
 
 	const Map<std::string, GltfAccessor>& getAllGltfAccessors() const;
+
+	const Map<std::string, GltfImage>& getAllGltfImages() const;
 
 	const Map<std::string, GltfMesh>& getAllGltfMeshes() const;
 

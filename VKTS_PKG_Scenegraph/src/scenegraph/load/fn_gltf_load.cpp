@@ -81,19 +81,22 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
         vertexBufferType |= VKTS_VERTEX_BUFFER_TYPE_NORMAL;
 	}
 
-    if (gltfPrimitive.normal && gltfPrimitive.binormal && gltfPrimitive.tangent)
+    if (gltfPrimitive.normal && (gltfPrimitive.binormal || gltfPrimitive.tangent))
     {
-        if (gltfPrimitive.binormal->count != gltfPrimitive.position->count)
-        {
-            logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Bitangent has different size");
+    	if (gltfPrimitive.binormal)
+    	{
+			if (gltfPrimitive.binormal->count != gltfPrimitive.position->count)
+			{
+				logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Bitangent has different size");
 
-            return VK_FALSE;
-        }
+				return VK_FALSE;
+			}
 
-        if (!visitor.isFloat(gltfPrimitive.binormal->componentType) || !(visitor.getComponentsPerType(gltfPrimitive.binormal->type) == 3))
-        {
-        	return VK_FALSE;
-        }
+			if (!visitor.isFloat(gltfPrimitive.binormal->componentType) || !(visitor.getComponentsPerType(gltfPrimitive.binormal->type) == 3))
+			{
+				return VK_FALSE;
+			}
+    	}
 
         subMesh->setBitangentOffset(strideInBytes);
         strideInBytes += 3 * sizeof(float);
@@ -102,16 +105,19 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 
         //
 
-        if (gltfPrimitive.tangent->count != gltfPrimitive.position->count)
+        if (gltfPrimitive.tangent)
         {
-            logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Tangent has different size");
+			if (gltfPrimitive.tangent->count != gltfPrimitive.position->count)
+			{
+				logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Tangent has different size");
 
-            return VK_FALSE;
-        }
+				return VK_FALSE;
+			}
 
-        if (!visitor.isFloat(gltfPrimitive.tangent->componentType) || !(visitor.getComponentsPerType(gltfPrimitive.tangent->type) == 3))
-        {
-        	return VK_FALSE;
+			if (!visitor.isFloat(gltfPrimitive.tangent->componentType) || !(visitor.getComponentsPerType(gltfPrimitive.tangent->type) == 3))
+			{
+				return VK_FALSE;
+			}
         }
 
         subMesh->setTangentOffset(strideInBytes);
@@ -258,25 +264,85 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
             }
             if (vertexBufferType & VKTS_VERTEX_BUFFER_TYPE_BITANGENT)
             {
-            	currentFloatData = visitor.getFloatPointer(*gltfPrimitive.binormal, currentVertexElement);
+            	float binormal[3];
 
-            	if (!currentFloatData)
+            	if (gltfPrimitive.binormal)
+            	{
+					currentFloatData = visitor.getFloatPointer(*gltfPrimitive.binormal, currentVertexElement);
+
+					if (!currentFloatData)
+					{
+						return VK_FALSE;
+					}
+
+					for (uint32_t i = 0; i < 3; i++)
+					{
+						binormal[i] = currentFloatData[i];
+					}
+            	}
+            	else if (gltfPrimitive.normal && gltfPrimitive.tangent)
+            	{
+					auto* normal = visitor.getFloatPointer(*gltfPrimitive.normal, currentVertexElement);
+					auto* tangent = visitor.getFloatPointer(*gltfPrimitive.tangent, currentVertexElement);
+
+					if (!normal || !tangent)
+					{
+						return VK_FALSE;
+					}
+
+					auto temp = glm::cross(glm::vec3(normal[0], normal[1], normal[2]), glm::vec3(tangent[0], tangent[1], tangent[2]));
+
+					binormal[0] = temp.x;
+					binormal[1] = temp.y;
+					binormal[2] = temp.z;
+            	}
+            	else
             	{
             		return VK_FALSE;
             	}
 
-                vertexBinaryBuffer->write((const void*)currentFloatData, 1, 3 * sizeof(float));
+                vertexBinaryBuffer->write((const void*)binormal, 1, 3 * sizeof(float));
             }
             if (vertexBufferType & VKTS_VERTEX_BUFFER_TYPE_TANGENT)
             {
-            	currentFloatData = visitor.getFloatPointer(*gltfPrimitive.tangent, currentVertexElement);
+            	float tangent[3];
 
-            	if (!currentFloatData)
+            	if (gltfPrimitive.tangent)
+            	{
+					currentFloatData = visitor.getFloatPointer(*gltfPrimitive.tangent, currentVertexElement);
+
+					if (!currentFloatData)
+					{
+						return VK_FALSE;
+					}
+
+					for (uint32_t i = 0; i < 3; i++)
+					{
+						tangent[i] = currentFloatData[i];
+					}
+            	}
+            	else if (gltfPrimitive.normal && gltfPrimitive.binormal)
+            	{
+					auto* normal = visitor.getFloatPointer(*gltfPrimitive.normal, currentVertexElement);
+					auto* binormal = visitor.getFloatPointer(*gltfPrimitive.binormal, currentVertexElement);
+
+					if (!normal || !binormal)
+					{
+						return VK_FALSE;
+					}
+
+					auto temp = glm::cross(glm::vec3(binormal[0], binormal[1], binormal[2]), glm::vec3(normal[0], normal[1], normal[2]));
+
+					tangent[0] = temp.x;
+					tangent[1] = temp.y;
+					tangent[2] = temp.z;
+            	}
+            	else
             	{
             		return VK_FALSE;
             	}
 
-                vertexBinaryBuffer->write((const void*)currentFloatData, 1, 3 * sizeof(float));
+                vertexBinaryBuffer->write((const void*)tangent, 1, 3 * sizeof(float));
             }
             if (vertexBufferType & VKTS_VERTEX_BUFFER_TYPE_TEXCOORD)
             {
@@ -470,6 +536,10 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 		default:
 			return VK_FALSE;
 	}
+
+	// Optional
+
+	// TODO: Gather optional material.
 
 	return VK_TRUE;
 }

@@ -30,7 +30,7 @@ namespace vkts
 {
 
 GltfVisitor::GltfVisitor(const std::string& directory) :
-	JsonVisitor(), directory(directory), state(), gltfBool(VK_FALSE), gltfString(), gltfInteger(0), gltfFloat(0.0f), gltfIntegerArray{}, gltfFloatArray{}, arrayIndex(0), arraySize(0), numberArray(VK_FALSE), objectArray(VK_FALSE), gltfBuffer{}, gltfBufferView{}, gltfAccessor{}, gltfPrimitive{}, gltfMesh{}, gltfSkin{}, gltfNode{}, gltfAnimation_Sampler{}, gltfChannel{}, gltfAnimation{}, gltfScene{}, allGltfBuffers(), allGltfBufferViews(), allGltfAccessors(), allGltfMeshes(), allGltfSkins(), allGltfNodes(), allGltfAnimations(), allGltfScenes(), defaultScene(nullptr)
+	JsonVisitor(), directory(directory), state(), gltfBool(VK_FALSE), gltfString(), gltfInteger(0), gltfFloat(0.0f), gltfIntegerArray{}, gltfFloatArray{}, arrayIndex(0), arraySize(0), numberArray(VK_FALSE), objectArray(VK_FALSE), gltfBuffer{}, gltfBufferView{}, gltfAccessor{}, gltfPrimitive{}, gltfImage{}, gltfMesh{}, gltfSkin{}, gltfNode{}, gltfAnimation_Sampler{}, gltfChannel{}, gltfAnimation{}, gltfScene{}, allGltfBuffers(), allGltfBufferViews(), allGltfAccessors(), allGltfImages(), allGltfMeshes(), allGltfSkins(), allGltfNodes(), allGltfAnimations(), allGltfScenes(), defaultScene(nullptr)
 {
 }
 
@@ -406,6 +406,43 @@ void GltfVisitor::visitAccessor(JSONobject& jsonObject)
 
 		gltfAccessor.byteStride = (uint32_t)gltfInteger;
 	}
+}
+
+void GltfVisitor::visitImage(JSONobject& jsonObject)
+{
+	if (!jsonObject.hasKey("uri"))
+	{
+		state.push(GltfState_Error);
+		return;
+	}
+
+	auto uri = jsonObject.getValue("uri");
+
+	uri->visit(*this);
+
+	if (state.top() == GltfState_Error)
+	{
+		return;
+	}
+
+	//
+
+	std::string finalFilename = directory + gltfString;
+
+	auto imageData = imageDataLoad(finalFilename.c_str());
+
+	if (!imageData.get())
+	{
+		imageData = imageDataLoad(gltfString.c_str());
+
+		if (!imageData.get())
+		{
+			state.push(GltfState_Error);
+			return;
+		}
+	}
+
+	gltfImage.imageData = imageData;
 }
 
 void GltfVisitor::visitMesh(JSONobject& jsonObject)
@@ -879,6 +916,8 @@ void GltfVisitor::visitMesh_Primitive(JSONobject& jsonObject)
 
 		gltfPrimitive.mode = gltfInteger;
 	}
+
+	// TODO: Gather optional material.
 }
 
 void GltfVisitor::visitMesh_Primitive_Attributes(JSONobject& jsonObject)
@@ -1561,6 +1600,27 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 
 		//
 
+		// Optional.
+
+		if (jsonObject.hasKey("images"))
+		{
+			auto images = jsonObject.getValue("images");
+
+			state.push(GltfState_Images);
+			images->visit(*this);
+
+			if (state.top() == GltfState_Error)
+			{
+				return;
+			}
+		}
+
+		// TODO: Process textures.
+
+		// TODO: Process materials.
+
+		//
+
 		if (!jsonObject.hasKey("meshes"))
 		{
 			state.push(GltfState_Error);
@@ -1857,6 +1917,31 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 			allGltfAccessors[allKeys[i]] = gltfAccessor;
 		}
 	}
+	else if (gltfState == GltfState_Images)
+	{
+		const auto& allKeys = jsonObject.getAllKeys();
+
+		for (uint32_t i = 0; i < allKeys.size(); i++)
+		{
+			gltfImage.imageData.reset();
+
+			//
+
+			auto currentImage = jsonObject.getValue(allKeys[i]);
+
+			state.push(GltfState_Image);
+			currentImage->visit(*this);
+
+			if (state.top() == GltfState_Error)
+			{
+				return;
+			}
+
+			//
+
+			allGltfImages[allKeys[i]] = gltfImage;
+		}
+	}
 	else if (gltfState == GltfState_Meshes)
 	{
 		const auto& allKeys = jsonObject.getAllKeys();
@@ -2049,6 +2134,10 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 	{
 		visitAccessor(jsonObject);
 	}
+	else if (gltfState == GltfState_Image)
+	{
+		visitImage(jsonObject);
+	}
 	else if (gltfState == GltfState_Mesh)
 	{
 		visitMesh(jsonObject);
@@ -2126,6 +2215,11 @@ const Map<std::string, GltfBufferView>& GltfVisitor::getAllGltfBufferViews() con
 const Map<std::string, GltfAccessor>& GltfVisitor::getAllGltfAccessors() const
 {
 	return allGltfAccessors;
+}
+
+const Map<std::string, GltfImage>& GltfVisitor::getAllGltfImages() const
+{
+	return allGltfImages;
 }
 
 const Map<std::string, GltfMesh>& GltfVisitor::getAllGltfMeshes() const
