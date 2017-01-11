@@ -52,13 +52,22 @@ VKTS_APICALL glm::vec3 VKTS_APIENTRY renderLambert(const IImageDataSP& cubeMap, 
 
 VKTS_APICALL glm::mat3 VKTS_APIENTRY renderGetBasis(const glm::vec3& normal);
 
+VKTS_APICALL float VKTS_APIENTRY renderColorGetLuminance(const glm::vec3& c);
+
+VKTS_APICALL float VKTS_APIENTRY renderColorGetLuminance(const glm::vec4& c);
+
 VKTS_APICALL glm::vec3 VKTS_APIENTRY renderColorToLinear(const glm::vec3& c, const float invGamma = 1.0f/VKTS_GAMMA);
+
+VKTS_APICALL glm::vec3 VKTS_APIENTRY renderColorTonemap(const glm::vec3& c);
 
 VKTS_APICALL glm::vec3 VKTS_APIENTRY renderColorToNonLinear(const glm::vec3& c, const float gamma = VKTS_GAMMA);
 
 VKTS_APICALL glm::vec4 VKTS_APIENTRY renderColorToLinear(const glm::vec4& c, const float invGamma = 1.0f/VKTS_GAMMA);
 
+VKTS_APICALL glm::vec4 VKTS_APIENTRY renderColorTonemap(const glm::vec4& c);
+
 VKTS_APICALL glm::vec4 VKTS_APIENTRY renderColorToNonLinear(const glm::vec4& c, const float gamma = VKTS_GAMMA);
+
 
 }
 

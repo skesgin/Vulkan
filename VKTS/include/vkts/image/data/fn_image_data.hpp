@@ -144,13 +144,7 @@ VKTS_APICALL IImageDataSP VKTS_APIENTRY imageDataCreate(const std::string& name,
  *
  * @ThreadSafe
  */
-VKTS_APICALL IImageDataSP VKTS_APIENTRY imageDataConvert(const IImageDataSP& sourceImage, const VkFormat targetFormat, const std::string& name, const VkBool32 srgbConversion = VK_TRUE);
-
-/**
- *
- * @ThreadSafe
- */
-VKTS_APICALL IImageDataSP VKTS_APIENTRY imageDataMirror(const IImageDataSP& sourceImage, const VkBool32 mirror[3], const std::string& name);
+VKTS_APICALL IImageDataSP VKTS_APIENTRY imageDataConvert(const IImageDataSP& sourceImage, const VkFormat targetFormat, const std::string& name, const enum VkTsImageDataType targetImageDataType = VKTS_NON_COLOR_DATA, const enum VkTsImageDataType sourceImageDataType = VKTS_NON_COLOR_DATA, const glm::vec4& factor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), const std::array<VkBool32, 3>& mirror = {VK_FALSE, VK_FALSE, VK_FALSE});
 
 /**
  *

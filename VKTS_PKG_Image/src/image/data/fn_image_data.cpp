@@ -1119,18 +1119,27 @@ IImageDataSP VKTS_APIENTRY imageDataCreate(const std::string& name, const uint32
 	return imageDataCreate(name, width, height, depth, glm::vec4(red, green, blue, alpha), imageType, format);
 }
 
-IImageDataSP VKTS_APIENTRY imageDataConvert(const IImageDataSP& sourceImage, const VkFormat targetFormat, const std::string& name, const VkBool32 srgbConversion)
+IImageDataSP VKTS_APIENTRY imageDataConvert(const IImageDataSP& sourceImage, const VkFormat targetFormat, const std::string& name, const enum VkTsImageDataType targetImageDataType, const enum VkTsImageDataType sourceImageDataType, const glm::vec4& factor, const std::array<VkBool32, 3>& mirror)
 {
     if (!sourceImage.get() || sourceImage->getMipLevels() != 1 || sourceImage->getArrayLayers() != 1)
     {
         return IImageDataSP();
     }
 
+    //
+
+    if ((targetFormat == sourceImage->getFormat()) && (targetImageDataType == sourceImageDataType) && (factor[0] == 1.0f) && (factor[1] == 1.0f) && (factor[2] == 1.0f) && (factor[3] == 1.0f) && !mirror[0] && !mirror[1] && !mirror[2])
+    {
+    	return imageDataCopy(sourceImage, name);
+    }
+
+    //
+
     int32_t sourceNumberChannels;
 
     VkBool32 sourceIsUNORM = VK_TRUE;
     VkBool32 sourceIsSFLOAT = VK_FALSE;
-    float sourceGamma = 1.0f;
+    VkBool32 sourceIsSRGB = VK_FALSE;
 
     int8_t sourceRgbaIndices[4] = { 0, -1, -1, -1 };
 
@@ -1139,7 +1148,7 @@ IImageDataSP VKTS_APIENTRY imageDataConvert(const IImageDataSP& sourceImage, con
 
     VkBool32 targetIsUNORM = VK_TRUE;
     VkBool32 targetIsSFLOAT = VK_FALSE;
-    float targetGamma = 1.0f;
+    VkBool32 targetIsSRGB = VK_FALSE;
 
     int8_t targetRgbaIndices[4] = { 0, -1, -1, -1 };
 
@@ -1155,7 +1164,7 @@ IImageDataSP VKTS_APIENTRY imageDataConvert(const IImageDataSP& sourceImage, con
 
             sourceNumberChannels = 1;
 
-            sourceGamma = 2.2f;
+            sourceIsSRGB = VK_TRUE;
 
             break;
 
@@ -1173,7 +1182,7 @@ IImageDataSP VKTS_APIENTRY imageDataConvert(const IImageDataSP& sourceImage, con
 
             sourceRgbaIndices[1] = 1;
 
-            sourceGamma = 2.2f;
+            sourceIsSRGB = VK_TRUE;
 
             break;
 
@@ -1193,7 +1202,7 @@ IImageDataSP VKTS_APIENTRY imageDataConvert(const IImageDataSP& sourceImage, con
             sourceRgbaIndices[1] = 1;
             sourceRgbaIndices[2] = 2;
 
-            sourceGamma = 2.2f;
+            sourceIsSRGB = VK_TRUE;
 
             break;
 
@@ -1215,7 +1224,7 @@ IImageDataSP VKTS_APIENTRY imageDataConvert(const IImageDataSP& sourceImage, con
             sourceRgbaIndices[1] = 1;
             sourceRgbaIndices[2] = 0;
 
-            sourceGamma = 2.2f;
+            sourceIsSRGB = VK_TRUE;
 
             break;
 
@@ -1237,7 +1246,7 @@ IImageDataSP VKTS_APIENTRY imageDataConvert(const IImageDataSP& sourceImage, con
             sourceRgbaIndices[2] = 2;
             sourceRgbaIndices[3] = 3;
 
-            sourceGamma = 2.2f;
+            sourceIsSRGB = VK_TRUE;
 
             break;
 
@@ -1261,7 +1270,7 @@ IImageDataSP VKTS_APIENTRY imageDataConvert(const IImageDataSP& sourceImage, con
             sourceRgbaIndices[2] = 0;
             sourceRgbaIndices[3] = 3;
 
-            sourceGamma = 2.2f;
+            sourceIsSRGB = VK_TRUE;
 
             break;
 
@@ -1332,7 +1341,7 @@ IImageDataSP VKTS_APIENTRY imageDataConvert(const IImageDataSP& sourceImage, con
 
             targetNumberChannels = 1;
 
-            targetGamma = 2.2f;
+            targetIsSRGB = VK_TRUE;
 
             break;
 
@@ -1354,7 +1363,7 @@ IImageDataSP VKTS_APIENTRY imageDataConvert(const IImageDataSP& sourceImage, con
 
             targetRgbaIndices[1] = 1;
 
-            targetGamma = 2.2f;
+            targetIsSRGB = VK_TRUE;
 
             break;
 
@@ -1378,7 +1387,7 @@ IImageDataSP VKTS_APIENTRY imageDataConvert(const IImageDataSP& sourceImage, con
             targetRgbaIndices[1] = 1;
             targetRgbaIndices[2] = 2;
 
-            targetGamma = 2.2f;
+            targetIsSRGB = VK_TRUE;
 
             break;
 
@@ -1404,7 +1413,7 @@ IImageDataSP VKTS_APIENTRY imageDataConvert(const IImageDataSP& sourceImage, con
             targetRgbaIndices[1] = 1;
             targetRgbaIndices[2] = 0;
 
-            targetGamma = 2.2f;
+            targetIsSRGB = VK_TRUE;
 
             break;
 
@@ -1430,7 +1439,7 @@ IImageDataSP VKTS_APIENTRY imageDataConvert(const IImageDataSP& sourceImage, con
             targetRgbaIndices[2] = 2;
             targetRgbaIndices[3] = 3;
 
-            targetGamma = 2.2f;
+            targetIsSRGB = VK_TRUE;
 
             break;
 
@@ -1458,7 +1467,7 @@ IImageDataSP VKTS_APIENTRY imageDataConvert(const IImageDataSP& sourceImage, con
             targetRgbaIndices[2] = 0;
             targetRgbaIndices[3] = 3;
 
-            targetGamma = 2.2f;
+            targetIsSRGB = VK_TRUE;
 
             break;
 
@@ -1531,25 +1540,23 @@ IImageDataSP VKTS_APIENTRY imageDataConvert(const IImageDataSP& sourceImage, con
     uint8_t* currentTargetUINT8 = &targetData[0];
     float* currentTargetFLOAT = (float*) &targetData[0];
 
-    float exponent = 1.0f;
-    if (sourceGamma != targetGamma && srgbConversion)
-    {
-    	if (targetGamma != 1.0f)
-    	{
-    		exponent = 1.0f / targetGamma;
-    	}
-    	else
-    	{
-    		exponent = sourceGamma;
-    	}
-    }
-
     for (int32_t z = 0; z < (int32_t)sourceImage->getDepth(); z++)
     {
         for (int32_t y = 0; y < (int32_t)sourceImage->getHeight(); y++)
         {
             for (int32_t x = 0; x < (int32_t)sourceImage->getWidth(); x++)
             {
+            	int32_t xTarget = mirror[0] ? (sourceImage->getWidth() - 1 - x) : x;
+            	int32_t yTarget = mirror[1] ? (sourceImage->getHeight() - 1 - y) : y;
+            	int32_t zTarget = mirror[2] ? (sourceImage->getDepth() - 1 - z) : z;
+
+            	float L = 1.0f;
+
+            	if (sourceImageDataType == VKTS_HDR_COLOR_DATA)
+				{
+            		L = renderColorGetLuminance(sourceImage->getTexel(x, y, z, 0, 0));
+				}
+
                 for (int32_t channel = 0; channel < targetNumberChannels; channel++)
                 {
                 	// Default target channel values, when less source channel values are present.
@@ -1572,47 +1579,102 @@ IImageDataSP VKTS_APIENTRY imageDataConvert(const IImageDataSP& sourceImage, con
                         if (sourceIsUNORM)
                         {
                         	currentByte = currentSourceUINT8[sourceRgbaIndices[channel] + x * sourceNumberChannels + y * sourceImage->getWidth() * sourceNumberChannels + z * sourceImage->getHeight() * sourceImage->getWidth() * sourceNumberChannels];
-
-                            // Only for color channels.
-                            if (exponent != 1.0f && channel < 3)
-                            {
-                            	float temp = static_cast<float>(currentByte) / 255.0f;
-                            	temp = powf(temp, exponent);
-                            	currentByte = static_cast<uint8_t>(glm::clamp(temp, 0.0f, 1.0f) * 255.0f);
-                            }
                         }
                         else if (sourceIsSFLOAT)
                         {
                         	currentFloat = currentSourceFLOAT[sourceRgbaIndices[channel] + x * sourceNumberChannels + y * sourceImage->getWidth() * sourceNumberChannels + z * sourceImage->getHeight() * sourceImage->getWidth() * sourceNumberChannels];
-
-                            // Only for color channels.
-                            if (exponent != 1.0f && channel < 3)
-                            {
-                            	currentFloat = powf(currentFloat, exponent);
-                            }
                         }
                     }
+
+                    //
+
+                    //
+                    // Conversions
+                    //
+
+                    if (!((targetFormat == sourceImage->getFormat()) && (targetImageDataType == sourceImageDataType) && (factor[0] == 1.0f) && (factor[1] == 1.0f) && (factor[2] == 1.0f) && (factor[3] == 1.0f)))
+					{
+                    	float c = currentFloat;
+
+                    	float f = factor[targetRgbaIndices[channel]];
+
+                    	if (sourceIsUNORM)
+                    	{
+                    		c = (float)currentByte / 255.0f;
+                    	}
+
+                    	if (targetRgbaIndices[channel] != 3)
+                    	{
+                    		// Non-linear to linear.
+							if (sourceIsSRGB || sourceImageDataType == VKTS_LDR_COLOR_DATA)
+							{
+								c = powf(c, VKTS_GAMMA);
+							}
+
+							// Convert normal data.
+							if (!sourceIsSFLOAT && sourceImageDataType == VKTS_NORMAL_DATA)
+							{
+								c = c * 2.0f - 1.0f;
+							}
+                    	}
+
+                    	//
+
+						c = c * f;
+
+						//
+
+                    	if (targetRgbaIndices[channel] != 3)
+                    	{
+							// Tonemap if needed.
+							if ((!targetIsSFLOAT || targetImageDataType != VKTS_HDR_COLOR_DATA) && sourceImageDataType == VKTS_HDR_COLOR_DATA)
+							{
+								c = c * 1.0f / (1.0f + L);
+							}
+
+							// Linear to non-linear.
+							if (targetIsSRGB || targetImageDataType == VKTS_LDR_COLOR_DATA)
+							{
+								c = powf(c, 1.0f / VKTS_GAMMA);
+							}
+
+							// Convert normal data.
+							if (!targetIsSFLOAT && targetImageDataType == VKTS_NORMAL_DATA)
+							{
+								c = (c + 1.0f) * 0.5f;
+							}
+                    	}
+
+						currentFloat = c;
+
+                    	if (targetIsUNORM)
+                    	{
+                    		currentByte = (uint8_t)(255.0f * c);
+                    	}
+					}
+
+                    //
 
 					if (targetIsUNORM)
 					{
 						if (sourceIsUNORM)
 						{
-							currentTargetUINT8[targetRgbaIndices[channel] + x * targetNumberChannels + y * sourceImage->getWidth() * targetNumberChannels + z * sourceImage->getHeight() * sourceImage->getWidth() * targetNumberChannels] = currentByte;
+							currentTargetUINT8[targetRgbaIndices[channel] + xTarget * targetNumberChannels + yTarget * sourceImage->getWidth() * targetNumberChannels + zTarget * sourceImage->getHeight() * sourceImage->getWidth() * targetNumberChannels] = currentByte;
 						}
 						else if (sourceIsSFLOAT)
 						{
-							currentTargetUINT8[targetRgbaIndices[channel] + x * targetNumberChannels + y * sourceImage->getWidth() * targetNumberChannels + z * sourceImage->getHeight() * sourceImage->getWidth() * targetNumberChannels] = static_cast<uint8_t>(glm::clamp(currentFloat, 0.0f, 1.0f) * 255.0f);
+							currentTargetUINT8[targetRgbaIndices[channel] + xTarget * targetNumberChannels + yTarget * sourceImage->getWidth() * targetNumberChannels + zTarget * sourceImage->getHeight() * sourceImage->getWidth() * targetNumberChannels] = static_cast<uint8_t>(glm::clamp(currentFloat, 0.0f, 1.0f) * 255.0f);
 						}
 					}
 					else if (targetIsSFLOAT)
 					{
 						if (sourceIsUNORM)
 						{
-							currentTargetFLOAT[targetRgbaIndices[channel] + x * targetNumberChannels + y * sourceImage->getWidth() * targetNumberChannels + z * sourceImage->getHeight() * sourceImage->getWidth() * targetNumberChannels] = static_cast<float>(currentByte) / 255.0f;
+							currentTargetFLOAT[targetRgbaIndices[channel] + xTarget * targetNumberChannels + yTarget * sourceImage->getWidth() * targetNumberChannels + zTarget * sourceImage->getHeight() * sourceImage->getWidth() * targetNumberChannels] = static_cast<float>(currentByte) / 255.0f;
 						}
 						else if (sourceIsSFLOAT)
 						{
-							currentTargetFLOAT[targetRgbaIndices[channel] + x * targetNumberChannels + y * sourceImage->getWidth() * targetNumberChannels + z * sourceImage->getHeight() * sourceImage->getWidth() * targetNumberChannels] = currentFloat;
+							currentTargetFLOAT[targetRgbaIndices[channel] + xTarget * targetNumberChannels + yTarget * sourceImage->getWidth() * targetNumberChannels + zTarget * sourceImage->getHeight() * sourceImage->getWidth() * targetNumberChannels] = currentFloat;
 						}
 					}
                 }
@@ -1623,43 +1685,6 @@ IImageDataSP VKTS_APIENTRY imageDataConvert(const IImageDataSP& sourceImage, con
     std::vector<uint32_t> allOffsets{0};
 
     return IImageDataSP(new ImageData(name, sourceImage->getImageType(), targetFormat, sourceImage->getExtent3D(), 1, 1, allOffsets, &targetData[0], sourceImage->getWidth() * sourceImage->getHeight() * sourceImage->getDepth() * targetNumberChannels * targetBytesPerChannel, sourceImage->getMaxLuminance()));
-}
-
-IImageDataSP VKTS_APIENTRY imageDataMirror(const IImageDataSP& sourceImage, const VkBool32 mirror[3], const std::string& name)
-{
-    if (!sourceImage.get() || sourceImage->getMipLevels() != 1 || sourceImage->getArrayLayers() != 1 || !mirror)
-    {
-        return IImageDataSP();
-    }
-
-    if (!mirror[0] && !mirror[1] && !mirror[2])
-    {
-    	return imageDataCopy(sourceImage, name);
-    }
-
-    auto mirrorImage = imageDataCreate(name, sourceImage->getWidth(), sourceImage->getHeight(), sourceImage->getDepth(), sourceImage->getImageType(), sourceImage->getFormat());
-
-    if (!mirrorImage)
-    {
-    	return IImageDataSP();
-    }
-
-    for (int32_t z = 0; z < (int32_t)sourceImage->getDepth(); z++)
-    {
-        for (int32_t y = 0; y < (int32_t)sourceImage->getHeight(); y++)
-        {
-            for (int32_t x = 0; x < (int32_t)sourceImage->getWidth(); x++)
-            {
-            	int32_t xTarget = mirror[0] ? (sourceImage->getWidth() - 1 - x) : x;
-            	int32_t yTarget = mirror[1] ? (sourceImage->getHeight() - 1 - y) : y;
-            	int32_t zTarget = mirror[2] ? (sourceImage->getDepth() - 1 - z) : z;
-
-            	mirrorImage->setTexel(sourceImage->getTexel((uint32_t)x, (uint32_t)y, (uint32_t)z, 0, 0), (uint32_t)xTarget, (uint32_t)yTarget, (uint32_t)zTarget, 0, 0);
-            }
-        }
-    }
-
-    return mirrorImage;
 }
 
 IImageDataSP VKTS_APIENTRY imageDataCopy(const IImageDataSP& sourceImage, const std::string& name)

@@ -221,9 +221,26 @@ glm::mat3 VKTS_APIENTRY renderGetBasis(const glm::vec3& normal)
 	return glm::mat3(tangent, bitangent, normal);
 }
 
+float VKTS_APIENTRY renderColorGetLuminance(const glm::vec3& c)
+{
+	return glm::dot(c, glm::vec3(0.2126, 0.7152, 0.0722));
+}
+
+float VKTS_APIENTRY renderColorGetLuminance(const glm::vec4& c)
+{
+	return renderColorGetLuminance(glm::vec3(c));
+}
+
 glm::vec3 VKTS_APIENTRY renderColorToLinear(const glm::vec3& c, const float invGamma)
 {
 	return glm::pow(c, glm::vec3(invGamma, invGamma, invGamma));
+}
+
+glm::vec3 VKTS_APIENTRY renderColorTonemap(const glm::vec3& c)
+{
+	float L = renderColorGetLuminance(c);
+
+	return c * 1.0f / (1.0f + L);
 }
 
 glm::vec3 VKTS_APIENTRY renderColorToNonLinear(const glm::vec3& c, const float gamma)
@@ -234,6 +251,11 @@ glm::vec3 VKTS_APIENTRY renderColorToNonLinear(const glm::vec3& c, const float g
 glm::vec4 VKTS_APIENTRY renderColorToLinear(const glm::vec4& c, const float invGamma)
 {
 	return glm::vec4(renderColorToLinear(glm::vec3(c), invGamma), c.a);
+}
+
+glm::vec4 VKTS_APIENTRY renderColorTonemap(const glm::vec4& c)
+{
+	return glm::vec4(renderColorTonemap(glm::vec3(c)), 1.0f);
 }
 
 glm::vec4 VKTS_APIENTRY renderColorToNonLinear(const glm::vec4& c, const float gamma)

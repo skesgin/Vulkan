@@ -43,6 +43,8 @@
 
 #define VKTS_GAMMA 2.2f
 
+enum VkTsImageDataType {VKTS_NON_COLOR_DATA, VKTS_LDR_COLOR_DATA, VKTS_HDR_COLOR_DATA, VKTS_NORMAL_DATA};
+
 /**
  * Image data.
  */
