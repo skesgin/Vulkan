@@ -75,9 +75,14 @@ void VKTS_APIENTRY visualDestroyDisplay(const NativeDisplaySP& display)
 
 //
 
-INativeWindowWP VKTS_APIENTRY visualCreateWindow(const INativeDisplayWP& display, const char* title, const int32_t width, const int32_t height, const VkBool32 fullscreen, const VkBool32 resize, const VkBool32 invisibleCursor)
+VkBool32 VKTS_APIENTRY visualGetWindowCapabilities(VkTsWindowCapabilites& windowCapabilites)
 {
-    return _visualCreateWindow(display, title, width, height, fullscreen, resize, invisibleCursor);
+	return _visualGetWindowCapabilities(windowCapabilites);
+}
+
+INativeWindowWP VKTS_APIENTRY visualCreateWindow(const INativeDisplayWP& display, const char* title, const int32_t width, const int32_t height, const VkBool32 fullscreen, const VkBool32 resize, const VkBool32 gameCursor)
+{
+    return _visualCreateWindow(display, title, width, height, fullscreen, resize, gameCursor);
 }
 
 const NativeWindowSP VKTS_APIENTRY visualGetWindowInternal(const int32_t windowIndex)

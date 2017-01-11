@@ -227,7 +227,7 @@ VkBool32 VisualContext::isGameMouse(const int32_t windowIndex) const
 
     if (currentWindow.get())
     {
-        return currentWindow->isInvisibleCursor();
+        return currentWindow->isGameCursor();
     }
 
     return VK_FALSE;

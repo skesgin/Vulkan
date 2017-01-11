@@ -27,10 +27,6 @@
 #ifndef VKTS_WINDOW_HPP_
 #define VKTS_WINDOW_HPP_
 
-// TODO: Add game mode cursor to Display and Wayland visual mode.
-
-// TODO: Add query, which windowing parameters are used and supported.
-
 /**
  * Window platform.
  */
@@ -56,6 +52,28 @@
  */
 
 #define VKTS_DEFAULT_WINDOW_INDEX   0
+
+/**
+ * Types.
+ */
+
+typedef struct _VkTsWindowCapabilites {
+	// Available and used parameters, when creating a window.
+	VkBool32 titleSetable;
+	VkBool32 widthSetable;
+	VkBool32 heightSetable;
+	VkBool32 fullscreenSetable;
+	VkBool32 resizeSetable;
+	VkBool32 gameCursorSetable;
+
+	// If parameter not used or available these are the used default values.
+	VkBool32 isTitleVisible;
+	//
+	//
+	VkBool32 isFullscreen;
+	VkBool32 isResizable;
+	VkBool32 isGameCursor;
+} VkTsWindowCapabilites;
 
 /**
  * Input.

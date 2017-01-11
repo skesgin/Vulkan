@@ -594,15 +594,32 @@ void VKTS_APIENTRY _visualDestroyDisplay(const NativeDisplaySP& display)
 
 //
 
-INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& display, const char* title, const int32_t width, const int32_t height, const VkBool32 fullscreen, const VkBool32 resize, const VkBool32 invisibleCursor)
+
+VkBool32 VKTS_APIENTRY _visualGetWindowCapabilities(VkTsWindowCapabilites& windowCapabilites)
+{
+	windowCapabilites.titleSetable = VK_FALSE;
+	windowCapabilites.widthSetable = VK_FALSE;
+	windowCapabilites.heightSetable = VK_FALSE;
+	windowCapabilites.fullscreenSetable = VK_FALSE;
+	windowCapabilites.resizeSetable = VK_FALSE;
+	windowCapabilites.gameCursorSetable = VK_FALSE;
+
+	windowCapabilites.isTitleVisible = VK_FALSE;
+	//
+	//
+	windowCapabilites.isFullscreen = VK_TRUE;
+	windowCapabilites.isResizable = VK_TRUE;
+	windowCapabilites.isGameCursor = VK_FALSE;
+
+	return VK_TRUE;
+}
+
+INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& display, const char* title, const int32_t width, const int32_t height, const VkBool32 fullscreen, const VkBool32 resize, const VkBool32 gameCursor)
 {
 	if (g_defaultWindowUsed)
 	{
 		return INativeWindowWP();
 	}
-
-    logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "On Android, all parameters for creating a window are ignored.");
-    logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Full screen is true, resize false and invisibleCursor false");
 
     //
 

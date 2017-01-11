@@ -67,9 +67,15 @@ VKTS_APICALL INativeDisplayWP VKTS_APIENTRY visualGetDisplay(const int32_t displ
 //
 
 /**
+ *
+ * @ThreadSafe
+ */
+VKTS_APICALL VkBool32 VKTS_APIENTRY visualGetWindowCapabilities(VkTsWindowCapabilites& windowCapabilites);
+
+/**
  * Not thread Safe.
  */
-VKTS_APICALL INativeWindowWP VKTS_APIENTRY visualCreateWindow(const INativeDisplayWP& display, const char* title, const int32_t width, const int32_t height, const VkBool32 fullscreen, const VkBool32 resize, const VkBool32 invisibleCursor);
+VKTS_APICALL INativeWindowWP VKTS_APIENTRY visualCreateWindow(const INativeDisplayWP& display, const char* title, const int32_t width, const int32_t height, const VkBool32 fullscreen, const VkBool32 resize, const VkBool32 gameCursor);
 
 /**
  * Not thread Safe.

@@ -369,7 +369,26 @@ void VKTS_APIENTRY _visualDestroyDisplay(const NativeDisplaySP& display)
 
 //
 
-INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& display, const char* title, const int32_t width, const int32_t height, const VkBool32 fullscreen, const VkBool32 resize, const VkBool32 invisibleCursor)
+VkBool32 VKTS_APIENTRY _visualGetWindowCapabilities(VkTsWindowCapabilites& windowCapabilites)
+{
+	windowCapabilites.titleSetable = VK_FALSE;
+	windowCapabilites.widthSetable = VK_TRUE;
+	windowCapabilites.heightSetable = VK_TRUE;
+	windowCapabilites.fullscreenSetable = VK_TRUE;
+	windowCapabilites.resizeSetable = VK_FALSE;
+	windowCapabilites.gameCursorSetable = VK_FALSE;
+
+	windowCapabilites.isTitleVisible = VK_FALSE;
+	//
+	//
+	windowCapabilites.isFullscreen = VK_FALSE;
+	windowCapabilites.isResizable = VK_FALSE;
+	windowCapabilites.isGameCursor = VK_FALSE;
+
+	return VK_TRUE;
+}
+
+INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& display, const char* title, const int32_t width, const int32_t height, const VkBool32 fullscreen, const VkBool32 resize, const VkBool32 gameCursor)
 {
 	auto currentNativeDisplay = display.lock();
 
@@ -614,7 +633,7 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 		return INativeWindowWP();
 	}
 
-	auto currentNativeWindow = NativeWindowSP(new NativeWindow(display, &currentNativeWindowContainer->displaySurfaceCreateInfo, currentWindowIndex, title, (int32_t)currentExtent.width, (int32_t)currentExtent.height, fullscreen, VK_FALSE, invisibleCursor));
+	auto currentNativeWindow = NativeWindowSP(new NativeWindow(display, &currentNativeWindowContainer->displaySurfaceCreateInfo, currentWindowIndex, title, (int32_t)currentExtent.width, (int32_t)currentExtent.height, fullscreen, VK_FALSE, gameCursor));
 
 	memset(&currentNativeWindowContainer->displaySurfaceCreateInfo, 0, sizeof(VkDisplaySurfaceCreateInfoKHR));
 
@@ -641,8 +660,6 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
     //
 
     g_windowBits |= currentWindowBit;
-
-    logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Using Display, title is not shown, resize is false and invisibleCursor is true");
 
     return currentNativeWindow;
 }

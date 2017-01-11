@@ -429,7 +429,7 @@ VkBool32 VKTS_APIENTRY _visualDispatchMessages()
 
     for (uint32_t i = 0; i < g_allWindows.values().size(); i++)
     {
-        if (g_allWindows.valueAt(i)->isInvisibleCursor())
+        if (g_allWindows.valueAt(i)->isGameCursor())
         {
             POINT centerPosition = {(LONG)g_allWindows.valueAt(i)->getDimension().x / 2, (LONG)g_allWindows.valueAt(i)->getDimension().y / 2};
 
@@ -665,7 +665,26 @@ void VKTS_APIENTRY _visualDestroyDisplay(const NativeDisplaySP& display)
 
 //
 
-INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& display, const char* title, const int32_t width, const int32_t height, const VkBool32 fullscreen, const VkBool32 resize, const VkBool32 invisibleCursor)
+VkBool32 VKTS_APIENTRY _visualGetWindowCapabilities(VkTsWindowCapabilites& windowCapabilites)
+{
+	windowCapabilites.titleSetable = VK_TRUE;
+	windowCapabilites.widthSetable = VK_TRUE;
+	windowCapabilites.heightSetable = VK_TRUE;
+	windowCapabilites.fullscreenSetable = VK_TRUE;
+	windowCapabilites.resizeSetable = VK_TRUE;
+	windowCapabilites.gameCursorSetable = VK_TRUE;
+
+	windowCapabilites.isTitleVisible = VK_TRUE;
+	//
+	//
+	windowCapabilites.isFullscreen = VK_FALSE;
+	windowCapabilites.isResizable = VK_FALSE;
+	windowCapabilites.isGameCursor = VK_FALSE;
+
+	return VK_TRUE;
+}
+
+INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& display, const char* title, const int32_t width, const int32_t height, const VkBool32 fullscreen, const VkBool32 resize, const VkBool32 gameCursor)
 {
     auto sharedDisplay = display.lock();
 
@@ -871,14 +890,14 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
     SetForegroundWindow(nativeWindow);
     SetFocus(nativeWindow);
 
-    if (invisibleCursor)
+    if (gameCursor)
     {
         while (ShowCursor(FALSE) >= 0);
     }
 
     //
 
-    auto currentWindow = NativeWindowSP(new NativeWindow(display, nativeWindow, currentWindowIndex, title, width, height, fullscreen, finalResize, invisibleCursor));
+    auto currentWindow = NativeWindowSP(new NativeWindow(display, nativeWindow, currentWindowIndex, title, width, height, fullscreen, finalResize, gameCursor));
 
     if (!currentWindow.get())
     {
@@ -888,7 +907,7 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
         int result = GetClassName(nativeWindow, className, VKTS_WINDOWS_MAX_CHARS);
 
-        if (invisibleCursor)
+        if (gameCursor)
         {
             while (ShowCursor(TRUE) < 0);
         }
@@ -1017,7 +1036,7 @@ void VKTS_APIENTRY _visualDestroyWindow(const NativeWindowSP& window)
 
         int result = GetClassName(nativeWindow, className, VKTS_WINDOWS_MAX_CHARS);
 
-        if (window->isInvisibleCursor())
+        if (window->isGameCursor())
         {
             while (ShowCursor(TRUE) < 0);
         }

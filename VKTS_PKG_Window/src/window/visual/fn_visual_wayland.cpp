@@ -204,9 +204,10 @@ void VKTS_APIENTRY _visualWaylandEnter(void *data, struct wl_pointer *wl_pointer
 		return;
 	}
 
-	if (currentWindowContainer->second->nativeWindow->isInvisibleCursor())
+	if (currentWindowContainer->second->nativeWindow->isGameCursor())
 	{
-		wl_pointer_set_cursor(wl_pointer, serial, nullptr, 0, 0);
+		//Disable, as game mode not possible.
+		/*wl_pointer_set_cursor(wl_pointer, serial, nullptr, 0, 0);*/
 	}
 	else
 	{
@@ -232,13 +233,14 @@ void VKTS_APIENTRY _visualWaylandLeave(void *data, struct wl_pointer* wl_pointer
 		return;
 	}
 
-	if (currentWindowContainer->second->nativeWindow->isInvisibleCursor())
+	if (currentWindowContainer->second->nativeWindow->isGameCursor())
 	{
-		wl_surface_attach(g_nativeCursorSurface, g_nativeCursorBuffer, 0, 0);
+		//Disable, as game mode not possible.
+		/*wl_surface_attach(g_nativeCursorSurface, g_nativeCursorBuffer, 0, 0);
 		wl_surface_damage(g_nativeCursorSurface, 0, 0, g_nativeCursor->images[0]->width, g_nativeCursor->images[0]->height);
 		wl_surface_commit(g_nativeCursorSurface);
 
-		wl_pointer_set_cursor(wl_pointer, serial, g_nativeCursorSurface, g_nativeCursor->images[0]->hotspot_x, g_nativeCursor->images[0]->hotspot_y);
+		wl_pointer_set_cursor(wl_pointer, serial, g_nativeCursorSurface, g_nativeCursor->images[0]->hotspot_x, g_nativeCursor->images[0]->hotspot_y);*/
 	}
 
 	//
@@ -892,7 +894,26 @@ void VKTS_APIENTRY _visualDestroyDisplay(const NativeDisplaySP& display)
 
 //
 
-INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& display, const char* title, const int32_t width, const int32_t height, const VkBool32 fullscreen, const VkBool32 resize, const VkBool32 invisibleCursor)
+VkBool32 VKTS_APIENTRY _visualGetWindowCapabilities(VkTsWindowCapabilites& windowCapabilites)
+{
+	windowCapabilites.titleSetable = VK_FALSE;
+	windowCapabilites.widthSetable = VK_TRUE;
+	windowCapabilites.heightSetable = VK_TRUE;
+	windowCapabilites.fullscreenSetable = VK_TRUE;
+	windowCapabilites.resizeSetable = VK_FALSE;
+	windowCapabilites.gameCursorSetable = VK_FALSE;
+
+	windowCapabilites.isTitleVisible = VK_FALSE;
+	//
+	//
+	windowCapabilites.isFullscreen = VK_TRUE;
+	windowCapabilites.isResizable = VK_FALSE;
+	windowCapabilites.isGameCursor = VK_FALSE;
+
+	return VK_TRUE;
+}
+
+INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& display, const char* title, const int32_t width, const int32_t height, const VkBool32 fullscreen, const VkBool32 resize, const VkBool32 gameCursor)
 {
     const auto sharedDisplay = display.lock();
 
@@ -943,8 +964,6 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
     }
 
     //
-
-    // TODO: Implement game mode cursor.
 
 	auto surface = wl_compositor_create_surface(g_nativeCompositor);
 
@@ -1005,7 +1024,7 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
 	//
 
-	auto nativeWindow = NativeWindowSP(new NativeWindow(display, surface, currentWindowIndex, title, width, height, fullscreen, finalResize, invisibleCursor));
+	auto nativeWindow = NativeWindowSP(new NativeWindow(display, surface, currentWindowIndex, title, width, height, fullscreen, finalResize, gameCursor));
 
 	if (!nativeWindow.get())
 	{
@@ -1054,8 +1073,6 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
     wl_surface_commit(surface);
 
     _visualWaylandConfigure(windowContainer, shell_surface, 0, width, height);
-
-    logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Using Wayland, title is not shown and resize is false");
 
     return nativeWindow;
 }
@@ -1109,7 +1126,7 @@ void VKTS_APIENTRY _visualDestroyWindow(const NativeWindowSP& window)
         	wl_shell_surface_set_toplevel(foundWindowContainerWalker->second->shell_surface);
         }
 
-        if (window->isInvisibleCursor())
+        if (window->isGameCursor())
         {
     		// Automatically reverted.
         }

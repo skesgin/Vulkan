@@ -59,7 +59,7 @@ typedef struct _VKTS_NATIVE_DISPLAY_CONTAINER
 
 static Display* g_nativeDisplay = nullptr;
 
-static Cursor g_invisibleCursor;
+static Cursor g_gameCursor;
 
 static Atom g_deleteMessage;
 
@@ -460,7 +460,7 @@ VkBool32 VKTS_APIENTRY _visualInit(const VkInstance instance, const VkPhysicalDe
 
     XColor color{};
 
-    g_invisibleCursor = XCreatePixmapCursor(g_nativeDisplay, pixmap, pixmap, &color, &color, 0, 0);
+    g_gameCursor = XCreatePixmapCursor(g_nativeDisplay, pixmap, pixmap, &color, &color, 0, 0);
 
     XFreePixmap(g_nativeDisplay, pixmap);
 
@@ -501,7 +501,7 @@ VkBool32 VKTS_APIENTRY _visualDispatchMessages()
 
     for (uint32_t i = 0; i < g_allWindows.values().size(); i++)
     {
-        if (g_allWindows.valueAt(i)->isInvisibleCursor())
+        if (g_allWindows.valueAt(i)->isGameCursor())
         {
             XWarpPointer(g_nativeDisplay, None, g_allWindows.valueAt(i)->getNativeWindow(), 0, 0, 0, 0, g_allWindows.valueAt(i)->getDimension().x / 2, g_allWindows.valueAt(i)->getDimension().y / 2);
 
@@ -676,7 +676,26 @@ void VKTS_APIENTRY _visualDestroyDisplay(const NativeDisplaySP& display)
 
 //
 
-INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& display, const char* title, const int32_t width, const int32_t height, const VkBool32 fullscreen, const VkBool32 resize, const VkBool32 invisibleCursor)
+VkBool32 VKTS_APIENTRY _visualGetWindowCapabilities(VkTsWindowCapabilites& windowCapabilites)
+{
+	windowCapabilites.titleSetable = VK_TRUE;
+	windowCapabilites.widthSetable = VK_TRUE;
+	windowCapabilites.heightSetable = VK_TRUE;
+	windowCapabilites.fullscreenSetable = VK_TRUE;
+	windowCapabilites.resizeSetable = VK_TRUE;
+	windowCapabilites.gameCursorSetable = VK_TRUE;
+
+	windowCapabilites.isTitleVisible = VK_TRUE;
+	//
+	//
+	windowCapabilites.isFullscreen = VK_FALSE;
+	windowCapabilites.isResizable = VK_FALSE;
+	windowCapabilites.isGameCursor = VK_FALSE;
+
+	return VK_TRUE;
+}
+
+INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& display, const char* title, const int32_t width, const int32_t height, const VkBool32 fullscreen, const VkBool32 resize, const VkBool32 gameCursor)
 {
     const auto sharedDisplay = display.lock();
 
@@ -954,20 +973,20 @@ INativeWindowWP VKTS_APIENTRY _visualCreateWindow(const INativeDisplayWP& displa
 
     XSetWMProtocols(g_nativeDisplay, nativeWindow, &g_deleteMessage, 1);
 
-    if (invisibleCursor)
+    if (gameCursor)
     {
-        XDefineCursor(g_nativeDisplay, nativeWindow, g_invisibleCursor);
+        XDefineCursor(g_nativeDisplay, nativeWindow, g_gameCursor);
     }
 
     //
 
-    auto window = NativeWindowSP(new NativeWindow(display, nativeWindow, currentWindowIndex, title, width, height, fullscreen, finalResize, invisibleCursor));
+    auto window = NativeWindowSP(new NativeWindow(display, nativeWindow, currentWindowIndex, title, width, height, fullscreen, finalResize, gameCursor));
 
     if (!window.get())
     {
         logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create native window.");
 
-        if (invisibleCursor)
+        if (gameCursor)
         {
             XUndefineCursor(g_nativeDisplay, nativeWindow);
         }
@@ -1131,7 +1150,7 @@ void VKTS_APIENTRY _visualDestroyWindow(const NativeWindowSP& window)
     {
         Window nativeWindow = window->getNativeWindow();
 
-        if (window->isInvisibleCursor())
+        if (window->isGameCursor())
         {
             XUndefineCursor(g_nativeDisplay, nativeWindow);
         }
@@ -1185,7 +1204,7 @@ void VKTS_APIENTRY _visualTerminate()
 
     if (g_nativeDisplay)
     {
-        XFreeCursor(g_nativeDisplay, g_invisibleCursor);
+        XFreeCursor(g_nativeDisplay, g_gameCursor);
 
         XCloseDisplay(g_nativeDisplay);
 

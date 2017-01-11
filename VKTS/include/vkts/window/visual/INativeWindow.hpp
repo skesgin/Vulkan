@@ -62,7 +62,7 @@ public:
 
     virtual VkBool32 isResizable() const = 0;
 
-    virtual VkBool32 isInvisibleCursor() const = 0;
+    virtual VkBool32 isGameCursor() const = 0;
 
 };
 

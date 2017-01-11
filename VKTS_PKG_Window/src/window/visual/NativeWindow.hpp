@@ -60,7 +60,7 @@ private:
 
     const VkBool32 resizable;
 
-    const VkBool32 invisibleCursor;
+    const VkBool32 gameCursor;
 
     mutable std::mutex mutex;
 
@@ -77,7 +77,7 @@ public:
     NativeWindow() = delete;
     NativeWindow(const NativeWindow& other) = delete;
     NativeWindow(NativeWindow&& other) = delete;
-    NativeWindow(const INativeDisplayWP& display, VKTS_NATIVE_WINDOW nativeWindow, const int32_t index, const char* title, const uint32_t width, const uint32_t height, const VkBool32 fullscreen, const VkBool32 resizable, const VkBool32 invisibleCursor);
+    NativeWindow(const INativeDisplayWP& display, VKTS_NATIVE_WINDOW nativeWindow, const int32_t index, const char* title, const uint32_t width, const uint32_t height, const VkBool32 fullscreen, const VkBool32 resizable, const VkBool32 gameCursor);
     virtual ~NativeWindow();
 
     NativeWindow& operator =(const NativeWindow& other) = delete;
@@ -128,7 +128,7 @@ public:
 
     virtual VkBool32 isResizable() const override;
 
-    virtual VkBool32 isInvisibleCursor() const override;
+    virtual VkBool32 isGameCursor() const override;
 
     //
     // IDestroyable

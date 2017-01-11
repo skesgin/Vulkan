@@ -262,8 +262,6 @@ VkBool32 VKTS_APIENTRY _visualDispatchMessagesDisplay()
         } while (numBytes > 0);        
     }
 
-    // TODO: Implement game mode cursor.
-
     //
     
 	VkBool32 result = _visualDispatchMessagesGamepad();
