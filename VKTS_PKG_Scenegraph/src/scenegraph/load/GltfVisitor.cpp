@@ -30,7 +30,7 @@ namespace vkts
 {
 
 GltfVisitor::GltfVisitor(const std::string& directory) :
-	JsonVisitor(), directory(directory), state(), gltfBool(VK_FALSE), gltfString(), gltfInteger(0), gltfFloat(0.0f), gltfIntegerArray{}, gltfFloatArray{}, arrayIndex(0), arraySize(0), numberArray(VK_FALSE), objectArray(VK_FALSE), gltfBuffer{}, gltfBufferView{}, gltfAccessor{}, gltfPrimitive{}, gltfImage{}, gltfMesh{}, gltfSkin{}, gltfNode{}, gltfAnimation_Sampler{}, gltfChannel{}, gltfAnimation{}, gltfScene{}, allGltfBuffers(), allGltfBufferViews(), allGltfAccessors(), allGltfImages(), allGltfMeshes(), allGltfSkins(), allGltfNodes(), allGltfAnimations(), allGltfScenes(), defaultScene(nullptr)
+	JsonVisitor(), directory(directory), state(), gltfBool(VK_FALSE), gltfString(), gltfInteger(0), gltfFloat(0.0f), gltfIntegerArray{}, gltfFloatArray{}, arrayIndex(0), arraySize(0), numberArray(VK_FALSE), objectArray(VK_FALSE), gltfBuffer{}, gltfBufferView{}, gltfAccessor{}, gltfPrimitive{}, gltfImage{}, gltfTexture{}, gltfMesh{}, gltfSkin{}, gltfNode{}, gltfAnimation_Sampler{}, gltfChannel{}, gltfAnimation{}, gltfScene{}, allGltfBuffers(), allGltfBufferViews(), allGltfAccessors(), allGltfImages(), allGltfTextures(), allGltfMeshes(), allGltfSkins(), allGltfNodes(), allGltfAnimations(), allGltfScenes(), defaultScene(nullptr)
 {
 }
 
@@ -443,6 +443,17 @@ void GltfVisitor::visitImage(JSONobject& jsonObject)
 	}
 
 	gltfImage.imageData = imageData;
+}
+
+void GltfVisitor::visitTexture(JSONobject& jsonObject)
+{
+	if (!jsonObject.hasKey("sampler") || !jsonObject.hasKey("source"))
+	{
+		state.push(GltfState_Error);
+		return;
+	}
+
+	// TODO: Gather fields.
 }
 
 void GltfVisitor::visitMesh(JSONobject& jsonObject)
@@ -1615,7 +1626,20 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 			}
 		}
 
-		// TODO: Process textures.
+		// TODO: Process samplers.
+
+		if (jsonObject.hasKey("textures"))
+		{
+			auto textures = jsonObject.getValue("textures");
+
+			state.push(GltfState_Textures);
+			textures->visit(*this);
+
+			if (state.top() == GltfState_Error)
+			{
+				return;
+			}
+		}
 
 		// TODO: Process materials.
 
@@ -1942,6 +1966,36 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 			allGltfImages[allKeys[i]] = gltfImage;
 		}
 	}
+	else if (gltfState == GltfState_Textures)
+	{
+		const auto& allKeys = jsonObject.getAllKeys();
+
+		for (uint32_t i = 0; i < allKeys.size(); i++)
+		{
+			gltfTexture.format = 6408;
+			gltfTexture.internalFormat = 6408;
+			gltfTexture.sampler = nullptr;
+			gltfTexture.source = nullptr;
+			gltfTexture.target = 3553;
+			gltfTexture.type = 5121;
+
+			//
+
+			auto currentTexture = jsonObject.getValue(allKeys[i]);
+
+			state.push(GltfState_Texture);
+			currentTexture->visit(*this);
+
+			if (state.top() == GltfState_Error)
+			{
+				return;
+			}
+
+			//
+
+			allGltfTextures[allKeys[i]] = gltfTexture;
+		}
+	}
 	else if (gltfState == GltfState_Meshes)
 	{
 		const auto& allKeys = jsonObject.getAllKeys();
@@ -2137,6 +2191,10 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 	else if (gltfState == GltfState_Image)
 	{
 		visitImage(jsonObject);
+	}
+	else if (gltfState == GltfState_Texture)
+	{
+		visitTexture(jsonObject);
 	}
 	else if (gltfState == GltfState_Mesh)
 	{
