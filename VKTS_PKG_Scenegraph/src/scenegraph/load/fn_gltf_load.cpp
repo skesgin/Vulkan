@@ -539,7 +539,81 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 
 	// Optional
 
-	// TODO: Gather optional material.
+	if (gltfPrimitive.material)
+	{
+		auto bsdfMaterial = sceneManager->useBSDFMaterial(gltfPrimitive.material->name);
+
+		if (!bsdfMaterial.get())
+		{
+			bsdfMaterial = sceneFactory->createBSDFMaterial(sceneManager, VK_TRUE);
+
+			if (!bsdfMaterial.get())
+			{
+				return VK_FALSE;
+			}
+
+			bsdfMaterial->setName(gltfPrimitive.material->name);
+
+			//
+			// Base color
+			//
+
+			// TODO: Check, if texture object exists with given factor.
+			ITextureObjectSP baseColor;
+
+			// TODO: Check, if image object exists with given factor.
+			IImageObjectSP baseColorImageObject;
+
+			// TODO: Check, if image data exists with given factor.
+			IImageDataSP baseColorImageData;
+
+			bsdfMaterial->addTextureObject(baseColor);
+
+			//
+			// Metallic
+			//
+
+			// TODO: Implement metallic.
+
+			//
+			// Roughness
+			//
+
+			// TODO: Implement roughness.
+
+			//
+			// Normal
+			//
+
+			// TODO: Implement normal.
+
+			//
+			// Ambient occlusion
+			//
+
+			// TODO: Implement ambient occlusion.
+
+			//
+			// Emissive
+			//
+
+			// TODO: Implement emissive.
+
+			//
+			// Shader
+			//
+
+			// TODO: Create / load PBR shader.
+
+			//
+			// Attribute
+			//
+
+			// TODO: Gather / set vertex attribute number.
+		}
+
+		subMesh->setBSDFMaterial(bsdfMaterial);
+	}
 
 	return VK_TRUE;
 }
@@ -667,7 +741,7 @@ static VkBool32 gltfProcessNode(INodeSP& node, const GltfVisitor& visitor, const
             return VK_FALSE;
         }
 
-        mesh->setName(node->getName() + "_Mesh_" + std::to_string(i));
+        mesh->setName(gltfNode.meshes[i]->name);
 
         sceneManager->addMesh(mesh);
 
@@ -682,7 +756,7 @@ static VkBool32 gltfProcessNode(INodeSP& node, const GltfVisitor& visitor, const
                 return VK_FALSE;
             }
 
-            subMesh->setName(node->getName() + "_SubMesh_" + std::to_string(k));
+            subMesh->setName(gltfNode.meshes[i]->name + "_" + gltfNode.meshes[i]->primitives[k].name);
 
             sceneManager->addSubMesh(subMesh);
 
@@ -796,7 +870,7 @@ static VkBool32 gltfProcessNode(INodeSP& node, const GltfVisitor& visitor, const
     	                return VK_FALSE;
     	            }
 
-    	            animation->setName(visitor.getAllGltfAnimations().keys()[animationIndex]);
+    	            animation->setName(visitor.getAllGltfAnimations().values()[animationIndex].name);
 
     	            sceneManager->addAnimation(animation);
     			}
@@ -896,7 +970,7 @@ static VkBool32 gltfProcessNode(INodeSP& node, const GltfVisitor& visitor, const
                 {
 					auto channel = sceneFactory->createChannel(sceneManager);
 
-					std::string channelName = node->getName() + "_" + animation->getName() + "_" + gltfChannel.targetPath + "_" + std::to_string(targetTransformElementIndex);
+					std::string channelName = gltfAnimation.name + "_" + gltfChannel.name + "_" + gltfChannel.targetPath + "_" + std::to_string(targetTransformElementIndex);
 
 					if (!channel.get())
 					{

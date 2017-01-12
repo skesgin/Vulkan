@@ -43,7 +43,9 @@ enum GltfState {
 	GltfState_BufferViews,
 	GltfState_Accessors,
 	GltfState_Images,
+	GltfState_Samplers,
 	GltfState_Textures,
+	GltfState_Materials,
 	GltfState_Meshes,
 	GltfState_Skins,
 	GltfState_Nodes,
@@ -54,13 +56,18 @@ enum GltfState {
 	GltfState_BufferView,
 	GltfState_Accessor,
 	GltfState_Image,
+	GltfState_Sampler,
 	GltfState_Texture,
+	GltfState_Material,
 	GltfState_Mesh,
 	GltfState_Skin,
 	GltfState_Node,
 	GltfState_Animation,
 	GltfState_Scene,
 
+	GltfState_Material_Extensions,
+	GltfState_Material_Extensions_Pbr,
+	GltfState_Material_Extensions_Pbr_Values,
 	GltfState_Mesh_Primitive,
 	GltfState_Mesh_Primitive_Attributes,
 	GltfState_Skin_InverseBindMatrices,
@@ -78,12 +85,14 @@ enum GltfState {
 typedef struct _GltfBuffer {
 	IBinaryBufferSP binaryBuffer;
 	uint32_t byteLength;
+	std::string name;
 } GltfBuffer;
 
 typedef struct _GltfBufferView {
 	GltfBuffer* buffer;
     uint32_t byteOffset;
     uint32_t byteLength;
+	std::string name;
 } GltfBufferView;
 
 typedef struct _GltfAccessor {
@@ -108,7 +117,55 @@ typedef struct _GltfAccessor {
     Vector<uint16_t> maxUnsignedShort;
     Vector<uint32_t> maxUnsignedInteger;
     Vector<float> maxFloat;
+	std::string name;
 } GltfAccessor;
+
+typedef struct _GltfImage {
+	IImageDataSP imageData;
+	std::string name;
+} GltfImage;
+
+typedef struct _GltfSampler {
+	int32_t magFilter;
+	int32_t minFilter;
+	int32_t wrapS;
+	int32_t wrapT;
+	std::string name;
+} GltfSampler;
+
+typedef struct _GltfTexture {
+	int32_t format;
+	int32_t internalFormat;
+	GltfSampler* sampler;
+	GltfImage* source;
+	int32_t target;
+	int32_t type;
+	std::string name;
+} GltfTexture;
+
+typedef struct _GltfMaterial {
+	// Not processing technique.
+	// Not processing values.
+
+	// Only using PBR.
+
+	std::string materialModel;
+
+	float baseColorFactor[4];
+	GltfTexture* baseColorTexture;
+	float metallicFactor;
+	GltfTexture* metallicTexture;
+	float roughnessFactor;
+	GltfTexture* roughnessTexture;
+	float normalFactor;
+	GltfTexture* normalTexture;
+	float aoFactor;
+	GltfTexture* aoTexture;
+	float emissiveFactor[4];
+	GltfTexture* emissiveTexture;
+
+	std::string name;
+} GltfMaterial;
 
 typedef struct _GltfPrimitive {
 	GltfAccessor* position;
@@ -120,27 +177,14 @@ typedef struct _GltfPrimitive {
 	GltfAccessor* weight;
 	GltfAccessor* indices;
 	int32_t mode;
+
+	GltfMaterial* material;
+	std::string name;
 } GltfPrimitive;
-
-typedef struct _GltfImage {
-	IImageDataSP imageData;
-} GltfImage;
-
-typedef struct _GltfSampler {
-	// TODO: Add fields.
-} GltfSampler;
-
-typedef struct _GltfTexture {
-	int32_t format;
-	int32_t internalFormat;
-	GltfSampler* sampler;
-	GltfImage* source;
-	int32_t target;
-	int32_t type;
-} GltfTexture;
 
 typedef struct _GltfMesh {
 	Vector<GltfPrimitive> primitives;
+	std::string name;
 } GltfMesh;
 
 struct _GltfNode;
@@ -150,6 +194,7 @@ typedef struct _GltfSkin {
 	Vector<GltfAccessor*> inverseBindMatrices;
 	Vector<std::string> jointNames;
 	Vector<struct _GltfNode*> jointNodes;
+	std::string name;
 } GltfSkin;
 
 typedef struct _GltfNode {
@@ -176,22 +221,24 @@ typedef struct _GltfAnimation_Sampler {
 	GltfAccessor* input;
     std::string interpolation;
     GltfAccessor* output;
+	std::string name;
 } GltfAnimation_Sampler;
 
 typedef struct _GltfChannel {
 	GltfAnimation_Sampler* sampler;
 	GltfNode* targetNode;
 	std::string targetPath;
+	std::string name;
 } GltfChannel;
 
 typedef struct _GltfAnimation {
 	Map<std::string, GltfAnimation_Sampler> samplers;
 	Vector<GltfChannel> channels;
+	std::string name;
 } GltfAnimation;
 
 typedef struct _GltfScene {
 	Vector<GltfNode*> nodes;
-	// Helper
 	std::string name;
 } GltfScene;
 
@@ -222,7 +269,9 @@ private:
 	GltfAccessor gltfAccessor;
 	GltfPrimitive gltfPrimitive;
 	GltfImage gltfImage;
+	GltfSampler gltfSampler;
 	GltfTexture gltfTexture;
+	GltfMaterial gltfMaterial;
 	GltfMesh gltfMesh;
 	GltfSkin gltfSkin;
 	GltfNode gltfNode;
@@ -235,7 +284,9 @@ private:
 	Map<std::string, GltfBufferView> allGltfBufferViews;
 	Map<std::string, GltfAccessor> allGltfAccessors;
 	Map<std::string, GltfImage> allGltfImages;
+	Map<std::string, GltfSampler> allGltfSamplers;
 	Map<std::string, GltfTexture> allGltfTextures;
+	Map<std::string, GltfMaterial> allGltfMaterials;
 	Map<std::string, GltfMesh> allGltfMeshes;
 	Map<std::string, GltfSkin> allGltfSkins;
 	Map<std::string, GltfNode> allGltfNodes;
@@ -247,13 +298,18 @@ private:
 	void visitBufferView(JSONobject& jsonObject);
 	void visitAccessor(JSONobject& jsonObject);
 	void visitImage(JSONobject& jsonObject);
+	void visitSampler(JSONobject& jsonObject);
 	void visitTexture(JSONobject& jsonObject);
+	void visitMaterial(JSONobject& jsonObject);
 	void visitMesh(JSONobject& jsonObject);
 	void visitSkin(JSONobject& jsonObject);
 	void visitNode(JSONobject& jsonObject);
 	void visitAnimation(JSONobject& jsonObject);
 	void visitScene(JSONobject& jsonObject);
 
+	void visitMaterial_Extensions(JSONobject& jsonObject);
+	void visitMaterial_Extensions_Pbr(JSONobject& jsonObject);
+	void visitMaterial_Extensions_Pbr_Values(JSONobject& jsonObject);
 	void visitMesh_Primitive(JSONobject& jsonObject);
 	void visitMesh_Primitive_Attributes(JSONobject& jsonObject);
 	void visitAnimation_Sampler(JSONobject& jsonObject);
@@ -301,7 +357,11 @@ public:
 
 	const Map<std::string, GltfImage>& getAllGltfImages() const;
 
+	const Map<std::string, GltfSampler>& getAllGltfSamplers() const;
+
 	const Map<std::string, GltfTexture>& getAllGltfTextures() const;
+
+	const Map<std::string, GltfMaterial>& getAllGltfMaterials() const;
 
 	const Map<std::string, GltfMesh>& getAllGltfMeshes() const;
 
