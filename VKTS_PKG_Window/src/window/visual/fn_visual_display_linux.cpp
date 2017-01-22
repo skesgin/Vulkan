@@ -35,6 +35,8 @@
 // Event numbering from evtest.
 #define HAS_EVENT(eventNumber, events) ((1 << eventNumber) & events)
 
+#define HAS_EVENT_CODE(eventCode, events) ((1 << (eventCode % 8)) & events[eventCode / 8])
+
 namespace vkts
 {
     
@@ -98,9 +100,25 @@ VkBool32 VKTS_APIENTRY _visualInitDisplay(const VkInstance instance, const VkPhy
 		}
         else if (HAS_EVENT(1, eventBits) && HAS_EVENT(2, eventBits))
         {
-	        logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Found mouse");
+        	uint8_t keyBits[(KEY_MAX - 1) / 8 + 1];
 
-            g_mouseFileDescriptor = fileDescriptor;
+    		if (ioctl(fileDescriptor, EVIOCGBIT(1, KEY_MAX), keyBits) < 0)
+    		{
+    			close(fileDescriptor);
+
+    			continue;
+    		}
+
+    		if (HAS_EVENT_CODE(BTN_MOUSE, keyBits))
+    		{
+    	        logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Found mouse");
+
+                g_mouseFileDescriptor = fileDescriptor;
+    		}
+    		else
+    		{
+    			close(fileDescriptor);
+    		}
         }
         else
         {
