@@ -36,11 +36,11 @@
 #define GLM_VERSION_MAJOR			0
 #define GLM_VERSION_MINOR			9
 #define GLM_VERSION_PATCH			8
-#define GLM_VERSION_REVISION		2
+#define GLM_VERSION_REVISION		4
 
 #if GLM_MESSAGES == GLM_MESSAGES_ENABLED && !defined(GLM_MESSAGE_VERSION_DISPLAYED)
 #	define GLM_MESSAGE_VERSION_DISPLAYED
-#	pragma message ("GLM: version 0.9.8.2")
+#	pragma message ("GLM: version 0.9.8.4")
 #endif//GLM_MESSAGES
 
 // Report compiler detection
@@ -150,6 +150,7 @@
 #			pragma message("GLM: Using GLM_FORCE_CXX14 but there is no known version of ICC compiler that fully supports C++14")
 #	endif
 #	define GLM_LANG GLM_LANG_CXX14
+#	define GLM_LANG_STL11_FORCED
 #elif defined(GLM_FORCE_CXX11)
 #	if((GLM_COMPILER & GLM_COMPILER_GCC) && (GLM_COMPILER <= GLM_COMPILER_GCC48)) || ((GLM_COMPILER & GLM_COMPILER_CLANG) && (GLM_COMPILER <= GLM_COMPILER_CLANG33))
 #			pragma message("GLM: Using GLM_FORCE_CXX11 with a compiler that doesn't fully support C++11")
@@ -159,6 +160,7 @@
 #			pragma message("GLM: Using GLM_FORCE_CXX11 but there is no known version of ICC compiler that fully supports C++11")
 #	endif
 #	define GLM_LANG GLM_LANG_CXX11
+#	define GLM_LANG_STL11_FORCED
 #elif defined(GLM_FORCE_CXX03)
 #	define GLM_LANG GLM_LANG_CXX03
 #elif defined(GLM_FORCE_CXX98)
@@ -293,8 +295,11 @@
 // http://gcc.gnu.org/projects/cxx0x.html
 // http://msdn.microsoft.com/en-us/library/vstudio/hh567368(v=vs.120).aspx
 
-#if GLM_COMPILER & GLM_COMPILER_CLANG
-#	if defined(_LIBCPP_VERSION) && GLM_LANG & GLM_LANG_CXX11_FLAG
+// Android has multiple STLs but C++11 STL detection doesn't always work #284 #564
+#if GLM_PLATFORM == GLM_PLATFORM_ANDROID && !defined(GLM_LANG_STL11_FORCED)
+#	define GLM_HAS_CXX11_STL 0
+#elif GLM_COMPILER & GLM_COMPILER_CLANG
+#	if (defined(_LIBCPP_VERSION) && GLM_LANG & GLM_LANG_CXX11_FLAG) || defined(GLM_LANG_STL11_FORCED)
 #		define GLM_HAS_CXX11_STL 1
 #	else
 #		define GLM_HAS_CXX11_STL 0
@@ -444,6 +449,11 @@
 		((GLM_COMPILER & GLM_COMPILER_INTEL) && (GLM_COMPILER >= GLM_COMPILER_INTEL15)) || \
 		((GLM_COMPILER & GLM_COMPILER_VC) && (GLM_COMPILER >= GLM_COMPILER_VC14)) || \
 		((GLM_COMPILER & GLM_COMPILER_CUDA) && (GLM_COMPILER >= GLM_COMPILER_CUDA70))))
+#endif
+
+#define GLM_HAS_ONLY_XYZW ((GLM_COMPILER & GLM_COMPILER_GCC) && (GLM_COMPILER < GLM_COMPILER_GCC46))
+#if GLM_HAS_ONLY_XYZW
+#	pragma message("GLM: GCC older than 4.6 has a bug presenting the use of rgba and stpq components")
 #endif
 
 //
@@ -603,6 +613,12 @@
 
 // #define GLM_FORCE_UNRESTRICTED_GENTYPE
 
+#ifdef GLM_FORCE_UNRESTRICTED_GENTYPE
+#	define GLM_UNRESTRICTED_GENTYPE 1
+#else
+#	define GLM_UNRESTRICTED_GENTYPE 0
+#endif
+
 #if GLM_MESSAGES == GLM_MESSAGES_ENABLED && !defined(GLM_MESSAGE_UNRESTRICTED_GENTYPE_DISPLAYED)
 #	define GLM_MESSAGE_UNRESTRICTED_GENTYPE_DISPLAYED
 #	ifdef GLM_FORCE_UNRESTRICTED_GENTYPE
@@ -722,17 +738,21 @@
 #	define GLM_DEFAULT_CTOR
 #endif
 
-#if GLM_HAS_CONSTEXPR
+#if GLM_HAS_CONSTEXPR || GLM_HAS_CONSTEXPR_PARTIAL
 #	define GLM_CONSTEXPR constexpr
-#	define GLM_CONSTEXPR_CTOR constexpr
-#	define GLM_RELAXED_CONSTEXPR constexpr
-#elif GLM_HAS_CONSTEXPR_PARTIAL
-#	define GLM_CONSTEXPR constexpr
-#	define GLM_CONSTEXPR_CTOR
-#	define GLM_RELAXED_CONSTEXPR const
+#	if GLM_COMPILER & GLM_COMPILER_VC // Visual C++ has a bug #594 https://github.com/g-truc/glm/issues/594
+#		define GLM_CONSTEXPR_CTOR
+#	else
+#		define GLM_CONSTEXPR_CTOR constexpr
+#	endif
 #else
 #	define GLM_CONSTEXPR
 #	define GLM_CONSTEXPR_CTOR
+#endif
+
+#if GLM_HAS_CONSTEXPR
+#	define GLM_RELAXED_CONSTEXPR constexpr
+#else
 #	define GLM_RELAXED_CONSTEXPR const
 #endif
 
