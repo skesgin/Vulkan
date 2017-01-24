@@ -36,13 +36,13 @@ IImageDataSP VKTS_APIENTRY createDeviceImageData(const IAssetManagerSP& assetMan
 	VkImageTiling imageTiling;
 	VkMemoryPropertyFlags memoryPropertyFlags;
 
-	if (!assetManager->getContextObject()->getPhysicalDevice()->getGetImageTilingAndMemoryProperty(imageTiling, memoryPropertyFlags, imageData->getFormat(), imageData->getImageType(), 0, imageData->getExtent3D(), imageData->getMipLevels(), 1, VK_SAMPLE_COUNT_1_BIT, imageData->getSize()))
+	if (!assetManager->getContextObject()->getPhysicalDevice()->getGetImageTilingAndMemoryProperty(imageTiling, memoryPropertyFlags, imageData->getFormat(), imageData->getImageType(), 0, imageData->getExtent3D(), imageData->getMipLevels(), 1, VK_SAMPLE_COUNT_1_BIT, imageData->getSize(), VK_IMAGE_TILING_BEGIN_RANGE, VK_IMAGE_TILING_OPTIMAL))
 	{
 		if (imageData->getFormat() == VK_FORMAT_R8G8B8_UNORM)
 		{
 			imageData = imageDataConvert(imageData, VK_FORMAT_R8G8B8A8_UNORM, imageData->getName());
 
-			if (!assetManager->getContextObject()->getPhysicalDevice()->getGetImageTilingAndMemoryProperty(imageTiling, memoryPropertyFlags, imageData->getFormat(), imageData->getImageType(), 0, imageData->getExtent3D(), imageData->getMipLevels(), 1, VK_SAMPLE_COUNT_1_BIT, imageData->getSize()))
+			if (!assetManager->getContextObject()->getPhysicalDevice()->getGetImageTilingAndMemoryProperty(imageTiling, memoryPropertyFlags, imageData->getFormat(), imageData->getImageType(), 0, imageData->getExtent3D(), imageData->getMipLevels(), 1, VK_SAMPLE_COUNT_1_BIT, imageData->getSize(), VK_IMAGE_TILING_BEGIN_RANGE, VK_IMAGE_TILING_OPTIMAL))
 			{
 				logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Format not supported.");
 
@@ -53,7 +53,7 @@ IImageDataSP VKTS_APIENTRY createDeviceImageData(const IAssetManagerSP& assetMan
 		{
 			imageData = imageDataConvert(imageData, VK_FORMAT_R32G32B32A32_SFLOAT, imageData->getName());
 
-			if (!assetManager->getContextObject()->getPhysicalDevice()->getGetImageTilingAndMemoryProperty(imageTiling, memoryPropertyFlags, imageData->getFormat(), imageData->getImageType(), 0, imageData->getExtent3D(), imageData->getMipLevels(), 1, VK_SAMPLE_COUNT_1_BIT, imageData->getSize()))
+			if (!assetManager->getContextObject()->getPhysicalDevice()->getGetImageTilingAndMemoryProperty(imageTiling, memoryPropertyFlags, imageData->getFormat(), imageData->getImageType(), 0, imageData->getExtent3D(), imageData->getMipLevels(), 1, VK_SAMPLE_COUNT_1_BIT, imageData->getSize(), VK_IMAGE_TILING_BEGIN_RANGE, VK_IMAGE_TILING_OPTIMAL))
 			{
 				logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Format not supported.");
 
@@ -64,7 +64,7 @@ IImageDataSP VKTS_APIENTRY createDeviceImageData(const IAssetManagerSP& assetMan
 		{
 			imageData = imageDataConvert(imageData, VK_FORMAT_R32G32B32A32_SFLOAT, imageData->getName());
 
-			if (!assetManager->getContextObject()->getPhysicalDevice()->getGetImageTilingAndMemoryProperty(imageTiling, memoryPropertyFlags, imageData->getFormat(), imageData->getImageType(), 0, imageData->getExtent3D(), imageData->getMipLevels(), 1, VK_SAMPLE_COUNT_1_BIT, imageData->getSize()))
+			if (!assetManager->getContextObject()->getPhysicalDevice()->getGetImageTilingAndMemoryProperty(imageTiling, memoryPropertyFlags, imageData->getFormat(), imageData->getImageType(), 0, imageData->getExtent3D(), imageData->getMipLevels(), 1, VK_SAMPLE_COUNT_1_BIT, imageData->getSize(), VK_IMAGE_TILING_BEGIN_RANGE, VK_IMAGE_TILING_OPTIMAL))
 			{
 				logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Format not supported.");
 

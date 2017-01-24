@@ -77,9 +77,9 @@ void PhysicalDevice::getGetPhysicalDeviceFormatProperties(VkFormatProperties& fo
     vkGetPhysicalDeviceFormatProperties(physicalDevice, format, &formatProperties);
 }
 
-void PhysicalDevice::getGetPhysicalDeviceImageFormatProperties(VkImageFormatProperties& imageFormatProperties, const VkFormat format, const VkImageType type, const VkImageTiling tiling, const VkImageUsageFlags usage, const VkImageCreateFlags flags) const
+VkResult PhysicalDevice::getGetPhysicalDeviceImageFormatProperties(VkImageFormatProperties& imageFormatProperties, const VkFormat format, const VkImageType type, const VkImageTiling tiling, const VkImageUsageFlags usage, const VkImageCreateFlags flags) const
 {
-    vkGetPhysicalDeviceImageFormatProperties(physicalDevice, format, type, tiling, usage, flags, &imageFormatProperties);
+    return vkGetPhysicalDeviceImageFormatProperties(physicalDevice, format, type, tiling, usage, flags, &imageFormatProperties);
 }
 
 VkDeviceSize PhysicalDevice::getNonCoherentAlignmentSizeInBytes(const VkDeviceSize currentSize) const
@@ -102,27 +102,32 @@ VkDeviceSize PhysicalDevice::getUniformBufferAlignmentSizeInBytes(const VkDevice
 
 VkBool32 PhysicalDevice::isImageTilingAvailable(const VkImageTiling imageTiling, const VkFormat format, const VkImageType type, const VkImageCreateFlags flags, const VkExtent3D& extent, const uint32_t mipLevels, const uint32_t arrayLayers, const VkSampleCountFlags sampleCounts, const VkDeviceSize resourceSize)
 {
-    VkFormatProperties formatProperties;
+    VkFormatProperties formatProperties{};
 
     getGetPhysicalDeviceFormatProperties(formatProperties, format);
 
     //
 
-    if (imageTiling == VK_IMAGE_TILING_LINEAR && !(formatProperties.linearTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT))
+    if (imageTiling == VK_IMAGE_TILING_LINEAR && !(formatProperties.linearTilingFeatures & (VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT | VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT)))
     {
         return VK_FALSE;
     }
 
-    if (imageTiling == VK_IMAGE_TILING_OPTIMAL && !(formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT))
+    if (imageTiling == VK_IMAGE_TILING_OPTIMAL && !(formatProperties.optimalTilingFeatures & (VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT | VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT)))
     {
         return VK_FALSE;
     }
 
     //
 
-    VkImageFormatProperties imageFormatProperties;
+    VkImageFormatProperties imageFormatProperties{};
 
-    getGetPhysicalDeviceImageFormatProperties(imageFormatProperties, format, type, imageTiling, VK_IMAGE_USAGE_SAMPLED_BIT, flags);
+    auto result = getGetPhysicalDeviceImageFormatProperties(imageFormatProperties, format, type, imageTiling, VK_IMAGE_USAGE_SAMPLED_BIT, flags);
+
+    if (result != VK_SUCCESS)
+    {
+    	return VK_FALSE;
+    }
 
     if (imageFormatProperties.maxExtent.width < extent.width || imageFormatProperties.maxExtent.height < extent.height || imageFormatProperties.maxExtent.depth < extent.depth)
     {
@@ -152,9 +157,9 @@ VkBool32 PhysicalDevice::isImageTilingAvailable(const VkImageTiling imageTiling,
     return VK_TRUE;
 }
 
-VkBool32 PhysicalDevice::getGetImageTilingAndMemoryProperty(VkImageTiling& imageTiling, VkMemoryPropertyFlags& memoryPropertyFlags, const VkFormat format, const VkImageType type, const VkImageCreateFlags flags, const VkExtent3D& extent, const uint32_t mipLevels, const uint32_t arraySize, const VkSampleCountFlags sampleCounts, const VkDeviceSize resourceSize)
+VkBool32 PhysicalDevice::getGetImageTilingAndMemoryProperty(VkImageTiling& imageTiling, VkMemoryPropertyFlags& memoryPropertyFlags, const VkFormat format, const VkImageType type, const VkImageCreateFlags flags, const VkExtent3D& extent, const uint32_t mipLevels, const uint32_t arraySize, const VkSampleCountFlags sampleCounts, const VkDeviceSize resourceSize, const VkImageTiling start, const VkImageTiling end)
 {
-    for (int32_t i = 0; i < 2; i++)
+    for (int32_t i = (int32_t)start; i <= (int32_t)end; i++)
     {
         // Test two tiling and memory property cases.
 
@@ -168,6 +173,8 @@ VkBool32 PhysicalDevice::getGetImageTilingAndMemoryProperty(VkImageTiling& image
                 imageTiling = VK_IMAGE_TILING_LINEAR;
                 memoryPropertyFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
                 break;
+            default:
+            	return VK_FALSE;
         }
 
         if (isImageTilingAvailable(imageTiling, format, type, flags, extent, mipLevels, arraySize, sampleCounts, resourceSize))

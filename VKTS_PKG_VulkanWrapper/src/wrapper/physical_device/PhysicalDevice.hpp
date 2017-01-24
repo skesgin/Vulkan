@@ -75,7 +75,7 @@ public:
 
     virtual void getGetPhysicalDeviceFormatProperties(VkFormatProperties& formatProperties, const VkFormat format) const override;
 
-    virtual void getGetPhysicalDeviceImageFormatProperties(VkImageFormatProperties& imageFormatProperties, const VkFormat format, const VkImageType type, const VkImageTiling tiling, const VkImageUsageFlags usage, const VkImageCreateFlags flags) const override;
+    virtual VkResult getGetPhysicalDeviceImageFormatProperties(VkImageFormatProperties& imageFormatProperties, const VkFormat format, const VkImageType type, const VkImageTiling tiling, const VkImageUsageFlags usage, const VkImageCreateFlags flags) const override;
 
     virtual VkDeviceSize getNonCoherentAlignmentSizeInBytes(const VkDeviceSize currentSize) const override;
 
@@ -83,7 +83,7 @@ public:
 
     virtual VkBool32 isImageTilingAvailable(const VkImageTiling imageTiling, const VkFormat format, const VkImageType type, const VkImageCreateFlags flags, const VkExtent3D& extent, const uint32_t mipLevels, const uint32_t arrayLayers, const VkSampleCountFlags sampleCounts, const VkDeviceSize resourceSize) override;
 
-    virtual VkBool32 getGetImageTilingAndMemoryProperty(VkImageTiling& imageTiling, VkMemoryPropertyFlags& memoryPropertyFlags, const VkFormat format, const VkImageType type, const VkImageCreateFlags flags, const VkExtent3D& extent, const uint32_t mipLevels, const uint32_t arraySize, const VkSampleCountFlags sampleCounts, const VkDeviceSize resourceSize) override;
+    virtual VkBool32 getGetImageTilingAndMemoryProperty(VkImageTiling& imageTiling, VkMemoryPropertyFlags& memoryPropertyFlags, const VkFormat format, const VkImageType type, const VkImageCreateFlags flags, const VkExtent3D& extent, const uint32_t mipLevels, const uint32_t arraySize, const VkSampleCountFlags sampleCounts, const VkDeviceSize resourceSize, const VkImageTiling start = VK_IMAGE_TILING_BEGIN_RANGE, const VkImageTiling end = VK_IMAGE_TILING_END_RANGE) override;
 
     virtual const std::vector<VkQueueFamilyProperties>& getAllQueueFamilyProperties(const VkBool32 refresh = VK_FALSE) override;
 
