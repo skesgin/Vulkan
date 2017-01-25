@@ -68,6 +68,12 @@ copy("../../VKTS_Binaries/texture/BSDF_LUT_512_256.data", "./assets/texture/")
 
 copy("../../VKTS_Binaries/cache/buster_drone/*.hdr", "./assets/cache/buster_drone/")
 
+
+print("Resizing images")
+
+subprocess.call("mogrify -resize 1024x1024 ./assets/buster_drone/*.tga", shell=True)
+
+
 print("Building project")
 
 os.chdir("jni")

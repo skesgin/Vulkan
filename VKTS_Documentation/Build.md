@@ -15,7 +15,9 @@ Following requirements do depend on the platform:
 
 - Building: ndk-build  
     - [Android NDK](http://developer.android.com/ndk/index.html) with Vulkan support required.  
-    - [Apache Ant](https://ant.apache.org/) required.  
+    - [Apache Ant](https://ant.apache.org/) required.
+    - [ImageMagick](https://www.imagemagick.org/) for automatic image resizing required.
+      
       
 
 ![Linux](images/linux_logo.png) Linux:

@@ -12,6 +12,7 @@ The tools etc. are used to develop VKTS and the Vulkan examples.
 - [GLI](http://gli.g-truc.net/)  
 - [GLM](http://glm.g-truc.net/)
 - [Hiero](http://https://github.com/libgdx/libgdx/wiki/Hiero/)  
+- [ImageMagick](https://www.imagemagick.org/)
 - [LunarG Vulkan SDK](https://vulkan.lunarg.com/)
 - [MinGW-w64 - for 32 and 64 bit Windows](https://sourceforge.net/projects/mingw-w64/)
 - [Python](https://www.python.org/)
