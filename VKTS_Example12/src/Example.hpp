@@ -29,10 +29,9 @@
 
 #include <vkts/vkts.hpp>
 
-#define VKTS_EXAMPLE_NAME "Example12"
+#include "LoadTask.hpp"
 
-#define VKTS_NUMBER_DYNAMIC_UNIFORM_BUFFERS 3
-#define VKTS_MAX_NUMBER_BUFFERS 3
+#define VKTS_EXAMPLE_NAME "Example12"
 
 #define VKTS_SAMPLE_COUNT_BIT VK_SAMPLE_COUNT_4_BIT
 
@@ -57,12 +56,6 @@
 
 #define VKTS_ENV_VERTEX_SHADER_NAME "shader/SPIR/V/environment.vert.spv"
 #define VKTS_ENV_FRAGMENT_SHADER_NAME "shader/SPIR/V/environment.frag.spv"
-
-
-#define VKTS_SCENE_NAME "buster_drone/buster_drone.vkts"
-//#define VKTS_SCENE_NAME "cerberus/cerberus.vkts"
-
-#define VKTS_ENVIRONMENT_SCENE_NAME "primitives/sphere.vkts"
 
 #define VKTS_ENVIRONMENT_DESCRIPTOR_SET_COUNT (VKTS_BINDING_UNIFORM_TRANSFORM_BINDING_COUNT + VKTS_BINDING_UNIFORM_ENVIRONMENT_COUNT + VKTS_BINDING_UNIFORM_LIGHTING_BINDING_COUNT)
 
@@ -127,6 +120,9 @@ private:
 	vkts::IGuiFactorySP guiFactory;
     vkts::IFontSP font;
 
+	ILoadTaskSP loadTask;
+
+	VkBool32 sceneLoaded;
     vkts::ISceneRenderFactorySP renderFactory;
 	vkts::ISceneManagerSP sceneManager;
 	vkts::ISceneFactorySP sceneFactory;
@@ -174,8 +170,6 @@ private:
 	VkBool32 buildFramebuffer(const int32_t usedBuffer);
 
 	VkBool32 updateDescriptorSets(const int32_t usedBuffer);
-
-	VkBool32 buildScene(const vkts::ICommandObjectSP& commandObject);
 
 	VkBool32 buildSwapchainImageView(const int32_t usedBuffer);
 

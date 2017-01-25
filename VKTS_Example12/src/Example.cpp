@@ -27,7 +27,7 @@
 #include "Example.hpp"
 
 Example::Example(const vkts::IContextObjectSP& contextObject, const int32_t windowIndex, const vkts::IVisualContextSP& visualContext, const vkts::ISurfaceSP& surface) :
-		IUpdateThread(), contextObject(contextObject), windowIndex(windowIndex), visualContext(visualContext), surface(surface), showStats(VK_TRUE), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), pipelineCache(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), environmentDescriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), environmentVertexViewProjectionUniformBuffer(nullptr), fragmentLightsUniformBuffer(nullptr), fragmentMatricesUniformBuffer(nullptr), allBSDFVertexShaderModules(), envVertexShaderModule(nullptr), envFragmentShaderModule(nullptr), environmentPipelineLayout(nullptr), guiRenderFactory(nullptr), guiManager(nullptr), guiFactory(nullptr), font(nullptr), renderFactory(nullptr), sceneManager(nullptr), sceneFactory(nullptr), scene(nullptr), environmentRenderFactory(nullptr), environmentSceneManager(nullptr), environmentSceneFactory(nullptr), environmentScene(nullptr), swapchain(nullptr), renderPass(nullptr), allGraphicsPipelines(), depthTexture(), msaaColorTexture(), msaaDepthTexture(), depthStencilImageView(), msaaColorImageView(), msaaDepthStencilImageView(), swapchainImagesCount(0), swapchainImageView(), framebuffer(), cmdBuffer(), cmdBufferFence(), rebuildCmdBufferCounter(0), fps(0), ram(0), cpuUsageApp(0.0f), processors(0)
+		IUpdateThread(), contextObject(contextObject), windowIndex(windowIndex), visualContext(visualContext), surface(surface), showStats(VK_TRUE), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), pipelineCache(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), environmentDescriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), environmentVertexViewProjectionUniformBuffer(nullptr), fragmentLightsUniformBuffer(nullptr), fragmentMatricesUniformBuffer(nullptr), allBSDFVertexShaderModules(), envVertexShaderModule(nullptr), envFragmentShaderModule(nullptr), environmentPipelineLayout(nullptr), guiRenderFactory(nullptr), guiManager(nullptr), guiFactory(nullptr), font(nullptr), loadTask(), sceneLoaded(VK_FALSE), renderFactory(nullptr), sceneManager(nullptr), sceneFactory(nullptr), scene(nullptr), environmentRenderFactory(nullptr), environmentSceneManager(nullptr), environmentSceneFactory(nullptr), environmentScene(nullptr), swapchain(nullptr), renderPass(nullptr), allGraphicsPipelines(), depthTexture(), msaaColorTexture(), msaaDepthTexture(), depthStencilImageView(), msaaColorImageView(), msaaDepthStencilImageView(), swapchainImagesCount(0), swapchainImageView(), framebuffer(), cmdBuffer(), cmdBufferFence(), rebuildCmdBufferCounter(0), fps(0), ram(0), cpuUsageApp(0.0f), processors(0)
 {
 	processors = glm::min(vkts::processorGetNumber(), VKTS_MAX_CORES);
 
@@ -422,164 +422,6 @@ VkBool32 Example::updateDescriptorSets(const int32_t usedBuffer)
 	return VK_TRUE;
 }
 
-VkBool32 Example::buildScene(const vkts::ICommandObjectSP& commandObject)
-{
-	if (!scene.get() || !environmentScene.get())
-	{
-		renderFactory = vkts::sceneRenderFactoryCreate(vkts::IDescriptorSetLayoutSP(), renderPass, pipelineCache, VKTS_MAX_NUMBER_BUFFERS);
-
-		if (!renderFactory.get())
-		{
-			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create data factory.");
-
-			return VK_FALSE;
-		}
-
-		//
-
-		sceneFactory = vkts::sceneFactoryCreate(renderFactory, VK_TRUE);
-
-		if (!sceneFactory.get())
-		{
-			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create factory.");
-
-			return VK_FALSE;
-		}
-
-		//
-
-		sceneManager = vkts::sceneManagerCreate(VK_FALSE, contextObject, commandObject);
-
-		if (!sceneManager.get())
-		{
-			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create cache.");
-
-			return VK_FALSE;
-		}
-
-		//
-
-		if (allBSDFVertexShaderModules.size() == 4)
-		{
-			sceneManager->addVertexShaderModule(VKTS_VERTEX_BUFFER_TYPE_VERTEX | VKTS_VERTEX_BUFFER_TYPE_NORMAL | VKTS_VERTEX_BUFFER_TYPE_TEXCOORD, allBSDFVertexShaderModules[0]);
-			sceneManager->addVertexShaderModule(VKTS_VERTEX_BUFFER_TYPE_VERTEX | VKTS_VERTEX_BUFFER_TYPE_NORMAL, allBSDFVertexShaderModules[1]);
-			sceneManager->addVertexShaderModule(VKTS_VERTEX_BUFFER_TYPE_VERTEX | VKTS_VERTEX_BUFFER_TYPE_TANGENTS | VKTS_VERTEX_BUFFER_TYPE_TEXCOORD, allBSDFVertexShaderModules[2]);
-			sceneManager->addVertexShaderModule(VKTS_VERTEX_BUFFER_TYPE_VERTEX | VKTS_VERTEX_BUFFER_TYPE_TANGENTS | VKTS_VERTEX_BUFFER_TYPE_TEXCOORD | VKTS_VERTEX_BUFFER_TYPE_BONES, allBSDFVertexShaderModules[3]);
-		}
-
-		//
-
-		scene = vkts::sceneLoad(VKTS_SCENE_NAME, sceneManager, sceneFactory, VK_TRUE);
-
-		if (!scene.get())
-		{
-			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load scene.");
-
-			return VK_FALSE;
-		}
-
-		vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Number objects: %d", scene->getNumberObjects());
-
-		//
-
-		environmentRenderFactory = vkts::sceneRenderFactoryCreate(environmentDescriptorSetLayout, vkts::IRenderPassSP(), pipelineCache, VKTS_MAX_NUMBER_BUFFERS);
-
-		if (!environmentRenderFactory.get())
-		{
-			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create data factory.");
-
-			return VK_FALSE;
-		}
-
-		//
-
-		environmentSceneFactory = vkts::sceneFactoryCreate(environmentRenderFactory);
-
-		if (!environmentSceneFactory.get())
-		{
-			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create factory.");
-
-			return VK_FALSE;
-		}
-
-		//
-
-		environmentSceneManager = vkts::sceneManagerCreate(VK_FALSE, contextObject, commandObject);
-
-		if (!environmentSceneManager.get())
-		{
-			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create cache.");
-
-			return VK_FALSE;
-		}
-
-		//
-
-		environmentScene = vkts::sceneLoad(VKTS_ENVIRONMENT_SCENE_NAME, environmentSceneManager, environmentSceneFactory, VK_TRUE);
-
-		if (!environmentScene.get() || environmentScene->getNumberObjects() == 0)
-		{
-			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load scene.");
-
-			return VK_FALSE;
-		}
-
-		// Enlarge the sphere.
-		environmentScene->getObjects()[0]->setScale(glm::vec3(10.0f, 10.0f, 10.0f));
-
-		vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Number objects: %d", environmentScene->getNumberObjects());
-
-		// Sorted by binding
-		dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_VIEWPROJECTION] = VkTsDynamicOffset{0, (uint32_t)contextObject->getPhysicalDevice()->getUniformBufferAlignmentSizeInBytes(vkts::alignmentGetSizeInBytes(16 * sizeof(float) * 2, 16))};
-		dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_TRANSFORM] = VkTsDynamicOffset{0, (uint32_t)sceneFactory->getSceneRenderFactory()->getTransformUniformBufferAlignmentSize(sceneManager)};
-		dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_BONE_TRANSFORM] = VkTsDynamicOffset{0, (uint32_t)sceneFactory->getSceneRenderFactory()->getJointsUniformBufferAlignmentSize(sceneManager)};
-		dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_BSDF_FORWARD_INVERSE] = VkTsDynamicOffset{0, (uint32_t)contextObject->getPhysicalDevice()->getUniformBufferAlignmentSizeInBytes(vkts::alignmentGetSizeInBytes(16 * sizeof(float) * 2, 16))};
-		dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_LIGHT] = VkTsDynamicOffset{0, (uint32_t)contextObject->getPhysicalDevice()->getUniformBufferAlignmentSizeInBytes(vkts::alignmentGetSizeInBytes(VKTS_MAX_LIGHTS * 4 * sizeof(float) * 2 + sizeof(int32_t), 16))};
-	}
-
-	//
-	// Free resources.
-	//
-
-	if (sceneFactory.get())
-	{
-		sceneFactory.reset();
-	}
-
-	if (sceneManager.get())
-	{
-		sceneManager->destroy();
-
-		sceneManager.reset();
-	}
-
-	if (renderFactory.get())
-	{
-		renderFactory.reset();
-	}
-
-	//
-
-	if (environmentSceneFactory.get())
-	{
-		environmentSceneFactory.reset();
-	}
-
-	if (environmentSceneManager.get())
-	{
-		environmentSceneManager->destroy();
-
-		environmentSceneManager.reset();
-	}
-
-	if (environmentRenderFactory.get())
-	{
-		environmentRenderFactory.reset();
-	}
-
-	return VK_TRUE;
-}
-
 VkBool32 Example::buildSwapchainImageView(const int32_t usedBuffer)
 {
 	VkComponentMapping componentMapping = { VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_G, VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_A };
@@ -826,7 +668,7 @@ VkBool32 Example::buildRenderPass()
 	VkAttachmentDescription attachmentDescription[4]{};
 
 	attachmentDescription[0].flags = 0;
-	attachmentDescription[0].format = swapchain->getImageFormat();
+	attachmentDescription[0].format = surface->getFormat(contextObject->getPhysicalDevice()->getPhysicalDevice());
 	attachmentDescription[0].samples = VK_SAMPLE_COUNT_1_BIT;
 	attachmentDescription[0].loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 	attachmentDescription[0].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -846,7 +688,7 @@ VkBool32 Example::buildRenderPass()
 	attachmentDescription[1].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
 	attachmentDescription[2].flags = 0;
-	attachmentDescription[2].format = swapchain->getImageFormat();	// Later request same format for MSAA image.
+	attachmentDescription[2].format = surface->getFormat(contextObject->getPhysicalDevice()->getPhysicalDevice());	// Later request same format for MSAA image.
 	attachmentDescription[2].samples = VKTS_SAMPLE_COUNT_BIT;
 	attachmentDescription[2].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 	attachmentDescription[2].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -1224,11 +1066,6 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 
 	//
 
-	if (!buildRenderPass())
-	{
-		return VK_FALSE;
-	}
-
 	if (!buildPipeline())
 	{
 		return VK_FALSE;
@@ -1322,13 +1159,6 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 		}
 	}
 
-	if (!buildScene(commandObject))
-	{
-		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not build scene.");
-
-		return VK_FALSE;
-	}
-
 	result = updateCmdBuffer->endCommandBuffer();
 
 	if (result != VK_SUCCESS)
@@ -1406,21 +1236,21 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 
 	//
 
-	for (uint32_t i = 0; i < swapchainImagesCount; i++)
+	if (sceneLoaded)
 	{
-		if (!updateDescriptorSets(i))
+		if (scene.get() && environmentScene.get())
 		{
-			return VK_FALSE;
-		}
+			for (uint32_t i = 0; i < swapchainImagesCount; i++)
+			{
+				if (!updateDescriptorSets(i))
+				{
+					return VK_FALSE;
+				}
 
-		if (scene.get())
-		{
-			scene->updateDescriptorSetsRecursive(VKTS_BINDING_UNIFORM_BSDF_FORWARD_TOTAL_BINDING_COUNT, writeDescriptorSets, i);
-		}
+				scene->updateDescriptorSetsRecursive(VKTS_BINDING_UNIFORM_BSDF_FORWARD_TOTAL_BINDING_COUNT, writeDescriptorSets, i);
 
-		if (environmentScene.get())
-		{
-			environmentScene->updateDescriptorSetsRecursive(VKTS_ENVIRONMENT_DESCRIPTOR_SET_COUNT, environmentWriteDescriptorSets, i);
+				environmentScene->updateDescriptorSetsRecursive(VKTS_ENVIRONMENT_DESCRIPTOR_SET_COUNT, environmentWriteDescriptorSets, i);
+			}
 		}
 	}
 
@@ -1505,12 +1335,6 @@ void Example::terminateResources(const vkts::IUpdateThreadContext& updateContext
 			if (msaaColorTexture.get())
 			{
 				msaaColorTexture->destroy();
-			}
-
-
-			if (renderPass.get())
-			{
-				renderPass->destroy();
 			}
 		}
 	}
@@ -1605,6 +1429,33 @@ VkBool32 Example::init(const vkts::IUpdateThreadContext& updateContext)
 		return VK_FALSE;
 	}
 
+	//
+
+	if (!buildRenderPass())
+	{
+		return VK_FALSE;
+	}
+
+	//
+
+	loadTask = ILoadTaskSP(new LoadTask(contextObject, renderPass, allBSDFVertexShaderModules, environmentDescriptorSetLayout, renderFactory, sceneManager, sceneFactory, scene, environmentRenderFactory, environmentSceneManager, environmentSceneFactory, environmentScene));
+
+	if (!loadTask.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create load task.");
+
+		return VK_FALSE;
+	}
+
+	if (!updateContext.sendTask(loadTask))
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not send load task.");
+
+		return VK_FALSE;
+	}
+
+	//
+
 	if (!buildResources(updateContext))
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not build resources.");
@@ -1620,300 +1471,323 @@ VkBool32 Example::init(const vkts::IUpdateThreadContext& updateContext)
 //
 VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 {
-	static VkBool32 pressedA = VK_FALSE;
-
-	if (visualContext->getGamepadButton(windowIndex, 0, VKTS_GAMEPAD_A))
+	if (sceneLoaded)
 	{
-		pressedA = VK_TRUE;
-	}
-	else if (pressedA && !visualContext->getGamepadButton(windowIndex, 0, VKTS_GAMEPAD_A))
-	{
-		pressedA = VK_FALSE;
+		static VkBool32 pressedA = VK_FALSE;
 
-		showStats = !showStats;
-	}
-
-	//
-
-	for (uint32_t i = 0; i < allUpdateables.size(); i++)
-	{
-		allUpdateables[i]->update(updateContext.getDeltaTime(), updateContext.getDeltaTicks(), updateContext.getTickTime());
-	}
-
-	//
-
-	VkResult result = VK_SUCCESS;
-
-	//
-
-	if (surface->hasCurrentExtentChanged(contextObject->getPhysicalDevice()->getPhysicalDevice()))
-	{
-		const auto& currentExtent = surface->getCurrentExtent(contextObject->getPhysicalDevice()->getPhysicalDevice(), VK_FALSE);
-
-		if (currentExtent.width == 0 || currentExtent.height == 0)
+		if (visualContext->getGamepadButton(windowIndex, 0, VKTS_GAMEPAD_A))
 		{
-			return VK_TRUE;
+			pressedA = VK_TRUE;
 		}
-
-		result = VK_ERROR_OUT_OF_DATE_KHR;
-	}
-
-	//
-
-	uint32_t currentBuffer;
-
-	if (result == VK_SUCCESS)
-	{
-		result = swapchain->acquireNextImage(UINT64_MAX, imageAcquiredSemaphore->getSemaphore(), VK_NULL_HANDLE, currentBuffer);
-	}
-
-	//
-
-	if (result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR)
-	{
-		// Wait until complete, before to commit again.
-		result = cmdBufferFence[currentBuffer]->waitForFence(UINT64_MAX);
-		if (result != VK_SUCCESS)
+		else if (pressedA && !visualContext->getGamepadButton(windowIndex, 0, VKTS_GAMEPAD_A))
 		{
-			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not wait for fence.");
+			pressedA = VK_FALSE;
 
-			return VK_FALSE;
-		}
-
-		result = cmdBufferFence[currentBuffer]->reset();
-		if (result != VK_SUCCESS)
-		{
-			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not reset fence.");
-
-			return VK_FALSE;
-		}
-
-		//
-		// Set Camera.
-		//
-
-		if (scene.get())
-		{
-			scene->updateTransformRecursive(updateContext.getDeltaTime(), updateContext.getDeltaTicks(), updateContext.getTickTime(), currentBuffer);
-
-			// Camera
-
-			if (!camera.get())
-			{
-				if (scene->getNumberCameras() > 0)
-				{
-					camera = vkts::userCameraCreate(scene->getCameras()[0]->getViewMatrix());
-				}
-				else
-				{
-					camera = vkts::userCameraCreate(glm::vec4(0.0f, 4.0f, 10.0f, 1.0f), glm::vec4(0.0f, 2.0f, 0.0f, 1.0f));
-				}
-
-				if (!camera.get())
-				{
-					return VK_FALSE;
-				}
-
-				allUpdateables.append(camera);
-
-				inputController = vkts::inputControllerCreate(updateContext, visualContext, windowIndex, 0, camera);
-
-				if (!inputController.get())
-				{
-					return VK_FALSE;
-				}
-
-				allUpdateables.insert(0, inputController);
-			}
-
-			// Lights need to uploaded after the scene has been updated.
-
-			int32_t lightCount = glm::min((int32_t)scene->getLights().size(), VKTS_MAX_LIGHTS);
-
-			if (!fragmentLightsUniformBuffer->upload(dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_LIGHT].stride * (VkDeviceSize)currentBuffer + VKTS_MAX_LIGHTS * 4 * sizeof(float) * 2, 0, lightCount))
-			{
-				vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not upload lights.");
-
-				return VK_FALSE;
-			}
-
-			for (int32_t i = 0; i < lightCount; i++)
-			{
-				if (!fragmentLightsUniformBuffer->upload(dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_LIGHT].stride * (VkDeviceSize)currentBuffer + i * 4 * sizeof(float), 0, scene->getLights()[i]->getDirection()))
-				{
-					vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not upload lights.");
-
-					return VK_FALSE;
-				}
-
-				if (!fragmentLightsUniformBuffer->upload(dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_LIGHT].stride * (VkDeviceSize)currentBuffer + i * 4 * sizeof(float) + VKTS_MAX_LIGHTS * 4 * sizeof(float), 0, glm::vec4(scene->getLights()[i]->getColor(), 1.0)))
-				{
-					vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not upload lights.");
-
-					return VK_FALSE;
-				}
-			}
-		}
-
-		if (!camera.get())
-		{
-			return VK_FALSE;
+			showStats = !showStats;
 		}
 
 		//
 
-		glm::mat4 projectionMatrix(1.0f);
-		glm::mat4 viewMatrix(1.0f);
-
-		const auto& currentExtent = surface->getCurrentExtent(contextObject->getPhysicalDevice()->getPhysicalDevice(), VK_FALSE);
-
-		projectionMatrix = vkts::perspectiveMat4(45.0f, (float)currentExtent.width / (float)currentExtent.height, 1.0f, 100.0f);
-
-		auto inverseProjectionMatrix = glm::inverse(projectionMatrix);
-
-		viewMatrix = camera->getViewMatrix();
-
-		auto inverseViewMatrix = glm::inverse(viewMatrix);
-
-		if (!vertexViewProjectionUniformBuffer->upload(dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_VIEWPROJECTION].stride * (VkDeviceSize)currentBuffer + 0 * sizeof(float) * 16, 0, projectionMatrix))
+		for (uint32_t i = 0; i < allUpdateables.size(); i++)
 		{
-			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not upload matrices.");
-
-			return VK_FALSE;
-		}
-		if (!environmentVertexViewProjectionUniformBuffer->upload(dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_VIEWPROJECTION].stride * (VkDeviceSize)currentBuffer + 0 * sizeof(float) * 16, 0, projectionMatrix))
-		{
-			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not upload matrices.");
-
-			return VK_FALSE;
-		}
-		if (!fragmentMatricesUniformBuffer->upload(dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_BSDF_FORWARD_INVERSE].stride * (VkDeviceSize)currentBuffer + 0 * sizeof(float) * 16, 0, inverseProjectionMatrix))
-		{
-			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not upload matrices.");
-
-			return VK_FALSE;
+			allUpdateables[i]->update(updateContext.getDeltaTime(), updateContext.getDeltaTicks(), updateContext.getTickTime());
 		}
 
 		//
 
-		if (!vertexViewProjectionUniformBuffer->upload(dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_VIEWPROJECTION].stride * (VkDeviceSize)currentBuffer + 1 * sizeof(float) * 16, 0, viewMatrix))
+		VkResult result = VK_SUCCESS;
+
+		//
+
+		if (surface->hasCurrentExtentChanged(contextObject->getPhysicalDevice()->getPhysicalDevice()))
 		{
-			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not upload matrices.");
+			const auto& currentExtent = surface->getCurrentExtent(contextObject->getPhysicalDevice()->getPhysicalDevice(), VK_FALSE);
 
-			return VK_FALSE;
-		}
-		if (!fragmentMatricesUniformBuffer->upload(dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_BSDF_FORWARD_INVERSE].stride * (VkDeviceSize)currentBuffer + 1 * sizeof(float) * 16, 0, inverseViewMatrix))
-		{
-			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not upload matrices.");
+			if (currentExtent.width == 0 || currentExtent.height == 0)
+			{
+				return VK_TRUE;
+			}
 
-			return VK_FALSE;
-		}
-
-		// Environment is not moveable.
-		auto fixedViewMatrix = viewMatrix;
-		fixedViewMatrix[3] = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-
-		if (!environmentVertexViewProjectionUniformBuffer->upload(dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_VIEWPROJECTION].stride * (VkDeviceSize)currentBuffer + 1 * sizeof(float) * 16, 0, fixedViewMatrix))
-		{
-			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not upload matrices.");
-
-			return VK_FALSE;
-		}
-
-		if (environmentScene.get())
-		{
-			environmentScene->updateTransformRecursive(updateContext.getDeltaTime(), updateContext.getDeltaTicks(), updateContext.getTickTime(), currentBuffer);
+			result = VK_ERROR_OUT_OF_DATE_KHR;
 		}
 
 		//
 
-		uint32_t currentFPS;
+		uint32_t currentBuffer;
 
-		if (vkts::profileApplicationGetFps(currentFPS, updateContext.getDeltaTime()))
+		if (result == VK_SUCCESS)
 		{
-			fps = currentFPS;
-
-			//
-
-			uint64_t currentRAM;
-
-			if (vkts::profileApplicationGetRam(currentRAM))
-			{
-				ram = currentRAM;
-			}
-
-			//
-
-			float currentCpuUsageApp;
-
-			if (vkts::profileApplicationGetCpuUsage(currentCpuUsageApp))
-			{
-				cpuUsageApp = currentCpuUsageApp;
-			}
-
-			//
-
-			for (uint32_t cpu = 0; cpu < processors; cpu++)
-			{
-				if (vkts::profileGetCpuUsage(currentCpuUsageApp, cpu))
-				{
-					cpuUsage[cpu] = currentCpuUsageApp;
-				}
-			}
-
-			//
-
-			rebuildCmdBufferCounter = swapchainImagesCount;
-		}
-
-		if (rebuildCmdBufferCounter > 0)
-		{
-			if (!buildCmdBuffer(currentBuffer))
-			{
-				return VK_FALSE;
-			}
-
-			rebuildCmdBufferCounter--;
+			result = swapchain->acquireNextImage(UINT64_MAX, imageAcquiredSemaphore->getSemaphore(), VK_NULL_HANDLE, currentBuffer);
 		}
 
 		//
-
-        VkSemaphore waitSemaphores = imageAcquiredSemaphore->getSemaphore();
-        VkSemaphore signalSemaphores = renderingCompleteSemaphore->getSemaphore();
-
-
-        VkPipelineStageFlags waitDstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
-
-        VkSubmitInfo submitInfo{};
-
-        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-
-        submitInfo.waitSemaphoreCount = 1;
-        submitInfo.pWaitSemaphores = &waitSemaphores;
-        submitInfo.pWaitDstStageMask = &waitDstStageMask;
-        submitInfo.commandBufferCount = 1;
-        submitInfo.pCommandBuffers = cmdBuffer[currentBuffer]->getCommandBuffers();
-        submitInfo.signalSemaphoreCount = 1;
-        submitInfo.pSignalSemaphores = &signalSemaphores;
-
-		result = contextObject->getQueue()->submit(1, &submitInfo, cmdBufferFence[currentBuffer]->getFence());
-
-		if (result != VK_SUCCESS)
-		{
-			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not submit queue.");
-
-			return VK_FALSE;
-		}
-
-        waitSemaphores = renderingCompleteSemaphore->getSemaphore();
-
-        VkSwapchainKHR swapchains = swapchain->getSwapchain();
-
-        result = swapchain->queuePresent(contextObject->getQueue()->getQueue(), 1, &waitSemaphores, 1, &swapchains, &currentBuffer, nullptr);
 
 		if (result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR)
 		{
-			// Do nothing, as everything is buffered and synchronized.
+			// Wait until complete, before to commit again.
+			result = cmdBufferFence[currentBuffer]->waitForFence(UINT64_MAX);
+			if (result != VK_SUCCESS)
+			{
+				vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not wait for fence.");
+
+				return VK_FALSE;
+			}
+
+			result = cmdBufferFence[currentBuffer]->reset();
+			if (result != VK_SUCCESS)
+			{
+				vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not reset fence.");
+
+				return VK_FALSE;
+			}
+
+			//
+			// Set Camera.
+			//
+
+			if (scene.get())
+			{
+				scene->updateTransformRecursive(updateContext.getDeltaTime(), updateContext.getDeltaTicks(), updateContext.getTickTime(), currentBuffer);
+
+				// Camera
+
+				if (!camera.get())
+				{
+					if (scene->getNumberCameras() > 0)
+					{
+						camera = vkts::userCameraCreate(scene->getCameras()[0]->getViewMatrix());
+					}
+					else
+					{
+						camera = vkts::userCameraCreate(glm::vec4(0.0f, 4.0f, 10.0f, 1.0f), glm::vec4(0.0f, 2.0f, 0.0f, 1.0f));
+					}
+
+					if (!camera.get())
+					{
+						return VK_FALSE;
+					}
+
+					allUpdateables.append(camera);
+
+					inputController = vkts::inputControllerCreate(updateContext, visualContext, windowIndex, 0, camera);
+
+					if (!inputController.get())
+					{
+						return VK_FALSE;
+					}
+
+					allUpdateables.insert(0, inputController);
+				}
+
+				// Lights need to uploaded after the scene has been updated.
+
+				int32_t lightCount = glm::min((int32_t)scene->getLights().size(), VKTS_MAX_LIGHTS);
+
+				if (!fragmentLightsUniformBuffer->upload(dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_LIGHT].stride * (VkDeviceSize)currentBuffer + VKTS_MAX_LIGHTS * 4 * sizeof(float) * 2, 0, lightCount))
+				{
+					vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not upload lights.");
+
+					return VK_FALSE;
+				}
+
+				for (int32_t i = 0; i < lightCount; i++)
+				{
+					if (!fragmentLightsUniformBuffer->upload(dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_LIGHT].stride * (VkDeviceSize)currentBuffer + i * 4 * sizeof(float), 0, scene->getLights()[i]->getDirection()))
+					{
+						vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not upload lights.");
+
+						return VK_FALSE;
+					}
+
+					if (!fragmentLightsUniformBuffer->upload(dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_LIGHT].stride * (VkDeviceSize)currentBuffer + i * 4 * sizeof(float) + VKTS_MAX_LIGHTS * 4 * sizeof(float), 0, glm::vec4(scene->getLights()[i]->getColor(), 1.0)))
+					{
+						vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not upload lights.");
+
+						return VK_FALSE;
+					}
+				}
+			}
+
+			if (!camera.get())
+			{
+				return VK_FALSE;
+			}
+
+			//
+
+			glm::mat4 projectionMatrix(1.0f);
+			glm::mat4 viewMatrix(1.0f);
+
+			const auto& currentExtent = surface->getCurrentExtent(contextObject->getPhysicalDevice()->getPhysicalDevice(), VK_FALSE);
+
+			projectionMatrix = vkts::perspectiveMat4(45.0f, (float)currentExtent.width / (float)currentExtent.height, 1.0f, 100.0f);
+
+			auto inverseProjectionMatrix = glm::inverse(projectionMatrix);
+
+			viewMatrix = camera->getViewMatrix();
+
+			auto inverseViewMatrix = glm::inverse(viewMatrix);
+
+			if (!vertexViewProjectionUniformBuffer->upload(dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_VIEWPROJECTION].stride * (VkDeviceSize)currentBuffer + 0 * sizeof(float) * 16, 0, projectionMatrix))
+			{
+				vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not upload matrices.");
+
+				return VK_FALSE;
+			}
+			if (!environmentVertexViewProjectionUniformBuffer->upload(dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_VIEWPROJECTION].stride * (VkDeviceSize)currentBuffer + 0 * sizeof(float) * 16, 0, projectionMatrix))
+			{
+				vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not upload matrices.");
+
+				return VK_FALSE;
+			}
+			if (!fragmentMatricesUniformBuffer->upload(dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_BSDF_FORWARD_INVERSE].stride * (VkDeviceSize)currentBuffer + 0 * sizeof(float) * 16, 0, inverseProjectionMatrix))
+			{
+				vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not upload matrices.");
+
+				return VK_FALSE;
+			}
+
+			//
+
+			if (!vertexViewProjectionUniformBuffer->upload(dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_VIEWPROJECTION].stride * (VkDeviceSize)currentBuffer + 1 * sizeof(float) * 16, 0, viewMatrix))
+			{
+				vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not upload matrices.");
+
+				return VK_FALSE;
+			}
+			if (!fragmentMatricesUniformBuffer->upload(dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_BSDF_FORWARD_INVERSE].stride * (VkDeviceSize)currentBuffer + 1 * sizeof(float) * 16, 0, inverseViewMatrix))
+			{
+				vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not upload matrices.");
+
+				return VK_FALSE;
+			}
+
+			// Environment is not moveable.
+			auto fixedViewMatrix = viewMatrix;
+			fixedViewMatrix[3] = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+
+			if (!environmentVertexViewProjectionUniformBuffer->upload(dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_VIEWPROJECTION].stride * (VkDeviceSize)currentBuffer + 1 * sizeof(float) * 16, 0, fixedViewMatrix))
+			{
+				vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not upload matrices.");
+
+				return VK_FALSE;
+			}
+
+			if (environmentScene.get())
+			{
+				environmentScene->updateTransformRecursive(updateContext.getDeltaTime(), updateContext.getDeltaTicks(), updateContext.getTickTime(), currentBuffer);
+			}
+
+			//
+
+			uint32_t currentFPS;
+
+			if (vkts::profileApplicationGetFps(currentFPS, updateContext.getDeltaTime()))
+			{
+				fps = currentFPS;
+
+				//
+
+				uint64_t currentRAM;
+
+				if (vkts::profileApplicationGetRam(currentRAM))
+				{
+					ram = currentRAM;
+				}
+
+				//
+
+				float currentCpuUsageApp;
+
+				if (vkts::profileApplicationGetCpuUsage(currentCpuUsageApp))
+				{
+					cpuUsageApp = currentCpuUsageApp;
+				}
+
+				//
+
+				for (uint32_t cpu = 0; cpu < processors; cpu++)
+				{
+					if (vkts::profileGetCpuUsage(currentCpuUsageApp, cpu))
+					{
+						cpuUsage[cpu] = currentCpuUsageApp;
+					}
+				}
+
+				//
+
+				rebuildCmdBufferCounter = swapchainImagesCount;
+			}
+
+			if (rebuildCmdBufferCounter > 0)
+			{
+				if (!buildCmdBuffer(currentBuffer))
+				{
+					return VK_FALSE;
+				}
+
+				rebuildCmdBufferCounter--;
+			}
+
+			//
+
+			VkSemaphore waitSemaphores = imageAcquiredSemaphore->getSemaphore();
+			VkSemaphore signalSemaphores = renderingCompleteSemaphore->getSemaphore();
+
+
+			VkPipelineStageFlags waitDstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+
+			VkSubmitInfo submitInfo{};
+
+			submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+			submitInfo.waitSemaphoreCount = 1;
+			submitInfo.pWaitSemaphores = &waitSemaphores;
+			submitInfo.pWaitDstStageMask = &waitDstStageMask;
+			submitInfo.commandBufferCount = 1;
+			submitInfo.pCommandBuffers = cmdBuffer[currentBuffer]->getCommandBuffers();
+			submitInfo.signalSemaphoreCount = 1;
+			submitInfo.pSignalSemaphores = &signalSemaphores;
+
+			result = contextObject->getQueue()->submit(1, &submitInfo, cmdBufferFence[currentBuffer]->getFence());
+
+			if (result != VK_SUCCESS)
+			{
+				vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not submit queue.");
+
+				return VK_FALSE;
+			}
+
+			waitSemaphores = renderingCompleteSemaphore->getSemaphore();
+
+			VkSwapchainKHR swapchains = swapchain->getSwapchain();
+
+			result = swapchain->queuePresent(contextObject->getQueue()->getQueue(), 1, &waitSemaphores, 1, &swapchains, &currentBuffer, nullptr);
+
+			if (result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR)
+			{
+				// Do nothing, as everything is buffered and synchronized.
+			}
+			else
+			{
+				if (result == VK_ERROR_OUT_OF_DATE_KHR)
+				{
+					terminateResources(updateContext);
+
+					if (!buildResources(updateContext))
+					{
+						vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not build resources.");
+
+						return VK_FALSE;
+					}
+				}
+				else
+				{
+					vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not present queue.");
+
+					return VK_FALSE;
+				}
+			}
 		}
 		else
 		{
@@ -1930,7 +1804,7 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 			}
 			else
 			{
-				vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not present queue.");
+				vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not acquire next image.");
 
 				return VK_FALSE;
 			}
@@ -1938,22 +1812,125 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 	}
 	else
 	{
-		if (result == VK_ERROR_OUT_OF_DATE_KHR)
+		vkts::ITaskSP executedTask;
+
+		// Do not wait.
+		if (!updateContext.receiveExecutedTask(executedTask, VK_FALSE))
 		{
-			terminateResources(updateContext);
-
-			if (!buildResources(updateContext))
-			{
-				vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not build resources.");
-
-				return VK_FALSE;
-			}
+			return VK_TRUE;
 		}
-		else
+
+		//
+
+		vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Scene loaded");
+
+		sceneLoaded = VK_TRUE;
+
+		//
+
+		VkCommandBuffer updateCommandBuffer = loadTask->getCommandBuffer();
+
+		//
+
+		VkSubmitInfo submitInfo{};
+
+		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+		submitInfo.waitSemaphoreCount = 0;
+		submitInfo.pWaitSemaphores = nullptr;
+		submitInfo.commandBufferCount = 1;
+		submitInfo.pCommandBuffers = &updateCommandBuffer;
+		submitInfo.signalSemaphoreCount = 0;
+		submitInfo.pSignalSemaphores = nullptr;
+
+		auto result = contextObject->getQueue()->submit(1, &submitInfo, VK_NULL_HANDLE);
+
+		if (result != VK_SUCCESS)
 		{
-			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not acquire next image.");
+			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not submit queue.");
 
 			return VK_FALSE;
+		}
+
+		result = contextObject->getQueue()->waitIdle();
+
+		if (result != VK_SUCCESS)
+		{
+			vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not wait for idle queue.");
+
+			return VK_FALSE;
+		}
+
+		//
+
+		// Enlarge the sphere.
+		environmentScene->getObjects()[0]->setScale(glm::vec3(10.0f, 10.0f, 10.0f));
+
+		// Sorted by binding
+		dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_VIEWPROJECTION] = VkTsDynamicOffset{0, (uint32_t)contextObject->getPhysicalDevice()->getUniformBufferAlignmentSizeInBytes(vkts::alignmentGetSizeInBytes(16 * sizeof(float) * 2, 16))};
+		dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_TRANSFORM] = VkTsDynamicOffset{0, (uint32_t)sceneFactory->getSceneRenderFactory()->getTransformUniformBufferAlignmentSize(sceneManager)};
+		dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_BONE_TRANSFORM] = VkTsDynamicOffset{0, (uint32_t)sceneFactory->getSceneRenderFactory()->getJointsUniformBufferAlignmentSize(sceneManager)};
+		dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_BSDF_FORWARD_INVERSE] = VkTsDynamicOffset{0, (uint32_t)contextObject->getPhysicalDevice()->getUniformBufferAlignmentSizeInBytes(vkts::alignmentGetSizeInBytes(16 * sizeof(float) * 2, 16))};
+		dynamicOffsets[VKTS_BINDING_UNIFORM_BUFFER_LIGHT] = VkTsDynamicOffset{0, (uint32_t)contextObject->getPhysicalDevice()->getUniformBufferAlignmentSizeInBytes(vkts::alignmentGetSizeInBytes(VKTS_MAX_LIGHTS * 4 * sizeof(float) * 2 + sizeof(int32_t), 16))};
+
+		//
+		// Free resources.
+		//
+
+		if (sceneFactory.get())
+		{
+			sceneFactory.reset();
+		}
+
+		if (sceneManager.get())
+		{
+			sceneManager->destroy();
+
+			sceneManager.reset();
+		}
+
+		if (renderFactory.get())
+		{
+			renderFactory.reset();
+		}
+
+		//
+
+		if (environmentSceneFactory.get())
+		{
+			environmentSceneFactory.reset();
+		}
+
+		if (environmentSceneManager.get())
+		{
+			environmentSceneManager->destroy();
+
+			environmentSceneManager.reset();
+		}
+
+		if (environmentRenderFactory.get())
+		{
+			environmentRenderFactory.reset();
+		}
+
+		// Destroys the load task.
+		loadTask = ILoadTaskSP();
+
+		//
+
+		if (scene.get())
+		{
+			for (uint32_t i = 0; i < swapchainImagesCount; i++)
+			{
+				if (!updateDescriptorSets(i))
+				{
+					return VK_FALSE;
+				}
+
+				scene->updateDescriptorSetsRecursive(VKTS_BINDING_UNIFORM_BSDF_FORWARD_TOTAL_BINDING_COUNT, writeDescriptorSets, i);
+
+				environmentScene->updateDescriptorSetsRecursive(VKTS_ENVIRONMENT_DESCRIPTOR_SET_COUNT, environmentWriteDescriptorSets, i);
+			}
 		}
 	}
 
@@ -1965,6 +1942,16 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 //
 void Example::terminate(const vkts::IUpdateThreadContext& updateContext)
 {
+	if (loadTask.get() && !sceneLoaded)
+	{
+		vkts::ITaskSP executedTask;
+
+		// Wait, until finished.
+		updateContext.receiveExecutedTask(executedTask);
+
+		loadTask = ILoadTaskSP();
+	}
+
 	if (contextObject.get())
 	{
 		if (contextObject->getDevice().get())
@@ -2048,6 +2035,11 @@ void Example::terminate(const vkts::IUpdateThreadContext& updateContext)
 			if (swapchain.get())
 			{
 				swapchain->destroy();
+			}
+
+			if (renderPass.get())
+			{
+				renderPass->destroy();
 			}
 
 			if (environmentPipelineLayout.get())

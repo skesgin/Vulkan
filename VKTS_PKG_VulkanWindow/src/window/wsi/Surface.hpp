@@ -72,6 +72,8 @@ public:
 
     virtual const VkSurfaceKHR getSurface() const override;
 
+    virtual VkFormat getFormat(const VkPhysicalDevice physicalDevice, const uint32_t index = 0) const override;
+
     virtual VkResult getPhysicalDeviceSurfaceCapabilities(const VkPhysicalDevice physicalDevice, VkSurfaceCapabilitiesKHR& surfaceCapabilities) const override;
 
     virtual VkBool32 hasCurrentExtentChanged(const VkPhysicalDevice physicalDevice) const override;

@@ -63,6 +63,29 @@ const VkSurfaceKHR Surface::getSurface() const
     return surface;
 }
 
+VkFormat Surface::getFormat(const VkPhysicalDevice physicalDevice, const uint32_t index) const
+{
+    uint32_t surfaceFormatsCount;
+
+    auto result = vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &surfaceFormatsCount, nullptr);
+
+    if (result != VK_SUCCESS || surfaceFormatsCount == 0 || index >= surfaceFormatsCount)
+    {
+        return VK_FORMAT_UNDEFINED;
+    }
+
+    std::vector<VkSurfaceFormatKHR> surfaceFormats(surfaceFormatsCount);
+
+    result = vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &surfaceFormatsCount, &surfaceFormats[0]);
+
+    if (result != VK_SUCCESS)
+    {
+    	return VK_FORMAT_UNDEFINED;
+    }
+
+    return surfaceFormats[index].format;
+}
+
 VkResult Surface::getPhysicalDeviceSurfaceCapabilities(const VkPhysicalDevice physicalDevice, VkSurfaceCapabilitiesKHR& surfaceCapabilities) const
 {
     return vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface, &surfaceCapabilities);
