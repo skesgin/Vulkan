@@ -99,7 +99,12 @@ public:
 
 int main(int argc, char* argv[])
 {
-	vkts::engineInit(vkts::visualDispatchMessages);
+	if (!vkts::engineInit(vkts::visualDispatchMessages))
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Test: Could not initialize engine.");
+
+		return -1;
+	}
 
 	vkts::logSetLevel(VKTS_LOG_INFO);
 
@@ -304,7 +309,10 @@ int main(int argc, char* argv[])
 		{
 			for (uint32_t i = 0; i < cubeMaps.size(); i++)
 			{
-				vkts::imageDataSave(cubeMaps[i]->getName().c_str(), cubeMaps[i]);
+				if (!vkts::imageDataSave(cubeMaps[i]->getName().c_str(), cubeMaps[i]))
+				{
+					vkts::logPrint(VKTS_LOG_WARNING, __FILE__, __LINE__, "Test: Could not save cube map %u.", i);
+				}
 			}
 		}
 		else

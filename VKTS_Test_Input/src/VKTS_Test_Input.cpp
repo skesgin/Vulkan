@@ -189,6 +189,8 @@ int main(int argc, char* argv[])
 
 	if (!vkts::engineInit(vkts::visualDispatchMessages))
 	{
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Test: Could not initialize engine.");
+
 		return -1;
 	}
 

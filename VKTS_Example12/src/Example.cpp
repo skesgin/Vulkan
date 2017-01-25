@@ -27,7 +27,7 @@
 #include "Example.hpp"
 
 Example::Example(const vkts::IContextObjectSP& contextObject, const int32_t windowIndex, const vkts::IVisualContextSP& visualContext, const vkts::ISurfaceSP& surface) :
-		IUpdateThread(), contextObject(contextObject), windowIndex(windowIndex), visualContext(visualContext), surface(surface), showStats(VK_TRUE), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), pipelineCache(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), environmentDescriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), environmentVertexViewProjectionUniformBuffer(nullptr), fragmentLightsUniformBuffer(nullptr), fragmentMatricesUniformBuffer(nullptr), allBSDFVertexShaderModules(), envVertexShaderModule(nullptr), envFragmentShaderModule(nullptr), environmentPipelineLayout(nullptr), guiRenderFactory(nullptr), guiManager(nullptr), guiFactory(nullptr), font(nullptr), loadTask(), sceneLoaded(VK_FALSE), renderFactory(nullptr), sceneManager(nullptr), sceneFactory(nullptr), scene(nullptr), environmentRenderFactory(nullptr), environmentSceneManager(nullptr), environmentSceneFactory(nullptr), environmentScene(nullptr), swapchain(nullptr), renderPass(nullptr), allGraphicsPipelines(), depthTexture(), msaaColorTexture(), msaaDepthTexture(), depthStencilImageView(), msaaColorImageView(), msaaDepthStencilImageView(), swapchainImagesCount(0), swapchainImageView(), framebuffer(), cmdBuffer(), cmdBufferFence(), rebuildCmdBufferCounter(0), fps(0), ram(0), cpuUsageApp(0.0f), processors(0)
+		IUpdateThread(), contextObject(contextObject), windowIndex(windowIndex), visualContext(visualContext), surface(surface), showStats(VK_TRUE), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), pipelineCache(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), environmentDescriptorSetLayout(nullptr), environmentDescriptorBufferInfos{}, descriptorBufferInfos{}, environmentDescriptorImageInfos{}, descriptorImageInfos{}, writeDescriptorSets{}, environmentWriteDescriptorSets{}, dynamicOffsets(), vertexViewProjectionUniformBuffer(nullptr), environmentVertexViewProjectionUniformBuffer(nullptr), fragmentLightsUniformBuffer(nullptr), fragmentMatricesUniformBuffer(nullptr), allBSDFVertexShaderModules(), envVertexShaderModule(nullptr), envFragmentShaderModule(nullptr), environmentPipelineLayout(nullptr), guiRenderFactory(nullptr), guiManager(nullptr), guiFactory(nullptr), font(nullptr), loadTask(), sceneLoaded(VK_FALSE), renderFactory(nullptr), sceneManager(nullptr), sceneFactory(nullptr), scene(nullptr), environmentRenderFactory(nullptr), environmentSceneManager(nullptr), environmentSceneFactory(nullptr), environmentScene(nullptr), swapchain(nullptr), renderPass(nullptr), allGraphicsPipelines(), depthTexture(), msaaColorTexture(), msaaDepthTexture(), depthStencilImageView(), msaaColorImageView(), msaaDepthStencilImageView(), swapchainImagesCount(0), swapchainImageView(), framebuffer(), cmdBuffer(), cmdBufferFence(), rebuildCmdBufferCounter(0), fps(0), ram(0), cpuUsageApp(0.0f), processors(0)
 {
 	processors = glm::min(vkts::processorGetNumber(), VKTS_MAX_CORES);
 
@@ -2004,7 +2004,7 @@ void Example::terminate(const vkts::IUpdateThreadContext& updateContext)
 
 			if (environmentRenderFactory.get())
 			{
-				renderFactory.reset();
+				environmentRenderFactory.reset();
 			}
 
 			if (environmentScene.get())
