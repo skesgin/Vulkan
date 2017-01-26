@@ -31,6 +31,127 @@
 namespace vkts
 {
 
+static ITextureObjectSP gltfProcessTextureObject(const GltfTexture* texture, const std::string& factorName, const ISceneManagerSP& sceneManager)
+{
+	std::string textureObjectName;
+	std::string imageObjectName;
+	std::string imageDataName;
+
+	if (texture && texture->source && texture->source->imageData.get())
+	{
+		textureObjectName = texture->name;
+
+		imageObjectName = texture->source->name;
+
+		imageDataName = texture->source->imageData->getName();
+	}
+	else
+	{
+		textureObjectName = "INTERNAL_WHITE";
+
+		imageObjectName = "INTERNAL_WHITE";
+
+		imageDataName = "INTERNAL_WHITE";
+	}
+
+	textureObjectName += factorName;
+
+	imageObjectName += factorName;
+
+	imageDataName += factorName;
+
+	//
+
+	VkBool32 mipmap = texture ? VK_TRUE : VK_FALSE;
+
+	//
+
+	ITextureObjectSP textureObject = sceneManager->useTextureObject(textureObjectName);
+
+	if (textureObject.get())
+	{
+		return textureObject;
+	}
+
+	//
+
+	IImageObjectSP imageObject = sceneManager->useImageObject(imageObjectName);
+
+	if (imageObject.get())
+	{
+		textureObject = createTextureObject(sceneManager->getAssetManager(), textureObjectName, mipmap, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_REPEAT, imageObject);
+
+		if (!textureObject.get())
+		{
+			return ITextureObjectSP();
+		}
+
+		sceneManager->addTextureObject(textureObject);
+
+		//
+
+		textureObject = sceneManager->useTextureObject(textureObjectName);
+
+		return textureObject;
+	}
+
+	//
+
+	IImageDataSP imageData = sceneManager->useImageData(imageDataName);
+
+	if (!imageData.get())
+	{
+		// TODO: Create image data with given factor.
+	}
+
+	if (imageData.get())
+	{
+		imageObject = createImageObject(sceneManager->getAssetManager(), imageObjectName, imageData, VK_FALSE);
+
+		if (!imageObject.get())
+		{
+			return textureObject;
+		}
+
+		sceneManager->addImageObject(imageObject);
+
+		imageObject = sceneManager->useImageObject(imageObjectName);
+
+		//
+
+		textureObject = createTextureObject(sceneManager->getAssetManager(), textureObjectName, mipmap, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_REPEAT, imageObject);
+
+		if (!textureObject.get())
+		{
+			return ITextureObjectSP();
+		}
+
+		sceneManager->addTextureObject(textureObject);
+
+		//
+
+		textureObject = sceneManager->useTextureObject(textureObjectName);
+
+		return textureObject;
+	}
+
+	return ITextureObjectSP();
+}
+
+static ITextureObjectSP gltfProcessTextureObject(const GltfTexture* texture, const float factor[4], const ISceneManagerSP& sceneManager)
+{
+	std::string factorName = "_" + std::to_string(factor[0]) + "_" + std::to_string(factor[1]) + "_" + std::to_string(factor[2]) + "_" + std::to_string(factor[3]);
+
+	return gltfProcessTextureObject(texture, factorName, sceneManager);
+}
+
+static ITextureObjectSP gltfProcessTextureObject(const GltfTexture* texture, const float factor, const ISceneManagerSP& sceneManager)
+{
+	std::string factorName = "_" + std::to_string(factor);
+
+	return gltfProcessTextureObject(texture, factorName, sceneManager);
+}
+
 static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visitor, const GltfPrimitive& gltfPrimitive, const ISceneManagerSP& sceneManager, const ISceneFactorySP& sceneFactory)
 {
 	if (!gltfPrimitive.position)
@@ -558,14 +679,12 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 			// Base color
 			//
 
-			// TODO: Check, if texture object exists with given factor.
-			ITextureObjectSP baseColor;
+			ITextureObjectSP baseColor = gltfProcessTextureObject(gltfPrimitive.material->baseColorTexture, gltfPrimitive.material->baseColorFactor, sceneManager);
 
-			// TODO: Check, if image object exists with given factor.
-			IImageObjectSP baseColorImageObject;
-
-			// TODO: Check, if image data exists with given factor.
-			IImageDataSP baseColorImageData;
+			if (!baseColor.get())
+			{
+				return VK_FALSE;
+			}
 
 			bsdfMaterial->addTextureObject(baseColor);
 
@@ -573,31 +692,66 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 			// Metallic
 			//
 
-			// TODO: Implement metallic.
+			ITextureObjectSP metallic = gltfProcessTextureObject(gltfPrimitive.material->metallicTexture, gltfPrimitive.material->metallicFactor, sceneManager);
+
+			if (!metallic.get())
+			{
+				return VK_FALSE;
+			}
+
+			bsdfMaterial->addTextureObject(metallic);
 
 			//
 			// Roughness
 			//
 
-			// TODO: Implement roughness.
+			ITextureObjectSP roughness = gltfProcessTextureObject(gltfPrimitive.material->roughnessTexture, gltfPrimitive.material->roughnessFactor, sceneManager);
+
+			if (!roughness.get())
+			{
+				return VK_FALSE;
+			}
+
+			bsdfMaterial->addTextureObject(roughness);
 
 			//
 			// Normal
 			//
 
-			// TODO: Implement normal.
+			ITextureObjectSP normal = gltfProcessTextureObject(gltfPrimitive.material->normalTexture, gltfPrimitive.material->normalFactor, sceneManager);
+
+			if (!normal.get())
+			{
+				return VK_FALSE;
+			}
+
+			bsdfMaterial->addTextureObject(normal);
 
 			//
 			// Ambient occlusion
 			//
 
-			// TODO: Implement ambient occlusion.
+			ITextureObjectSP ambientOcclusion = gltfProcessTextureObject(gltfPrimitive.material->aoTexture, gltfPrimitive.material->aoFactor, sceneManager);
+
+			if (!ambientOcclusion.get())
+			{
+				return VK_FALSE;
+			}
+
+			bsdfMaterial->addTextureObject(ambientOcclusion);
 
 			//
 			// Emissive
 			//
 
-			// TODO: Implement emissive.
+			ITextureObjectSP emissive = gltfProcessTextureObject(gltfPrimitive.material->emissiveTexture, gltfPrimitive.material->emissiveFactor, sceneManager);
+
+			if (!emissive.get())
+			{
+				return VK_FALSE;
+			}
+
+			bsdfMaterial->addTextureObject(emissive);
 
 			//
 			// Shader
