@@ -31,7 +31,7 @@
 namespace vkts
 {
 
-static ITextureObjectSP gltfProcessTextureObject(const GltfTexture* texture, const std::string& factorName, const ISceneManagerSP& sceneManager)
+static ITextureObjectSP gltfProcessTextureObject(const GltfTexture* texture, const std::string& factorName, const float factor[4], const enum VkTsImageDataType imageDataType, const ISceneManagerSP& sceneManager)
 {
 	std::string textureObjectName;
 	std::string imageObjectName;
@@ -101,7 +101,33 @@ static ITextureObjectSP gltfProcessTextureObject(const GltfTexture* texture, con
 
 	if (!imageData.get())
 	{
-		// TODO: Create image data with given factor.
+		if (texture->source->imageData.get())
+		{
+			imageData = imageDataConvert(imageData, imageData->getFormat(), imageDataName, imageDataType, imageDataType, glm::vec4(factor[0], factor[1], factor[2], factor[3]));
+		}
+		else
+		{
+			if (imageDataType == VKTS_NORMAL_DATA)
+			{
+				imageData = imageDataCreate(imageDataName, 1, 1, 1, glm::vec4(0.0f, factor[1], 0.0f, 0.0f), VK_IMAGE_TYPE_2D, VK_FORMAT_R8G8B8A8_UNORM);
+			}
+			else
+			{
+				imageData = imageDataCreate(imageDataName, 1, 1, 1, glm::vec4(factor[0], factor[1], factor[2], factor[3]), VK_IMAGE_TYPE_2D, VK_FORMAT_R8G8B8A8_UNORM);
+			}
+
+		}
+
+		if (!imageData.get())
+		{
+			return ITextureObjectSP();
+		}
+
+		sceneManager->addImageData(imageData);
+
+		//
+
+		imageData = sceneManager->useImageData(imageDataName);
 	}
 
 	if (imageData.get())
@@ -110,7 +136,7 @@ static ITextureObjectSP gltfProcessTextureObject(const GltfTexture* texture, con
 
 		if (!imageObject.get())
 		{
-			return textureObject;
+			return ITextureObjectSP();
 		}
 
 		sceneManager->addImageObject(imageObject);
@@ -138,18 +164,20 @@ static ITextureObjectSP gltfProcessTextureObject(const GltfTexture* texture, con
 	return ITextureObjectSP();
 }
 
-static ITextureObjectSP gltfProcessTextureObject(const GltfTexture* texture, const float factor[4], const ISceneManagerSP& sceneManager)
+static ITextureObjectSP gltfProcessTextureObject(const GltfTexture* texture, const float factor[4], const enum VkTsImageDataType imageDataType, const ISceneManagerSP& sceneManager)
 {
 	std::string factorName = "_" + std::to_string(factor[0]) + "_" + std::to_string(factor[1]) + "_" + std::to_string(factor[2]) + "_" + std::to_string(factor[3]);
 
-	return gltfProcessTextureObject(texture, factorName, sceneManager);
+	return gltfProcessTextureObject(texture, factorName, factor, imageDataType, sceneManager);
 }
 
-static ITextureObjectSP gltfProcessTextureObject(const GltfTexture* texture, const float factor, const ISceneManagerSP& sceneManager)
+static ITextureObjectSP gltfProcessTextureObject(const GltfTexture* texture, const float factor, const enum VkTsImageDataType imageDataType, const ISceneManagerSP& sceneManager)
 {
 	std::string factorName = "_" + std::to_string(factor);
 
-	return gltfProcessTextureObject(texture, factorName, sceneManager);
+	const float tempFactor[4] = {factor, factor, factor, factor};
+
+	return gltfProcessTextureObject(texture, factorName, tempFactor, imageDataType, sceneManager);
 }
 
 static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visitor, const GltfPrimitive& gltfPrimitive, const ISceneManagerSP& sceneManager, const ISceneFactorySP& sceneFactory)
@@ -679,7 +707,7 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 			// Base color
 			//
 
-			ITextureObjectSP baseColor = gltfProcessTextureObject(gltfPrimitive.material->baseColorTexture, gltfPrimitive.material->baseColorFactor, sceneManager);
+			ITextureObjectSP baseColor = gltfProcessTextureObject(gltfPrimitive.material->baseColorTexture, gltfPrimitive.material->baseColorFactor, VKTS_LDR_COLOR_DATA, sceneManager);
 
 			if (!baseColor.get())
 			{
@@ -692,7 +720,7 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 			// Metallic
 			//
 
-			ITextureObjectSP metallic = gltfProcessTextureObject(gltfPrimitive.material->metallicTexture, gltfPrimitive.material->metallicFactor, sceneManager);
+			ITextureObjectSP metallic = gltfProcessTextureObject(gltfPrimitive.material->metallicTexture, gltfPrimitive.material->metallicFactor, VKTS_NON_COLOR_DATA, sceneManager);
 
 			if (!metallic.get())
 			{
@@ -705,7 +733,7 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 			// Roughness
 			//
 
-			ITextureObjectSP roughness = gltfProcessTextureObject(gltfPrimitive.material->roughnessTexture, gltfPrimitive.material->roughnessFactor, sceneManager);
+			ITextureObjectSP roughness = gltfProcessTextureObject(gltfPrimitive.material->roughnessTexture, gltfPrimitive.material->roughnessFactor, VKTS_NON_COLOR_DATA, sceneManager);
 
 			if (!roughness.get())
 			{
@@ -718,7 +746,7 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 			// Normal
 			//
 
-			ITextureObjectSP normal = gltfProcessTextureObject(gltfPrimitive.material->normalTexture, gltfPrimitive.material->normalFactor, sceneManager);
+			ITextureObjectSP normal = gltfProcessTextureObject(gltfPrimitive.material->normalTexture, gltfPrimitive.material->normalFactor, VKTS_NORMAL_DATA, sceneManager);
 
 			if (!normal.get())
 			{
@@ -731,7 +759,7 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 			// Ambient occlusion
 			//
 
-			ITextureObjectSP ambientOcclusion = gltfProcessTextureObject(gltfPrimitive.material->aoTexture, gltfPrimitive.material->aoFactor, sceneManager);
+			ITextureObjectSP ambientOcclusion = gltfProcessTextureObject(gltfPrimitive.material->aoTexture, gltfPrimitive.material->aoFactor, VKTS_NON_COLOR_DATA, sceneManager);
 
 			if (!ambientOcclusion.get())
 			{
@@ -744,7 +772,7 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 			// Emissive
 			//
 
-			ITextureObjectSP emissive = gltfProcessTextureObject(gltfPrimitive.material->emissiveTexture, gltfPrimitive.material->emissiveFactor, sceneManager);
+			ITextureObjectSP emissive = gltfProcessTextureObject(gltfPrimitive.material->emissiveTexture, gltfPrimitive.material->emissiveFactor, VKTS_LDR_COLOR_DATA, sceneManager);
 
 			if (!emissive.get())
 			{
