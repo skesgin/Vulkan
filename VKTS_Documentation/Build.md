@@ -170,10 +170,6 @@ Using Android NDK:
 The needed shaders, textures and scene files are automatically copied into the assets folder by
 executing `build_project.py`. After the build, the assets are packed in the apk file. 
 
-Note:
-With the current NDK, copy the `include/vulkan` and `lib/libvulkan.so` from `android-24` to `android-23`,
-as `android-23` is still used.
-
 The following command builds the VKTS library:
 
 1. Open console in `Android/jni` project folder and execute following command:  
