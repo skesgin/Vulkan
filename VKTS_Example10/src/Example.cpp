@@ -2306,7 +2306,7 @@ void Example::terminate(const vkts::IUpdateThreadContext& updateContext)
 
 			if (environmentRenderFactory.get())
 			{
-				renderFactory.reset();
+				environmentRenderFactory.reset();
 			}
 
 			if (environmentScene.get())

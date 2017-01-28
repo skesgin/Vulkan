@@ -101,7 +101,7 @@ static ITextureObjectSP gltfProcessTextureObject(const GltfTexture* texture, con
 
 	if (!imageData.get())
 	{
-		if (texture->source->imageData.get())
+		if (texture && texture->source && texture->source->imageData.get())
 		{
 			imageData = imageDataConvert(imageData, imageData->getFormat(), imageDataName, imageDataType, imageDataType, glm::vec4(factor[0], factor[1], factor[2], factor[3]));
 		}
