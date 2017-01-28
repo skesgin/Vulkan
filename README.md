@@ -1,4 +1,5 @@
 [![Travis CI](https://api.travis-ci.org/McNopper/Vulkan.svg?branch=master)](https://travis-ci.org/McNopper/Vulkan)
+[![Coverity Scan](https://scan.coverity.com/projects/11301/badge.svg)](https://scan.coverity.com/projects/mcnopper-vulkan)
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](VKTS_Licenses/VKTS_license.txt)
 
 ![Vulkan](VKTS_Documentation/images/vulkan_logo.png)  
