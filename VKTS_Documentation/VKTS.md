@@ -5,7 +5,7 @@ Authors:
 
 **Norbert Nopper** (norbert@nopper.tv)
 
-VKTS version: **1.0.39.0**
+VKTS version: **1.0.39.1**
 
 Depending Vulkan API header version: **1.0.39**
 
@@ -84,6 +84,9 @@ Features:
 
 Changelog:
 ----------
+
+02/01/2017
+- Updated to LuanrG SDK 1.0.39.1.
 
 01/24/2017
 - Updated to LuanrG SDK 1.0.39.0.
