@@ -785,16 +785,21 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 			// Shader
 			//
 
-			// TODO: Create / load PBR shader.
+			// TODO: Load/add fragment shader.
 
 			//
 			// Attribute
 			//
 
-			// TODO: Gather / set vertex attribute number.
+			bsdfMaterial->setAttributes(subMesh->getVertexBufferType());
 		}
 
 		subMesh->setBSDFMaterial(bsdfMaterial);
+
+    	if (!sceneFactory->getSceneRenderFactory()->prepareBSDFMaterial(sceneManager, subMesh))
+    	{
+    		return VK_FALSE;
+    	}
 	}
 
 	return VK_TRUE;
