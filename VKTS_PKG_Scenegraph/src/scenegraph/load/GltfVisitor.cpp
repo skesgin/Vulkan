@@ -3246,6 +3246,11 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 	state.pop();
 }
 
+const std::string& GltfVisitor::getDirectory() const
+{
+	return directory;
+}
+
 enum GltfState GltfVisitor::getState() const
 {
 	if (state.size() > 0)

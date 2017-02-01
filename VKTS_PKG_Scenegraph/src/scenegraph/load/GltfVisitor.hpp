@@ -345,6 +345,8 @@ public:
 
 	//
 
+	const std::string& getDirectory() const;
+
 	enum GltfState getState() const;
 
 	//

@@ -28,6 +28,8 @@
 
 #include "GltfVisitor.hpp"
 
+#define VKTS_GLTF_FORWARD_FRAGMENT_SHADER_NAME "shader/SPIR/V/glTF_forward.frag.spv"
+
 namespace vkts
 {
 
@@ -785,7 +787,43 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 			// Shader
 			//
 
-			// TODO: Load/add fragment shader.
+			const char* fragmentShader = VKTS_GLTF_FORWARD_FRAGMENT_SHADER_NAME;
+
+            auto shaderModule = sceneManager->useFragmentShaderModule(fragmentShader);
+
+            if (!shaderModule.get())
+            {
+                std::string finalFilename = visitor.getDirectory() + std::string(fragmentShader);
+
+                auto shaderBinary = fileLoadBinary(finalFilename.c_str());
+
+				if (!shaderBinary.get())
+				{
+					shaderBinary = fileLoadBinary(fragmentShader);
+
+					if (!shaderBinary.get())
+					{
+						logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load fragment shader: '%s'", fragmentShader, VKTS_MAX_TOKEN_CHARS);
+
+						return VK_FALSE;
+					}
+				}
+
+				//
+
+				shaderModule = createShaderModule(sceneManager->getAssetManager(), fragmentShader, shaderBinary);
+
+				if (!shaderModule.get())
+				{
+					logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create fragment shader module.");
+
+					return VK_FALSE;
+				}
+
+				sceneManager->addFragmentShaderModule(shaderModule);
+            }
+
+            bsdfMaterial->setFragmentShader(shaderModule);
 
 			//
 			// Attribute
