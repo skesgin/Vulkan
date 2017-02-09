@@ -1154,8 +1154,6 @@ VkBool32 Example::buildPipeline()
 
     gp.getPipelineDepthStencilStateCreateInfo();
 
-    gp.getPipelineColorBlendAttachmentState(0);
-
 
     gp.getDynamicState(0) = VK_DYNAMIC_STATE_VIEWPORT;
     gp.getDynamicState(1) = VK_DYNAMIC_STATE_SCISSOR;
