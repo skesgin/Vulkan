@@ -84,7 +84,7 @@ VkBool32 LoadTask::execute()
 
 	//
 
-	sceneFactory = vkts::sceneFactoryCreate(renderFactory);
+	sceneFactory = vkts::sceneFactoryCreate(renderFactory, VK_TRUE);
 
 	if (!sceneFactory.get())
 	{
