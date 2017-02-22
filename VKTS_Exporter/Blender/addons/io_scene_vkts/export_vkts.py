@@ -2080,7 +2080,7 @@ def saveMeshes(context, filepath, materialsLibraryName, subMeshLibraryName):
 
     return
 
-def saveAnimation(context, fw, fw_animation, fw_channel, name, currentAnimation, filterName, isJoint):
+def saveAnimation(context, fw, fw_animation, fw_channel, name, currentAnimation, filterName, isJoint, isArmature):
 
     hasData = False
 
@@ -2242,12 +2242,12 @@ def saveBone(context, fw, fw_animation, fw_channel, currentPoseBone, armatureNam
     fw("\n")
     
     if animation_data is not None:
-        saveAnimation(context, fw, fw_animation, fw_channel, currentPoseBone.name, animation_data, currentPoseBone.name, True)
+        saveAnimation(context, fw, fw_animation, fw_channel, currentPoseBone.name, animation_data, currentPoseBone.name, True, False)
     
     return
 
 def saveNode(context, fw, fw_animation, fw_channel, currentObject):
-    location, rotation, scale = currentObject.matrix_local.decompose()
+    location, rotation, scale = currentObject.matrix_basis.decompose()
 
     location = convertLocation(location)
     rotation = convertRotation(rotation.to_euler('XYZ'))
@@ -2335,6 +2335,18 @@ def saveNode(context, fw, fw_animation, fw_channel, currentObject):
     fw("scale %f %f %f\n" % scale)
     fw("\n")
 
+    if parentName != "-":
+        location, rotation, scale = currentObject.matrix_parent_inverse.decompose()
+
+        location = convertLocation(location)
+        rotation = convertRotation(rotation.to_euler('XYZ'))
+        scale = convertScale(scale)
+
+        fw("bind_translate %f %f %f\n" % (location))
+        fw("bind_rotate %f %f %f\n" % (rotation))
+        fw("bind_scale %f %f %f\n" % (scale))
+        fw("\n")
+
     if currentObject.type == 'MESH':
         fw("mesh %s\n" % friendlyName(currentObject.data.name))
         fw("\n")
@@ -2350,8 +2362,8 @@ def saveNode(context, fw, fw_animation, fw_channel, currentObject):
             fw("\n")
 
     if currentObject.animation_data is not None:
-        isJoint = currentObject.type == 'ARMATURE'
-        saveAnimation(context, fw, fw_animation, fw_channel, currentObject.name, currentObject.animation_data, None, isJoint)
+        isArmature = currentObject.type == 'ARMATURE'
+        saveAnimation(context, fw, fw_animation, fw_channel, currentObject.name, currentObject.animation_data, None, False, isArmature)
 
     if currentObject.type == 'ARMATURE':
         fw("joints %d\n" % len(currentObject.pose.bones.values()))

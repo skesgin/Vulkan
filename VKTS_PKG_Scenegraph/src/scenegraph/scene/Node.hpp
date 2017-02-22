@@ -61,6 +61,7 @@ private:
     glm::vec3 bindRotate;
     glm::vec3 bindScale;
 
+    glm::mat4 correctionMatrix;
     glm::mat4 bindMatrix;
     glm::mat4 inverseBindMatrix;
     std::vector<VkBool32> bindMatrixDirty;
