@@ -53,6 +53,22 @@ glm::vec3 IMoveable::getAngle(const glm::vec3& forward, const glm::vec3& up) con
 
 	//
 
+	if (newForward.x == 0.0f && newForward.z == 0.0f)
+	{
+		if (newForward.x > 0.0f)
+		{
+			rotate.x = 90.0f;
+		}
+		else
+		{
+			rotate.x = -90.0f;
+		}
+
+		return rotate;
+	}
+
+	//
+
 	auto newForwardZ = glm::normalize(glm::vec3(newForward.x, 0.0f, newForward.z));
 
 	//

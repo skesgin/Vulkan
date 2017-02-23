@@ -64,27 +64,39 @@ IUserCameraSP VKTS_APIENTRY userCameraCreate(const glm::vec4& position, const gl
         return IUserCameraSP();
     }
 
-    newInstance->setForwardUp(glm::vec3(center - position), glm::vec3(0.0f, 1.0f, 0.0f));
+    glm::vec3 forward = glm::normalize(glm::vec3(center - position));
+
+    glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+
+    float fDOTu = glm::dot(forward, up);
+
+    if (fDOTu == 1.0f)
+    {
+    	up = glm::vec3(0.0f, 0.0f, 1.0f);
+    }
+    else if (fDOTu == -1.0f)
+    {
+    	up = glm::vec3(0.0f, 0.0f, -1.0f);
+    }
+
+    glm::vec3 side = glm::cross(forward, up);
+
+    up = glm::cross(side, forward);
+
+    newInstance->setForwardUp(glm::vec3(center - position), up);
 
     return IUserCameraSP(newInstance);
 }
 
 IUserCameraSP VKTS_APIENTRY userCameraCreate(const glm::mat4& viewMatrix)
 {
-	auto position = viewMatrix * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+	auto position = glm::vec4(viewMatrix[3][0], viewMatrix[3][1], viewMatrix[3][2], 1.0f);
 
-    auto newInstance = new UserCamera(position, glm::vec3(0.0f, 0.0f, 0.0f));
+	auto inverseViewMatrix = glm::inverse(viewMatrix);
 
-    if (!newInstance)
-    {
-        return IUserCameraSP();
-    }
+    auto center = position - glm::vec4(inverseViewMatrix[0][2], inverseViewMatrix[1][2], inverseViewMatrix[2][2], 0.0f);
 
-    auto forward = viewMatrix * glm::vec4(0.0f, 0.0f, 1.0f, 0.0f);
-
-    newInstance->setForwardUp(-glm::vec3(forward), glm::vec3(0.0f, 1.0f, 0.0f));
-
-    return IUserCameraSP(newInstance);
+    return userCameraCreate(position, center);
 }
 
 }

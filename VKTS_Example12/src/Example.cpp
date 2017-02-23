@@ -1620,7 +1620,16 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 
 			const auto& currentExtent = surface->getCurrentExtent(contextObject->getPhysicalDevice()->getPhysicalDevice(), VK_FALSE);
 
-			projectionMatrix = vkts::perspectiveMat4(45.0f, (float)currentExtent.width / (float)currentExtent.height, 1.0f, 100.0f);
+			if (scene->getNumberCameras() > 0)
+			{
+				scene->getCameras()[0]->setWindowDimension(glm::ivec2((int32_t)currentExtent.width, (int32_t)currentExtent.height));
+
+				projectionMatrix = scene->getCameras()[0]->getProjectionMatrix();
+			}
+			else
+			{
+				projectionMatrix = vkts::perspectiveMat4(45.0f, (float)currentExtent.width / (float)currentExtent.height, 1.0f, 100.0f);
+			}
 
 			auto inverseProjectionMatrix = glm::inverse(projectionMatrix);
 

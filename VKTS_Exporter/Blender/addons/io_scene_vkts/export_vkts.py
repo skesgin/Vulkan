@@ -1662,7 +1662,9 @@ def saveCameras(context, filepath):
         fw("zfar %f\n" % (currentCamera.data.clip_end))
         fw("\n")
         if cameraType == 'Perspective':
-            aspect = context.scene.render.resolution_x / context.scene.render.resolution_y
+            aspect = float(context.scene.render.resolution_x) / float(context.scene.render.resolution_y)
+            if aspect < 1.0:
+                aspect = 1.0
             fw("fovy %f\n" % (math.degrees(currentCamera.data.angle) * 1.0 / aspect))
         else:
             fw("ortho_scale %f\n" % (currentCamera.data.ortho_scale))
