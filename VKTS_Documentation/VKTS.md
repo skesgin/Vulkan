@@ -5,9 +5,9 @@ Authors:
 
 **Norbert Nopper** (norbert@nopper.tv)
 
-VKTS version: **1.0.39.1**
+VKTS version: **1.0.42.0**
 
-Depending Vulkan API header version: **1.0.39**
+Depending Vulkan API header version: **1.0.42**
 
 Depending Vulkan extensions, when using a window system:
 
@@ -85,14 +85,17 @@ Features:
 Changelog:
 ----------
 
+02/27/2017
+- Updated to LunarG SDK 1.0.42.0.
+
 02/01/2017
-- Updated to LuanrG SDK 1.0.39.1.
+- Updated to LunarG SDK 1.0.39.1.
 
 01/24/2017
-- Updated to LuanrG SDK 1.0.39.0.
+- Updated to LunarG SDK 1.0.39.0.
 
 12/16/2016
-- Updated to LuanrG SDK 1.0.37.0.
+- Updated to LunarG SDK 1.0.37.0.
 
 11/26/2016
 - Reorganized documentation. All documents are now in one folder.

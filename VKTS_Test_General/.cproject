@@ -43,7 +43,7 @@
 							<tool id="cdt.managedbuild.tool.gnu.c.linker.mingw.exe.debug.840923308" name="MinGW C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.mingw.exe.debug"/>
 							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.mingw.exe.debug.548663619" name="MinGW C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.mingw.exe.debug">
 								<option id="gnu.cpp.link.option.paths.892467159" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" useByScannerDiscovery="false" valueType="libPaths">
-									<listOptionValue builtIn="false" value="&quot;${env_var:VULKAN_SDK}\Bin&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${env_var:VULKAN_SDK}\Lib&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_PKG_Window/intel64_Windows_Win32_GNU_Debug}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_PKG_Interactive/intel64_Windows_Win32_GNU_Debug}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_PKG_Entity/intel64_Windows_Win32_GNU_Debug}&quot;"/>
@@ -127,7 +127,7 @@
 							<tool id="cdt.managedbuild.tool.gnu.c.linker.mingw.exe.release.1601093131" name="MinGW C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.mingw.exe.release"/>
 							<tool command="g++" commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG} ${OUTPUT_PREFIX}${OUTPUT} ${INPUTS}" errorParsers="org.eclipse.cdt.core.GLDErrorParser" id="cdt.managedbuild.tool.gnu.cpp.linker.mingw.exe.release.2007595507" name="MinGW C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.mingw.exe.release">
 								<option id="gnu.cpp.link.option.paths.1006176610" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" useByScannerDiscovery="false" valueType="libPaths">
-									<listOptionValue builtIn="false" value="&quot;${env_var:VULKAN_SDK}\Bin&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${env_var:VULKAN_SDK}\Lib&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_PKG_Window/intel64_Windows_Win32_GNU_Release}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_PKG_Interactive/intel64_Windows_Win32_GNU_Release}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/VKTS_PKG_Entity/intel64_Windows_Win32_GNU_Release}&quot;"/>

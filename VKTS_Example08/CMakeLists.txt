@@ -66,11 +66,11 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	
     if (${VKTS_BITS} MATCHES "64")
     
-        find_path(Vulkan_LIBRARY_DIR NAMES vulkan-1.lib HINTS "$ENV{VULKAN_SDK}/Bin")
+        find_path(Vulkan_LIBRARY_DIR NAMES vulkan-1.lib HINTS "$ENV{VULKAN_SDK}/Lib")
        
     else ()
     
-        find_path(Vulkan_LIBRARY_DIR NAMES vulkan-1.lib HINTS "$ENV{VULKAN_SDK}/Bin32")
+        find_path(Vulkan_LIBRARY_DIR NAMES vulkan-1.lib HINTS "$ENV{VULKAN_SDK}/Lib32")
             
     endif ()
     
