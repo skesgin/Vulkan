@@ -319,7 +319,15 @@ static VkBool32 sceneLoadImageObjects(const char* directory, const char* filenam
 
 							if (allCubeMaps.size() == 0)
 							{
-								auto oldAllCubeMaps = imageDataCubemap(imageData, imageData->getHeight() / 2, finalImageDataFilename);
+								uint32_t currentMapLength = imageData->getHeight() / 2;
+
+								uint32_t cubeMapLength = 1;
+								while (cubeMapLength * 2 <= currentMapLength)
+								{
+									cubeMapLength *= 2;
+								}
+
+								auto oldAllCubeMaps = imageDataCubemap(imageData, cubeMapLength, finalImageDataFilename);
 
 								if (oldAllCubeMaps.size() != 6)
 								{

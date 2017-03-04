@@ -27,8 +27,7 @@
 #ifndef VKTS_SCENEGRAPH_HPP_
 #define VKTS_SCENEGRAPH_HPP_
 
-// TODO: Implement voxel global illumination in Example 12.
-// TODO: Implement glTF 1.1. loader plus PBR renderer with transparency in Example 13.
+// TODO: Implement voxel global illumination in Example 11.
 // TODO: Implement particle system renderer in Example 14.
 
 /**

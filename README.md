@@ -2,7 +2,7 @@
 [![Coverity Scan](https://scan.coverity.com/projects/11301/badge.svg)](https://scan.coverity.com/projects/mcnopper-vulkan)
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](VKTS_Licenses/VKTS_license.txt)
 
-![Vulkan](VKTS_Documentation/images/vulkan_logo.png)  
+![Vulkan](VKTS_Documentation/images/vulkan_logo.png) ![Vulkan](VKTS_Documentation/images/glTF_logo.png)  
 Vulkan examples using VulKan ToolS (VKTS):
 ------------------------------------------
 
@@ -93,6 +93,11 @@ This example is not finished yet.
 This example is based on Example 10, but a forward PBR renderer is used. Furthermore, the environment is a HDR image and 
 used for the image based lighting. Finally, this example uses MSAA for anti-aliasing.
   
+[VKTS_Example13](VKTS_Example13) - glTF 2.0 with PBR materials (WIP).  
+![VKTS_Example13](VKTS_Documentation/screenshots/VKTS_Example13.png)  
+      
+This example is not finished yet.  
+    
   
 VKTS test programs:
 -------------------
