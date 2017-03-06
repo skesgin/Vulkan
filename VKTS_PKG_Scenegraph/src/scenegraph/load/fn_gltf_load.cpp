@@ -518,7 +518,7 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 
     	if (createTangents)
     	{
-        	uint32_t size = sizeof(float) * 3 * 2 * subMesh->getNumberIndices();
+        	uint32_t size = sizeof(float) * 3 * 2 * subMesh->getNumberVertices();
 
             tempBinaryBuffer = binaryBufferCreate(size);
 
@@ -529,7 +529,7 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
                 return VK_FALSE;
             }
 
-            for (uint32_t i = 0; i < (uint32_t)subMesh->getNumberIndices(); i+=3)
+            for (uint32_t i = 0; i < (uint32_t)subMesh->getNumberIndices() / 3; i++)
             {
             	int32_t index[3];
 
@@ -542,7 +542,7 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 
             	for (uint32_t k = 0; k < 3; k++)
             	{
-            		index[k] = ((const int32_t*)indicesBinaryBuffer->getData())[i + k];
+            		index[k] = ((const int32_t*)indicesBinaryBuffer->getData())[i * 3 + k];
 
             		//
 
@@ -591,8 +591,8 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 
                 float r = 1.0f / (deltaUV[0].x * deltaUV[1].y - deltaUV[0].y * deltaUV[1].x);
 
-                glm::vec3 tangent = (deltaPos[0] * deltaUV[1].y - deltaPos[1] * deltaUV[0].y) * r;
-                glm::vec3 bitangent = (deltaPos[1] * deltaUV[0].x - deltaPos[0] * deltaUV[1].x) * r;
+                glm::vec3 tangent = glm::normalize((deltaPos[0] * deltaUV[1].y - deltaPos[1] * deltaUV[0].y) * r);
+                glm::vec3 bitangent = glm::normalize((deltaPos[1] * deltaUV[0].x - deltaPos[0] * deltaUV[1].x) * r);
 
                 //
 
