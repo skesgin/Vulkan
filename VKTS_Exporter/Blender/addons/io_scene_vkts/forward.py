@@ -233,45 +233,23 @@ forwardOutAssignGLSL = """
         vec3 F0_dielectric = vec3(0.04, 0.04, 0.04);
         vec3 F0_metallic = baseColor.rgb;
         
+        // Image based lighting.
+        
         //
         // Lambert.
         //
-
-        vec3 colorLambert = vec3(0.0, 0.0, 0.0);
+        
+        vec3 diffuseColor = baseColor * (1.0 - metallic);
+        
+        vec3 colorLambert = iblLambert(N, diffuseColor) * ambientOcclusion;
 
         //
         // Cook Torrance.
         //
-                
-        vec3 colorCookTorrance = vec3(0.0, 0.0, 0.0);
         
-        // Image based lighting.
-        
-        //
-        // Dielectric
-        //
-        
-        vec3 dielectricFresnel = vec3(0.0, 0.0, 0.0);
-        vec3 inverseDielectricFresnel = vec3(0.0, 0.0, 0.0);
-        
-        if (metallic < 1.0)
-        {
-            dielectricFresnel = fresnel(NdotV, F0_dielectric);
-            inverseDielectricFresnel = vec3(1.0, 1.0, 1.0) - dielectricFresnel;
-        
-            colorLambert += iblLambert(N, baseColor) * ambientOcclusion * inverseDielectricFresnel;
-        
-            colorCookTorrance += iblCookTorrance(N, V, roughness, F0_dielectric) * dielectricFresnel;
-        }
-
-        //
-        // Metallic
-        //
+        vec3 F0 = mix(F0_dielectric, F0_metallic, metallic);
     
-        if (metallic > 0.0)
-        {
-            colorCookTorrance += iblCookTorrance(N, V, roughness, F0_metallic);
-        }
+        vec3 colorCookTorrance = iblCookTorrance(N, V, roughness, F0);
         
         // Dynamic lights.
         
@@ -293,22 +271,14 @@ forwardOutAssignGLSL = """
             
             //
             
-            if (metallic < 1.0)
-            {
-                colorLambert += lambert(light, u_bufferLights.color[i].xyz, N, baseColor) * inverseDielectricFresnel;
-        
-                colorCookTorrance += cookTorrance(light, u_bufferLights.color[i].xyz, N, V, roughness, F0_dielectric) * dielectricFresnel;
-            }
+            colorLambert += lambert(light, u_bufferLights.color[i].xyz, N, diffuseColor);
 
-            if (metallic > 0.0)
-            {
-                colorCookTorrance += cookTorrance(light, u_bufferLights.color[i].xyz, N, V, roughness, F0_metallic);
-            }
+            colorCookTorrance += cookTorrance(light, u_bufferLights.color[i].xyz, N, V, roughness, F0);
         }                
         
         //
 
-        color = mix(colorLambert, colorCookTorrance, metallic) + emissiveColor;
+        color = colorLambert + colorCookTorrance + emissiveColor;
         
         if (u_bufferParameter.toneMap > 0)
         {
