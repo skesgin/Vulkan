@@ -526,7 +526,7 @@ def replaceParameters(currentNode, openNodes, processedNodes, currentMain):
     return currentMain
 
 
-def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName, use_forward):
+def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName, use_forward, simplify):
     
     file = open(filepath, "w", encoding="utf8", newline="\n")
     fw = file.write
@@ -608,8 +608,6 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName, use
             fw("\n")        
             fw("name %s\n" % friendlyName(materialName))
             fw("\n")
-            fw("fragment_shader %s\n" % friendlyName(materialName + ".frag.spv"))
-            fw("\n")
             
             #
             
@@ -658,6 +656,9 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName, use
             processedNodes = []
             
             nodes = []
+
+            substancePainter = {}
+            doSimplify = simplify
 
             createOpenNodeList(openNodes, materialOutput)
             
@@ -1278,6 +1279,29 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName, use
                     if currentNode not in nodes:
                         nodes.append(currentNode)
 
+                        if doSimplify:
+                            #
+                            # Try to extract substance painter information.
+                            #
+
+                            checkFilename = os.path.splitext(bpy.path.basename(currentNode.image.filepath))[0]
+
+                            if checkFilename.endswith("_Base_Color") or checkFilename.endswith("_BaseColor"):
+                                substancePainter['BASE_COLOR'] = currentNode
+                            elif checkFilename.endswith("_Metallic"):
+                                substancePainter['METALLIC'] = currentNode
+                            elif checkFilename.endswith("_Roughness"):
+                                substancePainter['ROUGHNESS'] = currentNode
+                            elif checkFilename.endswith("_Mixed_AO"):
+                                substancePainter['AO'] = currentNode
+                            elif checkFilename.endswith("_Normal") or checkFilename.endswith("_Normal_OpenGL") or checkFilename.endswith("_Normal_DirectX"):
+                                substancePainter['NORMAL'] = currentNode
+                            elif checkFilename.endswith("_Emission") or checkFilename.endswith("_Emissive"):
+                                substancePainter['EMISSIVE'] = currentNode
+                            else:
+                                # If not all images can assigned, no simplifiaction possible.
+                                doSimplify = False
+
                     textureIndex = nodes.index(currentNode)
                         
                     # Inputs.
@@ -1419,13 +1443,70 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName, use
             if texCoordUsed:
                 currentFragmentGLSL = currentFragmentGLSL.replace("#nextAttribute#", texCoordAttribute)
                 currentFragmentGLSL = currentFragmentGLSL.replace("#nextTexCoord#", nextTexCoord)
-            
-            for binding in range (0, len(nodes)):
-                currentTexImage = texImageFunction % ((binding + currentTextureOffset), binding)
-                currentFragmentGLSL = currentFragmentGLSL.replace("#nextTexture#", currentTexImage)
+
+            if doSimplify and len(substancePainter) > 0:
+
+                if use_forward:
+                    fw("fragment_shader substance_forward.frag.spv\n")
+                    fw("\n")
+                else:
+                    fw("fragment_shader substance_deferred.frag.spv\n")
+                    fw("\n")
                 
-                fw("add_texture %s\n" % (friendlyName(material.name) + "_" + friendlyNodeName(nodes[binding].name) + "_texture" ))    
+                if 'BASE_COLOR' in substancePainter:
+                    fw("add_texture %s\n" % (friendlyName(material.name) + "_" + friendlyNodeName(substancePainter['BASE_COLOR'].name) + "_texture" ))
+                    fw("\n")
+                else:
+                    fw("add_texture DefaultBaseColor\n")
+                    fw("\n")
+
+                if 'METALLIC' in substancePainter:
+                    fw("add_texture %s\n" % (friendlyName(material.name) + "_" + friendlyNodeName(substancePainter['METALLIC'].name) + "_texture" ))
+                    fw("\n")
+                else:
+                    fw("add_texture DefaultMetallic\n")
+                    fw("\n")
+
+                if 'ROUGHNESS' in substancePainter:
+                    fw("add_texture %s\n" % (friendlyName(material.name) + "_" + friendlyNodeName(substancePainter['ROUGHNESS'].name) + "_texture" ))
+                    fw("\n")
+                else:
+                    fw("add_texture DefaultRoughness\n")
+                    fw("\n")
+
+                if 'AO' in substancePainter:
+                    fw("add_texture %s\n" % (friendlyName(material.name) + "_" + friendlyNodeName(substancePainter['AO'].name) + "_texture" ))
+                    fw("\n")
+                else:
+                    fw("add_texture DefaultAmbientOcclusion\n")
+                    fw("\n")
+
+                if 'NORMAL' in substancePainter:
+                    fw("add_texture %s\n" % (friendlyName(material.name) + "_" + friendlyNodeName(substancePainter['NORMAL'].name) + "_texture" ))
+                    fw("\n")
+                else:
+                    fw("add_texture DefaultNormal\n")
+                    fw("\n")
+
+                if 'EMISSIVE' in substancePainter:
+                    fw("add_texture %s\n" % (friendlyName(material.name) + "_" + friendlyNodeName(substancePainter['EMISSIVE'].name) + "_texture" ))
+                    fw("\n")
+                else:
+                    fw("add_texture DefaultEmissive\n")
+                    fw("\n")
+    
+            else:
+                doSimplify = False
+
+                fw("fragment_shader %s\n" % friendlyName(materialName + ".frag.spv"))
                 fw("\n")
+
+                for binding in range (0, len(nodes)):
+                    currentTexImage = texImageFunction % ((binding + currentTextureOffset), binding)
+                    currentFragmentGLSL = currentFragmentGLSL.replace("#nextTexture#", currentTexImage)
+                    
+                    fw("add_texture %s\n" % (friendlyName(material.name) + "_" + friendlyNodeName(nodes[binding].name) + "_texture" ))    
+                    fw("\n")
                 
             fw("attributes %x\n" % (vertexAttributes))
             fw("\n")
@@ -1442,13 +1523,14 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName, use
                                 
             #
 
-            fragmentShaderFilepath = os.path.dirname(filepath) + "/" + friendlyName(materialName) + ".frag"
-        
-            file_fragmentShader = open(fragmentShaderFilepath, "w", encoding="utf8", newline="\n")
+            if not doSimplify:
+                fragmentShaderFilepath = os.path.dirname(filepath) + "/" + friendlyName(materialName) + ".frag"
             
-            file_fragmentShader.write("%s\n" % currentFragmentGLSL)
-            
-            file_fragmentShader.close()
+                file_fragmentShader = open(fragmentShaderFilepath, "w", encoding="utf8", newline="\n")
+                
+                file_fragmentShader.write("%s\n" % currentFragmentGLSL)
+                
+                file_fragmentShader.close()
         
         else:
         
@@ -2481,7 +2563,8 @@ def saveObjects(context, filepath, meshLibraryName, animationLibraryName, channe
 def save(operator,
          context,
          filepath="",
-         use_forward=False
+         use_forward=False,
+         simplify=False
          ):
 
     # Mute all constraints.
@@ -2518,7 +2601,7 @@ def save(operator,
 
     materialsLibraryFilepath = os.path.dirname(sceneFilepath) + "/" + materialsLibraryName
 
-    allEnvironmentTextures = saveMaterials(context, materialsLibraryFilepath, texturesLibraryName, imagesLibraryName, use_forward)
+    allEnvironmentTextures = saveMaterials(context, materialsLibraryFilepath, texturesLibraryName, imagesLibraryName, use_forward, simplify)
 
     #
 

@@ -65,6 +65,12 @@ class ExportVKTS(bpy.types.Operator, ExportHelper):
             default=False,
             )
 
+    simplify = BoolProperty(
+            name="Simplify material (Cycles only)",
+            description="Simplify, if possible, to substance painter only ",
+            default=False,
+            )
+
     @classmethod
     def poll(cls, context):
         return True
@@ -83,6 +89,7 @@ class ExportVKTS(bpy.types.Operator, ExportHelper):
         layout = self.layout
 
         layout.prop(self, "use_forward")
+        layout.prop(self, "simplify")
 
 
 def menu_func_export(self, context):
