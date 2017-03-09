@@ -913,7 +913,7 @@ INodeSP Node::findNodeRecursiveFromRoot(const std::string& searchName)
 	return findNodeRecursive(searchName);
 }
 
-void Node::updateParameterRecursive(const Parameter* parameter)
+void Node::updateParameterRecursive(Parameter* parameter)
 {
 	if (parameter)
 	{

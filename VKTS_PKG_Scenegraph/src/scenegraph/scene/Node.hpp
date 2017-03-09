@@ -272,7 +272,7 @@ public:
 
     virtual INodeSP findNodeRecursiveFromRoot(const std::string& searchName) override;
 
-    virtual void updateParameterRecursive(const Parameter* parameter) override;
+    virtual void updateParameterRecursive(Parameter* parameter) override;
 
     virtual void updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets, const uint32_t currentBuffer) override;
 

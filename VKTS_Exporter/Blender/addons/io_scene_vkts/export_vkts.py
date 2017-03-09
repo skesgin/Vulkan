@@ -179,7 +179,25 @@ def convertScaleNoAdjust(scale):
 
     return (scale[0], scale[1], scale[2])
 
-def saveTextures(context, filepath, imagesLibraryName, materials):
+def createTexture(filepath, name, size, rgba, file_format):
+
+    image = bpy.data.images.new(name, width = size[0], height = size[1], alpha = True)
+
+    pixels = [1.0] * (4 * size[0] * size[1])
+    for x in range(size[0]):
+        for y in range(size[1]):
+            pixels[(y * size[0] * 4) + x * 4 + 0] = rgba[0]
+            pixels[(y * size[0] * 4) + x * 4 + 1] = rgba[1]
+            pixels[(y * size[0] * 4) + x * 4 + 2] = rgba[2]
+            pixels[(y * size[0] * 4) + x * 4 + 3] = rgba[3]
+
+    image.pixels = pixels
+
+    image.filepath_raw = filepath
+    image.file_format = file_format
+    image.save()
+
+def saveTextures(context, filepath, imagesLibraryName, materials, simplify):
 
     imagesLibraryFilepath = os.path.dirname(filepath) + "/" + imagesLibraryName
 
@@ -337,6 +355,68 @@ def saveTextures(context, filepath, imagesLibraryName, materials):
         fw("image %s\n" % (nameOfImage + "_image"))
         fw("\n")
 
+    if simplify:
+        textureName = "DefaultBaseColor"
+        fw("#\n")
+        fw("# Texture.\n")
+        fw("#\n")
+        fw("\n")
+        fw("name %s\n" % (textureName))
+        fw("\n")
+        fw("image %s\n" % (textureName))
+        fw("\n")
+
+        textureName = "DefaultMetallic"
+        fw("#\n")
+        fw("# Texture.\n")
+        fw("#\n")
+        fw("\n")
+        fw("name %s\n" % (textureName))
+        fw("\n")
+        fw("image %s\n" % (textureName))
+        fw("\n")
+
+        textureName = "DefaultRoughness"
+        fw("#\n")
+        fw("# Texture.\n")
+        fw("#\n")
+        fw("\n")
+        fw("name %s\n" % (textureName))
+        fw("\n")
+        fw("image %s\n" % (textureName))
+        fw("\n")
+
+        textureName = "DefaultNormal"
+        fw("#\n")
+        fw("# Texture.\n")
+        fw("#\n")
+        fw("\n")
+        fw("name %s\n" % (textureName))
+        fw("\n")
+        fw("image %s\n" % (textureName))
+        fw("\n")
+
+        textureName = "DefaultAmbientOcclusion"
+        fw("#\n")
+        fw("# Texture.\n")
+        fw("#\n")
+        fw("\n")
+        fw("name %s\n" % (textureName))
+        fw("\n")
+        fw("image %s\n" % (textureName))
+        fw("\n")
+
+        textureName = "DefaultEmissive"
+        fw("#\n")
+        fw("# Texture.\n")
+        fw("#\n")
+        fw("\n")
+        fw("name %s\n" % (textureName))
+        fw("\n")
+        fw("image %s\n" % (textureName))
+        fw("\n")
+
+
     allEnvironmentTextures = []
 
     for nameOfTexture in envTextures:
@@ -415,6 +495,87 @@ def saveTextures(context, filepath, imagesLibraryName, materials):
             if nameOfImage in preFilteredImages:
                 fw_image("pre_filtered true\n")
         fw_image("image_data %s\n" % (nameOfImage + extension))
+        fw_image("\n")
+    
+    if simplify:
+        size = [1, 1]
+
+        imageName = "DefaultBaseColor"
+        imageFilepath = os.path.dirname(filepath) + "/" + imageName + ".tga"
+        rgba = (1.0, 1.0, 1.0, 1.0)
+        createTexture(imageFilepath, imageName, size, rgba, 'TARGA')
+        fw_image("#\n")
+        fw_image("# Image.\n")
+        fw_image("#\n")
+        fw_image("\n")
+        fw_image("name %s\n" % (imageName))
+        fw_image("\n")
+        fw_image("image_data %s\n" % (imageName + ".tga"))
+        fw_image("\n")
+
+        imageName = "DefaultMetallic"
+        imageFilepath = os.path.dirname(filepath) + "/" + imageName + ".tga"
+        rgba = (0.0, 0.0, 0.0, 1.0)
+        createTexture(imageFilepath, imageName, size, rgba, 'TARGA')
+        fw_image("#\n")
+        fw_image("# Image.\n")
+        fw_image("#\n")
+        fw_image("\n")
+        fw_image("name %s\n" % (imageName))
+        fw_image("\n")
+        fw_image("image_data %s\n" % (imageName + ".tga"))
+        fw_image("\n")
+
+        imageName = "DefaultRoughness"
+        imageFilepath = os.path.dirname(filepath) + "/" + imageName + ".tga"
+        rgba = (0.0, 0.0, 0.0, 1.0)
+        createTexture(imageFilepath, imageName, size, rgba, 'TARGA')
+        fw_image("#\n")
+        fw_image("# Image.\n")
+        fw_image("#\n")
+        fw_image("\n")
+        fw_image("name %s\n" % (imageName))
+        fw_image("\n")
+        fw_image("image_data %s\n" % (imageName + ".tga"))
+        fw_image("\n")
+
+        imageName = "DefaultNormal"
+        imageFilepath = os.path.dirname(filepath) + "/" + imageName + ".tga"
+        rgba = (0.0, 1.0, 0.0, 1.0)
+        createTexture(imageFilepath, imageName, size, rgba, 'TARGA')
+        fw_image("#\n")
+        fw_image("# Image.\n")
+        fw_image("#\n")
+        fw_image("\n")
+        fw_image("name %s\n" % (imageName))
+        fw_image("\n")
+        fw_image("image_data %s\n" % (imageName + ".tga"))
+        fw_image("\n")
+
+        imageName = "DefaultAmbientOcclusion"
+        imageFilepath = os.path.dirname(filepath) + "/" + imageName + ".tga"
+        rgba = (1.0, 1.0, 1.0, 1.0)
+        createTexture(imageFilepath, imageName, size, rgba, 'TARGA')
+        fw_image("#\n")
+        fw_image("# Image.\n")
+        fw_image("#\n")
+        fw_image("\n")
+        fw_image("name %s\n" % (imageName))
+        fw_image("\n")
+        fw_image("image_data %s\n" % (imageName + ".tga"))
+        fw_image("\n")
+
+        imageName = "DefaultEmissive"
+        imageFilepath = os.path.dirname(filepath) + "/" + imageName + ".tga"
+        rgba = (0.0, 0.0, 0.0, 1.0)
+        createTexture(imageFilepath, imageName, size, rgba, 'TARGA')
+        fw_image("#\n")
+        fw_image("# Image.\n")
+        fw_image("#\n")
+        fw_image("\n")
+        fw_image("name %s\n" % (imageName))
+        fw_image("\n")
+        fw_image("image_data %s\n" % (imageName + ".tga"))
         fw_image("\n")
     
     file.close()
@@ -551,7 +712,7 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName, use
     # Save textures.
 
     texturesLibraryFilepath = os.path.dirname(filepath) + "/" + texturesLibraryName
-    allEnvironmentTextures = saveTextures(context, texturesLibraryFilepath, imagesLibraryName, materials)
+    allEnvironmentTextures = saveTextures(context, texturesLibraryFilepath, imagesLibraryName, materials, simplify)
 
     # Write materials.
     for materialName in materials:
@@ -1292,10 +1453,10 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName, use
                                 substancePainter['METALLIC'] = currentNode
                             elif checkFilename.endswith("_Roughness"):
                                 substancePainter['ROUGHNESS'] = currentNode
-                            elif checkFilename.endswith("_Mixed_AO"):
-                                substancePainter['AO'] = currentNode
                             elif checkFilename.endswith("_Normal") or checkFilename.endswith("_Normal_OpenGL") or checkFilename.endswith("_Normal_DirectX"):
                                 substancePainter['NORMAL'] = currentNode
+                            elif checkFilename.endswith("_Mixed_AO"):
+                                substancePainter['AO'] = currentNode
                             elif checkFilename.endswith("_Emission") or checkFilename.endswith("_Emissive"):
                                 substancePainter['EMISSIVE'] = currentNode
                             else:
@@ -1474,18 +1635,18 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName, use
                     fw("add_texture DefaultRoughness\n")
                     fw("\n")
 
-                if 'AO' in substancePainter:
-                    fw("add_texture %s\n" % (friendlyName(material.name) + "_" + friendlyNodeName(substancePainter['AO'].name) + "_texture" ))
-                    fw("\n")
-                else:
-                    fw("add_texture DefaultAmbientOcclusion\n")
-                    fw("\n")
-
                 if 'NORMAL' in substancePainter:
                     fw("add_texture %s\n" % (friendlyName(material.name) + "_" + friendlyNodeName(substancePainter['NORMAL'].name) + "_texture" ))
                     fw("\n")
                 else:
                     fw("add_texture DefaultNormal\n")
+                    fw("\n")
+
+                if 'AO' in substancePainter:
+                    fw("add_texture %s\n" % (friendlyName(material.name) + "_" + friendlyNodeName(substancePainter['AO'].name) + "_texture" ))
+                    fw("\n")
+                else:
+                    fw("add_texture DefaultAmbientOcclusion\n")
                     fw("\n")
 
                 if 'EMISSIVE' in substancePainter:

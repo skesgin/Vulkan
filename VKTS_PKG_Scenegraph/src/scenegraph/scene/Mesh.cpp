@@ -118,7 +118,7 @@ const Aabb& Mesh::getAABB() const
 	return box;
 }
 
-void Mesh::updateParameterRecursive(const Parameter* parameter)
+void Mesh::updateParameterRecursive(Parameter* parameter)
 {
 	if (parameter)
 	{

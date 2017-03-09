@@ -321,7 +321,7 @@ void SubMesh::setDoubleSided(const VkBool32 doubleSided)
 	this->doubleSided = doubleSided;
 }
 
-void SubMesh::updateParameterRecursive(const Parameter* parameter)
+void SubMesh::updateParameterRecursive(Parameter* parameter)
 {
 	if (parameter)
 	{

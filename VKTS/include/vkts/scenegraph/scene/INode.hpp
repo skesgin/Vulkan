@@ -210,7 +210,7 @@ public:
 
 	virtual std::shared_ptr<INode> findNodeRecursiveFromRoot(const std::string& searchName) = 0;
 
-    virtual void updateParameterRecursive(const Parameter* parameter) = 0;
+    virtual void updateParameterRecursive(Parameter* parameter) = 0;
 
     virtual void updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets, const uint32_t currentBuffer) = 0;
 

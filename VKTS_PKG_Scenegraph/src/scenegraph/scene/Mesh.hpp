@@ -79,7 +79,7 @@ public:
 
     virtual const Aabb& getAABB() const override;
 
-    virtual void updateParameterRecursive(const Parameter* parameter) override;
+    virtual void updateParameterRecursive(Parameter* parameter) override;
 
     virtual void updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets, const uint32_t currentBuffer, const std::string& nodeName) override;
 

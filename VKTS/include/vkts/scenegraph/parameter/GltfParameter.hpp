@@ -24,74 +24,78 @@
  * THE SOFTWARE.
  */
 
-#ifndef VKTS_PARAMETER_HPP_
-#define VKTS_PARAMETER_HPP_
+#ifndef VKTS_GLTFPARAMETER_HPP_
+#define VKTS_GLTFPARAMETER_HPP_
 
 #include <vkts/scenegraph/vkts_scenegraph.hpp>
 
 namespace vkts
 {
 
-class IScene;
-class IObject;
-class INode;
-class IMesh;
-class ISubMesh;
-class IPhongMaterial;
-class IBSDFMaterial;
-
-class Parameter
+class GltfParameter : public Parameter
 {
+
+private:
+
+	JSONobjectSP glTF;
 
 public:
 
-	Parameter()
+	GltfParameter() :
+		Parameter(), glTF()
     {
     }
 
-    virtual ~Parameter()
+    virtual ~GltfParameter()
     {
     }
 
     //
 
+	const JSONobjectSP& getGlTf() const
+	{
+		return glTF;
+	}
+
+    //
+
     virtual void visit(IScene& scene)
     {
-    	// Do nothing.
-    }
+    	glTF = JSONobjectSP(new JSONobject());
 
-    virtual void visit(IObject& object)
-    {
-    	// Do nothing.
-    }
+    	if (!glTF.get())
+    	{
+    		return;
+    	}
 
-    virtual void visit(INode& node)
-    {
-    	// Do nothing.
-    }
+    	//
+    	// asset
+    	//
 
-    virtual void visit(IMesh& mesh)
-    {
-    	// Do nothing.
-    }
+    	auto assetValue = JSONobjectSP(new JSONobject());
 
-    virtual void visit(ISubMesh& subMesh)
-    {
-    	// Do nothing.
-    }
+    	auto generatorValue = JSONstringSP(new JSONstring("VKTS glTF 2.0 exporter"));
 
-    virtual void visit(IPhongMaterial& material)
-    {
-    	// Do nothing.
-    }
+    	auto versionValue = JSONstringSP(new JSONstring("2.0"));
 
-    virtual void visit(IBSDFMaterial& material)
-    {
-    	// Do nothing.
-    }
+    	if (!assetValue.get() || !generatorValue.get() || !versionValue.get())
+    	{
+    		return;
+    	}
 
+    	assetValue->addKeyValue("generator", generatorValue);
+    	assetValue->addKeyValue("version", versionValue);
+
+    	//
+
+    	glTF->addKeyValue("asset", assetValue);
+
+    	//
+    	// TODO: All the rest :-)
+    	//
+    }
 };
 
 } /* namespace vkts */
 
-#endif /* VKTS_PARAMETER_HPP_ */
+#endif /* VKTS_GLTFPARAMETER_HPP_ */

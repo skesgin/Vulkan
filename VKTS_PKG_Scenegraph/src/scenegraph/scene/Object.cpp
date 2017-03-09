@@ -118,7 +118,7 @@ void Object::setDirty()
     dirty = VK_TRUE;
 }
 
-void Object::updateParameterRecursive(const Parameter* parameter)
+void Object::updateParameterRecursive(Parameter* parameter)
 {
 	if (parameter)
 	{

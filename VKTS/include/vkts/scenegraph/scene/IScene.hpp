@@ -113,7 +113,7 @@ public:
 
     //
 
-    virtual void updateParameterRecursive(const Parameter* parameter, const uint32_t objectOffset = 0, const uint32_t objectStep = 1, const uint32_t objectLimit = UINT32_MAX) = 0;
+    virtual void updateParameterRecursive(Parameter* parameter, const uint32_t objectOffset = 0, const uint32_t objectStep = 1, const uint32_t objectLimit = UINT32_MAX) = 0;
 
     virtual void updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets, const uint32_t currentBuffer, const uint32_t objectOffset = 0, const uint32_t objectStep = 1, const uint32_t objectLimit = UINT32_MAX) = 0;
 

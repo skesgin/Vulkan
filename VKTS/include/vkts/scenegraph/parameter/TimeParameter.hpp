@@ -69,7 +69,7 @@ public:
 
     //
 
-    virtual void visit(INode& node) const
+    virtual void visit(INode& node)
     {
     	for (uint32_t i = 0; i < node.getAnimations().size(); i++)
     	{

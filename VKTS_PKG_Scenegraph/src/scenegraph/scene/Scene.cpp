@@ -309,7 +309,7 @@ float Scene::getMaxLuminance() const
     return maxLuminance;
 }
 
-void Scene::updateParameterRecursive(const Parameter* parameter, const uint32_t objectOffset, const uint32_t objectStep, const uint32_t objectLimit)
+void Scene::updateParameterRecursive(Parameter* parameter, const uint32_t objectOffset, const uint32_t objectStep, const uint32_t objectLimit)
 {
 	if (parameter)
 	{
