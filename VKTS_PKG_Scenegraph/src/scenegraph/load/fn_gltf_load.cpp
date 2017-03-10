@@ -862,6 +862,9 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 
 			bsdfMaterial->setName(gltfPrimitive.material->name);
 
+			bsdfMaterial->setSorted(VK_TRUE);
+			bsdfMaterial->setPacked(VK_TRUE);
+
 			//
 			// Base color
 			//

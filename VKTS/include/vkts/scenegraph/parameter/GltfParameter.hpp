@@ -50,10 +50,12 @@ private:
 
 	JSONarraySP primitives;
 
+	JSONarraySP materials;
+
 public:
 
 	GltfParameter() :
-		Parameter(), glTF(), scenes_nodes(), rootNodeCounter(0), nodes(), nodeCounter(0), meshes(), primitives()
+		Parameter(), glTF(), scenes_nodes(), rootNodeCounter(0), nodes(), nodeCounter(0), meshes(), primitives(), materials()
     {
     }
 
@@ -180,6 +182,25 @@ public:
     	//
 
     	this->meshes = meshesValue;
+
+    	//
+    	// materials
+    	//
+
+    	auto materialsValue = JSONarraySP(new JSONarray());
+
+    	if (!materialsValue.get())
+    	{
+    		return;
+    	}
+
+    	//
+
+    	glTF->addKeyValue("materials", materialsValue);
+
+    	//
+
+    	this->materials = materialsValue;
     }
 
     virtual void visit(IObject& object)
@@ -452,7 +473,87 @@ public:
 
     	primitives->addValue(currentPrimitive);
 
+    	//
+    	// Mode
+		//
+
+    	int32_t mode = 0;
+
+    	switch (subMesh.getPrimitiveTopology())
+    	{
+			case VK_PRIMITIVE_TOPOLOGY_POINT_LIST:
+				mode = 0;
+				break;
+			case VK_PRIMITIVE_TOPOLOGY_LINE_LIST:
+				mode = 1;
+				break;
+			case VK_PRIMITIVE_TOPOLOGY_LINE_STRIP:
+				mode = 3;
+				break;
+			case VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST:
+				mode = 4;
+				break;
+			case VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP:
+				mode = 5;
+				break;
+			case VK_PRIMITIVE_TOPOLOGY_TRIANGLE_FAN:
+				mode = 6;
+				break;
+			default:
+				logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "SubMesh has unsupported topology 0x%x!", (uint32_t)subMesh.getPrimitiveTopology());
+				return;
+    	}
+
+    	auto modeValue = JSONintegerSP(new JSONinteger(mode));
+
+    	if (!modeValue.get())
+    	{
+    		return;
+    	}
+
+    	currentPrimitive->addKeyValue("mode", modeValue);
+
+    	//
+    	// material
+    	//
+
+    	if (!subMesh.getBSDFMaterial().get() || !subMesh.getBSDFMaterial()->isSorted())
+    	{
+			logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "SubMesh has unsupported material!");
+			return;
+    	}
+
+    	auto materialValue = JSONintegerSP(new JSONinteger((int32_t)materials->size()));
+
+    	if (!materialValue.get())
+    	{
+    		return;
+    	}
+
+    	currentPrimitive->addKeyValue("material", materialValue);
+
     	// TODO: Gather primitives values.
+    }
+
+    virtual void visit(IBSDFMaterial& material)
+    {
+    	if (!materials.get())
+    	{
+    		return;
+    	}
+
+    	//
+
+    	auto currentMaterial = JSONobjectSP(new JSONobject());
+
+    	if (!currentMaterial.get())
+    	{
+    		return;
+    	}
+
+    	materials->addValue(currentMaterial);
+
+    	// TODO: Gather material parameters.
     }
 
 };

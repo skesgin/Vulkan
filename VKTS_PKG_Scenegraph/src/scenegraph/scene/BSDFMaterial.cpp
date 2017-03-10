@@ -30,12 +30,12 @@ namespace vkts
 {
 
 BSDFMaterial::BSDFMaterial(const VkBool32 forwardRendering) :
-    IBSDFMaterial(), Material(forwardRendering, VK_FALSE, ""), fragmentShader(nullptr), attributes(VKTS_VERTEX_BUFFER_TYPE_VERTEX | VKTS_VERTEX_BUFFER_TYPE_NORMAL), allTextureObjects(), transparent(VK_FALSE), sorted(VK_FALSE)
+    IBSDFMaterial(), Material(forwardRendering, VK_FALSE, ""), fragmentShader(nullptr), attributes(VKTS_VERTEX_BUFFER_TYPE_VERTEX | VKTS_VERTEX_BUFFER_TYPE_NORMAL), allTextureObjects(), transparent(VK_FALSE), sorted(VK_FALSE), packed(VK_FALSE)
 {
 }
 
 BSDFMaterial::BSDFMaterial(const BSDFMaterial& other) :
-    IBSDFMaterial(), Material(other), fragmentShader(other.fragmentShader), attributes(other.attributes), allTextureObjects(), transparent(other.transparent), sorted(other.sorted)
+    IBSDFMaterial(), Material(other), fragmentShader(other.fragmentShader), attributes(other.attributes), allTextureObjects(), transparent(other.transparent), sorted(other.sorted), packed(other.packed)
 {
 	for (uint32_t i = 0; i < other.allTextureObjects.size(); i++)
 	{
@@ -155,6 +155,24 @@ VkBool32 BSDFMaterial::isSorted() const
 void BSDFMaterial::setSorted(const VkBool32 sorted)
 {
 	this->sorted = sorted;
+}
+
+VkBool32 BSDFMaterial::isPacked() const
+{
+	return sorted;
+}
+
+void BSDFMaterial::setPacked(const VkBool32 packed)
+{
+	this->packed = packed;
+}
+
+void BSDFMaterial::updateParameterRecursive(Parameter* parameter)
+{
+	if (parameter)
+	{
+		parameter->visit(*this);
+	}
 }
 
 void BSDFMaterial::updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets, const uint32_t currentBuffer, const std::string& nodeName)

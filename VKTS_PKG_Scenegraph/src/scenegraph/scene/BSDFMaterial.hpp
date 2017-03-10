@@ -49,6 +49,8 @@ protected:
 
     VkBool32 sorted;
 
+    VkBool32 packed;
+
 public:
 
     BSDFMaterial() = delete;
@@ -104,7 +106,14 @@ public:
 
     virtual void setSorted(const VkBool32 sorted) override;
 
+
+    virtual VkBool32 isPacked() const override;
+
+    virtual void setPacked(const VkBool32 packed) override;
+
     //
+
+    virtual void updateParameterRecursive(Parameter* parameter) override;
 
     virtual void updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets, const uint32_t currentBuffer, const std::string& nodeName) override;
 

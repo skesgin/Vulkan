@@ -327,6 +327,15 @@ void SubMesh::updateParameterRecursive(Parameter* parameter)
 	{
 		parameter->visit(*this);
 	}
+
+	if (bsdfMaterial.get())
+	{
+		bsdfMaterial->updateParameterRecursive(parameter);
+	}
+	else if (phongMaterial.get())
+	{
+		phongMaterial->updateParameterRecursive(parameter);
+	}
 }
 
 void SubMesh::updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets, const uint32_t currentBuffer, const std::string& nodeName)

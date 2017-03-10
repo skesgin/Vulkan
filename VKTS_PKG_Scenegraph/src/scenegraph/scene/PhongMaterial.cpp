@@ -307,6 +307,14 @@ void PhongMaterial::setTransparent(const VkBool32 transparent)
 	this->transparent = transparent;
 }
 
+void PhongMaterial::updateParameterRecursive(Parameter* parameter)
+{
+	if (parameter)
+	{
+		parameter->visit(*this);
+	}
+}
+
 void PhongMaterial::updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets, const uint32_t currentBuffer, const std::string& nodeName)
 {
 	if (currentBuffer >= materialData.size())

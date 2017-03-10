@@ -84,7 +84,13 @@ public:
 
     virtual void setSorted(const VkBool32 sorted) = 0;
 
+    virtual VkBool32 isPacked() const = 0;
+
+    virtual void setPacked(const VkBool32 packed) = 0;
+
     //
+
+    virtual void updateParameterRecursive(Parameter* parameter) = 0;
 
     virtual void updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets, const uint32_t currentBuffer, const std::string& nodeName) = 0;
 
