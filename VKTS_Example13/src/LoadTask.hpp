@@ -29,9 +29,13 @@
 
 #include <vkts/vkts.hpp>
 
+// Microsoft
 //#define GLTF_SCENE_NAME "glTF/BoomBox/BoomBox.gltf"
-#define GLTF_SCENE_NAME "glTF/Corset/Corset.gltf"
+//#define GLTF_SCENE_NAME "glTF/Corset/Corset.gltf"
 //#define GLTF_SCENE_NAME "glTF/Lantern/Lantern.gltf"
+
+// Sketchfab
+#define GLTF_SCENE_NAME "glTF/damagedHelmet/damagedHelmet.gltf"
 
 //#define VKTS_ENVIRONMENT_SCENE_NAME "environment/studio.vkts"
 //#define VKTS_ENVIRONMENT_SCENE_NAME "environment/terrace_near_the_granaries.vkts"
