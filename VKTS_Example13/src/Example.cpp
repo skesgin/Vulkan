@@ -1941,6 +1941,18 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 				sphereScene->updateDescriptorSetsRecursive(VKTS_ENVIRONMENT_DESCRIPTOR_SET_COUNT, environmentWriteDescriptorSets, i);
 			}
 		}
+
+		//
+		// TODO: glTF encoding.
+		//
+
+		vkts::GltfParameter glTFparameter;
+
+		scene->updateParameterRecursive(&glTFparameter);
+
+		auto glTF = vkts::jsonEncode(glTFparameter.getGlTf());
+
+		vkts::fileSaveText("encoded_out.gltf", vkts::textBufferCreate(glTF.c_str()));
 	}
 
 	return VK_TRUE;

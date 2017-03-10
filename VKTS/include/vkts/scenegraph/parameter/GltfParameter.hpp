@@ -46,10 +46,14 @@ private:
 	SmartPointerMap<std::string, JSONarraySP> nodeNameToChildren;
 	int32_t nodeCounter;
 
+	JSONarraySP meshes;
+
+	JSONarraySP primitives;
+
 public:
 
 	GltfParameter() :
-		Parameter(), glTF(), scenes_nodes(), rootNodeCounter(0), nodes(), nodeCounter(0)
+		Parameter(), glTF(), scenes_nodes(), rootNodeCounter(0), nodes(), nodeCounter(0), meshes(), primitives()
     {
     }
 
@@ -157,6 +161,25 @@ public:
     	//
 
     	this->nodes = nodesValue;
+
+    	//
+    	// meshes
+    	//
+
+    	auto meshesValue = JSONarraySP(new JSONarray());
+
+    	if (!meshesValue.get())
+    	{
+    		return;
+    	}
+
+    	//
+
+    	glTF->addKeyValue("meshes", meshesValue);
+
+    	//
+
+    	this->meshes = meshesValue;
     }
 
     virtual void visit(IObject& object)
@@ -218,7 +241,24 @@ public:
 
     	//
 
-    	// TODO: Mesh.
+		if (node.getMeshes().size() > 1)
+		{
+			logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Node has %u meshes!", node.getMeshes().size());
+
+			return;
+		}
+
+    	if (node.getMeshes().size() == 1)
+    	{
+        	auto meshValue = JSONintegerSP(new JSONinteger((int32_t)meshes->size()));
+
+        	if (!meshValue.get())
+        	{
+        		return;
+        	}
+
+        	currentNode->addKeyValue("mesh", meshValue);
+    	}
 
     	//
 
@@ -353,6 +393,66 @@ public:
     	//
 
     	nodeCounter++;
+    }
+
+    virtual void visit(IMesh& mesh)
+    {
+    	if (!meshes.get() || mesh.getNumberSubMeshes() == 0)
+    	{
+    		return;
+    	}
+
+    	auto currentMesh = JSONobjectSP(new JSONobject());
+
+    	if (!currentMesh.get())
+    	{
+    		return;
+    	}
+
+    	meshes->addValue(currentMesh);
+
+    	//
+
+    	auto primitivesValue = JSONarraySP(new JSONarray());
+
+    	if (!primitivesValue.get())
+    	{
+    		return;
+    	}
+
+    	currentMesh->addKeyValue("primitives", primitivesValue);
+
+    	this->primitives = primitivesValue;
+
+    	//
+
+    	auto nameValue = JSONstringSP(new JSONstring(mesh.getName()));
+
+    	if (!nameValue.get())
+    	{
+    		return;
+    	}
+
+    	currentMesh->addKeyValue("name", nameValue);
+    }
+
+    virtual void visit(ISubMesh& subMesh)
+    {
+    	if (!primitives.get())
+    	{
+    		return;
+    	}
+
+    	auto currentPrimitive = JSONobjectSP(new JSONobject());
+
+    	if (!currentPrimitive.get())
+    	{
+    		return;
+    	}
+
+    	primitives->addValue(currentPrimitive);
+
+    	// TODO: Gather primitives values.
     }
 
 };
