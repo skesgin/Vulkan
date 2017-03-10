@@ -80,6 +80,10 @@ public:
 
     virtual void setTransparent(const VkBool32 transparent) = 0;
 
+    virtual VkBool32 isSorted() const = 0;
+
+    virtual void setSorted(const VkBool32 sorted) = 0;
+
     //
 
     virtual void updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets, const uint32_t currentBuffer, const std::string& nodeName) = 0;

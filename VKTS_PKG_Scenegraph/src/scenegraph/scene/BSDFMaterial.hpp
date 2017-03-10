@@ -47,6 +47,8 @@ protected:
 
     VkBool32 transparent;
 
+    VkBool32 sorted;
+
 public:
 
     BSDFMaterial() = delete;
@@ -96,6 +98,11 @@ public:
     virtual VkBool32 isTransparent() const override;
 
     virtual void setTransparent(const VkBool32 transparent) override;
+
+
+    virtual VkBool32 isSorted() const override;
+
+    virtual void setSorted(const VkBool32 sorted) override;
 
     //
 

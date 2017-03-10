@@ -49,6 +49,9 @@
 #define VKTS_CONVERT_BEZIER VK_TRUE
 #define VKTS_CONVERT_SAMPLING (1.0f/60.0f)
 
+#define VKTS_SHADER_DIRECTORY "shader/SPIR/V/"
+#define VKTS_TEXTURE_DIRECTORY "texture/"
+
 /**
  * Types.
  */

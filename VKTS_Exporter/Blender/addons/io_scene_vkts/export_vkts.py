@@ -179,24 +179,6 @@ def convertScaleNoAdjust(scale):
 
     return (scale[0], scale[1], scale[2])
 
-def createTexture(filepath, name, size, rgba, file_format):
-
-    image = bpy.data.images.new(name, width = size[0], height = size[1], alpha = True)
-
-    pixels = [1.0] * (4 * size[0] * size[1])
-    for x in range(size[0]):
-        for y in range(size[1]):
-            pixels[(y * size[0] * 4) + x * 4 + 0] = rgba[0]
-            pixels[(y * size[0] * 4) + x * 4 + 1] = rgba[1]
-            pixels[(y * size[0] * 4) + x * 4 + 2] = rgba[2]
-            pixels[(y * size[0] * 4) + x * 4 + 3] = rgba[3]
-
-    image.pixels = pixels
-
-    image.filepath_raw = filepath
-    image.file_format = file_format
-    image.save()
-
 def saveTextures(context, filepath, imagesLibraryName, materials, simplify):
 
     imagesLibraryFilepath = os.path.dirname(filepath) + "/" + imagesLibraryName
@@ -500,82 +482,70 @@ def saveTextures(context, filepath, imagesLibraryName, materials, simplify):
     if simplify:
         size = [1, 1]
 
-        imageName = "DefaultBaseColor"
-        imageFilepath = os.path.dirname(filepath) + "/" + imageName + ".tga"
-        rgba = (1.0, 1.0, 1.0, 1.0)
-        createTexture(imageFilepath, imageName, size, rgba, 'TARGA')
+        typeName = "BaseColor"
+        imageName = "Default" + typeName
         fw_image("#\n")
         fw_image("# Image.\n")
         fw_image("#\n")
         fw_image("\n")
         fw_image("name %s\n" % (imageName))
         fw_image("\n")
-        fw_image("image_data %s\n" % (imageName + ".tga"))
+        fw_image("image_data %s\n" % ("Default_" + typeName + ".tga"))
         fw_image("\n")
 
-        imageName = "DefaultMetallic"
-        imageFilepath = os.path.dirname(filepath) + "/" + imageName + ".tga"
-        rgba = (0.0, 0.0, 0.0, 1.0)
-        createTexture(imageFilepath, imageName, size, rgba, 'TARGA')
+        typeName = "Metallic"
+        imageName = "Default" + typeName
         fw_image("#\n")
         fw_image("# Image.\n")
         fw_image("#\n")
         fw_image("\n")
         fw_image("name %s\n" % (imageName))
         fw_image("\n")
-        fw_image("image_data %s\n" % (imageName + ".tga"))
+        fw_image("image_data %s\n" % ("Default_" + typeName + ".tga"))
         fw_image("\n")
 
-        imageName = "DefaultRoughness"
-        imageFilepath = os.path.dirname(filepath) + "/" + imageName + ".tga"
-        rgba = (0.0, 0.0, 0.0, 1.0)
-        createTexture(imageFilepath, imageName, size, rgba, 'TARGA')
+        typeName = "Roughness"
+        imageName = "Default" + typeName
         fw_image("#\n")
         fw_image("# Image.\n")
         fw_image("#\n")
         fw_image("\n")
         fw_image("name %s\n" % (imageName))
         fw_image("\n")
-        fw_image("image_data %s\n" % (imageName + ".tga"))
+        fw_image("image_data %s\n" % ("Default_" + typeName + ".tga"))
         fw_image("\n")
 
-        imageName = "DefaultNormal"
-        imageFilepath = os.path.dirname(filepath) + "/" + imageName + ".tga"
-        rgba = (0.0, 1.0, 0.0, 1.0)
-        createTexture(imageFilepath, imageName, size, rgba, 'TARGA')
+        typeName = "Normal"
+        imageName = "Default" + typeName
         fw_image("#\n")
         fw_image("# Image.\n")
         fw_image("#\n")
         fw_image("\n")
         fw_image("name %s\n" % (imageName))
         fw_image("\n")
-        fw_image("image_data %s\n" % (imageName + ".tga"))
+        fw_image("image_data %s\n" % ("Default_" + typeName + ".tga"))
         fw_image("\n")
 
-        imageName = "DefaultAmbientOcclusion"
-        imageFilepath = os.path.dirname(filepath) + "/" + imageName + ".tga"
-        rgba = (1.0, 1.0, 1.0, 1.0)
-        createTexture(imageFilepath, imageName, size, rgba, 'TARGA')
+        typeName = "AmbientOcclusion"
+        imageName = "Default" + typeName
         fw_image("#\n")
         fw_image("# Image.\n")
         fw_image("#\n")
         fw_image("\n")
         fw_image("name %s\n" % (imageName))
         fw_image("\n")
-        fw_image("image_data %s\n" % (imageName + ".tga"))
+        fw_image("image_data %s\n" % ("Default_" + typeName + ".tga"))
         fw_image("\n")
 
-        imageName = "DefaultEmissive"
-        imageFilepath = os.path.dirname(filepath) + "/" + imageName + ".tga"
-        rgba = (0.0, 0.0, 0.0, 1.0)
-        createTexture(imageFilepath, imageName, size, rgba, 'TARGA')
+        typeName = "Emissive"
+        imageName = "Default" + typeName
         fw_image("#\n")
         fw_image("# Image.\n")
         fw_image("#\n")
         fw_image("\n")
         fw_image("name %s\n" % (imageName))
         fw_image("\n")
-        fw_image("image_data %s\n" % (imageName + ".tga"))
+        fw_image("image_data %s\n" % ("Default_" + typeName + ".tga"))
         fw_image("\n")
     
     file.close()
@@ -1447,17 +1417,17 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName, use
 
                             checkFilename = os.path.splitext(bpy.path.basename(currentNode.image.filepath))[0]
 
-                            if checkFilename.endswith("_Base_Color") or checkFilename.endswith("_BaseColor"):
+                            if checkFilename.lower().endswith("_basecolor") or checkFilename.lower().endswith("_base_color"):
                                 substancePainter['BASE_COLOR'] = currentNode
-                            elif checkFilename.endswith("_Metallic"):
+                            elif checkFilename.lower().endswith("_metallic"):
                                 substancePainter['METALLIC'] = currentNode
-                            elif checkFilename.endswith("_Roughness"):
+                            elif checkFilename.lower().endswith("_roughness"):
                                 substancePainter['ROUGHNESS'] = currentNode
-                            elif checkFilename.endswith("_Normal") or checkFilename.endswith("_Normal_OpenGL") or checkFilename.endswith("_Normal_DirectX"):
+                            elif checkFilename.lower().endswith("_normal") or checkFilename.lower().endswith("_normal_opengl") or checkFilename.lower().endswith("_normal_directx"):
                                 substancePainter['NORMAL'] = currentNode
-                            elif checkFilename.endswith("_Mixed_AO"):
-                                substancePainter['AO'] = currentNode
-                            elif checkFilename.endswith("_Emission") or checkFilename.endswith("_Emissive"):
+                            elif checkFilename.lower().endswith("_ambientocclusion") or checkFilename.lower().endswith("_ambient_occlusion") or checkFilename.lower().endswith("_ao") or checkFilename.lower().endswith("_mixed_ao"):
+                                substancePainter['AMBIENT_OCCLUSION'] = currentNode
+                            elif checkFilename.lower().endswith("_emissive") or checkFilename.lower().endswith("_emission"):
                                 substancePainter['EMISSIVE'] = currentNode
                             else:
                                 # If not all images can assigned, no simplifiaction possible.
@@ -1642,8 +1612,8 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName, use
                     fw("add_texture DefaultNormal\n")
                     fw("\n")
 
-                if 'AO' in substancePainter:
-                    fw("add_texture %s\n" % (friendlyName(material.name) + "_" + friendlyNodeName(substancePainter['AO'].name) + "_texture" ))
+                if 'AMBIENT_OCCLUSION' in substancePainter:
+                    fw("add_texture %s\n" % (friendlyName(material.name) + "_" + friendlyNodeName(substancePainter['AMBIENT_OCCLUSION'].name) + "_texture" ))
                     fw("\n")
                 else:
                     fw("add_texture DefaultAmbientOcclusion\n")
@@ -1655,6 +1625,9 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName, use
                 else:
                     fw("add_texture DefaultEmissive\n")
                     fw("\n")
+
+                fw("sorted true\n")
+                fw("\n")
     
             else:
                 doSimplify = False

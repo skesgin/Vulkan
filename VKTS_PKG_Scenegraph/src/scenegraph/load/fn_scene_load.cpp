@@ -154,13 +154,20 @@ static VkBool32 sceneLoadImageObjects(const char* directory, const char* filenam
 
 					if (!imageData.get())
 					{
-						imageData = imageDataLoad(imageDataFilename.c_str());
+						std::string textureImageDataFilename = std::string(VKTS_TEXTURE_DIRECTORY) + imageDataFilename;
+
+						imageData = imageDataLoad(textureImageDataFilename.c_str());
 
 						if (!imageData.get())
 						{
-							logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load image data '%s'", finalImageDataFilename.c_str());
+							imageData = imageDataLoad(imageDataFilename.c_str());
 
-							return VK_FALSE;
+							if (!imageData.get())
+							{
+								logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load image data '%s'", finalImageDataFilename.c_str());
+
+								return VK_FALSE;
+							}
 						}
 					}
 
@@ -603,7 +610,7 @@ static VkBool32 sceneLoadImageObjects(const char* directory, const char* filenam
 
 							auto lutImageObjectName = "BSDF_LUT_" + std::to_string(VKTS_BSDF_LENGTH) + "_" + std::to_string(VKTS_BSDF_SAMPLES);
 
-							auto lutImageFilename = "texture/" + lutImageObjectName + ".data";
+							auto lutImageFilename = std::string(VKTS_TEXTURE_DIRECTORY) + lutImageObjectName + ".data";
 
 							IImageDataSP lutImageData = imageDataLoadRaw(lutImageFilename.c_str(), VKTS_BSDF_LENGTH, VKTS_BSDF_LENGTH, VK_FORMAT_R32G32_SFLOAT);
 
@@ -1042,6 +1049,24 @@ static VkBool32 sceneLoadMaterials(const char* directory, const char* filename, 
             else if (bsdfMaterial.get())
             {
             	bsdfMaterial->setTransparent(bdata);
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No material");
+
+                return VK_FALSE;
+            }
+        }
+        else if (parseIsToken(buffer, "sorted"))
+        {
+            if (!parseBool(buffer, &bdata))
+            {
+                return VK_FALSE;
+            }
+
+            if (bsdfMaterial.get())
+            {
+            	bsdfMaterial->setSorted(bdata);
             }
             else
             {
@@ -1567,13 +1592,20 @@ static VkBool32 sceneLoadMaterials(const char* directory, const char* filename, 
 
 				if (!shaderBinary.get())
 				{
-					shaderBinary = fileLoadBinary(filename);
+					finalFilename = std::string(VKTS_SHADER_DIRECTORY) + std::string(sdata);
+
+					shaderBinary = fileLoadBinary(finalFilename.c_str());
 
 					if (!shaderBinary.get())
 					{
-						logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load fragment shader: '%s'", sdata, VKTS_MAX_TOKEN_CHARS);
+						shaderBinary = fileLoadBinary(filename);
 
-						return VK_FALSE;
+						if (!shaderBinary.get())
+						{
+							logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load fragment shader: '%s'", sdata, VKTS_MAX_TOKEN_CHARS);
+
+							return VK_FALSE;
+						}
 					}
 				}
 
