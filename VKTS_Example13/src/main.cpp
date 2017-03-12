@@ -181,6 +181,10 @@ int main(int argc, char* argv[])
 		}
 	}
 
+	std::string sceneName = "";
+
+	vkts::parameterGetString(sceneName, std::string("-f"), argc, argv);
+
 	//
 
 	auto instance = vkts::instanceCreate(VKTS_EXAMPLE_NAME, VK_MAKE_VERSION(1, 0, 0), VK_MAKE_VERSION(1, 0, 0), 0, vkts::layerGetNeededInstanceLayerCount(), vkts::layerGetNeededInstanceLayerNames(), vkts::extensionGetNeededInstanceExtensionCount(), vkts::extensionGetNeededInstanceExtensionNames());
@@ -394,7 +398,7 @@ int main(int argc, char* argv[])
 	//
 
 	// Single threaded application, so it is safe to pass display and window.
-	vkts::IUpdateThreadSP example = vkts::IUpdateThreadSP(new Example(contextObject, window->getIndex(), visualContext, surface));
+	vkts::IUpdateThreadSP example = vkts::IUpdateThreadSP(new Example(contextObject, window->getIndex(), visualContext, surface, sceneName));
 
 	if (!example.get())
 	{
