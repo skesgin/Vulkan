@@ -51,11 +51,12 @@ private:
 	JSONarraySP primitives;
 
 	JSONarraySP materials;
+	SmartPointerMap<std::string, JSONobjectSP> materialNameToMaterial;
 
 public:
 
 	GltfParameter() :
-		Parameter(), glTF(), scenes_nodes(), rootNodeCounter(0), nodes(), nodeCounter(0), meshes(), primitives(), materials()
+		Parameter(), glTF(), scenes_nodes(), rootNodeCounter(0), nodes(), nodeCounter(0), meshes(), primitives(), materials(),  materialNameToMaterial()
     {
     }
 
@@ -523,7 +524,25 @@ public:
 			return;
     	}
 
-    	auto materialValue = JSONintegerSP(new JSONinteger((int32_t)materials->size()));
+    	//
+
+    	if (!materialNameToMaterial.contains(subMesh.getBSDFMaterial()->getName()))
+    	{
+        	auto currentMaterial = JSONobjectSP(new JSONobject());
+
+        	if (!currentMaterial.get())
+        	{
+        		return;
+        	}
+
+        	materials->addValue(currentMaterial);
+
+        	materialNameToMaterial[subMesh.getBSDFMaterial()->getName()] = currentMaterial;
+    	}
+
+    	//
+
+    	auto materialValue = JSONintegerSP(new JSONinteger((int32_t)materials->size() - 1));
 
     	if (!materialValue.get())
     	{
@@ -532,26 +551,40 @@ public:
 
     	currentPrimitive->addKeyValue("material", materialValue);
 
+    	//
+
     	// TODO: Gather primitives values.
     }
 
     virtual void visit(IBSDFMaterial& material)
     {
-    	if (!materials.get())
+    	if (!materials.get() || !materialNameToMaterial.contains(material.getName()))
     	{
     		return;
     	}
 
     	//
 
-    	auto currentMaterial = JSONobjectSP(new JSONobject());
+    	// Check, if values already gathered.
+    	auto currentMaterial = materialNameToMaterial[material.getName()];
 
-    	if (!currentMaterial.get())
+    	if (currentMaterial->size() != 0)
     	{
     		return;
     	}
 
-    	materials->addValue(currentMaterial);
+    	//
+
+    	auto nameValue = JSONstringSP(new JSONstring(material.getName()));
+
+    	if (!nameValue.get())
+    	{
+    		return;
+    	}
+
+    	currentMaterial->addKeyValue("name", nameValue);
+
+    	//
 
     	// TODO: Gather material parameters.
     }
