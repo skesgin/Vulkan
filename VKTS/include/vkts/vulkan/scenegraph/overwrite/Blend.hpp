@@ -58,6 +58,10 @@ public:
         {
         	transparent = subMesh.getPhongMaterial()->isTransparent();
         }
+        else if (subMesh.getBSDFMaterial().get())
+        {
+            transparent = subMesh.getBSDFMaterial()->isTransparent();
+        }
 
     	return (transparent && passTransparent) || (!transparent && !passTransparent);
     }

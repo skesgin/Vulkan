@@ -180,7 +180,15 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 	{
 		vkts::SmartPointerVector<vkts::IGraphicsPipelineSP> empty;
 
-		scene->drawRecursive(cmdBuffer[usedBuffer], empty, usedBuffer, dynamicOffsets);
+		vkts::Blend blend;
+
+		// First all opaque elements.
+		blend.setPassTransparent(VK_FALSE);
+		scene->drawRecursive(cmdBuffer[usedBuffer], empty, usedBuffer, dynamicOffsets, &blend);
+
+		// Then, transparent elements.
+		blend.setPassTransparent(VK_TRUE);
+		scene->drawRecursive(cmdBuffer[usedBuffer], empty, usedBuffer, dynamicOffsets, &blend);
 	}
 
 	// Render font.

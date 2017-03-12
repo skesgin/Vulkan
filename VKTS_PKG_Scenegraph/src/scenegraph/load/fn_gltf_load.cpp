@@ -531,7 +531,7 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 
             // Store all tangents and indices. Bitangents are calculated out of normals and tangents.
             std::vector<glm::vec3> tangents(subMesh->getNumberIndices());
-            std::vector<int32_t> indices(subMesh->getNumberIndices());
+            std::vector<int32_t> indicesToVertex(subMesh->getNumberIndices());
 
             for (uint32_t i = 0; i < (uint32_t)subMesh->getNumberIndices() / 3; i++)
             {
@@ -548,7 +548,7 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
             	{
             		index[k] = ((const int32_t*)indicesBinaryBuffer->getData())[i * 3 + k];
 
-            		indices[i * 3 + k] = index[k];
+            		indicesToVertex[i * 3 + k] = index[k];
 
             		//
 
@@ -595,7 +595,14 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 
             	//
 
-                float r = 1.0f / (deltaUV[0].x * deltaUV[1].y - deltaUV[0].y * deltaUV[1].x);
+            	float divisor = (deltaUV[0].x * deltaUV[1].y - deltaUV[0].y * deltaUV[1].x);
+
+            	if (divisor == 0.0f)
+            	{
+            		continue;
+            	}
+
+                float r = 1.0f / divisor;
 
                 glm::vec3 tangent = glm::normalize((deltaPos[0] * deltaUV[1].y - deltaPos[1] * deltaUV[0].y) * r);
 
@@ -612,7 +619,7 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 
             for (uint32_t i = 0; i < (uint32_t)subMesh->getNumberIndices(); i++)
             {
-            	tangentsPerVertex[indices[i]] += tangents[i];
+            	tangentsPerVertex[indicesToVertex[i]] += tangents[i];
             }
 
             //
@@ -627,9 +634,16 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 					return VK_FALSE;
 				}
 
-				auto tangent = glm::normalize(tangentsPerVertex[i]);
+				glm::vec3 tangent = glm::vec3(normal[2], normal[0], normal[1]);
 
-				auto bitangent = glm::cross(glm::vec3(normal[0], normal[1], normal[2]), tangent);
+				if (tangentsPerVertex[i].x != 0.0f || tangentsPerVertex[i].y != 0.0f || tangentsPerVertex[i].z != 0.0f)
+				{
+					tangent = tangentsPerVertex[i];
+				}
+
+				tangent = glm::normalize(tangent);
+
+				auto bitangent = glm::cross(glm::normalize(glm::vec3(normal[0], normal[1], normal[2])), tangent);
 
 				tempBinaryBuffer->seek(i * 3 * 2 * sizeof(float), VKTS_SEARCH_ABSOLUTE);
 				tempBinaryBuffer->write(glm::value_ptr(bitangent), 1, 3 * sizeof(float));
@@ -681,7 +695,9 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
             		return VK_FALSE;
             	}
 
-                vertexBinaryBuffer->write((const void*)currentFloatData, 1, 3 * sizeof(float));
+            	glm::vec3 normal = glm::normalize(glm::vec3(currentFloatData[0], currentFloatData[1], currentFloatData[2]));
+
+                vertexBinaryBuffer->write(glm::value_ptr(normal), 1, 3 * sizeof(float));
             }
             if (vertexBufferType & VKTS_VERTEX_BUFFER_TYPE_BITANGENT)
             {
@@ -711,7 +727,7 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 						return VK_FALSE;
 					}
 
-					auto temp = glm::cross(glm::vec3(normal[0], normal[1], normal[2]), glm::vec3(tangent[0], tangent[1], tangent[2]));
+					auto temp = glm::cross(glm::normalize(glm::vec3(normal[0], normal[1], normal[2])), glm::normalize(glm::vec3(tangent[0], tangent[1], tangent[2])));
 
 					binormal[0] = temp.x;
 					binormal[1] = temp.y;
@@ -722,7 +738,9 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
             		tempBinaryBuffer->read((void*)binormal, 1, 3 * sizeof(float));
             	}
 
-                vertexBinaryBuffer->write((const void*)binormal, 1, 3 * sizeof(float));
+            	glm::vec3 binormalNormalized = glm::normalize(glm::vec3(binormal[0], binormal[1], binormal[2]));
+
+                vertexBinaryBuffer->write(glm::value_ptr(binormalNormalized), 1, 3 * sizeof(float));
             }
             if (vertexBufferType & VKTS_VERTEX_BUFFER_TYPE_TANGENT)
             {
@@ -752,7 +770,7 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 						return VK_FALSE;
 					}
 
-					auto temp = glm::cross(glm::vec3(binormal[0], binormal[1], binormal[2]), glm::vec3(normal[0], normal[1], normal[2]));
+					auto temp = glm::cross(glm::normalize(glm::vec3(binormal[0], binormal[1], binormal[2])), glm::normalize(glm::vec3(normal[0], normal[1], normal[2])));
 
 					tangent[0] = temp.x;
 					tangent[1] = temp.y;
@@ -763,7 +781,9 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
             		tempBinaryBuffer->read((void*)tangent, 1, 3 * sizeof(float));
             	}
 
-                vertexBinaryBuffer->write((const void*)tangent, 1, 3 * sizeof(float));
+            	glm::vec3 tangentNormalized = glm::normalize(glm::vec3(tangent[0], tangent[1], tangent[2]));
+
+                vertexBinaryBuffer->write(glm::value_ptr(tangentNormalized), 1, 3 * sizeof(float));
             }
             if (vertexBufferType & VKTS_VERTEX_BUFFER_TYPE_TEXCOORD)
             {
@@ -894,6 +914,11 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 
 			bsdfMaterial->setSorted(VK_TRUE);
 			bsdfMaterial->setPacked(VK_TRUE);
+
+			if (gltfPrimitive.material->extras.alphaMode == "BLEND")
+			{
+				bsdfMaterial->setTransparent(VK_TRUE);
+			}
 
 			//
 			// Base color

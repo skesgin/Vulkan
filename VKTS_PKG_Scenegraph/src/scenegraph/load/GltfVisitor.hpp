@@ -65,6 +65,7 @@ enum GltfState {
 	GltfState_Animation,
 	GltfState_Scene,
 
+	GltfState_Material_Extras,
 	GltfState_Material_PbrMetallicRoughness,
 	GltfState_Material_TextureInfo,
 	GltfState_Mesh_Primitive,
@@ -137,7 +138,14 @@ typedef struct _GltfPbrMetallicRoughness {
 	GltfTexture* metallicRoughnessTexture;
 } GltfPbrMetallicRoughness;
 
+typedef struct _GltfMaterialExtras {
+	std::string alphaMode;
+	float alphaCutoff;
+} GltfMaterialExtras;
+
 typedef struct _GltfMaterial {
+	GltfMaterialExtras extras;
+
 	GltfPbrMetallicRoughness pbrMetallicRoughness;
 
 	GltfTexture* normalTexture;
@@ -279,6 +287,7 @@ private:
 	void visitAnimation(JSONobject& jsonObject);
 	void visitScene(JSONobject& jsonObject);
 
+	void visitMaterial_Extras(JSONobject& jsonObject);
 	void visitMaterial_PbrMetallicRoughness(JSONobject& jsonObject);
 	void visitMaterial_TextureInfo(JSONobject& jsonObject);
 	void visitMesh_Primitive(JSONobject& jsonObject);

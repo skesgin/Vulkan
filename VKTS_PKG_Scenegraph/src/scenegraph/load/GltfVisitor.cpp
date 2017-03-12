@@ -785,7 +785,22 @@ void GltfVisitor::visitTexture(JSONobject& jsonObject)
 
 void GltfVisitor::visitMaterial(JSONobject& jsonObject)
 {
-	// Not processing extension, extras.
+	// Not processing extension.
+
+	if (jsonObject.hasKey("extras"))
+	{
+		auto extras = jsonObject.getValue("extras");
+
+		state.push(GltfState_Material_Extras);
+		extras->visit(*this);
+
+		if (state.top() == GltfState_Error)
+		{
+			return;
+		}
+	}
+
+	//
 
 	if (jsonObject.hasKey("pbrMetallicRoughness"))
 	{
@@ -1331,6 +1346,43 @@ void GltfVisitor::visitScene(JSONobject& jsonObject)
 		}
 
 		gltfScene.name = gltfString;
+	}
+}
+
+void GltfVisitor::visitMaterial_Extras(JSONobject& jsonObject)
+{
+	if (jsonObject.hasKey("alphaMode"))
+	{
+		auto alphaMode = jsonObject.getValue("alphaMode");
+
+		alphaMode->visit(*this);
+
+		if (state.top() == GltfState_Error)
+		{
+			return;
+		}
+
+		if (gltfString != "OPAQUE" && gltfString != "BLEND" && gltfString != "MASK")
+		{
+			state.push(GltfState_Error);
+			return;
+		}
+
+		gltfMaterial.extras.alphaMode = gltfString;
+	}
+
+	if (jsonObject.hasKey("alphaCutoff"))
+	{
+		auto alphaCutoff = jsonObject.getValue("alphaCutoff");
+
+		alphaCutoff->visit(*this);
+
+		if (state.top() == GltfState_Error)
+		{
+			return;
+		}
+
+		gltfMaterial.extras.alphaCutoff = gltfFloat;
 	}
 }
 
@@ -2176,6 +2228,9 @@ void GltfVisitor::visit(JSONarray& jsonArray)
 		{
 			for (int32_t i = 0; i < (int32_t)jsonArray.size(); i++)
 			{
+				gltfMaterial.extras.alphaMode = "OPAQUE";
+				gltfMaterial.extras.alphaCutoff = 0.5f;
+
 				gltfMaterial.pbrMetallicRoughness.baseColorFactor[0] = 1.0f;
 				gltfMaterial.pbrMetallicRoughness.baseColorFactor[1] = 1.0f;
 				gltfMaterial.pbrMetallicRoughness.baseColorFactor[2] = 1.0f;
@@ -2895,6 +2950,10 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 	else if (gltfState == GltfState_Scene)
 	{
 		visitScene(jsonObject);
+	}
+	else if (gltfState == GltfState_Material_Extras)
+	{
+		visitMaterial_Extras(jsonObject);
 	}
 	else if (gltfState == GltfState_Material_PbrMetallicRoughness)
 	{
