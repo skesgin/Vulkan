@@ -36,7 +36,8 @@
 
 // Sketchfab
 //#define GLTF_SCENE_NAME "glTF/damagedHelmet/damagedHelmet.gltf"
-#define GLTF_SCENE_NAME "glTF/microphone/microphone.gltf"
+//#define GLTF_SCENE_NAME "glTF/microphone/microphone.gltf"
+#define GLTF_SCENE_NAME "glTF/steampunkExplorer/steampunkExplorer.gltf"
 
 //#define VKTS_ENVIRONMENT_SCENE_NAME "environment/studio.vkts"
 //#define VKTS_ENVIRONMENT_SCENE_NAME "environment/terrace_near_the_granaries.vkts"

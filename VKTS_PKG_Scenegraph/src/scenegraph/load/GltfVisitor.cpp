@@ -2382,6 +2382,10 @@ void GltfVisitor::visit(JSONarray& jsonArray)
 				}
 
 				gltfMesh.primitives.append(gltfPrimitive);
+
+				//
+
+				state.push(GltfState_Mesh_Primitive);
 			}
 		}
 		else if (gltfState == GltfState_Skin_InverseBindMatrices)
