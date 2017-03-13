@@ -82,6 +82,14 @@ void RenderSubMesh::draw(const ICommandBuffersSP& cmdBuffer, const SmartPointerV
 	if (subMesh.getBSDFMaterial().get())
 	{
 		subMesh.getBSDFMaterial()->drawRecursive(cmdBuffer, graphicsPipeline, currentBuffer, dynamicOffsetMappings, renderOverwrite, nodeName);
+
+		// For now, alpha cut off only in glTF shader.
+		if (subMesh.getBSDFMaterial()->isSorted() && subMesh.getBSDFMaterial()->isPacked())
+		{
+			float alphaCutoff = subMesh.getBSDFMaterial()->getAlphaCutoff();
+
+			vkCmdPushConstants(cmdBuffer->getCommandBuffer(), graphicsPipeline->getLayout(), VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(int32_t) + sizeof(float) + sizeof(float), sizeof(int32_t), &alphaCutoff);
+		}
 	}
 
 	if (subMesh.getPhongMaterial().get())

@@ -183,7 +183,15 @@ int main(int argc, char* argv[])
 
 	std::string sceneName = "";
 
-	vkts::parameterGetString(sceneName, std::string("-f"), argc, argv);
+	vkts::parameterGetString(sceneName, std::string("-s"), argc, argv);
+
+	std::string environmentName = "";
+
+	vkts::parameterGetString(environmentName, std::string("-e"), argc, argv);
+
+	VkBool32 fullscreen = VK_FALSE;
+
+	vkts::parameterGetVkBool32(fullscreen, std::string("-f"), argc, argv);
 
 	//
 
@@ -275,7 +283,10 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 
-	window = vkts::visualCreateWindow(display, VKTS_EXAMPLE_NAME, 1024, 768, VK_FALSE, VK_TRUE, VK_FALSE).lock();
+	int32_t width = fullscreen ? 1920 : 1024;
+	int32_t height = fullscreen ? 1080 : 768;
+
+	window = vkts::visualCreateWindow(display, VKTS_EXAMPLE_NAME, width, height, fullscreen, !fullscreen, fullscreen).lock();
 
 	if (!window.get())
 	{
@@ -398,7 +409,7 @@ int main(int argc, char* argv[])
 	//
 
 	// Single threaded application, so it is safe to pass display and window.
-	vkts::IUpdateThreadSP example = vkts::IUpdateThreadSP(new Example(contextObject, window->getIndex(), visualContext, surface, sceneName));
+	vkts::IUpdateThreadSP example = vkts::IUpdateThreadSP(new Example(contextObject, window->getIndex(), visualContext, surface, sceneName, environmentName));
 
 	if (!example.get())
 	{

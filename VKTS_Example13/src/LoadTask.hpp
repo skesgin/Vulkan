@@ -38,9 +38,11 @@
 //#define GLTF_SCENE_NAME "glTF/damagedHelmet/damagedHelmet.gltf"
 //#define GLTF_SCENE_NAME "glTF/microphone/microphone.gltf"
 #define GLTF_SCENE_NAME "glTF/steampunkExplorer/steampunkExplorer.gltf"
+//#define GLTF_SCENE_NAME "glTF/centurion/centurion.gltf"
 
 //#define VKTS_ENVIRONMENT_SCENE_NAME "environment/studio.vkts"
 //#define VKTS_ENVIRONMENT_SCENE_NAME "environment/terrace_near_the_granaries.vkts"
+//#define VKTS_ENVIRONMENT_SCENE_NAME "environment/road_in_tenerife_mountain.vkts"
 #define VKTS_ENVIRONMENT_SCENE_NAME "environment/ennis.vkts"
 
 #define VKTS_SPHERE_SCENE_NAME "primitives/sphere.vkts"
@@ -81,13 +83,15 @@ private:
 
 	std::string sceneName;
 
+	std::string environmentName;
+
 protected:
 
 	virtual VkBool32 execute() override;
 
 public:
 
-	LoadTask(const vkts::IContextObjectSP& contextObject, const vkts::IRenderPassSP& renderPass, const vkts::SmartPointerVector<vkts::IShaderModuleSP>& allBSDFVertexShaderModules, const vkts::IDescriptorSetLayoutSP environmentDescriptorSetLayout, vkts::ISceneRenderFactorySP& renderFactory, vkts::ISceneManagerSP& sceneManager, vkts::ISceneFactorySP& sceneFactory, vkts::ISceneSP& scene, vkts::ISceneRenderFactorySP& environmentRenderFactory, vkts::ISceneManagerSP& environmentSceneManager, vkts::ISceneFactorySP& environmentSceneFactory, vkts::ISceneSP& environmentScene, vkts::ISceneRenderFactorySP& sphereRenderFactory, vkts::ISceneManagerSP& sphereSceneManager, vkts::ISceneFactorySP& sphereSceneFactory, vkts::ISceneSP& sphereScene, const std::string& sceneName);
+	LoadTask(const vkts::IContextObjectSP& contextObject, const vkts::IRenderPassSP& renderPass, const vkts::SmartPointerVector<vkts::IShaderModuleSP>& allBSDFVertexShaderModules, const vkts::IDescriptorSetLayoutSP environmentDescriptorSetLayout, vkts::ISceneRenderFactorySP& renderFactory, vkts::ISceneManagerSP& sceneManager, vkts::ISceneFactorySP& sceneFactory, vkts::ISceneSP& scene, vkts::ISceneRenderFactorySP& environmentRenderFactory, vkts::ISceneManagerSP& environmentSceneManager, vkts::ISceneFactorySP& environmentSceneFactory, vkts::ISceneSP& environmentScene, vkts::ISceneRenderFactorySP& sphereRenderFactory, vkts::ISceneManagerSP& sphereSceneManager, vkts::ISceneFactorySP& sphereSceneFactory, vkts::ISceneSP& sphereScene, const std::string& sceneName, const std::string& environmentName);
 	virtual ~LoadTask();
 
     VkCommandBuffer getCommandBuffer() const;

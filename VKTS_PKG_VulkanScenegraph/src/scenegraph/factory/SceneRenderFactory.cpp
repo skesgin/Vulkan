@@ -301,6 +301,12 @@ VkBool32 SceneRenderFactory::prepareBSDFMaterial(const ISceneManagerSP& sceneMan
 	{
 		finalPushConstantRangeCount = 1;
 		finalPushConstantRange = pushConstantRange;
+
+		// For now, alpha cut off only in glTF shader.
+		if (subMesh->getBSDFMaterial()->isSorted() && subMesh->getBSDFMaterial()->isPacked())
+		{
+			pushConstantRange[0].size += sizeof(int32_t);
+		}
 	}
 
 	//

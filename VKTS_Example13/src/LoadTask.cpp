@@ -170,11 +170,18 @@ VkBool32 LoadTask::execute()
 
 	//
 
-	vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Loading '%s'", VKTS_ENVIRONMENT_SCENE_NAME);
+	std::string currentEnvironmentName = environmentName;
+
+	if (currentEnvironmentName == "")
+	{
+		currentEnvironmentName = VKTS_ENVIRONMENT_SCENE_NAME;
+	}
+
+	vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Loading '%s'", currentEnvironmentName.c_str());
 
 	//
 
-	environmentScene = vkts::sceneLoad(VKTS_ENVIRONMENT_SCENE_NAME, environmentSceneManager, environmentSceneFactory, VK_TRUE);
+	environmentScene = vkts::sceneLoad(currentEnvironmentName.c_str(), environmentSceneManager, environmentSceneFactory, VK_TRUE);
 
 	if (!environmentScene.get())
 	{
@@ -249,8 +256,8 @@ VkBool32 LoadTask::execute()
 	return VK_TRUE;
 }
 
-LoadTask::LoadTask(const vkts::IContextObjectSP& contextObject, const vkts::IRenderPassSP& renderPass, const vkts::SmartPointerVector<vkts::IShaderModuleSP>& allBSDFVertexShaderModules, const vkts::IDescriptorSetLayoutSP environmentDescriptorSetLayout, vkts::ISceneRenderFactorySP& renderFactory, vkts::ISceneManagerSP& sceneManager, vkts::ISceneFactorySP& sceneFactory, vkts::ISceneSP& scene, vkts::ISceneRenderFactorySP& environmentRenderFactory, vkts::ISceneManagerSP& environmentSceneManager, vkts::ISceneFactorySP& environmentSceneFactory, vkts::ISceneSP& environmentScene, vkts::ISceneRenderFactorySP& sphereRenderFactory, vkts::ISceneManagerSP& sphereSceneManager, vkts::ISceneFactorySP& sphereSceneFactory, vkts::ISceneSP& sphereScene, const std::string& sceneName) :
-	ITask(0), contextObject(contextObject), renderPass(renderPass), allBSDFVertexShaderModules(allBSDFVertexShaderModules), environmentDescriptorSetLayout(environmentDescriptorSetLayout), renderFactory(renderFactory), sceneManager(sceneManager), sceneFactory(sceneFactory), scene(scene), environmentRenderFactory(environmentRenderFactory), environmentSceneManager(environmentSceneManager), environmentSceneFactory(environmentSceneFactory), environmentScene(environmentScene), sphereRenderFactory(sphereRenderFactory), sphereSceneManager(sphereSceneManager), sphereSceneFactory(sphereSceneFactory), sphereScene(sphereScene), commandPool(), cmdBuffer(), commandObject(), sceneName(sceneName)
+LoadTask::LoadTask(const vkts::IContextObjectSP& contextObject, const vkts::IRenderPassSP& renderPass, const vkts::SmartPointerVector<vkts::IShaderModuleSP>& allBSDFVertexShaderModules, const vkts::IDescriptorSetLayoutSP environmentDescriptorSetLayout, vkts::ISceneRenderFactorySP& renderFactory, vkts::ISceneManagerSP& sceneManager, vkts::ISceneFactorySP& sceneFactory, vkts::ISceneSP& scene, vkts::ISceneRenderFactorySP& environmentRenderFactory, vkts::ISceneManagerSP& environmentSceneManager, vkts::ISceneFactorySP& environmentSceneFactory, vkts::ISceneSP& environmentScene, vkts::ISceneRenderFactorySP& sphereRenderFactory, vkts::ISceneManagerSP& sphereSceneManager, vkts::ISceneFactorySP& sphereSceneFactory, vkts::ISceneSP& sphereScene, const std::string& sceneName, const std::string& environmentName) :
+	ITask(0), contextObject(contextObject), renderPass(renderPass), allBSDFVertexShaderModules(allBSDFVertexShaderModules), environmentDescriptorSetLayout(environmentDescriptorSetLayout), renderFactory(renderFactory), sceneManager(sceneManager), sceneFactory(sceneFactory), scene(scene), environmentRenderFactory(environmentRenderFactory), environmentSceneManager(environmentSceneManager), environmentSceneFactory(environmentSceneFactory), environmentScene(environmentScene), sphereRenderFactory(sphereRenderFactory), sphereSceneManager(sphereSceneManager), sphereSceneFactory(sphereSceneFactory), sphereScene(sphereScene), commandPool(), cmdBuffer(), commandObject(), sceneName(sceneName), environmentName(environmentName)
 {
 }
 

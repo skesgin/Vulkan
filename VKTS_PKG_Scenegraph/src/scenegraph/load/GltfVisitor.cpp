@@ -785,19 +785,54 @@ void GltfVisitor::visitTexture(JSONobject& jsonObject)
 
 void GltfVisitor::visitMaterial(JSONobject& jsonObject)
 {
-	// Not processing extension.
+	// Not processing extension and extras.
 
-	if (jsonObject.hasKey("extras"))
+	if (jsonObject.hasKey("alphaMode"))
 	{
-		auto extras = jsonObject.getValue("extras");
+		auto alphaMode = jsonObject.getValue("alphaMode");
 
-		state.push(GltfState_Material_Extras);
-		extras->visit(*this);
+		alphaMode->visit(*this);
 
 		if (state.top() == GltfState_Error)
 		{
 			return;
 		}
+
+		if (gltfString != "OPAQUE" && gltfString != "BLEND" && gltfString != "MASK")
+		{
+			state.push(GltfState_Error);
+			return;
+		}
+
+		gltfMaterial.alphaMode = gltfString;
+	}
+
+	if (jsonObject.hasKey("alphaCutoff"))
+	{
+		auto alphaCutoff = jsonObject.getValue("alphaCutoff");
+
+		alphaCutoff->visit(*this);
+
+		if (state.top() == GltfState_Error)
+		{
+			return;
+		}
+
+		gltfMaterial.alphaCutoff = gltfFloat;
+	}
+
+	if (jsonObject.hasKey("doubleSided"))
+	{
+		auto doubleSided = jsonObject.getValue("doubleSided");
+
+		doubleSided->visit(*this);
+
+		if (state.top() == GltfState_Error)
+		{
+			return;
+		}
+
+		gltfMaterial.doubleSided = gltfBool;
 	}
 
 	//
@@ -1346,43 +1381,6 @@ void GltfVisitor::visitScene(JSONobject& jsonObject)
 		}
 
 		gltfScene.name = gltfString;
-	}
-}
-
-void GltfVisitor::visitMaterial_Extras(JSONobject& jsonObject)
-{
-	if (jsonObject.hasKey("alphaMode"))
-	{
-		auto alphaMode = jsonObject.getValue("alphaMode");
-
-		alphaMode->visit(*this);
-
-		if (state.top() == GltfState_Error)
-		{
-			return;
-		}
-
-		if (gltfString != "OPAQUE" && gltfString != "BLEND" && gltfString != "MASK")
-		{
-			state.push(GltfState_Error);
-			return;
-		}
-
-		gltfMaterial.extras.alphaMode = gltfString;
-	}
-
-	if (jsonObject.hasKey("alphaCutoff"))
-	{
-		auto alphaCutoff = jsonObject.getValue("alphaCutoff");
-
-		alphaCutoff->visit(*this);
-
-		if (state.top() == GltfState_Error)
-		{
-			return;
-		}
-
-		gltfMaterial.extras.alphaCutoff = gltfFloat;
 	}
 }
 
@@ -2228,8 +2226,9 @@ void GltfVisitor::visit(JSONarray& jsonArray)
 		{
 			for (int32_t i = 0; i < (int32_t)jsonArray.size(); i++)
 			{
-				gltfMaterial.extras.alphaMode = "OPAQUE";
-				gltfMaterial.extras.alphaCutoff = 0.5f;
+				gltfMaterial.alphaMode = "OPAQUE";
+				gltfMaterial.alphaCutoff = 0.5f;
+				gltfMaterial.doubleSided = VK_FALSE;
 
 				gltfMaterial.pbrMetallicRoughness.baseColorFactor[0] = 1.0f;
 				gltfMaterial.pbrMetallicRoughness.baseColorFactor[1] = 1.0f;
@@ -2950,10 +2949,6 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 	else if (gltfState == GltfState_Scene)
 	{
 		visitScene(jsonObject);
-	}
-	else if (gltfState == GltfState_Material_Extras)
-	{
-		visitMaterial_Extras(jsonObject);
 	}
 	else if (gltfState == GltfState_Material_PbrMetallicRoughness)
 	{

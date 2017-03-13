@@ -51,7 +51,7 @@ VkBool32 VKTS_APIENTRY _fileCreateDirectory(const char* directory)
 
 	//
 
-	std::string targetDirectory = std::string(_fileGetBaseDirectory());
+	std::string targetDirectory = std::string(fileGetBaseDirectory());
 
 	//
 

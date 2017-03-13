@@ -915,9 +915,18 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 			bsdfMaterial->setSorted(VK_TRUE);
 			bsdfMaterial->setPacked(VK_TRUE);
 
-			if (gltfPrimitive.material->extras.alphaMode == "BLEND")
+			if (gltfPrimitive.material->alphaMode == "BLEND")
 			{
 				bsdfMaterial->setTransparent(VK_TRUE);
+			}
+			else if (gltfPrimitive.material->alphaMode == "MASK")
+			{
+				bsdfMaterial->setAlphaCutoff(gltfPrimitive.material->alphaCutoff);
+			}
+
+			if (gltfPrimitive.material->doubleSided)
+			{
+				subMesh->setDoubleSided(VK_TRUE);
 			}
 
 			//

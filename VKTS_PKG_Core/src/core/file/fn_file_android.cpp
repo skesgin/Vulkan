@@ -46,7 +46,7 @@ VkBool32 VKTS_APIENTRY _fileInit()
 		return VK_FALSE;
 	}
 
-    _fileSetBaseDirectory(::g_app->activity->externalDataPath);
+    fileSetBaseDirectory(::g_app->activity->externalDataPath);
 
 	return VK_TRUE;
 }
@@ -145,7 +145,7 @@ VkBool32 VKTS_APIENTRY _fileCreateDirectory(const char* directory)
 
 	//
 
-	std::string targetDirectory = std::string(_fileGetBaseDirectory());
+	std::string targetDirectory = std::string(fileGetBaseDirectory());
 
 	//
 

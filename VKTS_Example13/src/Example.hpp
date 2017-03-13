@@ -172,6 +172,8 @@ private:
 
     std::string sceneName;
 
+    std::string environmentName;
+
 	VkBool32 buildCmdBuffer(const int32_t usedBuffer);
 
 	VkBool32 buildFramebuffer(const int32_t usedBuffer);
@@ -210,7 +212,7 @@ private:
 
 public:
 
-	Example(const vkts::IContextObjectSP& contextObject, const int32_t windowIndex, const vkts::IVisualContextSP& visualContext, const vkts::ISurfaceSP& surface, const std::string& sceneName);
+	Example(const vkts::IContextObjectSP& contextObject, const int32_t windowIndex, const vkts::IVisualContextSP& visualContext, const vkts::ISurfaceSP& surface, const std::string& sceneName, const std::string& environmentName);
 
 	virtual ~Example();
 

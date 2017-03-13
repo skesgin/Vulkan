@@ -58,7 +58,12 @@ static VkBool32 fileSave(const char* filename, const void* data, const uint32_t 
 
     FILE* file;
 
-    std::string saveFilename = g_baseDirectory + std::string(filename);
+    std::string saveFilename = std::string(filename);
+
+    if (!fileIsAbsolutePath(filename))
+    {
+    	saveFilename = g_baseDirectory + saveFilename;
+    }
 
     file = fopen(saveFilename.c_str(), "wb");
 
@@ -85,12 +90,24 @@ VkBool32 VKTS_APIENTRY fileInit()
 
 //
 
-void VKTS_APIENTRY _fileSetBaseDirectory(const char* directory)
+void VKTS_APIENTRY fileSetBaseDirectory(const char* directory)
 {
-	g_baseDirectory = std::string(directory) + "/";
+	if (!directory || strlen(directory) == 0)
+	{
+		g_baseDirectory = "";
+
+		return;
+	}
+
+	g_baseDirectory = std::string(directory);
+
+	if (g_baseDirectory.back() != '/' && g_baseDirectory.back() != '\\')
+	{
+		g_baseDirectory = g_baseDirectory + "/";
+	}
 }
 
-const char* VKTS_APIENTRY _fileGetBaseDirectory()
+const char* VKTS_APIENTRY fileGetBaseDirectory()
 {
 	return g_baseDirectory.c_str();
 }
@@ -189,6 +206,26 @@ VkBool32 VKTS_APIENTRY fileGetDirectory(char* directory, const char* filename)
         strncpy(directory, filename, (position - filename) + 1);
 
         return VK_TRUE;
+    }
+
+    return VK_FALSE;
+}
+
+VkBool32 VKTS_APIENTRY fileIsAbsolutePath(const char* filename)
+{
+    if (!filename || strlen(filename) == 0)
+    {
+        return VK_FALSE;
+    }
+
+    if (filename[0] == '/' || filename[0] == '\\')
+    {
+    	return VK_TRUE;
+    }
+
+    if (strlen(filename) >= 2 && filename[1] == ':')
+    {
+    	return VK_TRUE;
     }
 
     return VK_FALSE;

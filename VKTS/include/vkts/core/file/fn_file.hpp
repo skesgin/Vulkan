@@ -38,6 +38,16 @@ namespace vkts
 VKTS_APICALL VkBool32 VKTS_APIENTRY fileInit();
 
 /**
+ * Not thread Safe.
+ */
+VKTS_APICALL void VKTS_APIENTRY fileSetBaseDirectory(const char* directory);
+
+/**
+ * Not thread Safe.
+ */
+VKTS_APICALL const char* VKTS_APIENTRY fileGetBaseDirectory();
+
+/**
  *
  * @ThreadSafe
  */
@@ -78,6 +88,12 @@ VKTS_APICALL VkBool32 VKTS_APIENTRY fileCreateDirectory(const char* directory);
  * @ThreadSafe
  */
 VKTS_APICALL VkBool32 VKTS_APIENTRY fileGetDirectory(char* directory, const char* filename);
+
+/**
+ *
+ * @ThreadSafe
+ */
+VKTS_APICALL VkBool32 VKTS_APIENTRY fileIsAbsolutePath(const char* filename);
 
 /**
  * Not thread Safe.

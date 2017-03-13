@@ -51,6 +51,8 @@ protected:
 
     VkBool32 packed;
 
+    float alphaCutoff;
+
 public:
 
     BSDFMaterial() = delete;
@@ -110,6 +112,11 @@ public:
     virtual VkBool32 isPacked() const override;
 
     virtual void setPacked(const VkBool32 packed) override;
+
+
+    virtual float getAlphaCutoff() const override;
+
+    virtual void setAlphaCutoff(const float alphaCutoff) override;
 
     //
 

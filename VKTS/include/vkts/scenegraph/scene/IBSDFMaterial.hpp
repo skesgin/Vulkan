@@ -88,6 +88,10 @@ public:
 
     virtual void setPacked(const VkBool32 packed) = 0;
 
+    virtual float getAlphaCutoff() const = 0;
+
+    virtual void setAlphaCutoff(const float alphaCutoff) = 0;
+
     //
 
     virtual void updateParameterRecursive(Parameter* parameter) = 0;

@@ -54,7 +54,7 @@ VkBool32 VKTS_APIENTRY _fileInit()
 
 		if (testFile)
 		{
-			_fileSetBaseDirectory(directory.c_str());
+			fileSetBaseDirectory(directory.c_str());
 
 			fclose(testFile);
 
@@ -80,7 +80,12 @@ IBinaryBufferSP VKTS_APIENTRY _fileLoadBinary(const char* filename)
 
     FILE* file;
 
-    std::string loadFilename = _fileGetBaseDirectory() + std::string(filename);
+    std::string loadFilename = std::string(filename);
+
+    if (!fileIsAbsolutePath(filename))
+    {
+    	loadFilename = fileGetBaseDirectory() + loadFilename;
+    }
 
     //
 
