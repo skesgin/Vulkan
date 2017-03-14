@@ -2250,7 +2250,7 @@ static VkBool32 sceneLoadSubMeshes(const char* directory, const char* filename, 
 
                     //
 
-                    subMesh->setVertexBuffer(vertexBuffer, vertexBufferType, Aabb((const float*)vertexBinaryBuffer->getData(), subMesh->getNumberVertices(), subMesh->getStrideInBytes()));
+                    subMesh->setVertexBuffer(vertexBuffer, vertexBufferType, Aabb((const float*)vertexBinaryBuffer->getData(), subMesh->getNumberVertices(), subMesh->getStrideInBytes()), vertexBinaryBuffer);
                 }
                 else
                 {
@@ -2285,7 +2285,7 @@ static VkBool32 sceneLoadSubMeshes(const char* directory, const char* filename, 
 
                     //
 
-                    subMesh->setIndexBuffer(indexVertexBuffer);
+                    subMesh->setIndexBuffer(indexVertexBuffer, indicesBinaryBuffer);
                 }
                 else
                 {
@@ -4706,6 +4706,11 @@ ISceneSP VKTS_APIENTRY sceneLoad(const char* filename, const ISceneManagerSP& sc
         for (uint32_t i = 0; i < sceneManager->getAllImageDatas().values().size(); i++)
         {
         	sceneManager->getAllImageDatas().values()[i]->freeHostMemory();
+        }
+
+        for (uint32_t i = 0; i < sceneManager->getAllSubMeshes().values().size(); i++)
+        {
+        	sceneManager->getAllSubMeshes().values()[i]->freeHostMemory();
         }
     }
 

@@ -280,6 +280,11 @@ VkBool32 SceneManager::removeSubMesh(const ISubMeshSP& subMesh)
     return remove(subMesh->getName(), allSubMeshes);
 }
 
+const SmartPointerMap<std::string, ISubMeshSP>& SceneManager::getAllSubMeshes() const
+{
+	return allSubMeshes;
+}
+
 //
 
 IAnimationSP SceneManager::useAnimation(const std::string& name) const

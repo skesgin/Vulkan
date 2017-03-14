@@ -506,7 +506,7 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 
     //
 
-    subMesh->setIndexBuffer(indexVertexBuffer);
+    subMesh->setIndexBuffer(indexVertexBuffer, indicesBinaryBuffer);
 
     //
     //
@@ -857,7 +857,7 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 
         //
 
-        subMesh->setVertexBuffer(vertexBuffer, vertexBufferType, Aabb((const float*)vertexBinaryBuffer->getData(), subMesh->getNumberVertices(), subMesh->getStrideInBytes()));
+        subMesh->setVertexBuffer(vertexBuffer, vertexBufferType, Aabb((const float*)vertexBinaryBuffer->getData(), subMesh->getNumberVertices(), subMesh->getStrideInBytes()), vertexBinaryBuffer);
     }
     else
     {
@@ -1539,6 +1539,11 @@ ISceneSP VKTS_APIENTRY gltfLoad(const char* filename, const ISceneManagerSP& sce
         for (uint32_t i = 0; i < sceneManager->getAllImageDatas().values().size(); i++)
         {
         	sceneManager->getAllImageDatas().values()[i]->freeHostMemory();
+        }
+
+        for (uint32_t i = 0; i < sceneManager->getAllSubMeshes().values().size(); i++)
+        {
+        	sceneManager->getAllSubMeshes().values()[i]->freeHostMemory();
         }
     }
 

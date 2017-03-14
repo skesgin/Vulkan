@@ -40,12 +40,15 @@ private:
     std::string name;
 
     IBufferObjectSP vertexBuffer;
+    IBinaryBufferSP vertexBinaryBuffer;
 
     VkTsVertexBufferType vertexBufferType;
+
 
     int32_t numberVertices;
 
     IBufferObjectSP indicesVertexBuffer;
+    IBinaryBufferSP indicesBinaryBuffer;
 
     int32_t numberIndices;
 
@@ -109,9 +112,11 @@ public:
 
     virtual const IBufferObjectSP& getVertexBuffer() const override;
 
+    virtual const IBinaryBufferSP& getVertexBinaryBuffer() const override;
+
     virtual VkTsVertexBufferType getVertexBufferType() const override;
 
-    virtual void setVertexBuffer(const IBufferObjectSP& vertexBuffer, const VkTsVertexBufferType vertexBufferType, const Aabb& verticesAABB) override;
+    virtual void setVertexBuffer(const IBufferObjectSP& vertexBuffer, const VkTsVertexBufferType vertexBufferType, const Aabb& verticesAABB, const IBinaryBufferSP& vertexBinaryBuffer) override;
 
     virtual int32_t getNumberVertices() const override;
 
@@ -119,7 +124,9 @@ public:
 
     virtual const IBufferObjectSP& getIndexBuffer() const override;
 
-    virtual void setIndexBuffer(const IBufferObjectSP& indicesVertexBuffer) override;
+    virtual const IBinaryBufferSP& getIndicesBinaryBuffer() const override;
+
+    virtual void setIndexBuffer(const IBufferObjectSP& indicesVertexBuffer, const IBinaryBufferSP& indicesBinaryBuffer) override;
 
     virtual int32_t getNumberIndices() const override;
 
@@ -206,6 +213,9 @@ public:
     virtual void updateParameterRecursive(Parameter* parameter) override;
 
     virtual void updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets, const uint32_t currentBuffer, const std::string& nodeName) override;
+
+
+    virtual void freeHostMemory() override;
 
     //
 

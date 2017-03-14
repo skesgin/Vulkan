@@ -125,7 +125,8 @@ VkBool32 LoadTask::execute()
 
 	//
 
-	scene = vkts::gltfLoad(currentSceneName.c_str(), sceneManager, sceneFactory, VK_TRUE);
+	// WAnt to store the content, so do not free.
+	scene = vkts::gltfLoad(currentSceneName.c_str(), sceneManager, sceneFactory, VK_FALSE);
 
 	if (!scene.get())
 	{

@@ -107,6 +107,8 @@ public:
 
     virtual VkBool32 removeSubMesh(const ISubMeshSP& subMesh) = 0;
 
+    virtual const SmartPointerMap<std::string, ISubMeshSP>& getAllSubMeshes() const = 0;
+
     //
 
     virtual IAnimationSP useAnimation(const std::string& name) const = 0;

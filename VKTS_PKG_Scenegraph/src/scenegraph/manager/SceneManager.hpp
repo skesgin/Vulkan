@@ -180,6 +180,8 @@ public:
 
     virtual VkBool32 removeSubMesh(const ISubMeshSP& subMesh) override;
 
+    virtual const SmartPointerMap<std::string, ISubMeshSP>& getAllSubMeshes() const override;
+
     //
 
     virtual IAnimationSP useAnimation(const std::string& name) const override;

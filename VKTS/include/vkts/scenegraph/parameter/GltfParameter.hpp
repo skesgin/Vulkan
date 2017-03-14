@@ -37,6 +37,8 @@ class GltfParameter : public Parameter
 
 private:
 
+	std::vector<uint8_t> binary;
+
 	JSONobjectSP glTF;
 
 	JSONarraySP scenes_nodes;
@@ -53,10 +55,21 @@ private:
 	JSONarraySP materials;
 	SmartPointerMap<std::string, JSONobjectSP> materialNameToMaterial;
 
+	JSONarraySP images;
+	Vector<std::string> storedImages;
+	SmartPointerMap<std::string, IImageDataSP> storedImagesMap;
+
+	JSONarraySP accessors;
+	Vector<std::string> storedAccessors;
+
+	JSONarraySP bufferViews;
+
+	JSONarraySP buffers;
+
 public:
 
 	GltfParameter() :
-		Parameter(), glTF(), scenes_nodes(), rootNodeCounter(0), nodes(), nodeCounter(0), meshes(), primitives(), materials(),  materialNameToMaterial()
+		Parameter(), binary(), glTF(), scenes_nodes(), rootNodeCounter(0), nodes(), nodeCounter(0), meshes(), primitives(), materials(),  materialNameToMaterial(), images(), storedImages(), accessors(), storedAccessors(), bufferViews(), buffers()
     {
     }
 
@@ -64,11 +77,107 @@ public:
     {
     }
 
-    //
+	//
 
-	const JSONobjectSP& getGlTf() const
+	VkBool32 save(const char* filename, const char* directory = nullptr)
 	{
-		return glTF;
+		if (!glTF.get())
+		{
+			return VK_FALSE;
+		}
+
+		char baseName[VKTS_MAX_BUFFER_CHARS];
+
+		if (!fileGetBasename(baseName, filename))
+		{
+			return VK_FALSE;
+		}
+
+		//
+
+		if (binary.size() > 0)
+		{
+	    	auto currentBuffer = JSONobjectSP(new JSONobject());
+
+	    	if (!currentBuffer.get())
+	    	{
+	    		return VK_FALSE;
+	    	}
+
+	    	buffers->addValue(currentBuffer);
+
+	    	//
+
+	    	auto byteLengthValue = JSONintegerSP(new JSONinteger((int32_t)binary.size()));
+
+	    	if (!byteLengthValue.get())
+	    	{
+	    		return VK_FALSE;
+	    	}
+
+	    	currentBuffer->addKeyValue("byteLength", byteLengthValue);
+
+	    	//
+
+	    	auto uriValue = JSONstringSP(new JSONstring(std::string(baseName) + ".bin"));
+
+	    	if (!uriValue.get())
+	    	{
+	    		return VK_FALSE;
+	    	}
+
+	    	currentBuffer->addKeyValue("uri", uriValue);
+		}
+
+		//
+
+		auto gltfEncoded = jsonEncode(glTF);
+
+		if (gltfEncoded == "")
+		{
+			return VK_FALSE;
+		}
+
+		//
+
+		std::string currentDirectory = "";
+
+		if (directory && strlen(directory) > 0)
+		{
+			currentDirectory = std::string(directory);
+
+			if (currentDirectory.back() != '/' && currentDirectory.back() != '\\')
+			{
+				currentDirectory += "/";
+			}
+		}
+
+		//
+
+		if (!fileSaveText((currentDirectory + filename).c_str(), textBufferCreate(gltfEncoded.c_str())))
+		{
+			return VK_FALSE;
+		}
+
+		for (uint32_t i = 0; i < storedImagesMap.size(); i++)
+		{
+			if (!imageDataSave((currentDirectory + storedImagesMap.keyAt(i)).c_str(), storedImagesMap.valueAt(i), 0, 0))
+			{
+				return VK_FALSE;
+			}
+		}
+
+		//
+
+		if (binary.size() > 0)
+		{
+			if (!fileSaveBinaryData((currentDirectory + baseName + ".bin").c_str(), (const void*)&binary[0], (uint32_t)binary.size()))
+			{
+				return VK_FALSE;
+			}
+		}
+
+		return VK_TRUE;
 	}
 
     //
@@ -185,6 +294,25 @@ public:
     	this->meshes = meshesValue;
 
     	//
+    	// images
+    	//
+
+    	auto imagesValue = JSONarraySP(new JSONarray());
+
+    	if (!imagesValue.get())
+    	{
+    		return;
+    	}
+
+    	//
+
+    	glTF->addKeyValue("images", imagesValue);
+
+    	//
+
+    	this->images = imagesValue;
+
+    	//
     	// materials
     	//
 
@@ -202,6 +330,63 @@ public:
     	//
 
     	this->materials = materialsValue;
+
+    	//
+    	// accessors
+    	//
+
+    	auto accessorsValue = JSONarraySP(new JSONarray());
+
+    	if (!accessorsValue.get())
+    	{
+    		return;
+    	}
+
+    	//
+
+    	glTF->addKeyValue("accessors", accessorsValue);
+
+    	//
+
+    	this->accessors = accessorsValue;
+
+    	//
+    	// bufferViews
+    	//
+
+    	auto bufferViewsValue = JSONarraySP(new JSONarray());
+
+    	if (!bufferViewsValue.get())
+    	{
+    		return;
+    	}
+
+    	//
+
+    	glTF->addKeyValue("bufferViews", bufferViewsValue);
+
+    	//
+
+    	this->bufferViews = bufferViewsValue;
+
+    	//
+    	// buffers
+    	//
+
+    	auto buffersValue = JSONarraySP(new JSONarray());
+
+    	if (!buffersValue.get())
+    	{
+    		return;
+    	}
+
+    	//
+
+    	glTF->addKeyValue("buffers", buffersValue);
+
+    	//
+
+    	this->buffers = buffersValue;
     }
 
     virtual void visit(IObject& object)
@@ -518,7 +703,7 @@ public:
     	// material
     	//
 
-    	if (!subMesh.getBSDFMaterial().get() || !subMesh.getBSDFMaterial()->isSorted())
+    	if (!subMesh.getBSDFMaterial().get() || !subMesh.getBSDFMaterial()->isSorted() || !subMesh.getBSDFMaterial()->isPacked() || (subMesh.getBSDFMaterial()->getTextureObjects().size() != 5))
     	{
 			logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "SubMesh has unsupported material!");
 			return;
@@ -538,6 +723,20 @@ public:
         	materials->addValue(currentMaterial);
 
         	materialNameToMaterial[subMesh.getBSDFMaterial()->getName()] = currentMaterial;
+
+        	//
+
+        	if (subMesh.getDoubleSided())
+        	{
+            	auto doubleSidedValue = JSONtrueSP(new JSONtrue());
+
+            	if (!doubleSidedValue.get())
+            	{
+            		return;
+            	}
+
+            	currentMaterial->addKeyValue("doubleSided", doubleSidedValue);
+        	}
     	}
 
     	//
@@ -553,12 +752,101 @@ public:
 
     	//
 
+    	std::string accessorName = subMesh.getName() + "_indices";
+
+		uint32_t indicesIndex = storedAccessors.index(accessorName);
+
+		if (indicesIndex == storedAccessors.size())
+		{
+			//
+			// Create buffer view.
+			//
+
+	    	auto currentBufferView = JSONobjectSP(new JSONobject());
+
+	    	if (!currentBufferView.get())
+	    	{
+	    		return;
+	    	}
+
+	    	bufferViews->addValue(currentBufferView);
+
+	    	//
+
+	    	auto bufferValue = JSONintegerSP(new JSONinteger(0));
+
+	    	if (!bufferValue.get())
+	    	{
+	    		return;
+	    	}
+
+	    	currentBufferView->addKeyValue("buffer", bufferValue);
+
+	    	//
+
+	    	uint32_t byteOffset = (uint32_t)binary.size();
+
+	    	auto byteOffsetValue = JSONintegerSP(new JSONinteger((int32_t)byteOffset));
+
+	    	if (!byteOffsetValue.get())
+	    	{
+	    		return;
+	    	}
+
+	    	currentBufferView->addKeyValue("byteOffset", byteOffsetValue);
+
+	    	//
+
+	    	uint32_t byteLength = subMesh.getIndicesBinaryBuffer()->getSize();
+
+	    	auto byteLengthValue = JSONintegerSP(new JSONinteger((int32_t)byteLength));
+
+	    	if (!byteLengthValue.get())
+	    	{
+	    		return;
+	    	}
+
+	    	currentBufferView->addKeyValue("byteLength", byteLengthValue);
+
+	    	//
+
+	    	auto targetValue = JSONintegerSP(new JSONinteger(34963));
+
+	    	if (!targetValue.get())
+	    	{
+	    		return;
+	    	}
+
+	    	currentBufferView->addKeyValue("target", targetValue);
+
+	    	//
+
+	    	const uint8_t* data = subMesh.getIndicesBinaryBuffer()->getByteData();
+
+	    	binary.insert(binary.end(), data, data + subMesh.getIndicesBinaryBuffer()->getSize());
+
+	    	//
+	    	// Buffer will be written, when everything is saved.
+	    	//
+
+	    	// TODO: Write accessor.
+		}
+
+    	auto indicesValue = JSONintegerSP(new JSONinteger(indicesIndex));
+
+    	if (!indicesValue.get())
+    	{
+    		return;
+    	}
+
+    	currentPrimitive->addKeyValue("indices", indicesValue);
+
     	// TODO: Gather primitives values.
     }
 
     virtual void visit(IBSDFMaterial& material)
     {
-    	if (!materials.get() || !materialNameToMaterial.contains(material.getName()))
+    	if (!images.get() || !materials.get() || !materialNameToMaterial.contains(material.getName()))
     	{
     		return;
     	}
@@ -586,7 +874,298 @@ public:
 
     	//
 
-    	// TODO: Gather material parameters.
+    	if (material.isTransparent())
+    	{
+        	auto alphaModeValue = JSONstringSP(new JSONstring("BLEND"));
+
+        	if (!alphaModeValue.get())
+        	{
+        		return;
+        	}
+
+        	currentMaterial->addKeyValue("alphaMode", alphaModeValue);
+    	}
+    	else if (material.getAlphaCutoff() > 0.0f)
+    	{
+        	auto alphaModeValue = JSONstringSP(new JSONstring("MASK"));
+
+        	if (!alphaModeValue.get())
+        	{
+        		return;
+        	}
+
+        	currentMaterial->addKeyValue("alphaMode", alphaModeValue);
+
+        	//
+
+        	auto alphaCutoffValue = JSONfloatSP(new JSONfloat(material.getAlphaCutoff()));
+
+        	if (!alphaCutoffValue.get())
+        	{
+        		return;
+        	}
+
+        	currentMaterial->addKeyValue("alphaCutoff", alphaCutoffValue);
+    	}
+
+    	//
+
+    	auto pbrMetallicRoughness = JSONobjectSP(new JSONobject());
+
+    	if (!pbrMetallicRoughness.get())
+    	{
+    		return;
+    	}
+
+    	currentMaterial->addKeyValue("pbrMetallicRoughness", pbrMetallicRoughness);
+
+    	for (uint32_t i = 0; i < material.getTextureObjects().size(); i++)
+    	{
+        	auto textureValue = JSONobjectSP(new JSONobject());
+
+        	if (!textureValue.get())
+        	{
+        		return;
+        	}
+
+    		//
+
+    		auto& currentImageData = material.getTextureObjects()[i]->getImageObject()->getImageData();
+
+    		//
+
+    		std::string storeImageName = currentImageData->getName();
+
+    		auto index = storeImageName.find_last_of('/');
+
+    		if (index != storeImageName.npos)
+    		{
+    			storeImageName = storeImageName.substr(index + 1);
+    		}
+    		else
+    		{
+    			index = storeImageName.find_last_of('\\');
+
+        		if (index != storeImageName.npos)
+        		{
+        			storeImageName = storeImageName.substr(index + 1);
+        		}
+    		}
+
+    		index = storeImageName.find_first_of('.');
+
+    		if (index != storeImageName.npos)
+    		{
+    			storeImageName = storeImageName.substr(0, index);
+    		}
+
+    		storeImageName += ".png";
+
+    		//
+
+    		VkBool32 storeImage = VK_TRUE;
+
+    		glm::vec4 texel;
+
+    		switch (i)
+    		{
+    			case 0:
+    				if (currentImageData->getWidth() == 1 && currentImageData->getHeight() == 1)
+    				{
+    					storeImage = VK_FALSE;
+
+    					texel = currentImageData->getTexel(0, 0, 0, 0, 0);
+
+    					//
+
+    					auto baseColorFactor = JSONarraySP(new JSONarray());
+
+    					if (!baseColorFactor.get())
+    					{
+    						return;
+    					}
+
+    					for (uint32_t k = 0; k < 4; k++)
+    					{
+    				    	auto floatValue = JSONfloatSP(new JSONfloat(texel[k]));
+
+    				    	if (!floatValue.get())
+    				    	{
+    				    		return;
+    				    	}
+
+    				    	baseColorFactor->addValue(floatValue);
+    					}
+
+    					pbrMetallicRoughness->addKeyValue("baseColorFactor", baseColorFactor);
+    				}
+    				else
+    				{
+    					pbrMetallicRoughness->addKeyValue("baseColorTexture", textureValue);
+    				}
+
+    				break;
+    			case 1:
+    				if (currentImageData->getWidth() == 1 && currentImageData->getHeight() == 1)
+    				{
+    					storeImage = VK_FALSE;
+
+    					texel = currentImageData->getTexel(0, 0, 0, 0, 0);
+
+    					//
+
+    					auto metallicFactor = JSONfloatSP(new JSONfloat(texel.x));
+
+    					if (!metallicFactor.get())
+    					{
+    						return;
+    					}
+
+    					pbrMetallicRoughness->addKeyValue("metallicFactor", metallicFactor);
+
+    					//
+
+    					auto roughnessFactor = JSONfloatSP(new JSONfloat(texel.y));
+
+    					if (!roughnessFactor.get())
+    					{
+    						return;
+    					}
+
+    					pbrMetallicRoughness->addKeyValue("roughnessFactor", roughnessFactor);
+    				}
+    				else
+    				{
+    					pbrMetallicRoughness->addKeyValue("metallicRoughnessTexture", textureValue);
+    				}
+
+    				break;
+    			case 2:
+    				if (currentImageData->getWidth() == 1 && currentImageData->getHeight() == 1)
+    				{
+    					texel = currentImageData->getTexel(0, 0, 0, 0, 0);
+
+    					//
+
+    					if (texel.x == 0.0f && texel.y == 1.0f && texel.z == 0.0f)
+    					{
+        					storeImage = VK_FALSE;
+    					}
+    				}
+
+    				if (storeImage)
+    				{
+    					currentMaterial->addKeyValue("normalTexture", textureValue);
+    				}
+
+    				break;
+    			case 3:
+    				if (currentImageData->getWidth() == 1 && currentImageData->getHeight() == 1)
+    				{
+    					texel = currentImageData->getTexel(0, 0, 0, 0, 0);
+
+    					//
+
+    					if (texel.x == 1.0f)
+    					{
+        					storeImage = VK_FALSE;
+    					}
+    				}
+
+    				if (storeImage)
+    				{
+    					currentMaterial->addKeyValue("occlusionTexture", textureValue);
+    				}
+
+    				break;
+    			case 4:
+    				if (currentImageData->getWidth() == 1 && currentImageData->getHeight() == 1)
+    				{
+    					storeImage = VK_FALSE;
+
+    					texel = currentImageData->getTexel(0, 0, 0, 0, 0);
+
+    					//
+
+    					if (texel.x != 0.0f || texel.y != 0.0f || texel.z != 0.0f)
+    					{
+							auto emissiveFactor = JSONarraySP(new JSONarray());
+
+							if (!emissiveFactor.get())
+							{
+								return;
+							}
+
+							for (uint32_t k = 0; k < 3; k++)
+							{
+								auto floatValue = JSONfloatSP(new JSONfloat(texel[k]));
+
+								if (!floatValue.get())
+								{
+									return;
+								}
+
+								emissiveFactor->addValue(floatValue);
+							}
+
+							currentMaterial->addKeyValue("emissiveFactor", emissiveFactor);
+    					}
+    				}
+    				else
+    				{
+    					currentMaterial->addKeyValue("emissiveTexture", textureValue);
+    				}
+
+    				break;
+    		}
+
+    		if (storeImage)
+    		{
+    			uint32_t imageIndex = storedImages.index(storeImageName);
+
+    			if (imageIndex == storedImages.size())
+    			{
+    		    	auto currentImage = JSONobjectSP(new JSONobject());
+
+    		    	if (!currentImage.get())
+    		    	{
+    		    		return;
+    		    	}
+
+    		    	images->addValue(currentImage);
+
+    				//
+
+    	        	auto uriValue = JSONstringSP(new JSONstring(storeImageName));
+
+    	        	if (!uriValue.get())
+    	        	{
+    	        		return;
+    	        	}
+
+    	        	currentImage->addKeyValue("uri", uriValue);
+
+    		    	//
+
+    		    	storedImages.append(storeImageName);
+
+    		    	//
+
+    		    	storedImagesMap[storeImageName] = currentImageData;
+    			}
+
+    			//
+
+		    	auto indexValue = JSONintegerSP(new JSONinteger((int32_t)imageIndex));
+
+		    	if (!indexValue.get())
+		    	{
+		    		return;
+		    	}
+
+		    	textureValue->addKeyValue("index", indexValue);
+    		}
+    	}
     }
 
 };

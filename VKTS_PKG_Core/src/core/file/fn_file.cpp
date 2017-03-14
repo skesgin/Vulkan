@@ -211,6 +211,45 @@ VkBool32 VKTS_APIENTRY fileGetDirectory(char* directory, const char* filename)
     return VK_FALSE;
 }
 
+VkBool32 VKTS_APIENTRY fileGetBasename(char* basename, const char* filename)
+{
+    if (!basename || !filename)
+    {
+        return VK_FALSE;
+    }
+
+    auto position = strrchr(filename, '/');
+
+    if (position)
+    {
+        strcpy(basename, ++position);
+    }
+    else
+    {
+		position = strrchr(filename, '\\');
+
+		if (position)
+		{
+			strcpy(basename, ++position);
+		}
+		else
+		{
+			strcpy(basename, filename);
+		}
+    }
+
+    //
+
+    position = strrchr(basename, '.');
+
+	if (position)
+	{
+		*position = '\0';
+	}
+
+    return VK_TRUE;
+}
+
 VkBool32 VKTS_APIENTRY fileIsAbsolutePath(const char* filename)
 {
     if (!filename || strlen(filename) == 0)

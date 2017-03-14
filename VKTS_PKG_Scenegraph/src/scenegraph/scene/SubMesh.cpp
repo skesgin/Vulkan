@@ -30,12 +30,12 @@ namespace vkts
 {
 
 SubMesh::SubMesh() :
-    ISubMesh(), name(""), vertexBuffer(), vertexBufferType(0), numberVertices(0), indicesVertexBuffer(), numberIndices(0), primitiveTopology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST), bsdfMaterial(), descriptorSetLayout(), pipelineLayout(), graphicsPipeline(), phongMaterial(), vertexOffset(-1), normalOffset(-1), bitangentOffset(-1), tangentOffset(-1), texcoordOffset(-1), boneIndices0Offset(-1), boneIndices1Offset(-1), boneWeights0Offset(-1), boneWeights1Offset(-1), numberBonesOffset(-1), strideInBytes(0), box(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)), doubleSided(VK_FALSE), subMeshData()
+    ISubMesh(), name(""), vertexBuffer(), vertexBinaryBuffer(), vertexBufferType(0), numberVertices(0), indicesVertexBuffer(), indicesBinaryBuffer(), numberIndices(0), primitiveTopology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST), bsdfMaterial(), descriptorSetLayout(), pipelineLayout(), graphicsPipeline(), phongMaterial(), vertexOffset(-1), normalOffset(-1), bitangentOffset(-1), tangentOffset(-1), texcoordOffset(-1), boneIndices0Offset(-1), boneIndices1Offset(-1), boneWeights0Offset(-1), boneWeights1Offset(-1), numberBonesOffset(-1), strideInBytes(0), box(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)), doubleSided(VK_FALSE), subMeshData()
 {
 }
 
 SubMesh::SubMesh(const SubMesh& other) :
-    ISubMesh(), name(other.name + "_clone"), vertexBuffer(other.vertexBuffer), vertexBufferType(other.vertexBufferType), numberVertices(other.numberVertices), indicesVertexBuffer(other.indicesVertexBuffer), numberIndices(other.numberIndices), primitiveTopology(other.primitiveTopology), bsdfMaterial(), descriptorSetLayout(other.descriptorSetLayout), pipelineLayout(other.pipelineLayout), graphicsPipeline(other.graphicsPipeline), phongMaterial(), vertexOffset(other.vertexOffset), normalOffset(other.normalOffset), bitangentOffset(other.bitangentOffset), tangentOffset(other.tangentOffset), texcoordOffset(other.texcoordOffset), boneIndices0Offset(other.boneIndices0Offset), boneIndices1Offset(other.boneIndices1Offset), boneWeights0Offset(other.boneWeights0Offset), boneWeights1Offset(other.boneWeights1Offset), numberBonesOffset(other.numberBonesOffset), strideInBytes(other.strideInBytes), box(other.box), doubleSided(other.doubleSided), subMeshData(other.subMeshData)
+    ISubMesh(), name(other.name + "_clone"), vertexBuffer(other.vertexBuffer), vertexBinaryBuffer(other.vertexBinaryBuffer), vertexBufferType(other.vertexBufferType), numberVertices(other.numberVertices), indicesVertexBuffer(other.indicesVertexBuffer), indicesBinaryBuffer(other.indicesBinaryBuffer), numberIndices(other.numberIndices), primitiveTopology(other.primitiveTopology), bsdfMaterial(), descriptorSetLayout(other.descriptorSetLayout), pipelineLayout(other.pipelineLayout), graphicsPipeline(other.graphicsPipeline), phongMaterial(), vertexOffset(other.vertexOffset), normalOffset(other.normalOffset), bitangentOffset(other.bitangentOffset), tangentOffset(other.tangentOffset), texcoordOffset(other.texcoordOffset), boneIndices0Offset(other.boneIndices0Offset), boneIndices1Offset(other.boneIndices1Offset), boneWeights0Offset(other.boneWeights0Offset), boneWeights1Offset(other.boneWeights1Offset), numberBonesOffset(other.numberBonesOffset), strideInBytes(other.strideInBytes), box(other.box), doubleSided(other.doubleSided), subMeshData(other.subMeshData)
 {
     if (other.bsdfMaterial.get())
     {
@@ -81,15 +81,21 @@ const IBufferObjectSP& SubMesh::getVertexBuffer() const
     return vertexBuffer;
 }
 
+const IBinaryBufferSP& SubMesh::getVertexBinaryBuffer() const
+{
+	return vertexBinaryBuffer;
+}
+
 VkTsVertexBufferType SubMesh::getVertexBufferType() const
 {
     return vertexBufferType;
 }
 
-void SubMesh::setVertexBuffer(const IBufferObjectSP& vertexBuffer, const VkTsVertexBufferType vertexBufferType, const Aabb& verticesAABB)
+void SubMesh::setVertexBuffer(const IBufferObjectSP& vertexBuffer, const VkTsVertexBufferType vertexBufferType, const Aabb& verticesAABB, const IBinaryBufferSP& vertexBinaryBuffer)
 {
     this->vertexBuffer = vertexBuffer;
     this->vertexBufferType = vertexBufferType;
+    this->vertexBinaryBuffer = vertexBinaryBuffer;
 
     //
 
@@ -111,9 +117,15 @@ const IBufferObjectSP& SubMesh::getIndexBuffer() const
     return indicesVertexBuffer;
 }
 
-void SubMesh::setIndexBuffer(const IBufferObjectSP& indicesVertexBuffer)
+const IBinaryBufferSP& SubMesh::getIndicesBinaryBuffer() const
+{
+	return indicesBinaryBuffer;
+}
+
+void SubMesh::setIndexBuffer(const IBufferObjectSP& indicesVertexBuffer, const IBinaryBufferSP& indicesBinaryBuffer)
 {
     this->indicesVertexBuffer = indicesVertexBuffer;
+    this->indicesBinaryBuffer = indicesBinaryBuffer;
 }
 
 int32_t SubMesh::getNumberIndices() const
@@ -348,6 +360,12 @@ void SubMesh::updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSet
 	{
 		phongMaterial->updateDescriptorSetsRecursive(allWriteDescriptorSetsCount, allWriteDescriptorSets, currentBuffer, nodeName);
 	}
+}
+
+void SubMesh::freeHostMemory()
+{
+	vertexBinaryBuffer = IBinaryBufferSP();
+	indicesBinaryBuffer = IBinaryBufferSP();
 }
 
 //

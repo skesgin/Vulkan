@@ -58,9 +58,11 @@ public:
 
     virtual const IBufferObjectSP& getVertexBuffer() const = 0;
 
+    virtual const IBinaryBufferSP& getVertexBinaryBuffer() const = 0;
+
     virtual VkTsVertexBufferType getVertexBufferType() const = 0;
 
-    virtual void setVertexBuffer(const IBufferObjectSP& vertexBuffer, const VkTsVertexBufferType vertexBufferType, const Aabb& verticesAABB) = 0;
+    virtual void setVertexBuffer(const IBufferObjectSP& vertexBuffer, const VkTsVertexBufferType vertexBufferType, const Aabb& verticesAABB, const IBinaryBufferSP& vertexBinaryBuffer) = 0;
 
     virtual int32_t getNumberVertices() const = 0;
 
@@ -68,7 +70,9 @@ public:
 
     virtual const IBufferObjectSP& getIndexBuffer() const = 0;
 
-    virtual void setIndexBuffer(const IBufferObjectSP& indicesVertexBuffer) = 0;
+    virtual const IBinaryBufferSP& getIndicesBinaryBuffer() const = 0;
+
+    virtual void setIndexBuffer(const IBufferObjectSP& indicesVertexBuffer, const IBinaryBufferSP& indicesBinaryBuffer) = 0;
 
     virtual int32_t getNumberIndices() const = 0;
 
@@ -155,6 +159,9 @@ public:
     virtual void updateParameterRecursive(Parameter* parameter) = 0;
 
     virtual void updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets, const uint32_t currentBuffer, const std::string& nodeName) = 0;
+
+
+    virtual void freeHostMemory() = 0;
 
     //
 

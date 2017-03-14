@@ -1958,9 +1958,8 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 
 		scene->updateParameterRecursive(&glTFparameter);
 
-		auto glTF = vkts::jsonEncode(glTFparameter.getGlTf());
-
-		vkts::fileSaveText("encoded_out.gltf", vkts::textBufferCreate(glTF.c_str()));
+		// Enable to store
+		//glTFparameter.save("encoded_out.gltf", "C:/Temp");
 	}
 
 	return VK_TRUE;
