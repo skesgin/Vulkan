@@ -244,7 +244,7 @@ VkBool32 VKTS_APIENTRY fileGetBasename(char* basename, const char* filename)
 
 	if (position)
 	{
-		*position = '\0';
+		basename[position - basename] = '\0';
 	}
 
     return VK_TRUE;
