@@ -59,6 +59,9 @@ private:
 	Vector<std::string> storedImages;
 	SmartPointerMap<std::string, IImageDataSP> storedImagesMap;
 
+	JSONarraySP textures;
+	JSONarraySP samplers;
+
 	JSONarraySP accessors;
 	Vector<std::string> storedAccessors;
 
@@ -66,10 +69,273 @@ private:
 
 	JSONarraySP buffers;
 
+	void writeBinaryBuffer(const IBinaryBufferSP& binaryBuffer, const uint32_t count, const uint8_t elementCount, const std::string& currentType, const int32_t currentComponentType, const uint32_t offset = 0, const uint32_t stride = 0)
+	{
+		//
+		// Create buffer view.
+		//
+
+    	auto currentBufferView = JSONobjectSP(new JSONobject());
+
+    	if (!currentBufferView.get())
+    	{
+    		return;
+    	}
+
+    	bufferViews->addValue(currentBufferView);
+
+    	//
+
+    	auto bufferValue = JSONintegerSP(new JSONinteger(0));
+
+    	if (!bufferValue.get())
+    	{
+    		return;
+    	}
+
+    	currentBufferView->addKeyValue("buffer", bufferValue);
+
+    	//
+
+    	uint32_t byteOffset = (uint32_t)binary.size();
+
+    	auto byteOffsetValue = JSONintegerSP(new JSONinteger((int32_t)byteOffset));
+
+    	if (!byteOffsetValue.get())
+    	{
+    		return;
+    	}
+
+    	currentBufferView->addKeyValue("byteOffset", byteOffsetValue);
+
+    	//
+
+    	uint32_t byteLength = binaryBuffer->getSize();
+
+    	auto byteLengthValue = JSONintegerSP(new JSONinteger((int32_t)byteLength));
+
+    	if (!byteLengthValue.get())
+    	{
+    		return;
+    	}
+
+    	currentBufferView->addKeyValue("byteLength", byteLengthValue);
+
+    	//
+
+    	auto targetValue = JSONintegerSP(new JSONinteger(34963));
+
+    	if (!targetValue.get())
+    	{
+    		return;
+    	}
+
+    	currentBufferView->addKeyValue("target", targetValue);
+
+    	//
+
+    	glm::uvec4 integerMin;
+    	glm::uvec4 integerMax;
+
+    	glm::vec4 floatMin;
+    	glm::vec4 floatMax;
+
+    	// We write unsigned short, but fallback to .
+    	uint32_t byteSize = 0;
+
+    	if (currentComponentType == 5126)
+    	{
+    		byteSize = sizeof(float);
+    	}
+    	else if (currentComponentType == 5125)
+    	{
+    		byteSize = sizeof(uint32_t);
+    	}
+    	else if (currentComponentType == 5123)
+    	{
+    		byteSize = sizeof(uint16_t);
+    	}
+    	else
+    	{
+    		return;
+    	}
+
+    	for (uint32_t i = 0; i < count; i++)
+    	{
+        	const uint8_t* data = &binaryBuffer->getByteData()[offset + i * stride];
+        	const float* floatData = (const float*)data;
+        	const int32_t* integerData = (const int32_t*)data;
+
+        	for (uint32_t k = 0; k < elementCount; k++)
+        	{
+				float currentFloat = floatData[k];
+				uint32_t currentInteger = (uint32_t)integerData[k];
+				uint16_t currentShort = (uint16_t)integerData[k];
+
+				uint8_t* currentData = nullptr;
+
+				if (currentComponentType == 5126)
+				{
+					currentData = (uint8_t*)&currentFloat;
+
+					if (i == 0 || currentFloat < floatMin[k])
+					{
+						floatMin[k] = currentFloat;
+					}
+					if (i == 0 || currentFloat > floatMax[k])
+					{
+						floatMax[k] = currentFloat;
+					}
+				}
+				else if (currentComponentType == 5125)
+				{
+					currentData = (uint8_t*)&currentInteger;
+
+					if (i == 0 || currentInteger < integerMin[k])
+					{
+						integerMin[k] = currentInteger;
+					}
+					if (i == 0 || currentInteger > integerMax[k])
+					{
+						integerMax[k] = currentInteger;
+					}
+				}
+				else if (currentComponentType == 5123)
+				{
+					currentData = (uint8_t*)&currentShort;
+
+					if (i == 0 || (uint32_t)currentShort < integerMin[k])
+					{
+						integerMin[k] = (uint32_t)currentShort;
+					}
+					if (i == 0 || (uint32_t)currentShort > integerMax[k])
+					{
+						integerMax[k] = (uint32_t)currentShort;
+					}
+				}
+
+				for (uint32_t m = 0; m < byteSize; m++)
+				{
+					binary.push_back(currentData[m]);
+				}
+        	}
+    	}
+
+    	//
+    	// Buffer will be written, when everything is saved.
+    	//
+
+		//
+		// Create accessor.
+		//
+
+    	auto currentAccessor = JSONobjectSP(new JSONobject());
+
+    	if (!currentAccessor.get())
+    	{
+    		return;
+    	}
+
+    	accessors->addValue(currentAccessor);
+
+    	//
+
+    	byteOffsetValue = JSONintegerSP(new JSONinteger(0));
+
+    	if (!byteOffsetValue.get())
+    	{
+    		return;
+    	}
+
+    	currentAccessor->addKeyValue("byteOffset", byteOffsetValue);
+
+    	//
+
+    	auto bufferViewValue = JSONintegerSP(new JSONinteger((int32_t)(bufferViews->size() - 1)));
+
+    	if (!bufferViewValue.get())
+    	{
+    		return;
+    	}
+
+    	currentAccessor->addKeyValue("bufferView", bufferViewValue);
+
+    	//
+
+    	auto minValue = JSONarraySP(new JSONarray());
+    	auto maxValue = JSONarraySP(new JSONarray());
+
+    	if (!minValue.get() || !maxValue.get())
+    	{
+    		return;
+    	}
+
+    	currentAccessor->addKeyValue("min", minValue);
+    	currentAccessor->addKeyValue("max", maxValue);
+
+    	for (uint32_t i = 0; i < elementCount; i++)
+    	{
+    		JSONvalueSP currentMin;
+    		JSONvalueSP currentMax;
+
+    		if (currentComponentType == 5126)
+    		{
+    			currentMin = JSONfloatSP(new JSONfloat(floatMin[i]));
+    			currentMax = JSONfloatSP(new JSONfloat(floatMax[i]));
+    		}
+    		else
+    		{
+    			currentMin = JSONintegerSP(new JSONinteger(integerMin[i]));
+    			currentMax = JSONintegerSP(new JSONinteger(integerMax[i]));
+    		}
+
+    		if (!currentMin.get() || !currentMax.get())
+    		{
+    			return;
+    		}
+
+    		minValue->addValue(currentMin);
+    		maxValue->addValue(currentMax);
+    	}
+
+    	//
+
+    	auto countValue = JSONintegerSP(new JSONinteger((int32_t)count));
+
+    	if (!countValue.get())
+    	{
+    		return;
+    	}
+
+    	currentAccessor->addKeyValue("count", countValue);
+
+    	//
+
+    	auto typeValue = JSONstringSP(new JSONstring(currentType));
+
+    	if (!typeValue.get())
+    	{
+    		return;
+    	}
+
+    	currentAccessor->addKeyValue("type", typeValue);
+
+    	//
+
+    	auto componentType = JSONintegerSP(new JSONinteger(currentComponentType));
+
+    	if (!componentType.get())
+    	{
+    		return;
+    	}
+
+    	currentAccessor->addKeyValue("componentType", componentType);
+	}
+
 public:
 
 	GltfParameter() :
-		Parameter(), binary(), glTF(), scenes_nodes(), rootNodeCounter(0), nodes(), nodeCounter(0), meshes(), primitives(), materials(),  materialNameToMaterial(), images(), storedImages(), accessors(), storedAccessors(), bufferViews(), buffers()
+		Parameter(), binary(), glTF(), scenes_nodes(), rootNodeCounter(0), nodes(), nodeCounter(0), meshes(), primitives(), materials(),  materialNameToMaterial(), images(), storedImages(), textures(), accessors(), storedAccessors(), bufferViews(), buffers()
     {
     }
 
@@ -311,6 +577,44 @@ public:
     	//
 
     	this->images = imagesValue;
+
+    	//
+    	// textures
+    	//
+
+    	auto texturesValue = JSONarraySP(new JSONarray());
+
+    	if (!texturesValue.get())
+    	{
+    		return;
+    	}
+
+    	//
+
+    	glTF->addKeyValue("textures", texturesValue);
+
+    	//
+
+    	this->textures = texturesValue;
+
+    	//
+    	// samplers
+    	//
+
+    	auto samplersValue = JSONarraySP(new JSONarray());
+
+    	if (!samplersValue.get())
+    	{
+    		return;
+    	}
+
+    	//
+
+    	glTF->addKeyValue("samplers", samplersValue);
+
+    	//
+
+    	this->samplers = samplersValue;
 
     	//
     	// materials
@@ -703,6 +1007,7 @@ public:
     	// material
     	//
 
+    	// TODO: Support unpacked materials, by merging metallic and roughness.
     	if (!subMesh.getBSDFMaterial().get() || !subMesh.getBSDFMaterial()->isSorted() || !subMesh.getBSDFMaterial()->isPacked() || (subMesh.getBSDFMaterial()->getTextureObjects().size() != 5))
     	{
 			logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "SubMesh has unsupported material!");
@@ -758,78 +1063,15 @@ public:
 
 		if (indicesIndex == storedAccessors.size())
 		{
-			//
-			// Create buffer view.
-			//
+			uint32_t componentType = 5123;
 
-	    	auto currentBufferView = JSONobjectSP(new JSONobject());
+			if (subMesh.getNumberIndices() > 65535)
+			{
+				componentType = 5125;
+			}
 
-	    	if (!currentBufferView.get())
-	    	{
-	    		return;
-	    	}
-
-	    	bufferViews->addValue(currentBufferView);
-
-	    	//
-
-	    	auto bufferValue = JSONintegerSP(new JSONinteger(0));
-
-	    	if (!bufferValue.get())
-	    	{
-	    		return;
-	    	}
-
-	    	currentBufferView->addKeyValue("buffer", bufferValue);
-
-	    	//
-
-	    	uint32_t byteOffset = (uint32_t)binary.size();
-
-	    	auto byteOffsetValue = JSONintegerSP(new JSONinteger((int32_t)byteOffset));
-
-	    	if (!byteOffsetValue.get())
-	    	{
-	    		return;
-	    	}
-
-	    	currentBufferView->addKeyValue("byteOffset", byteOffsetValue);
-
-	    	//
-
-	    	uint32_t byteLength = subMesh.getIndicesBinaryBuffer()->getSize();
-
-	    	auto byteLengthValue = JSONintegerSP(new JSONinteger((int32_t)byteLength));
-
-	    	if (!byteLengthValue.get())
-	    	{
-	    		return;
-	    	}
-
-	    	currentBufferView->addKeyValue("byteLength", byteLengthValue);
-
-	    	//
-
-	    	auto targetValue = JSONintegerSP(new JSONinteger(34963));
-
-	    	if (!targetValue.get())
-	    	{
-	    		return;
-	    	}
-
-	    	currentBufferView->addKeyValue("target", targetValue);
-
-	    	//
-
-	    	const uint8_t* data = subMesh.getIndicesBinaryBuffer()->getByteData();
-
-	    	binary.insert(binary.end(), data, data + subMesh.getIndicesBinaryBuffer()->getSize());
-
-	    	//
-	    	// Buffer will be written, when everything is saved.
-	    	//
-
-	    	// TODO: Write accessor.
+			writeBinaryBuffer(subMesh.getIndicesBinaryBuffer(), subMesh.getNumberIndices(), 1, "SCALAR", componentType, 0, sizeof(int32_t));
+			storedAccessors.append(accessorName);
 		}
 
     	auto indicesValue = JSONintegerSP(new JSONinteger(indicesIndex));
@@ -841,7 +1083,130 @@ public:
 
     	currentPrimitive->addKeyValue("indices", indicesValue);
 
-    	// TODO: Gather primitives values.
+    	//
+    	//
+    	//
+
+    	auto attributesValue = JSONobjectSP(new JSONobject());
+
+    	if (!attributesValue.get())
+    	{
+    		return;
+    	}
+
+    	currentPrimitive->addKeyValue("attributes", attributesValue);
+
+    	//
+
+    	if (subMesh.getVertexBufferType() & VKTS_VERTEX_BUFFER_TYPE_VERTEX)
+    	{
+        	accessorName = subMesh.getName() + "_vertices";
+
+    		uint32_t positionIndex = storedAccessors.index(accessorName);
+
+    		if (positionIndex == storedAccessors.size())
+    		{
+    			writeBinaryBuffer(subMesh.getVertexBinaryBuffer(), subMesh.getNumberVertices(), 4, "VEC4", 5126, (uint32_t)subMesh.getVertexOffset(), (uint32_t)subMesh.getStrideInBytes());
+    			storedAccessors.append(accessorName);
+    		}
+
+        	auto positionValue = JSONintegerSP(new JSONinteger(positionIndex));
+
+        	if (!positionValue.get())
+        	{
+        		return;
+        	}
+
+        	attributesValue->addKeyValue("POSITION", positionValue);
+    	}
+
+    	if (subMesh.getVertexBufferType() & VKTS_VERTEX_BUFFER_TYPE_NORMAL)
+    	{
+        	accessorName = subMesh.getName() + "_normals";
+
+    		uint32_t normalIndex = storedAccessors.index(accessorName);
+
+    		if (normalIndex == storedAccessors.size())
+    		{
+    			writeBinaryBuffer(subMesh.getVertexBinaryBuffer(), subMesh.getNumberVertices(), 3, "VEC3", 5126, (uint32_t)subMesh.getNormalOffset(), (uint32_t)subMesh.getStrideInBytes());
+    			storedAccessors.append(accessorName);
+    		}
+
+        	auto normalValue = JSONintegerSP(new JSONinteger(normalIndex));
+
+        	if (!normalValue.get())
+        	{
+        		return;
+        	}
+
+        	attributesValue->addKeyValue("NORMAL", normalValue);
+    	}
+
+    	if (subMesh.getVertexBufferType() & VKTS_VERTEX_BUFFER_TYPE_BITANGENT)
+    	{
+        	accessorName = subMesh.getName() + "_bitangents";
+
+    		uint32_t bitangentIndex = storedAccessors.index(accessorName);
+
+    		if (bitangentIndex == storedAccessors.size())
+    		{
+    			writeBinaryBuffer(subMesh.getVertexBinaryBuffer(), subMesh.getNumberVertices(), 3, "VEC3", 5126, (uint32_t)subMesh.getBitangentOffset(), (uint32_t)subMesh.getStrideInBytes());
+    			storedAccessors.append(accessorName);
+    		}
+
+        	auto bitangentValue = JSONintegerSP(new JSONinteger(bitangentIndex));
+
+        	if (!bitangentValue.get())
+        	{
+        		return;
+        	}
+
+        	attributesValue->addKeyValue("BINORMAL", bitangentValue);
+    	}
+
+    	if (subMesh.getVertexBufferType() & VKTS_VERTEX_BUFFER_TYPE_TANGENT)
+    	{
+        	accessorName = subMesh.getName() + "_tangents";
+
+    		uint32_t tangentIndex = storedAccessors.index(accessorName);
+
+    		if (tangentIndex == storedAccessors.size())
+    		{
+    			writeBinaryBuffer(subMesh.getVertexBinaryBuffer(), subMesh.getNumberVertices(), 3, "VEC3", 5126, (uint32_t)subMesh.getTangentOffset(), (uint32_t)subMesh.getStrideInBytes());
+    			storedAccessors.append(accessorName);
+    		}
+
+        	auto tangentValue = JSONintegerSP(new JSONinteger(tangentIndex));
+
+        	if (!tangentValue.get())
+        	{
+        		return;
+        	}
+
+        	attributesValue->addKeyValue("TANGENT", tangentValue);
+    	}
+
+    	if (subMesh.getVertexBufferType() & VKTS_VERTEX_BUFFER_TYPE_TEXCOORD)
+    	{
+        	accessorName = subMesh.getName() + "_texcoords";
+
+    		uint32_t texCoordIndex = storedAccessors.index(accessorName);
+
+    		if (texCoordIndex == storedAccessors.size())
+    		{
+    			writeBinaryBuffer(subMesh.getVertexBinaryBuffer(), subMesh.getNumberVertices(), 2, "VEC2", 5126, (uint32_t)subMesh.getTexcoordOffset(), (uint32_t)subMesh.getStrideInBytes());
+    			storedAccessors.append(accessorName);
+    		}
+
+        	auto texCoordValue = JSONintegerSP(new JSONinteger(texCoordIndex));
+
+        	if (!texCoordValue.get())
+        	{
+        		return;
+        	}
+
+        	attributesValue->addKeyValue("TEXCOORD_0", texCoordValue);
+    	}
     }
 
     virtual void visit(IBSDFMaterial& material)
@@ -1121,6 +1486,21 @@ public:
 
     		if (storeImage)
     		{
+    			// Create default sampler if it does not exist.
+    			if (samplers->size() == 0)
+    			{
+    		    	auto currentSampler = JSONobjectSP(new JSONobject());
+
+    		    	if (!currentSampler.get())
+    		    	{
+    		    		return;
+    		    	}
+
+    		    	samplers->addValue(currentSampler);
+    			}
+
+    			//
+
     			uint32_t imageIndex = storedImages.index(storeImageName);
 
     			if (imageIndex == storedImages.size())
@@ -1152,8 +1532,45 @@ public:
     		    	//
 
     		    	storedImagesMap[storeImageName] = currentImageData;
+
+    		    	//
+    		    	// For now, for every image we have a texture.
+    		    	//
+
+    		    	auto currentTexture = JSONobjectSP(new JSONobject());
+
+    		    	if (!currentTexture.get())
+    		    	{
+    		    		return;
+    		    	}
+
+    		    	textures->addValue(currentTexture);
+
+    				//
+
+    	        	auto samplerValue = JSONintegerSP(new JSONinteger(0));
+
+    	        	if (!samplerValue.get())
+    	        	{
+    	        		return;
+    	        	}
+
+    	        	currentTexture->addKeyValue("sampler", samplerValue);
+
+    	        	//
+
+    	        	auto sourceValue = JSONintegerSP(new JSONinteger((int32_t)imageIndex));
+
+    	        	if (!sourceValue.get())
+    	        	{
+    	        		return;
+    	        	}
+
+    	        	currentTexture->addKeyValue("source", sourceValue);
     			}
 
+    			//
+    			// Now, set reference to texture index, which is the same as image index.
     			//
 
 		    	auto indexValue = JSONintegerSP(new JSONinteger((int32_t)imageIndex));
