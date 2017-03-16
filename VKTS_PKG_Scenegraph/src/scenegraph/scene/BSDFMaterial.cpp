@@ -159,7 +159,7 @@ void BSDFMaterial::setSorted(const VkBool32 sorted)
 
 VkBool32 BSDFMaterial::isPacked() const
 {
-	return sorted;
+	return packed;
 }
 
 void BSDFMaterial::setPacked(const VkBool32 packed)

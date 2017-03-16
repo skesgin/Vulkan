@@ -1007,8 +1007,7 @@ public:
     	// material
     	//
 
-    	// TODO: Support unpacked materials, by merging metallic and roughness.
-    	if (!subMesh.getBSDFMaterial().get() || !subMesh.getBSDFMaterial()->isSorted() || !subMesh.getBSDFMaterial()->isPacked() || (subMesh.getBSDFMaterial()->getTextureObjects().size() != 5))
+    	if (!subMesh.getBSDFMaterial().get() || !subMesh.getBSDFMaterial()->isSorted() || (subMesh.getBSDFMaterial()->isPacked() && (subMesh.getBSDFMaterial()->getTextureObjects().size() != 5)) || (!subMesh.getBSDFMaterial()->isPacked() && (subMesh.getBSDFMaterial()->getTextureObjects().size() != 6)))
     	{
 			logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "SubMesh has unsupported material!");
 			return;
@@ -1161,7 +1160,7 @@ public:
         		return;
         	}
 
-        	attributesValue->addKeyValue("BINORMAL", bitangentValue);
+        	attributesValue->addKeyValue("BITANGENT", bitangentValue);
     	}
 
     	if (subMesh.getVertexBufferType() & VKTS_VERTEX_BUFFER_TYPE_TANGENT)
@@ -1223,7 +1222,10 @@ public:
 
     	if (currentMaterial->size() != 0)
     	{
-    		return;
+    		if (currentMaterial->size() != 1 || !currentMaterial->hasKey("doubleSided"))
+    		{
+    			return;
+    		}
     	}
 
     	//
@@ -1295,7 +1297,55 @@ public:
 
     		//
 
-    		auto& currentImageData = material.getTextureObjects()[i]->getImageObject()->getImageData();
+    		IImageDataSP currentImageData;
+    		uint32_t usedIndex = i;
+
+    		if (material.isPacked() || i == 0)
+    		{
+    			currentImageData = material.getTextureObjects()[i]->getImageObject()->getImageData();
+    		}
+    		else
+    		{
+    			if (i == 1)
+    			{
+    				usedIndex = i;
+    				i++;
+
+    				//
+
+    				std::string imageName = "";
+
+    				std::string imageNameMetallic = material.getTextureObjects()[1]->getImageObject()->getImageData()->getName();
+    				std::string imageNameRoughness = material.getTextureObjects()[2]->getImageObject()->getImageData()->getName();
+
+    				// Gather common letters, that name looks identical.
+    				uint32_t charIndex = 0;
+    				while (charIndex < imageNameMetallic.size() && charIndex < imageNameRoughness.size() && imageNameMetallic[charIndex] == imageNameRoughness[charIndex])
+    				{
+    					imageName.push_back(imageNameMetallic[charIndex]);
+
+						charIndex++;
+    				}
+
+    				// Fallback, if names did completely mismatch.
+    				if (imageName.size() == 0)
+    				{
+    					imageName = material.getName() + "_";
+    				}
+
+    				imageName += "MetallicRoughness.png";
+
+    				//
+
+    				currentImageData = imageDataUnite(material.getTextureObjects()[1]->getImageObject()->getImageData(), material.getTextureObjects()[2]->getImageObject()->getImageData(), imageName, VKTS_SOURCE_0_RED, VKTS_SOURCE_1_RED, VKTS_SOURCE_ZERO, VKTS_SOURCE_ONE, VK_FORMAT_R8G8B8A8_UNORM);
+    			}
+    			else
+    			{
+    				usedIndex = i - 1;
+
+    				currentImageData = material.getTextureObjects()[i]->getImageObject()->getImageData();
+    			}
+    		}
 
     		//
 
@@ -1332,7 +1382,7 @@ public:
 
     		glm::vec4 texel;
 
-    		switch (i)
+    		switch (usedIndex)
     		{
     			case 0:
     				if (currentImageData->getWidth() == 1 && currentImageData->getHeight() == 1)

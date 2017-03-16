@@ -1119,6 +1119,111 @@ IImageDataSP VKTS_APIENTRY imageDataCreate(const std::string& name, const uint32
 	return imageDataCreate(name, width, height, depth, glm::vec4(red, green, blue, alpha), imageType, format);
 }
 
+IImageDataSP VKTS_APIENTRY imageDataUnite(const IImageDataSP& sourceImage0, const IImageDataSP& sourceImage1, const std::string& name, const VkTsImageDataChannels red, const VkTsImageDataChannels green, const VkTsImageDataChannels blue, const VkTsImageDataChannels alpha, const VkFormat format)
+{
+	if (!sourceImage0.get() || !sourceImage1.get())
+	{
+		return IImageDataSP();
+	}
+
+	if (sourceImage0->getImageType() != sourceImage1->getImageType())
+	{
+		return IImageDataSP();
+	}
+
+	if ((sourceImage0->getWidth() != sourceImage1->getWidth()) || (sourceImage0->getHeight() != sourceImage1->getHeight()) || (sourceImage0->getDepth() != sourceImage1->getDepth()))
+	{
+		return IImageDataSP();
+	}
+
+	auto width = sourceImage0->getWidth();
+	auto height = sourceImage0->getHeight();
+	auto depth = sourceImage0->getDepth();
+
+	//
+
+	auto currentImageData = imageDataCreate(name, width, height, depth, sourceImage0->getImageType(), format);
+
+	if (!currentImageData.get())
+	{
+        return IImageDataSP();
+    }
+
+    for (uint32_t z = 0; z < depth; z++)
+    {
+        for (uint32_t y = 0; y < height; y++)
+        {
+            for (uint32_t x = 0; x < width; x++)
+            {
+            	glm::vec4 color;
+
+            	for (uint32_t i = 0; i < 4; i++)
+            	{
+            		VkTsImageDataChannels current;
+
+            		switch (i)
+            		{
+            			case 0:
+            				current = red;
+            				break;
+            			case 1:
+            				current = green;
+            				break;
+            			case 2:
+            				current = blue;
+            				break;
+            			case 3:
+            				current = alpha;
+            				break;
+            		}
+
+            		float c = 0.0f;
+
+            		switch (current)
+            		{
+						case VKTS_SOURCE_0_RED:
+							c = sourceImage0->getTexel(x, y, z, 0, 0).r;
+							break;
+						case VKTS_SOURCE_0_GREEN:
+							c = sourceImage0->getTexel(x, y, z, 0, 0).g;
+							break;
+						case VKTS_SOURCE_0_BLUE:
+							c = sourceImage0->getTexel(x, y, z, 0, 0).b;
+							break;
+						case VKTS_SOURCE_0_ALPHA:
+							c = sourceImage0->getTexel(x, y, z, 0, 0).a;
+							break;
+						case VKTS_SOURCE_1_RED:
+							c = sourceImage1->getTexel(x, y, z, 0, 0).r;
+							break;
+						case VKTS_SOURCE_1_GREEN:
+							c = sourceImage1->getTexel(x, y, z, 0, 0).g;
+							break;
+						case VKTS_SOURCE_1_BLUE:
+							c = sourceImage1->getTexel(x, y, z, 0, 0).b;
+							break;
+						case VKTS_SOURCE_1_ALPHA:
+							c = sourceImage1->getTexel(x, y, z, 0, 0).a;
+							break;
+						case VKTS_SOURCE_ZERO:
+							c = 0.0f;
+							break;
+						case VKTS_SOURCE_ONE:
+							c = 1.0f;
+							break;
+            		}
+
+            		color[i] = c;
+            	}
+
+            	currentImageData->setTexel(color, x, y, z, 0, 0);
+            }
+        }
+    }
+
+	return currentImageData;
+}
+
 IImageDataSP VKTS_APIENTRY imageDataConvert(const IImageDataSP& sourceImage, const VkFormat targetFormat, const std::string& name, const enum VkTsImageDataType targetImageDataType, const enum VkTsImageDataType sourceImageDataType, const glm::vec4& factor, const std::array<VkBool32, 3>& mirror)
 {
     if (!sourceImage.get() || sourceImage->getMipLevels() != 1 || sourceImage->getArrayLayers() != 1)

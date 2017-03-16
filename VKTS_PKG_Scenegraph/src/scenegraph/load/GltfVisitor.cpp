@@ -1642,9 +1642,9 @@ void GltfVisitor::visitMesh_Primitive_Attributes(JSONobject& jsonObject)
 		gltfPrimitive.normal = &(allGltfAccessors[gltfInteger]);
 	}
 
-	if (jsonObject.hasKey("BINORMAL"))
+	if (jsonObject.hasKey("BITANGENT"))
 	{
-		auto binormal = jsonObject.getValue("BINORMAL");
+		auto binormal = jsonObject.getValue("BITANGENT");
 
 		binormal->visit(*this);
 
