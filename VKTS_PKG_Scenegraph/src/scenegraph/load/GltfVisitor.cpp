@@ -461,6 +461,37 @@ void GltfVisitor::visitImage(JSONobject& jsonObject)
 
 	//
 
+	if (jsonObject.hasKey("internalFormat"))
+	{
+		auto internalFormat = jsonObject.getValue("internalFormat");
+
+		internalFormat->visit(*this);
+
+		if (state.top() == GltfState_Error)
+		{
+			return;
+		}
+
+		//
+
+		switch (gltfInteger)
+		{
+			case 6406:
+			case 6407:
+			case 6408:
+			case 6409:
+			case 6410:
+				gltfImage.internalFormat = gltfInteger;
+				return;
+			break;
+			default:
+				state.push(GltfState_Error);
+				return;
+		}
+	}
+
+	//
+
 	if (jsonObject.hasKey("name"))
 	{
 		auto name = jsonObject.getValue("name");
@@ -675,35 +706,6 @@ void GltfVisitor::visitTexture(JSONobject& jsonObject)
 			case 6409:
 			case 6410:
 				gltfTexture.format = gltfInteger;
-				return;
-			break;
-			default:
-				state.push(GltfState_Error);
-				return;
-		}
-	}
-
-	if (jsonObject.hasKey("internalFormat"))
-	{
-		auto internalFormat = jsonObject.getValue("internalFormat");
-
-		internalFormat->visit(*this);
-
-		if (state.top() == GltfState_Error)
-		{
-			return;
-		}
-
-		//
-
-		switch (gltfInteger)
-		{
-			case 6406:
-			case 6407:
-			case 6408:
-			case 6409:
-			case 6410:
-				gltfTexture.internalFormat = gltfInteger;
 				return;
 			break;
 			default:
@@ -1682,6 +1684,26 @@ void GltfVisitor::visitMesh_Primitive_Attributes(JSONobject& jsonObject)
 		gltfPrimitive.tangent = &(allGltfAccessors[gltfInteger]);
 	}
 
+	if (jsonObject.hasKey("TANGENT4"))
+	{
+		auto tangent4 = jsonObject.getValue("TANGENT4");
+
+		tangent4->visit(*this);
+
+		if (state.top() == GltfState_Error)
+		{
+			return;
+		}
+
+		if (allGltfAccessors.size() <= (uint32_t)gltfInteger)
+		{
+			state.push(GltfState_Error);
+			return;
+		}
+
+		gltfPrimitive.tangent4 = &(allGltfAccessors[gltfInteger]);
+	}
+
 	if (jsonObject.hasKey("TEXCOORD_0"))
 	{
 		auto texCoord = jsonObject.getValue("TEXCOORD_0");
@@ -2153,6 +2175,7 @@ void GltfVisitor::visit(JSONarray& jsonArray)
 			for (int32_t i = 0; i < (int32_t)jsonArray.size(); i++)
 			{
 				gltfImage.imageData.reset();
+				gltfImage.internalFormat = 6408;
 				gltfImage.name = "Image_" + std::to_string(i);
 
 				//
@@ -2200,7 +2223,6 @@ void GltfVisitor::visit(JSONarray& jsonArray)
 			for (int32_t i = 0; i < (int32_t)jsonArray.size(); i++)
 			{
 				gltfTexture.format = 6408;
-				gltfTexture.internalFormat = 6408;
 				gltfTexture.sampler = nullptr;
 				gltfTexture.source = nullptr;
 				gltfTexture.target = 3553;
@@ -2418,6 +2440,7 @@ void GltfVisitor::visit(JSONarray& jsonArray)
 				gltfPrimitive.normal = nullptr;
 				gltfPrimitive.binormal = nullptr;
 				gltfPrimitive.tangent = nullptr;
+				gltfPrimitive.tangent4 = nullptr;
 				gltfPrimitive.texCoord = nullptr;
 				gltfPrimitive.joint = nullptr;
 				gltfPrimitive.weight = nullptr;

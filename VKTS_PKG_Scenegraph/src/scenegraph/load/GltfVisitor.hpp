@@ -108,6 +108,7 @@ typedef struct _GltfAccessor {
 
 typedef struct _GltfImage {
 	IImageDataSP imageData;
+	int32_t internalFormat;
 	std::string name;
 } GltfImage;
 
@@ -121,7 +122,6 @@ typedef struct _GltfSampler {
 
 typedef struct _GltfTexture {
 	int32_t format;
-	int32_t internalFormat;
 	GltfSampler* sampler;
 	GltfImage* source;
 	int32_t target;
@@ -157,6 +157,7 @@ typedef struct _GltfPrimitive {
 	GltfAccessor* normal;
 	GltfAccessor* binormal;
 	GltfAccessor* tangent;
+	GltfAccessor* tangent4;
 	GltfAccessor* texCoord;
 	GltfAccessor* joint;
 	GltfAccessor* weight;

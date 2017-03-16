@@ -217,7 +217,7 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 
 	VkBool32 createTangents = VK_FALSE;
 
-    if (gltfPrimitive.normal && gltfPrimitive.texCoord && !(gltfPrimitive.binormal && gltfPrimitive.tangent))
+    if ((gltfPrimitive.normal && gltfPrimitive.texCoord && !(gltfPrimitive.binormal && gltfPrimitive.tangent)) || (gltfPrimitive.normal && gltfPrimitive.tangent4))
     {
     	createTangents = VK_TRUE;
     }
@@ -529,125 +529,155 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
                 return VK_FALSE;
             }
 
-            // Store all tangents and indices. Bitangents are calculated out of normals and tangents.
-            std::vector<glm::vec3> tangents(subMesh->getNumberIndices());
-            std::vector<int32_t> indicesToVertex(subMesh->getNumberIndices());
-
-            for (uint32_t i = 0; i < (uint32_t)subMesh->getNumberIndices() / 3; i++)
+            // Spherical Skinning with Dual-Quaternions and QTangents
+            // see http://www.crytek.com/cryengine/presentations/spherical-skinning-with-dual-quaternions-and-qtangents
+            if (gltfPrimitive.tangent4)
             {
-            	int32_t index[3];
-
-            	const float* currentFloatData = nullptr;
-
-            	//
-
-            	glm::vec4 v[3];
-            	glm::vec2 uv[3];
-
-            	for (uint32_t k = 0; k < 3; k++)
-            	{
-            		index[k] = ((const int32_t*)indicesBinaryBuffer->getData())[i * 3 + k];
-
-            		indicesToVertex[i * 3 + k] = index[k];
-
-            		//
-
-                	currentFloatData = visitor.getFloatPointer(*gltfPrimitive.position, index[k]);
-
-                	if (!currentFloatData)
-                	{
-                		return VK_FALSE;
-                	}
-
-                	v[k] = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-
-                	for (uint32_t m = 0; m < visitor.getComponentsPerType(gltfPrimitive.position->type); m++)
-                	{
-                		v[k][m] = currentFloatData[m];
-                	}
-
-                	//
-
-                	currentFloatData = visitor.getFloatPointer(*gltfPrimitive.texCoord, index[k]);
-
-                	if (!currentFloatData)
-                	{
-                		return VK_FALSE;
-                	}
-
-                	uv[k] = glm::vec2(0.0f, 0.0f);
-
-                	uv[k].s = currentFloatData[0];
-                	uv[k].t = currentFloatData[1];
-            	}
-
-            	//
-
-            	glm::vec3 deltaPos[2];
-
-            	deltaPos[0] = glm::vec3(v[1]) - glm::vec3(v[0]);
-            	deltaPos[1] = glm::vec3(v[2]) - glm::vec3(v[0]);
-
-            	glm::vec2 deltaUV[2];
-
-            	deltaUV[0] = uv[1] - uv[0];
-            	deltaUV[1] = uv[2] - uv[0];
-
-            	//
-
-            	float divisor = (deltaUV[0].x * deltaUV[1].y - deltaUV[0].y * deltaUV[1].x);
-
-            	if (divisor == 0.0f)
-            	{
-            		continue;
-            	}
-
-                float r = 1.0f / divisor;
-
-                glm::vec3 tangent = glm::normalize((deltaPos[0] * deltaUV[1].y - deltaPos[1] * deltaUV[0].y) * r);
-
-                //
-
-                for (uint32_t k = 0; k < 3; k++)
-                {
-					tangents[i * 3 + k] = tangent;
-                }
-            }
-
-            // Accumulate all calculated tangents per vertex ...
-            std::vector<glm::vec3> tangentsPerVertex(subMesh->getNumberVertices());
-
-            for (uint32_t i = 0; i < (uint32_t)subMesh->getNumberIndices(); i++)
-            {
-            	tangentsPerVertex[indicesToVertex[i]] += tangents[i];
-            }
-
-            //
-
-            // ... and write the normalized result. Also, calculate and write bitangent.
-            for (uint32_t i = 0; i < (uint32_t)subMesh->getNumberVertices(); i++)
-            {
-				auto* normal = visitor.getFloatPointer(*gltfPrimitive.normal, i);
-
-				if (!normal)
+				for (uint32_t i = 0; i < (uint32_t)subMesh->getNumberVertices(); i++)
 				{
-					return VK_FALSE;
+					auto* tangent4 = visitor.getFloatPointer(*gltfPrimitive.tangent4, i);
+
+					if (!tangent4)
+					{
+						return VK_FALSE;
+					}
+
+					glm::vec3 temp(tangent4[0], tangent4[1], tangent4[2]);
+
+					float w = sqrtf(1.0f - glm::dot(temp, temp));
+
+					Quat q(tangent4[0], tangent4[1], tangent4[2], w);
+
+					glm::vec3 tangent = glm::normalize(q * glm::vec3(1.0f, 0.0f, 0.0f));
+					glm::vec3 bitangent = glm::normalize(q * glm::vec3(0.0f, 1.0f, 0.0f));
+
+					tempBinaryBuffer->seek(i * 3 * 2 * sizeof(float), VKTS_SEARCH_ABSOLUTE);
+					tempBinaryBuffer->write(glm::value_ptr(bitangent), 1, 3 * sizeof(float));
+					tempBinaryBuffer->write(glm::value_ptr(tangent), 1, 3 * sizeof(float));
+				}
+            }
+            else
+            {
+				// Store all tangents and indices. Bitangents are calculated out of normals and tangents.
+				std::vector<glm::vec3> tangents(subMesh->getNumberIndices());
+				std::vector<int32_t> indicesToVertex(subMesh->getNumberIndices());
+
+				for (uint32_t i = 0; i < (uint32_t)subMesh->getNumberIndices() / 3; i++)
+				{
+					int32_t index[3];
+
+					const float* currentFloatData = nullptr;
+
+					//
+
+					glm::vec4 v[3];
+					glm::vec2 uv[3];
+
+					for (uint32_t k = 0; k < 3; k++)
+					{
+						index[k] = ((const int32_t*)indicesBinaryBuffer->getData())[i * 3 + k];
+
+						indicesToVertex[i * 3 + k] = index[k];
+
+						//
+
+						currentFloatData = visitor.getFloatPointer(*gltfPrimitive.position, index[k]);
+
+						if (!currentFloatData)
+						{
+							return VK_FALSE;
+						}
+
+						v[k] = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+
+						for (uint32_t m = 0; m < visitor.getComponentsPerType(gltfPrimitive.position->type); m++)
+						{
+							v[k][m] = currentFloatData[m];
+						}
+
+						//
+
+						currentFloatData = visitor.getFloatPointer(*gltfPrimitive.texCoord, index[k]);
+
+						if (!currentFloatData)
+						{
+							return VK_FALSE;
+						}
+
+						uv[k] = glm::vec2(0.0f, 0.0f);
+
+						uv[k].s = currentFloatData[0];
+						uv[k].t = currentFloatData[1];
+					}
+
+					//
+
+					glm::vec3 deltaPos[2];
+
+					deltaPos[0] = glm::vec3(v[1]) - glm::vec3(v[0]);
+					deltaPos[1] = glm::vec3(v[2]) - glm::vec3(v[0]);
+
+					glm::vec2 deltaUV[2];
+
+					deltaUV[0] = uv[1] - uv[0];
+					deltaUV[1] = uv[2] - uv[0];
+
+					//
+
+					float divisor = (deltaUV[0].x * deltaUV[1].y - deltaUV[0].y * deltaUV[1].x);
+
+					if (divisor == 0.0f)
+					{
+						continue;
+					}
+
+					float r = 1.0f / divisor;
+
+					glm::vec3 tangent = glm::normalize((deltaPos[0] * deltaUV[1].y - deltaPos[1] * deltaUV[0].y) * r);
+
+					//
+
+					for (uint32_t k = 0; k < 3; k++)
+					{
+						tangents[i * 3 + k] = tangent;
+					}
 				}
 
-				glm::vec3 tangent = glm::vec3(normal[2], normal[0], normal[1]);
+				// Accumulate all calculated tangents per vertex ...
+				std::vector<glm::vec3> tangentsPerVertex(subMesh->getNumberVertices());
 
-				if (tangentsPerVertex[i].x != 0.0f || tangentsPerVertex[i].y != 0.0f || tangentsPerVertex[i].z != 0.0f)
+				for (uint32_t i = 0; i < (uint32_t)subMesh->getNumberIndices(); i++)
 				{
-					tangent = tangentsPerVertex[i];
+					tangentsPerVertex[indicesToVertex[i]] += tangents[i];
 				}
 
-				tangent = glm::normalize(tangent);
+				//
 
-				auto bitangent = glm::cross(glm::normalize(glm::vec3(normal[0], normal[1], normal[2])), tangent);
+				// ... and write the normalized result. Also, calculate and write bitangent.
+				for (uint32_t i = 0; i < (uint32_t)subMesh->getNumberVertices(); i++)
+				{
+					auto* normal = visitor.getFloatPointer(*gltfPrimitive.normal, i);
 
-				tempBinaryBuffer->seek(i * 3 * 2 * sizeof(float), VKTS_SEARCH_ABSOLUTE);
-				tempBinaryBuffer->write(glm::value_ptr(bitangent), 1, 3 * sizeof(float));
-				tempBinaryBuffer->write(glm::value_ptr(tangent), 1, 3 * sizeof(float));
+					if (!normal)
+					{
+						return VK_FALSE;
+					}
+
+					glm::vec3 tangent = glm::vec3(normal[2], normal[0], normal[1]);
+
+					if (tangentsPerVertex[i].x != 0.0f || tangentsPerVertex[i].y != 0.0f || tangentsPerVertex[i].z != 0.0f)
+					{
+						tangent = tangentsPerVertex[i];
+					}
+
+					tangent = glm::normalize(tangent);
+
+					auto bitangent = glm::cross(glm::normalize(glm::vec3(normal[0], normal[1], normal[2])), tangent);
+
+					tempBinaryBuffer->seek(i * 3 * 2 * sizeof(float), VKTS_SEARCH_ABSOLUTE);
+					tempBinaryBuffer->write(glm::value_ptr(bitangent), 1, 3 * sizeof(float));
+					tempBinaryBuffer->write(glm::value_ptr(tangent), 1, 3 * sizeof(float));
+				}
             }
 
             tempBinaryBuffer->seek(0, VKTS_SEARCH_ABSOLUTE);
