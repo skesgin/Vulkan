@@ -110,19 +110,6 @@ private:
 
     	//
 
-    	uint32_t byteLength = binaryBuffer->getSize();
-
-    	auto byteLengthValue = JSONintegerSP(new JSONinteger((int32_t)byteLength));
-
-    	if (!byteLengthValue.get())
-    	{
-    		return;
-    	}
-
-    	currentBufferView->addKeyValue("byteLength", byteLengthValue);
-
-    	//
-
     	auto targetValue = JSONintegerSP(new JSONinteger(34963));
 
     	if (!targetValue.get())
@@ -159,6 +146,21 @@ private:
     	{
     		return;
     	}
+
+    	//
+
+    	uint32_t byteLength = count * elementCount * byteSize;
+
+    	auto byteLengthValue = JSONintegerSP(new JSONinteger((int32_t)byteLength));
+
+    	if (!byteLengthValue.get())
+    	{
+    		return;
+    	}
+
+    	currentBufferView->addKeyValue("byteLength", byteLengthValue);
+
+    	//
 
     	for (uint32_t i = 0; i < count; i++)
     	{
