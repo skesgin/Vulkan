@@ -69,7 +69,7 @@ private:
 
 	JSONarraySP buffers;
 
-	void writeBinaryBuffer(const IBinaryBufferSP& binaryBuffer, const uint32_t count, const uint8_t elementCount, const std::string& currentType, const int32_t currentComponentType, const uint32_t offset = 0, const uint32_t stride = 0)
+	void writeBinaryBuffer(const IBinaryBufferSP& binaryBuffer, const uint32_t count, const uint8_t elementCount, const std::string& currentType, const int32_t currentComponentType, const int32_t target, const uint32_t offset, const uint32_t stride)
 	{
 		//
 		// Create buffer view.
@@ -110,7 +110,7 @@ private:
 
     	//
 
-    	auto targetValue = JSONintegerSP(new JSONinteger(34963));
+    	auto targetValue = JSONintegerSP(new JSONinteger(target));
 
     	if (!targetValue.get())
     	{
@@ -1071,7 +1071,7 @@ public:
 				componentType = 5125;
 			}
 
-			writeBinaryBuffer(subMesh.getIndicesBinaryBuffer(), subMesh.getNumberIndices(), 1, "SCALAR", componentType, 0, sizeof(int32_t));
+			writeBinaryBuffer(subMesh.getIndicesBinaryBuffer(), subMesh.getNumberIndices(), 1, "SCALAR", componentType, 34963, 0, sizeof(int32_t));
 			storedAccessors.append(accessorName);
 		}
 
@@ -1107,7 +1107,7 @@ public:
 
     		if (positionIndex == storedAccessors.size())
     		{
-    			writeBinaryBuffer(subMesh.getVertexBinaryBuffer(), subMesh.getNumberVertices(), 4, "VEC4", 5126, (uint32_t)subMesh.getVertexOffset(), (uint32_t)subMesh.getStrideInBytes());
+    			writeBinaryBuffer(subMesh.getVertexBinaryBuffer(), subMesh.getNumberVertices(), 4, "VEC4", 5126, 34962, (uint32_t)subMesh.getVertexOffset(), (uint32_t)subMesh.getStrideInBytes());
     			storedAccessors.append(accessorName);
     		}
 
@@ -1129,7 +1129,7 @@ public:
 
     		if (normalIndex == storedAccessors.size())
     		{
-    			writeBinaryBuffer(subMesh.getVertexBinaryBuffer(), subMesh.getNumberVertices(), 3, "VEC3", 5126, (uint32_t)subMesh.getNormalOffset(), (uint32_t)subMesh.getStrideInBytes());
+    			writeBinaryBuffer(subMesh.getVertexBinaryBuffer(), subMesh.getNumberVertices(), 3, "VEC3", 5126, 34962, (uint32_t)subMesh.getNormalOffset(), (uint32_t)subMesh.getStrideInBytes());
     			storedAccessors.append(accessorName);
     		}
 
@@ -1151,7 +1151,7 @@ public:
 
     		if (bitangentIndex == storedAccessors.size())
     		{
-    			writeBinaryBuffer(subMesh.getVertexBinaryBuffer(), subMesh.getNumberVertices(), 3, "VEC3", 5126, (uint32_t)subMesh.getBitangentOffset(), (uint32_t)subMesh.getStrideInBytes());
+    			writeBinaryBuffer(subMesh.getVertexBinaryBuffer(), subMesh.getNumberVertices(), 3, "VEC3", 5126, 34962, (uint32_t)subMesh.getBitangentOffset(), (uint32_t)subMesh.getStrideInBytes());
     			storedAccessors.append(accessorName);
     		}
 
@@ -1173,7 +1173,7 @@ public:
 
     		if (tangentIndex == storedAccessors.size())
     		{
-    			writeBinaryBuffer(subMesh.getVertexBinaryBuffer(), subMesh.getNumberVertices(), 3, "VEC3", 5126, (uint32_t)subMesh.getTangentOffset(), (uint32_t)subMesh.getStrideInBytes());
+    			writeBinaryBuffer(subMesh.getVertexBinaryBuffer(), subMesh.getNumberVertices(), 3, "VEC3", 5126, 34962, (uint32_t)subMesh.getTangentOffset(), (uint32_t)subMesh.getStrideInBytes());
     			storedAccessors.append(accessorName);
     		}
 
@@ -1195,7 +1195,7 @@ public:
 
     		if (texCoordIndex == storedAccessors.size())
     		{
-    			writeBinaryBuffer(subMesh.getVertexBinaryBuffer(), subMesh.getNumberVertices(), 2, "VEC2", 5126, (uint32_t)subMesh.getTexcoordOffset(), (uint32_t)subMesh.getStrideInBytes());
+    			writeBinaryBuffer(subMesh.getVertexBinaryBuffer(), subMesh.getNumberVertices(), 2, "VEC2", 5126, 34962, (uint32_t)subMesh.getTexcoordOffset(), (uint32_t)subMesh.getStrideInBytes());
     			storedAccessors.append(accessorName);
     		}
 
