@@ -1107,7 +1107,7 @@ public:
 
     		if (positionIndex == storedAccessors.size())
     		{
-    			writeBinaryBuffer(subMesh.getVertexBinaryBuffer(), subMesh.getNumberVertices(), 4, "VEC4", 5126, 34962, (uint32_t)subMesh.getVertexOffset(), (uint32_t)subMesh.getStrideInBytes());
+    			writeBinaryBuffer(subMesh.getVertexBinaryBuffer(), subMesh.getNumberVertices(), 3, "VEC3", 5126, 34962, (uint32_t)subMesh.getVertexOffset(), (uint32_t)subMesh.getStrideInBytes());
     			storedAccessors.append(accessorName);
     		}
 
