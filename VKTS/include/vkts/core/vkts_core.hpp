@@ -199,6 +199,12 @@ typedef struct VkTsDynamicOffset_
 #include <vkts/core/file/fn_file.hpp>
 
 /**
+ * BASE64.
+ */
+
+#include <vkts/core/base64/fn_base64.hpp>
+
+/**
  * JSON.
  */
 
