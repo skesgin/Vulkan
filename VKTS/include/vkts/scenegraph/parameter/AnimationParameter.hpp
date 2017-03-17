@@ -24,38 +24,67 @@
  * THE SOFTWARE.
  */
 
-#ifndef VKTS_TIMEPARAMETER_HPP_
-#define VKTS_TIMEPARAMETER_HPP_
+#ifndef VKTS_ANIMATIONPARAMETER_HPP_
+#define VKTS_ANIMATIONPARAMETER_HPP_
 
 #include <vkts/scenegraph/vkts_scenegraph.hpp>
 
 namespace vkts
 {
 
-class TimeParameter : public Parameter
+class AnimationParameter : public Parameter
 {
 
 private:
 
+	enum AnimationType animationType;
+	VkBool32 writeAnimationType;
+
 	float currentTime;
+	VkBool32 writeCurrentTime;
 
 public:
 
-	TimeParameter() :
-		Parameter(), currentTime(0.0f)
+	AnimationParameter() :
+		Parameter(), animationType(AnimationStop), writeAnimationType(VK_TRUE), currentTime(0.0f), writeCurrentTime(VK_TRUE)
     {
     }
 
-	TimeParameter(const float currentTime) :
-		Parameter(), currentTime(currentTime)
+	AnimationParameter(const float currentTime) :
+		Parameter(), animationType(AnimationStop), writeAnimationType(VK_TRUE), currentTime(currentTime), writeCurrentTime(VK_TRUE)
     {
     }
 
-    virtual ~TimeParameter()
+	AnimationParameter(const enum AnimationType animationType, const float currentTime) :
+		Parameter(), animationType(animationType), writeAnimationType(VK_TRUE), currentTime(currentTime), writeCurrentTime(VK_TRUE)
+    {
+    }
+
+    virtual ~AnimationParameter()
     {
     }
 
     //
+
+	float getAnimationType() const
+	{
+		return animationType;
+	}
+
+	void setAnimationType(const enum AnimationType animationType)
+	{
+		this->animationType = animationType;
+	}
+
+	VkBool32 getWriteAnimationType() const
+	{
+		return writeAnimationType;
+	}
+
+	void setWriteAnimationType(const VkBool32 writeAnimationType)
+	{
+		this->writeAnimationType = writeAnimationType;
+	}
 
 	float getCurrentTime() const
 	{
@@ -67,17 +96,35 @@ public:
 		this->currentTime = currentTime;
 	}
 
+	VkBool32 getWriteCurrentTime() const
+	{
+		return writeCurrentTime;
+	}
+
+	void setWriteCurrentTime(const VkBool32 writeCurrentTime)
+	{
+		this->writeCurrentTime = writeCurrentTime;
+	}
+
     //
 
     virtual void visit(INode& node)
     {
     	for (uint32_t i = 0; i < node.getAnimations().size(); i++)
     	{
-    		node.getAnimations()[i]->setCurrentTime(currentTime);
+    		if (writeAnimationType)
+    		{
+    			node.getAnimations()[i]->setAnimationType(animationType);
+    		}
+
+    		if (writeCurrentTime)
+    		{
+    			node.getAnimations()[i]->setCurrentTime(currentTime);
+    		}
     	}
     }
 };
 
 } /* namespace vkts */
 
-#endif /* VKTS_TIMEPARAMETER_HPP_ */
+#endif /* VKTS_ANIMATIONPARAMETER_HPP_ */

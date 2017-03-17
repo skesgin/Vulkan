@@ -166,7 +166,7 @@ typedef enum VkTsInterpolator_
  */
 
 #include <vkts/scenegraph/parameter/GltfParameter.hpp>
-#include <vkts/scenegraph/parameter/TimeParameter.hpp>
+#include <vkts/scenegraph/parameter/AnimationParameter.hpp>
 
 /**
  * Interpolator.
