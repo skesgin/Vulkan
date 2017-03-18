@@ -29,16 +29,31 @@
 
 #include <vkts/vkts.hpp>
 
+//
+// Metal roughness
+//
+
 // Microsoft
-//#define GLTF_SCENE_NAME "glTF/BoomBox/BoomBox.gltf"
-//#define GLTF_SCENE_NAME "glTF/Corset/Corset.gltf"
-//#define GLTF_SCENE_NAME "glTF/Lantern/Lantern.gltf"
+//#define GLTF_SCENE_NAME "glTF/mr/BoomBox/BoomBox.gltf"
+//#define GLTF_SCENE_NAME "glTF/mr/Corset/Corset.gltf"
+//#define GLTF_SCENE_NAME "glTF/mr/Lantern/Lantern.gltf"
 
 // Sketchfab
-//#define GLTF_SCENE_NAME "glTF/damagedHelmet/damagedHelmet.gltf"
-//#define GLTF_SCENE_NAME "glTF/microphone/microphone.gltf"
-#define GLTF_SCENE_NAME "glTF/steampunkExplorer/steampunkExplorer.gltf"
-//#define GLTF_SCENE_NAME "glTF/centurion/centurion.gltf"
+//#define GLTF_SCENE_NAME "glTF/mr/damagedHelmet/damagedHelmet.gltf"
+//#define GLTF_SCENE_NAME "glTF/mr/microphone/microphone.gltf"
+#define GLTF_SCENE_NAME "glTF/mr/steampunkExplorer/steampunkExplorer.gltf"
+//#define GLTF_SCENE_NAME "glTF/mr/centurion/centurion.gltf"
+
+//
+// Specular glossiness
+//
+
+// Microsoft
+//#define GLTF_SCENE_NAME "glTF/sg/BoomBox/BoomBox.gltf"
+//#define GLTF_SCENE_NAME "glTF/sg/Corset/Corset.gltf"
+//#define GLTF_SCENE_NAME "glTF/sg/Lantern/Lantern.gltf"
+
+//
 
 //#define VKTS_ENVIRONMENT_SCENE_NAME "environment/studio.vkts"
 //#define VKTS_ENVIRONMENT_SCENE_NAME "environment/terrace_near_the_granaries.vkts"

@@ -51,7 +51,7 @@ copy("../../VKTS_Binaries/shader/SPIR/V/bsdf_no_texcoord.vert.spv", "./assets/sh
 copy("../../VKTS_Binaries/shader/SPIR/V/bsdf_tangents.vert.spv", "./assets/shader/SPIR/V/")
 copy("../../VKTS_Binaries/shader/SPIR/V/bsdf_skinning.vert.spv", "./assets/shader/SPIR/V/")
 
-copy("../../VKTS_Binaries/shader/SPIR/V/glTF_forward.vert.spv", "./assets/shader/SPIR/V/")
+copy("../../VKTS_Binaries/shader/SPIR/V/glTF_mr_forward.vert.spv", "./assets/shader/SPIR/V/")
 
 copy("../../VKTS_Binaries/shader/SPIR/V/environment.vert.spv", "./assets/shader/SPIR/V/")
 copy("../../VKTS_Binaries/shader/SPIR/V/environment.frag.spv", "./assets/shader/SPIR/V/")

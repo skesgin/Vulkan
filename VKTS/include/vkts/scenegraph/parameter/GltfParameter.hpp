@@ -1015,6 +1015,12 @@ public:
 			return;
     	}
 
+    	if (subMesh.getBSDFMaterial()->isSpecularGlossiness())
+    	{
+			logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Specular Glossiness material can not yet be exported");
+			return;
+    	}
+
     	//
 
     	if (!materialNameToMaterial.contains(subMesh.getBSDFMaterial()->getName()))

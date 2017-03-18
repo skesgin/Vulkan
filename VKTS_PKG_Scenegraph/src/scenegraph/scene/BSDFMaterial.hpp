@@ -53,6 +53,8 @@ protected:
 
     float alphaCutoff;
 
+    VkBool32 specularGlossiness;
+
 public:
 
     BSDFMaterial() = delete;
@@ -117,6 +119,11 @@ public:
     virtual float getAlphaCutoff() const override;
 
     virtual void setAlphaCutoff(const float alphaCutoff) override;
+
+
+    virtual VkBool32 isSpecularGlossiness() const override;
+
+    virtual void setSpecularGlossiness(const VkBool32 specularGlossiness) override;
 
     //
 

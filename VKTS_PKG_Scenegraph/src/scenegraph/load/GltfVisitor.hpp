@@ -38,6 +38,8 @@ enum GltfState {
 
 	GltfState_Error,
 
+	GltfState_ExtensionsRequired,
+	GltfState_ExtensionsUsed,
 	GltfState_Asset,
 	GltfState_Buffers,
 	GltfState_BufferViews,
@@ -66,6 +68,8 @@ enum GltfState {
 	GltfState_Scene,
 
 	GltfState_Material_PbrMetallicRoughness,
+	GltfState_Material_Extensions,
+	GltfState_Material_Extensions_PbrSpecularGlossiness,
 	GltfState_Material_TextureInfo,
 	GltfState_Mesh_Primitive,
 	GltfState_Mesh_Primitive_Attributes,
@@ -78,6 +82,11 @@ enum GltfState {
 	GltfState_Animation_Channel_Target,
 	GltfState_Scene_Node
 };
+
+typedef struct _GltfExtensions {
+	VkBool32 required_pbrSpecularGlossiness;
+	VkBool32 used_pbrSpecularGlossiness;
+} GltfExtensions;
 
 typedef struct _GltfBuffer {
 	IBinaryBufferSP binaryBuffer;
@@ -129,6 +138,11 @@ typedef struct _GltfTexture {
 	std::string name;
 } GltfTexture;
 
+typedef struct _GltfTextureInfo {
+	int32_t index;
+	int32_t texCoord;
+} GltfTextureInfo;
+
 typedef struct _GltfPbrMetallicRoughness {
 	float baseColorFactor[4];
 	GltfTexture* baseColorTexture;
@@ -137,12 +151,22 @@ typedef struct _GltfPbrMetallicRoughness {
 	GltfTexture* metallicRoughnessTexture;
 } GltfPbrMetallicRoughness;
 
+typedef struct _GltfPbrSpecularGlossiness {
+	float diffuseFactor[4];
+	GltfTexture* diffuseTexture;
+	float specularFactor[3];
+	float glossinessFactor;
+	GltfTexture* specularGlossinessTexture;
+} GltfPbrSpecularGlossiness;
+
 typedef struct _GltfMaterial {
 	std::string alphaMode;
 	float alphaCutoff;
 	VkBool32 doubleSided;
 
+	VkBool32 useSpecularGlossiness;
 	GltfPbrMetallicRoughness pbrMetallicRoughness;
+	GltfPbrSpecularGlossiness pbrSpecularGlossiness;
 
 	GltfTexture* normalTexture;
 	GltfTexture* occlusionTexture;
@@ -241,6 +265,8 @@ private:
 
 	VkBool32 objectArray;
 
+	GltfExtensions gltfExtensions;
+
 	GltfBuffer gltfBuffer;
 	GltfBufferView gltfBufferView;
 	GltfAccessor gltfAccessor;
@@ -248,6 +274,7 @@ private:
 	GltfImage gltfImage;
 	GltfSampler gltfSampler;
 	GltfTexture gltfTexture;
+	GltfTextureInfo gltfTextureInfo;
 	GltfMaterial gltfMaterial;
 	GltfMesh gltfMesh;
 	GltfSkin gltfSkin;
@@ -285,6 +312,8 @@ private:
 	void visitScene(JSONobject& jsonObject);
 
 	void visitMaterial_PbrMetallicRoughness(JSONobject& jsonObject);
+	void visitMaterial_Extensions(JSONobject& jsonObject);
+	void visitMaterial_Extensions_PbrSpecularGlossiness(JSONobject& jsonObject);
 	void visitMaterial_TextureInfo(JSONobject& jsonObject);
 	void visitMesh_Primitive(JSONobject& jsonObject);
 	void visitMesh_Primitive_Attributes(JSONobject& jsonObject);

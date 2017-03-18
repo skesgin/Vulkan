@@ -30,7 +30,7 @@ namespace vkts
 {
 
 GltfVisitor::GltfVisitor(const std::string& directory) :
-	JsonVisitor(), directory(directory), state(), gltfBool(VK_FALSE), gltfString(), gltfInteger(0), gltfFloat(0.0f), gltfIntegerArray{}, gltfFloatArray{}, arrayIndex(0), arraySize(0), numberArray(VK_FALSE), objectArray(VK_FALSE), gltfBuffer{}, gltfBufferView{}, gltfAccessor{}, gltfPrimitive{}, gltfImage{}, gltfSampler{}, gltfTexture{}, gltfMaterial{}, gltfMesh{}, gltfSkin{}, gltfNode{}, gltfAnimation_Sampler{}, gltfChannel{}, gltfAnimation{}, gltfScene{}, allGltfBuffers(), allGltfBufferViews(), allGltfAccessors(), allGltfImages(), allGltfSamplers(), allGltfTextures(), allGltfMaterials(), allGltfMeshes(), allGltfSkins(), allGltfNodes(), allGltfAnimations(), allGltfScenes(), defaultScene(nullptr)
+	JsonVisitor(), directory(directory), state(), gltfBool(VK_FALSE), gltfString(), gltfInteger(0), gltfFloat(0.0f), gltfIntegerArray{}, gltfFloatArray{}, arrayIndex(0), arraySize(0), numberArray(VK_FALSE), objectArray(VK_FALSE), gltfExtensions{}, gltfBuffer{}, gltfBufferView{}, gltfAccessor{}, gltfPrimitive{}, gltfImage{}, gltfSampler{}, gltfTexture{}, gltfTextureInfo{}, gltfMaterial{}, gltfMesh{}, gltfSkin{}, gltfNode{}, gltfAnimation_Sampler{}, gltfChannel{}, gltfAnimation{}, gltfScene{}, allGltfBuffers(), allGltfBufferViews(), allGltfAccessors(), allGltfImages(), allGltfSamplers(), allGltfTextures(), allGltfMaterials(), allGltfMeshes(), allGltfSkins(), allGltfNodes(), allGltfAnimations(), allGltfScenes(), defaultScene(nullptr)
 {
 }
 
@@ -787,7 +787,7 @@ void GltfVisitor::visitTexture(JSONobject& jsonObject)
 
 void GltfVisitor::visitMaterial(JSONobject& jsonObject)
 {
-	// Not processing extension and extras.
+	// Not processing extras.
 
 	if (jsonObject.hasKey("alphaMode"))
 	{
@@ -852,6 +852,19 @@ void GltfVisitor::visitMaterial(JSONobject& jsonObject)
 		}
 	}
 
+	if (jsonObject.hasKey("extensions"))
+	{
+		auto extensions = jsonObject.getValue("extensions");
+
+		state.push(GltfState_Material_Extensions);
+		extensions->visit(*this);
+
+		if (state.top() == GltfState_Error)
+		{
+			return;
+		}
+	}
+
 	//
 
 	if (jsonObject.hasKey("normalTexture"))
@@ -866,13 +879,13 @@ void GltfVisitor::visitMaterial(JSONobject& jsonObject)
 			return;
 		}
 
-		if (allGltfTextures.size() <= (uint32_t)gltfInteger)
+		if (allGltfTextures.size() <= (uint32_t)gltfTextureInfo.index)
 		{
 			state.push(GltfState_Error);
 			return;
 		}
 
-		gltfMaterial.normalTexture = &(allGltfTextures[gltfInteger]);
+		gltfMaterial.normalTexture = &(allGltfTextures[gltfTextureInfo.index]);
 	}
 
 	if (jsonObject.hasKey("occlusionTexture"))
@@ -887,13 +900,13 @@ void GltfVisitor::visitMaterial(JSONobject& jsonObject)
 			return;
 		}
 
-		if (allGltfTextures.size() <= (uint32_t)gltfInteger)
+		if (allGltfTextures.size() <= (uint32_t)gltfTextureInfo.index)
 		{
 			state.push(GltfState_Error);
 			return;
 		}
 
-		gltfMaterial.occlusionTexture = &(allGltfTextures[gltfInteger]);
+		gltfMaterial.occlusionTexture = &(allGltfTextures[gltfTextureInfo.index]);
 	}
 
 	if (jsonObject.hasKey("emissiveFactor"))
@@ -935,13 +948,13 @@ void GltfVisitor::visitMaterial(JSONobject& jsonObject)
 			return;
 		}
 
-		if (allGltfTextures.size() <= (uint32_t)gltfInteger)
+		if (allGltfTextures.size() <= (uint32_t)gltfTextureInfo.index)
 		{
 			state.push(GltfState_Error);
 			return;
 		}
 
-		gltfMaterial.emissiveTexture = &(allGltfTextures[gltfInteger]);
+		gltfMaterial.emissiveTexture = &(allGltfTextures[gltfTextureInfo.index]);
 	}
 
 	if (jsonObject.hasKey("name"))
@@ -1427,13 +1440,13 @@ void GltfVisitor::visitMaterial_PbrMetallicRoughness(JSONobject& jsonObject)
 			return;
 		}
 
-		if (allGltfTextures.size() <= (uint32_t)gltfInteger)
+		if (allGltfTextures.size() <= (uint32_t)gltfTextureInfo.index)
 		{
 			state.push(GltfState_Error);
 			return;
 		}
 
-		gltfMaterial.pbrMetallicRoughness.baseColorTexture = &(allGltfTextures[gltfInteger]);
+		gltfMaterial.pbrMetallicRoughness.baseColorTexture = &(allGltfTextures[gltfTextureInfo.index]);
 	}
 
 	if (jsonObject.hasKey("metallicFactor"))
@@ -1476,25 +1489,186 @@ void GltfVisitor::visitMaterial_PbrMetallicRoughness(JSONobject& jsonObject)
 			return;
 		}
 
-		if (allGltfTextures.size() <= (uint32_t)gltfInteger)
+		if (allGltfTextures.size() <= (uint32_t)gltfTextureInfo.index)
 		{
 			state.push(GltfState_Error);
 			return;
 		}
 
-		gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture = &(allGltfTextures[gltfInteger]);
+		gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture = &(allGltfTextures[gltfTextureInfo.index]);
+	}
+}
+
+void GltfVisitor::visitMaterial_Extensions(JSONobject& jsonObject)
+{
+	if (jsonObject.hasKey("KHR_materials_pbrSpecularGlossiness"))
+	{
+		auto pbrSpecularGlossiness = jsonObject.getValue("KHR_materials_pbrSpecularGlossiness");
+
+		state.push(GltfState_Material_Extensions_PbrSpecularGlossiness);
+		pbrSpecularGlossiness->visit(*this);
+
+		if (state.top() == GltfState_Error)
+		{
+			return;
+		}
+	}
+}
+
+void GltfVisitor::visitMaterial_Extensions_PbrSpecularGlossiness(JSONobject& jsonObject)
+{
+	if (jsonObject.hasKey("diffuseFactor"))
+	{
+		numberArray = VK_TRUE;
+
+		arrayIndex = 0;
+		arraySize = 4;
+
+		auto diffuseFactor = jsonObject.getValue("diffuseFactor");
+
+		diffuseFactor->visit(*this);
+
+		numberArray = VK_FALSE;
+
+		arrayIndex = 0;
+		arraySize = 0;
+
+		if (state.top() == GltfState_Error)
+		{
+			return;
+		}
+
+		for (uint32_t i = 0; i < 4; i++)
+		{
+			gltfMaterial.pbrSpecularGlossiness.diffuseFactor[i] = gltfFloatArray[i];
+		}
+	}
+
+	if (jsonObject.hasKey("diffuseTexture"))
+	{
+		auto diffuseTexture = jsonObject.getValue("diffuseTexture");
+
+		state.push(GltfState_Material_TextureInfo);
+		diffuseTexture->visit(*this);
+
+		if (state.top() == GltfState_Error)
+		{
+			return;
+		}
+
+		if (allGltfTextures.size() <= (uint32_t)gltfTextureInfo.index)
+		{
+			state.push(GltfState_Error);
+			return;
+		}
+
+		gltfMaterial.pbrSpecularGlossiness.diffuseTexture = &(allGltfTextures[gltfTextureInfo.index]);
+	}
+
+	if (jsonObject.hasKey("specularFactor"))
+	{
+		numberArray = VK_TRUE;
+
+		arrayIndex = 0;
+		arraySize = 3;
+
+		auto specularFactor = jsonObject.getValue("specularFactor");
+
+		specularFactor->visit(*this);
+
+		numberArray = VK_FALSE;
+
+		arrayIndex = 0;
+		arraySize = 0;
+
+		if (state.top() == GltfState_Error)
+		{
+			return;
+		}
+
+		for (uint32_t i = 0; i < 3; i++)
+		{
+			gltfMaterial.pbrSpecularGlossiness.specularFactor[i] = gltfFloatArray[i];
+		}
+	}
+
+	if (jsonObject.hasKey("glossinessFactor"))
+	{
+		auto glossinessFactor = jsonObject.getValue("glossinessFactor");
+
+		glossinessFactor->visit(*this);
+
+		if (state.top() == GltfState_Error)
+		{
+			return;
+		}
+
+		gltfMaterial.pbrSpecularGlossiness.glossinessFactor = gltfFloat;
+	}
+
+	if (jsonObject.hasKey("specularGlossinessTexture"))
+	{
+		auto specularGlossinessTexture = jsonObject.getValue("specularGlossinessTexture");
+
+		state.push(GltfState_Material_TextureInfo);
+		specularGlossinessTexture->visit(*this);
+
+		if (state.top() == GltfState_Error)
+		{
+			return;
+		}
+
+		if (allGltfTextures.size() <= (uint32_t)gltfTextureInfo.index)
+		{
+			state.push(GltfState_Error);
+			return;
+		}
+
+		gltfMaterial.pbrSpecularGlossiness.specularGlossinessTexture = &(allGltfTextures[gltfTextureInfo.index]);
 	}
 }
 
 void GltfVisitor::visitMaterial_TextureInfo(JSONobject& jsonObject)
 {
-	// Not processing texCoord.
+	gltfTextureInfo.index = 0;
+	gltfTextureInfo.texCoord = 0;
 
 	if (jsonObject.hasKey("index"))
 	{
 		auto index = jsonObject.getValue("index");
 
 		index->visit(*this);
+
+		if (state.top() == GltfState_Error)
+		{
+			return;
+		}
+
+		gltfTextureInfo.index = gltfInteger;
+	}
+
+	if (jsonObject.hasKey("texCoord"))
+	{
+		auto texCoord = jsonObject.getValue("texCoord");
+
+		texCoord->visit(*this);
+
+		if (state.top() == GltfState_Error)
+		{
+			return;
+		}
+
+		gltfTextureInfo.texCoord = gltfInteger;
+	}
+
+	//
+
+	if (gltfTextureInfo.texCoord > 0)
+	{
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Multiple texture sets not supported");
+
+		state.push(GltfState_Error);
+		return;
 	}
 }
 
@@ -2170,6 +2344,40 @@ void GltfVisitor::visit(JSONarray& jsonArray)
 				allGltfAccessors.append(gltfAccessor);
 			}
 		}
+		else if (gltfState == GltfState_ExtensionsRequired)
+		{
+			for (int32_t i = 0; i < (int32_t)jsonArray.size(); i++)
+			{
+				jsonArray.getValueAt(i)->visit(*this);
+
+				if (state.top() == GltfState_Error)
+				{
+					return;
+				}
+
+				if (gltfString == "KHR_materials_pbrSpecularGlossiness")
+				{
+					gltfExtensions.required_pbrSpecularGlossiness = VK_TRUE;
+				}
+			}
+		}
+		else if (gltfState == GltfState_ExtensionsUsed)
+		{
+			for (int32_t i = 0; i < (int32_t)jsonArray.size(); i++)
+			{
+				jsonArray.getValueAt(i)->visit(*this);
+
+				if (state.top() == GltfState_Error)
+				{
+					return;
+				}
+
+				if (gltfString == "KHR_materials_pbrSpecularGlossiness")
+				{
+					gltfExtensions.used_pbrSpecularGlossiness = VK_TRUE;
+				}
+			}
+		}
 		else if (gltfState == GltfState_Images)
 		{
 			for (int32_t i = 0; i < (int32_t)jsonArray.size(); i++)
@@ -2252,6 +2460,11 @@ void GltfVisitor::visit(JSONarray& jsonArray)
 				gltfMaterial.alphaCutoff = 0.5f;
 				gltfMaterial.doubleSided = VK_FALSE;
 
+				// If required, force using specular glossiness model.
+				gltfMaterial.useSpecularGlossiness = gltfExtensions.used_pbrSpecularGlossiness;
+
+				//
+
 				gltfMaterial.pbrMetallicRoughness.baseColorFactor[0] = 1.0f;
 				gltfMaterial.pbrMetallicRoughness.baseColorFactor[1] = 1.0f;
 				gltfMaterial.pbrMetallicRoughness.baseColorFactor[2] = 1.0f;
@@ -2262,6 +2475,22 @@ void GltfVisitor::visit(JSONarray& jsonArray)
 
 				gltfMaterial.pbrMetallicRoughness.roughnessFactor = 1.0f;
 				gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture = nullptr;
+
+				//
+
+				gltfMaterial.pbrSpecularGlossiness.diffuseFactor[0] = 1.0f;
+				gltfMaterial.pbrSpecularGlossiness.diffuseFactor[1] = 1.0f;
+				gltfMaterial.pbrSpecularGlossiness.diffuseFactor[2] = 1.0f;
+				gltfMaterial.pbrSpecularGlossiness.diffuseFactor[3] = 1.0f;
+				gltfMaterial.pbrSpecularGlossiness.diffuseTexture = nullptr;
+
+				gltfMaterial.pbrSpecularGlossiness.specularFactor[0] = 1.0f;
+				gltfMaterial.pbrSpecularGlossiness.specularFactor[1] = 1.0f;
+				gltfMaterial.pbrSpecularGlossiness.specularFactor[2] = 1.0f;
+
+				gltfMaterial.pbrSpecularGlossiness.glossinessFactor = 1.0f;
+
+				gltfMaterial.pbrSpecularGlossiness.specularGlossinessTexture = nullptr;
 
 				//
 
@@ -2582,7 +2811,7 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 	}
 	else if (gltfState == GltfState_Start)
 	{
-		// Not processing extensionsUsed, extensionsRequired, cameras, programs, shaders, techniques, glExtensionsUsed, extensions, extras
+		// Not processing cameras, programs, shaders, techniques, glExtensionsUsed, extensions, extras
 
 		//
 
@@ -2671,6 +2900,42 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 		//
 
 		// Optional.
+
+		if (jsonObject.hasKey("extensionsRequired"))
+		{
+			objectArray = VK_TRUE;
+
+			auto extensionsRequired = jsonObject.getValue("extensionsRequired");
+
+			state.push(GltfState_ExtensionsRequired);
+			extensionsRequired->visit(*this);
+
+			objectArray = VK_FALSE;
+
+			if (state.top() == GltfState_Error)
+			{
+				return;
+			}
+		}
+
+		if (jsonObject.hasKey("extensionsUsed"))
+		{
+			objectArray = VK_TRUE;
+
+			auto extensionsUsed = jsonObject.getValue("extensionsUsed");
+
+			state.push(GltfState_ExtensionsUsed);
+			extensionsUsed->visit(*this);
+
+			objectArray = VK_FALSE;
+
+			if (state.top() == GltfState_Error)
+			{
+				return;
+			}
+		}
+
+		//
 
 		if (jsonObject.hasKey("images"))
 		{
@@ -2976,6 +3241,14 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 	else if (gltfState == GltfState_Material_PbrMetallicRoughness)
 	{
 		visitMaterial_PbrMetallicRoughness(jsonObject);
+	}
+	else if (gltfState == GltfState_Material_Extensions)
+	{
+		visitMaterial_Extensions(jsonObject);
+	}
+	else if (gltfState == GltfState_Material_Extensions_PbrSpecularGlossiness)
+	{
+		visitMaterial_Extensions_PbrSpecularGlossiness(jsonObject);
 	}
 	else if (gltfState == GltfState_Material_TextureInfo)
 	{

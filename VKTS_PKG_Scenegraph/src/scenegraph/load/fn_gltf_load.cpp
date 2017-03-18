@@ -28,7 +28,8 @@
 
 #include "GltfVisitor.hpp"
 
-#define VKTS_GLTF_FORWARD_FRAGMENT_SHADER_NAME "shader/SPIR/V/glTF_forward.frag.spv"
+#define VKTS_GLTF_MR_FORWARD_FRAGMENT_SHADER_NAME "shader/SPIR/V/glTF_mr_forward.frag.spv"
+#define VKTS_GLTF_SG_FORWARD_FRAGMENT_SHADER_NAME "shader/SPIR/V/glTF_sg_forward.frag.spv"
 
 namespace vkts
 {
@@ -215,11 +216,18 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 
 	//
 
+	VkBool32 useTangents = VK_FALSE;
+
+	if (gltfPrimitive.normal && gltfPrimitive.texCoord)
+	{
+		useTangents = VK_TRUE;
+	}
+
 	VkBool32 createTangents = VK_FALSE;
 
-    if ((gltfPrimitive.normal && gltfPrimitive.texCoord && !(gltfPrimitive.binormal && gltfPrimitive.tangent)) || (gltfPrimitive.normal && gltfPrimitive.tangent4))
+    if (useTangents && !gltfPrimitive.binormal && !gltfPrimitive.tangent)
     {
-    	createTangents = VK_TRUE;
+        createTangents = VK_TRUE;
     }
 
 	//
@@ -267,7 +275,7 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
         vertexBufferType |= VKTS_VERTEX_BUFFER_TYPE_NORMAL;
 	}
 
-    if (gltfPrimitive.normal && (gltfPrimitive.binormal || gltfPrimitive.tangent))
+    if (useTangents)
     {
     	if (gltfPrimitive.binormal)
     	{
@@ -305,25 +313,6 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 				return VK_FALSE;
 			}
         }
-
-        subMesh->setTangentOffset(strideInBytes);
-        strideInBytes += 3 * sizeof(float);
-
-        totalSize += 3 * sizeof(float) * subMesh->getNumberVertices();
-
-        //
-
-        vertexBufferType |= VKTS_VERTEX_BUFFER_TYPE_TANGENTS;
-    }
-    else if (createTangents)
-    {
-        subMesh->setBitangentOffset(strideInBytes);
-        strideInBytes += 3 * sizeof(float);
-
-        totalSize += 3 * sizeof(float) * subMesh->getNumberVertices();
-
-        //
-
 
         subMesh->setTangentOffset(strideInBytes);
         strideInBytes += 3 * sizeof(float);
@@ -513,7 +502,6 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 
     if (totalSize > 0)
     {
-
         IBinaryBufferSP tempBinaryBuffer;
 
     	if (createTangents)
@@ -959,33 +947,66 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 				subMesh->setDoubleSided(VK_TRUE);
 			}
 
-			//
-			// Base color
-			//
-
-			ITextureObjectSP baseColor = gltfProcessTextureObject(gltfPrimitive.material->pbrMetallicRoughness.baseColorTexture, gltfPrimitive.material->pbrMetallicRoughness.baseColorFactor, VK_TRUE, VKTS_LDR_COLOR_DATA, sceneManager);
-
-			if (!baseColor.get())
+			if (gltfPrimitive.material->useSpecularGlossiness)
 			{
-				return VK_FALSE;
+				//
+				// Diffuse
+				//
+
+				ITextureObjectSP diffuse = gltfProcessTextureObject(gltfPrimitive.material->pbrSpecularGlossiness.diffuseTexture, gltfPrimitive.material->pbrSpecularGlossiness.diffuseFactor, VK_TRUE, VKTS_LDR_COLOR_DATA, sceneManager);
+
+				if (!diffuse.get())
+				{
+					return VK_FALSE;
+				}
+
+				bsdfMaterial->addTextureObject(diffuse);
+
+				//
+				// Specular glossiness
+				//
+
+				float specularGlossinessFactors[] = {gltfPrimitive.material->pbrSpecularGlossiness.specularFactor[0], gltfPrimitive.material->pbrSpecularGlossiness.specularFactor[1], gltfPrimitive.material->pbrSpecularGlossiness.specularFactor[2], gltfPrimitive.material->pbrSpecularGlossiness.glossinessFactor};
+
+				ITextureObjectSP specularGlossiness = gltfProcessTextureObject(gltfPrimitive.material->pbrSpecularGlossiness.specularGlossinessTexture, specularGlossinessFactors, VK_TRUE, VKTS_NON_COLOR_DATA, sceneManager);
+
+				if (!specularGlossiness.get())
+				{
+					return VK_FALSE;
+				}
+
+				bsdfMaterial->addTextureObject(specularGlossiness);
 			}
-
-			bsdfMaterial->addTextureObject(baseColor);
-
-			//
-			// Metallic roughness
-			//
-
-			float metallicRoughnessFactors[] = {gltfPrimitive.material->pbrMetallicRoughness.metallicFactor, gltfPrimitive.material->pbrMetallicRoughness.roughnessFactor, 1.0f, 1.0f};
-
-			ITextureObjectSP metallicRoughness = gltfProcessTextureObject(gltfPrimitive.material->pbrMetallicRoughness.metallicRoughnessTexture, metallicRoughnessFactors, VK_FALSE, VKTS_NON_COLOR_DATA, sceneManager);
-
-			if (!metallicRoughness.get())
+			else
 			{
-				return VK_FALSE;
-			}
+				//
+				// Base color
+				//
 
-			bsdfMaterial->addTextureObject(metallicRoughness);
+				ITextureObjectSP baseColor = gltfProcessTextureObject(gltfPrimitive.material->pbrMetallicRoughness.baseColorTexture, gltfPrimitive.material->pbrMetallicRoughness.baseColorFactor, VK_TRUE, VKTS_LDR_COLOR_DATA, sceneManager);
+
+				if (!baseColor.get())
+				{
+					return VK_FALSE;
+				}
+
+				bsdfMaterial->addTextureObject(baseColor);
+
+				//
+				// Metallic roughness
+				//
+
+				float metallicRoughnessFactors[] = {gltfPrimitive.material->pbrMetallicRoughness.metallicFactor, gltfPrimitive.material->pbrMetallicRoughness.roughnessFactor, 1.0f, 1.0f};
+
+				ITextureObjectSP metallicRoughness = gltfProcessTextureObject(gltfPrimitive.material->pbrMetallicRoughness.metallicRoughnessTexture, metallicRoughnessFactors, VK_FALSE, VKTS_NON_COLOR_DATA, sceneManager);
+
+				if (!metallicRoughness.get())
+				{
+					return VK_FALSE;
+				}
+
+				bsdfMaterial->addTextureObject(metallicRoughness);
+			}
 
 			//
 			// Normal
@@ -1032,7 +1053,7 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 			// Shader
 			//
 
-			const char* fragmentShader = VKTS_GLTF_FORWARD_FRAGMENT_SHADER_NAME;
+			const char* fragmentShader = gltfPrimitive.material->useSpecularGlossiness ? VKTS_GLTF_SG_FORWARD_FRAGMENT_SHADER_NAME : VKTS_GLTF_MR_FORWARD_FRAGMENT_SHADER_NAME;
 
             auto shaderModule = sceneManager->useFragmentShaderModule(fragmentShader);
 
@@ -1069,6 +1090,7 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
             }
 
             bsdfMaterial->setFragmentShader(shaderModule);
+            bsdfMaterial->setSpecularGlossiness(gltfPrimitive.material->useSpecularGlossiness);
 
 			//
 			// Attribute
