@@ -77,7 +77,6 @@ enum GltfState {
 	GltfState_Skin_Joints,
 	GltfState_Node_Children,
 	GltfState_Animation_Sampler,
-	GltfState_Animation_Sampler_Properties,
 	GltfState_Animation_Channel,
 	GltfState_Animation_Channel_Target,
 	GltfState_Scene_Node
@@ -99,6 +98,7 @@ typedef struct _GltfBufferView {
     uint32_t byteOffset;
     uint32_t byteLength;
     uint32_t byteStride;
+    int32_t target;
 	std::string name;
 } GltfBufferView;
 
@@ -128,6 +128,7 @@ typedef struct _GltfSampler {
 } GltfSampler;
 
 typedef struct _GltfTexture {
+	int32_t internalFormat;
 	int32_t format;
 	GltfSampler* sampler;
 	GltfImage* source;
@@ -315,7 +316,6 @@ private:
 	void visitMesh_Primitive(JSONobject& jsonObject);
 	void visitMesh_Primitive_Attributes(JSONobject& jsonObject);
 	void visitAnimation_Sampler(JSONobject& jsonObject);
-	void visitAnimation_Sampler_Properties(JSONobject& jsonObject);
 	void visitAnimation_Channel(JSONobject& jsonObject);
 	void visitAnimation_Channel_Target(JSONobject& jsonObject);
 
