@@ -111,13 +111,11 @@ typedef struct _GltfAccessor {
     std::string type;
     Vector<float> max;
     Vector<float> min;
-    // TODO: Add 'sparse'.
 	std::string name;
 } GltfAccessor;
 
 typedef struct _GltfImage {
 	IImageDataSP imageData;
-	int32_t internalFormat;
 	std::string name;
 } GltfImage;
 
@@ -207,7 +205,6 @@ typedef struct _GltfSkin {
 } GltfSkin;
 
 typedef struct _GltfNode {
-	// TODO: Add 'camera',
 	Vector<uint32_t> children;
 	GltfSkin* skin;
 	float matrix[16];

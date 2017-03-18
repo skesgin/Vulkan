@@ -126,6 +126,12 @@ VKTS_APICALL VkBool32 VKTS_APIENTRY imageDataSave(const char* filename, const II
  *
  * @ThreadSafe
  */
+VKTS_APICALL IImageDataSP VKTS_APIENTRY imageDataCreate(const std::string& name, const std::string& extension, const IBinaryBufferSP& buffer);
+
+/**
+ *
+ * @ThreadSafe
+ */
 VKTS_APICALL IImageDataSP VKTS_APIENTRY imageDataCreate(const std::string& name, const uint32_t width, const uint32_t height, const uint32_t depth, const VkImageType imageType, const VkFormat& format);
 
 /**

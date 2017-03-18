@@ -44,39 +44,89 @@ void GltfVisitor::visitBuffer(JSONobject& jsonObject)
 {
 	// Not processing extensions, extras.
 
-	if (!jsonObject.hasKey("uri") ||  !jsonObject.hasKey("byteLength"))
+	if (!jsonObject.hasKey("byteLength"))
 	{
 		state.push(GltfState_Error);
 		return;
 	}
 
-	auto uri = jsonObject.getValue("uri");
-
-	uri->visit(*this);
-
-	if (state.top() == GltfState_Error)
+	if (jsonObject.hasKey("uri"))
 	{
-		return;
-	}
+		auto uri = jsonObject.getValue("uri");
 
-	//
+		uri->visit(*this);
 
-	std::string finalFilename = directory + gltfString;
+		if (state.top() == GltfState_Error)
+		{
+			return;
+		}
 
-	auto binaryBuffer = fileLoadBinary(finalFilename.c_str());
+		IBinaryBufferSP binaryBuffer;
 
-	if (!binaryBuffer.get())
-	{
-		binaryBuffer = fileLoadBinary(gltfString.c_str());
+		//
+
+		if (gltfString.length() >= 5 && gltfString.substr(0, 5) == "data:")
+		{
+			auto index = gltfString.find("application/octet-stream;");
+
+			if (index == gltfString.npos)
+			{
+				state.push(GltfState_Error);
+				return;
+			}
+
+			//
+
+			index = gltfString.find("base64,");
+
+			if (index == gltfString.npos)
+			{
+				state.push(GltfState_Error);
+				return;
+			}
+
+			//
+
+			auto base64 = gltfString.substr(index + 7);
+
+			if (base64.size() == 0)
+			{
+				state.push(GltfState_Error);
+				return;
+			}
+
+			auto decoded = base64Decode(base64);
+
+			if (decoded.size() == 0)
+			{
+				state.push(GltfState_Error);
+				return;
+			}
+
+			binaryBuffer = binaryBufferCreate(decoded);
+		}
+		else
+		{
+			std::string finalFilename = directory + gltfString;
+
+			binaryBuffer = fileLoadBinary(finalFilename.c_str());
+
+			if (!binaryBuffer.get())
+			{
+				binaryBuffer = fileLoadBinary(gltfString.c_str());
+			}
+		}
+
+		//
 
 		if (!binaryBuffer.get())
 		{
 			state.push(GltfState_Error);
 			return;
 		}
-	}
 
-	gltfBuffer.binaryBuffer = binaryBuffer;
+		gltfBuffer.binaryBuffer = binaryBuffer;
+	}
 
 	//
 
@@ -91,11 +141,7 @@ void GltfVisitor::visitBuffer(JSONobject& jsonObject)
 
 	gltfBuffer.byteLength = (int32_t)gltfInteger;
 
-	if (gltfBuffer.byteLength != gltfBuffer.binaryBuffer->getSize())
-	{
-		state.push(GltfState_Error);
-		return;
-	}
+	//
 
 	if (jsonObject.hasKey("name"))
 	{
@@ -425,73 +471,6 @@ void GltfVisitor::visitImage(JSONobject& jsonObject)
 {
 	// Nor processing mimeType, bufferView, extensions, extras.
 
-	if (!jsonObject.hasKey("uri"))
-	{
-		state.push(GltfState_Error);
-		return;
-	}
-
-	auto uri = jsonObject.getValue("uri");
-
-	uri->visit(*this);
-
-	if (state.top() == GltfState_Error)
-	{
-		return;
-	}
-
-	//
-
-	std::string finalFilename = directory + gltfString;
-
-	auto imageData = imageDataLoad(finalFilename.c_str());
-
-	if (!imageData.get())
-	{
-		imageData = imageDataLoad(gltfString.c_str());
-
-		if (!imageData.get())
-		{
-			state.push(GltfState_Error);
-			return;
-		}
-	}
-
-	gltfImage.imageData = imageData;
-
-	//
-
-	if (jsonObject.hasKey("internalFormat"))
-	{
-		auto internalFormat = jsonObject.getValue("internalFormat");
-
-		internalFormat->visit(*this);
-
-		if (state.top() == GltfState_Error)
-		{
-			return;
-		}
-
-		//
-
-		switch (gltfInteger)
-		{
-			case 6406:
-			case 6407:
-			case 6408:
-			case 6409:
-			case 6410:
-				gltfImage.internalFormat = gltfInteger;
-				return;
-			break;
-			default:
-				state.push(GltfState_Error);
-				return;
-		}
-	}
-
-	//
-
 	if (jsonObject.hasKey("name"))
 	{
 		auto name = jsonObject.getValue("name");
@@ -504,6 +483,107 @@ void GltfVisitor::visitImage(JSONobject& jsonObject)
 		}
 
 		gltfImage.name = gltfString;
+	}
+
+	//
+
+	if (jsonObject.hasKey("uri"))
+	{
+		auto uri = jsonObject.getValue("uri");
+
+		uri->visit(*this);
+
+		if (state.top() == GltfState_Error)
+		{
+			return;
+		}
+
+		//
+
+		IImageDataSP imageData;
+
+		if (gltfString.length() >= 5 && gltfString.substr(0, 5) == "data:")
+		{
+			auto index = gltfString.find("image/");
+
+			if (index == gltfString.npos)
+			{
+				state.push(GltfState_Error);
+				return;
+			}
+
+			auto imageString = gltfString.substr(index + 6);
+
+			//
+
+			index = imageString.find(";");
+
+			if (index == gltfString.npos || index == 0)
+			{
+				state.push(GltfState_Error);
+				return;
+			}
+
+			auto extensionString = imageString.substr(0, index);
+
+			//
+			//
+
+			index = gltfString.find("base64,");
+
+			if (index == gltfString.npos)
+			{
+				state.push(GltfState_Error);
+				return;
+			}
+
+			//
+
+			auto base64 = gltfString.substr(index + 7);
+
+			if (base64.size() == 0)
+			{
+				state.push(GltfState_Error);
+				return;
+			}
+
+			auto decoded = base64Decode(base64);
+
+			if (decoded.size() == 0)
+			{
+				state.push(GltfState_Error);
+				return;
+			}
+
+			auto binaryBuffer = binaryBufferCreate(decoded);
+
+			if (!binaryBuffer.get())
+			{
+				state.push(GltfState_Error);
+				return;
+			}
+
+			imageData = imageDataCreate(gltfImage.name, extensionString, binaryBuffer);
+		}
+		else
+		{
+			std::string finalFilename = directory + gltfString;
+
+			imageData = imageDataLoad(finalFilename.c_str());
+
+			if (!imageData.get())
+			{
+				imageData = imageDataLoad(gltfString.c_str());
+			}
+		}
+
+		if (!imageData.get())
+		{
+			state.push(GltfState_Error);
+			return;
+		}
+
+		gltfImage.imageData = imageData;
 	}
 }
 
@@ -2383,7 +2463,6 @@ void GltfVisitor::visit(JSONarray& jsonArray)
 			for (int32_t i = 0; i < (int32_t)jsonArray.size(); i++)
 			{
 				gltfImage.imageData.reset();
-				gltfImage.internalFormat = 6408;
 				gltfImage.name = "Image_" + std::to_string(i);
 
 				//

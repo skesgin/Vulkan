@@ -962,6 +962,46 @@ VkBool32 VKTS_APIENTRY imageDataSave(const char* filename, const IImageDataSP& i
     return VK_FALSE;
 }
 
+IImageDataSP VKTS_APIENTRY imageDataCreate(const std::string& name, const std::string& extension, const IBinaryBufferSP& buffer)
+{
+	if (!buffer.get())
+	{
+		return IImageDataSP();
+	}
+
+	auto filename = name + "." + extension;
+
+	std::string lowerCaseFilename(filename);
+    std::transform(lowerCaseFilename.begin(), lowerCaseFilename.end(), lowerCaseFilename.begin(), ::tolower);
+
+    auto dotPos = lowerCaseFilename.rfind('.');
+    if (dotPos == lowerCaseFilename.npos)
+    {
+        return IImageDataSP();
+    }
+
+    std::string lowerCaseExtension = lowerCaseFilename.substr(dotPos);
+
+    if (lowerCaseExtension == ".tga")
+    {
+        return imageDataLoadTga(filename, buffer);
+    }
+    else if (lowerCaseExtension == ".hdr")
+    {
+        return imageDataLoadHdr(filename, buffer);
+    }
+    else if (lowerCaseExtension == ".dds" || lowerCaseExtension == ".ktx")
+    {
+        return imageDataLoadGli(filename, buffer);
+    }
+    else if (lowerCaseExtension == ".png" || lowerCaseExtension == ".jpg" || lowerCaseExtension == ".jpeg")
+    {
+        return imageDataLoadStb(filename, buffer);
+    }
+
+    return IImageDataSP();
+}
+
 IImageDataSP VKTS_APIENTRY imageDataCreate(const std::string& name, const uint32_t width, const uint32_t height, const uint32_t depth, const VkImageType imageType, const VkFormat& format)
 {
     if (width < 1 || height < 1 || depth < 1)
