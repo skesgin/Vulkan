@@ -879,6 +879,25 @@ public:
     	currentNode->addKeyValue("name", nameValue);
 
     	//
+    	// Process animation
+    	//
+
+    	if (node.getAnimations().size() > 0)
+    	{
+    		if (node.getAnimations().size() > 1)
+    		{
+				logPrint(VKTS_LOG_WARNING, __FILE__, __LINE__, "Node '%s' has '%u' animations. Storing only first one.", node.getName().c_str(), node.getAnimations().size());
+    		}
+
+    		auto& currentAnimation = node.getAnimations()[0];
+
+    		for (uint32_t channelIndex = 0; channelIndex < currentAnimation->getNumberChannels(); channelIndex++)
+    		{
+    			// TODO: Merge scale, rotation and translation channels into one animation. Sample all available keys. Convert Euler rotation to quaternion rotation.
+    		}
+    	}
+
+    	//
     	// Process children index.
     	//
 
