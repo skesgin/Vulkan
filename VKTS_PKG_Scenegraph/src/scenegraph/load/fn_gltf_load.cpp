@@ -29,7 +29,10 @@
 #include "GltfVisitor.hpp"
 
 #define VKTS_GLTF_MR_FORWARD_FRAGMENT_SHADER_NAME "shader/SPIR/V/glTF_mr_forward.frag.spv"
+#define VKTS_GLTF_MR_FORWARD_NO_TEXCOORD_FRAGMENT_SHADER_NAME "shader/SPIR/V/glTF_mr_forward_no_texcoord.frag.spv"
+
 #define VKTS_GLTF_SG_FORWARD_FRAGMENT_SHADER_NAME "shader/SPIR/V/glTF_sg_forward.frag.spv"
+#define VKTS_GLTF_SG_FORWARD_NO_TEXCOORD_FRAGMENT_SHADER_NAME "shader/SPIR/V/glTF_sg_forward_no_texcoord.frag.spv"
 
 namespace vkts
 {
@@ -1050,10 +1053,39 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 			bsdfMaterial->addTextureObject(emissive);
 
 			//
+			// Attribute
+			//
+
+			bsdfMaterial->setAttributes(subMesh->getVertexBufferType());
+
+			//
 			// Shader
 			//
 
-			const char* fragmentShader = gltfPrimitive.material->useSpecularGlossiness ? VKTS_GLTF_SG_FORWARD_FRAGMENT_SHADER_NAME : VKTS_GLTF_MR_FORWARD_FRAGMENT_SHADER_NAME;
+			const char* fragmentShader = nullptr;
+
+			if (gltfPrimitive.material->useSpecularGlossiness)
+			{
+				if ((bsdfMaterial->getAttributes() & VKTS_VERTEX_BUFFER_TYPE_TEXCOORD) == VKTS_VERTEX_BUFFER_TYPE_TEXCOORD)
+				{
+					fragmentShader = VKTS_GLTF_SG_FORWARD_FRAGMENT_SHADER_NAME;
+				}
+				else
+				{
+					fragmentShader = VKTS_GLTF_SG_FORWARD_NO_TEXCOORD_FRAGMENT_SHADER_NAME;
+				}
+			}
+			else
+			{
+				if ((bsdfMaterial->getAttributes() & VKTS_VERTEX_BUFFER_TYPE_TEXCOORD) == VKTS_VERTEX_BUFFER_TYPE_TEXCOORD)
+				{
+					fragmentShader = VKTS_GLTF_MR_FORWARD_FRAGMENT_SHADER_NAME;
+				}
+				else
+				{
+					fragmentShader = VKTS_GLTF_MR_FORWARD_NO_TEXCOORD_FRAGMENT_SHADER_NAME;
+				}
+			}
 
             auto shaderModule = sceneManager->useFragmentShaderModule(fragmentShader);
 
@@ -1091,12 +1123,6 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 
             bsdfMaterial->setFragmentShader(shaderModule);
             bsdfMaterial->setSpecularGlossiness(gltfPrimitive.material->useSpecularGlossiness);
-
-			//
-			// Attribute
-			//
-
-			bsdfMaterial->setAttributes(subMesh->getVertexBufferType());
 		}
 
 		subMesh->setBSDFMaterial(bsdfMaterial);
