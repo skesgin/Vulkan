@@ -891,10 +891,48 @@ public:
 
     		auto& currentAnimation = node.getAnimations()[0];
 
+    		SmartPointerVector<IChannelSP> allTranslates;
+    		SmartPointerVector<IChannelSP> allScales;
+    		SmartPointerVector<IChannelSP> allRotations;
+    		SmartPointerVector<IChannelSP> allQuaternionRotations;
+
+    		// Merging channels, targeting the same transform.
     		for (uint32_t channelIndex = 0; channelIndex < currentAnimation->getNumberChannels(); channelIndex++)
     		{
-    			// TODO: Merge scale, rotation and translation channels into one animation. Sample all available keys. Convert Euler rotation to quaternion rotation.
+    			auto& currentChannel = currentAnimation->getChannels()[channelIndex];
+
+    			switch (currentChannel->getTargetTransform())
+    			{
+					case VKTS_TARGET_TRANSFORM_TRANSLATE:
+						allTranslates.append(currentChannel);
+						break;
+					case VKTS_TARGET_TRANSFORM_ROTATE:
+						allRotations.append(currentChannel);
+						break;
+					case VKTS_TARGET_TRANSFORM_QUATERNION_ROTATE:
+						allQuaternionRotations.append(currentChannel);
+						break;
+					case VKTS_TARGET_TRANSFORM_SCALE:
+						allScales.append(currentChannel);
+						break;
+    			}
     		}
+
+    		// Invalid combination, either Euler or Quaternion is valid.
+    		if (allRotations.size() > 0 && allQuaternionRotations.size() > 0)
+    		{
+    			return;
+    		}
+
+    		// Convert Euler rotation to quaternion rotation.
+    		if (allRotations.size() > 0)
+    		{
+    			// TODO: Convert Euler to quaternion rotation.
+
+    			allRotations.clear();
+    		}
+
+			// TODO: Merge scale, rotation and translation channels into one animation. Sample all available keys.
     	}
 
     	//
