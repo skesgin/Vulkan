@@ -899,7 +899,7 @@ public:
     		// Merging channels, targeting the same transform.
     		for (uint32_t channelIndex = 0; channelIndex < currentAnimation->getNumberChannels(); channelIndex++)
     		{
-    			auto& currentChannel = currentAnimation->getChannels()[channelIndex];
+    			auto currentChannel = currentAnimation->getChannels()[channelIndex];
 
     			switch (currentChannel->getTargetTransform())
     			{
@@ -924,15 +924,230 @@ public:
     			return;
     		}
 
-    		// Convert Euler rotation to quaternion rotation.
-    		if (allRotations.size() > 0)
-    		{
-    			// TODO: Convert Euler to quaternion rotation.
+    		//
+    		// Merge all translations.
+    		//
 
-    			allRotations.clear();
+    		std::map<float, glm::vec3> translateValues;
+
+    		for (uint32_t i = 0; i < allTranslates.size(); i++)
+    		{
+				uint32_t elementIndex = 0;
+
+				switch (allTranslates[i]->getTargetTransformElement())
+				{
+					case VKTS_TARGET_TRANSFORM_ELEMENT_X:
+						elementIndex = 0;
+						break;
+					case VKTS_TARGET_TRANSFORM_ELEMENT_Y:
+						elementIndex = 1;
+						break;
+					case VKTS_TARGET_TRANSFORM_ELEMENT_Z:
+						elementIndex = 2;
+						break;
+					case VKTS_TARGET_TRANSFORM_ELEMENT_W:
+						return;
+				}
+
+				for (uint32_t k = 0; k < allTranslates[i]->getNumberEntries(); k++)
+    			{
+    				if (allTranslates[i]->getInterpolators()[k] == VKTS_INTERPOLATOR_BEZIER)
+    				{
+    					logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Animation has Bezier animation.");
+    					return;
+    				}
+
+    				float key = allTranslates[i]->getKeys()[k];
+    				float value = allTranslates[i]->getValues()[k];
+
+    				if (translateValues.find(key) == translateValues.end())
+    				{
+    					translateValues[key] = glm::vec3(0.0f, 0.0f, 0.0f);
+    				}
+
+    				translateValues[key][elementIndex] = value;
+    			}
     		}
 
-			// TODO: Merge scale, rotation and translation channels into one animation. Sample all available keys.
+    		//
+    		// Merge all scales.
+    		//
+
+    		std::map<float, glm::vec3> scaleValues;
+
+    		for (uint32_t i = 0; i < allScales.size(); i++)
+    		{
+				uint32_t elementIndex = 0;
+
+				switch (allScales[i]->getTargetTransformElement())
+				{
+					case VKTS_TARGET_TRANSFORM_ELEMENT_X:
+						elementIndex = 0;
+						break;
+					case VKTS_TARGET_TRANSFORM_ELEMENT_Y:
+						elementIndex = 1;
+						break;
+					case VKTS_TARGET_TRANSFORM_ELEMENT_Z:
+						elementIndex = 2;
+						break;
+					case VKTS_TARGET_TRANSFORM_ELEMENT_W:
+						return;
+				}
+
+				for (uint32_t k = 0; k < allScales[i]->getNumberEntries(); k++)
+    			{
+    				if (allScales[i]->getInterpolators()[k] == VKTS_INTERPOLATOR_BEZIER)
+    				{
+    					logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Animation has Bezier animation.");
+    					return;
+    				}
+
+    				float key = allScales[i]->getKeys()[k];
+    				float value = allScales[i]->getValues()[k];
+
+    				if (scaleValues.find(key) == scaleValues.end())
+    				{
+    					scaleValues[key] = glm::vec3(1.0f, 1.0f, 1.0f);
+    				}
+
+    				scaleValues[key][elementIndex] = value;
+    			}
+    		}
+
+    		//
+    		// Merge all rotations.
+    		//
+
+    		std::map<float, glm::vec3> rotationValues;
+
+    		for (uint32_t i = 0; i < allRotations.size(); i++)
+    		{
+				uint32_t elementIndex = 0;
+
+				switch (allRotations[i]->getTargetTransformElement())
+				{
+					case VKTS_TARGET_TRANSFORM_ELEMENT_X:
+						elementIndex = 0;
+						break;
+					case VKTS_TARGET_TRANSFORM_ELEMENT_Y:
+						elementIndex = 1;
+						break;
+					case VKTS_TARGET_TRANSFORM_ELEMENT_Z:
+						elementIndex = 2;
+						break;
+					case VKTS_TARGET_TRANSFORM_ELEMENT_W:
+						return;
+				}
+
+				for (uint32_t k = 0; k < allRotations[i]->getNumberEntries(); k++)
+    			{
+    				if (allRotations[i]->getInterpolators()[k] == VKTS_INTERPOLATOR_BEZIER)
+    				{
+    					logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Animation has Bezier animation.");
+    					return;
+    				}
+
+    				float key = allRotations[i]->getKeys()[k];
+    				float value = allRotations[i]->getValues()[k];
+
+    				if (rotationValues.find(key) == rotationValues.end())
+    				{
+    					rotationValues[key] = glm::vec3(0.0f, 0.0f, 0.0f);
+    				}
+
+    				rotationValues[key][elementIndex] = value;
+    			}
+    		}
+
+    		//
+    		// Merge all quaternion rotations.
+    		//
+
+    		std::map<float, glm::vec4> quaternionValues;
+
+    		for (uint32_t i = 0; i < allQuaternionRotations.size(); i++)
+    		{
+				uint32_t elementIndex = 0;
+
+				switch (allQuaternionRotations[i]->getTargetTransformElement())
+				{
+					case VKTS_TARGET_TRANSFORM_ELEMENT_X:
+						elementIndex = 0;
+						break;
+					case VKTS_TARGET_TRANSFORM_ELEMENT_Y:
+						elementIndex = 1;
+						break;
+					case VKTS_TARGET_TRANSFORM_ELEMENT_Z:
+						elementIndex = 2;
+						break;
+					case VKTS_TARGET_TRANSFORM_ELEMENT_W:
+						elementIndex = 3;
+						break;
+				}
+
+				for (uint32_t k = 0; k < allQuaternionRotations[i]->getNumberEntries(); k++)
+    			{
+    				if (allQuaternionRotations[i]->getInterpolators()[k] == VKTS_INTERPOLATOR_BEZIER)
+    				{
+    					logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Animation has Bezier animation.");
+    					return;
+    				}
+
+    				float key = allQuaternionRotations[i]->getKeys()[k];
+    				float value = allQuaternionRotations[i]->getValues()[k];
+
+    				if (quaternionValues.find(key) == quaternionValues.end())
+    				{
+    					quaternionValues[key] = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+    				}
+
+    				quaternionValues[key][elementIndex] = value;
+    			}
+    		}
+
+    		//
+    		// Convert rotations to quaternion rotations.
+    		//
+
+    		if (rotationValues.size() > 0)
+    		{
+	        	VkTsRotationMode currentRotationMode = node.getNodeRotationMode();
+
+	        	if (node.isArmature() || node.isJoint())
+	        	{
+	        		// Processing armature and joint.
+
+	        		currentRotationMode = node.getBindRotationMode();
+	        	}
+
+	        	for (auto it :  rotationValues)
+    			{
+	        		Quat q;
+
+    	        	switch (currentRotationMode)
+    	        	{
+    	        		case VKTS_EULER_YXZ:
+    	        			q = rotateRzRxRy(it.second.z, it.second.x, it.second.y);
+    	        			break;
+    	        		case VKTS_EULER_XYZ:
+    	        			q = rotateRzRyRx(it.second.z, it.second.y, it.second.x);
+    	        			break;
+    	        		case VKTS_EULER_XZY:
+    	        			q = rotateRyRzRx(it.second.y, it.second.z, it.second.x);
+    	        			break;
+    	        		default:
+    	        			return;
+    	        	}
+
+    	        	quaternionValues[it.first] = glm::vec4(q.x, q.y, q.z, q.w);
+    			}
+
+	        	rotationValues.clear();
+    		}
+
+    		//
+
+    		// TODO: Create glTF nodes and store to binary.
     	}
 
     	//
