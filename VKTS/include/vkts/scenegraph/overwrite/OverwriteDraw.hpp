@@ -24,8 +24,8 @@
  * THE SOFTWARE.
  */
 
-#ifndef VKTS_OVERWRITE_HPP_
-#define VKTS_OVERWRITE_HPP_
+#ifndef VKTS_OVERWRITEDRAW_HPP_
+#define VKTS_OVERWRITEDRAW_HPP_
 
 #include <vkts/scenegraph/vkts_scenegraph.hpp>
 
@@ -115,4 +115,4 @@ public:
 
 } /* namespace vkts */
 
-#endif /* VKTS_OVERWRITE_HPP_ */
+#endif /* VKTS_OVERWRITEDRAW_HPP_ */

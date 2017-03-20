@@ -47,7 +47,7 @@ VkBool32 BuildCommandTask::execute()
     // Update / transform the scene.
     if (scene.get())
     {
-        scene->updateTransformRecursive(updateContext.getDeltaTime(), updateContext.getDeltaTicks(), updateContext.getTickTime(), usedBuffer, objectOffset, objectStep);
+        scene->updateTransformRecursive(updateContext.getDeltaTime(), updateContext.getDeltaTicks(), updateContext.getTickTime(), usedBuffer, nullptr, objectOffset, objectStep);
     }
 
     //

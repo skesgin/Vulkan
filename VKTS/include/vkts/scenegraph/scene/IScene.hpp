@@ -34,6 +34,7 @@ namespace vkts
 
 class Parameter;
 class OverwriteDraw;
+class OverwriteUpdate;
 
 class IScene: public ICloneable<IScene>, public IDestroyable
 {
@@ -117,7 +118,7 @@ public:
 
     virtual void updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCount, VkWriteDescriptorSet* allWriteDescriptorSets, const uint32_t currentBuffer, const uint32_t objectOffset = 0, const uint32_t objectStep = 1, const uint32_t objectLimit = UINT32_MAX) = 0;
 
-    virtual void updateTransformRecursive(const double deltaTime, const uint64_t deltaTicks, const double tickTime, const uint32_t currentBuffer = 0, const uint32_t objectOffset = 0, const uint32_t objectStep = 1, const uint32_t objectLimit = UINT32_MAX) = 0;
+    virtual void updateTransformRecursive(const double deltaTime, const uint64_t deltaTicks, const double tickTime, const uint32_t currentBuffer = 0, const OverwriteUpdate* updateOverwrite = nullptr, const uint32_t objectOffset = 0, const uint32_t objectStep = 1, const uint32_t objectLimit = UINT32_MAX) = 0;
 
     virtual void drawRecursive(const ICommandBuffersSP& cmdBuffer, const SmartPointerVector<IGraphicsPipelineSP>& allGraphicsPipelines, const uint32_t currentBuffer, const std::map<uint32_t, VkTsDynamicOffset>& dynamicOffsetMappings, const OverwriteDraw* renderOverwrite = nullptr, const uint32_t objectOffset = 0, const uint32_t objectStep = 1, const uint32_t objectLimit = UINT32_MAX) = 0;
 

@@ -958,8 +958,21 @@ void Node::updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsCo
 	}
 }
 
-void Node::updateTransformRecursive(const double deltaTime, const uint64_t deltaTicks, const double tickTime, const uint32_t currentBuffer, const glm::mat4& parentTransformMatrix, const VkBool32 parentTransformMatrixDirty, const glm::mat4& parentBindMatrix, const VkBool32 parentBindMatrixDirty, const INodeSP& armatureNode)
+void Node::updateTransformRecursive(const double deltaTime, const uint64_t deltaTicks, const double tickTime, const uint32_t currentBuffer, const glm::mat4& parentTransformMatrix, const VkBool32 parentTransformMatrixDirty, const glm::mat4& parentBindMatrix, const VkBool32 parentBindMatrixDirty, const INodeSP& armatureNode, const OverwriteUpdate* updateOverwrite)
 {
+    const OverwriteUpdate* currentOverwrite = updateOverwrite;
+    while (currentOverwrite)
+    {
+    	if (!currentOverwrite->visit(*this, deltaTime, deltaTicks, tickTime, currentBuffer, parentTransformMatrix, parentTransformMatrixDirty, parentBindMatrix, parentBindMatrixDirty, armatureNode.get()))
+    	{
+    		return;
+    	}
+
+    	currentOverwrite = currentOverwrite->getNextOverwrite();
+    }
+
+	//
+
 	if (transformMatrixDirty.size() != bindMatrixDirty.size() || currentBuffer >= (uint32_t)transformMatrixDirty.size())
 	{
 		transformMatrixDirty.resize(currentBuffer + 1);
@@ -1308,7 +1321,7 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
 
     for (uint32_t i = 0; i < allChildNodes.size(); i++)
     {
-        allChildNodes[i]->updateTransformRecursive(deltaTime, deltaTicks, tickTime, currentBuffer, this->transformMatrix, this->transformMatrixDirty[currentBuffer], this->bindMatrix, this->bindMatrixDirty[currentBuffer], newArmatureNode);
+        allChildNodes[i]->updateTransformRecursive(deltaTime, deltaTicks, tickTime, currentBuffer, this->transformMatrix, this->transformMatrixDirty[currentBuffer], this->bindMatrix, this->bindMatrixDirty[currentBuffer], newArmatureNode, updateOverwrite);
     }
 
     //

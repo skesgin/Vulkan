@@ -141,8 +141,21 @@ void Object::updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSets
     }
 }
 
-void Object::updateTransformRecursive(const double deltaTime, const uint64_t deltaTicks, const double tickTime, const uint32_t currentBuffer)
+void Object::updateTransformRecursive(const double deltaTime, const uint64_t deltaTicks, const double tickTime, const uint32_t currentBuffer, const OverwriteUpdate* updateOverwrite)
 {
+    const OverwriteUpdate* currentOverwrite = updateOverwrite;
+    while (currentOverwrite)
+    {
+    	if (!currentOverwrite->visit(*this, deltaTime, deltaTicks, tickTime, currentBuffer))
+    	{
+    		return;
+    	}
+
+    	currentOverwrite = currentOverwrite->getNextOverwrite();
+    }
+
+	//
+
 	if (!IMoveable::update(deltaTime, deltaTicks, tickTime))
 	{
 		return;
@@ -155,7 +168,7 @@ void Object::updateTransformRecursive(const double deltaTime, const uint64_t del
 
     if (rootNode.get())
     {
-        rootNode->updateTransformRecursive(deltaTime, deltaTicks, tickTime, currentBuffer, transformMatrix, dirty, glm::mat4(1.0f), VK_FALSE, INodeSP());
+        rootNode->updateTransformRecursive(deltaTime, deltaTicks, tickTime, currentBuffer, transformMatrix, dirty, glm::mat4(1.0f), VK_FALSE, INodeSP(), updateOverwrite);
     }
 
     dirty = VK_FALSE;

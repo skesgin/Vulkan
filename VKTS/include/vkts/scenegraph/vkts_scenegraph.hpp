@@ -93,10 +93,11 @@ typedef enum VkTsInterpolator_
 #include <vkts/scenegraph/parameter/Parameter.hpp>
 
 /**
- * Overwrite draw.
+ * Overwrite.
  */
 
 #include <vkts/scenegraph/overwrite/OverwriteDraw.hpp>
+#include <vkts/scenegraph/overwrite/OverwriteUpdate.hpp>
 
 /**
  * Scene.

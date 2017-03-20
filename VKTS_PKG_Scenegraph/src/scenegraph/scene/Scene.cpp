@@ -342,8 +342,21 @@ void Scene::updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsC
     }
 }
 
-void Scene::updateTransformRecursive(const double deltaTime, const uint64_t deltaTicks, const double tickTime, const uint32_t currentBuffer, const uint32_t objectOffset, const uint32_t objectStep, const uint32_t objectLimit)
+void Scene::updateTransformRecursive(const double deltaTime, const uint64_t deltaTicks, const double tickTime, const uint32_t currentBuffer, const OverwriteUpdate* updateOverwrite, const uint32_t objectOffset, const uint32_t objectStep, const uint32_t objectLimit)
 {
+    const OverwriteUpdate* currentOverwrite = updateOverwrite;
+    while (currentOverwrite)
+    {
+    	if (!currentOverwrite->visit(*this, deltaTime, deltaTicks, tickTime, currentBuffer, objectOffset, objectStep, objectLimit))
+    	{
+    		return;
+    	}
+
+    	currentOverwrite = currentOverwrite->getNextOverwrite();
+    }
+
+    //
+
     if (objectStep == 0)
     {
         return;
@@ -351,7 +364,7 @@ void Scene::updateTransformRecursive(const double deltaTime, const uint64_t delt
 
     for (uint32_t i = objectOffset; i < glm::min(allObjects.size(), objectLimit); i += objectStep)
     {
-        allObjects[i]->updateTransformRecursive(deltaTime, deltaTicks, tickTime, currentBuffer);
+        allObjects[i]->updateTransformRecursive(deltaTime, deltaTicks, tickTime, currentBuffer, updateOverwrite);
     }
 }
 
