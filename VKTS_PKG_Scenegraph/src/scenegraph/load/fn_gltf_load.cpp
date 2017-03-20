@@ -1251,6 +1251,32 @@ static VkBool32 gltfProcessNode(INodeSP& node, const GltfVisitor& visitor, const
     {
     	const auto& gltfAnimation = visitor.getAllGltfAnimations()[animationIndex];
 
+    	//
+
+    	if (node->getNumberAnimations() == 0)
+    	{
+            animation = sceneFactory->createAnimation(sceneManager);
+
+            if (!animation.get())
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Animation not created: '%s'", visitor.getAllGltfAnimations()[animationIndex].name.c_str(), VKTS_MAX_TOKEN_CHARS);
+
+                return VK_FALSE;
+            }
+
+            animation->setName(visitor.getAllGltfAnimations()[animationIndex].name);
+
+            sceneManager->addAnimation(animation);
+
+            //
+
+            node->addAnimation(sceneManager->useAnimation(animation->getName()));
+    	}
+
+    	animation = node->getAnimations()[0];
+
+    	//
+
     	for (uint32_t channelIndex = 0; channelIndex < gltfAnimation.channels.size(); channelIndex++)
     	{
     		if (gltfAnimation.channels[channelIndex].targetNode == &gltfNode)
@@ -1260,22 +1286,6 @@ static VkBool32 gltfProcessNode(INodeSP& node, const GltfVisitor& visitor, const
     			if (!gltfChannel.sampler)
     			{
     				return VK_FALSE;
-    			}
-
-    			if (!animation.get())
-    			{
-    	            animation = sceneFactory->createAnimation(sceneManager);
-
-    	            if (!animation.get())
-    	            {
-    	                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Animation not created: '%s'", visitor.getAllGltfAnimations()[animationIndex].name.c_str(), VKTS_MAX_TOKEN_CHARS);
-
-    	                return VK_FALSE;
-    	            }
-
-    	            animation->setName(visitor.getAllGltfAnimations()[animationIndex].name);
-
-    	            sceneManager->addAnimation(animation);
     			}
 
                 //
@@ -1404,8 +1414,12 @@ static VkBool32 gltfProcessNode(INodeSP& node, const GltfVisitor& visitor, const
 							return VK_FALSE;
 						}
 
-						channel->addEntry(*key, value[targetTransformElementIndex], glm::vec4(*key - 0.1f, value[targetTransformElementIndex], *key + 0.1f, *value), interpolator);
+						channel->addEntry(*key, value[targetTransformElementIndex], glm::vec4(*key - 0.1f, value[targetTransformElementIndex], *key + 0.1f, value[targetTransformElementIndex]), interpolator);
 					}
+
+					//
+
+					animation->addChannel(channel);
                 }
     		}
     	}

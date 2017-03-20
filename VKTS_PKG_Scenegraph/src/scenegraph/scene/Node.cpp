@@ -1004,33 +1004,76 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
 
         //
 
-        Quat quaternion;
+        Quat a;
+        Quat b;
+        float t;
         VkBool32 quaternionDirty = VK_FALSE;
 
         //
 
         for (uint32_t i = 0; i < currentChannels.size(); i++)
         {
-        	float value = interpolate(currentTime, currentChannels[i]);
+        	if (currentChannels[i]->getTargetTransform() == VKTS_TARGET_TRANSFORM_QUATERNION_ROTATE)
+        	{
+        		quaternionDirty = VK_TRUE;
 
-            if (currentChannels[i]->getTargetTransform() == VKTS_TARGET_TRANSFORM_TRANSLATE)
-            {
-                finalTranslate[currentChannels[i]->getTargetTransformElement()] = value;
-            }
-            else if (currentChannels[i]->getTargetTransform() == VKTS_TARGET_TRANSFORM_ROTATE)
-            {
-            	finalRotate[currentChannels[i]->getTargetTransformElement()] = value;
-            }
-            else if (currentChannels[i]->getTargetTransform() == VKTS_TARGET_TRANSFORM_QUATERNION_ROTATE)
-            {
-            	quaternion[currentChannels[i]->getTargetTransformElement()] = value;
+        	    if (currentChannels[i]->getNumberEntries() == 0)
+        	    {
+        	        // Do nothing.
+        	    }
+        	    else if (currentChannels[i]->getNumberEntries() == 1 || currentTime <= currentChannels[i]->getKeys()[0])
+        	    {
+        	        a[currentChannels[i]->getTargetTransformElement()] = currentChannels[i]->getValues()[0];
+        	        b[currentChannels[i]->getTargetTransformElement()] = currentChannels[i]->getValues()[0];
+        	    }
+        	    else
+        	    {
+            	    auto lastIndex = currentChannels[i]->getNumberEntries() - 1;
 
-            	quaternionDirty = VK_TRUE;
-            }
-            else if (currentChannels[i]->getTargetTransform() == VKTS_TARGET_TRANSFORM_SCALE)
-            {
-            	finalScale[currentChannels[i]->getTargetTransformElement()] = value;
-            }
+            	    if (currentTime >= currentChannels[i]->getKeys()[lastIndex])
+            	    {
+            	    	a[currentChannels[i]->getTargetTransformElement()] = currentChannels[i]->getValues()[lastIndex];
+            	    	b[currentChannels[i]->getTargetTransformElement()] = currentChannels[i]->getValues()[lastIndex];
+            	    }
+            	    else
+            	    {
+            	        uint32_t currentIndex = 0;
+            	        while (currentIndex < currentChannels[i]->getNumberEntries())
+            	        {
+            	            if (currentTime < currentChannels[i]->getKeys()[currentIndex])
+            	            {
+            	            	currentIndex--;
+
+            	                break;
+            	            }
+
+            	            currentIndex++;
+            	        }
+
+            	        t = (currentTime - currentChannels[i]->getKeys()[currentIndex]) / (currentChannels[i]->getKeys()[currentIndex + 1] - currentChannels[i]->getKeys()[currentIndex]);
+
+            	    	a[currentChannels[i]->getTargetTransformElement()] = currentChannels[i]->getValues()[currentIndex];
+            	    	b[currentChannels[i]->getTargetTransformElement()] = currentChannels[i]->getValues()[currentIndex + 1];
+            	    }
+        	    }
+        	}
+        	else
+        	{
+				float value = interpolate(currentTime, currentChannels[i]);
+
+				if (currentChannels[i]->getTargetTransform() == VKTS_TARGET_TRANSFORM_TRANSLATE)
+				{
+					finalTranslate[currentChannels[i]->getTargetTransformElement()] = value;
+				}
+				else if (currentChannels[i]->getTargetTransform() == VKTS_TARGET_TRANSFORM_ROTATE)
+				{
+					finalRotate[currentChannels[i]->getTargetTransformElement()] = value;
+				}
+				else if (currentChannels[i]->getTargetTransform() == VKTS_TARGET_TRANSFORM_SCALE)
+				{
+					finalScale[currentChannels[i]->getTargetTransformElement()] = value;
+				}
+        	}
         }
 
         //
@@ -1045,6 +1088,8 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
 
         		currentRotationMode = bindRotationMode;
         	}
+
+        	Quat quaternion = slerp(a, b, t);
 
         	switch (currentRotationMode)
         	{

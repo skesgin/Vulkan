@@ -69,6 +69,8 @@ private:
 
 	JSONarraySP buffers;
 
+	JSONarraySP animations;
+
 	void writeBinaryBuffer(const IBinaryBufferSP& binaryBuffer, const uint32_t count, const uint8_t elementCount, const std::string& currentType, const int32_t currentComponentType, const int32_t target, const uint32_t offset, const uint32_t stride)
 	{
 		//
@@ -110,14 +112,17 @@ private:
 
     	//
 
-    	auto targetValue = JSONintegerSP(new JSONinteger(target));
-
-    	if (!targetValue.get())
+    	if (target != 0)
     	{
-    		return;
-    	}
+			auto targetValue = JSONintegerSP(new JSONinteger(target));
 
-    	currentBufferView->addKeyValue("target", targetValue);
+			if (!targetValue.get())
+			{
+				return;
+			}
+
+			currentBufferView->addKeyValue("target", targetValue);
+    	}
 
     	//
 
@@ -334,10 +339,68 @@ private:
     	currentAccessor->addKeyValue("componentType", componentType);
 	}
 
+    VkBool32 addAnimation(JSONarraySP& channels, JSONarraySP& samplers, const char* path, const VkTsInterpolator interpolate)
+    {
+		auto channel = JSONobjectSP(new JSONobject());
+		auto sampler = JSONobjectSP(new JSONobject());
+
+    	if (!channel.get() || !sampler.get())
+    	{
+    		return VK_FALSE;
+    	}
+
+    	//
+
+    	auto samplerIndex = JSONintegerSP(new JSONinteger((int32_t)samplers->size()));
+    	auto targetObject = JSONobjectSP(new JSONobject());
+
+    	auto nodeIndex = JSONintegerSP(new JSONinteger(nodeCounter));
+    	auto targetPath = JSONstringSP(new JSONstring(path));
+
+    	if (!samplerIndex.get() || !targetObject.get() || !nodeIndex.get() || !targetPath.get())
+    	{
+    		return VK_FALSE;
+    	}
+
+    	targetObject->addKeyValue("node", nodeIndex);
+    	targetObject->addKeyValue("path", targetPath);
+
+    	//
+
+    	channel->addKeyValue("sampler", samplerIndex);
+    	channel->addKeyValue("target", targetObject);
+
+    	//
+
+    	std::string interpolationString = interpolate == VKTS_INTERPOLATOR_LINEAR ? "LINEAR" : "STEP";
+
+    	auto inputIndex = JSONintegerSP(new JSONinteger((int32_t)accessors->size()));
+
+    	auto interpolation = JSONstringSP(new JSONstring(interpolationString));
+
+    	auto outputIndex = JSONintegerSP(new JSONinteger((int32_t)accessors->size() + 1));
+
+    	if (!inputIndex.get() || !interpolation.get() || !outputIndex.get())
+    	{
+    		return VK_FALSE;
+    	}
+
+    	sampler->addKeyValue("input", inputIndex);
+    	sampler->addKeyValue("interpolation", interpolation);
+    	sampler->addKeyValue("output", outputIndex);
+
+    	//
+
+    	channels->addValue(channel);
+    	samplers->addValue(sampler);
+
+    	return VK_TRUE;
+    }
+
 public:
 
 	GltfParameter() :
-		Parameter(), binary(), glTF(), scenes_nodes(), rootNodeCounter(0), nodes(), nodeCounter(0), meshes(), primitives(), materials(),  materialNameToMaterial(), images(), storedImages(), textures(), accessors(), storedAccessors(), bufferViews(), buffers()
+		Parameter(), binary(), glTF(), scenes_nodes(), rootNodeCounter(0), nodes(), nodeCounter(0), meshes(), primitives(), materials(),  materialNameToMaterial(), images(), storedImages(), textures(), accessors(), storedAccessors(), bufferViews(), buffers(), animations()
     {
     }
 
@@ -693,6 +756,25 @@ public:
     	//
 
     	this->buffers = buffersValue;
+
+    	//
+    	// animations
+    	//
+
+    	auto animationsValue = JSONarraySP(new JSONarray());
+
+    	if (!animationsValue.get())
+    	{
+    		return;
+    	}
+
+    	//
+
+    	glTF->addKeyValue("animations", animationsValue);
+
+    	//
+
+    	this->animations = animationsValue;
     }
 
     virtual void visit(IObject& object)
@@ -929,6 +1011,7 @@ public:
     		//
 
     		std::map<float, glm::vec3> translateValues;
+    		VkTsInterpolator translateInterpolate;
 
     		for (uint32_t i = 0; i < allTranslates.size(); i++)
     		{
@@ -957,6 +1040,16 @@ public:
     					return;
     				}
 
+    				if (k == 0)
+    				{
+    					translateInterpolate = allTranslates[i]->getInterpolators()[k];
+    				}
+    				else if (translateInterpolate != allTranslates[i]->getInterpolators()[k])
+    				{
+    					logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Animation has mixed animation.");
+    					return;
+    				}
+
     				float key = allTranslates[i]->getKeys()[k];
     				float value = allTranslates[i]->getValues()[k];
 
@@ -974,6 +1067,7 @@ public:
     		//
 
     		std::map<float, glm::vec3> scaleValues;
+    		VkTsInterpolator scaleInterpolate;
 
     		for (uint32_t i = 0; i < allScales.size(); i++)
     		{
@@ -1002,6 +1096,16 @@ public:
     					return;
     				}
 
+    				if (k == 0)
+    				{
+    					scaleInterpolate = allScales[i]->getInterpolators()[k];
+    				}
+    				else if (scaleInterpolate != allScales[i]->getInterpolators()[k])
+    				{
+    					logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Animation has mixed animation.");
+    					return;
+    				}
+
     				float key = allScales[i]->getKeys()[k];
     				float value = allScales[i]->getValues()[k];
 
@@ -1019,6 +1123,7 @@ public:
     		//
 
     		std::map<float, glm::vec3> rotationValues;
+    		VkTsInterpolator rotationInterpolate;
 
     		for (uint32_t i = 0; i < allRotations.size(); i++)
     		{
@@ -1047,6 +1152,16 @@ public:
     					return;
     				}
 
+    				if (k == 0)
+    				{
+    					rotationInterpolate = allRotations[i]->getInterpolators()[k];
+    				}
+    				else if (rotationInterpolate != allRotations[i]->getInterpolators()[k])
+    				{
+    					logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Animation has mixed animation.");
+    					return;
+    				}
+
     				float key = allRotations[i]->getKeys()[k];
     				float value = allRotations[i]->getValues()[k];
 
@@ -1064,6 +1179,7 @@ public:
     		//
 
     		std::map<float, glm::vec4> quaternionValues;
+    		VkTsInterpolator quaternionInterpolate;
 
     		for (uint32_t i = 0; i < allQuaternionRotations.size(); i++)
     		{
@@ -1090,6 +1206,16 @@ public:
     				if (allQuaternionRotations[i]->getInterpolators()[k] == VKTS_INTERPOLATOR_BEZIER)
     				{
     					logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Animation has Bezier animation.");
+    					return;
+    				}
+
+    				if (k == 0)
+    				{
+    					quaternionInterpolate = allQuaternionRotations[i]->getInterpolators()[k];
+    				}
+    				else if (quaternionInterpolate != allQuaternionRotations[i]->getInterpolators()[k])
+    				{
+    					logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Animation has mixed animation.");
     					return;
     				}
 
@@ -1143,11 +1269,108 @@ public:
     			}
 
 	        	rotationValues.clear();
+
+	        	//
+
+	        	quaternionInterpolate = rotationInterpolate;
     		}
 
     		//
+    		// Create animation
+    		//
 
-    		// TODO: Create glTF nodes and store to binary.
+        	auto animation = JSONobjectSP(new JSONobject());
+
+        	auto channels = JSONarraySP(new JSONarray());
+        	auto samplers = JSONarraySP(new JSONarray());
+        	auto name = JSONstringSP(new JSONstring(currentAnimation->getName()));
+
+        	if (!animation.get() || !channels.get() || !samplers.get() || !name.get())
+        	{
+        		return;
+        	}
+
+        	animation->addKeyValue("channels", channels);
+        	animation->addKeyValue("samplers", samplers);
+        	animation->addKeyValue("name", name);
+
+        	//
+
+        	animations->addValue(animation);
+
+        	//
+
+        	if (translateValues.size() > 0)
+        	{
+        		if (!addAnimation(channels, samplers, "translation", translateInterpolate))
+        		{
+        			return;
+        		}
+
+        		//
+
+        		IBinaryBufferSP keys = binaryBufferCreate((uint32_t)translateValues.size() * sizeof(float));
+        		IBinaryBufferSP values = binaryBufferCreate((uint32_t)translateValues.size() * sizeof(float) * 3);
+
+        		for (auto it : translateValues)
+        		{
+        			keys->write(&it.first, sizeof(float), 1);
+        			values->write(glm::value_ptr(it.second), sizeof(float), 3);
+        		}
+
+        		writeBinaryBuffer(keys, (uint32_t)translateValues.size(), 1, "SCALAR", 5126, 0, 0, sizeof(float));
+        		storedAccessors.append(currentAnimation->getName() + "_translation_keys");
+        		writeBinaryBuffer(values, (uint32_t)translateValues.size(), 3, "VEC3", 5126, 0, 0, sizeof(float) * 3);
+    			storedAccessors.append(currentAnimation->getName() + "_translation_values");
+        	}
+
+        	if (scaleValues.size() > 0)
+        	{
+        		if (!addAnimation(channels, samplers, "scale", scaleInterpolate))
+        		{
+        			return;
+        		}
+
+        		//
+
+        		IBinaryBufferSP keys = binaryBufferCreate((uint32_t)scaleValues.size() * sizeof(float));
+        		IBinaryBufferSP values = binaryBufferCreate((uint32_t)scaleValues.size() * sizeof(float) * 3);
+
+        		for (auto it : scaleValues)
+        		{
+        			keys->write(&it.first, sizeof(float), 1);
+        			values->write(glm::value_ptr(it.second), sizeof(float), 3);
+        		}
+
+        		writeBinaryBuffer(keys, (uint32_t)scaleValues.size(), 1, "SCALAR", 5126, 0, 0, sizeof(float));
+        		storedAccessors.append(currentAnimation->getName() + "_scale_keys");
+        		writeBinaryBuffer(values, (uint32_t)scaleValues.size(), 3, "VEC3", 5126, 0, 0, sizeof(float) * 3);
+    			storedAccessors.append(currentAnimation->getName() + "_scale_values");
+        	}
+
+        	if (quaternionValues.size() > 0)
+        	{
+        		if (!addAnimation(channels, samplers, "rotation", quaternionInterpolate))
+        		{
+        			return;
+        		}
+
+        		//
+
+        		IBinaryBufferSP keys = binaryBufferCreate((uint32_t)quaternionValues.size() * sizeof(float));
+        		IBinaryBufferSP values = binaryBufferCreate((uint32_t)quaternionValues.size() * sizeof(float) * 4);
+
+        		for (auto it : quaternionValues)
+        		{
+        			keys->write(&it.first, sizeof(float), 1);
+        			values->write(glm::value_ptr(it.second), sizeof(float), 4);
+        		}
+
+        		writeBinaryBuffer(keys, (uint32_t)quaternionValues.size(), 1, "SCALAR", 5126, 0, 0, sizeof(float));
+        		storedAccessors.append(currentAnimation->getName() + "_rotation_keys");
+        		writeBinaryBuffer(values, (uint32_t)quaternionValues.size(), 4, "VEC4", 5126, 0, 0, sizeof(float) * 4);
+    			storedAccessors.append(currentAnimation->getName() + "_rotation_values");
+        	}
     	}
 
     	//
