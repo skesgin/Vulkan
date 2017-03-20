@@ -1,6 +1,8 @@
 [![Travis CI](https://api.travis-ci.org/McNopper/Vulkan.svg?branch=master)](https://travis-ci.org/McNopper/Vulkan)
 [![Coverity Scan](https://scan.coverity.com/projects/11301/badge.svg)](https://scan.coverity.com/projects/mcnopper-vulkan)
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](VKTS_Licenses/VKTS_license.txt)
+[![Join the chat at https://gitter.im/McNopper/Lobby](https://badges.gitter.im/McNopper/glTF.svg)](https://gitter.im/McNopper/Lobby)
+
 
 ![Vulkan](VKTS_Documentation/images/vulkan_logo.png) ![Vulkan](VKTS_Documentation/images/glTF_logo.png)  
 Vulkan examples using VulKan ToolS (VKTS):
