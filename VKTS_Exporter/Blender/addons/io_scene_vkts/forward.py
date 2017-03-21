@@ -249,7 +249,7 @@ forwardOutAssignGLSL = """
         
         vec3 F0 = mix(F0_dielectric, F0_metallic, metallic);
     
-        vec3 colorCookTorrance = iblCookTorrance(N, V, roughness, F0) * ambientOcclusion;
+        vec3 colorCookTorrance = iblCookTorrance(N, V, roughness, F0);
         
         // Dynamic lights.
         
