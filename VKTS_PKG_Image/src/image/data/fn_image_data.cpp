@@ -1696,10 +1696,22 @@ IImageDataSP VKTS_APIENTRY imageDataConvert(const IImageDataSP& sourceImage, con
             	int32_t zTarget = mirror[2] ? (sourceImage->getDepth() - 1 - z) : z;
 
             	float L = 1.0f;
+            	float normalLength = 1.0f;
 
             	if (sourceImageDataType == VKTS_HDR_COLOR_DATA)
 				{
             		L = renderColorGetLuminance(sourceImage->getTexel(x, y, z, 0, 0));
+				}
+            	else if (sourceImageDataType == VKTS_NORMAL_DATA)
+				{
+            		glm::vec4 scaledNormal = (sourceImage->getTexel(x, y, z, 0, 0) * 2.0f - 1.0f) * factor;
+
+            		normalLength = glm::length(scaledNormal);
+
+            		if (normalLength == 0.0f)
+            		{
+            			normalLength = 1.0f;
+            		}
 				}
 
                 for (int32_t channel = 0; channel < targetNumberChannels; channel++)
@@ -1759,7 +1771,7 @@ IImageDataSP VKTS_APIENTRY imageDataConvert(const IImageDataSP& sourceImage, con
 							// Convert normal data.
 							if (!sourceIsSFLOAT && sourceImageDataType == VKTS_NORMAL_DATA)
 							{
-								c = c * 2.0f - 1.0f;
+								c = (c * 2.0f - 1.0f) / normalLength;
 							}
                     	}
 

@@ -30,7 +30,7 @@ namespace vkts
 {
 
 GltfVisitor::GltfVisitor(const std::string& directory) :
-	JsonVisitor(), directory(directory), state(), gltfBool(VK_FALSE), gltfString(), gltfInteger(0), gltfFloat(0.0f), gltfIntegerArray{}, gltfFloatArray{}, arrayIndex(0), arraySize(0), numberArray(VK_FALSE), objectArray(VK_FALSE), gltfExtensions{}, gltfBuffer{}, gltfBufferView{}, gltfAccessor{}, gltfPrimitive{}, gltfImage{}, gltfSampler{}, gltfTexture{}, gltfTextureInfo{}, gltfMaterial{}, gltfMesh{}, gltfSkin{}, gltfNode{}, gltfAnimation_Sampler{}, gltfChannel{}, gltfAnimation{}, gltfScene{}, allGltfBuffers(), allGltfBufferViews(), allGltfAccessors(), allGltfImages(), allGltfSamplers(), allGltfTextures(), allGltfMaterials(), allGltfMeshes(), allGltfSkins(), allGltfNodes(), allGltfAnimations(), allGltfScenes(), defaultScene(nullptr)
+	JsonVisitor(), directory(directory), state(), subState(), gltfBool(VK_FALSE), gltfString(), gltfInteger(0), gltfFloat(0.0f), gltfIntegerArray{}, gltfFloatArray{}, arrayIndex(0), arraySize(0), numberArray(VK_FALSE), objectArray(VK_FALSE), gltfExtensions{}, gltfBuffer{}, gltfBufferView{}, gltfAccessor{}, gltfPrimitive{}, gltfImage{}, gltfSampler{}, gltfTexture{}, gltfTextureInfo{}, gltfMaterial{}, gltfMesh{}, gltfSkin{}, gltfNode{}, gltfAnimation_Sampler{}, gltfChannel{}, gltfAnimation{}, gltfScene{}, allGltfBuffers(), allGltfBufferViews(), allGltfAccessors(), allGltfImages(), allGltfSamplers(), allGltfTextures(), allGltfMaterials(), allGltfMeshes(), allGltfSkins(), allGltfNodes(), allGltfAnimations(), allGltfScenes(), defaultScene(nullptr)
 {
 }
 
@@ -1043,9 +1043,10 @@ void GltfVisitor::visitMaterial(JSONobject& jsonObject)
 		auto normalTexture = jsonObject.getValue("normalTexture");
 
 		state.push(GltfState_Material_TextureInfo);
+		subState.push(GltfSubState_NormalTexture);
 		normalTexture->visit(*this);
 
-		if (state.top() == GltfState_Error)
+		if (state.top() == GltfState_Error || subState.top() == GltfSubState_Error)
 		{
 			return;
 		}
@@ -1056,6 +1057,7 @@ void GltfVisitor::visitMaterial(JSONobject& jsonObject)
 			return;
 		}
 
+		gltfMaterial.normalScale = gltfTextureInfo.normalScale;
 		gltfMaterial.normalTexture = &(allGltfTextures[gltfTextureInfo.index]);
 	}
 
@@ -1064,9 +1066,10 @@ void GltfVisitor::visitMaterial(JSONobject& jsonObject)
 		auto occlusionTexture = jsonObject.getValue("occlusionTexture");
 
 		state.push(GltfState_Material_TextureInfo);
+		subState.push(GltfSubState_OcclusionTexture);
 		occlusionTexture->visit(*this);
 
-		if (state.top() == GltfState_Error)
+		if (state.top() == GltfState_Error || subState.top() == GltfSubState_Error)
 		{
 			return;
 		}
@@ -1077,6 +1080,7 @@ void GltfVisitor::visitMaterial(JSONobject& jsonObject)
 			return;
 		}
 
+		gltfMaterial.occlusionStrength = gltfTextureInfo.occlusionStrength;
 		gltfMaterial.occlusionTexture = &(allGltfTextures[gltfTextureInfo.index]);
 	}
 
@@ -1857,11 +1861,10 @@ void GltfVisitor::visitMaterial_Extensions_PbrSpecularGlossiness(JSONobject& jso
 
 void GltfVisitor::visitMaterial_TextureInfo(JSONobject& jsonObject)
 {
-	// FIXME scale (normalTexture)
-	// FIXME strength (occlusionTexture)
-
 	gltfTextureInfo.index = 0;
 	gltfTextureInfo.texCoord = 0;
+	gltfTextureInfo.normalScale = 1.0f;
+	gltfTextureInfo.occlusionStrength = 1.0f;
 
 	if (jsonObject.hasKey("index"))
 	{
@@ -1891,6 +1894,57 @@ void GltfVisitor::visitMaterial_TextureInfo(JSONobject& jsonObject)
 		gltfTextureInfo.texCoord = gltfInteger;
 	}
 
+	//
+
+	if (jsonObject.hasKey("scale"))
+	{
+		if (subState.top() == GltfSubState_NormalTexture)
+		{
+			auto scale = jsonObject.getValue("scale");
+
+			scale->visit(*this);
+
+			if (state.top() == GltfState_Error)
+			{
+				return;
+			}
+
+			gltfTextureInfo.normalScale = gltfFloat;
+		}
+		else
+		{
+			state.push(GltfState_Error);
+			subState.push(GltfSubState_Error);
+			return;
+		}
+	}
+
+	//
+
+	if (jsonObject.hasKey("strength"))
+	{
+		if (subState.top() == GltfSubState_OcclusionTexture)
+		{
+			auto strength = jsonObject.getValue("strength");
+
+			strength->visit(*this);
+
+			if (state.top() == GltfState_Error)
+			{
+				return;
+			}
+
+			gltfTextureInfo.occlusionStrength = gltfFloat;
+		}
+		else
+		{
+			state.push(GltfState_Error);
+			subState.push(GltfSubState_Error);
+			return;
+		}
+	}
+
+	//
 	//
 
 	if (gltfTextureInfo.texCoord > 0)
@@ -2728,8 +2782,10 @@ void GltfVisitor::visit(JSONarray& jsonArray)
 
 				//
 
+				gltfMaterial.normalScale = 1.0f;
 				gltfMaterial.normalTexture = nullptr;
 
+				gltfMaterial.occlusionStrength = 1.0f;
 				gltfMaterial.occlusionTexture = nullptr;
 
 				gltfMaterial.emissiveFactor[0] = 1.0f;
@@ -3052,9 +3108,10 @@ void GltfVisitor::visit(JSONarray& jsonArray)
 
 void GltfVisitor::visit(JSONobject& jsonObject)
 {
-	if (state.size() == 0)
+	if (state.size() == 0 && subState.size() == 0)
 	{
 		state.push(GltfState_Start);
+		subState.push(GltfSubState_Start);
 	}
 
 	auto gltfState = state.top();
@@ -3397,6 +3454,7 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 		//
 
 		state.push(GltfState_End);
+		subState.push(GltfSubState_End);
 
 		return;
 	}

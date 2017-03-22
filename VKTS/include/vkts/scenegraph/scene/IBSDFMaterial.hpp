@@ -92,6 +92,10 @@ public:
 
     virtual void setAlphaCutoff(const float alphaCutoff) = 0;
 
+    virtual float getAmbientOcclusionStrength() const = 0;
+
+    virtual void setAmbientOcclusionStrength(const float ambientOcclusionStrength) = 0;
+
     virtual VkBool32 isSpecularGlossiness() const = 0;
 
     virtual void setSpecularGlossiness(const VkBool32 specularGlossiness) = 0;

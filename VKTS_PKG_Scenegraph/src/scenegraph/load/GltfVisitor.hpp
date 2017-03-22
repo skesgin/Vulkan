@@ -32,6 +32,16 @@
 namespace vkts
 {
 
+enum GltfSubState {
+	GltfSubState_Start,
+	GltfSubState_End,
+
+	GltfSubState_Error,
+
+	GltfSubState_NormalTexture,
+	GltfSubState_OcclusionTexture
+};
+
 enum GltfState {
 	GltfState_Start,
 	GltfState_End,
@@ -140,6 +150,8 @@ typedef struct _GltfTexture {
 typedef struct _GltfTextureInfo {
 	int32_t index;
 	int32_t texCoord;
+	float normalScale;
+	float occlusionStrength;
 } GltfTextureInfo;
 
 typedef struct _GltfPbrMetallicRoughness {
@@ -167,7 +179,9 @@ typedef struct _GltfMaterial {
 	GltfPbrMetallicRoughness pbrMetallicRoughness;
 	GltfPbrSpecularGlossiness pbrSpecularGlossiness;
 
+	float normalScale;
 	GltfTexture* normalTexture;
+	float occlusionStrength;
 	GltfTexture* occlusionTexture;
 	float emissiveFactor[3];
 	GltfTexture* emissiveTexture;
@@ -249,6 +263,7 @@ private:
 	const std::string directory;
 
 	std::stack<enum GltfState> state;
+	std::stack<enum GltfSubState> subState;
 
 	VkBool32 gltfBool;
 	std::string gltfString;

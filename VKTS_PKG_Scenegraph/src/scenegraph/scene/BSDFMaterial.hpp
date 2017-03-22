@@ -53,6 +53,8 @@ protected:
 
     float alphaCutoff;
 
+    float ambientOcclusionStrength;
+
     VkBool32 specularGlossiness;
 
 public:
@@ -119,6 +121,11 @@ public:
     virtual float getAlphaCutoff() const override;
 
     virtual void setAlphaCutoff(const float alphaCutoff) override;
+
+
+    virtual float getAmbientOcclusionStrength() const override;
+
+    virtual void setAmbientOcclusionStrength(const float ambientOcclusionStrength) override;
 
 
     virtual VkBool32 isSpecularGlossiness() const override;

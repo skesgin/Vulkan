@@ -30,12 +30,12 @@ namespace vkts
 {
 
 BSDFMaterial::BSDFMaterial(const VkBool32 forwardRendering) :
-    IBSDFMaterial(), Material(forwardRendering, VK_FALSE, ""), fragmentShader(nullptr), attributes(VKTS_VERTEX_BUFFER_TYPE_VERTEX | VKTS_VERTEX_BUFFER_TYPE_NORMAL), allTextureObjects(), transparent(VK_FALSE), sorted(VK_FALSE), packed(VK_FALSE), alphaCutoff(0.0f), specularGlossiness(VK_FALSE)
+    IBSDFMaterial(), Material(forwardRendering, VK_FALSE, ""), fragmentShader(nullptr), attributes(VKTS_VERTEX_BUFFER_TYPE_VERTEX | VKTS_VERTEX_BUFFER_TYPE_NORMAL), allTextureObjects(), transparent(VK_FALSE), sorted(VK_FALSE), packed(VK_FALSE), alphaCutoff(0.0f), ambientOcclusionStrength(1.0f), specularGlossiness(VK_FALSE)
 {
 }
 
 BSDFMaterial::BSDFMaterial(const BSDFMaterial& other) :
-    IBSDFMaterial(), Material(other), fragmentShader(other.fragmentShader), attributes(other.attributes), allTextureObjects(), transparent(other.transparent), sorted(other.sorted), packed(other.packed), alphaCutoff(other.alphaCutoff), specularGlossiness(other.specularGlossiness)
+    IBSDFMaterial(), Material(other), fragmentShader(other.fragmentShader), attributes(other.attributes), allTextureObjects(), transparent(other.transparent), sorted(other.sorted), packed(other.packed), alphaCutoff(other.alphaCutoff), ambientOcclusionStrength(other.ambientOcclusionStrength), specularGlossiness(other.specularGlossiness)
 {
 	for (uint32_t i = 0; i < other.allTextureObjects.size(); i++)
 	{
@@ -175,6 +175,16 @@ float BSDFMaterial::getAlphaCutoff() const
 void BSDFMaterial::setAlphaCutoff(const float alphaCutoff)
 {
 	this->alphaCutoff = alphaCutoff;
+}
+
+float BSDFMaterial::getAmbientOcclusionStrength() const
+{
+	return ambientOcclusionStrength;
+}
+
+void BSDFMaterial::setAmbientOcclusionStrength(const float ambientOcclusionStrength)
+{
+	this->ambientOcclusionStrength = ambientOcclusionStrength;
 }
 
 VkBool32 BSDFMaterial::isSpecularGlossiness() const

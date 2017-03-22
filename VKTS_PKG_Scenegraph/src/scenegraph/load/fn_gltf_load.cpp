@@ -117,7 +117,14 @@ static ITextureObjectSP gltfProcessTextureObject(const GltfTexture* texture, con
 	{
 		if (texture && texture->source && texture->source->imageData.get())
 		{
-			imageData = imageDataConvert(texture->source->imageData, texture->source->imageData->getFormat(), imageDataName, imageDataType, imageDataType, glm::vec4(factor[0], factor[1], factor[2], factor[3]));
+			if (imageDataType == VKTS_NORMAL_DATA)
+			{
+				imageData = imageDataConvert(texture->source->imageData, texture->source->imageData->getFormat(), imageDataName, imageDataType, imageDataType, glm::vec4(factor[0], factor[1], 1.0f, 0.0f));
+			}
+			else
+			{
+				imageData = imageDataConvert(texture->source->imageData, texture->source->imageData->getFormat(), imageDataName, imageDataType, imageDataType, glm::vec4(factor[0], factor[1], factor[2], factor[3]));
+			}
 		}
 		else
 		{
@@ -1015,6 +1022,8 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 			// Normal
 			//
 
+			// Note: Even when scaling, normalized is y up.
+
 			ITextureObjectSP normal = gltfProcessTextureObject(gltfPrimitive.material->normalTexture, 1.0f, VK_TRUE, VKTS_NORMAL_DATA, sceneManager);
 
 			if (!normal.get())
@@ -1034,6 +1043,8 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 			{
 				return VK_FALSE;
 			}
+
+			bsdfMaterial->setAmbientOcclusionStrength(gltfPrimitive.material->occlusionStrength);
 
 			bsdfMaterial->addTextureObject(ambientOcclusion);
 

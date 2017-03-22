@@ -1993,6 +1993,20 @@ public:
     				if (storeImage)
     				{
     					currentMaterial->addKeyValue("occlusionTexture", textureValue);
+
+    					//
+
+    					if (material.getAmbientOcclusionStrength() < 1.0f)
+    					{
+    				    	auto strength = JSONfloatSP(new JSONfloat(material.getAmbientOcclusionStrength()));
+
+    				    	if (!strength.get())
+    				    	{
+    				    		return;
+    				    	}
+
+    				    	textureValue->addKeyValue("strength", strength);
+    					}
     				}
 
     				break;

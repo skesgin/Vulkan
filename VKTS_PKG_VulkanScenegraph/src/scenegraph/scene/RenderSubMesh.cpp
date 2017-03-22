@@ -83,12 +83,16 @@ void RenderSubMesh::draw(const ICommandBuffersSP& cmdBuffer, const SmartPointerV
 	{
 		subMesh.getBSDFMaterial()->drawRecursive(cmdBuffer, graphicsPipeline, currentBuffer, dynamicOffsetMappings, renderOverwrite, nodeName);
 
-		// For now, alpha cut off only in glTF shader.
+		// For now, alpha cut off and ambeint occlusion strerength only in glTF shader.
 		if (subMesh.getBSDFMaterial()->isSorted() && subMesh.getBSDFMaterial()->isPacked())
 		{
 			float alphaCutoff = subMesh.getBSDFMaterial()->getAlphaCutoff();
 
-			vkCmdPushConstants(cmdBuffer->getCommandBuffer(), graphicsPipeline->getLayout(), VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(int32_t) + sizeof(float) + sizeof(float), sizeof(int32_t), &alphaCutoff);
+			vkCmdPushConstants(cmdBuffer->getCommandBuffer(), graphicsPipeline->getLayout(), VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(int32_t) + sizeof(float) + sizeof(float), sizeof(float), &alphaCutoff);
+
+			float strength = subMesh.getBSDFMaterial()->getAmbientOcclusionStrength();
+
+			vkCmdPushConstants(cmdBuffer->getCommandBuffer(), graphicsPipeline->getLayout(), VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(int32_t) + sizeof(float) + sizeof(float) + sizeof(float), sizeof(float), &strength);
 		}
 	}
 
