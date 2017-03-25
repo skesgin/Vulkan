@@ -16,7 +16,18 @@ file(GLOB_RECURSE CPP_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 
 list(APPEND IGNORE_CPP_FILES )
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+if (${ANDROID_PLATFORM} MATCHES "android")
+
+    include_directories(AFTER $ENV{ANDROID_NDK_HOME}/sources/android/native_app_glue)
+
+    list(APPEND IGNORE_CPP_FILES    ${CMAKE_CURRENT_SOURCE_DIR}/src/core/processor/fn_processor_linux.cpp
+                                    ${CMAKE_CURRENT_SOURCE_DIR}/src/core/processor/fn_processor_windows.cpp    
+                                    ${CMAKE_CURRENT_SOURCE_DIR}/src/core/profile/fn_profile_windows.cpp
+                                    ${CMAKE_CURRENT_SOURCE_DIR}/src/core/file/fn_file_linux.cpp                                    
+                                    ${CMAKE_CURRENT_SOURCE_DIR}/src/core/file/fn_file_windows.cpp
+    )
+
+elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
     find_path(Vulkan_INCLUDE_DIR NAMES vulkan/vulkan.h PATHS "$ENV{VULKAN_SDK}/Include")
     include_directories(AFTER ${Vulkan_INCLUDE_DIR})

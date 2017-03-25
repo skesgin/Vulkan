@@ -14,7 +14,11 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../VKTS_External/include ${CMAKE
 
 file(GLOB_RECURSE CPP_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+if (${ANDROID_PLATFORM} MATCHES "android")
+
+    include_directories(AFTER $ENV{ANDROID_NDK_HOME}/sources/android/native_app_glue)
+
+elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
     find_path(Vulkan_INCLUDE_DIR NAMES vulkan/vulkan.h PATHS "$ENV{VULKAN_SDK}/Include")
     include_directories(AFTER ${Vulkan_INCLUDE_DIR})
@@ -24,18 +28,6 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
         add_definitions(-D_CRT_SECURE_NO_WARNINGS)
         
     endif ()        
-
-elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-
-    if (${VKTS_WSI} MATCHES "VKTS_DISPLAY_VISUAL")
-
-        add_definitions(-DVKTS_DISPLAY_VISUAL)
-
-    elseif (${VKTS_WSI} MATCHES "VKTS_WAYLAND_VISUAL")
-
-        add_definitions(-DVKTS_WAYLAND_VISUAL)
-
-    endif ()
 
 endif ()
 

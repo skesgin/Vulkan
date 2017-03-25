@@ -15,7 +15,11 @@ build/
 Debug/
 Release/
 CMakeFiles/
+.externalNativeBuild/
+.idea/
+.gradle/
 language.settings.xml
+local.properties
 *.apk
 *.blend1
 *.cmake
@@ -23,6 +27,7 @@ language.settings.xml
 *.dir
 *.filters
 *.ilk
+*.iml
 *.lastbuildstate
 *.log
 *.obj

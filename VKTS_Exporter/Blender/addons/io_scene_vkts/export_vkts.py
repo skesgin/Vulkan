@@ -1578,10 +1578,16 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName, use
             if doSimplify and len(substancePainter) > 0:
 
                 if use_forward:
-                    fw("fragment_shader substance_forward.frag.spv\n")
+                    if texCoordUsed:
+                        fw("fragment_shader substance_forward.frag.spv\n")
+                    else:
+                        fw("fragment_shader substance_forward_no_texcoord.frag.spv\n")
                     fw("\n")
                 else:
-                    fw("fragment_shader substance_deferred.frag.spv\n")
+                    if texCoordUsed:
+                        fw("fragment_shader substance_deferred.frag.spv\n")
+                    else:
+                        fw("fragment_shader substance_deferred_no_texcoord.frag.spv\n")
                     fw("\n")
                 
                 if 'BASE_COLOR' in substancePainter:

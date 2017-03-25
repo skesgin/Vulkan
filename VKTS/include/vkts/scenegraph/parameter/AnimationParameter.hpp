@@ -66,7 +66,7 @@ public:
 
     //
 
-	float getAnimationType() const
+    enum AnimationType getAnimationType() const
 	{
 		return animationType;
 	}
