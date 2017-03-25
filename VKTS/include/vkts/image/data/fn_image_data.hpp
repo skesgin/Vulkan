@@ -180,7 +180,7 @@ VKTS_APICALL SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataMipmap(cons
  *
  * @ThreadSafe
  */
-VKTS_APICALL SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataCubemap(const IImageDataSP& sourceImage, const uint32_t length, const std::string& name);
+VKTS_APICALL SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataCubemap(const IImageDataSP& sourceImage, const uint32_t length, const std::string& name, const enum VkTsEnvironmentType environmentType = VKTS_ENVIRONMENT_PANORAMA);
 
 /**
  *

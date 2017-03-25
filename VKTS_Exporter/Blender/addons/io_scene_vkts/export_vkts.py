@@ -401,6 +401,8 @@ def saveTextures(context, filepath, imagesLibraryName, materials, simplify):
 
     allEnvironmentTextures = []
 
+    allMirrorBallEnvironments = []
+
     for nameOfTexture in envTextures:
 
         texture = envTextures[nameOfTexture]
@@ -409,6 +411,10 @@ def saveTextures(context, filepath, imagesLibraryName, materials, simplify):
 
         if not nameOfImage in environmentImages:
             environmentImages.append(nameOfImage)
+
+            if texture.texture_coords == 'SPHERE' and not nameOfImage in allMirrorBallEnvironments:
+                allMirrorBallEnvironments.append(nameOfImage)
+            
 
         fw("#\n")
         fw("# Environment Texture.\n")
@@ -430,6 +436,10 @@ def saveTextures(context, filepath, imagesLibraryName, materials, simplify):
         
         if not nameOfImage in environmentImages:
             environmentImages.append(nameOfImage)
+
+            if node.projection == 'MIRROR_BALL' and not nameOfImage in allMirrorBallEnvironments:
+                allMirrorBallEnvironments.append(nameOfImage)
+
         if not nameOfImage in preFilteredImages:
             preFilteredImages.append(nameOfImage)
 
@@ -474,6 +484,10 @@ def saveTextures(context, filepath, imagesLibraryName, materials, simplify):
         else:
             if nameOfImage in environmentImages:
                 fw_image("environment true\n")
+
+                if nameOfImage in allMirrorBallEnvironments:
+                    fw_image("environment_type mirror_sphere\n")
+
             if nameOfImage in preFilteredImages:
                 fw_image("pre_filtered true\n")
         fw_image("image_data %s\n" % (nameOfImage + extension))

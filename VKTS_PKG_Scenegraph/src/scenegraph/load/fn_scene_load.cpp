@@ -57,6 +57,7 @@ static VkBool32 sceneLoadImageObjects(const char* directory, const char* filenam
     std::string imageObjectName;
     VkBool32 mipMap = VK_FALSE;
     VkBool32 environment = VK_FALSE;
+    VkTsEnvironmentType environmentType = VKTS_ENVIRONMENT_PANORAMA;
     VkBool32 preFiltered = VK_FALSE;
     IImageDataSP imageData;
 
@@ -79,6 +80,7 @@ static VkBool32 sceneLoadImageObjects(const char* directory, const char* filenam
 
             mipMap = VK_FALSE;
             environment = VK_FALSE;
+            environmentType = VKTS_ENVIRONMENT_PANORAMA;
             preFiltered = VK_FALSE;
         }
         else if (parseIsToken(buffer, "mipmap"))
@@ -98,6 +100,34 @@ static VkBool32 sceneLoadImageObjects(const char* directory, const char* filenam
             }
 
             environment = bdata;
+        }
+        else if (parseIsToken(buffer, "environment_type"))
+        {
+            if (!parseString(buffer, sdata, VKTS_MAX_TOKEN_CHARS))
+            {
+                return VK_FALSE;
+            }
+
+            environmentType = VKTS_ENVIRONMENT_PANORAMA;
+
+            if (strcmp(sdata, "panorama") == 0)
+            {
+            	environmentType = VKTS_ENVIRONMENT_PANORAMA;
+            }
+            else if (strcmp(sdata, "mirror_sphere") == 0)
+            {
+            	environmentType = VKTS_ENVIRONMENT_MIRROR_SPHERE;
+            }
+            else if (strcmp(sdata, "mirror_dome") == 0)
+            {
+            	environmentType = VKTS_ENVIRONMENT_MIRROR_DOME;
+            }
+            else
+            {
+                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Unknown environment type '%s'", sdata, VKTS_MAX_TOKEN_CHARS);
+
+                return VK_FALSE;
+            }
         }
         else if (parseIsToken(buffer, "pre_filtered"))
         {
@@ -334,7 +364,12 @@ static VkBool32 sceneLoadImageObjects(const char* directory, const char* filenam
 									cubeMapLength *= 2;
 								}
 
-								auto oldAllCubeMaps = imageDataCubemap(imageData, cubeMapLength, finalImageDataFilename);
+								if (environmentType == VKTS_ENVIRONMENT_MIRROR_DOME)
+								{
+									cubeMapLength *= 2;
+								}
+
+								auto oldAllCubeMaps = imageDataCubemap(imageData, cubeMapLength, finalImageDataFilename, environmentType);
 
 								if (oldAllCubeMaps.size() != 6)
 								{

@@ -31,7 +31,7 @@
 namespace vkts
 {
 
-SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataCubemap(const IImageDataSP& sourceImage, const uint32_t length, const std::string& name)
+SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataCubemap(const IImageDataSP& sourceImage, const uint32_t length, const std::string& name, const enum VkTsEnvironmentType environmentType)
 {
     if (name.size() == 0 || !sourceImage.get() || length == 0)
     {
@@ -88,12 +88,43 @@ SmartPointerVector<IImageDataSP> VKTS_APIENTRY imageDataCubemap(const IImageData
 
 				//
 
-				sampleLocation.s = 0.5f + 0.5f * atan2f(scanVector.z, scanVector.x) / VKTS_MATH_PI;
-				sampleLocation.t = 1.0f - acosf(scanVector.y) / VKTS_MATH_PI;
+				switch (environmentType)
+				{
+					case VKTS_ENVIRONMENT_PANORAMA:
+					{
+						sampleLocation.s = 0.5f + 0.5f * atan2f(scanVector.z, scanVector.x) / VKTS_MATH_PI;
+						sampleLocation.t = 1.0f - acosf(scanVector.y) / VKTS_MATH_PI;
+					}
+					break;
+					case VKTS_ENVIRONMENT_MIRROR_SPHERE:
+					{
+						float rz = 1.0f + scanVector.z;
+
+						float inv_two_m = 1.0f / (2.0f * sqrtf(scanVector.x * scanVector.x + scanVector.y * scanVector.y + rz * rz));
+
+						sampleLocation.s = 0.5f + scanVector.x * inv_two_m;
+						sampleLocation.t = 0.5f + scanVector.y * inv_two_m;
+					}
+					break;
+					case VKTS_ENVIRONMENT_MIRROR_DOME:
+					{
+						sampleLocation.s = 0.5f + scanVector.x * 0.5f;
+						sampleLocation.t = 0.5f - scanVector.z * 0.5f;
+					}
+					break;
+				}
+
+				// Only the upper values are valid.
+				if (scanVector.y < 0.0f && environmentType == VKTS_ENVIRONMENT_MIRROR_DOME)
+				{
+					texel = glm::vec4(0.5f, 0.5f, 0.5f, 1.0f);
+				}
+				else
+				{
+					texel = sourceImage->getSample(sampleLocation.s, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_REPEAT, sampleLocation.t, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT, 0.5f, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, 0, 0);
+				}
 
 				//
-
-				texel = sourceImage->getSample(sampleLocation.s, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_REPEAT, sampleLocation.t, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT, 0.5f, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, 0, 0);
 
 				result[side]->setTexel(texel, x, y, 0, 0, 0);
 			}
