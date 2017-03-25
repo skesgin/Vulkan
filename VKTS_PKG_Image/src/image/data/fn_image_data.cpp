@@ -1173,12 +1173,15 @@ IImageDataSP VKTS_APIENTRY imageDataUnite(const IImageDataSP& sourceImage0, cons
 
 	if ((sourceImage0->getWidth() != sourceImage1->getWidth()) || (sourceImage0->getHeight() != sourceImage1->getHeight()) || (sourceImage0->getDepth() != sourceImage1->getDepth()))
 	{
-		return IImageDataSP();
+		if (!(sourceImage0->getWidth() == 1 && sourceImage0->getHeight() == 1 && sourceImage0->getDepth() == 1) && !(sourceImage1->getWidth() == 1 && sourceImage1->getHeight() == 1 && sourceImage1->getDepth() == 1))
+		{
+			return IImageDataSP();
+		}
 	}
 
-	auto width = sourceImage0->getWidth();
-	auto height = sourceImage0->getHeight();
-	auto depth = sourceImage0->getDepth();
+	auto width = glm::max(sourceImage0->getWidth(), sourceImage1->getWidth());
+	auto height = glm::max(sourceImage0->getHeight(), sourceImage1->getHeight());
+	auto depth = glm::max(sourceImage0->getDepth(), sourceImage1->getDepth());
 
 	//
 
@@ -1196,6 +1199,14 @@ IImageDataSP VKTS_APIENTRY imageDataUnite(const IImageDataSP& sourceImage0, cons
             for (uint32_t x = 0; x < width; x++)
             {
             	glm::vec4 color;
+
+        		uint32_t x0 = glm::min(x, sourceImage0->getWidth() - 1);
+        		uint32_t y0 = glm::min(y, sourceImage0->getHeight() - 1);
+        		uint32_t z0 = glm::min(z, sourceImage0->getDepth() - 1);
+
+        		uint32_t x1 = glm::min(x, sourceImage1->getWidth() - 1);
+        		uint32_t y1 = glm::min(y, sourceImage1->getHeight() - 1);
+        		uint32_t z1 = glm::min(z, sourceImage1->getDepth() - 1);
 
             	for (uint32_t i = 0; i < 4; i++)
             	{
@@ -1222,28 +1233,28 @@ IImageDataSP VKTS_APIENTRY imageDataUnite(const IImageDataSP& sourceImage0, cons
             		switch (current)
             		{
 						case VKTS_SOURCE_0_RED:
-							c = sourceImage0->getTexel(x, y, z, 0, 0).r;
+							c = sourceImage0->getTexel(x0, y0, z0, 0, 0).r;
 							break;
 						case VKTS_SOURCE_0_GREEN:
-							c = sourceImage0->getTexel(x, y, z, 0, 0).g;
+							c = sourceImage0->getTexel(x0, y0, z0, 0, 0).g;
 							break;
 						case VKTS_SOURCE_0_BLUE:
-							c = sourceImage0->getTexel(x, y, z, 0, 0).b;
+							c = sourceImage0->getTexel(x0, y0, z0, 0, 0).b;
 							break;
 						case VKTS_SOURCE_0_ALPHA:
-							c = sourceImage0->getTexel(x, y, z, 0, 0).a;
+							c = sourceImage0->getTexel(x0, y0, z0, 0, 0).a;
 							break;
 						case VKTS_SOURCE_1_RED:
-							c = sourceImage1->getTexel(x, y, z, 0, 0).r;
+							c = sourceImage1->getTexel(x1, y1, z1, 0, 0).r;
 							break;
 						case VKTS_SOURCE_1_GREEN:
-							c = sourceImage1->getTexel(x, y, z, 0, 0).g;
+							c = sourceImage1->getTexel(x1, y1, z1, 0, 0).g;
 							break;
 						case VKTS_SOURCE_1_BLUE:
-							c = sourceImage1->getTexel(x, y, z, 0, 0).b;
+							c = sourceImage1->getTexel(x1, y1, z1, 0, 0).b;
 							break;
 						case VKTS_SOURCE_1_ALPHA:
-							c = sourceImage1->getTexel(x, y, z, 0, 0).a;
+							c = sourceImage1->getTexel(x1, y1, z1, 0, 0).a;
 							break;
 						case VKTS_SOURCE_ZERO:
 							c = 0.0f;
@@ -1256,7 +1267,7 @@ IImageDataSP VKTS_APIENTRY imageDataUnite(const IImageDataSP& sourceImage0, cons
             		color[i] = c;
             	}
 
-            	currentImageData->setTexel(color, x, y, z, 0, 0);
+            	currentImageData->setTexel(color, glm::min(x0, x1), glm::min(y0, y1), glm::min(z0, z1), 0, 0);
             }
         }
     }
