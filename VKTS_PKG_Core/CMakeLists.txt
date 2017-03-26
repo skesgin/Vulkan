@@ -18,11 +18,12 @@ list(APPEND IGNORE_CPP_FILES )
 
 if (${ANDROID_PLATFORM} MATCHES "android")
 
-    include_directories(AFTER $ENV{ANDROID_NDK_HOME}/sources/android/native_app_glue)
+    include_directories(AFTER $ENV{ANDROID_NDK_HOME}/sources/android/native_app_glue $ENV{ANDROID_NDK_HOME}/sources/android/cpufeatures)
 
     list(APPEND IGNORE_CPP_FILES    ${CMAKE_CURRENT_SOURCE_DIR}/src/core/processor/fn_processor_linux.cpp
                                     ${CMAKE_CURRENT_SOURCE_DIR}/src/core/processor/fn_processor_windows.cpp    
                                     ${CMAKE_CURRENT_SOURCE_DIR}/src/core/profile/fn_profile_windows.cpp
+                                    ${CMAKE_CURRENT_SOURCE_DIR}/src/core/file/fn_file_general.cpp                                    
                                     ${CMAKE_CURRENT_SOURCE_DIR}/src/core/file/fn_file_linux.cpp                                    
                                     ${CMAKE_CURRENT_SOURCE_DIR}/src/core/file/fn_file_windows.cpp
     )

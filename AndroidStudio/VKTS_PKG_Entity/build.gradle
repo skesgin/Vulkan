@@ -24,6 +24,14 @@ android {
         }
     }
 
+    defaultConfig {
+        externalNativeBuild {
+            cmake {
+                targets "VKTS_PKG_Entity"
+            }
+        }
+    }
+
     externalNativeBuild {
         cmake {
             path '../../VKTS_PKG_Entity/CMakeLists.txt'
