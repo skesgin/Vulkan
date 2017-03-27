@@ -1,9 +1,9 @@
-apply plugin: 'com.android.library'
-
+apply plugin: 'com.android.application'
 android {
     compileSdkVersion 24
     buildToolsVersion '25.0.2'
     defaultConfig {
+        applicationId = 'tv.nopper.VKTS_Example02'
         minSdkVersion 24
         targetSdkVersion 24
         ndk {
@@ -29,14 +29,23 @@ android {
     defaultConfig {
         externalNativeBuild {
             cmake {
-                targets "VKTS_PKG_Interactive"
+                targets "VKTS_Example02"
             }
         }
     }
 
     externalNativeBuild {
         cmake {
-            path '../../VKTS_PKG_Interactive/CMakeLists.txt'
+            path '../../VKTS_Example02/CMakeLists.txt'
         }
     }
 }
+
+task copyFiles(type: Copy) {
+    println("Copying needed assets:")
+    //
+    from "../../VKTS_Binaries/shader/SPIR/V/vertex_only_ndc.vert.spv" into "./src/main/assets/shader/SPIR/V/"
+    from "../../VKTS_Binaries/shader/SPIR/V/red.frag.spv" into "./src/main/assets/shader/SPIR/V/"
+}
+
+preBuild.dependsOn(copyFiles)

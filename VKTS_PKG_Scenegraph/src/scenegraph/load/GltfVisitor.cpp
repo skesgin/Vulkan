@@ -30,7 +30,7 @@ namespace vkts
 {
 
 GltfVisitor::GltfVisitor(const std::string& directory) :
-	JsonVisitor(), directory(directory), state(), subState(), gltfBool(VK_FALSE), gltfString(), gltfInteger(0), gltfFloat(0.0f), gltfIntegerArray{}, gltfFloatArray{}, arrayIndex(0), arraySize(0), numberArray(VK_FALSE), objectArray(VK_FALSE), gltfExtensions{}, gltfBuffer{}, gltfBufferView{}, gltfAccessor{}, gltfPrimitive{}, gltfImage{}, gltfSampler{}, gltfTexture{}, gltfTextureInfo{}, gltfMaterial{}, gltfMesh{}, gltfSkin{}, gltfNode{}, gltfAnimation_Sampler{}, gltfChannel{}, gltfAnimation{}, gltfScene{}, allGltfBuffers(), allGltfBufferViews(), allGltfAccessors(), allGltfImages(), allGltfSamplers(), allGltfTextures(), allGltfMaterials(), allGltfMeshes(), allGltfSkins(), allGltfNodes(), allGltfAnimations(), allGltfScenes(), defaultScene(nullptr)
+	JsonVisitor(), directory(directory), state(), subState(), gltfBool(VK_FALSE), gltfString(), gltfInteger(0), gltfFloat(0.0f), gltfIntegerArray{}, gltfFloatArray{}, arrayIndex(0), arraySize(0), numberArray(VK_FALSE), objectArray(VK_FALSE), gltfExtensions{}, gltfBuffer{}, gltfBufferView{}, gltfSparse{}, gltfAccessor{}, gltfPrimitive{}, gltfImage{}, gltfSampler{}, gltfTexture{}, gltfTextureInfo{}, gltfMaterial{}, gltfMesh{}, gltfSkin{}, gltfNode{}, gltfAnimation_Sampler{}, gltfChannel{}, gltfAnimation{}, gltfScene{}, allGltfBuffers(), allGltfBufferViews(), allGltfSparses(), allGltfAccessors(), allGltfImages(), allGltfSamplers(), allGltfTextures(), allGltfMaterials(), allGltfMeshes(), allGltfSkins(), allGltfNodes(), allGltfAnimations(), allGltfScenes(), defaultScene(nullptr)
 {
 }
 
@@ -278,10 +278,46 @@ void GltfVisitor::visitBufferView(JSONobject& jsonObject)
 	}
 }
 
+void GltfVisitor::visitAccessorSparse(JSONobject& jsonObject)
+{
+	//
+	// Required
+	//
+
+	if (!jsonObject.hasKey("count") || !jsonObject.hasKey("indices") || !jsonObject.hasKey("values"))
+	{
+		state.push(GltfState_Error);
+		return;
+	}
+
+	//
+	//
+	//
+
+	auto count = jsonObject.getValue("count");
+
+	count->visit(*this);
+
+	if (state.top() == GltfState_Error)
+	{
+		return;
+	}
+
+	if (gltfInteger < 1)
+	{
+		state.push(GltfState_Error);
+		return;
+	}
+
+	gltfSparse.count = (uint32_t)gltfInteger;
+
+	//
+
+	// TODO: Parse rest of parameters.
+}
+
 void GltfVisitor::visitAccessor(JSONobject& jsonObject)
 {
-	// FIXME sparse
-
 	//
 	// Required
 	//
@@ -488,6 +524,28 @@ void GltfVisitor::visitAccessor(JSONobject& jsonObject)
 		}
 
 		gltfAccessor.byteOffset = (uint32_t)gltfInteger;
+	}
+
+	//
+
+	if (jsonObject.hasKey("sparse"))
+	{
+		auto sparse = jsonObject.getValue("sparse");
+
+		state.push(GltfState_Accessor_Sparse);
+
+		sparse->visit(*this);
+
+		if (state.top() == GltfState_Error)
+		{
+			return;
+		}
+
+		state.pop();
+
+		allGltfSparses.append(gltfSparse);
+
+		gltfAccessor.sparse = &allGltfSparses[allGltfSparses.size() - 1];
 	}
 
 	//
@@ -2615,7 +2673,12 @@ void GltfVisitor::visit(JSONarray& jsonArray)
 				gltfAccessor.type = "";
 				gltfAccessor.max.clear();
 				gltfAccessor.min.clear();
+				gltfAccessor.sparse = nullptr;
 				gltfAccessor.name = "Accessor_" + std::to_string(i);
+
+				gltfSparse.count = 0;
+
+				// TODO: Initialize rest of parameters.
 
 				//
 
@@ -3559,6 +3622,10 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 	else if (gltfState == GltfState_Scene)
 	{
 		visitScene(jsonObject);
+	}
+	else if (gltfState == GltfState_Accessor_Sparse)
+	{
+		visitAccessorSparse(jsonObject);
 	}
 	else if (gltfState == GltfState_Material_PbrMetallicRoughness)
 	{

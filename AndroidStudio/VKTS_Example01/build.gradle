@@ -1,9 +1,9 @@
-apply plugin: 'com.android.library'
-
+apply plugin: 'com.android.application'
 android {
     compileSdkVersion 24
     buildToolsVersion '25.0.2'
     defaultConfig {
+        applicationId = 'tv.nopper.VKTS_Example01'
         minSdkVersion 24
         targetSdkVersion 24
         ndk {
@@ -29,14 +29,22 @@ android {
     defaultConfig {
         externalNativeBuild {
             cmake {
-                targets "VKTS_PKG_Interactive"
+                targets "VKTS_Example01"
             }
         }
     }
 
     externalNativeBuild {
         cmake {
-            path '../../VKTS_PKG_Interactive/CMakeLists.txt'
+            path '../../VKTS_Example01/CMakeLists.txt'
         }
     }
 }
+
+task copyFiles(type: Copy) {
+    println("Copying needed assets:")
+    //
+    println("No assets needed.")
+}
+
+preBuild.dependsOn(copyFiles)
