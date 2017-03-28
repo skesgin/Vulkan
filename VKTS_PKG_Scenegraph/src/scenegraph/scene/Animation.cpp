@@ -186,6 +186,8 @@ float Animation::update(const float deltaTime)
 		else if (getAnimationType() == AnimationOnce)
 		{
 			currentTime = getStart();
+
+			setAnimationType(AnimationStop);
 		}
 	}
 
