@@ -78,6 +78,8 @@ enum GltfState {
 	GltfState_Scene,
 
 	GltfState_Accessor_Sparse,
+	GltfState_Accessor_Sparse_Indices,
+	GltfState_Accessor_Sparse_Values,
 	GltfState_Material_PbrMetallicRoughness,
 	GltfState_Material_Extensions,
 	GltfState_Material_Extensions_PbrSpecularGlossiness,
@@ -113,9 +115,24 @@ typedef struct _GltfBufferView {
 	std::string name;
 } GltfBufferView;
 
+typedef struct _GltfSparseIndex {
+	uint32_t bufferView;
+	uint32_t byteOffset;
+	int32_t componentType;
+	std::string name;
+} GltfSparseIndex;
+
+typedef struct _GltfSparseValue {
+	uint32_t bufferView;
+	uint32_t byteOffset;
+	std::string name;
+} GltfSparseValue;
+
 typedef struct _GltfSparse {
 	uint32_t count;
-	// TODO: Add rest of parameters.
+	std::vector<GltfSparseIndex> indices;
+	std::vector<GltfSparseValue> values;
+	std::string name;
 } GltfSparse;
 
 typedef struct _GltfAccessor {
@@ -290,6 +307,8 @@ private:
 	GltfBuffer gltfBuffer;
 	GltfBufferView gltfBufferView;
 	GltfSparse gltfSparse;
+	GltfSparseIndex gltfSparseIndex;
+	GltfSparseValue gltfSparseValue;
 	GltfAccessor gltfAccessor;
 	GltfPrimitive gltfPrimitive;
 	GltfImage gltfImage;
@@ -334,6 +353,8 @@ private:
 	void visitScene(JSONobject& jsonObject);
 
 	void visitAccessorSparse(JSONobject& jsonObject);
+	void visitAccessorSparseIndex(JSONobject& jsonObject);
+	void visitAccessorSparseValue(JSONobject& jsonObject);
 	void visitMaterial_PbrMetallicRoughness(JSONobject& jsonObject);
 	void visitMaterial_Extensions(JSONobject& jsonObject);
 	void visitMaterial_Extensions_PbrSpecularGlossiness(JSONobject& jsonObject);

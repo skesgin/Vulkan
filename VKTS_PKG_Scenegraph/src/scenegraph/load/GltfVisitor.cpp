@@ -30,7 +30,7 @@ namespace vkts
 {
 
 GltfVisitor::GltfVisitor(const std::string& directory) :
-	JsonVisitor(), directory(directory), state(), subState(), gltfBool(VK_FALSE), gltfString(), gltfInteger(0), gltfFloat(0.0f), gltfIntegerArray{}, gltfFloatArray{}, arrayIndex(0), arraySize(0), numberArray(VK_FALSE), objectArray(VK_FALSE), gltfExtensions{}, gltfBuffer{}, gltfBufferView{}, gltfSparse{}, gltfAccessor{}, gltfPrimitive{}, gltfImage{}, gltfSampler{}, gltfTexture{}, gltfTextureInfo{}, gltfMaterial{}, gltfMesh{}, gltfSkin{}, gltfNode{}, gltfAnimation_Sampler{}, gltfChannel{}, gltfAnimation{}, gltfScene{}, allGltfBuffers(), allGltfBufferViews(), allGltfSparses(), allGltfAccessors(), allGltfImages(), allGltfSamplers(), allGltfTextures(), allGltfMaterials(), allGltfMeshes(), allGltfSkins(), allGltfNodes(), allGltfAnimations(), allGltfScenes(), defaultScene(nullptr)
+	JsonVisitor(), directory(directory), state(), subState(), gltfBool(VK_FALSE), gltfString(), gltfInteger(0), gltfFloat(0.0f), gltfIntegerArray{}, gltfFloatArray{}, arrayIndex(0), arraySize(0), numberArray(VK_FALSE), objectArray(VK_FALSE), gltfExtensions{}, gltfBuffer{}, gltfBufferView{}, gltfSparse{}, gltfSparseIndex{}, gltfSparseValue{} , gltfAccessor{}, gltfPrimitive{}, gltfImage{}, gltfSampler{}, gltfTexture{}, gltfTextureInfo{}, gltfMaterial{}, gltfMesh{}, gltfSkin{}, gltfNode{}, gltfAnimation_Sampler{}, gltfChannel{}, gltfAnimation{}, gltfScene{}, allGltfBuffers(), allGltfBufferViews(), allGltfSparses(), allGltfAccessors(), allGltfImages(), allGltfSamplers(), allGltfTextures(), allGltfMaterials(), allGltfMeshes(), allGltfSkins(), allGltfNodes(), allGltfAnimations(), allGltfScenes(), defaultScene(nullptr)
 {
 }
 
@@ -294,6 +294,22 @@ void GltfVisitor::visitAccessorSparse(JSONobject& jsonObject)
 	//
 	//
 
+	if (jsonObject.hasKey("name"))
+	{
+		auto name = jsonObject.getValue("name");
+
+		name->visit(*this);
+
+		if (state.top() == GltfState_Error)
+		{
+			return;
+		}
+
+		gltfSparse.name = gltfString;
+	}
+
+	//
+
 	auto count = jsonObject.getValue("count");
 
 	count->visit(*this);
@@ -313,7 +329,177 @@ void GltfVisitor::visitAccessorSparse(JSONobject& jsonObject)
 
 	//
 
-	// TODO: Parse rest of parameters.
+	auto indices = jsonObject.getValue("indices");
+
+	state.push(GltfState_Accessor_Sparse_Indices);
+	indices->visit(*this);
+
+	if (state.top() == GltfState_Error)
+	{
+		return;
+	}
+
+	state.pop();
+
+	//
+
+	auto values = jsonObject.getValue("values");
+
+	state.push(GltfState_Accessor_Sparse_Values);
+	values->visit(*this);
+
+	if (state.top() == GltfState_Error)
+	{
+		return;
+	}
+
+	state.pop();
+}
+
+void GltfVisitor::visitAccessorSparseIndex(JSONobject& jsonObject)
+{
+	//
+	// Required
+	//
+
+	if (!jsonObject.hasKey("bufferView") || !jsonObject.hasKey("componentType"))
+	{
+		state.push(GltfState_Error);
+		return;
+	}
+
+	//
+	//
+	//
+
+	if (jsonObject.hasKey("name"))
+	{
+		auto name = jsonObject.getValue("name");
+
+		name->visit(*this);
+
+		if (state.top() == GltfState_Error)
+		{
+			return;
+		}
+
+		gltfSparseIndex.name = gltfString;
+	}
+
+	//
+
+	auto bufferView = jsonObject.getValue("bufferView");
+
+	bufferView->visit(*this);
+
+	if (state.top() == GltfState_Error)
+	{
+		return;
+	}
+
+	gltfSparseIndex.bufferView = (uint32_t)gltfInteger;
+
+	//
+
+	auto componentType = jsonObject.getValue("componentType");
+
+	componentType->visit(*this);
+
+	if (state.top() == GltfState_Error)
+	{
+		return;
+	}
+
+	if (gltfInteger == 5120 ||
+		gltfInteger == 5121 ||
+		gltfInteger == 5122 ||
+		gltfInteger == 5123 ||
+		gltfInteger == 5125 ||
+		gltfInteger == 5126)
+	{
+		gltfSparseIndex.componentType = gltfInteger;
+	}
+	else
+	{
+		state.push(GltfState_Error);
+		return;
+	}
+
+	// Optional
+
+	if (jsonObject.hasKey("byteOffset"))
+	{
+		auto byteOffset = jsonObject.getValue("byteOffset");
+
+		byteOffset->visit(*this);
+
+		if (state.top() == GltfState_Error)
+		{
+			return;
+		}
+
+		gltfSparseIndex.byteOffset =  (uint32_t)gltfInteger;
+	}
+}
+
+void GltfVisitor::visitAccessorSparseValue(JSONobject& jsonObject)
+{
+	//
+	// Required
+	//
+
+	if (!jsonObject.hasKey("bufferView"))
+	{
+		state.push(GltfState_Error);
+		return;
+	}
+
+	//
+	//
+	//
+
+	if (jsonObject.hasKey("name"))
+	{
+		auto name = jsonObject.getValue("name");
+
+		name->visit(*this);
+
+		if (state.top() == GltfState_Error)
+		{
+			return;
+		}
+
+		gltfSparseValue.name = gltfString;
+	}
+
+	//
+
+	auto bufferView = jsonObject.getValue("bufferView");
+
+	bufferView->visit(*this);
+
+	if (state.top() == GltfState_Error)
+	{
+		return;
+	}
+
+	gltfSparseValue.bufferView = (uint32_t)gltfInteger;
+
+	// Optional
+
+	if (jsonObject.hasKey("byteOffset"))
+	{
+		auto byteOffset = jsonObject.getValue("byteOffset");
+
+		byteOffset->visit(*this);
+
+		if (state.top() == GltfState_Error)
+		{
+			return;
+		}
+
+		gltfSparseValue.byteOffset =  (uint32_t)gltfInteger;
+	}
 }
 
 void GltfVisitor::visitAccessor(JSONobject& jsonObject)
@@ -2677,8 +2863,9 @@ void GltfVisitor::visit(JSONarray& jsonArray)
 				gltfAccessor.name = "Accessor_" + std::to_string(i);
 
 				gltfSparse.count = 0;
-
-				// TODO: Initialize rest of parameters.
+				gltfSparse.indices.clear();
+				gltfSparse.values.clear();
+				gltfSparse.name = gltfAccessor.name + "_Sparse_" + std::to_string(i);
 
 				//
 
@@ -3156,6 +3343,43 @@ void GltfVisitor::visit(JSONarray& jsonArray)
 				gltfScene.nodes.append(&allGltfNodes[gltfInteger]);
 			}
 		}
+		else if (gltfState == GltfState_Accessor_Sparse_Indices)
+		{
+			for (int32_t i = 0; i < (int32_t)jsonArray.size(); i++)
+			{
+				gltfSparseIndex.bufferView = 0;
+				gltfSparseIndex.byteOffset = 0;
+				gltfSparseIndex.componentType = 0;
+				gltfSparseIndex.name = gltfSparse.name + "_Index_" + std::to_string(i);
+
+				jsonArray.getValueAt(i)->visit(*this);
+
+				if (state.top() == GltfState_Error)
+				{
+					return;
+				}
+
+				gltfSparse.indices.push_back(gltfSparseIndex);
+			}
+		}
+		else if (gltfState == GltfState_Accessor_Sparse_Values)
+		{
+			for (int32_t i = 0; i < (int32_t)jsonArray.size(); i++)
+			{
+				gltfSparseValue.bufferView = 0;
+				gltfSparseValue.byteOffset = 0;
+				gltfSparseValue.name = gltfSparse.name + "_Value_" + std::to_string(i);
+
+				jsonArray.getValueAt(i)->visit(*this);
+
+				if (state.top() == GltfState_Error)
+				{
+					return;
+				}
+
+				gltfSparse.values.push_back(gltfSparseValue);
+			}
+		}
 		else
 		{
 			state.push(GltfState_Error);
@@ -3626,6 +3850,14 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 	else if (gltfState == GltfState_Accessor_Sparse)
 	{
 		visitAccessorSparse(jsonObject);
+	}
+	else if (gltfState == GltfState_Accessor_Sparse_Indices)
+	{
+		visitAccessorSparseIndex(jsonObject);
+	}
+	else if (gltfState == GltfState_Accessor_Sparse_Values)
+	{
+		visitAccessorSparseValue(jsonObject);
 	}
 	else if (gltfState == GltfState_Material_PbrMetallicRoughness)
 	{
