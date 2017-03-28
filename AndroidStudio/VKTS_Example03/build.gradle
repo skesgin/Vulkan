@@ -3,7 +3,7 @@ android {
     compileSdkVersion 24
     buildToolsVersion '25.0.2'
     defaultConfig {
-        applicationId = 'tv.nopper.VKTS_Example02'
+        applicationId = 'tv.nopper.VKTS_Example03'
         minSdkVersion 24
         targetSdkVersion 24
         ndk {
@@ -29,14 +29,14 @@ android {
     defaultConfig {
         externalNativeBuild {
             cmake {
-                targets "VKTS_Example02"
+                targets "VKTS_Example03"
             }
         }
     }
 
     externalNativeBuild {
         cmake {
-            path '../../VKTS_Example02/CMakeLists.txt'
+            path '../../VKTS_Example03/CMakeLists.txt'
         }
     }
 }
@@ -45,10 +45,13 @@ task copyFiles(type: Copy) {
     println("Copying needed assets:")
     //
     copy {
-        from "../../VKTS_Binaries/shader/SPIR/V/vertex_only_ndc.vert.spv" into "./src/main/assets/shader/SPIR/V/"
+        from "../../VKTS_Binaries/shader/SPIR/V/texture_ndc.vert.spv" into "./src/main/assets/shader/SPIR/V/"
     }
     copy {
-        from "../../VKTS_Binaries/shader/SPIR/V/red.frag.spv" into "./src/main/assets/shader/SPIR/V/"
+        from "../../VKTS_Binaries/shader/SPIR/V/texture.frag.spv" into "./src/main/assets/shader/SPIR/V/"
+    }
+    copy {
+        from "../../VKTS_Binaries/texture/crater_lake.tga" into "./src/main/assets/texture/"
     }
 }
 
