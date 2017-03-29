@@ -51,7 +51,7 @@ if (${ANDROID_PLATFORM} MATCHES "android")
     
     set(VKTS_LIB .externalNativeBuild/cmake/${VKTS_BUILD_TYPE}/${ANDROID_ABI}/lib)
     
-    set(VKTS_ADDITIONAL_LIBS android log vulkan cpufeatures native_app_glue)
+    set(VKTS_ADDITIONAL_LIBS VKTS_PKG_Window android log vulkan cpufeatures native_app_glue)
     
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
