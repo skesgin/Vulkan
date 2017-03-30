@@ -1589,7 +1589,7 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName, use
                 currentFragmentGLSL = currentFragmentGLSL.replace("#nextAttribute#", texCoordAttribute)
                 currentFragmentGLSL = currentFragmentGLSL.replace("#nextTexCoord#", nextTexCoord)
 
-            if doSimplify and len(substancePainter) > 0:
+            if doSimplify:
 
                 if use_forward:
                     if texCoordUsed:
