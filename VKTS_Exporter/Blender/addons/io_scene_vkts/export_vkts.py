@@ -711,7 +711,6 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName, use
         if material.use_nodes == True and context.scene.render.engine == 'CYCLES':
             
             useParallax = False 
-            normalMapUsed = False
             texCoordUsed = False
 
             parallaxObject = None
@@ -865,10 +864,6 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName, use
 
                         parallaxInputName = friendlyNodeName(currentNode.inputs[0].links[0].from_node.name) + "_" + friendlyNodeName(currentNode.inputs[0].links[0].from_socket.name)
 
-
-
-                        normalMapUsed = True
-                    
                         vertexAttributes = vertexAttributes | 0x00000010 | 0x00000004 | 0x00000008
 
                     currentMain = replaceParameters(currentNode, openNodes, processedNodes, currentMain)
@@ -1255,9 +1250,7 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName, use
                     
                     #
                 
-                    normalMapUsed = True
-                    
-                    vertexAttributes = vertexAttributes | 0x00000004 | 0x00000008
+                    vertexAttributes = vertexAttributes | 0x00000010 | 0x00000004 | 0x00000008
 
                 elif isinstance(currentNode, bpy.types.ShaderNodeGamma):
                     # Gamma.
@@ -1486,7 +1479,7 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName, use
 
                     texCoordUsed = True
                     
-                    vertexAttributes = vertexAttributes | 0x00000010
+                    vertexAttributes = vertexAttributes | 0x00000010 | 0x00000004 | 0x00000008
 
                 elif isinstance(currentNode, bpy.types.ShaderNodeFresnel):
                     # Fresnel.
@@ -1554,7 +1547,7 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName, use
                     
                     texCoordUsed = True
                     
-                    vertexAttributes = vertexAttributes | 0x00000010
+                    vertexAttributes = vertexAttributes | 0x00000010 | 0x00000004 | 0x00000008
 
                 elif isinstance(currentNode, bpy.types.ShaderNodeValue):
                     # Value.
@@ -1581,11 +1574,9 @@ def saveMaterials(context, filepath, texturesLibraryName, imagesLibraryName, use
                 if currentNode not in processedNodes:
                     processedNodes.append(currentNode)
 
-            if normalMapUsed:
+            if texCoordUsed:
                 currentFragmentGLSL = currentFragmentGLSL.replace("#nextTangents#", nextTangents)
                 currentFragmentGLSL = currentFragmentGLSL.replace("#nextAttribute#", normalMapAttribute)
-                
-            if texCoordUsed:
                 currentFragmentGLSL = currentFragmentGLSL.replace("#nextAttribute#", texCoordAttribute)
                 currentFragmentGLSL = currentFragmentGLSL.replace("#nextTexCoord#", nextTexCoord)
 
