@@ -5,7 +5,7 @@ Authors:
 
 **Norbert Nopper** (norbert@nopper.tv)
 
-VKTS version: **1.0.42.1**
+VKTS version: **1.0.42.2**
 
 Depending Vulkan API header version: **1.0.42**
 
