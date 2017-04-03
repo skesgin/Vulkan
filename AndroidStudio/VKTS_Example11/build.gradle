@@ -1,0 +1,81 @@
+apply plugin: 'com.android.application'
+android {
+    compileSdkVersion 24
+    buildToolsVersion '25.0.2'
+    defaultConfig {
+        applicationId = 'tv.nopper.VKTS_Example11'
+        minSdkVersion 24
+        targetSdkVersion 24
+        ndk {
+            abiFilters 'x86', 'armeabi-v7a', 'arm64-v8a'
+        }
+        externalNativeBuild {
+            cmake {
+                arguments '-DANDROID_PLATFORM=android-24', '-DANDROID_TOOLCHAIN=clang', '-DANDROID_STL=c++_static', '-DANDROID_CPP_FEATURES=exceptions'
+                cppFlags '-std=c++11'
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+        debug {
+        }
+    }
+
+    defaultConfig {
+        externalNativeBuild {
+            cmake {
+                targets "VKTS_Example11"
+            }
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path '../../VKTS_Example11/CMakeLists.txt'
+        }
+    }
+}
+
+task copyFiles(type: Copy) {
+    println("Copying needed assets:")
+    //
+    copy {
+        from "../../VKTS_Binaries/shader/SPIR/V/phong_tangents_shadow.vert.spv" into "./src/main/assets/shader/SPIR/V/"
+    }
+    copy {
+        from "../../VKTS_Binaries/shader/SPIR/V/phong_tangents_shadow.frag.spv" into "./src/main/assets/shader/SPIR/V/"
+    }
+    copy {
+        from "../../VKTS_Binaries/shader/SPIR/V/phong_tangents_write_shadow.frag.spv" into "./src/main/assets/shader/SPIR/V/"
+    }
+    copy {
+        from "../../VKTS_Binaries/shader/SPIR/V/voxelize.vert.spv" into "./src/main/assets/shader/SPIR/V/"
+    }
+    copy {
+        from "../../VKTS_Binaries/shader/SPIR/V/voxelize.geom.spv" into "./src/main/assets/shader/SPIR/V/"
+    }
+    copy {
+        from "../../VKTS_Binaries/shader/SPIR/V/voxelize.frag.spv" into "./src/main/assets/shader/SPIR/V/"
+    }
+    
+    copy {
+        from "../../VKTS_Binaries/sponza/" into "./src/main/assets/sponza/"
+        include "**/*.vkts"
+    }
+    copy {
+        from "../../VKTS_Binaries/sponza/" into "./src/main/assets/sponza/"
+        include "**/*.tga"
+    }
+    
+    copy {
+        from "../../VKTS_Binaries/cache/sponza/" into "./src/main/assets/cache/sponza/"
+        include "**/*.tga"
+    }
+}
+
+preBuild.dependsOn(copyFiles)
