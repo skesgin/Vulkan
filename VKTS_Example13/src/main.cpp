@@ -185,6 +185,10 @@ int main(int argc, char* argv[])
 
 	vkts::parameterGetString(sceneName, std::string("-s"), argc, argv);
 
+	std::string outputSceneName = "";
+
+	vkts::parameterGetString(outputSceneName, std::string("-o"), argc, argv);
+
 	std::string environmentName = "";
 
 	vkts::parameterGetString(environmentName, std::string("-e"), argc, argv);
@@ -409,7 +413,7 @@ int main(int argc, char* argv[])
 	//
 
 	// Single threaded application, so it is safe to pass display and window.
-	vkts::IUpdateThreadSP example = vkts::IUpdateThreadSP(new Example(contextObject, window->getIndex(), visualContext, surface, sceneName, environmentName));
+	vkts::IUpdateThreadSP example = vkts::IUpdateThreadSP(new Example(contextObject, window->getIndex(), visualContext, surface, sceneName, outputSceneName, environmentName));
 
 	if (!example.get())
 	{

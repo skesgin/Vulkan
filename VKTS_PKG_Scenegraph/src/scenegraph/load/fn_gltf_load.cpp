@@ -540,11 +540,7 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 						return VK_FALSE;
 					}
 
-					glm::vec3 temp(tangent4[0], tangent4[1], tangent4[2]);
-
-					float w = sqrtf(1.0f - glm::dot(temp, temp));
-
-					Quat q(tangent4[0], tangent4[1], tangent4[2], w);
+					Quat q(tangent4[0], tangent4[1], tangent4[2], tangent4[3]);
 
 					glm::vec3 tangent = glm::normalize(q * glm::vec3(1.0f, 0.0f, 0.0f));
 					glm::vec3 bitangent = glm::normalize(q * glm::vec3(0.0f, 1.0f, 0.0f));

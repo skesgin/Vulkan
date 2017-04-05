@@ -72,6 +72,12 @@ VKTS_APICALL Quat VKTS_APIENTRY slerp(const Quat& q0, const Quat& q1, const floa
  *
  * @ThreadSafe
  */
+VKTS_APICALL Quat VKTS_APIENTRY rotate(const glm::mat3& m);
+
+/**
+ *
+ * @ThreadSafe
+ */
 VKTS_APICALL Quat VKTS_APIENTRY rotateAxis(const float angle, const float x, const float y, const float z);
 
 /**

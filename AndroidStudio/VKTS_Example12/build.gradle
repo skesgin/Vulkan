@@ -1,0 +1,126 @@
+apply plugin: 'com.android.application'
+android {
+    compileSdkVersion 24
+    buildToolsVersion '25.0.2'
+    defaultConfig {
+        applicationId = 'tv.nopper.VKTS_Example12'
+        minSdkVersion 24
+        targetSdkVersion 24
+        ndk {
+            abiFilters 'x86', 'armeabi-v7a', 'arm64-v8a'
+        }
+        externalNativeBuild {
+            cmake {
+                arguments '-DANDROID_PLATFORM=android-24', '-DANDROID_TOOLCHAIN=clang', '-DANDROID_STL=c++_static', '-DANDROID_CPP_FEATURES=exceptions'
+                cppFlags '-std=c++11'
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+        debug {
+        }
+    }
+
+    defaultConfig {
+        externalNativeBuild {
+            cmake {
+                targets "VKTS_Example12"
+            }
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path '../../VKTS_Example12/CMakeLists.txt'
+        }
+    }
+}
+
+task copyFiles(type: Copy) {
+    println("Copying needed assets:")
+    //
+    copy {
+        from "../../VKTS_Binaries/shader/SPIR/V/font.vert.spv" into "./src/main/assets/shader/SPIR/V/"
+    }
+    copy {
+        from "../../VKTS_Binaries/shader/SPIR/V/font.frag.spv" into "./src/main/assets/shader/SPIR/V/"
+    }
+    copy {
+        from "../../VKTS_Binaries/shader/SPIR/V/font_df.vert.spv" into "./src/main/assets/shader/SPIR/V/"
+    }
+    copy {
+        from "../../VKTS_Binaries/shader/SPIR/V/font_df.frag.spv" into "./src/main/assets/shader/SPIR/V/"
+    }
+
+    copy {
+        from "../../VKTS_Binaries/shader/SPIR/V/bsdf.vert.spv" into "./src/main/assets/shader/SPIR/V/"
+    }
+    copy {
+        from "../../VKTS_Binaries/shader/SPIR/V/bsdf_no_texcoord.vert.spv" into "./src/main/assets/shader/SPIR/V/"
+    }
+    copy {
+        from "../../VKTS_Binaries/shader/SPIR/V/bsdf_tangents.vert.spv" into "./src/main/assets/shader/SPIR/V/"
+    }
+    copy {
+        from "../../VKTS_Binaries/shader/SPIR/V/bsdf_skinning.vert.spv" into "./src/main/assets/shader/SPIR/V/"
+    }
+    
+    copy {
+        from "../../VKTS_Binaries/shader/SPIR/V/environment.vert.spv" into "./src/main/assets/shader/SPIR/V/"
+    }
+    copy {
+        from "../../VKTS_Binaries/shader/SPIR/V/environment.frag.spv" into "./src/main/assets/shader/SPIR/V/"
+    }
+
+    copy {
+        from "../../VKTS_Binaries/font/" into "./src/main/assets/font/"
+        include "**/*.fnt"
+    }
+    copy {
+        from "../../VKTS_Binaries/font/" into "./src/main/assets/font/"
+        include "**/*.tga"
+    }
+    
+    copy {
+        from "../../VKTS_Binaries/buster_drone/" into "./src/main/assets/buster_drone/"
+        include "**/*.spv"
+    }
+    copy {
+        from "../../VKTS_Binaries/buster_drone/" into "./src/main/assets/buster_drone/"
+        include "**/*.vkts"
+    }
+    copy {
+        from "../../VKTS_Binaries/buster_drone/" into "./src/main/assets/buster_drone/"
+        include "**/*.tga"
+    }
+    copy {
+        from "../../VKTS_Binaries/buster_drone/" into "./src/main/assets/buster_drone/"
+        include "**/*.hdr"
+    }
+    
+    copy {
+        from "../../VKTS_Binaries/primitives/" into "./src/main/assets/primitives/"
+        include "**/*.vkts"
+    }
+    
+    copy {
+        from "../../VKTS_Binaries/texture/BSDF_LUT_512_256.data" into "./src/main/assets/texture/"
+    }
+    
+    copy {
+        from "../../VKTS_Binaries/cache/buster_drone/" into "./src/main/assets/cache/buster_drone/"
+        include "**/*.hdr"
+    }
+}
+
+task resizeImages(type:Exec) {
+    commandLine 'mogrify', '-resize', '1024x1024', './src/main/assets/buster_drone/*.tga'
+}
+
+preBuild.dependsOn(copyFiles)
+preBuild.dependsOn(resizeImages)

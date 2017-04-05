@@ -93,6 +93,12 @@ VKTS_APICALL VkBool32 VKTS_APIENTRY fileGetDirectory(char* directory, const char
  *
  * @ThreadSafe
  */
+VKTS_APICALL VkBool32 VKTS_APIENTRY fileGetFilename(char* out, const char* filename);
+
+/**
+ *
+ * @ThreadSafe
+ */
 VKTS_APICALL VkBool32 VKTS_APIENTRY fileGetBasename(char* basename, const char* filename);
 
 /**

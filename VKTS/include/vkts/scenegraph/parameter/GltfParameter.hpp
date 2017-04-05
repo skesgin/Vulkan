@@ -1644,48 +1644,70 @@ public:
         	attributesValue->addKeyValue("NORMAL", normalValue);
     	}
 
-    	if (subMesh.getVertexBufferType() & VKTS_VERTEX_BUFFER_TYPE_BITANGENT)
+    	if (subMesh.getVertexBufferType() & VKTS_VERTEX_BUFFER_TYPE_TANGENTS)
     	{
-        	accessorName = subMesh.getName() + "_bitangents";
+        	accessorName = subMesh.getName() + "_tangents4";
 
-    		uint32_t bitangentIndex = storedAccessors.index(accessorName);
+    		uint32_t tangent4Index = storedAccessors.index(accessorName);
 
-    		if (bitangentIndex == storedAccessors.size())
+    		if (tangent4Index == storedAccessors.size())
     		{
-    			writeBinaryBuffer(subMesh.getVertexBinaryBuffer(), subMesh.getNumberVertices(), 3, "VEC3", 5126, 34962, (uint32_t)subMesh.getBitangentOffset(), (uint32_t)subMesh.getStrideInBytes());
+    			auto tangent4Buffer = binaryBufferCreate(subMesh.getNumberVertices() * 4 * sizeof(float));
+
+    			if (!tangent4Buffer.get())
+    			{
+    				return;
+    			}
+
+				float bias = 0.000001f;
+				float w = sqrtf(1.0f - bias * bias);
+
+    			for (uint32_t i = 0; i < (uint32_t)subMesh.getNumberVertices(); i++)
+    			{
+    				const float* tangent = (const float*)(&subMesh.getVertexBinaryBuffer()->getByteData()[subMesh.getTangentOffset() + subMesh.getStrideInBytes() * i]);
+    				const float* bitangent = (const float*)(&subMesh.getVertexBinaryBuffer()->getByteData()[subMesh.getBitangentOffset() + subMesh.getStrideInBytes() * i]);
+    				const float* normal = (const float*)(&subMesh.getVertexBinaryBuffer()->getByteData()[subMesh.getNormalOffset() + subMesh.getStrideInBytes() * i]);
+
+    				glm::mat3 tangentSpace(glm::vec3(tangent[0], bitangent[0], normal[0]), glm::vec3(tangent[1], bitangent[1], normal[1]), glm::vec3(tangent[2], bitangent[2], normal[2]));
+
+    				float scale = glm::determinant(tangentSpace) < 0.0f ? 1.0f : -1.0f;
+
+    				tangentSpace[0][2] *= scale;
+    				tangentSpace[1][2] *= scale;
+    				tangentSpace[2][2] *= scale;
+
+    				Quat q = rotate(tangentSpace);
+
+    				if (glm::abs(q.w) < bias)
+    				{
+    					q.x *= w;
+    					q.y *= w;
+    					q.z *= w;
+    					q.w = w;
+    				}
+
+    				float qs = (scale < 0.0f && q.w >0.f) || (scale > 0.0f && q.w < 0.0f) ? -1.0f : 1.0f;
+
+    				q *= qs;
+
+    				//
+
+    				tangent4Buffer->write(&q, sizeof(float), 4);
+    			}
+
+    			writeBinaryBuffer(tangent4Buffer, subMesh.getNumberVertices(), 4, "VEC4", 5126, 34962, 0, 4 * sizeof(float));
+
     			storedAccessors.append(accessorName);
     		}
 
-        	auto bitangentValue = JSONintegerSP(new JSONinteger(bitangentIndex));
+        	auto tangent4Value = JSONintegerSP(new JSONinteger(tangent4Index));
 
-        	if (!bitangentValue.get())
+        	if (!tangent4Value.get())
         	{
         		return;
         	}
 
-        	attributesValue->addKeyValue("BITANGENT", bitangentValue);
-    	}
-
-    	if (subMesh.getVertexBufferType() & VKTS_VERTEX_BUFFER_TYPE_TANGENT)
-    	{
-        	accessorName = subMesh.getName() + "_tangents";
-
-    		uint32_t tangentIndex = storedAccessors.index(accessorName);
-
-    		if (tangentIndex == storedAccessors.size())
-    		{
-    			writeBinaryBuffer(subMesh.getVertexBinaryBuffer(), subMesh.getNumberVertices(), 3, "VEC3", 5126, 34962, (uint32_t)subMesh.getTangentOffset(), (uint32_t)subMesh.getStrideInBytes());
-    			storedAccessors.append(accessorName);
-    		}
-
-        	auto tangentValue = JSONintegerSP(new JSONinteger(tangentIndex));
-
-        	if (!tangentValue.get())
-        	{
-        		return;
-        	}
-
-        	attributesValue->addKeyValue("TANGENT", tangentValue);
+        	attributesValue->addKeyValue("TANGENT4", tangent4Value);
     	}
 
     	if (subMesh.getVertexBufferType() & VKTS_VERTEX_BUFFER_TYPE_TEXCOORD)

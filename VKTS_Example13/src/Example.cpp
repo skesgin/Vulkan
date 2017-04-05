@@ -26,8 +26,8 @@
 
 #include "Example.hpp"
 
-Example::Example(const vkts::IContextObjectSP& contextObject, const int32_t windowIndex, const vkts::IVisualContextSP& visualContext, const vkts::ISurfaceSP& surface, const std::string& sceneName, const std::string& environmentName) :
-		IUpdateThread(), contextObject(contextObject), windowIndex(windowIndex), visualContext(visualContext), surface(surface), showStats(VK_FALSE), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), pipelineCache(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), environmentDescriptorSetLayout(nullptr), environmentDescriptorBufferInfos{}, descriptorBufferInfos{}, environmentDescriptorImageInfos{}, descriptorImageInfos{}, writeDescriptorSets{}, environmentWriteDescriptorSets{}, dynamicOffsets(), vertexViewProjectionUniformBuffer(nullptr), environmentVertexViewProjectionUniformBuffer(nullptr), fragmentLightsUniformBuffer(nullptr), fragmentMatricesUniformBuffer(nullptr), allBSDFVertexShaderModules(), envVertexShaderModule(nullptr), envFragmentShaderModule(nullptr), environmentPipelineLayout(nullptr), guiRenderFactory(nullptr), guiManager(nullptr), guiFactory(nullptr), font(nullptr), loadTask(), sceneLoaded(VK_FALSE), renderFactory(nullptr), sceneManager(nullptr), sceneFactory(nullptr), scene(nullptr), environmentRenderFactory(nullptr), environmentSceneManager(nullptr), environmentSceneFactory(nullptr), environmentScene(nullptr), swapchain(nullptr), renderPass(nullptr), allGraphicsPipelines(), depthTexture(), msaaColorTexture(), msaaDepthTexture(), depthStencilImageView(), msaaColorImageView(), msaaDepthStencilImageView(), swapchainImagesCount(0), swapchainImageView(), framebuffer(), cmdBuffer(), cmdBufferFence(), rebuildCmdBufferCounter(0), fps(0), ram(0), cpuUsageApp(0.0f), processors(0), sceneName(sceneName), environmentName(environmentName)
+Example::Example(const vkts::IContextObjectSP& contextObject, const int32_t windowIndex, const vkts::IVisualContextSP& visualContext, const vkts::ISurfaceSP& surface, const std::string& sceneName, const std::string& outputSceneName, const std::string& environmentName) :
+		IUpdateThread(), contextObject(contextObject), windowIndex(windowIndex), visualContext(visualContext), surface(surface), showStats(VK_FALSE), camera(nullptr), inputController(nullptr), allUpdateables(), commandPool(nullptr), pipelineCache(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), environmentDescriptorSetLayout(nullptr), environmentDescriptorBufferInfos{}, descriptorBufferInfos{}, environmentDescriptorImageInfos{}, descriptorImageInfos{}, writeDescriptorSets{}, environmentWriteDescriptorSets{}, dynamicOffsets(), vertexViewProjectionUniformBuffer(nullptr), environmentVertexViewProjectionUniformBuffer(nullptr), fragmentLightsUniformBuffer(nullptr), fragmentMatricesUniformBuffer(nullptr), allBSDFVertexShaderModules(), envVertexShaderModule(nullptr), envFragmentShaderModule(nullptr), environmentPipelineLayout(nullptr), guiRenderFactory(nullptr), guiManager(nullptr), guiFactory(nullptr), font(nullptr), loadTask(), sceneLoaded(VK_FALSE), renderFactory(nullptr), sceneManager(nullptr), sceneFactory(nullptr), scene(nullptr), environmentRenderFactory(nullptr), environmentSceneManager(nullptr), environmentSceneFactory(nullptr), environmentScene(nullptr), swapchain(nullptr), renderPass(nullptr), allGraphicsPipelines(), depthTexture(), msaaColorTexture(), msaaDepthTexture(), depthStencilImageView(), msaaColorImageView(), msaaDepthStencilImageView(), swapchainImagesCount(0), swapchainImageView(), framebuffer(), cmdBuffer(), cmdBufferFence(), rebuildCmdBufferCounter(0), fps(0), ram(0), cpuUsageApp(0.0f), processors(0), sceneName(sceneName), outputSceneName(outputSceneName), environmentName(environmentName)
 {
 	processors = glm::min(vkts::processorGetNumber(), VKTS_MAX_CORES);
 
@@ -1951,15 +1951,24 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 		}
 
 		//
-		// TODO: glTF encoding.
+		// glTF encoding.
 		//
 
-		vkts::GltfParameter glTFparameter;
+		if (outputSceneName != "")
+		{
+			char directory[VKTS_MAX_BUFFER_CHARS];
+			char filename[VKTS_MAX_BUFFER_CHARS];
 
-		scene->updateParameterRecursive(&glTFparameter);
+			vkts::fileGetDirectory(directory, outputSceneName.c_str());
+			vkts::fileGetFilename(filename, outputSceneName.c_str());
 
-		// Enable to store
-		//glTFparameter.save("encoded_out.gltf", "C:/Temp");
+			vkts::GltfParameter glTFparameter;
+
+			scene->updateParameterRecursive(&glTFparameter);
+
+			// Enable to store
+			glTFparameter.save(filename, directory);
+		}
 	}
 
 	return VK_TRUE;

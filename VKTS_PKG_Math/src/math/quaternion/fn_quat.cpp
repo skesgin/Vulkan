@@ -88,6 +88,48 @@ Quat VKTS_APIENTRY slerp(const Quat& q0, const Quat& q1, const float t)
     return q0 * a + q1 * b;
 }
 
+Quat VKTS_APIENTRY rotate(const glm::mat3& m)
+{
+	float tr = m[0][0] + m[1][1] + m[2][2];
+
+	Quat q;
+
+	if (tr > 0)
+	{
+		float S = sqrtf(tr + 1.0f) * 2.0f;
+		q.x = (m[2][1] - m[1][2]) / S;
+		q.y = (m[0][2] - m[2][0]) / S;
+		q.z = (m[1][0] - m[0][1]) / S;
+		q.w = 0.25f * S;
+	}
+	else if ((m[0][0] > m[1][1]) && (m[0][0] > m[2][2]))
+	{
+		float S = sqrtf(1.0f + m[0][0] - m[1][1] - m[2][2]) * 2.0f;
+		q.x = 0.25f * S;
+		q.y = (m[0][1] + m[1][0]) / S;
+		q.z = (m[0][2] + m[2][0]) / S;
+		q.w = (m[2][1] - m[1][2]) / S;
+	}
+	else if (m[1][1] > m[2][2])
+	{
+		float S = sqrtf(1.0f + m[1][1] - m[0][0] - m[2][2]) * 2.0f;
+		q.x = (m[0][1] + m[1][0]) / S;
+		q.y = 0.25f * S;
+		q.z = (m[1][2] + m[2][1]) / S;
+		q.w = (m[0][2] - m[2][0]) / S;
+	}
+	else
+	{
+		float S = sqrtf(1.0f + m[2][2] - m[0][0] - m[1][1]) * 2.0f;
+		q.x = (m[0][2] + m[2][0]) / S;
+		q.y = (m[1][2] + m[2][1]) / S;
+		q.z = 0.25f * S;
+		q.w = (m[1][0] - m[0][1]) / S;
+	}
+
+    return q;
+}
+
 Quat VKTS_APIENTRY rotateAxis(const float angle, const float x, const float y, const float z)
 {
     float halfAngleRadian = glm::radians(angle) * 0.5f;
