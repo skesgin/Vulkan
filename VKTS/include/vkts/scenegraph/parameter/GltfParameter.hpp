@@ -1659,40 +1659,25 @@ public:
     				return;
     			}
 
-				float bias = 0.000001f;
-				float w = sqrtf(1.0f - bias * bias);
-
     			for (uint32_t i = 0; i < (uint32_t)subMesh.getNumberVertices(); i++)
     			{
-    				const float* tangent = (const float*)(&subMesh.getVertexBinaryBuffer()->getByteData()[subMesh.getTangentOffset() + subMesh.getStrideInBytes() * i]);
-    				const float* bitangent = (const float*)(&subMesh.getVertexBinaryBuffer()->getByteData()[subMesh.getBitangentOffset() + subMesh.getStrideInBytes() * i]);
-    				const float* normal = (const float*)(&subMesh.getVertexBinaryBuffer()->getByteData()[subMesh.getNormalOffset() + subMesh.getStrideInBytes() * i]);
-
-    				glm::mat3 tangentSpace(glm::vec3(tangent[0], bitangent[0], normal[0]), glm::vec3(tangent[1], bitangent[1], normal[1]), glm::vec3(tangent[2], bitangent[2], normal[2]));
-
-    				float scale = glm::determinant(tangentSpace) < 0.0f ? 1.0f : -1.0f;
-
-    				tangentSpace[0][2] *= scale;
-    				tangentSpace[1][2] *= scale;
-    				tangentSpace[2][2] *= scale;
-
-    				Quat q = rotate(tangentSpace);
-
-    				if (glm::abs(q.w) < bias)
-    				{
-    					q.x *= w;
-    					q.y *= w;
-    					q.z *= w;
-    					q.w = w;
-    				}
-
-    				float qs = (scale < 0.0f && q.w >0.f) || (scale > 0.0f && q.w < 0.0f) ? -1.0f : 1.0f;
-
-    				q *= qs;
+    				const float* currentTangent = (const float*)(&subMesh.getVertexBinaryBuffer()->getByteData()[subMesh.getTangentOffset() + subMesh.getStrideInBytes() * i]);
+    				const float* currentBitangent = (const float*)(&subMesh.getVertexBinaryBuffer()->getByteData()[subMesh.getBitangentOffset() + subMesh.getStrideInBytes() * i]);
+    				const float* currentNormal = (const float*)(&subMesh.getVertexBinaryBuffer()->getByteData()[subMesh.getNormalOffset() + subMesh.getStrideInBytes() * i]);
 
     				//
 
-    				tangent4Buffer->write(&q, sizeof(float), 4);
+    				glm::vec3 tangent(currentTangent[0], currentTangent[1], currentTangent[2]);
+    				glm::vec3 bitangent(currentBitangent[0], currentBitangent[1], currentBitangent[2]);
+    				glm::vec3 normal(currentNormal[0], currentNormal[1], currentNormal[2]);
+
+    				float handedness = glm::dot(glm::cross(normal, tangent), bitangent) < 0.0f ? -1.0f : 1.0f;
+
+    				//
+
+					float tangent4[4] = {currentTangent[0], currentTangent[1], currentTangent[2], handedness};
+
+    				tangent4Buffer->write(tangent4, sizeof(float), 4);
     			}
 
     			writeBinaryBuffer(tangent4Buffer, subMesh.getNumberVertices(), 4, "VEC4", 5126, 34962, 0, 4 * sizeof(float));

@@ -119,7 +119,7 @@ static ITextureObjectSP gltfProcessTextureObject(const GltfTexture* texture, con
 		{
 			if (imageDataType == VKTS_NORMAL_DATA)
 			{
-				imageData = imageDataConvert(texture->source->imageData, texture->source->imageData->getFormat(), imageDataName, imageDataType, imageDataType, glm::vec4(factor[0], factor[1], 1.0f, 0.0f));
+				imageData = imageDataConvert(texture->source->imageData, texture->source->imageData->getFormat(), imageDataName, imageDataType, imageDataType, glm::vec4(factor[0], factor[1], 1.0f, 1.0f));
 			}
 			else
 			{
@@ -130,7 +130,7 @@ static ITextureObjectSP gltfProcessTextureObject(const GltfTexture* texture, con
 		{
 			if (imageDataType == VKTS_NORMAL_DATA)
 			{
-				imageData = imageDataCreate(imageDataName, 1, 1, 1, glm::vec4(0.0f, factor[1], 0.0f, 0.0f), VK_IMAGE_TYPE_2D, VK_FORMAT_R8G8B8A8_UNORM);
+				imageData = imageDataCreate(imageDataName, 1, 1, 1, glm::vec4(0.0f, factor[1], 0.0f, 1.0f), VK_IMAGE_TYPE_2D, VK_FORMAT_R8G8B8A8_UNORM);
 			}
 			else
 			{
@@ -527,12 +527,17 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
                 return VK_FALSE;
             }
 
-            // Spherical Skinning with Dual-Quaternions and QTangents
-            // see http://www.crytek.com/cryengine/presentations/spherical-skinning-with-dual-quaternions-and-qtangents
-            if (gltfPrimitive.tangent4)
+            if (gltfPrimitive.tangent4 && gltfPrimitive.normal)
             {
 				for (uint32_t i = 0; i < (uint32_t)subMesh->getNumberVertices(); i++)
 				{
+					auto* currentNormal = visitor.getFloatPointer(*gltfPrimitive.normal, i);
+
+					if (!currentNormal)
+					{
+						return VK_FALSE;
+					}
+
 					auto* tangent4 = visitor.getFloatPointer(*gltfPrimitive.tangent4, i);
 
 					if (!tangent4)
@@ -540,10 +545,9 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 						return VK_FALSE;
 					}
 
-					Quat q(tangent4[0], tangent4[1], tangent4[2], tangent4[3]);
-
-					glm::vec3 tangent = glm::normalize(q * glm::vec3(1.0f, 0.0f, 0.0f));
-					glm::vec3 bitangent = glm::normalize(q * glm::vec3(0.0f, 1.0f, 0.0f));
+					glm::vec3 normal(currentNormal[0], currentNormal[1], currentNormal[2]);
+					glm::vec3 tangent(tangent4[0], tangent4[1], tangent4[2]);
+					glm::vec3 bitangent = glm::cross(normal, tangent) * tangent4[3];
 
 					tempBinaryBuffer->seek(i * 3 * 2 * sizeof(float), VKTS_SEARCH_ABSOLUTE);
 					tempBinaryBuffer->write(glm::value_ptr(bitangent), 1, 3 * sizeof(float));

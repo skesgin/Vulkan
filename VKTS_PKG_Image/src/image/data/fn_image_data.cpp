@@ -1267,7 +1267,7 @@ IImageDataSP VKTS_APIENTRY imageDataUnite(const IImageDataSP& sourceImage0, cons
             		color[i] = c;
             	}
 
-            	currentImageData->setTexel(color, glm::min(x0, x1), glm::min(y0, y1), glm::min(z0, z1), 0, 0);
+            	currentImageData->setTexel(color, glm::max(x0, x1), glm::max(y0, y1), glm::max(z0, z1), 0, 0);
             }
         }
     }
