@@ -4108,16 +4108,16 @@ const void* GltfVisitor::getBufferPointer(const GltfAccessor& accessor, const ui
 
 	uint32_t elementSize = bytesPerComponent * componentsPerType + accessor.bufferView->byteStride;
 
-	uint32_t localOffset = elementSize * element + accessor.byteOffset;
+	uint32_t localOffset = elementSize * element;
 
-	if (localOffset >= accessor.bufferView->byteLength || (localOffset + elementSize) > accessor.bufferView->byteLength)
+	if (localOffset >= accessor.bufferView->byteLength || (localOffset + elementSize) > (accessor.bufferView->byteLength + accessor.bufferView->byteStride))
 	{
 		return nullptr;
 	}
 
-	uint32_t totalOffset = localOffset + accessor.bufferView->byteOffset;
+	uint32_t totalOffset = localOffset + accessor.bufferView->byteOffset + accessor.byteOffset;
 
-	if (totalOffset >= accessor.bufferView->buffer->byteLength || (totalOffset + elementSize) > accessor.bufferView->buffer->byteLength)
+	if (totalOffset >= accessor.bufferView->buffer->byteLength || (totalOffset + elementSize) > (accessor.bufferView->buffer->byteLength + accessor.bufferView->byteStride))
 	{
 		return nullptr;
 	}
