@@ -130,7 +130,7 @@ static ITextureObjectSP gltfProcessTextureObject(const GltfTexture* texture, con
 		{
 			if (imageDataType == VKTS_NORMAL_DATA)
 			{
-				imageData = imageDataCreate(imageDataName, 1, 1, 1, glm::vec4(0.0f, factor[1], 0.0f, 1.0f), VK_IMAGE_TYPE_2D, VK_FORMAT_R8G8B8A8_UNORM);
+				imageData = imageDataCreate(imageDataName, 1, 1, 1, glm::vec4(0.5f * factor[0], 0.5f * factor[1], 1.0f, 1.0f), VK_IMAGE_TYPE_2D, VK_FORMAT_R8G8B8A8_UNORM);
 			}
 			else
 			{
@@ -1022,9 +1022,7 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 			// Normal
 			//
 
-			// Note: Even when scaling, normalized is y up.
-
-			ITextureObjectSP normal = gltfProcessTextureObject(gltfPrimitive.material->normalTexture, 1.0f, VK_TRUE, VKTS_NORMAL_DATA, sceneManager);
+			ITextureObjectSP normal = gltfProcessTextureObject(gltfPrimitive.material->normalTexture, gltfPrimitive.material->normalScale, VK_TRUE, VKTS_NORMAL_DATA, sceneManager);
 
 			if (!normal.get())
 			{

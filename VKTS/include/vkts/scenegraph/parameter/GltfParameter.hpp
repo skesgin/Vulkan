@@ -1972,7 +1972,9 @@ public:
 
     					//
 
-    					if (texel.x == 0.0f && texel.y == 1.0f && texel.z == 0.0f)
+    					auto localNormal = texel * 2.0f - 1.0f;
+
+    					if (localNormal.z >= 1.0f - 0.001f)
     					{
         					storeImage = VK_FALSE;
     					}
