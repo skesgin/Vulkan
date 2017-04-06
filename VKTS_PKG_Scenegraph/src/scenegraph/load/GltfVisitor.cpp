@@ -3901,7 +3901,10 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 		return;
 	}
 
-	state.pop();
+	if (state.top() != GltfState_Error)
+	{
+		state.pop();
+	}
 }
 
 const std::string& GltfVisitor::getDirectory() const

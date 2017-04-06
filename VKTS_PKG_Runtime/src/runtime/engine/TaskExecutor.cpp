@@ -64,7 +64,7 @@ void TaskExecutor::run() const
         {
             doRun = task->run();
 
-            doRun = doRun && executedTaskQueue->addTask(task);
+            doRun = executedTaskQueue->addTask(task) && doRun;
         }
 
         if (doRun)

@@ -41,9 +41,13 @@ private:
 
     const uint64_t id;
 
+    VkBool32 success;
+
     VkBool32 run()
     {
-        return execute();
+    	success = execute();
+
+        return success;
     }
 
 protected:
@@ -53,7 +57,7 @@ protected:
 public:
 
     ITask(const uint64_t id) :
-    	id(id)
+    	id(id), success(VK_FALSE)
     {
     }
 
@@ -61,9 +65,14 @@ public:
     {
     }
 
-    uint64_t getID()
+    uint64_t getID() const
     {
         return id;
+    }
+
+    VkBool32 getSuccess() const
+    {
+        return success;
     }
 };
 

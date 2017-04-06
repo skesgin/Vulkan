@@ -1837,6 +1837,11 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 			return VK_TRUE;
 		}
 
+		if (!loadTask->getSuccess())
+		{
+			return VK_FALSE;
+		}
+
 		//
 
 		vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Scene loaded");
