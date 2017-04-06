@@ -1256,8 +1256,6 @@ static VkBool32 gltfProcessNode(INodeSP& node, const GltfVisitor& visitor, const
     // Process animations.
     //
 
-    IAnimationSP animation;
-
     for (uint32_t animationIndex = 0; animationIndex < visitor.getAllGltfAnimations().size(); animationIndex++)
     {
     	const auto& gltfAnimation = visitor.getAllGltfAnimations()[animationIndex];
@@ -1270,6 +1268,8 @@ static VkBool32 gltfProcessNode(INodeSP& node, const GltfVisitor& visitor, const
     			// Only create animation, when really needed.
     			//
 
+    			IAnimationSP animation;
+
     	    	if (node->getNumberAnimations() == 0)
     	    	{
     	            animation = sceneFactory->createAnimation(sceneManager);
@@ -1281,7 +1281,9 @@ static VkBool32 gltfProcessNode(INodeSP& node, const GltfVisitor& visitor, const
     	                return VK_FALSE;
     	            }
 
-    	            animation->setName(visitor.getAllGltfAnimations()[animationIndex].name);
+    	            std::string animationName = gltfAnimation.name + "_" + gltfNode.name;
+
+    	            animation->setName(animationName);
 
     	            sceneManager->addAnimation(animation);
 
@@ -1396,26 +1398,43 @@ static VkBool32 gltfProcessNode(INodeSP& node, const GltfVisitor& visitor, const
 
                 for (uint32_t targetTransformElementIndex = 0; targetTransformElementIndex < targetTransformElementCount; targetTransformElementIndex++)
                 {
-					auto channel = sceneFactory->createChannel(sceneManager);
+                	IChannelSP channel;
 
-					std::string channelName = gltfAnimation.name + "_" + gltfChannel.name + "_" + gltfChannel.targetPath + "_" + std::to_string(targetTransformElementIndex);
+                	for (uint32_t channelIndex = 0; channelIndex < animation->getNumberChannels(); channelIndex++)
+                	{
+                		if (animation->getChannels()[channelIndex]->getTargetTransform() == targetTransform && animation->getChannels()[channelIndex]->getTargetTransformElement() == (VkTsTargetTransformElement)targetTransformElementIndex)
+                		{
+                			channel = animation->getChannels()[channelIndex];
 
-					if (!channel.get())
-					{
-						logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Channel not created: '%s'", channelName.c_str(), VKTS_MAX_TOKEN_CHARS);
+                			break;
+                		}
+                	}
 
-						return VK_FALSE;
-					}
+                	if (!channel.get())
+                	{
+						channel = sceneFactory->createChannel(sceneManager);
 
-					channel->setName(channelName);
+						std::string channelName = gltfAnimation.name + "_" + gltfNode.name + "_" + gltfChannel.name + "_" + gltfChannel.targetPath + "_" + std::to_string(targetTransformElementIndex);
 
-					channel->setTargetTransform(targetTransform);
+						if (!channel.get())
+						{
+							logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Channel not created: '%s'", channelName.c_str(), VKTS_MAX_TOKEN_CHARS);
 
-					channel->setTargetTransformElement((VkTsTargetTransformElement)targetTransformElementIndex);
+							return VK_FALSE;
+						}
 
-					//
+						channel->setName(channelName);
 
-					sceneManager->addChannel(channel);
+						channel->setTargetTransform(targetTransform);
+
+						channel->setTargetTransformElement((VkTsTargetTransformElement)targetTransformElementIndex);
+
+						//
+
+						sceneManager->addChannel(channel);
+
+						animation->addChannel(sceneManager->useChannel(channel->getName()));
+                	}
 
 					//
 
@@ -1431,10 +1450,6 @@ static VkBool32 gltfProcessNode(INodeSP& node, const GltfVisitor& visitor, const
 
 						channel->addEntry(*key, value[targetTransformElementIndex], glm::vec4(*key - 0.1f, value[targetTransformElementIndex], *key + 0.1f, value[targetTransformElementIndex]), interpolator);
 					}
-
-					//
-
-					animation->addChannel(channel);
                 }
     		}
     	}
