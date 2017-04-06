@@ -1265,6 +1265,8 @@ void GltfVisitor::visitMaterial(JSONobject& jsonObject)
 		{
 			return;
 		}
+
+		state.pop();
 	}
 
 	if (jsonObject.hasKey("extensions"))
@@ -1278,6 +1280,8 @@ void GltfVisitor::visitMaterial(JSONobject& jsonObject)
 		{
 			return;
 		}
+
+		state.pop();
 	}
 
 	//
@@ -1294,6 +1298,9 @@ void GltfVisitor::visitMaterial(JSONobject& jsonObject)
 		{
 			return;
 		}
+
+		state.pop();
+		subState.pop();
 
 		if (allGltfTextures.size() <= (uint32_t)gltfTextureInfo.index)
 		{
@@ -1317,6 +1324,9 @@ void GltfVisitor::visitMaterial(JSONobject& jsonObject)
 		{
 			return;
 		}
+
+		state.pop();
+		subState.pop();
 
 		if (allGltfTextures.size() <= (uint32_t)gltfTextureInfo.index)
 		{
@@ -1366,6 +1376,8 @@ void GltfVisitor::visitMaterial(JSONobject& jsonObject)
 		{
 			return;
 		}
+
+		state.pop();
 
 		if (allGltfTextures.size() <= (uint32_t)gltfTextureInfo.index)
 		{
@@ -1423,6 +1435,8 @@ void GltfVisitor::visitMesh(JSONobject& jsonObject)
 		return;
 	}
 
+	state.pop();
+
 	//
 
 	if (jsonObject.hasKey("name"))
@@ -1470,6 +1484,8 @@ void GltfVisitor::visitSkin(JSONobject& jsonObject)
 		return;
 	}
 
+	state.pop();
+
 	//
 
 	if (jsonObject.hasKey("inverseBindMatrices"))
@@ -1487,6 +1503,8 @@ void GltfVisitor::visitSkin(JSONobject& jsonObject)
 		{
 			return;
 		}
+
+		state.pop();
 	}
 
 	//
@@ -1561,6 +1579,8 @@ void GltfVisitor::visitNode(JSONobject& jsonObject)
 		{
 			return;
 		}
+
+		state.pop();
 	}
 
 	//
@@ -1789,6 +1809,8 @@ void GltfVisitor::visitAnimation(JSONobject& jsonObject)
 		return;
 	}
 
+	state.pop();
+
 	//
 
 	objectArray = VK_TRUE;
@@ -1804,6 +1826,8 @@ void GltfVisitor::visitAnimation(JSONobject& jsonObject)
 	{
 		return;
 	}
+
+	state.pop();
 
 	//
 
@@ -1839,6 +1863,8 @@ void GltfVisitor::visitScene(JSONobject& jsonObject)
 		{
 			return;
 		}
+
+		state.pop();
 	}
 
 	//
@@ -1901,6 +1927,8 @@ void GltfVisitor::visitMaterial_PbrMetallicRoughness(JSONobject& jsonObject)
 			return;
 		}
 
+		state.pop();
+
 		if (allGltfTextures.size() <= (uint32_t)gltfTextureInfo.index)
 		{
 			state.push(GltfState_Error);
@@ -1956,6 +1984,8 @@ void GltfVisitor::visitMaterial_PbrMetallicRoughness(JSONobject& jsonObject)
 			return;
 		}
 
+		state.pop();
+
 		if (allGltfTextures.size() <= (uint32_t)gltfTextureInfo.index)
 		{
 			state.push(GltfState_Error);
@@ -1979,6 +2009,8 @@ void GltfVisitor::visitMaterial_Extensions(JSONobject& jsonObject)
 		{
 			return;
 		}
+
+		state.pop();
 	}
 }
 
@@ -2024,6 +2056,8 @@ void GltfVisitor::visitMaterial_Extensions_PbrSpecularGlossiness(JSONobject& jso
 		{
 			return;
 		}
+
+		state.pop();
 
 		if (allGltfTextures.size() <= (uint32_t)gltfTextureInfo.index)
 		{
@@ -2092,6 +2126,8 @@ void GltfVisitor::visitMaterial_Extensions_PbrSpecularGlossiness(JSONobject& jso
 		{
 			return;
 		}
+
+		state.pop();
 
 		if (allGltfTextures.size() <= (uint32_t)gltfTextureInfo.index)
 		{
@@ -2227,6 +2263,8 @@ void GltfVisitor::visitMesh_Primitive(JSONobject& jsonObject)
 	{
 		return;
 	}
+
+	state.pop();
 
 	// Optional
 
@@ -2617,6 +2655,8 @@ void GltfVisitor::visitAnimation_Channel(JSONobject& jsonObject)
 		return;
 	}
 
+	state.pop();
+
 	// Optional
 
 	if (jsonObject.hasKey("name"))
@@ -2816,6 +2856,8 @@ void GltfVisitor::visit(JSONarray& jsonArray)
 					return;
 				}
 
+				state.pop();
+
 				//
 
 				allGltfBuffers.append(gltfBuffer);
@@ -2841,6 +2883,8 @@ void GltfVisitor::visit(JSONarray& jsonArray)
 				{
 					return;
 				}
+
+				state.pop();
 
 				//
 
@@ -2876,6 +2920,8 @@ void GltfVisitor::visit(JSONarray& jsonArray)
 				{
 					return;
 				}
+
+				state.pop();
 
 				//
 
@@ -2933,6 +2979,8 @@ void GltfVisitor::visit(JSONarray& jsonArray)
 					return;
 				}
 
+				state.pop();
+
 				//
 
 				allGltfImages.append(gltfImage);
@@ -2957,6 +3005,8 @@ void GltfVisitor::visit(JSONarray& jsonArray)
 				{
 					return;
 				}
+
+				state.pop();
 
 				//
 
@@ -2984,6 +3034,8 @@ void GltfVisitor::visit(JSONarray& jsonArray)
 				{
 					return;
 				}
+
+				state.pop();
 
 				//
 
@@ -3055,6 +3107,8 @@ void GltfVisitor::visit(JSONarray& jsonArray)
 					return;
 				}
 
+				state.pop();
+
 				//
 
 				allGltfMaterials.append(gltfMaterial);
@@ -3076,6 +3130,8 @@ void GltfVisitor::visit(JSONarray& jsonArray)
 				{
 					return;
 				}
+
+				state.pop();
 
 				//
 
@@ -3100,6 +3156,8 @@ void GltfVisitor::visit(JSONarray& jsonArray)
 				{
 					return;
 				}
+
+				state.pop();
 
 				//
 
@@ -3151,6 +3209,8 @@ void GltfVisitor::visit(JSONarray& jsonArray)
 					return;
 				}
 
+				state.pop();
+
 				//
 
 				allGltfNodes.append(gltfNode);
@@ -3174,6 +3234,8 @@ void GltfVisitor::visit(JSONarray& jsonArray)
 					return;
 				}
 
+				state.pop();
+
 				//
 
 				allGltfAnimations.append(gltfAnimation);
@@ -3195,6 +3257,8 @@ void GltfVisitor::visit(JSONarray& jsonArray)
 				{
 					return;
 				}
+
+				state.pop();
 
 				//
 
@@ -3228,10 +3292,6 @@ void GltfVisitor::visit(JSONarray& jsonArray)
 				}
 
 				gltfMesh.primitives.append(gltfPrimitive);
-
-				//
-
-				state.push(GltfState_Mesh_Primitive);
 			}
 		}
 		else if (gltfState == GltfState_Skin_InverseBindMatrices)
@@ -3447,6 +3507,8 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 			return;
 		}
 
+		state.pop();
+
 		// Optional
 
 		if (jsonObject.hasKey("buffers"))
@@ -3464,6 +3526,8 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 			{
 				return;
 			}
+
+			state.pop();
 		}
 
 		//
@@ -3483,6 +3547,8 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 			{
 				return;
 			}
+
+			state.pop();
 		}
 
 		//
@@ -3502,6 +3568,8 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 			{
 				return;
 			}
+
+			state.pop();
 		}
 
 		//
@@ -3521,6 +3589,8 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 			{
 				return;
 			}
+
+			state.pop();
 		}
 
 		//
@@ -3540,6 +3610,8 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 			{
 				return;
 			}
+
+			state.pop();
 		}
 
 		//
@@ -3559,6 +3631,8 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 			{
 				return;
 			}
+
+			state.pop();
 		}
 
 		//
@@ -3578,6 +3652,8 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 			{
 				return;
 			}
+
+			state.pop();
 		}
 
 		//
@@ -3597,6 +3673,8 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 			{
 				return;
 			}
+
+			state.pop();
 		}
 
 		//
@@ -3616,6 +3694,8 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 			{
 				return;
 			}
+
+			state.pop();
 		}
 
 		//
@@ -3635,6 +3715,8 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 			{
 				return;
 			}
+
+			state.pop();
 		}
 
 		//
@@ -3654,6 +3736,8 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 			{
 				return;
 			}
+
+			state.pop();
 		}
 
 		//
@@ -3673,6 +3757,8 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 			{
 				return;
 			}
+
+			state.pop();
 		}
 
 		//
@@ -3692,6 +3778,8 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 			{
 				return;
 			}
+
+			state.pop();
 		}
 
 
@@ -3712,6 +3800,8 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 			{
 				return;
 			}
+
+			state.pop();
 		}
 
 		//
@@ -3899,11 +3989,6 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 	{
 		state.push(GltfState_Error);
 		return;
-	}
-
-	if (state.top() != GltfState_Error)
-	{
-		state.pop();
 	}
 }
 
