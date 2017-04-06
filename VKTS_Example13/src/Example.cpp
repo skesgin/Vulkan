@@ -1984,7 +1984,7 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 //
 void Example::terminate(const vkts::IUpdateThreadContext& updateContext)
 {
-	if (loadTask.get() && !sceneLoaded)
+	if (loadTask.get() && !loadTask->getSuccess() && !sceneLoaded)
 	{
 		vkts::ITaskSP executedTask;
 

@@ -39,15 +39,21 @@ class ITask
 
 private:
 
+    mutable std::mutex taskMutex;
+
     const uint64_t id;
 
     VkBool32 success;
 
     VkBool32 run()
     {
-    	success = execute();
+    	VkBool32 success = execute();
 
-        return success;
+    	std::lock_guard<std::mutex> taskLock(taskMutex);
+
+    	this->success = success;
+
+        return this->success;
     }
 
 protected:
@@ -57,7 +63,7 @@ protected:
 public:
 
     ITask(const uint64_t id) :
-    	id(id), success(VK_FALSE)
+    	taskMutex(), id(id), success(VK_FALSE)
     {
     }
 
@@ -72,6 +78,8 @@ public:
 
     VkBool32 getSuccess() const
     {
+    	std::lock_guard<std::mutex> taskLock(taskMutex);
+
         return success;
     }
 };
