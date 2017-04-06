@@ -1847,7 +1847,7 @@ public:
 
     				//
 
-    				currentImageData = imageDataUnite(material.getTextureObjects()[1]->getImageObject()->getImageData(), material.getTextureObjects()[2]->getImageObject()->getImageData(), imageName, VKTS_SOURCE_0_RED, VKTS_SOURCE_1_RED, VKTS_SOURCE_ZERO, VKTS_SOURCE_ONE, VK_FORMAT_R8G8B8A8_UNORM);
+    				currentImageData = imageDataUnite(material.getTextureObjects()[1]->getImageObject()->getImageData(), material.getTextureObjects()[2]->getImageObject()->getImageData(), imageName, VKTS_SOURCE_ZERO, VKTS_SOURCE_0_RED, VKTS_SOURCE_1_RED, VKTS_SOURCE_ONE, VK_FORMAT_R8G8B8A8_UNORM);
     			}
     			else
     			{
