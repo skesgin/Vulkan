@@ -1149,7 +1149,7 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 
 static VkBool32 gltfProcessNode(INodeSP& node, const GltfVisitor& visitor, const GltfNode& gltfNode, const ISceneManagerSP& sceneManager, const ISceneFactorySP& sceneFactory)
 {
-	node->setNodeRotationMode(VKTS_EULER_XYZ);
+	node->setNodeRotationMode(VKTS_EULER_YXZ);
 
 	//
 
@@ -1159,7 +1159,7 @@ static VkBool32 gltfProcessNode(INodeSP& node, const GltfVisitor& visitor, const
 
 	Quat quat(gltfNode.rotation[0], gltfNode.rotation[1], gltfNode.rotation[2], gltfNode.rotation[3]);
 
-	node->setRotate(decomposeRotateRzRyRx(quat.mat4()));
+	node->setRotate(decomposeRotateRzRxRy(quat.mat4()));
 
 	node->setScale(glm::vec3(gltfNode.scale[0], gltfNode.scale[1], gltfNode.scale[2]));
 
@@ -1262,36 +1262,40 @@ static VkBool32 gltfProcessNode(INodeSP& node, const GltfVisitor& visitor, const
     {
     	const auto& gltfAnimation = visitor.getAllGltfAnimations()[animationIndex];
 
-    	//
-
-    	if (node->getNumberAnimations() == 0)
-    	{
-            animation = sceneFactory->createAnimation(sceneManager);
-
-            if (!animation.get())
-            {
-                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Animation not created: '%s'", visitor.getAllGltfAnimations()[animationIndex].name.c_str(), VKTS_MAX_TOKEN_CHARS);
-
-                return VK_FALSE;
-            }
-
-            animation->setName(visitor.getAllGltfAnimations()[animationIndex].name);
-
-            sceneManager->addAnimation(animation);
-
-            //
-
-            node->addAnimation(sceneManager->useAnimation(animation->getName()));
-    	}
-
-    	animation = node->getAnimations()[0];
-
-    	//
-
     	for (uint32_t channelIndex = 0; channelIndex < gltfAnimation.channels.size(); channelIndex++)
     	{
-    		if (gltfAnimation.channels[channelIndex].targetNode == &gltfNode)
+    		if (gltfAnimation.channels[channelIndex].targetNode->name == gltfNode.name)
     		{
+    			//
+    			// Only create animation, when really needed.
+    			//
+
+    	    	if (node->getNumberAnimations() == 0)
+    	    	{
+    	            animation = sceneFactory->createAnimation(sceneManager);
+
+    	            if (!animation.get())
+    	            {
+    	                logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Animation not created: '%s'", visitor.getAllGltfAnimations()[animationIndex].name.c_str(), VKTS_MAX_TOKEN_CHARS);
+
+    	                return VK_FALSE;
+    	            }
+
+    	            animation->setName(visitor.getAllGltfAnimations()[animationIndex].name);
+
+    	            sceneManager->addAnimation(animation);
+
+    	            //
+
+    	            node->addAnimation(sceneManager->useAnimation(animation->getName()));
+    	    	}
+
+    	    	animation = node->getAnimations()[0];
+
+    			//
+    	    	//
+    	    	//
+
     			const auto& gltfChannel = gltfAnimation.channels[channelIndex];
 
     			if (!gltfChannel.sampler)

@@ -29,6 +29,11 @@
 namespace vkts
 {
 
+static float signum(const float f)
+{
+	return f >= 0.0f ? 1.0f : -1.0f;
+}
+
 glm::mat4 VKTS_APIENTRY translateMat4(const float x, const float y, const float z)
 {
     glm::mat4 matrix(1.0f);
@@ -576,7 +581,7 @@ glm::vec3 VKTS_APIENTRY decomposeRotateRyRzRx(const glm::mat3& matrix)
 
 	glm::vec3 scale = decomposeScale(matrix);
 
-	rotation[0] = glm::degrees(atan2f(-matrix[2][1] / scale[1], matrix[1][1] / scale[2]));
+	rotation[0] = glm::degrees(atan2f(-matrix[2][1] / scale[2], matrix[1][1] / scale[1]));
 	rotation[1] = glm::degrees(atan2f(-matrix[0][2] / scale[0], matrix[0][0] / scale[0]));
 	rotation[2] = glm::degrees(asinf(matrix[0][1] / scale[0]));
 
@@ -610,11 +615,11 @@ glm::vec3 VKTS_APIENTRY decomposeRotateRyRzRx(const glm::mat3& matrix)
 
 float VKTS_APIENTRY decomposeRotate(const glm::mat3& matrix)
 {
-	float scale = sqrtf(matrix[0][0] * matrix[0][0] + matrix[1][1] * matrix[1][1]);
+	glm::vec2 scale = decomposeScale(glm::mat2(matrix));
 
-	if (scale != 0.0f)
+	if (scale.x != 0.0f)
 	{
-		return glm::degrees(acosf(matrix[0][0] / scale));
+		return glm::degrees(acosf(matrix[0][0] / scale.x));
 	}
 
 	return 0.0f;
@@ -629,9 +634,16 @@ glm::vec3 VKTS_APIENTRY decomposeScale(const glm::mat3& matrix)
 {
 	glm::vec3 scale;
 
+	float sign = signum(glm::determinant(matrix));
+
 	for (int32_t i = 0; i < 3; i++)
 	{
 		scale[i] = sqrtf(matrix[i][0] * matrix[i][0] + matrix[i][1] * matrix[i][1] + matrix[i][2] * matrix[i][2]);
+
+		if (sign < 0.0f)
+		{
+			scale[i] *= signum(matrix[i][i]);
+		}
 	}
 
 	return scale;
@@ -641,9 +653,16 @@ glm::vec2 VKTS_APIENTRY decomposeScale(const glm::mat2& matrix)
 {
 	glm::vec2 scale;
 
+	float sign = signum(glm::determinant(matrix));
+
 	for (int32_t i = 0; i < 2; i++)
 	{
 		scale[i] = sqrtf(matrix[i][0] * matrix[i][0] + matrix[i][1] * matrix[i][1]);
+
+		if (sign < 0.0f)
+		{
+			scale[i] *= signum(matrix[i][i]);
+		}
 	}
 
 	return scale;

@@ -1642,8 +1642,8 @@ void GltfVisitor::visitNode(JSONobject& jsonObject)
 		gltfNode.translation[1] = translate.y;
 		gltfNode.translation[2] = translate.z;
 
-		auto rotate = decomposeRotateRzRyRx(localMatrix);
-		Quat r = rotateRzRyRx(rotate.z, rotate.y, rotate.x);
+		auto rotate = decomposeRotateRzRxRy(localMatrix);
+		Quat r = rotateRzRxRy(rotate.z, rotate.x, rotate.y);
 		gltfNode.rotation[0] = r.x;
 		gltfNode.rotation[1] = r.y;
 		gltfNode.rotation[2] = r.z;
