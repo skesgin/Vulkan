@@ -149,7 +149,7 @@ static ITextureObjectSP gltfProcessTextureObject(const GltfTexture* texture, con
 					color[0] = 0.0f;
 					color[1] = 0.0f;
 					color[2] = 0.0f;
-					color[3] = 0.0f;
+					color[3] = 1.0f;
 				}
 
 				imageData = imageDataCreate(imageDataName, 1, 1, 1, glm::vec4(factor[0] * color[0], factor[1] * color[1], factor[2] * color[2], factor[3] * color[3]), VK_IMAGE_TYPE_2D, VK_FORMAT_R8G8B8A8_UNORM);
@@ -1016,7 +1016,7 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 
 				float metallicRoughnessFactors[] = {1.0f, gltfPrimitive.material->pbrMetallicRoughness.roughnessFactor, gltfPrimitive.material->pbrMetallicRoughness.metallicFactor, 1.0f};
 
-				ITextureObjectSP metallicRoughness = gltfProcessTextureObject(gltfPrimitive.material->pbrMetallicRoughness.metallicRoughnessTexture, metallicRoughnessFactors, VK_FALSE, VKTS_NON_COLOR_DATA, sceneManager);
+				ITextureObjectSP metallicRoughness = gltfProcessTextureObject(gltfPrimitive.material->pbrMetallicRoughness.metallicRoughnessTexture, metallicRoughnessFactors, VK_TRUE, VKTS_NON_COLOR_DATA, sceneManager);
 
 				if (!metallicRoughness.get())
 				{
@@ -1060,7 +1060,7 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 
 			float emissiveFactors[] = {gltfPrimitive.material->emissiveFactor[0], gltfPrimitive.material->emissiveFactor[1], gltfPrimitive.material->emissiveFactor[2], 1.0f};
 
-			ITextureObjectSP emissive = gltfProcessTextureObject(gltfPrimitive.material->emissiveTexture, emissiveFactors, VK_FALSE, VKTS_LDR_COLOR_DATA, sceneManager);
+			ITextureObjectSP emissive = gltfProcessTextureObject(gltfPrimitive.material->emissiveTexture, emissiveFactors, VK_TRUE, VKTS_LDR_COLOR_DATA, sceneManager);
 
 			if (!emissive.get())
 			{
