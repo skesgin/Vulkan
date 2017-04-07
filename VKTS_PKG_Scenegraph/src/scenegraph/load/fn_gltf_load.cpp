@@ -51,6 +51,14 @@ static ITextureObjectSP gltfProcessTextureObject(const GltfTexture* texture, con
 
 		imageDataName = texture->source->imageData->getName();
 	}
+	else if (imageDataType == VKTS_NORMAL_DATA)
+	{
+		textureObjectName = "INTERNAL_NORMAL";
+
+		imageObjectName = "INTERNAL_NORMAL";
+
+		imageDataName = "INTERNAL_NORMAL";
+	}
 	else if (defaultWhite)
 	{
 		textureObjectName = "INTERNAL_WHITE";
