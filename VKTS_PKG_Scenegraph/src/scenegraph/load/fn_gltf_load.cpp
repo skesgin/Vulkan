@@ -1014,7 +1014,7 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 				// Metallic roughness
 				//
 
-				float metallicRoughnessFactors[] = {gltfPrimitive.material->pbrMetallicRoughness.metallicFactor, gltfPrimitive.material->pbrMetallicRoughness.roughnessFactor, 1.0f, 1.0f};
+				float metallicRoughnessFactors[] = {1.0f, gltfPrimitive.material->pbrMetallicRoughness.roughnessFactor, gltfPrimitive.material->pbrMetallicRoughness.metallicFactor, 1.0f};
 
 				ITextureObjectSP metallicRoughness = gltfProcessTextureObject(gltfPrimitive.material->pbrMetallicRoughness.metallicRoughnessTexture, metallicRoughnessFactors, VK_FALSE, VKTS_NON_COLOR_DATA, sceneManager);
 
