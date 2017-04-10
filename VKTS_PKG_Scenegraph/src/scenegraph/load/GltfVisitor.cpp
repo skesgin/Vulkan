@@ -3090,9 +3090,9 @@ void GltfVisitor::visit(JSONarray& jsonArray)
 				gltfMaterial.occlusionStrength = 1.0f;
 				gltfMaterial.occlusionTexture = nullptr;
 
-				gltfMaterial.emissiveFactor[0] = 1.0f;
-				gltfMaterial.emissiveFactor[1] = 1.0f;
-				gltfMaterial.emissiveFactor[2] = 1.0f;
+				gltfMaterial.emissiveFactor[0] = 0.0f;
+				gltfMaterial.emissiveFactor[1] = 0.0f;
+				gltfMaterial.emissiveFactor[2] = 0.0f;
 				gltfMaterial.emissiveTexture = nullptr;
 
 				gltfMaterial.name = "Material_" + std::to_string(i);
