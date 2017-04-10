@@ -55,16 +55,17 @@ VkBool32 VKTS_APIENTRY validationGatherNeededInstanceLayers()
 
     //
 
-    static const char* validationLayerNames[7] =
+    static const char* validationLayerNames[8] =
     {
-        "VK_LAYER_GOOGLE_threading",
-        "VK_LAYER_LUNARG_parameter_validation",
-        "VK_LAYER_LUNARG_object_tracker",
+		"VK_LAYER_GOOGLE_threading",
+		"VK_LAYER_LUNARG_parameter_validation",
+		"VK_LAYER_LUNARG_device_limits",
+		"VK_LAYER_LUNARG_object_tracker",
 		"VK_LAYER_LUNARG_image",
-        "VK_LAYER_LUNARG_core_validation",
-        "VK_LAYER_LUNARG_swapchain",
-        "VK_LAYER_GOOGLE_unique_objects"
-    };
+		"VK_LAYER_LUNARG_core_validation",
+		"VK_LAYER_LUNARG_swapchain",
+		"VK_LAYER_GOOGLE_unique_objects"
+	};
 
     for (auto validationLayerName : validationLayerNames)
     {
@@ -76,8 +77,10 @@ VkBool32 VKTS_APIENTRY validationGatherNeededInstanceLayers()
 			{
 				if (!layerAddInstanceLayers(validationLayerName))
 				{
-					return VK_FALSE;
+					vkts::logPrint(VKTS_LOG_WARNING, __FILE__, __LINE__, "Could not add validation layer: %s", validationLayerName);
 				}
+
+				vkts::logPrint(VKTS_LOG_INFO, __FILE__, __LINE__, "Successfully added validation layer: %s", validationLayerName);
 
 				extensionFound = VK_TRUE;
 
@@ -87,7 +90,7 @@ VkBool32 VKTS_APIENTRY validationGatherNeededInstanceLayers()
 
 		if (!extensionFound)
 		{
-			return VK_FALSE;
+			vkts::logPrint(VKTS_LOG_WARNING, __FILE__, __LINE__, "Could not find validation layer: %s", validationLayerName);
 		}
     }
 

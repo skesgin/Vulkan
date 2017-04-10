@@ -1006,7 +1006,7 @@ void Node::updateTransformRecursive(const double deltaTime, const uint64_t delta
 
         Quat a;
         Quat b;
-        float t;
+        float t = 0;
         VkBool32 quaternionDirty = VK_FALSE;
 
         //

@@ -32,6 +32,8 @@
 namespace vkts
 {
 
+// TODO:	Shouldn't all of these methods return an IObjectSP since the other elements need an IObjectSP wrapper around them before they can be added to a scene?
+//			This could eliminate more boilerplate code.
 class ISceneFactory
 {
 

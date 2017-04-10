@@ -26,6 +26,8 @@
 
 #include "InputController.hpp"
 
+// TODO:	Input control mapping should be handled via a configuraion file not programmatically.
+
 namespace vkts
 {
 
@@ -264,89 +266,87 @@ VkBool32 InputController::update(const double deltaTime, const uint64_t deltaTic
 
                 moveable->moveTranslateRotate(forwardFactor, strafeFactor, upFactor, deltaRotation);
             }
-            else if (gamepadIndex < 0)
+
+            // Keyboard
+
+            float moveSpeedFactor = 1.0f;
+            float rotateSpeedFactor = 1.0f;
+            if (visualContext->getKey(windowIndex, VKTS_KEY_LEFT_SHIFT))
             {
-                // Keyboard
+                moveSpeedFactor = moveMulitply;
+                rotateSpeedFactor = rotateMulitply;
+            }
 
-                float moveSpeedFactor = 1.0f;
-                float rotateSpeedFactor = 1.0f;
-                if (visualContext->getKey(windowIndex, VKTS_KEY_LEFT_SHIFT))
-                {
-                    moveSpeedFactor = moveMulitply;
-                    rotateSpeedFactor = rotateMulitply;
-                }
+            float forwardFactor = 0.0f;
+            if (visualContext->getKey(windowIndex, VKTS_KEY_W))
+            {
+                forwardFactor += 1.0f * forwardSpeed * moveSpeedFactor * (float) deltaTime;
+            }
+            if (visualContext->getKey(windowIndex, VKTS_KEY_S))
+            {
+                forwardFactor -= 1.0f * forwardSpeed * moveSpeedFactor * (float) deltaTime;
+            }
 
-                float forwardFactor = 0.0f;
-                if (visualContext->getKey(windowIndex, VKTS_KEY_W))
-                {
-                    forwardFactor += 1.0f * forwardSpeed * moveSpeedFactor * (float) deltaTime;
-                }
-                if (visualContext->getKey(windowIndex, VKTS_KEY_S))
-                {
-                    forwardFactor -= 1.0f * forwardSpeed * moveSpeedFactor * (float) deltaTime;
-                }
+            float strafeFactor = 0.0f;
+            if (visualContext->getKey(windowIndex, VKTS_KEY_D))
+            {
+                strafeFactor -= 1.0f * strafeSpeed * moveSpeedFactor * (float) deltaTime;
+            }
+            if (visualContext->getKey(windowIndex, VKTS_KEY_A))
+            {
+                strafeFactor += 1.0f * strafeSpeed * moveSpeedFactor * (float) deltaTime;
+            }
 
-                float strafeFactor = 0.0f;
-                if (visualContext->getKey(windowIndex, VKTS_KEY_D))
-                {
-                    strafeFactor -= 1.0f * strafeSpeed * moveSpeedFactor * (float) deltaTime;
-                }
-                if (visualContext->getKey(windowIndex, VKTS_KEY_A))
-                {
-                    strafeFactor += 1.0f * strafeSpeed * moveSpeedFactor * (float) deltaTime;
-                }
+            float upFactor = 0.0f;
+            if (visualContext->getKey(windowIndex, VKTS_KEY_E) || visualContext->getKey(windowIndex, VKTS_KEY_PAGE_UP))
+            {
+                upFactor += 1.0f * upSpeed * moveSpeedFactor * (float) deltaTime;
+            }
+            if (visualContext->getKey(windowIndex, VKTS_KEY_Q) || visualContext->getKey(windowIndex, VKTS_KEY_PAGE_DOWN))
+            {
+                upFactor -= 1.0f * upSpeed * moveSpeedFactor * (float) deltaTime;
+            }
 
-                float upFactor = 0.0f;
-                if (visualContext->getKey(windowIndex, VKTS_KEY_PAGE_UP))
-                {
-                    upFactor += 1.0f * upSpeed * moveSpeedFactor * (float) deltaTime;
-                }
-                if (visualContext->getKey(windowIndex, VKTS_KEY_PAGE_DOWN))
-                {
-                    upFactor -= 1.0f * upSpeed * moveSpeedFactor * (float) deltaTime;
-                }
+            if (forwardOnly && forwardFactor > 0.0f)
+            {
+                forwardFactor = 0.0f;
+            }
 
-                if (forwardOnly && forwardFactor > 0.0f)
+            glm::vec3 deltaRotation(0.0f, 0.0f, 0.0f);
+
+            const auto& currentMouseLocation = visualContext->getMouseLocation(windowIndex);
+
+            if (visualContext->isGameMouse(windowIndex))
+            {
+                if (!mouseLocationInitialized)
                 {
-                	forwardFactor = 0.0f;
-                }
-
-                glm::vec3 deltaRotation(0.0f, 0.0f, 0.0f);
-
-                const auto& currentMouseLocation = visualContext->getMouseLocation(windowIndex);
-
-                if (visualContext->isGameMouse(windowIndex))
-                {
-                    if (!mouseLocationInitialized)
+                    if (currentMouseLocation.y == (int32_t)visualContext->getWindowDimension(windowIndex).y / 2 && currentMouseLocation.x == (int32_t)visualContext->getWindowDimension(windowIndex).x / 2)
                     {
-                        if (currentMouseLocation.y == (int32_t)visualContext->getWindowDimension(windowIndex).y / 2 && currentMouseLocation.x == (int32_t)visualContext->getWindowDimension(windowIndex).x / 2)
-                        {
-                            mouseLocationInitialized = VK_TRUE;
-                        }
-                    }
-                    else
-                    {
-                        deltaRotation.x = -(float)(2 * (currentMouseLocation.y - (int32_t)visualContext->getWindowDimension(windowIndex).y / 2)) / (float) visualContext->getWindowDimension(windowIndex).y * pitchSpeed * rotateSpeedFactor * pitchMulitply * (float) deltaTime * mouseMultiply;
-                        deltaRotation.y = -(float)(2 * (currentMouseLocation.x - (int32_t)visualContext->getWindowDimension(windowIndex).x / 2)) / (float) visualContext->getWindowDimension(windowIndex).x * yawSpeed * rotateSpeedFactor * (float) deltaTime * mouseMultiply;
+                        mouseLocationInitialized = VK_TRUE;
                     }
                 }
                 else
                 {
-                    if (!mouseLocationInitialized)
-                    {
-                        lastMouseLocation = currentMouseLocation;
+                    deltaRotation.x = -(float)(2 * (currentMouseLocation.y - (int32_t)visualContext->getWindowDimension(windowIndex).y / 2)) / (float) visualContext->getWindowDimension(windowIndex).y * pitchSpeed * rotateSpeedFactor * pitchMulitply * (float) deltaTime * mouseMultiply;
+                    deltaRotation.y = -(float)(2 * (currentMouseLocation.x - (int32_t)visualContext->getWindowDimension(windowIndex).x / 2)) / (float) visualContext->getWindowDimension(windowIndex).x * yawSpeed * rotateSpeedFactor * (float) deltaTime * mouseMultiply;
+                }
+            }
+            else
+            {
+                if (!mouseLocationInitialized)
+                {
+                    lastMouseLocation = currentMouseLocation;
 
-                        mouseLocationInitialized = VK_TRUE;
-                    }
-
-                    deltaRotation.x = -(float)(2 * (currentMouseLocation.y - lastMouseLocation.y)) / (float) visualContext->getWindowDimension(windowIndex).y * pitchSpeed * rotateSpeedFactor * pitchMulitply * (float) deltaTime * mouseMultiply;
-                    deltaRotation.y = -(float)(2 * (currentMouseLocation.x - lastMouseLocation.x)) / (float) visualContext->getWindowDimension(windowIndex).x * yawSpeed * rotateSpeedFactor * (float) deltaTime * mouseMultiply;
-
-                    lastMouseLocation = glm::ivec2(currentMouseLocation.x, currentMouseLocation.y);
+                    mouseLocationInitialized = VK_TRUE;
                 }
 
-                moveable->moveTranslateRotate(forwardFactor, strafeFactor, upFactor, deltaRotation);
+                deltaRotation.x = -(float)(2 * (currentMouseLocation.y - lastMouseLocation.y)) / (float) visualContext->getWindowDimension(windowIndex).y * pitchSpeed * rotateSpeedFactor * pitchMulitply * (float) deltaTime * mouseMultiply;
+                deltaRotation.y = -(float)(2 * (currentMouseLocation.x - lastMouseLocation.x)) / (float) visualContext->getWindowDimension(windowIndex).x * yawSpeed * rotateSpeedFactor * (float) deltaTime * mouseMultiply;
+
+                lastMouseLocation = glm::ivec2(currentMouseLocation.x, currentMouseLocation.y);
             }
+
+            moveable->moveTranslateRotate(forwardFactor, strafeFactor, upFactor, deltaRotation);
         }
     }
 

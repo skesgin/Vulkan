@@ -37,6 +37,11 @@ local.properties
 *.stamp
 *.tlog
 *.vcxproj
+*.vcxproj.user
 *.zip
 /CMakeLists.txt
+CMakeCache.txt
 /MSVC
+/VKTS_Binaries
+.vs
+*.VC.db
