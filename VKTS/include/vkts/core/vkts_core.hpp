@@ -65,6 +65,12 @@
 #include <glm/gtc/matrix_access.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+ /**
+ * Validation Helpers.
+ */
+
+#include "validation/ValidationHelpers.hpp"
+
 /**
  * OS platform.
  */
