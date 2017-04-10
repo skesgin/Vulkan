@@ -76,8 +76,10 @@ public:
     //
 
     virtual ICameraSP createCamera(const ISceneManagerSP& sceneManager) override;
+	virtual ICameraSP createCamera(const ISceneManagerSP & sceneManager, const std::string& name, CameraType cameraType, const float zNear, const float zFar, const float fovy, const float orthoScale, const glm::ivec2& windowDimension) override;
 
-    virtual ILightSP createLight(const ISceneManagerSP& sceneManager) override;
+	virtual ILightSP createLight(const ISceneManagerSP& sceneManager) override;
+	virtual ILightSP createLight(const ISceneManagerSP& sceneManager, const std::string& name, const enum LightType lightType, const float stength, const glm::vec3& color, const glm::vec4& transform) override;
 
     virtual IParticleSystemSP createParticleSystem(const ISceneManagerSP& sceneManager) override;
 
@@ -89,11 +91,13 @@ public:
 
     //
 
-    virtual INodeSP createNode(const ISceneManagerSP& sceneManager) override;
+	virtual INodeSP createNode(const ISceneManagerSP& sceneManager) override;
+	virtual INodeSP createNode(const ISceneManagerSP& sceneManager, const std::string& name, const glm::vec3& translate, const glm::vec3& rotate, const glm::vec3& scale) override;
 
     //
 
-    virtual IObjectSP createObject(const ISceneManagerSP& sceneManager) override;
+	virtual IObjectSP createObject(const ISceneManagerSP& sceneManager) override;
+	virtual IObjectSP createObject(const ISceneManagerSP& sceneManager, const std::string& name, const glm::vec3& translate, const glm::vec3& rotate, const glm::vec3& scale) override;
 
     //
 

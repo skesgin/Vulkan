@@ -46,6 +46,13 @@ Object::Object() :
 {
 }
 
+Object::Object(std::string name, glm::vec3 translate = glm::vec3(0), glm::vec3 rotate = glm::vec3(0), glm::vec3 scale = glm::vec3(1)):
+	IObject(), name(name), scale(scale), transformMatrix(1.0f), dirty(VK_TRUE)
+{
+	auto node = INodeSP(new Node(name + "_RootNode", translate, rotate, scale));
+	this->Object::setRootNode(node);
+}
+
 Object::Object(const Object& other) :
     IObject(other), name(other.name + "_clone"), scale(other.scale), transformMatrix(other.transformMatrix), dirty(VK_TRUE), rootNode()
 {

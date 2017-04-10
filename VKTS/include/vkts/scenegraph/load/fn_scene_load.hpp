@@ -38,6 +38,13 @@ namespace vkts
  */
 VKTS_APICALL ISceneSP VKTS_APIENTRY sceneLoad(const char* filename, const ISceneManagerSP& sceneManager, const ISceneFactorySP& sceneFactory, const VkBool32 freeHostMemory = VK_FALSE);
 
+
+VKTS_APICALL VkBool32 VKTS_APIENTRY populateSubMesh(const ISceneManagerSP& sceneManager, const ISceneFactorySP& sceneFactory, ISubMeshSP& subMesh, std::vector<float>& vertex, std::vector<int32_t>& indices,
+	std::vector<float>& normal, std::vector<float>& bitangent, std::vector<float>& tangent, std::vector<float>& texcoord, std::vector<float>& boneIndices0,
+	std::vector<float>& boneIndices1, std::vector<float>& boneWeights0, std::vector<float>& boneWeights1, std::vector<float>& numberBones);
+
+VKTS_APICALL IImageDataSP VKTS_APIENTRY loadImageData(const ISceneManagerSP& sceneManager, const ISceneFactorySP& sceneFactory, VkBool32 mipMap, VkBool32 environment, VkTsEnvironmentType environmentType,
+	VkBool32 preFiltered, const std::string& imageDataFilename, const std::string& imageDataFilePath, const std::string& imageObjectName);
 }
 
 #endif /* VKTS_FN_SCENE_LOAD_HPP_ */

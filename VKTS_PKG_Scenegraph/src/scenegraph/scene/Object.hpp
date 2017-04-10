@@ -56,7 +56,8 @@ protected:
 
 public:
 
-    Object();
+	Object();
+	Object(std::string name, glm::vec3 translate, glm::vec3 rotate, glm::vec3 scale);
     Object(const Object& other);
     Object(Object&& other) = delete;
     virtual ~Object();

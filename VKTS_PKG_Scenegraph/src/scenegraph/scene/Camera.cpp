@@ -47,8 +47,14 @@ Camera::Camera() :
 	updateProjectionMatrix();
 }
 
+Camera::Camera(const std::string& name, CameraType cameraType, float zNear, float zFar, float fovy, float orthoScale, const glm::ivec2& windowDimension) :
+	ICamera(), name(std::move(name)), cameraType(cameraType), zNear(zNear), zFar(zFar), fovy(fovy), orthoScale(orthoScale), windowDimension(windowDimension)
+{
+	updateProjectionMatrix();
+}
+
 Camera::Camera(const Camera& other) :
-	ICamera(), name(other.name + "_clone"), cameraType(other.cameraType), zNear(other.zNear), zFar(other.zFar), fovy(other.fovy), orthoScale(other.orthoScale), windowDimension(other.windowDimension), view(other.view), projection(other.projection)
+	ICamera(), name(std::move(other.name + "_clone")), cameraType(other.cameraType), zNear(other.zNear), zFar(other.zFar), fovy(other.fovy), orthoScale(other.orthoScale), windowDimension(other.windowDimension), view(other.view), projection(other.projection)
 {
 }
 

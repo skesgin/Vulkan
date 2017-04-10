@@ -96,7 +96,8 @@ private:
 
 public:
 
-    Node();
+	Node();
+	Node(const std::string& name, const glm::vec3& translate, const glm::vec3& rotate, const glm::vec3& scale);
     Node(const Node& other);
     Node(Node&& other) = delete;
     virtual ~Node();

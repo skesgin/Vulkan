@@ -168,9 +168,18 @@ ICameraSP SceneFactory::createCamera(const ISceneManagerSP& sceneManager)
 	return ICameraSP(new Camera());
 }
 
+ICameraSP SceneFactory::createCamera(const ISceneManagerSP& sceneManager, const std::string& name, const CameraType cameraType = CameraType::PerspectiveCamera, const float zNear = 0.1f, const float zFar = 100.f, const float fovy = 45.0f, const float orthoScale = 1.0f, const glm::ivec2& windowDimension = glm::ivec2(1))
+{
+	return ICameraSP(new Camera(name, cameraType, zNear, zFar, fovy, orthoScale, windowDimension));
+}
+
 ILightSP SceneFactory::createLight(const ISceneManagerSP& sceneManager)
 {
 	return ILightSP(new Light());
+}
+ILightSP SceneFactory::createLight(const ISceneManagerSP& sceneManager, const std::string& name = "Light", const enum LightType lightType = LightType::DirectionalLight, const float stength = 1.0f, const glm::vec3& color = glm::vec3(1), const glm::vec4& direction = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f))
+{
+	return ILightSP(new Light(name, lightType, stength, color, direction));
 }
 
 IParticleSystemSP SceneFactory::createParticleSystem(const ISceneManagerSP& sceneManager)
@@ -216,11 +225,42 @@ INodeSP SceneFactory::createNode(const ISceneManagerSP& sceneManager)
 	return node;
 }
 
+INodeSP SceneFactory::createNode(const ISceneManagerSP& sceneManager, const std::string& name, const glm::vec3& translate = glm::vec3(0), const glm::vec3& rotate = glm::vec3(0), const glm::vec3& scale = glm::vec3(1))
+{
+	auto node = INodeSP(new Node(name, translate, rotate, scale));
+
+	if (!node.get())
+	{
+		return INodeSP();
+	}
+
+	for (VkDeviceSize i = 0; i < sceneRenderFactory->getBufferCount(); i++)
+	{
+		auto renderNode = sceneRenderFactory->createRenderNode(sceneManager);
+
+		if (!renderNode.get())
+		{
+			return INodeSP();
+		}
+
+		node->addRenderNode(renderNode);
+	}
+
+	return node;
+}
+
 //
 
 IObjectSP SceneFactory::createObject(const ISceneManagerSP& sceneManager)
 {
 	return IObjectSP(new Object());
+}
+
+IObjectSP SceneFactory::createObject(const ISceneManagerSP& sceneManager, const std::string& name, const glm::vec3& translate = glm::vec3(0), const glm::vec3& rotate = glm::vec3(0), const glm::vec3& scale = glm::vec3(1))
+{
+	auto object = new Object();
+	object->setRootNode(createNode(sceneManager, name + "_RootNode", translate, rotate, scale));
+	return IObjectSP(object);
 }
 
 //

@@ -32,7 +32,7 @@
 namespace vkts
 {
 
-// TODO:	Shouldn't all of these methods return an IObjectSP since the other elements need an IObjectSP wrapper around them before they can be added to a scene?
+// TODO:	Shouldn't all of these methods return an IObjectSP since the other elements need an IObjectSP wraooer around them before they can be added to a scene?
 //			This could eliminate more boilerplate code.
 class ISceneFactory
 {
@@ -72,8 +72,10 @@ public:
     //
 
     virtual ICameraSP createCamera(const ISceneManagerSP& sceneManager) = 0;
+	virtual ICameraSP createCamera(const ISceneManagerSP & sceneManager, const std::string& name, CameraType cameraType, const float zNear, const float zFar, const float fovy, const float orthoScale, const glm::ivec2& windowDimension) = 0;
 
-    virtual ILightSP createLight(const ISceneManagerSP& sceneManager) = 0;
+	virtual ILightSP createLight(const ISceneManagerSP& sceneManager) = 0;
+	virtual ILightSP createLight(const ISceneManagerSP& sceneManager, const std::string& name, const enum LightType lightType, const float stength, const glm::vec3& color, const glm::vec4& transform) = 0;
 
     virtual IParticleSystemSP createParticleSystem(const ISceneManagerSP& sceneManager) = 0;
 
@@ -85,11 +87,13 @@ public:
 
     //
 
-    virtual INodeSP createNode(const ISceneManagerSP& sceneManager) = 0;
+	virtual INodeSP createNode(const ISceneManagerSP& sceneManager) = 0;
+	virtual INodeSP createNode(const ISceneManagerSP& sceneManager, const std::string& name, const glm::vec3& translate = glm::vec3(0), const glm::vec3& rotate = glm::vec3(0), const glm::vec3& scale = glm::vec3(1)) = 0;
 
     //
 
-    virtual IObjectSP createObject(const ISceneManagerSP& sceneManager) = 0;
+	virtual IObjectSP createObject(const ISceneManagerSP& sceneManager) = 0;
+	virtual IObjectSP createObject(const ISceneManagerSP& sceneManager, const std::string& name, const glm::vec3& translate = glm::vec3(0), const glm::vec3& rotate = glm::vec3(0), const glm::vec3& scale = glm::vec3(1)) = 0;
 
     //
 

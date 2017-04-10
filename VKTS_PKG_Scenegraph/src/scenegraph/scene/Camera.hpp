@@ -58,7 +58,8 @@ private:
 
 public:
 
-    Camera();
+	explicit Camera();
+	Camera(const std::string& name, CameraType cameraType = CameraType::PerspectiveCamera, float zNear = 0.1f, float zFar = 100.f, float fovy = 45.0f, float orthoScale = 1.0f, const glm::ivec2& windowDimension = glm::ivec2(1));
     Camera(const Camera& other);
     Camera(Camera&& other) = delete;
     virtual ~Camera();

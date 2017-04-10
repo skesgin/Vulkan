@@ -38,27 +38,27 @@ void Node::reset()
 
     parentNode = INodeSP();
 
-    translate = glm::vec3(0.0f, 0.0f, 0.0f);
+    translate        = glm::vec3(0.0f, 0.0f, 0.0f);
     nodeRotationMode = VKTS_EULER_XZY;
-    rotate = glm::vec3(0.0f, 0.0f, 0.0f);
-    scale = glm::vec3(1.0f, 1.0f, 1.0f);
+    rotate           = glm::vec3(0.0f, 0.0f, 0.0f);
+    scale            = glm::vec3(1.0f, 1.0f, 1.0f);
 
     finalTranslate = translate;
-    finalRotate = rotate;
-    finalScale = scale;
+    finalRotate    = rotate;
+    finalScale     = scale;
 
     transformMatrix = glm::mat4(1.0f);
 
     jointIndex = -1;
-    joints = 0;
+    joints     = 0;
 
-    bindTranslate = glm::vec3(0.0f, 0.0f, 0.0f);
+    bindTranslate    = glm::vec3(0.0f, 0.0f, 0.0f);
     bindRotationMode = VKTS_EULER_XYZ;
-    bindRotate = glm::vec3(0.0f, 0.0f, 0.0f);
-    bindScale = glm::vec3(1.0f, 1.0f, 1.0f);
+    bindRotate       = glm::vec3(0.0f, 0.0f, 0.0f);
+    bindScale        = glm::vec3(1.0f, 1.0f, 1.0f);
 
-    correctionMatrix = glm::mat4(1.0f);
-    bindMatrix = glm::mat4(1.0f);
+    correctionMatrix  = glm::mat4(1.0f);
+    bindMatrix        = glm::mat4(1.0f);
     inverseBindMatrix = glm::mat4(1.0f);
 
     setDirty();
@@ -105,6 +105,11 @@ Node::Node() :
 
 {
     reset();
+}
+
+Node::Node(const std::string& name = "Node", const glm::vec3& translate = glm::vec3(0), const glm::vec3& rotate = glm::vec3(0), const glm::vec3& scale = glm::vec3(1)):
+	INode(), name(std::move(name)), parentNode(), nodeRotationMode(VKTS_EULER_XZY), finalTranslate(translate), finalRotate(rotate), finalScale(scale), transformMatrix(1.0f), transformMatrixDirty(), jointIndex(-1), joints(0), bindTranslate(translate), bindRotationMode(VKTS_EULER_XYZ), bindRotate(rotate), bindScale(scale), correctionMatrix(1.0f), bindMatrix(1.0f), inverseBindMatrix(1.0f), bindMatrixDirty(), allChildNodes(), allMeshes(), allCameras(), allLights(), allConstraints(), allAnimations(), currentAnimation(-1), allParticleSystems(), allParticleSystemSeeds(), transformUniformBuffer(), jointsUniformBuffer(), box(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)), layers(0x01), translate(std::move(translate)), rotate(std::move(rotate)), scale(std::move(scale)), nodeData()
+{
 }
 
 Node::Node(const Node& other) :

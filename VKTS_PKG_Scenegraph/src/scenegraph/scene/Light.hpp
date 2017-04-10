@@ -57,7 +57,8 @@ private:
 
 public:
 
-    Light();
+	Light();
+	Light(const std::string& name, const enum LightType lightType, const float stength, const glm::vec3& color, const glm::vec4& transform);
     Light(const Light& other);
     Light(Light&& other) = delete;
     virtual ~Light();

@@ -34,6 +34,11 @@ Light::Light() :
 {
 }
 
+Light::Light(const std::string& name = "Light", const enum LightType lightType = LightType::DirectionalLight, const float stength = 1.0f , const glm::vec3& color = glm::vec3(1), const glm::vec4& direction = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)) :
+    ILight(), name(std::move(name)), index(0), lightType(lightType), falloffType(QuadraticFalloff), strength(stength), outerAngle(0.0f), innerAngle(0.0f), color(std::move(color)), direction(std::move(direction))
+{
+}
+
 Light::Light(const Light& other) :
 	ILight(), name(other.name + "_clone"), index(other.index), lightType(other.lightType), falloffType(other.falloffType), strength(other.strength), outerAngle(other.outerAngle), innerAngle(other.innerAngle), color(other.color), direction(other.direction)
 {
