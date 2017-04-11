@@ -86,8 +86,8 @@ static float interpolateCubicSpline(const uint32_t currentIndex, const float key
     float K1 = channel->getKeys()[currentIndex + 1];
     float V1 = channel->getValues()[currentIndex + 1];
 
-    float M0 = channel->getHandles()[currentIndex].x;
-    float M1 = channel->getHandles()[currentIndex + 1].y;
+    float M0 = channel->getHandles()[currentIndex].y;
+    float M1 = channel->getHandles()[currentIndex + 1].w;
 
     //
 

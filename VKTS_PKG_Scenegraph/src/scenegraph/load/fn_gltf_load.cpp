@@ -1277,6 +1277,9 @@ static VkBool32 gltfProcessNode(INodeSP& node, const GltfVisitor& visitor, const
 
                 VkTsInterpolator interpolator;
 
+                uint32_t entryIndexMultiply = 1;
+                uint32_t targetTransformElementIndexMultiply = 0;
+
                 if (gltfChannel.sampler->interpolation == "STEP")
                 {
                 	interpolator = VKTS_INTERPOLATOR_CONSTANT;
@@ -1292,6 +1295,9 @@ static VkBool32 gltfProcessNode(INodeSP& node, const GltfVisitor& visitor, const
                 else if (gltfChannel.sampler->interpolation == "CUBICSPLINE")
                 {
                 	interpolator = VKTS_INTERPOLATOR_CUBICSPLINE;
+
+                	entryIndexMultiply = 3;
+                	targetTransformElementIndexMultiply = 1;
                 }
                 else
                 {
@@ -1349,19 +1355,19 @@ static VkBool32 gltfProcessNode(INodeSP& node, const GltfVisitor& visitor, const
 
 					//
 
+
+
 					for (uint32_t entryIndex = 0; entryIndex < gltfChannel.sampler->input->count; entryIndex++)
 					{
 						const float* key = visitor.getFloatPointer(*gltfChannel.sampler->input, entryIndex);
-						const float* value = visitor.getFloatPointer(*gltfChannel.sampler->output, entryIndex);
+						const float* value = visitor.getFloatPointer(*gltfChannel.sampler->output, entryIndex * entryIndexMultiply);
 
 						if (!key || !value)
 						{
 							return VK_FALSE;
 						}
 
-						// TODO: Clarify access to CUBICSPLINE.
-
-						channel->addEntry(*key, value[targetTransformElementIndex], glm::vec4(*key - 0.1f, value[targetTransformElementIndex], *key + 0.1f, value[targetTransformElementIndex]), interpolator);
+						channel->addEntry(*key, value[targetTransformElementIndex], glm::vec4(*key - 0.1f, value[targetTransformElementIndex + 1 * targetTransformElementIndexMultiply], *key + 0.1f, value[targetTransformElementIndex + 2 * targetTransformElementIndexMultiply]), interpolator);
 					}
                 }
     		}
