@@ -1692,7 +1692,7 @@ public:
         		return;
         	}
 
-        	attributesValue->addKeyValue("TANGENT4", tangent4Value);
+        	attributesValue->addKeyValue("TANGENT", tangent4Value);
     	}
 
     	if (subMesh.getVertexBufferType() & VKTS_VERTEX_BUFFER_TYPE_TEXCOORD)

@@ -2398,26 +2398,6 @@ void GltfVisitor::visitMesh_Primitive_Attributes(JSONobject& jsonObject)
 		gltfPrimitive.normal = &(allGltfAccessors[gltfInteger]);
 	}
 
-	if (jsonObject.hasKey("BITANGENT"))
-	{
-		auto binormal = jsonObject.getValue("BITANGENT");
-
-		binormal->visit(*this);
-
-		if (state.top() == GltfState_Error)
-		{
-			return;
-		}
-
-		if (allGltfAccessors.size() <= (uint32_t)gltfInteger)
-		{
-			state.push(GltfState_Error);
-			return;
-		}
-
-		gltfPrimitive.binormal = &(allGltfAccessors[gltfInteger]);
-	}
-
 	if (jsonObject.hasKey("TANGENT"))
 	{
 		auto tangent = jsonObject.getValue("TANGENT");
@@ -2436,26 +2416,6 @@ void GltfVisitor::visitMesh_Primitive_Attributes(JSONobject& jsonObject)
 		}
 
 		gltfPrimitive.tangent = &(allGltfAccessors[gltfInteger]);
-	}
-
-	if (jsonObject.hasKey("TANGENT4"))
-	{
-		auto tangent4 = jsonObject.getValue("TANGENT4");
-
-		tangent4->visit(*this);
-
-		if (state.top() == GltfState_Error)
-		{
-			return;
-		}
-
-		if (allGltfAccessors.size() <= (uint32_t)gltfInteger)
-		{
-			state.push(GltfState_Error);
-			return;
-		}
-
-		gltfPrimitive.tangent4 = &(allGltfAccessors[gltfInteger]);
 	}
 
 	if (jsonObject.hasKey("TEXCOORD_0"))
@@ -3271,9 +3231,7 @@ void GltfVisitor::visit(JSONarray& jsonArray)
 			{
 				gltfPrimitive.position = nullptr;
 				gltfPrimitive.normal = nullptr;
-				gltfPrimitive.binormal = nullptr;
 				gltfPrimitive.tangent = nullptr;
-				gltfPrimitive.tangent4 = nullptr;
 				gltfPrimitive.texCoord = nullptr;
 				gltfPrimitive.joint = nullptr;
 				gltfPrimitive.weight = nullptr;

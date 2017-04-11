@@ -216,9 +216,7 @@ typedef struct _GltfMaterial {
 typedef struct _GltfPrimitive {
 	GltfAccessor* position;
 	GltfAccessor* normal;
-	GltfAccessor* binormal;
 	GltfAccessor* tangent;
-	GltfAccessor* tangent4;
 	GltfAccessor* texCoord;
 	GltfAccessor* joint;
 	GltfAccessor* weight;
