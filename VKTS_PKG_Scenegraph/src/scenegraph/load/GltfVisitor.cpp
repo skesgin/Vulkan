@@ -2584,7 +2584,7 @@ void GltfVisitor::visitAnimation_Sampler(JSONobject& jsonObject)
 			return;
 		}
 
-		if (gltfString != "STEP" && gltfString != "LINEAR")
+		if (gltfString != "STEP" && gltfString != "LINEAR" && gltfString != "CATMULLROMSPLINE" && gltfString != "CUBICSPLINE")
 		{
 			state.push(GltfState_Error);
 			return;
@@ -3837,7 +3837,7 @@ void GltfVisitor::visit(JSONobject& jsonObject)
 	}
 	else if (gltfState == GltfState_Asset)
 	{
-		// FIXME copyright, generator
+		// FIXME copyright, generator, minVersion
 
 		//
 		// Required

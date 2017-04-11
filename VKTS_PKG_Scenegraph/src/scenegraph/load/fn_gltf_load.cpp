@@ -1388,6 +1388,14 @@ static VkBool32 gltfProcessNode(INodeSP& node, const GltfVisitor& visitor, const
                 {
                 	interpolator = VKTS_INTERPOLATOR_LINEAR;
                 }
+                else if (gltfChannel.sampler->interpolation == "CATMULLROMSPLINE")
+                {
+                	interpolator = VKTS_INTERPOLATOR_CATMULLROMSPLINE;
+                }
+                else if (gltfChannel.sampler->interpolation == "CUBICSPLINE")
+                {
+                	interpolator = VKTS_INTERPOLATOR_CUBICSPLINE;
+                }
                 else
                 {
                 	return VK_FALSE;
@@ -1453,6 +1461,8 @@ static VkBool32 gltfProcessNode(INodeSP& node, const GltfVisitor& visitor, const
 						{
 							return VK_FALSE;
 						}
+
+						// TODO: Clarify access to CUBICSPLINE.
 
 						channel->addEntry(*key, value[targetTransformElementIndex], glm::vec4(*key - 0.1f, value[targetTransformElementIndex], *key + 0.1f, value[targetTransformElementIndex]), interpolator);
 					}

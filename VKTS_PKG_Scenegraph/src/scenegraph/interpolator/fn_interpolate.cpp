@@ -50,6 +50,61 @@ static float interpolateLinear(const uint32_t currentIndex, const float key, con
     return (afterValue - beforeValue) * (key - beforeKey) / deltaKey + beforeValue;
 }
 
+// see https://en.wikipedia.org/wiki/Cubic_Hermite_spline
+static float interpolateCatmullRom(const uint32_t currentIndex, const float key, const IChannelSP& channel)
+{
+    float K0 = channel->getKeys()[currentIndex];
+    float V0 = channel->getValues()[currentIndex];
+
+    float K1 = channel->getKeys()[currentIndex + 1];
+    float V1 = channel->getValues()[currentIndex + 1];
+
+    float M0 = (channel->getValues()[currentIndex + 1] - channel->getValues()[currentIndex - 1]) / (channel->getKeys()[currentIndex + 1] - channel->getKeys()[currentIndex - 1]);
+    float M1 = (channel->getValues()[currentIndex + 1 + 1] - channel->getValues()[currentIndex + 1 - 1]) / (channel->getKeys()[currentIndex + 1 + 1] - channel->getKeys()[currentIndex + 1 - 1]);
+
+    //
+
+    float t = (key - K0) / (K1 - K0);
+    float t2 = t * t;
+    float t3 = t2 * t;
+
+    //
+
+    float h00 = 2.0f * t3 - 3.0f * t2 + 1.0f;
+    float h01 = t3 - 2.0f * t2 + t;
+    float h10 = -2.0f * t3 + 3.0f * t2;
+    float h11 = t3 - t2;
+
+    return h00 * V0 + h01 * M0 + h10 * V1 + h11 * M1;
+}
+
+static float interpolateCubicSpline(const uint32_t currentIndex, const float key, const IChannelSP& channel)
+{
+    float K0 = channel->getKeys()[currentIndex];
+    float V0 = channel->getValues()[currentIndex];
+
+    float K1 = channel->getKeys()[currentIndex + 1];
+    float V1 = channel->getValues()[currentIndex + 1];
+
+    float M0 = channel->getHandles()[currentIndex].x;
+    float M1 = channel->getHandles()[currentIndex + 1].y;
+
+    //
+
+    float t = (key - K0) / (K1 - K0);
+    float t2 = t * t;
+    float t3 = t2 * t;
+
+    //
+
+    float h00 = 2.0f * t3 - 3.0f * t2 + 1.0f;
+    float h01 = t3 - 2.0f * t2 + t;
+    float h10 = -2.0f * t3 + 3.0f * t2;
+    float h11 = t3 - t2;
+
+    return h00 * V0 + h01 * M0 + h10 * V1 + h11 * M1;
+}
+
 static float interpolateBezier(const uint32_t currentIndex, const float key, const IChannelSP& channel)
 {
     float beforeKey = channel->getKeys()[currentIndex];
@@ -173,6 +228,26 @@ float VKTS_APIENTRY interpolate(const float key, const IChannelSP& channel)
         }
 
         currentIndex++;
+    }
+
+    if (channel->getInterpolators()[currentIndex] == VKTS_INTERPOLATOR_CATMULLROMSPLINE)
+    {
+        if (currentIndex > 0 && currentIndex < channel->getNumberEntries() - 2)
+        {
+            return interpolateCatmullRom(currentIndex, key, channel);
+        }
+
+        return interpolateLinear(currentIndex, key, channel);
+    }
+
+    if (channel->getInterpolators()[currentIndex] == VKTS_INTERPOLATOR_CUBICSPLINE)
+    {
+        if (currentIndex > 0 && currentIndex < channel->getNumberEntries() - 2)
+        {
+            return interpolateCubicSpline(currentIndex, key, channel);
+        }
+
+        return interpolateLinear(currentIndex, key, channel);
     }
 
     if (channel->getInterpolators()[currentIndex] == VKTS_INTERPOLATOR_BEZIER)
