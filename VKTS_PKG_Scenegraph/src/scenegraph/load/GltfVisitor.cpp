@@ -2463,9 +2463,9 @@ void GltfVisitor::visitMesh_Primitive_Attributes(JSONobject& jsonObject)
 		gltfPrimitive.texCoord1 = &(allGltfAccessors[gltfInteger]);
 	}
 
-	if (jsonObject.hasKey("JOINT"))
+	if (jsonObject.hasKey("JOINTS_0"))
 	{
-		auto joint = jsonObject.getValue("JOINT");
+		auto joint = jsonObject.getValue("JOINTS_0");
 
 		joint->visit(*this);
 
@@ -2483,9 +2483,9 @@ void GltfVisitor::visitMesh_Primitive_Attributes(JSONobject& jsonObject)
 		gltfPrimitive.joint = &(allGltfAccessors[gltfInteger]);
 	}
 
-	if (jsonObject.hasKey("WEIGHT"))
+	if (jsonObject.hasKey("WEIGHTS_0"))
 	{
-		auto weight = jsonObject.getValue("WEIGHT");
+		auto weight = jsonObject.getValue("WEIGHTS_0");
 
 		weight->visit(*this);
 
