@@ -35,7 +35,7 @@ BSDFMaterial::BSDFMaterial(const VkBool32 forwardRendering) :
 }
 
 BSDFMaterial::BSDFMaterial(const BSDFMaterial& other) :
-    IBSDFMaterial(), Material(other), fragmentShader(other.fragmentShader), attributes(other.attributes), allTextureObjects(), transparent(other.transparent), sorted(other.sorted), packed(other.packed), alphaCutoff(other.alphaCutoff), ambientOcclusionStrength(other.ambientOcclusionStrength), specularGlossiness(other.specularGlossiness)
+    IBSDFMaterial(), Material(other), fragmentShader(other.fragmentShader), attributes(other.attributes), allTextureObjects(), texCoordIndices(), transparent(other.transparent), sorted(other.sorted), packed(other.packed), alphaCutoff(other.alphaCutoff), ambientOcclusionStrength(other.ambientOcclusionStrength), specularGlossiness(other.specularGlossiness)
 {
 	for (uint32_t i = 0; i < other.allTextureObjects.size(); i++)
 	{
@@ -120,11 +120,21 @@ void BSDFMaterial::addTextureObject(const ITextureObjectSP& textureObject)
     }
 
     allTextureObjects.append(textureObject);
+    texCoordIndices.push_back(0);
 }
 
 VkBool32 BSDFMaterial::removeTextureObject(const ITextureObjectSP& textureObject)
 {
-    return allTextureObjects.remove(textureObject);
+	auto removeIndex = allTextureObjects.index(textureObject);
+
+	if (removeIndex != allTextureObjects.size())
+	{
+		texCoordIndices.erase(texCoordIndices.begin() + removeIndex);
+
+		return allTextureObjects.remove(textureObject);
+	}
+
+    return VK_FALSE;
 }
 
 uint32_t BSDFMaterial::getNumberTextureObjects() const
@@ -195,6 +205,24 @@ VkBool32 BSDFMaterial::isSpecularGlossiness() const
 void BSDFMaterial::setSpecularGlossiness(const VkBool32 specularGlossiness)
 {
 	this->specularGlossiness = specularGlossiness;
+}
+
+int32_t BSDFMaterial::getTexCoordIndex(const int32_t textureIndex) const
+{
+	if (textureIndex >= 0 && textureIndex < (int32_t)texCoordIndices.size())
+	{
+		return texCoordIndices[textureIndex];
+	}
+
+	return 0;
+}
+
+void BSDFMaterial::setTexCoordIndex(const int32_t textureIndex, const int32_t texCoordIndex)
+{
+	if (textureIndex >= 0 && textureIndex < (int32_t)texCoordIndices.size())
+	{
+		texCoordIndices[textureIndex] = texCoordIndex;
+	}
 }
 
 void BSDFMaterial::updateParameterRecursive(Parameter* parameter)

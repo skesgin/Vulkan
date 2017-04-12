@@ -120,9 +120,13 @@ public:
 
     virtual void setTangentOffset(const int32_t tangentOffset) = 0;
 
-    virtual int32_t getTexcoordOffset() const = 0;
+    virtual int32_t getTexcoord0Offset() const = 0;
 
-    virtual void setTexcoordOffset(const int32_t texcoordOffset) = 0;
+    virtual void setTexcoord0Offset(const int32_t texcoordOffset) = 0;
+
+    virtual int32_t getTexcoord1Offset() const = 0;
+
+    virtual void setTexcoord1Offset(const int32_t texcoordOffset) = 0;
 
     virtual int32_t getBoneIndices0Offset() const = 0;
 

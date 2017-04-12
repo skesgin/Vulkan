@@ -466,7 +466,7 @@ VkBool32 Example::buildPipeline()
 
 	//
 
-	VkTsVertexBufferType vertexBufferType = VKTS_VERTEX_BUFFER_TYPE_VERTEX | VKTS_VERTEX_BUFFER_TYPE_TEXCOORD;
+	VkTsVertexBufferType vertexBufferType = VKTS_VERTEX_BUFFER_TYPE_VERTEX | VKTS_VERTEX_BUFFER_TYPE_TEXCOORD0;
 
 
 	VkVertexInputBindingDescription vertexInputBindingDescription{};

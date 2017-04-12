@@ -372,7 +372,7 @@ VkBool32 Example::buildPipeline()
 
 	//
 
-	VkTsVertexBufferType vertexBufferType = VKTS_VERTEX_BUFFER_TYPE_VERTEX | VKTS_VERTEX_BUFFER_TYPE_TANGENTS | VKTS_VERTEX_BUFFER_TYPE_TEXCOORD;
+	VkTsVertexBufferType vertexBufferType = VKTS_VERTEX_BUFFER_TYPE_VERTEX | VKTS_VERTEX_BUFFER_TYPE_TANGENTS | VKTS_VERTEX_BUFFER_TYPE_TEXCOORD0;
 
 	VkVertexInputBindingDescription vertexInputBindingDescription{};
 
@@ -395,7 +395,7 @@ VkBool32 Example::buildPipeline()
 	vertexInputAttributeDescription[2].location = 2;
 	vertexInputAttributeDescription[2].binding = VKTS_BINDING_VERTEX_BUFFER;
 	vertexInputAttributeDescription[2].format = VK_FORMAT_R32G32_SFLOAT;
-	vertexInputAttributeDescription[2].offset = vkts::alignmentGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_TEXCOORD, vertexBufferType);
+	vertexInputAttributeDescription[2].offset = vkts::alignmentGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_TEXCOORD0, vertexBufferType);
 
 	VkPipelineVertexInputStateCreateInfo pipelineVertexInputCreateInfo{};
 

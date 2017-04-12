@@ -288,6 +288,9 @@ VkBool32 SceneRenderFactory::prepareBSDFMaterial(const ISceneManagerSP& sceneMan
     //
     //
 
+	auto vertexBufferType = subMesh->getVertexBufferType() & subMesh->getBSDFMaterial()->getAttributes();
+
+
 	VkPushConstantRange pushConstantRange[1];
 
 	pushConstantRange[0].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
@@ -307,6 +310,16 @@ VkBool32 SceneRenderFactory::prepareBSDFMaterial(const ISceneManagerSP& sceneMan
 		{
 			pushConstantRange[0].size += sizeof(int32_t);
 			pushConstantRange[0].size += sizeof(float);
+
+			if ((vertexBufferType & VKTS_VERTEX_BUFFER_TYPE_TEXCOORD1) == VKTS_VERTEX_BUFFER_TYPE_TEXCOORD1)
+			{
+				// Multiple texture coordinates.
+				pushConstantRange[0].size += sizeof(int32_t);
+				pushConstantRange[0].size += sizeof(int32_t);
+				pushConstantRange[0].size += sizeof(int32_t);
+				pushConstantRange[0].size += sizeof(int32_t);
+				pushConstantRange[0].size += sizeof(int32_t);
+			}
 		}
 	}
 
@@ -338,8 +351,6 @@ VkBool32 SceneRenderFactory::prepareBSDFMaterial(const ISceneManagerSP& sceneMan
         return VK_FALSE;
 	}
 
-
-	auto vertexBufferType = subMesh->getVertexBufferType() & subMesh->getBSDFMaterial()->getAttributes();
 
 	if (vertexBufferType != subMesh->getBSDFMaterial()->getAttributes())
 	{
@@ -410,16 +421,25 @@ VkBool32 SceneRenderFactory::prepareBSDFMaterial(const ISceneManagerSP& sceneMan
 		}
 	}
 
-	if ((vertexBufferType & VKTS_VERTEX_BUFFER_TYPE_TEXCOORD) == VKTS_VERTEX_BUFFER_TYPE_TEXCOORD)
+	if ((vertexBufferType & VKTS_VERTEX_BUFFER_TYPE_TEXCOORD0) == VKTS_VERTEX_BUFFER_TYPE_TEXCOORD0)
 	{
 		location++;
 
 		gp.getVertexInputAttributeDescription(location).location = location;
 		gp.getVertexInputAttributeDescription(location).binding = 0;
 		gp.getVertexInputAttributeDescription(location).format = VK_FORMAT_R32G32_SFLOAT;
-		gp.getVertexInputAttributeDescription(location).offset = alignmentGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_TEXCOORD, subMesh->getVertexBufferType());
+		gp.getVertexInputAttributeDescription(location).offset = alignmentGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_TEXCOORD0, subMesh->getVertexBufferType());
 	}
 
+	if ((vertexBufferType & VKTS_VERTEX_BUFFER_TYPE_TEXCOORD1) == VKTS_VERTEX_BUFFER_TYPE_TEXCOORD1)
+	{
+		location++;
+
+		gp.getVertexInputAttributeDescription(location).location = location;
+		gp.getVertexInputAttributeDescription(location).binding = 0;
+		gp.getVertexInputAttributeDescription(location).format = VK_FORMAT_R32G32_SFLOAT;
+		gp.getVertexInputAttributeDescription(location).offset = alignmentGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_TEXCOORD1, subMesh->getVertexBufferType());
+	}
 
 	if ((vertexBufferType & VKTS_VERTEX_BUFFER_TYPE_BONES) == VKTS_VERTEX_BUFFER_TYPE_BONES)
 	{

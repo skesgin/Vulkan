@@ -93,6 +93,16 @@ void RenderSubMesh::draw(const ICommandBuffersSP& cmdBuffer, const SmartPointerV
 			float strength = subMesh.getBSDFMaterial()->getAmbientOcclusionStrength();
 
 			vkCmdPushConstants(cmdBuffer->getCommandBuffer(), graphicsPipeline->getLayout(), VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(int32_t) + sizeof(float) + sizeof(float) + sizeof(float), sizeof(float), &strength);
+
+			if ((subMesh.getBSDFMaterial()->getAttributes() & VKTS_VERTEX_BUFFER_TYPE_TEXCOORD1) == VKTS_VERTEX_BUFFER_TYPE_TEXCOORD1)
+			{
+				for (uint32_t i = 0; i < 5; i++)
+				{
+					int32_t texCoordIndex = subMesh.getBSDFMaterial()->getTexCoordIndex(i);
+
+					vkCmdPushConstants(cmdBuffer->getCommandBuffer(), graphicsPipeline->getLayout(), VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(int32_t) + sizeof(float) + sizeof(float) + sizeof(float) + sizeof(float) + sizeof(int32_t) * i, sizeof(int32_t), &texCoordIndex);
+				}
+			}
 		}
 	}
 

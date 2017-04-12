@@ -1310,6 +1310,7 @@ void GltfVisitor::visitMaterial(JSONobject& jsonObject)
 
 		gltfMaterial.normalScale = gltfTextureInfo.normalScale;
 		gltfMaterial.normalTexture = &(allGltfTextures[gltfTextureInfo.index]);
+		gltfMaterial.normalTexture->texCoord = gltfTextureInfo.texCoord;
 	}
 
 	if (jsonObject.hasKey("occlusionTexture"))
@@ -1336,6 +1337,7 @@ void GltfVisitor::visitMaterial(JSONobject& jsonObject)
 
 		gltfMaterial.occlusionStrength = gltfTextureInfo.occlusionStrength;
 		gltfMaterial.occlusionTexture = &(allGltfTextures[gltfTextureInfo.index]);
+		gltfMaterial.occlusionTexture->texCoord = gltfTextureInfo.texCoord;
 	}
 
 	if (jsonObject.hasKey("emissiveFactor"))
@@ -1386,6 +1388,7 @@ void GltfVisitor::visitMaterial(JSONobject& jsonObject)
 		}
 
 		gltfMaterial.emissiveTexture = &(allGltfTextures[gltfTextureInfo.index]);
+		gltfMaterial.emissiveTexture->texCoord = gltfTextureInfo.texCoord;
 	}
 
 	if (jsonObject.hasKey("name"))
@@ -1936,6 +1939,7 @@ void GltfVisitor::visitMaterial_PbrMetallicRoughness(JSONobject& jsonObject)
 		}
 
 		gltfMaterial.pbrMetallicRoughness.baseColorTexture = &(allGltfTextures[gltfTextureInfo.index]);
+		gltfMaterial.pbrMetallicRoughness.baseColorTexture->texCoord = gltfTextureInfo.texCoord;
 	}
 
 	//
@@ -1993,6 +1997,7 @@ void GltfVisitor::visitMaterial_PbrMetallicRoughness(JSONobject& jsonObject)
 		}
 
 		gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture = &(allGltfTextures[gltfTextureInfo.index]);
+		gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture->texCoord = gltfTextureInfo.texCoord;
 	}
 }
 
@@ -2227,9 +2232,9 @@ void GltfVisitor::visitMaterial_TextureInfo(JSONobject& jsonObject)
 	//
 	//
 
-	if (gltfTextureInfo.texCoord > 0)
+	if (gltfTextureInfo.texCoord > 1)
 	{
-        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Multiple texture sets not supported");
+        logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "More than two texture sets not supported");
 
 		state.push(GltfState_Error);
 		return;
@@ -2349,7 +2354,7 @@ void GltfVisitor::visitMesh_Primitive(JSONobject& jsonObject)
 
 void GltfVisitor::visitMesh_Primitive_Attributes(JSONobject& jsonObject)
 {
-	// Not processing TEXCOORD_x (x >= 1) and COLOR_x (x >= 0)
+	// FIXME COLOR_0
 
 	//
 	// Required
@@ -2435,7 +2440,27 @@ void GltfVisitor::visitMesh_Primitive_Attributes(JSONobject& jsonObject)
 			return;
 		}
 
-		gltfPrimitive.texCoord = &(allGltfAccessors[gltfInteger]);
+		gltfPrimitive.texCoord0 = &(allGltfAccessors[gltfInteger]);
+	}
+
+	if (jsonObject.hasKey("TEXCOORD_1"))
+	{
+		auto texCoord = jsonObject.getValue("TEXCOORD_1");
+
+		texCoord->visit(*this);
+
+		if (state.top() == GltfState_Error)
+		{
+			return;
+		}
+
+		if (allGltfAccessors.size() <= (uint32_t)gltfInteger)
+		{
+			state.push(GltfState_Error);
+			return;
+		}
+
+		gltfPrimitive.texCoord1 = &(allGltfAccessors[gltfInteger]);
 	}
 
 	if (jsonObject.hasKey("JOINT"))
@@ -2984,6 +3009,7 @@ void GltfVisitor::visit(JSONarray& jsonArray)
 				gltfTexture.target = 3553;
 				gltfTexture.type = 5121;
 				gltfTexture.name = "Texture_" + std::to_string(i);
+				gltfTexture.texCoord = 0;
 
 				//
 
@@ -3232,7 +3258,8 @@ void GltfVisitor::visit(JSONarray& jsonArray)
 				gltfPrimitive.position = nullptr;
 				gltfPrimitive.normal = nullptr;
 				gltfPrimitive.tangent = nullptr;
-				gltfPrimitive.texCoord = nullptr;
+				gltfPrimitive.texCoord0 = nullptr;
+				gltfPrimitive.texCoord1 = nullptr;
 				gltfPrimitive.joint = nullptr;
 				gltfPrimitive.weight = nullptr;
 				gltfPrimitive.indices = nullptr;

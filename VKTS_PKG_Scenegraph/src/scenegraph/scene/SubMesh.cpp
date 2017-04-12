@@ -30,12 +30,12 @@ namespace vkts
 {
 
 SubMesh::SubMesh() :
-    ISubMesh(), name(""), vertexBuffer(), vertexBinaryBuffer(), vertexBufferType(0), numberVertices(0), indicesVertexBuffer(), indicesBinaryBuffer(), numberIndices(0), primitiveTopology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST), bsdfMaterial(), descriptorSetLayout(), pipelineLayout(), graphicsPipeline(), phongMaterial(), vertexOffset(-1), normalOffset(-1), bitangentOffset(-1), tangentOffset(-1), texcoordOffset(-1), boneIndices0Offset(-1), boneIndices1Offset(-1), boneWeights0Offset(-1), boneWeights1Offset(-1), numberBonesOffset(-1), strideInBytes(0), box(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)), doubleSided(VK_FALSE), subMeshData()
+    ISubMesh(), name(""), vertexBuffer(), vertexBinaryBuffer(), vertexBufferType(0), numberVertices(0), indicesVertexBuffer(), indicesBinaryBuffer(), numberIndices(0), primitiveTopology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST), bsdfMaterial(), descriptorSetLayout(), pipelineLayout(), graphicsPipeline(), phongMaterial(), vertexOffset(-1), normalOffset(-1), bitangentOffset(-1), tangentOffset(-1), texcoord0Offset(-1), texcoord1Offset(-1), boneIndices0Offset(-1), boneIndices1Offset(-1), boneWeights0Offset(-1), boneWeights1Offset(-1), numberBonesOffset(-1), strideInBytes(0), box(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)), doubleSided(VK_FALSE), subMeshData()
 {
 }
 
 SubMesh::SubMesh(const SubMesh& other) :
-    ISubMesh(), name(other.name + "_clone"), vertexBuffer(other.vertexBuffer), vertexBinaryBuffer(other.vertexBinaryBuffer), vertexBufferType(other.vertexBufferType), numberVertices(other.numberVertices), indicesVertexBuffer(other.indicesVertexBuffer), indicesBinaryBuffer(other.indicesBinaryBuffer), numberIndices(other.numberIndices), primitiveTopology(other.primitiveTopology), bsdfMaterial(), descriptorSetLayout(other.descriptorSetLayout), pipelineLayout(other.pipelineLayout), graphicsPipeline(other.graphicsPipeline), phongMaterial(), vertexOffset(other.vertexOffset), normalOffset(other.normalOffset), bitangentOffset(other.bitangentOffset), tangentOffset(other.tangentOffset), texcoordOffset(other.texcoordOffset), boneIndices0Offset(other.boneIndices0Offset), boneIndices1Offset(other.boneIndices1Offset), boneWeights0Offset(other.boneWeights0Offset), boneWeights1Offset(other.boneWeights1Offset), numberBonesOffset(other.numberBonesOffset), strideInBytes(other.strideInBytes), box(other.box), doubleSided(other.doubleSided), subMeshData(other.subMeshData)
+    ISubMesh(), name(other.name + "_clone"), vertexBuffer(other.vertexBuffer), vertexBinaryBuffer(other.vertexBinaryBuffer), vertexBufferType(other.vertexBufferType), numberVertices(other.numberVertices), indicesVertexBuffer(other.indicesVertexBuffer), indicesBinaryBuffer(other.indicesBinaryBuffer), numberIndices(other.numberIndices), primitiveTopology(other.primitiveTopology), bsdfMaterial(), descriptorSetLayout(other.descriptorSetLayout), pipelineLayout(other.pipelineLayout), graphicsPipeline(other.graphicsPipeline), phongMaterial(), vertexOffset(other.vertexOffset), normalOffset(other.normalOffset), bitangentOffset(other.bitangentOffset), tangentOffset(other.tangentOffset), texcoord0Offset(other.texcoord0Offset), texcoord1Offset(other.texcoord1Offset), boneIndices0Offset(other.boneIndices0Offset), boneIndices1Offset(other.boneIndices1Offset), boneWeights0Offset(other.boneWeights0Offset), boneWeights1Offset(other.boneWeights1Offset), numberBonesOffset(other.numberBonesOffset), strideInBytes(other.strideInBytes), box(other.box), doubleSided(other.doubleSided), subMeshData(other.subMeshData)
 {
     if (other.bsdfMaterial.get())
     {
@@ -243,14 +243,24 @@ void SubMesh::setTangentOffset(const int32_t tangentOffset)
     this->tangentOffset = tangentOffset;
 }
 
-int32_t SubMesh::getTexcoordOffset() const
+int32_t SubMesh::getTexcoord0Offset() const
 {
-    return texcoordOffset;
+    return texcoord0Offset;
 }
 
-void SubMesh::setTexcoordOffset(const int32_t texcoordOffset)
+void SubMesh::setTexcoord0Offset(const int32_t texcoordOffset)
 {
-    this->texcoordOffset = texcoordOffset;
+    this->texcoord0Offset = texcoordOffset;
+}
+
+int32_t SubMesh::getTexcoord1Offset() const
+{
+    return texcoord1Offset;
+}
+
+void SubMesh::setTexcoord1Offset(const int32_t texcoordOffset)
+{
+    this->texcoord1Offset = texcoordOffset;
 }
 
 int32_t SubMesh::getBoneIndices0Offset() const

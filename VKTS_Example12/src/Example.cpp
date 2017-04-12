@@ -603,7 +603,7 @@ VkBool32 Example::buildPipeline()
     gp.getPipelineShaderStageCreateInfo(1).module = envFragmentShaderModule->getShaderModule();
 
 
-	VkTsVertexBufferType vertexBufferType = VKTS_VERTEX_BUFFER_TYPE_VERTEX | VKTS_VERTEX_BUFFER_TYPE_TANGENTS | VKTS_VERTEX_BUFFER_TYPE_TEXCOORD;
+	VkTsVertexBufferType vertexBufferType = VKTS_VERTEX_BUFFER_TYPE_VERTEX | VKTS_VERTEX_BUFFER_TYPE_TANGENTS | VKTS_VERTEX_BUFFER_TYPE_TEXCOORD0;
 
     gp.getVertexInputBindingDescription(0).binding = VKTS_BINDING_VERTEX_BUFFER;
     gp.getVertexInputBindingDescription(0).stride = vkts::alignmentGetStrideInBytes(vertexBufferType);

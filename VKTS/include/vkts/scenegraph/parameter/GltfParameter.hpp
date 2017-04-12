@@ -1695,15 +1695,15 @@ public:
         	attributesValue->addKeyValue("TANGENT", tangent4Value);
     	}
 
-    	if (subMesh.getVertexBufferType() & VKTS_VERTEX_BUFFER_TYPE_TEXCOORD)
+    	if (subMesh.getVertexBufferType() & VKTS_VERTEX_BUFFER_TYPE_TEXCOORD0)
     	{
-        	accessorName = subMesh.getName() + "_texcoords";
+        	accessorName = subMesh.getName() + "_texcoords0";
 
     		uint32_t texCoordIndex = storedAccessors.index(accessorName);
 
     		if (texCoordIndex == storedAccessors.size())
     		{
-    			writeBinaryBuffer(subMesh.getVertexBinaryBuffer(), subMesh.getNumberVertices(), 2, "VEC2", 5126, 34962, (uint32_t)subMesh.getTexcoordOffset(), (uint32_t)subMesh.getStrideInBytes());
+    			writeBinaryBuffer(subMesh.getVertexBinaryBuffer(), subMesh.getNumberVertices(), 2, "VEC2", 5126, 34962, (uint32_t)subMesh.getTexcoord0Offset(), (uint32_t)subMesh.getStrideInBytes());
     			storedAccessors.append(accessorName);
     		}
 
@@ -1715,6 +1715,28 @@ public:
         	}
 
         	attributesValue->addKeyValue("TEXCOORD_0", texCoordValue);
+    	}
+
+    	if (subMesh.getVertexBufferType() & VKTS_VERTEX_BUFFER_TYPE_TEXCOORD1)
+    	{
+        	accessorName = subMesh.getName() + "_texcoords1";
+
+    		uint32_t texCoordIndex = storedAccessors.index(accessorName);
+
+    		if (texCoordIndex == storedAccessors.size())
+    		{
+    			writeBinaryBuffer(subMesh.getVertexBinaryBuffer(), subMesh.getNumberVertices(), 2, "VEC2", 5126, 34962, (uint32_t)subMesh.getTexcoord1Offset(), (uint32_t)subMesh.getStrideInBytes());
+    			storedAccessors.append(accessorName);
+    		}
+
+        	auto texCoordValue = JSONintegerSP(new JSONinteger(texCoordIndex));
+
+        	if (!texCoordValue.get())
+        	{
+        		return;
+        	}
+
+        	attributesValue->addKeyValue("TEXCOORD_1", texCoordValue);
     	}
     }
 

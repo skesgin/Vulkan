@@ -30,9 +30,11 @@
 
 #define VKTS_GLTF_MR_FORWARD_FRAGMENT_SHADER_NAME "shader/SPIR/V/glTF_mr_forward.frag.spv"
 #define VKTS_GLTF_MR_FORWARD_NO_TEXCOORD_FRAGMENT_SHADER_NAME "shader/SPIR/V/glTF_mr_forward_no_texcoord.frag.spv"
+#define VKTS_GLTF_MR_FORWARD_TWO_TEXCOORD_FRAGMENT_SHADER_NAME "shader/SPIR/V/glTF_mr_forward_two_texcoord.frag.spv"
 
 #define VKTS_GLTF_SG_FORWARD_FRAGMENT_SHADER_NAME "shader/SPIR/V/glTF_sg_forward.frag.spv"
 #define VKTS_GLTF_SG_FORWARD_NO_TEXCOORD_FRAGMENT_SHADER_NAME "shader/SPIR/V/glTF_sg_forward_no_texcoord.frag.spv"
+#define VKTS_GLTF_SG_FORWARD_TWO_TEXCOORD_FRAGMENT_SHADER_NAME "shader/SPIR/V/glTF_sg_forward_two_texcoord.frag.spv"
 
 namespace vkts
 {
@@ -237,7 +239,7 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 	VkBool32 useTangents = VK_FALSE;
 	VkBool32 createTangents = VK_FALSE;
 
-	if (gltfPrimitive.normal && (gltfPrimitive.texCoord || gltfPrimitive.tangent))
+	if (gltfPrimitive.normal && (gltfPrimitive.texCoord0 || gltfPrimitive.tangent))
 	{
 		useTangents = VK_TRUE;
 		createTangents = VK_TRUE;
@@ -305,26 +307,48 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
         vertexBufferType |= VKTS_VERTEX_BUFFER_TYPE_TANGENTS;
     }
 
-	if (gltfPrimitive.texCoord)
+	if (gltfPrimitive.texCoord0)
 	{
-        if (gltfPrimitive.texCoord->count != gltfPrimitive.position->count)
+        if (gltfPrimitive.texCoord0->count != gltfPrimitive.position->count)
         {
             logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Texture coordinate has different size");
 
             return VK_FALSE;
         }
 
-        if (!visitor.isFloat(gltfPrimitive.texCoord->componentType) || !(visitor.getComponentsPerType(gltfPrimitive.texCoord->type) == 2))
+        if (!visitor.isFloat(gltfPrimitive.texCoord0->componentType) || !(visitor.getComponentsPerType(gltfPrimitive.texCoord0->type) == 2))
         {
         	return VK_FALSE;
         }
 
-        subMesh->setTexcoordOffset(strideInBytes);
+        subMesh->setTexcoord0Offset(strideInBytes);
         strideInBytes += 2 * sizeof(float);
 
         totalSize += 2 * sizeof(float) * subMesh->getNumberVertices();
 
-        vertexBufferType |= VKTS_VERTEX_BUFFER_TYPE_TEXCOORD;
+        vertexBufferType |= VKTS_VERTEX_BUFFER_TYPE_TEXCOORD0;
+	}
+
+	if (gltfPrimitive.texCoord1)
+	{
+        if (gltfPrimitive.texCoord1->count != gltfPrimitive.position->count)
+        {
+            logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Texture coordinate has different size");
+
+            return VK_FALSE;
+        }
+
+        if (!visitor.isFloat(gltfPrimitive.texCoord1->componentType) || !(visitor.getComponentsPerType(gltfPrimitive.texCoord1->type) == 2))
+        {
+        	return VK_FALSE;
+        }
+
+        subMesh->setTexcoord1Offset(strideInBytes);
+        strideInBytes += 2 * sizeof(float);
+
+        totalSize += 2 * sizeof(float) * subMesh->getNumberVertices();
+
+        vertexBufferType |= VKTS_VERTEX_BUFFER_TYPE_TEXCOORD1;
 	}
 
     if (gltfPrimitive.joint && gltfPrimitive.weight)
@@ -566,7 +590,7 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 
 						//
 
-						currentFloatData = visitor.getFloatPointer(*gltfPrimitive.texCoord, index[k]);
+						currentFloatData = visitor.getFloatPointer(*gltfPrimitive.texCoord0, index[k]);
 
 						if (!currentFloatData)
 						{
@@ -718,9 +742,20 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 
                 vertexBinaryBuffer->write(glm::value_ptr(tangentNormalized), 1, 3 * sizeof(float));
             }
-            if (vertexBufferType & VKTS_VERTEX_BUFFER_TYPE_TEXCOORD)
+            if (vertexBufferType & VKTS_VERTEX_BUFFER_TYPE_TEXCOORD0)
             {
-            	currentFloatData = visitor.getFloatPointer(*gltfPrimitive.texCoord, currentVertexElement);
+            	currentFloatData = visitor.getFloatPointer(*gltfPrimitive.texCoord0, currentVertexElement);
+
+            	if (!currentFloatData)
+            	{
+            		return VK_FALSE;
+            	}
+
+                vertexBinaryBuffer->write((const void*)currentFloatData, 1, 2 * sizeof(float));
+            }
+            if (vertexBufferType & VKTS_VERTEX_BUFFER_TYPE_TEXCOORD1)
+            {
+            	currentFloatData = visitor.getFloatPointer(*gltfPrimitive.texCoord1, currentVertexElement);
 
             	if (!currentFloatData)
             	{
@@ -876,6 +911,10 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 				}
 
 				bsdfMaterial->addTextureObject(diffuse);
+				if (gltfPrimitive.material->pbrSpecularGlossiness.diffuseTexture)
+				{
+					bsdfMaterial->setTexCoordIndex(0, gltfPrimitive.material->pbrSpecularGlossiness.diffuseTexture->texCoord);
+				}
 
 				//
 				// Specular glossiness
@@ -891,6 +930,10 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 				}
 
 				bsdfMaterial->addTextureObject(specularGlossiness);
+				if (gltfPrimitive.material->pbrSpecularGlossiness.specularGlossinessTexture)
+				{
+					bsdfMaterial->setTexCoordIndex(1, gltfPrimitive.material->pbrSpecularGlossiness.specularGlossinessTexture->texCoord);
+				}
 			}
 			else
 			{
@@ -906,6 +949,10 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 				}
 
 				bsdfMaterial->addTextureObject(baseColor);
+				if (gltfPrimitive.material->pbrMetallicRoughness.baseColorTexture)
+				{
+					bsdfMaterial->setTexCoordIndex(0, gltfPrimitive.material->pbrMetallicRoughness.baseColorTexture->texCoord);
+				}
 
 				//
 				// Metallic roughness
@@ -921,6 +968,10 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 				}
 
 				bsdfMaterial->addTextureObject(metallicRoughness);
+				if (gltfPrimitive.material->pbrMetallicRoughness.metallicRoughnessTexture)
+				{
+					bsdfMaterial->setTexCoordIndex(1, gltfPrimitive.material->pbrMetallicRoughness.metallicRoughnessTexture->texCoord);
+				}
 			}
 
 			//
@@ -935,6 +986,10 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 			}
 
 			bsdfMaterial->addTextureObject(normal);
+			if (gltfPrimitive.material->normalTexture)
+			{
+				bsdfMaterial->setTexCoordIndex(2, gltfPrimitive.material->normalTexture->texCoord);
+			}
 
 			//
 			// Ambient occlusion
@@ -950,6 +1005,10 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 			bsdfMaterial->setAmbientOcclusionStrength(gltfPrimitive.material->occlusionStrength);
 
 			bsdfMaterial->addTextureObject(ambientOcclusion);
+			if (gltfPrimitive.material->occlusionTexture)
+			{
+				bsdfMaterial->setTexCoordIndex(3, gltfPrimitive.material->occlusionTexture->texCoord);
+			}
 
 			//
 			// Emissive
@@ -965,6 +1024,10 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 			}
 
 			bsdfMaterial->addTextureObject(emissive);
+			if (gltfPrimitive.material->emissiveTexture)
+			{
+				bsdfMaterial->setTexCoordIndex(4, gltfPrimitive.material->emissiveTexture->texCoord);
+			}
 
 			//
 			// Attribute
@@ -980,7 +1043,11 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 
 			if (gltfPrimitive.material->useSpecularGlossiness)
 			{
-				if ((bsdfMaterial->getAttributes() & VKTS_VERTEX_BUFFER_TYPE_TEXCOORD) == VKTS_VERTEX_BUFFER_TYPE_TEXCOORD)
+				if ((bsdfMaterial->getAttributes() & (VKTS_VERTEX_BUFFER_TYPE_TEXCOORD0 | VKTS_VERTEX_BUFFER_TYPE_TEXCOORD1)) == (VKTS_VERTEX_BUFFER_TYPE_TEXCOORD0 | VKTS_VERTEX_BUFFER_TYPE_TEXCOORD1))
+				{
+					fragmentShader = VKTS_GLTF_SG_FORWARD_TWO_TEXCOORD_FRAGMENT_SHADER_NAME;
+				}
+				else if ((bsdfMaterial->getAttributes() & VKTS_VERTEX_BUFFER_TYPE_TEXCOORD0) == VKTS_VERTEX_BUFFER_TYPE_TEXCOORD0)
 				{
 					fragmentShader = VKTS_GLTF_SG_FORWARD_FRAGMENT_SHADER_NAME;
 				}
@@ -991,7 +1058,11 @@ static VkBool32 gltfProcessSubMesh(ISubMeshSP& subMesh, const GltfVisitor& visit
 			}
 			else
 			{
-				if ((bsdfMaterial->getAttributes() & VKTS_VERTEX_BUFFER_TYPE_TEXCOORD) == VKTS_VERTEX_BUFFER_TYPE_TEXCOORD)
+				if ((bsdfMaterial->getAttributes() & (VKTS_VERTEX_BUFFER_TYPE_TEXCOORD0 | VKTS_VERTEX_BUFFER_TYPE_TEXCOORD1)) == (VKTS_VERTEX_BUFFER_TYPE_TEXCOORD0 | VKTS_VERTEX_BUFFER_TYPE_TEXCOORD1))
+				{
+					fragmentShader = VKTS_GLTF_MR_FORWARD_TWO_TEXCOORD_FRAGMENT_SHADER_NAME;
+				}
+				else if ((bsdfMaterial->getAttributes() & VKTS_VERTEX_BUFFER_TYPE_TEXCOORD0) == VKTS_VERTEX_BUFFER_TYPE_TEXCOORD0)
 				{
 					fragmentShader = VKTS_GLTF_MR_FORWARD_FRAGMENT_SHADER_NAME;
 				}

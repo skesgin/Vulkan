@@ -100,6 +100,10 @@ public:
 
     virtual void setSpecularGlossiness(const VkBool32 specularGlossiness) = 0;
 
+    virtual int32_t getTexCoordIndex(const int32_t textureIndex) const = 0;
+
+    virtual void setTexCoordIndex(const int32_t textureIndex, const int32_t texCoordIndex) = 0;
+
     //
 
     virtual void updateParameterRecursive(Parameter* parameter) = 0;

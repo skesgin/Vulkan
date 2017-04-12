@@ -44,6 +44,7 @@ protected:
     VkTsVertexBufferType attributes;
 
     SmartPointerVector<ITextureObjectSP> allTextureObjects;
+    std::vector<int32_t> texCoordIndices;
 
     VkBool32 transparent;
 
@@ -131,6 +132,11 @@ public:
     virtual VkBool32 isSpecularGlossiness() const override;
 
     virtual void setSpecularGlossiness(const VkBool32 specularGlossiness) override;
+
+
+    virtual int32_t getTexCoordIndex(const int32_t textureIndex) const override;
+
+    virtual void setTexCoordIndex(const int32_t textureIndex, const int32_t texCoordIndex) override;
 
     //
 

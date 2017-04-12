@@ -611,7 +611,7 @@ VkBool32 Example::buildPipeline()
     gp.getPipelineShaderStageCreateInfo(1).module = envFragmentShaderModule->getShaderModule();
 
 
-	VkTsVertexBufferType vertexBufferType = VKTS_VERTEX_BUFFER_TYPE_VERTEX | VKTS_VERTEX_BUFFER_TYPE_TANGENTS | VKTS_VERTEX_BUFFER_TYPE_TEXCOORD;
+	VkTsVertexBufferType vertexBufferType = VKTS_VERTEX_BUFFER_TYPE_VERTEX | VKTS_VERTEX_BUFFER_TYPE_TANGENTS | VKTS_VERTEX_BUFFER_TYPE_TEXCOORD0;
 
     gp.getVertexInputBindingDescription(0).binding = VKTS_BINDING_VERTEX_BUFFER;
     gp.getVertexInputBindingDescription(0).stride = vkts::alignmentGetStrideInBytes(vertexBufferType);
@@ -939,6 +939,48 @@ VkBool32 Example::buildShader()
 	}
 
 	bsdfVertexShaderModule = vkts::shaderModuleCreate(VKTS_BSDF3_VERTEX_SHADER_NAME, contextObject->getDevice()->getDevice(), 0, vertexShaderBinary->getSize(), (uint32_t*)vertexShaderBinary->getData());
+
+	if (!bsdfVertexShaderModule.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create vertex shader module.");
+
+		return VK_FALSE;
+	}
+
+	allBSDFVertexShaderModules.append(bsdfVertexShaderModule);
+
+
+	vertexShaderBinary = vkts::fileLoadBinary(VKTS_BSDF4_VERTEX_SHADER_NAME);
+
+	if (!vertexShaderBinary.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load vertex shader: '%s'", VKTS_BSDF4_VERTEX_SHADER_NAME);
+
+		return VK_FALSE;
+	}
+
+	bsdfVertexShaderModule = vkts::shaderModuleCreate(VKTS_BSDF4_VERTEX_SHADER_NAME, contextObject->getDevice()->getDevice(), 0, vertexShaderBinary->getSize(), (uint32_t*)vertexShaderBinary->getData());
+
+	if (!bsdfVertexShaderModule.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not create vertex shader module.");
+
+		return VK_FALSE;
+	}
+
+	allBSDFVertexShaderModules.append(bsdfVertexShaderModule);
+
+
+	vertexShaderBinary = vkts::fileLoadBinary(VKTS_BSDF5_VERTEX_SHADER_NAME);
+
+	if (!vertexShaderBinary.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "Could not load vertex shader: '%s'", VKTS_BSDF5_VERTEX_SHADER_NAME);
+
+		return VK_FALSE;
+	}
+
+	bsdfVertexShaderModule = vkts::shaderModuleCreate(VKTS_BSDF5_VERTEX_SHADER_NAME, contextObject->getDevice()->getDevice(), 0, vertexShaderBinary->getSize(), (uint32_t*)vertexShaderBinary->getData());
 
 	if (!bsdfVertexShaderModule.get())
 	{

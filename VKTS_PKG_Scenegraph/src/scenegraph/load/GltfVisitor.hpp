@@ -169,6 +169,8 @@ typedef struct _GltfTexture {
 	int32_t target;
 	int32_t type;
 	std::string name;
+	//
+	int32_t texCoord;
 } GltfTexture;
 
 typedef struct _GltfTextureInfo {
@@ -217,7 +219,8 @@ typedef struct _GltfPrimitive {
 	GltfAccessor* position;
 	GltfAccessor* normal;
 	GltfAccessor* tangent;
-	GltfAccessor* texCoord;
+	GltfAccessor* texCoord0;
+	GltfAccessor* texCoord1;
 	GltfAccessor* joint;
 	GltfAccessor* weight;
 	GltfAccessor* indices;

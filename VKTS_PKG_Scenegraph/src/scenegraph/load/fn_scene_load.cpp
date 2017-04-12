@@ -2142,12 +2142,12 @@ static VkBool32 sceneLoadSubMeshes(const char* directory, const char* filename, 
                         return VK_FALSE;
                     }
 
-                    subMesh->setTexcoordOffset(strideInBytes);
+                    subMesh->setTexcoord0Offset(strideInBytes);
                     strideInBytes += 2 * sizeof(float);
 
                     totalSize += 2 * sizeof(float) * subMesh->getNumberVertices();
 
-                    vertexBufferType |= VKTS_VERTEX_BUFFER_TYPE_TEXCOORD;
+                    vertexBufferType |= VKTS_VERTEX_BUFFER_TYPE_TEXCOORD0;
                 }
 
                 if (boneIndices0.size() > 0 && boneIndices1.size() > 0 && boneWeights0.size() > 0 && boneWeights1.size() > 0 && numberBones.size() > 0)
@@ -2246,7 +2246,7 @@ static VkBool32 sceneLoadSubMeshes(const char* directory, const char* filename, 
                         {
                             vertexBinaryBuffer->write(reinterpret_cast<const uint8_t*>(&tangent[currentVertexElement * 3]), 1, 3 * sizeof(float));
                         }
-                        if (vertexBufferType & VKTS_VERTEX_BUFFER_TYPE_TEXCOORD)
+                        if (vertexBufferType & VKTS_VERTEX_BUFFER_TYPE_TEXCOORD0)
                         {
                             vertexBinaryBuffer->write(reinterpret_cast<const uint8_t*>(&texcoord[currentVertexElement * 2]), 1, 2 * sizeof(float));
                         }
