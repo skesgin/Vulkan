@@ -69,7 +69,8 @@ private:
     int32_t bitangentOffset;
     int32_t tangentOffset;
 
-    int32_t texcoordOffset;
+	int32_t texcoordOffset;
+	int32_t colorOffset;
 
     int32_t boneIndices0Offset;
     int32_t boneIndices1Offset;
@@ -177,6 +178,10 @@ public:
     virtual int32_t getTexcoordOffset() const override;
 
     virtual void setTexcoordOffset(const int32_t texcoordOffset) override;
+
+	virtual int32_t getColorOffset() const override;
+
+	virtual void setColorOffset(const int32_t texcoordOffset) override;
 
     virtual int32_t getBoneIndices0Offset() const override;
 

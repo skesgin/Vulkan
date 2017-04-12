@@ -124,6 +124,10 @@ public:
 
     virtual void setTexcoordOffset(const int32_t texcoordOffset) = 0;
 
+    virtual int32_t getColorOffset() const = 0;
+
+    virtual void setColorOffset(const int32_t texcoordOffset) = 0;
+
     virtual int32_t getBoneIndices0Offset() const = 0;
 
     virtual void setBoneIndices0Offset(const int32_t boneIndices0Offset) = 0;

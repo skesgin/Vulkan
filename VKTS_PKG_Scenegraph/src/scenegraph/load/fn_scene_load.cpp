@@ -489,7 +489,7 @@ IImageDataSP loadImageData(const ISceneManagerSP& sceneManager, const ISceneFact
 //			which contains all the components (vertex coordinates, indices, uv, color, etc.) defined as individual, easily accessible members? We can create multiple versions of this struct which contains different
 //			components by using macros to reduce memory consumption for the cases where not all of the components are needed.
 VkBool32 populateSubMesh(const ISceneManagerSP& sceneManager, const ISceneFactorySP& sceneFactory, ISubMeshSP& subMesh, std::vector<float>& vertex, std::vector<int32_t>& indices,
-	std::vector<float>& normal, std::vector<float>& bitangent, std::vector<float>& tangent, std::vector<float>& texcoord, std::vector<float>& boneIndices0,
+	std::vector<float>& normal, std::vector<float>& bitangent, std::vector<float>& tangent, std::vector<float>& texcoord, std::vector<float>& color, std::vector<float>& boneIndices0,
 	std::vector<float>& boneIndices1, std::vector<float>& boneWeights0, std::vector<float>& boneWeights1, std::vector<float>& numberBones)
 {
 	subMesh->setNumberVertices((int32_t)(vertex.size() / 4));
@@ -555,6 +555,18 @@ VkBool32 populateSubMesh(const ISceneManagerSP& sceneManager, const ISceneFactor
 		totalSize += 2 * sizeof(float) * subMesh->getNumberVertices();
 
 		vertexBufferType |= VKTS_VERTEX_BUFFER_TYPE_TEXCOORD;
+	}
+
+	if (color.size() > 0)
+	{
+		VALIDATE_CONDITION(color.size() != vertex.size(), "TextureObject coordinate has different size.");
+
+		subMesh->setColorOffset(strideInBytes);
+		strideInBytes += 4 * sizeof(float);
+
+		totalSize += 4 * sizeof(float) * subMesh->getNumberVertices();
+
+		vertexBufferType |= VKTS_VERTEX_BUFFER_TYPE_COLOR;
 	}
 
 	if (boneIndices0.size() > 0 && boneIndices1.size() > 0 && boneWeights0.size() > 0 && boneWeights1.size() > 0 && numberBones.size() > 0)
@@ -626,6 +638,10 @@ VkBool32 populateSubMesh(const ISceneManagerSP& sceneManager, const ISceneFactor
 			if (vertexBufferType & VKTS_VERTEX_BUFFER_TYPE_TEXCOORD)
 			{
 				vertexBinaryBuffer->write(reinterpret_cast<const uint8_t*>(&texcoord[currentVertexElement * 2]), 1, 2 * sizeof(float));
+			}
+			if (vertexBufferType & VKTS_VERTEX_BUFFER_TYPE_COLOR)
+			{
+				vertexBinaryBuffer->write(reinterpret_cast<const uint8_t*>(&color[currentVertexElement * 4]), 1, 4 * sizeof(float));
 			}
 			if (vertexBufferType & VKTS_VERTEX_BUFFER_TYPE_BONE_INDICES0)
 			{
@@ -1901,7 +1917,8 @@ static VkBool32 sceneLoadSubMeshes(const char* directory, const char* filename, 
     std::vector<float> normal;
     std::vector<float> bitangent;
     std::vector<float> tangent;
-    std::vector<float> texcoord;
+	std::vector<float> texcoord;
+	std::vector<float> color;
 
     std::vector<float> boneIndices0;
     std::vector<float> boneIndices1;
@@ -2073,6 +2090,27 @@ static VkBool32 sceneLoadSubMeshes(const char* directory, const char* filename, 
                 return VK_FALSE;
             }
         }
+		else if (parseIsToken(buffer, "color"))
+		{
+			if (!parseVec4(buffer, fdata))
+			{
+				return VK_FALSE;
+			}
+
+			if (subMesh.get())
+			{
+				for (int32_t i = 0; i < 4; i++)
+				{
+					color.push_back(fdata[i]);
+				}
+			}
+			else
+			{
+				logPrint(VKTS_LOG_ERROR, __FILE__, __LINE__, "No sub mesh");
+
+				return VK_FALSE;
+			}
+		}
         else if (parseIsToken(buffer, "boneIndex"))
         {
             if (!parseVec8(buffer, fdata))
@@ -2212,7 +2250,7 @@ static VkBool32 sceneLoadSubMeshes(const char* directory, const char* filename, 
 
             if (subMesh.get())
             {
-				if (populateSubMesh(sceneManager, sceneFactory, subMesh, vertex, indices, normal, bitangent, tangent, texcoord, boneIndices0, boneIndices1, boneWeights0, boneWeights1, numberBones) == VK_FALSE)
+				if (populateSubMesh(sceneManager, sceneFactory, subMesh, vertex, indices, normal, bitangent, tangent, texcoord, color, boneIndices0, boneIndices1, boneWeights0, boneWeights1, numberBones) == VK_FALSE)
 				{
 					return VK_FALSE;
 				}
@@ -2232,6 +2270,7 @@ static VkBool32 sceneLoadSubMeshes(const char* directory, const char* filename, 
             bitangent.clear();
             tangent.clear();
             texcoord.clear();
+			color.clear();
 
             boneIndices0.clear();
             boneIndices1.clear();

@@ -253,6 +253,16 @@ void SubMesh::setTexcoordOffset(const int32_t texcoordOffset)
     this->texcoordOffset = texcoordOffset;
 }
 
+int32_t SubMesh::getColorOffset() const
+{
+    return colorOffset;
+}
+
+void SubMesh::setColorOffset(const int32_t colorOffset)
+{
+    this->colorOffset = colorOffset;
+}
+
 int32_t SubMesh::getBoneIndices0Offset() const
 {
     return boneIndices0Offset;

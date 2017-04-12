@@ -330,7 +330,8 @@ VkBool32 Example::buildScene(const vkts::ICommandObjectSP& commandObject)
 		33, 34, 35 
 	};
 
-	vkts::populateSubMesh(sceneManager, sceneFactory, subMesh, vertex, indices, normal, bitangent, tangent, texcoord, std::vector<float>(), std::vector<float>(), std::vector<float>(), std::vector<float>(), std::vector<float>());
+	std::vector<float> dummy;
+	vkts::populateSubMesh(sceneManager, sceneFactory, subMesh, vertex, indices, normal, bitangent, tangent, texcoord, dummy, dummy, dummy, dummy, dummy, dummy);
 	sceneManager->addSubMesh(subMesh);
 
 	vertex.clear();

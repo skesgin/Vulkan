@@ -420,6 +420,16 @@ VkBool32 SceneRenderFactory::prepareBSDFMaterial(const ISceneManagerSP& sceneMan
 		gp.getVertexInputAttributeDescription(location).offset = alignmentGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_TEXCOORD, subMesh->getVertexBufferType());
 	}
 
+	if ((vertexBufferType & VKTS_VERTEX_BUFFER_TYPE_COLOR) == VKTS_VERTEX_BUFFER_TYPE_COLOR)
+	{
+		location++;
+
+		gp.getVertexInputAttributeDescription(location).location = location;
+		gp.getVertexInputAttributeDescription(location).binding  = 0;
+		gp.getVertexInputAttributeDescription(location).format   = VK_FORMAT_R32G32B32A32_SFLOAT;
+		gp.getVertexInputAttributeDescription(location).offset   = alignmentGetOffsetInBytes(VKTS_VERTEX_BUFFER_TYPE_COLOR, subMesh->getVertexBufferType());
+	}
+
 
 	if ((vertexBufferType & VKTS_VERTEX_BUFFER_TYPE_BONES) == VKTS_VERTEX_BUFFER_TYPE_BONES)
 	{

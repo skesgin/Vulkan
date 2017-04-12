@@ -93,6 +93,16 @@ uint32_t VKTS_APIENTRY alignmentGetOffsetInBytes(const VkTsVertexBufferType elem
         result += 2 * (uint32_t)sizeof(float);
     }
 
+    if (allElements & VKTS_VERTEX_BUFFER_TYPE_COLOR)
+    {
+        if (VKTS_VERTEX_BUFFER_TYPE_COLOR == element)
+        {
+            return result;
+        }
+
+        result += 4 * (uint32_t)sizeof(float);
+    }
+
     if (allElements & VKTS_VERTEX_BUFFER_TYPE_BONE_INDICES0)
     {
         if (VKTS_VERTEX_BUFFER_TYPE_BONE_INDICES0 == element)
@@ -171,6 +181,11 @@ uint32_t VKTS_APIENTRY alignmentGetStrideInBytes(const VkTsVertexBufferType allE
     if (allElements & VKTS_VERTEX_BUFFER_TYPE_TEXCOORD)
     {
         result += 2 * (uint32_t)sizeof(float);
+    }
+
+    if (allElements & VKTS_VERTEX_BUFFER_TYPE_COLOR)
+    {
+        result += 4 * (uint32_t)sizeof(float);
     }
 
     if (allElements & VKTS_VERTEX_BUFFER_TYPE_BONE_INDICES0)
